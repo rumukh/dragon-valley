@@ -5,7 +5,7 @@
  * small-table generators, grading, Leitner moves, re-ask jobs, coins, eggs, dragon growth,
  * stickers, the market, outfits, the daily goal and gift, rule settings and the full view.
  *
- * Rejected with `not-implemented` until S2 builds them: placement, arena, snack time, minigame
+ * Rejected with `not-implemented` until S2b builds them: placement, arena, snack time, minigame
  * moves and quest claims. Level runs skip activities the skeleton cannot play (minigames and
  * generators other than mul.fact/div.fact/mul.missing).
  */

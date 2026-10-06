@@ -1,6 +1,6 @@
 /**
  * The Dragon Valley domain contract: content, problems, state, actions, views, events and
- * identifiers shared by the rules (S2), the shell (S3), art (S4), audio (S5) and QA (S6).
+ * identifiers shared by the rules (S2a, S2b), the shell (S3), art (S4), audio (S5) and QA (S6).
  * docs/contract.md explains every type, its invariants and who owns what.
  */
 export * from './ids';

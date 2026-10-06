@@ -7,7 +7,7 @@
  * `balance.reask.maxPerRound` per round). Re-ask jobs are anchored to the round's runtime phase,
  * so closing the round cancels any that have not fired.
  *
- * Not implemented yet (S2): the adaptive mix (rounds draw uniformly from their skills, avoiding
+ * Not implemented yet (S2b): the adaptive mix (rounds draw uniformly from their skills, avoiding
  * recent items), minigame activities and generators other than mul.fact/div.fact/mul.missing
  * (a run skips activities it cannot play), arena, snack time and placement.
  */

@@ -1,7 +1,7 @@
 # The domain contract
 
 `src/rules/contract/` is the shared language of Dragon Valley: the content pack, problems and
-answers, item IDs, per-profile state, actions, views, events and identifiers. The rules (S2)
+answers, item IDs, per-profile state, actions, views, events and identifiers. The rules (S2a, S2b)
 implement it, the shell (S3) renders it, art (S4) and audio (S5) are keyed by its IDs, and QA (S6)
 asserts on it. Everything is built on public `@aegis/runtime` schemas and `@aegis/narrative` types,
 and everything is plain JSON.
@@ -32,17 +32,18 @@ The runtime adapter is `src/rules/adapter.ts` (`dragonValleyAdapter`, `createGam
 
 ## 2. Ownership and changing the contract
 
-| Area                                                                                        | Owner                         |
-| ------------------------------------------------------------------------------------------- | ----------------------------- |
-| `src/rules/**` (contract, adapter, rules), `content/**` except UI strings                   | S2 Rules & content            |
-| `src/app/**` except `src/app/art/**`; `content/catalogs/en.ui.json`                         | S3 App shell & screens        |
-| `assets/art/**`, `assets/backgrounds/**`, `src/app/art/**`, `scripts/art/**`, `docs/art.md` | S4 Art                        |
-| `assets/audio/**`, `scripts/audio/**`, `docs/audio.md`                                      | S5 Audio                      |
-| `test/e2e/**`, CI hardening (`.github/**` changes beyond fixes)                             | S6 QA & release               |
-| Toolchain (`package.json`, tsconfigs, ESLint, Prettier, `scripts/*.mjs`, `vendor/**`)       | Coordinator review; S1 set up |
+| Area                                                                                                                                                                                                                             | Owner                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| Problem generation: `src/rules/learning/generate.ts` and the generator and distractor modules under `src/rules/learning/`; the content `wordTemplates` section and the `word.*` catalog keys; learner simulation (`test/sim/**`) | S2a Problem generators & learner sim |
+| The rest of `src/rules/**` (adapter, rounds and item selection, minigames, economy, progression, story, view) and the rest of `content/**` (pack, history, `en.content.json`)                                                    | S2b Game rules & content             |
+| `src/app/**` except `src/app/art/**`; `content/catalogs/en.ui.json`                                                                                                                                                              | S3 App shell & screens               |
+| `assets/art/**`, `assets/backgrounds/**`, `src/app/art/**`, `scripts/art/**`, `docs/art.md`                                                                                                                                      | S4 Art                               |
+| `assets/audio/**`, `scripts/audio/**`, `docs/audio.md`                                                                                                                                                                           | S5 Audio                             |
+| `test/e2e/**`, CI hardening (`.github/**` changes beyond fixes)                                                                                                                                                                  | S6 QA & release                      |
+| Toolchain (`package.json`, tsconfigs, ESLint, Prettier, `scripts/*.mjs`, `vendor/**`)                                                                                                                                            | Coordinator review; S1 set up        |
 
 **Contract changes** (anything under `src/rules/contract/`) go through a PR reviewed by the
-coordinator, even when S2 makes them, because every session builds on it. A contract PR states
+coordinator, even when S2a or S2b makes them, because every session builds on it. A contract PR states
 what changed, why, and what each consumer must do. Prefer additive changes: a new optional view
 field, a new event, a new union variant. Renaming or removing something is a breaking change and
 needs the coordinator's agreement first.
@@ -258,7 +259,7 @@ IDs exist in `assets/art/catalog.json` (reported now, `--strict-art` later); cur
 
 ### 7.4 Catalogs
 
-- `content/catalogs/en.content.json`: every string the content refers to (S2).
+- `content/catalogs/en.content.json`: every string the content refers to (S2b; the `word.*` keys S2a).
 - `content/catalogs/en.ui.json`: the shell's own strings (S3).
 
 Both are flat `{ key: string }` maps with `{placeholder}` parameters, the format
@@ -492,7 +493,8 @@ outfits, the daily goal and gift, settings, state validation and the complete vi
 Not yet implemented (rejected with `not-implemented`, or skipped in a level run): placement, arena,
 snack time, minigame moves (level runs skip minigame activities), quest drawing and claims, the
 other generators, the adaptive mix (rounds draw new facts first, then uniformly, avoiding recent
-items), partial credit for commuted facts, and the finale. These are S2's rules work; the module
+items), partial credit for commuted facts, and the finale. These are the rules work of S2a (generators,
+distractors, learner simulation) and S2b (everything else); the module
 layout follows plan §3.2 so each piece can be replaced in place.
 
 `test/traces/first-session.test.ts` pins the skeleton's first session with named checks, a literal
