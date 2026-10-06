@@ -408,16 +408,18 @@ if (typeof art.renderSticker === 'function') {
     title: 'Sticker composer samples',
     width: 1500,
     height: 900,
-    body: () =>
-      art
-        .stickerSamples()
-        .map((/** @type {any} */ s, /** @type {number} */ i) =>
-          cell(
-            art.renderSticker({ ...s, idPrefix: uid(`st${i}`), size: 120 }),
-            `${s.frame}/${s.icon}${s.dragon ? '/' + s.dragon : ''}`,
-          ),
-        )
-        .join(''),
+    body: () => {
+      const samples = art.stickerSamples();
+      const label = (/** @type {any} */ s) =>
+        [s.frame, s.icon, s.dragon, s.stage].filter(Boolean).join(' / ');
+      const big = samples.map((/** @type {any} */ s, /** @type {number} */ i) =>
+        cell(art.renderSticker({ ...s, idPrefix: uid(`st${i}`), size: 140 }), label(s)),
+      );
+      const small = samples.map((/** @type {any} */ s, /** @type {number} */ i) =>
+        cell(art.renderSticker({ ...s, idPrefix: uid(`ss${i}`), size: 56 }), s.frame),
+      );
+      return grid(8, big, 140) + '<h2>56 px</h2>' + grid(16, small, 56);
+    },
   });
 }
 
@@ -425,15 +427,28 @@ if (typeof art.renderMagicWindow === 'function') {
   sheets.push({
     name: 'window',
     title: 'Magic Window states',
-    width: 1700,
-    height: 1150,
-    body: () =>
-      art
-        .magicWindowSamples()
-        .map((/** @type {any} */ s, /** @type {number} */ i) =>
-          cell(art.renderMagicWindow({ ...s.options, idPrefix: uid(`w${i}`), size: 520 }), s.label),
-        )
-        .join(''),
+    width: 1720,
+    height: 1200,
+    body: () => {
+      const samples = art.magicWindowSamples();
+      const windows = samples.map((/** @type {any} */ s, /** @type {number} */ i) =>
+        cell(art.renderMagicWindow({ ...s.options, idPrefix: uid(`w${i}`), size: 320 }), s.label),
+      );
+      const grids = [2, 3].flatMap((/** @type {number} */ n) =>
+        ['mul', 'div'].map((/** @type {string} */ op) =>
+          cell(
+            art.renderMasteryGrid({
+              op,
+              cells: samples[n].options[op === 'mul' ? 'multiplication' : 'division'],
+              idPrefix: uid(`mg${n}${op}`),
+              size: 320,
+            }),
+            `mastery grid ${op}: ${samples[n].label}`,
+          ),
+        ),
+      );
+      return grid(5, windows, 320) + '<h2>Parent-area mastery grids</h2>' + grid(4, grids, 320);
+    },
   });
 }
 
