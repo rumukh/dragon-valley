@@ -1,7 +1,7 @@
 import { polar } from '../svg/num';
 import { M, L, Q, roundRectD, roundStarD, smoothClosedD } from '../svg/path';
 import { h } from '../svg/xml';
-import { clover, snowflake } from '../glyphs';
+import { clover } from '../glyphs';
 import { linearGradient, type Ctx } from './ctx';
 import { belly, bellyPathD, bodyPathD } from './parts';
 import { CX } from './skeleton';
@@ -21,6 +21,7 @@ function rainbowBelly(ctx: Ctx): string {
   const top = b.cy - b.ry;
   const step = (b.ry * 2) / 7;
   let stripes = '';
+  let seams = '';
   RAINBOW.forEach((c, i) => {
     stripes += h('rect', {
       x: b.cx - b.rx - 2,
@@ -29,6 +30,7 @@ function rainbowBelly(ctx: Ctx): string {
       height: step + 1,
       fill: c,
     });
+    if (i > 0) seams += M(b.cx - b.rx - 2, top + i * step) + L(b.cx + b.rx + 2, top + i * step);
   });
   return h(
     'g',
@@ -37,30 +39,33 @@ function rainbowBelly(ctx: Ctx): string {
       'g',
       { 'clip-path': `url(#${clip})` },
       stripes,
+      h('path', { d: seams, stroke: '#ffffff', 'stroke-width': ctx.W * 0.45, opacity: 0.75 }),
       h('ellipse', {
-        cx: b.cx - b.rx * 0.35,
+        cx: b.cx - b.rx * 0.38,
         cy: b.cy - b.ry * 0.45,
-        rx: b.rx * 0.22,
-        ry: b.ry * 0.3,
+        rx: b.rx * 0.18,
+        ry: b.ry * 0.26,
         fill: '#ffffff',
-        opacity: 0.3,
+        opacity: 0.28,
       }),
     ),
-    h('path', { d, fill: 'none', stroke: ctx.paint.line, 'stroke-width': ctx.W * 0.7 }),
+    h('path', { d, fill: 'none', stroke: ctx.paint.line, 'stroke-width': ctx.W * 0.75 }),
   );
 }
 
 function clockFace(ctx: Ctx): string {
   const b = ctx.sk.belly;
-  const r = Math.min(b.rx, b.ry) * 0.86;
+  const r = Math.min(b.rx, b.ry) * 0.9;
   const cy = b.cy + b.ry * 0.04;
   let ticks = '';
+  let bold = '';
   for (let i = 0; i < 12; i++) {
     const a = -90 + i * 30;
     const long = i % 3 === 0;
-    const p0 = polar(b.cx, cy, r * (long ? 0.66 : 0.76), a);
-    const p1 = polar(b.cx, cy, r * 0.9, a);
-    ticks += M(p0.x, p0.y) + L(p1.x, p1.y);
+    const p0 = polar(b.cx, cy, r * (long ? 0.62 : 0.74), a);
+    const p1 = polar(b.cx, cy, r * 0.88, a);
+    if (long) bold += M(p0.x, p0.y) + L(p1.x, p1.y);
+    else ticks += M(p0.x, p0.y) + L(p1.x, p1.y);
   }
   return h(
     'g',
@@ -71,26 +76,33 @@ function clockFace(ctx: Ctx): string {
       r,
       fill: '#fffbe8',
       stroke: ctx.paint.accentLine,
-      'stroke-width': ctx.W * 0.7,
+      'stroke-width': ctx.W * 0.8,
     }),
     h('path', {
       d: ticks,
       stroke: ctx.paint.accentShade,
-      'stroke-width': ctx.W * 0.7,
+      'stroke-width': ctx.W * 0.8,
       'stroke-linecap': 'round',
     }),
-    h('circle', { cx: b.cx, cy, r: r * 0.08, fill: ctx.paint.accentShade }),
+    h('path', {
+      d: bold,
+      stroke: ctx.paint.accentLine,
+      'stroke-width': ctx.W * 1.25,
+      'stroke-linecap': 'round',
+    }),
+    h('circle', { cx: b.cx, cy, r: r * 0.1, fill: ctx.paint.accentShade }),
   );
 }
 
+/** Starry's ten-frame: two rows of five places, nine stars and one empty place (10 - 1). */
 function tenFrame(ctx: Ctx): string {
   const b = ctx.sk.belly;
   const cols = 5;
-  const slot = Math.min((b.rx * 1.62) / cols, (b.ry * 1.2) / 2);
+  const slot = Math.min((b.rx * 2.16) / cols, (b.ry * 1.5) / 2);
   const w = slot * cols;
   const hgt = slot * 2;
   const x0 = b.cx - w / 2;
-  const y0 = b.cy - hgt / 2 + b.ry * 0.05;
+  const y0 = b.cy - hgt / 2 + b.ry * 0.08;
   let cells = '';
   let stars = '';
   for (let r = 0; r < 2; r++) {
@@ -98,44 +110,120 @@ function tenFrame(ctx: Ctx): string {
       const i = r * cols + c;
       const cx = x0 + slot * (c + 0.5);
       const cy = y0 + slot * (r + 0.5);
-      cells += h('circle', { cx, cy, r: slot * 0.44, fill: '#1c1a52', opacity: 0.35 });
+      cells += h('circle', { cx, cy, r: slot * 0.45, fill: '#14123f', opacity: 0.55 });
       if (i < 9) {
         stars += h('path', {
-          d: roundStarD(cx, cy, 5, slot * 0.44, slot * 0.21, -90, 0.2),
+          d: roundStarD(cx, cy + slot * 0.02, 5, slot * 0.47, slot * 0.23, -90, 0.18),
           fill: '#ffd84d',
-          stroke: '#8a5a00',
-          'stroke-width': ctx.W * 0.32,
+          stroke: '#7a4a00',
+          'stroke-width': ctx.W * 0.42,
           'stroke-linejoin': 'round',
+        });
+        stars += h('circle', {
+          cx: cx - slot * 0.1,
+          cy: cy - slot * 0.1,
+          r: slot * 0.06,
+          fill: '#ffffff',
+          opacity: 0.8,
         });
       } else {
         stars += h('path', {
-          d: roundStarD(cx, cy, 5, slot * 0.4, slot * 0.19, -90, 0.2),
+          d: roundStarD(cx, cy + slot * 0.02, 5, slot * 0.4, slot * 0.2, -90, 0.18),
           fill: 'none',
-          stroke: '#ffd84d',
-          'stroke-width': ctx.W * 0.32,
-          'stroke-dasharray': `${(slot * 0.12).toFixed(2)} ${(slot * 0.1).toFixed(2)}`,
+          stroke: '#ffe58a',
+          'stroke-width': ctx.W * 0.45,
+          'stroke-dasharray': `${(slot * 0.1).toFixed(2)} ${(slot * 0.09).toFixed(2)}`,
           'stroke-linejoin': 'round',
-          opacity: 0.85,
         });
       }
     }
   }
+  const pad = slot * 0.14;
   return h(
     'g',
     { class: 'dv-ten-frame' },
     h('path', {
-      d: roundRectD(
-        x0 - slot * 0.12,
-        y0 - slot * 0.12,
-        w + slot * 0.24,
-        hgt + slot * 0.24,
-        slot * 0.35,
-      ),
-      fill: '#2a2878',
-      opacity: 0.55,
+      d: roundRectD(x0 - pad, y0 - pad, w + pad * 2, hgt + pad * 2, slot * 0.4),
+      fill: '#22206a',
+      stroke: '#ffd84d',
+      'stroke-width': ctx.W * 0.5,
+    }),
+    h('path', {
+      d:
+        M(x0, y0 + slot) +
+        L(x0 + w, y0 + slot) +
+        [1, 2, 3, 4].map((k) => M(x0 + slot * k, y0) + L(x0 + slot * k, y0 + hgt)).join(''),
+      stroke: '#ffd84d',
+      'stroke-width': ctx.W * 0.25,
+      opacity: 0.45,
     }),
     cells,
     stars,
+  );
+}
+
+/** Crystal's bold 8-arm snowflake (double, double, double: 2, 4, 8). */
+function boldSnowflake(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const r = Math.min(b.rx, b.ry) * 0.9;
+  const cx = b.cx;
+  const cy = b.cy + b.ry * 0.03;
+  let arms = '';
+  let tips = '';
+  for (let i = 0; i < 8; i++) {
+    const a = -90 + i * 45;
+    const tip = polar(cx, cy, r * 0.8, a);
+    arms += M(cx, cy) + L(tip.x, tip.y);
+    const br = polar(cx, cy, r * 0.5, a);
+    const l = polar(br.x, br.y, r * 0.24, a - 45);
+    const rr = polar(br.x, br.y, r * 0.24, a + 45);
+    arms += M(l.x, l.y) + L(br.x, br.y) + L(rr.x, rr.y);
+    const d0 = polar(cx, cy, r, a);
+    const s0 = polar(tip.x, tip.y, r * 0.09, a - 90);
+    const s1 = polar(tip.x, tip.y, r * 0.09, a + 90);
+    tips +=
+      M(d0.x, d0.y) +
+      L(s0.x, s0.y) +
+      L(polar(cx, cy, r * 0.72, a).x, polar(cx, cy, r * 0.72, a).y) +
+      L(s1.x, s1.y) +
+      'Z';
+  }
+  const outline = ctx.paint.accentShade;
+  return h(
+    'g',
+    { class: 'dv-snowflake' },
+    h('path', {
+      d: arms,
+      fill: 'none',
+      stroke: outline,
+      'stroke-width': ctx.W * 2.6,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    }),
+    h('path', {
+      d: tips,
+      fill: outline,
+      stroke: outline,
+      'stroke-width': ctx.W * 1.1,
+      'stroke-linejoin': 'round',
+    }),
+    h('path', {
+      d: arms,
+      fill: 'none',
+      stroke: '#ffffff',
+      'stroke-width': ctx.W * 1.3,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    }),
+    h('path', { d: tips, fill: '#ffffff' }),
+    h('circle', {
+      cx,
+      cy,
+      r: r * 0.17,
+      fill: '#ffffff',
+      stroke: outline,
+      'stroke-width': ctx.W * 0.6,
+    }),
   );
 }
 
@@ -414,16 +502,7 @@ export function bellyLayer(ctx: Ctx): string {
     has(ctx, 'zero-medallion');
   let out = belly(ctx, undefined, !plain);
   if (has(ctx, 'clock-belly')) out += clockFace(ctx);
-  if (has(ctx, 'snowflake-belly')) {
-    const b = ctx.sk.belly;
-    const r = Math.min(b.rx, b.ry) * 0.82;
-    out += h(
-      'g',
-      { class: 'dv-snowflake' },
-      snowflake(b.cx, b.cy, r, 8, ctx.paint.accent, ctx.W * 1.5),
-      snowflake(b.cx, b.cy, r, 8, '#ffffff', ctx.W * 0.7),
-    );
-  }
+  if (has(ctx, 'snowflake-belly')) out += boldSnowflake(ctx);
   if (has(ctx, 'ten-frame-stars')) out += tenFrame(ctx);
   if (has(ctx, 'clover-spots')) {
     const b = ctx.sk.belly;

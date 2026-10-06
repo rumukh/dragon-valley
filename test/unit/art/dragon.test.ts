@@ -209,9 +209,9 @@ describe('dragon rig', () => {
 // goldens:start
 const GOLDENS: Record<string, string> = {
   'bubbles hatchling idle': '9bde7df0c40921d14acc5a7875c488c90aaf43695998a1f908a0a8ad3cc14290',
-  'sunny adult happy fit': 'fcc1df563c872a648e2bfa90c06d8ccef2c1318c44bb3845eb2342a810fcb883',
-  'goldie crowned proud outfit': '025ad648a42c5a8013fcfa79c779cc5ca62eb75111ba80c7fb730198ec465a13',
+  'sunny adult happy fit': 'ac057989976739d2782676fc3f217bbfc3cff9d30ae1e50e9bc90a1b8ce2d9e9',
+  'goldie crowned proud outfit': 'd5a79401feb06d948726a09b04d44b5ab6d83a661f27e940f3e2b77c55a6b016',
   'starry egg cold': '09dd4b9502a99c3deccc0150c009650aab3c39ebb541a583ab2c53c922f314a8',
-  'clover hatch': '0980090716ab176f7d810f3a62787f3d7d83d3534f9b0c939a60c6fc1fc143a6',
+  'clover hatch': '4f8a78fbe2657af7268b304e9a6ce4988b684e0df23d0787dab48518723fee7d',
 };
 // goldens:end

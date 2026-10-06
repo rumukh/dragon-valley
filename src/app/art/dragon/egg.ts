@@ -146,7 +146,14 @@ function eggPattern(ctx: Ctx): string {
       out += h(
         'g',
         { transform: `translate(${cx} ${(cy - 16).toFixed(2)})` },
-        flame(84, accent, '#ffe066', line, W),
+        // "+1": the extra flame uses the dragon's second accent when it has one (Ember: blue).
+        flame(
+          84,
+          ctx.recipe.colors.accent2 ?? accent,
+          ctx.recipe.colors.accent2 ? '#e6f4ff' : '#ffe066',
+          outlineOf(ctx.recipe.colors.accent2 ?? accent, 0.5),
+          W,
+        ),
       );
       return out;
     }

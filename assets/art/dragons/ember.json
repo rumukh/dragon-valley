@@ -4,7 +4,7 @@
   "name": "Ember",
   "kind": "table",
   "table": 6,
-  "mnemonic": "A fire dragon with 6 flames: 5 on its tail and 1 more on the tip. 6 groups = 5 groups + 1 group.",
+  "mnemonic": "A fire dragon with 5 golden flames on its head and 1 more blue flame on its tail. 6 groups = 5 groups + 1 group.",
   "colors": {
     "body": "#ff6a3d",
     "shade": "#cc3a26",
@@ -13,7 +13,8 @@
     "horn": "#fff0c9",
     "accent": "#ff8a2a",
     "iris": "#7a2410",
-    "cheek": "#ffb3a0"
+    "cheek": "#ffb3a0",
+    "accent2": "#3d8bff"
   },
   "build": {
     "chub": 0.5,
@@ -22,9 +23,9 @@
     "body": 1
   },
   "horns": {
-    "style": "curved",
-    "count": 2,
-    "length": 0.9
+    "style": "none",
+    "count": 0,
+    "length": 1
   },
   "ears": {
     "style": "frill",
@@ -38,16 +39,17 @@
   "tail": {
     "count": 1,
     "tip": "flame",
-    "length": 1.12
+    "length": 1.1,
+    "curl": 0.7
   },
   "spikes": {
-    "style": "flame",
-    "where": "tail",
-    "count": 5
+    "style": "none",
+    "where": "none",
+    "count": 0
   },
   "crest": {
-    "style": "none",
-    "count": 0
+    "style": "flames",
+    "count": 5
   },
   "markings": [
     "belly-plates"

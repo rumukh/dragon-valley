@@ -69,7 +69,15 @@ const TIPS: readonly TailTip[] = [
   'tuft',
 ];
 const SPIKES: readonly SpikeStyle[] = ['round', 'flame', 'crystal', 'leaf', 'stone', 'none'];
-const CRESTS: readonly CrestStyle[] = ['none', 'sun', 'flower', 'crown10', 'shell', 'cloud-tuft'];
+const CRESTS: readonly CrestStyle[] = [
+  'none',
+  'sun',
+  'flower',
+  'crown10',
+  'shell',
+  'cloud-tuft',
+  'flames',
+];
 const MARKINGS: readonly MarkingStyle[] = [
   'belly-plates',
   'rainbow-belly',
@@ -99,6 +107,7 @@ const FEATURES: readonly FeatureStyle[] = [
   'bushy-brows',
   'shawl',
   'sparkle-cheeks',
+  'rock-body',
 ];
 const EGGS: readonly EggPattern[] = [
   'clouds',
@@ -198,6 +207,13 @@ export function parseRecipe(input: unknown): DragonRecipe {
   const spikes = obj(r.spikes, 'spikes');
   const crest = obj(r.crest, 'crest');
   const egg = obj(r.egg, 'egg');
+  only(horns, ['style', 'count', 'length'], 'horns');
+  only(ears, ['style', 'size'], 'ears');
+  only(wings, ['style', 'count', 'size'], 'wings');
+  only(tail, ['count', 'tip', 'length', 'curl'], 'tail');
+  only(spikes, ['style', 'where', 'count'], 'spikes');
+  only(crest, ['style', 'count'], 'crest');
+  only(egg, ['base', 'accent', 'pattern'], 'egg');
   if (!Array.isArray(r.markings)) throw new Error('markings must be an array');
   if (!Array.isArray(r.features)) throw new Error('features must be an array');
   const recipe: DragonRecipe = {
@@ -240,6 +256,7 @@ export function parseRecipe(input: unknown): DragonRecipe {
       count: num(tail.count, 'tail.count', 1, 2) === 2 ? 2 : 1,
       tip: oneOf(tail.tip, TIPS, 'tail.tip'),
       length: num(tail.length, 'tail.length', 0.5, 1.5),
+      ...(tail.curl === undefined ? {} : { curl: num(tail.curl, 'tail.curl', 0.3, 1.3) }),
     },
     spikes: {
       style: oneOf(spikes.style, SPIKES, 'spikes.style'),

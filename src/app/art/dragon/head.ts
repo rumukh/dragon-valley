@@ -1,7 +1,7 @@
-import { lerp, polar, type Pt } from '../svg/num';
-import { M, L, Q, C, Mp, Lp, Qp, polyD } from '../svg/path';
+import { atan2Deg, lerp, polar, type Pt } from '../svg/num';
+import { M, L, Q, C, Mp, Lp, Qp, Cp, polyD, ellipsePoint } from '../svg/path';
 import { h } from '../svg/xml';
-import { flower } from '../glyphs';
+import { flame, flower } from '../glyphs';
 import { linearGradient, type Ctx } from './ctx';
 import { cloudUnion, mirrorX, taperD } from './shapes';
 import { CX } from './skeleton';
@@ -155,29 +155,38 @@ function hornRight(ctx: Ctx, base: Pt, len: number, tilt: number): string {
       );
     }
     case 'branch': {
+      // A chunky little sapling horn with a leaf sprout: bold enough to count at gameplay size.
       const d = taperD(
         at(-6, 0),
-        at(len * 0.4, len * 0.05),
-        at(len * 0.75, len * 0.02),
-        at(len, len * 0.14),
-        bw * 0.85,
-        6,
+        at(len * 0.4, len * 0.04),
+        at(len * 0.72, len * 0.02),
+        at(len, len * 0.1),
+        bw * 1.1,
+        9,
       );
-      const twigBase = at(len * 0.55, len * 0.04);
+      const twigBase = at(len * 0.5, len * 0.04);
       const twig = taperD(
         twigBase,
-        at(len * 0.72, len * 0.22),
-        at(len * 0.78, len * 0.3),
-        at(len * 0.82, len * 0.4),
-        8,
-        4,
+        at(len * 0.6, len * 0.2),
+        at(len * 0.64, len * 0.28),
+        at(len * 0.68, len * 0.36),
+        10,
+        5,
       );
-      const leafAt = at(len * 0.84, len * 0.42);
+      const s = len * 0.5 + 8;
+      const leafAt = at(len * 0.98, len * 0.12);
+      const leafDir = polar(0, 0, 1, -90 + tilt + 30);
+      const leafN = polar(0, 0, 1, tilt + 30);
+      const lp = (a: number, b: number): Pt => ({
+        x: leafAt.x + leafDir.x * a * s + leafN.x * b * s,
+        y: leafAt.y + leafDir.y * a * s + leafN.y * b * s,
+      });
       const leaf =
-        M(leafAt.x, leafAt.y) +
-        C(leafAt.x + 6, leafAt.y - 14, leafAt.x + 18, leafAt.y - 14, leafAt.x + 22, leafAt.y - 4) +
-        C(leafAt.x + 14, leafAt.y + 4, leafAt.x + 6, leafAt.y + 4, leafAt.x, leafAt.y) +
+        Mp(lp(0, 0)) +
+        Cp(lp(0.25, -0.42), lp(0.75, -0.38), lp(1, 0)) +
+        Cp(lp(0.75, 0.38), lp(0.25, 0.42), lp(0, 0)) +
         'Z';
+      const vein = Mp(lp(0.05, 0)) + Lp(lp(0.85, 0));
       return (
         h('path', { d: twig, fill, stroke: line, 'stroke-width': W }) +
         h('path', { d, fill, stroke: line, 'stroke-width': W, 'stroke-linejoin': 'round' }) +
@@ -187,7 +196,8 @@ function hornRight(ctx: Ctx, base: Pt, len: number, tilt: number): string {
           stroke: ctx.paint.accentLine,
           'stroke-width': W * 0.8,
           'stroke-linejoin': 'round',
-        })
+        }) +
+        h('path', { d: vein, stroke: ctx.paint.accentLine, 'stroke-width': W * 0.5, opacity: 0.5 })
       );
     }
     case 'none':
@@ -466,9 +476,9 @@ export function sunCrest(ctx: Ctx): string {
 export function crownTen(ctx: Ctx, grand = false): string {
   const hd = ctx.sk.head;
   const n = Math.max(3, ctx.recipe.crest.count);
-  const w = hd.rx * (grand ? 1.32 : 1.22);
+  const w = hd.rx * (grand ? 1.62 : 1.5);
   const bandH = lerp(16, 22, ctx.sk.t) * (grand ? 1.15 : 1);
-  const pointH = lerp(18, 26, ctx.sk.t) * (grand ? 1.2 : 1);
+  const pointH = lerp(22, 32, ctx.sk.t) * (grand ? 1.15 : 1);
   const baseY = hd.cy - hd.ry * 0.82;
   const x0 = CX - w / 2;
   const top = baseY - bandH;
@@ -525,15 +535,64 @@ export function crownTen(ctx: Ctx, grand = false): string {
   );
 }
 
+/** Ember's flame crest: `count` (5) golden flames standing on the head, the middle one tallest. */
+export function flameCrest(ctx: Ctx): string {
+  const hd = ctx.sk.head;
+  const n = Math.max(1, ctx.recipe.crest.count);
+  const s = lerp(40, 50, ctx.sk.t);
+  const span = 104;
+  let out = '';
+  for (let i = 0; i < n; i++) {
+    const a = -90 - span / 2 + (n === 1 ? span / 2 : (i * span) / (n - 1));
+    const base = ellipsePoint(hd.cx, hd.cy, hd.rx * 0.8, hd.ry * 0.93, a);
+    const out1 = polar(0, 0, 1, a);
+    const lean = { x: out1.x * 0.55, y: -1 + out1.y * 0.2 };
+    const deg = atan2Deg(lean.y, lean.x) + 90;
+    const k = 1 - Math.abs(i - (n - 1) / 2) * 0.08;
+    out += h(
+      'g',
+      {
+        transform: `translate(${base.x.toFixed(2)} ${base.y.toFixed(2)}) rotate(${deg.toFixed(2)}) scale(0.78 1)`,
+      },
+      flame(s * k * 1.3, '#ffbe1f', '#fff3a6', '#b8520a', ctx.W * 0.85),
+    );
+  }
+  return h('g', { class: 'dv-crest dv-crest-flames' }, out);
+}
+
 export function flowerCrest(ctx: Ctx): string {
   const hd = ctx.sk.head;
-  const s = lerp(26, 36, ctx.sk.t);
+  const s = lerp(34, 46, ctx.sk.t);
+  const cy = hd.cy - hd.ry * 1.0;
+  const leaf = (dir: number): string => {
+    const d =
+      M(CX, cy + s * 0.2) +
+      C(
+        CX + dir * s * 0.4,
+        cy - s * 0.1,
+        CX + dir * s * 1.2,
+        cy - s * 0.05,
+        CX + dir * s * 1.45,
+        cy + s * 0.25,
+      ) +
+      C(CX + dir * s * 1.1, cy + s * 0.55, CX + dir * s * 0.45, cy + s * 0.55, CX, cy + s * 0.2) +
+      'Z';
+    return h('path', {
+      d,
+      fill: '#6fcf6a',
+      stroke: '#2f6b2a',
+      'stroke-width': ctx.W * 0.6,
+      'stroke-linejoin': 'round',
+    });
+  };
   return h(
     'g',
     { class: 'dv-crest' },
+    leaf(-1),
+    leaf(1),
     flower(
       CX,
-      hd.cy - hd.ry * 0.95,
+      cy,
       s,
       Math.max(4, ctx.recipe.crest.count),
       ctx.paint.wing,
@@ -593,30 +652,40 @@ export function shellCrest(ctx: Ctx): string {
 
 export function cloudTuft(ctx: Ctx): string {
   const hd = ctx.sk.head;
-  const s = lerp(30, 40, ctx.sk.t);
-  const y = hd.cy - hd.ry * 0.92;
+  const s = lerp(36, 48, ctx.sk.t);
+  const y = hd.cy - hd.ry * 0.96;
   return h(
     'g',
     { class: 'dv-crest' },
     cloudUnion(
       [
-        { x: CX - s * 0.55, y: y + s * 0.1, r: s * 0.42 },
-        { x: CX + s * 0.05, y: y - s * 0.25, r: s * 0.55 },
-        { x: CX + s * 0.62, y: y + s * 0.12, r: s * 0.4 },
+        { x: CX - s * 0.95, y: y + s * 0.3, r: s * 0.34 },
+        { x: CX - s * 0.5, y: y - s * 0.05, r: s * 0.45 },
+        { x: CX + s * 0.05, y: y - s * 0.32, r: s * 0.56 },
+        { x: CX + s * 0.6, y: y - s * 0.02, r: s * 0.44 },
+        { x: CX + s * 1.0, y: y + s * 0.32, r: s * 0.32 },
       ],
       ctx.paint.wing,
       ctx.paint.wingLine,
       ctx.W * 0.8,
     ),
+    h('ellipse', {
+      cx: CX - s * 0.15,
+      cy: y - s * 0.55,
+      rx: s * 0.26,
+      ry: s * 0.14,
+      fill: '#ffffff',
+      opacity: 0.7,
+    }),
   );
 }
 
-/** Small royal crown for the `crowned` stage (5 points, three gems). */
-export function royalCrown(ctx: Ctx): string {
+/** Small royal crown for the `crowned` stage (5 points, three gems); `lift` raises it above a crest. */
+export function royalCrown(ctx: Ctx, lift = 0): string {
   const hd = ctx.sk.head;
   const w = hd.rx * 0.95;
   const H = hd.ry * 0.52;
-  const baseY = hd.cy - hd.ry * 0.8;
+  const baseY = hd.cy - hd.ry * 0.8 - lift;
   const x0 = CX - w / 2;
   const pts: Pt[] = [
     { x: x0, y: baseY },

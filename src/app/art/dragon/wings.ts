@@ -225,46 +225,41 @@ function leaf(ctx: Ctx, S: number, H: number): WingArt {
   };
 }
 
+/** Petal wing: a blossom petal with a notched tip, pale at the heart and pink at the rim. */
 function petal(ctx: Ctx, S: number, H: number, angle: number): WingArt {
-  const len = Math.max(S, H) * 1.05;
-  const w = len * 0.72;
-  const tip = polar(0, 0, len, angle);
-  const n = polar(0, 0, w / 2, angle - 90);
-  const a = polar(0, 0, len * 0.25, angle);
-  const b = polar(0, 0, len * 0.92, angle);
+  const len = Math.max(S, H) * 1.06;
+  const wd = len * 0.74;
+  const u = polar(0, 0, 1, angle);
+  const v = polar(0, 0, 1, angle - 90);
+  const P = (a: number, b: number): Pt => ({
+    x: u.x * a * len + v.x * b * wd,
+    y: u.y * a * len + v.y * b * wd,
+  });
   const d =
-    M(0, 0) +
-    Cp(
-      { x: a.x + n.x * 1.25, y: a.y + n.y * 1.25 },
-      { x: b.x + n.x * 1.15, y: b.y + n.y * 1.15 },
-      tip,
-    ) +
-    Cp(
-      { x: b.x - n.x * 1.15, y: b.y - n.y * 1.15 },
-      { x: a.x - n.x * 1.25, y: a.y - n.y * 1.25 },
-      { x: 0, y: 0 },
-    ) +
+    Mp(P(0, 0)) +
+    Cp(P(0.1, 0.44), P(0.34, 0.6), P(0.58, 0.52)) +
+    Cp(P(0.8, 0.45), P(0.98, 0.32), P(1, 0.14)) +
+    Qp(P(0.95, 0.03), P(0.87, 0)) +
+    Qp(P(0.95, -0.03), P(1, -0.14)) +
+    Cp(P(0.98, -0.32), P(0.8, -0.45), P(0.58, -0.52)) +
+    Cp(P(0.34, -0.6), P(0.1, -0.44), P(0, 0)) +
     'Z';
-  const veins = [-14, 0, 14]
-    .map(
-      (o) =>
-        M(0, 0) + Qp(polar(0, 0, len * 0.5, angle + o * 0.6), polar(0, 0, len * 0.8, angle + o)),
-    )
+  const veins = [-0.22, 0, 0.22]
+    .map((o) => Mp(P(0.04, 0)) + Qp(P(0.4, o * 0.5), P(0.74, o)))
     .join('');
-  const glow = polar(0, 0, len * 0.45, angle);
+  const gid = ctx.def(`petal-grad-${angle}`, (id) =>
+    h(
+      'radialGradient',
+      { id, gradientUnits: 'userSpaceOnUse', cx: 0, cy: 0, r: len * 1.02 },
+      h('stop', { offset: '0', 'stop-color': '#fff7fb' }),
+      h('stop', { offset: '0.45', 'stop-color': ctx.paint.wingLight }),
+      h('stop', { offset: '0.85', 'stop-color': ctx.paint.wing }),
+      h('stop', { offset: '1', 'stop-color': ctx.paint.wingShade }),
+    ),
+  );
   return {
     membrane: d,
-    base:
-      h('path', { d, fill: wingFill(ctx, S, H) }) +
-      h('ellipse', {
-        cx: glow.x,
-        cy: glow.y,
-        rx: len * 0.22,
-        ry: len * 0.16,
-        fill: '#ffffff',
-        opacity: 0.25,
-        transform: `rotate(${angle} ${glow.x.toFixed(2)} ${glow.y.toFixed(2)})`,
-      }),
+    base: h('path', { d, fill: `url(#${gid})` }),
     top:
       h('path', {
         d: veins,
@@ -272,7 +267,7 @@ function petal(ctx: Ctx, S: number, H: number, angle: number): WingArt {
         stroke: ctx.paint.wingLine,
         'stroke-width': ctx.W * 0.5,
         'stroke-linecap': 'round',
-        opacity: 0.45,
+        opacity: 0.4,
       }) +
       h('path', {
         d,

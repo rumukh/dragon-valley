@@ -166,6 +166,27 @@ sheets.push({
 });
 
 sheets.push({
+  name: 'mnemonics',
+  title: 'Mnemonics at gameplay size (160 px, fit): hatchling, youngling, adult',
+  width: 1640,
+  height: 1180,
+  body: () => {
+    const cells = [];
+    for (const id of DRAGONS.filter((d) => d !== 'glimmer')) {
+      for (const stage of /** @type {const} */ (['hatchling', 'youngling', 'adult'])) {
+        cells.push(
+          cell(
+            art.renderDragon({ dragon: id, stage, idPrefix: uid(id), size: 160, framing: 'fit' }),
+            `${id} ${stage}`,
+          ),
+        );
+      }
+    }
+    return grid(9, cells, 160);
+  },
+});
+
+sheets.push({
   name: 'roster-small',
   title: 'Readability at 64 px (hatchling, adult) and 128 px',
   width: 1500,

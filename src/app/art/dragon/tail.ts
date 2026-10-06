@@ -1,6 +1,7 @@
 import { atan2Deg, bez, bezTangent, polar, type Pt } from '../svg/num';
 import { M, L, Q, C, polyD, circleD, heartD, roundStarD, tf } from '../svg/path';
 import { h } from '../svg/xml';
+import { lighten, outlineOf } from '../svg/color';
 import { clover, flame, flameD, flower, gearD, pearl } from '../glyphs';
 import { softGradient, type Ctx } from './ctx';
 import { cloudUnion, mirrorX, pivot, taperD } from './shapes';
@@ -34,14 +35,19 @@ export function tailTipArt(ctx: Ctx, tip: TailTip, s: number): string {
     }
     case 'heart':
       return h('path', { d: heartD(0, -s * 0.5, s * 1.1), fill: p.accent, ...stroke });
-    case 'flame':
+    case 'flame': {
+      // The tip flame may use its own shade (Ember: the "+1" flame is blue, unlike the 5 orange ones).
+      const outer = ctx.recipe.colors.accent2 ?? '#ff8a2a';
+      const mid = ctx.recipe.colors.accent2 ? lighten(outer, 0.45) : '#ffd447';
+      const core = ctx.recipe.colors.accent2 ? '#ffffff' : '#fff4b8';
       return h(
         'g',
         null,
-        h('path', { d: flameD(s * 1.5), fill: '#ff8a2a', ...stroke }),
-        h('path', { d: flameD(s * 1.05), fill: '#ffd447', transform: 'translate(0 -2)' }),
-        h('path', { d: flameD(s * 0.55), fill: '#fff4b8', transform: 'translate(0 -3)' }),
+        h('path', { d: flameD(s * 1.5), fill: outer, ...stroke, stroke: outlineOf(outer, 0.5) }),
+        h('path', { d: flameD(s * 1.05), fill: mid, transform: 'translate(0 -2)' }),
+        h('path', { d: flameD(s * 0.55), fill: core, transform: 'translate(0 -3)' }),
       );
+    }
     case 'cloud':
       return cloudUnion(
         [
@@ -244,7 +250,7 @@ function spikeArt(ctx: Ctx, style: SpikeStyle, s: number): string {
   const W = ctx.W * 0.75;
   switch (style) {
     case 'flame':
-      return flame(s * 1.25, '#ff9a2e', '#ffe066', p.line, W);
+      return flame(s * 1.3, '#ffbe1f', '#fff3a6', '#b8520a', W);
     case 'crystal':
       return h('path', {
         d: polyD([
@@ -314,6 +320,18 @@ function orient(p: Pt, dir: Pt, art: string): string {
   return h('g', { transform: tf(p.x, p.y, deg) }, art);
 }
 
+/** Parameter t where the (x-monotonic) tail curve reaches x, by bisection. */
+function tAtX(p0: Pt, p1: Pt, p2: Pt, p3: Pt, x: number): number {
+  let lo = 0;
+  let hi = 1;
+  for (let i = 0; i < 30; i++) {
+    const m = (lo + hi) / 2;
+    if (bez(p0, p1, p2, p3, m).x < x) lo = m;
+    else hi = m;
+  }
+  return (lo + hi) / 2;
+}
+
 /** One tail (right side). */
 function tailOne(ctx: Ctx, cls: string): string {
   const sk = ctx.sk;
@@ -333,9 +351,27 @@ function tailOne(ctx: Ctx, cls: string): string {
   );
   const sp = ctx.recipe.spikes;
   let spikes = '';
-  if (sp.where === 'tail' && sp.style !== 'none' && sp.count > 0) {
+  if (sp.where === 'tail' && sp.style === 'flame' && sp.count > 0) {
+    // Counted flames (Ember: 5 + 1) stand upright like candles, evenly spaced along the visible
+    // part of the tail and sized to their spacing so each one can be counted at gameplay size.
     const n = sp.count;
-    const s = (sp.style === 'flame' ? 0.8 : 0.62) * (20 + sk.t * 12);
+    const x0 = CX + sk.body.w * 0.6;
+    const x1 = p3.x - (p3.x - p0.x) * 0.16;
+    const step = n === 1 ? 0 : (x1 - x0) / (n - 1);
+    const size = Math.min(26 + sk.t * 12, Math.max(step, 16) * 0.98);
+    for (let i = 0; i < n; i++) {
+      const t = tAtX(p0, p1, p2, p3, x0 + step * i);
+      const at = bez(p0, p1, p2, p3, t);
+      const tg = bezTangent(p0, p1, p2, p3, t);
+      const w = (w0 + (w1 - w0) * t) / 2;
+      const nrm = { x: tg.y, y: -tg.x };
+      const up = { x: nrm.x * 0.35, y: -1 + nrm.y * 0.35 };
+      const base = { x: at.x + nrm.x * w * 0.55, y: at.y + nrm.y * w * 0.55 };
+      spikes += orient(base, up, spikeArt(ctx, sp.style, size));
+    }
+  } else if (sp.where === 'tail' && sp.style !== 'none' && sp.count > 0) {
+    const n = sp.count;
+    const s = 0.62 * (20 + sk.t * 12);
     for (let i = 0; i < n; i++) {
       const t = n === 1 ? 0.5 : 0.18 + (i * 0.56) / (n - 1);
       const at = bez(p0, p1, p2, p3, t);
@@ -347,7 +383,7 @@ function tailOne(ctx: Ctx, cls: string): string {
     }
   }
   const tg = bezTangent(p0, p1, p2, p3, 1);
-  const tipSize = (ctx.recipe.tail.tip === 'flame' ? 26 : 30) + sk.t * 16;
+  const tipSize = 30 + sk.t * 16;
   const tip = orient(p3, tg, tailTipArt(ctx, ctx.recipe.tail.tip, tipSize));
   const inner =
     spikes +

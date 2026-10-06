@@ -84,15 +84,23 @@ export function computeSkeleton(recipe: DragonRecipe, stage: DragonStage): Skele
   const mcy = eyeY + eyeR * 1.12 + mry * 0.5;
   const muzzle: Ellipse = { cx: CX, cy: mcy, rx: mrx, ry: mry };
 
+  // Dragons whose mnemonic lives on the belly get a bigger belly so it can be counted at 120-200 px.
+  const emblem = hasBellyEmblem(recipe);
   const bellyCy = top + bh * 0.6;
   const tailLen = lerp(92, 160, t) * recipe.tail.length;
+  const curl = recipe.tail.curl ?? 0.62;
 
   return {
     stage,
     t,
     line: lerp(0.86, 1, t),
     body: { top, bottom, w: bw, h: bh },
-    belly: { cx: CX, cy: bellyCy, rx: bw * 0.31, ry: bh * 0.35 },
+    belly: {
+      cx: CX,
+      cy: bellyCy,
+      rx: bw * (emblem ? 0.375 : 0.31),
+      ry: bh * (emblem ? 0.37 : 0.35),
+    },
     neck: t > 0.2 ? { w: hw * 0.4, top: hcy, bottom: top + bh * 0.25 } : null,
     head,
     muzzle,
@@ -122,11 +130,29 @@ export function computeSkeleton(recipe: DragonRecipe, stage: DragonStage): Skele
     tail: {
       p0: { x: CX + bw * 0.28, y: bottom - 28 },
       p1: { x: CX + bw * 0.58, y: bottom + 6 },
-      p2: { x: CX + bw * 0.52 + tailLen * 0.62, y: bottom - 2 },
-      p3: { x: CX + bw * 0.46 + tailLen * 0.8, y: bottom - tailLen * 0.62 },
+      p2: { x: CX + bw * 0.52 + tailLen * 0.62, y: bottom - 2 - tailLen * (curl - 0.62) * 0.3 },
+      p3: {
+        x: CX + bw * 0.46 + tailLen * (0.8 - (curl - 0.62) * 0.25),
+        y: bottom - tailLen * curl,
+      },
       w0: lerp(36, 46, t),
       w1: lerp(9, 11, t),
     },
     neckPivot: { x: CX, y: headBottom - hh * 0.12 },
   };
+}
+
+const BELLY_EMBLEMS = new Set([
+  'rainbow-belly',
+  'clock-belly',
+  'snowflake-belly',
+  'ten-frame-stars',
+  'clover-spots',
+  'gears',
+  'place-value',
+]);
+
+/** True when the dragon's mnemonic is drawn on its belly (bigger belly, paws rest at the sides). */
+export function hasBellyEmblem(recipe: DragonRecipe): boolean {
+  return recipe.markings.some((m) => BELLY_EMBLEMS.has(m));
 }
