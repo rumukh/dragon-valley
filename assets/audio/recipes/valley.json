@@ -37,8 +37,8 @@
       "sends": { "hall": -11 },
       "humanize": { "time": 0.006, "velocity": 0.05 },
       "phrases": {
-        "A": "mf C5:q F5:e G5:e A5:q | Bb5:q. A5:e G5:q | D5:q G5:e A5:e Bb5:q | A5:q G5:h | C5:q F5:e G5:e A5:q | D6:q. C6:e Bb5:q | A5:e Bb5:e G5:q E5:q | F5:h.",
-        "A2": "p A4:q C5:e E5:e F5:q | G5:q. F5:e E5:q | Bb4:q D5:e F5:e G5:q | F5:q E5:h | A4:q C5:e E5:e F5:q | Bb5:q. A5:e F5:q | F5:e G5:e E5:q C5:q | A4:h F4:q'"
+        "A": "mf C5:q F5:e G5:e A5:q | Bb5:q. A5:e G5:q | D5:q G5:e A5:e Bb5:q | A5:q G5:h | C5:q F5:e G5:e A5:q | D6:q. C6:e Bb5:q | Bb5:e A5:e G5:q E5:q | F5:h.",
+        "A2": "p A4:q C5:e E5:e F5:q | G5:q. F5:e E5:q | Bb4:q D5:e F5:e G5:q | F5:q E5:h | A4:q C5:e E5:e F5:q | Bb5:q. A5:e F5:q | G5:e F5:e E5:q C5:q | A4:h F4:q'"
       }
     },
     {
@@ -49,7 +49,7 @@
       "humanize": { "time": 0.006, "velocity": 0.05 },
       "phrases": {
         "B": "mf D5:e F5:e Bb5:e A5:e G5:e F5:e | G5:q. F5:e D5:q | C5:e F5:e A5:e G5:e F5:e E5:e | F5:q. E5:e D5:q | Bb4:e D5:e G5:e F5:e E5:e D5:e | E5:q. F5:e G5:q | A5:e G5:e F5:e E5:e D5:e C5:e | G5:q. F5:e E5:q",
-        "A2": "mf C5:q F5:e G5:e A5:q | Bb5:q. A5:e G5:q | D5:q G5:e A5:e Bb5:q | A5:q G5:h | C5:q F5:e G5:e A5:q | D6:q. C6:e Bb5:q | A5:e Bb5:e G5:q E5:q | F5:h A4:q'"
+        "A2": "mf C5:q F5:e G5:e A5:q | Bb5:q. A5:e G5:q | D5:q G5:e A5:e Bb5:q | A5:q G5:h | C5:q F5:e G5:e A5:q | D6:q. C6:e Bb5:q | Bb5:e A5:e G5:q E5:q | F5:h A4:q'"
       }
     },
     {

@@ -1,7 +1,7 @@
 {
   "schema": "dragon-valley-audio-manifest/1",
   "packId": "dragon-valley-audio",
-  "revision": "audio-a2058272d5db1091",
+  "revision": "audio-697637b8dd125af5",
   "advisory": "Suggested mapping only. Domain events follow docs/plan.md section 3.3 (final names come from the domain contract); presentation cues are shell moments that are not domain events. S3 owns the actual mapping.",
   "format": {
     "container": "wav",
@@ -678,11 +678,11 @@
       "samples": 793800,
       "sampleRate": 22050,
       "bytes": 1587644,
-      "sha256": "6c42fbe14ab2fc3144b9ca017429e4177b170865cd6a76932f6169b0fdcf9c60",
+      "sha256": "930d2bc015edc57ad24903f5a5de92f23c223e9af2f87e25ab448ec2a48bc0f7",
       "volume": 1,
       "loudnessLufs": -23,
       "loudnessMeasure": "integrated",
-      "truePeakDbtp": -10.33,
+      "truePeakDbtp": -10.34,
       "description": "An original gentle folk dance in the spirit of the Czech sousedska: a lilting 3/4 at 120 BPM in F major. A: clarinet tune over tuba 'oom' and accordion 'pah-pah'. B: flute in flowing eighths over sustained accordion and cimbalom arpeggios (subdominant colour). A2: flute and clarinet in parallel thirds with a rocking cimbalom.",
       "music": {
         "tempo": 120,

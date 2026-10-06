@@ -297,10 +297,10 @@
     {
       "id": "valley",
       "file": "assets/audio/music/valley.wav",
-      "sha256": "6c42fbe14ab2fc3144b9ca017429e4177b170865cd6a76932f6169b0fdcf9c60",
+      "sha256": "930d2bc015edc57ad24903f5a5de92f23c223e9af2f87e25ab448ec2a48bc0f7",
       "bytes": 1587644,
       "recipe": "assets/audio/recipes/valley.json",
-      "recipeSha256": "a6a3513d6f40fcbe444dd7938b3449d776b5adec6bdd30fda4ef3920f3b5b519",
+      "recipeSha256": "7b864d93762c3265c706e29a6583dc6f27149274a1b8b5a752229507da0be894",
       "seed": 3101
     },
     {

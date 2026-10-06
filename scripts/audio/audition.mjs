@@ -89,6 +89,7 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
 <title>Dragon Valley audio audition (${manifest.revision})</title>
 <style>
   :root { color-scheme: dark; font-family: system-ui, sans-serif; }
