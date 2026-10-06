@@ -33,10 +33,10 @@
     "art:goldens": "node scripts/art/goldens.mjs"
   },
   "dependencies": {
-    "@aegis/browser": "file:vendor/aegis/0.0.0-local.r5949a7fa1a34.d2c83c1814069db10/aegis-browser-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz",
-    "@aegis/core": "file:vendor/aegis/0.0.0-local.r5949a7fa1a34.d2c83c1814069db10/aegis-core-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz",
-    "@aegis/narrative": "file:vendor/aegis/0.0.0-local.r5949a7fa1a34.d2c83c1814069db10/aegis-narrative-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz",
-    "@aegis/runtime": "file:vendor/aegis/0.0.0-local.r5949a7fa1a34.d2c83c1814069db10/aegis-runtime-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz"
+    "@aegis/browser": "file:vendor/aegis/0.0.0-local.r0abd61b5a679.da726c53afdf74c5f/aegis-browser-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz",
+    "@aegis/core": "file:vendor/aegis/0.0.0-local.r0abd61b5a679.da726c53afdf74c5f/aegis-core-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz",
+    "@aegis/narrative": "file:vendor/aegis/0.0.0-local.r0abd61b5a679.da726c53afdf74c5f/aegis-narrative-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz",
+    "@aegis/runtime": "file:vendor/aegis/0.0.0-local.r0abd61b5a679.da726c53afdf74c5f/aegis-runtime-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
