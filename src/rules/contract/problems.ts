@@ -175,8 +175,9 @@ export function solveBlank(expr: Expr, target: number): number | null {
         if (known === 0) return null;
         inner = target * known;
       } else {
-        // k : ? = t  ->  k : t (exact, and t must not be 0)
-        if (target === 0 || known % target !== 0) return null;
+        // k : ? = t  ->  k : t (exact; t must not be 0, and k must not be 0 either, since
+        // 0 : ? = t has no solution for t > 0 and every divisor fits for t = 0)
+        if (target === 0 || known === 0 || known % target !== 0) return null;
         inner = known / target;
       }
       break;

@@ -120,6 +120,24 @@ describe('content validation reports authoring mistakes', () => {
     expectDiagnostic(pack, 'missing-reference', 'sunny-meadow.1');
   });
 
+  it('rejects references to an existing record of the wrong kind', () => {
+    const eggIsCosmetic = fresh();
+    eggIsCosmetic.data.levels[0]!.rewards.eggs = ['scarf-striped'];
+    expectDiagnostic(eggIsCosmetic, 'missing-reference', 'sunny-meadow.1');
+
+    const regionIsSkill = fresh();
+    regionIsSkill.data.levels[0]!.region = 'mul-2';
+    expectDiagnostic(regionIsSkill, 'missing-reference', 'sunny-meadow.1');
+
+    const bossIsLevel = fresh();
+    bossIsLevel.data.levels.find((l) => l.kind === 'boss')!.boss = 'sunny-meadow.1';
+    expectDiagnostic(bossIsLevel, 'missing-reference', 'sunny-meadow.boss');
+
+    const storyEggIsCosmetic = fresh();
+    storyEggIsCosmetic.data.story.rewards[0]!.grant = { kind: 'egg', dragon: 'scarf-striped' };
+    expectDiagnostic(storyEggIsCosmetic, 'missing-reference', 'first-egg.bubbles');
+  });
+
   it('rejects duplicate level IDs', () => {
     const pack = fresh();
     pack.data.levels[1]!.id = pack.data.levels[0]!.id;

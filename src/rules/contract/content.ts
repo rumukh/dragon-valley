@@ -761,168 +761,175 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
   const out: RuntimeDiagnostic[] = [];
   const problem = (recordId: string, path: string, message: string, code = 'invalid-content') =>
     out.push({ code, message, file, recordId, path });
-  const refs = (
-    catalog: string,
-    records: readonly { id: string; references: readonly string[] }[],
-    available: readonly string[],
-  ) => out.push(...validateReferences(records, available, `${file}#${catalog}`));
-
-  const objectiveIds = data.objectives.map((o) => o.id);
-  const regionIds = data.regions.map((r) => r.id);
-  const levelIds = data.levels.map((l) => l.id);
-  const skillIds = data.skills.map((s) => s.id);
-  const dragonIds = data.dragons.map((d) => d.id);
-  const bossIds = data.bosses.map((b) => b.id);
-  const cosmeticIds = data.cosmetics.map((c) => c.id);
-  const beatIds = data.story.beats.map((b) => b.id);
-  const listIds = data.wordLists.map((w) => w.id);
-  const templateIds = data.wordTemplates.map((t) => t.id);
-
-  refs(
-    'objectives',
-    data.objectives.map((o) => ({ id: o.id, references: [] })),
-    [],
-  );
-  refs(
-    'regions',
-    data.regions.map((r) => ({
-      id: r.id,
-      references: [...(r.boss ? [r.boss] : []), ...r.unlock.after],
-    })),
-    [...bossIds, ...levelIds],
-  );
-  refs(
-    'levels',
-    data.levels.map((l) => ({
-      id: l.id,
-      references: [
-        l.region,
-        ...l.unlock.after,
-        ...(l.boss ? [l.boss] : []),
-        ...(l.storyBeat ? [l.storyBeat] : []),
-        ...l.objectives,
-        ...l.activities.flatMap((a) => a.skills),
-        ...l.rewards.eggs,
-        ...l.rewards.cosmetics,
-      ],
-    })),
-    [
-      ...regionIds,
-      ...levelIds,
-      ...bossIds,
-      ...beatIds,
-      ...objectiveIds,
-      ...skillIds,
-      ...dragonIds,
-      ...cosmeticIds,
-    ],
-  );
-  refs(
-    'skills',
-    data.skills.map((s) => ({
-      id: s.id,
-      references: s.generator === 'word' ? s.params.templates : [],
-    })),
-    templateIds,
-  );
-  refs(
-    'dragons',
-    data.dragons.map((d) => ({
-      id: d.id,
-      references: [d.region, ...d.skills, ...d.divisionSkills, ...(d.boss ? [d.boss] : [])],
-    })),
-    [...regionIds, ...skillIds, ...bossIds],
-  );
-  refs(
-    'bosses',
-    data.bosses.map((b) => ({ id: b.id, references: [b.region] })),
-    regionIds,
-  );
-  refs(
-    'cosmetics',
-    data.cosmetics.map((c) => ({ id: c.id, references: c.unlock ? [c.unlock] : [] })),
-    levelIds,
-  );
-  refs(
-    'stickers',
-    data.stickers.map((s) => {
-      const c = s.criteria;
-      const target =
-        c.kind === 'level-complete'
-          ? [c.level]
-          : c.kind === 'boss-defeated'
-            ? [c.boss]
-            : c.kind === 'dragon-stage' && c.dragon
-              ? [c.dragon]
-              : [];
-      return { id: s.id, references: [s.page, ...target] };
-    }),
-    [...regionIds, ...levelIds, ...bossIds, ...dragonIds],
-  );
-  refs(
-    'quests',
-    data.quests.map((q) => ({ id: q.id, references: q.unlock ? [q.unlock] : [] })),
-    levelIds,
-  );
-  refs(
-    'wordLists',
-    data.wordLists.map((w) => ({ id: w.id, references: [] })),
-    [],
-  );
-  refs(
-    'wordTemplates',
-    data.wordTemplates.map((t) => ({
-      id: t.id,
-      references: Object.values(t.vars).flatMap((v) => (v.kind === 'word' ? [v.list] : [])),
-    })),
-    listIds,
-  );
-  refs(
-    'placement',
-    data.placement.steps.map((step, index) => ({
-      id: `step-${index}`,
-      references: [step.skill, ...step.levels],
-    })),
-    [...skillIds, ...levelIds],
-  );
-  refs(
-    'beats',
-    data.story.beats.map((b) => {
-      const t = b.trigger;
-      const target =
-        t.kind === 'after-beat'
-          ? [t.beat]
-          : t.kind === 'level-start' || t.kind === 'level-complete'
-            ? [t.level]
-            : t.kind === 'boss-defeated'
-              ? [t.boss]
-              : [];
-      return { id: b.id, references: target };
-    }),
-    [...beatIds, ...levelIds, ...bossIds],
-  );
-  refs(
-    'storyRewards',
-    data.story.rewards.map((r) => ({
-      id: r.reward,
-      references:
-        r.grant.kind === 'egg'
-          ? [r.grant.dragon]
-          : r.grant.kind === 'cosmetic'
-            ? [r.grant.item]
-            : [],
-    })),
-    [...dragonIds, ...cosmeticIds],
-  );
-  if (!levelIds.includes(data.balance.arena.unlockAfter)) {
-    problem(
-      'balance',
-      'arena.unlockAfter',
-      `Unknown level "${data.balance.arena.unlockAfter}".`,
-      'missing-reference',
+  /** Duplicate IDs within one collection. */
+  const unique = (catalog: string, ids: readonly string[]) =>
+    out.push(
+      ...validateReferences(
+        ids.map((id) => ({ id, references: [] })),
+        [],
+        `${file}#${catalog}`,
+      ),
     );
-  }
+  /** References of one field, checked against the IDs of the kind the field names. */
+  const need = (
+    catalog: string,
+    recordId: string,
+    field: string,
+    references: readonly string[],
+    available: ReadonlySet<string>,
+    kind: string,
+  ) =>
+    references.forEach((reference, index) => {
+      if (!available.has(reference)) {
+        out.push({
+          code: 'missing-reference',
+          message: `Unknown ${kind} "${reference}".`,
+          file: `${file}#${catalog}`,
+          recordId,
+          path: references.length === 1 ? field : `${field}[${index}]`,
+        });
+      }
+    });
+  const one = (value: string | null): string[] => (value === null ? [] : [value]);
 
+  const objectives = new Set(data.objectives.map((o) => o.id));
+  const regions = new Set(data.regions.map((r) => r.id));
+  const levels = new Set(data.levels.map((l) => l.id));
+  const skills = new Set(data.skills.map((s) => s.id));
+  const dragons = new Set(data.dragons.map((d) => d.id));
+  const bosses = new Set(data.bosses.map((b) => b.id));
+  const cosmetics = new Set(data.cosmetics.map((c) => c.id));
+  const beats = new Set(data.story.beats.map((b) => b.id));
+  const lists = new Set(data.wordLists.map((w) => w.id));
+  const templates = new Set(data.wordTemplates.map((t) => t.id));
+
+  unique(
+    'objectives',
+    data.objectives.map((o) => o.id),
+  );
+  unique(
+    'regions',
+    data.regions.map((r) => r.id),
+  );
+  unique(
+    'levels',
+    data.levels.map((l) => l.id),
+  );
+  unique(
+    'skills',
+    data.skills.map((s) => s.id),
+  );
+  unique(
+    'dragons',
+    data.dragons.map((d) => d.id),
+  );
+  unique(
+    'bosses',
+    data.bosses.map((b) => b.id),
+  );
+  unique(
+    'cosmetics',
+    data.cosmetics.map((c) => c.id),
+  );
+  unique(
+    'stickers',
+    data.stickers.map((s) => s.id),
+  );
+  unique(
+    'quests',
+    data.quests.map((q) => q.id),
+  );
+  unique(
+    'wordLists',
+    data.wordLists.map((w) => w.id),
+  );
+  unique(
+    'wordTemplates',
+    data.wordTemplates.map((t) => t.id),
+  );
+  unique(
+    'beats',
+    data.story.beats.map((b) => b.id),
+  );
+  unique(
+    'storyRewards',
+    data.story.rewards.map((r) => r.reward),
+  );
+
+  for (const r of data.regions) {
+    need('regions', r.id, 'unlock.after', r.unlock.after, levels, 'level');
+    need('regions', r.id, 'boss', one(r.boss), bosses, 'boss');
+  }
+  for (const l of data.levels) {
+    need('levels', l.id, 'region', [l.region], regions, 'region');
+    need('levels', l.id, 'unlock.after', l.unlock.after, levels, 'level');
+    need('levels', l.id, 'boss', one(l.boss), bosses, 'boss');
+    need('levels', l.id, 'storyBeat', one(l.storyBeat), beats, 'story beat');
+    need('levels', l.id, 'objectives', l.objectives, objectives, 'objective');
+    l.activities.forEach((a, index) =>
+      need('levels', l.id, `activities[${index}].skills`, a.skills, skills, 'skill'),
+    );
+    need('levels', l.id, 'rewards.eggs', l.rewards.eggs, dragons, 'dragon');
+    need('levels', l.id, 'rewards.cosmetics', l.rewards.cosmetics, cosmetics, 'cosmetic');
+  }
+  for (const s of data.skills) {
+    if (s.generator === 'word') {
+      need('skills', s.id, 'params.templates', s.params.templates, templates, 'word template');
+    }
+  }
+  for (const d of data.dragons) {
+    need('dragons', d.id, 'region', [d.region], regions, 'region');
+    need('dragons', d.id, 'skills', d.skills, skills, 'skill');
+    need('dragons', d.id, 'divisionSkills', d.divisionSkills, skills, 'skill');
+    need('dragons', d.id, 'boss', one(d.boss), bosses, 'boss');
+  }
+  for (const b of data.bosses) need('bosses', b.id, 'region', [b.region], regions, 'region');
+  for (const c of data.cosmetics) need('cosmetics', c.id, 'unlock', one(c.unlock), levels, 'level');
+  for (const s of data.stickers) {
+    const c = s.criteria;
+    need('stickers', s.id, 'page', [s.page], regions, 'region');
+    if (c.kind === 'level-complete')
+      need('stickers', s.id, 'criteria.level', [c.level], levels, 'level');
+    if (c.kind === 'boss-defeated')
+      need('stickers', s.id, 'criteria.boss', [c.boss], bosses, 'boss');
+    if (c.kind === 'dragon-stage') {
+      need('stickers', s.id, 'criteria.dragon', one(c.dragon), dragons, 'dragon');
+    }
+  }
+  for (const q of data.quests) need('quests', q.id, 'unlock', one(q.unlock), levels, 'level');
+  for (const t of data.wordTemplates) {
+    for (const [name, v] of Object.entries(t.vars)) {
+      if (v.kind === 'word')
+        need('wordTemplates', t.id, `vars.${name}.list`, [v.list], lists, 'word list');
+    }
+  }
+  data.placement.steps.forEach((step, index) => {
+    need('placement', `step-${index}`, 'skill', [step.skill], skills, 'skill');
+    need('placement', `step-${index}`, 'levels', step.levels, levels, 'level');
+  });
+  for (const b of data.story.beats) {
+    const t = b.trigger;
+    if (t.kind === 'after-beat') need('beats', b.id, 'trigger.beat', [t.beat], beats, 'story beat');
+    if (t.kind === 'level-start' || t.kind === 'level-complete') {
+      need('beats', b.id, 'trigger.level', [t.level], levels, 'level');
+    }
+    if (t.kind === 'boss-defeated') need('beats', b.id, 'trigger.boss', [t.boss], bosses, 'boss');
+  }
+  for (const r of data.story.rewards) {
+    if (r.grant.kind === 'egg')
+      need('storyRewards', r.reward, 'grant.dragon', [r.grant.dragon], dragons, 'dragon');
+    if (r.grant.kind === 'cosmetic') {
+      need('storyRewards', r.reward, 'grant.item', [r.grant.item], cosmetics, 'cosmetic');
+    }
+  }
+  need(
+    'balance',
+    'balance',
+    'arena.unlockAfter',
+    [data.balance.arena.unlockAfter],
+    levels,
+    'level',
+  );
   // Skills produce at least one item; word templates are internally consistent.
   for (const [id, items] of skillItemIndex(data)) {
     if (items.length === 0)

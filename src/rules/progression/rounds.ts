@@ -109,6 +109,11 @@ export function startProblemRound(
   serveNext(ctx, index);
 }
 
+/** The recently served items that may not be served again yet (none when `window` is 0). */
+export function blockedRecent(recent: readonly string[], window: number): string[] {
+  return window <= 0 ? [] : recent.slice(-window);
+}
+
 function roundDone(round: ProblemRound): boolean {
   if (round.meter !== null && round.meter.value >= round.meter.target) return true;
   return round.target !== null && round.answered >= round.target;
@@ -134,7 +139,7 @@ export function serveNext(ctx: Ctx, index: ReadonlyMap<string, readonly string[]
   } else {
     skill = skillById(data, problems.pick(skills))!;
     const universe = index.get(skill.id) ?? [];
-    const recent = round.recent.slice(-data.balance.mix.noRepeatWithin);
+    const recent = blockedRecent(round.recent, data.balance.mix.noRepeatWithin);
     const fresh = universe.filter((candidate) => !recent.includes(candidate));
     // Skeleton mix: new facts first, so a first round meets as many facts as it can.
     const unseen = fresh.filter((candidate) => ctx.state.items[candidate] === undefined);
@@ -170,6 +175,18 @@ function isWindowItem(item: string): boolean {
   return kind === 'mul' || kind === 'div';
 }
 
+/**
+ * Unlock the daily gift once today's correct answers reach the goal. Checked after answers and
+ * after the parent changes the goal, so lowering the goal below today's count still unlocks it.
+ */
+export function checkDailyGoal(ctx: Ctx): void {
+  const daily = ctx.state.daily;
+  if (daily && daily.gift === 'locked' && daily.correct >= daily.goal) {
+    daily.gift = 'ready';
+    ctx.emit(EVENTS.dailyGoalReached, { day: isoDay(daily.day) });
+  }
+}
+
 function recordDay(ctx: Ctx, correct: boolean, fast: boolean): void {
   const state = ctx.state;
   const day = state.day ?? 0;
@@ -177,10 +194,7 @@ function recordDay(ctx: Ctx, correct: boolean, fast: boolean): void {
     state.daily.answers += 1;
     if (correct) state.daily.correct += 1;
     if (fast) state.daily.fast += 1;
-    if (correct && state.daily.correct === state.daily.goal) {
-      if (state.daily.gift === 'locked') state.daily.gift = 'ready';
-      ctx.emit(EVENTS.dailyGoalReached, { day: isoDay(day) });
-    }
+    checkDailyGoal(ctx);
   }
   const record = state.history[state.history.length - 1];
   if (record && record.day === day) {
@@ -309,21 +323,29 @@ export function completeRound(
   const run = ctx.state.run;
   if (round.source.kind === 'level' && run && run.level === round.source.level) {
     const activity = round.source.activity;
+    // Only a round played to its end completes the activity; quitting or the parent's time
+    // limit keeps the answers' progress but leaves the activity to finish another time.
+    const completed = reason === 'finished' || reason === 'time-up';
     run.results = [
       ...run.results.filter((r) => r.activity !== activity),
-      { activity, answered, correct, fast, completed: reason !== 'quit' },
+      { activity, answered, correct, fast, completed },
     ].sort((a, b) => a.activity - b.activity);
-    if (reason !== 'quit') {
+    if (completed) {
+      const before = run.next;
       run.next = Math.max(run.next, activity + 1);
-      advanceRun(ctx, index);
+      advanceRun(ctx, index, before);
     }
   }
   applyGrowth(ctx, index);
   awardStickers(ctx);
 }
 
-/** Skip activities this build cannot play, then complete the level once all are done. */
-function advanceRun(ctx: Ctx, index: ReadonlyMap<string, readonly string[]>): void {
+/**
+ * Skip activities this build cannot play, then complete the level when the run first reaches its
+ * end. `before` is the run's next activity before this step: replaying an activity of a finished
+ * run does not complete the level again (start the level again for a new run instead).
+ */
+function advanceRun(ctx: Ctx, index: ReadonlyMap<string, readonly string[]>, before: number): void {
   const run = ctx.state.run!;
   const level = levelOf(ctx.content.data, run.level)!;
   while (run.next < level.activities.length && !canPlay(ctx.content.data, level, run.next, index)) {
@@ -334,7 +356,9 @@ function advanceRun(ctx: Ctx, index: ReadonlyMap<string, readonly string[]>): vo
     ].sort((a, b) => a.activity - b.activity);
     run.next += 1;
   }
-  if (run.next >= level.activities.length) completeLevel(ctx, index);
+  if (before < level.activities.length && run.next >= level.activities.length) {
+    completeLevel(ctx, index);
+  }
 }
 
 export function canPlay(
@@ -361,8 +385,9 @@ export function startRunActivity(
   const data = ctx.content.data;
   const level = levelOf(data, run.level)!;
   if (!canPlay(data, level, activityIndex, index)) {
+    const before = run.next;
     run.next = Math.max(run.next, activityIndex);
-    advanceRun(ctx, index);
+    advanceRun(ctx, index, before);
     if (run.next < level.activities.length && ctx.state.run) startRunActivity(ctx, index, run.next);
     return;
   }
@@ -387,7 +412,13 @@ export function completeLevel(ctx: Ctx, index: ReadonlyMap<string, readonly stri
   const answered = run.results.reduce((sum, r) => sum + r.answered, 0);
   const correct = run.results.reduce((sum, r) => sum + r.correct, 0);
   const fast = run.results.reduce((sum, r) => sum + r.fast, 0);
-  const stars = starsFor(answered, correct, fast, level.stars ?? data.balance.stars);
+  // A run with no answers earns stars by completion only when every activity was really played
+  // (minigame-only levels); a run whose activities were all skipped counts as completed (1 star).
+  const played = run.results.every((r) => r.completed);
+  const stars =
+    answered === 0 && !played
+      ? 1
+      : starsFor(answered, correct, fast, level.stars ?? data.balance.stars);
   const progress = ctx.state.levels[level.id] ?? {
     stars: 0,
     bestAccuracy: 0,

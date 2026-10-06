@@ -50,6 +50,8 @@ import { applyGrowth } from './progression/dragons';
 import { isPlayable } from './progression/levels';
 import {
   activeProblemRound,
+  canPlay,
+  checkDailyGoal,
   closeRound,
   completeRound,
   gradeAnswer,
@@ -98,9 +100,12 @@ function legality(action: GameAction, read: Read): Reject | null {
       const run = state.run;
       const level = run === null ? undefined : data.levels.find((l) => l.id === run.level);
       if (!run || !level) return reject('no-level', 'Start a level first.');
-      return action.activity.index <= run.next && action.activity.index < level.activities.length
+      if (action.activity.index > run.next || action.activity.index >= level.activities.length) {
+        return reject('locked-activity', 'Play the activities in order.');
+      }
+      return canPlay(data, level, action.activity.index, skillItemIndex(data))
         ? null
-        : reject('locked-activity', 'Play the activities in order.');
+        : reject('not-implemented', 'This activity is coming with the rules work.');
     }
     case 'answer': {
       if (round === null || round.type !== 'problems' || !activeRound || round.current === null) {
@@ -117,7 +122,11 @@ function legality(action: GameAction, read: Read): Reject | null {
       if (round === null) return reject('no-round', 'There is no round.');
       if (action.reason === 'done')
         return activeRound ? reject('round-active', 'The round is still going.') : null;
-      return activeRound ? null : reject('round-finished', 'The round has already finished.');
+      if (!activeRound) return reject('round-finished', 'The round has already finished.');
+      // Only the Lightning Arena is timed; any round may end on the parent's time limit or a quit.
+      return action.reason === 'time-up' && round.activity !== 'arena'
+        ? reject('not-timed', 'Only the Arena ends on time.')
+        : null;
     case 'buy': {
       const item = data.cosmetics.find((c) => c.id === action.item);
       if (!item || !availableCosmetics(state, data).includes(item.id))
@@ -393,6 +402,7 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
           if (setting.key === 'dailyGoal') {
             ctx.state.settings.dailyGoal = setting.value;
             if (ctx.state.daily) ctx.state.daily.goal = setting.value;
+            checkDailyGoal(ctx);
           } else if (setting.key === 'arena') ctx.state.settings.arena = setting.value;
           else ctx.state.settings.unlockAhead = [...setting.value];
         },

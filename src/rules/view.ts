@@ -122,7 +122,7 @@ function runView(state: ReadState, data: Data): RunView | null {
     activities: level.activities.map((activity, index) => ({
       index,
       kind: activity.kind,
-      done: run.results.some((r) => r.activity === index),
+      done: run.results.some((r) => r.activity === index && r.completed),
     })),
     result:
       done && progress

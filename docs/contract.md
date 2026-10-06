@@ -352,26 +352,26 @@ Every action is validated by `gameActionSchema` and then by the rules' legality 
 A rejected action changes nothing, costs nothing and draws no randomness. Only answers cost a
 logical turn (`ACTION_TURNS`); re-ask jobs count turns.
 
-| Action                                              | Turns   | Legal when                                            | Effect                                                        |
-| --------------------------------------------------- | ------- | ----------------------------------------------------- | ------------------------------------------------------------- |
-| `startSession { day: 'YYYY-MM-DD' }`                | 0       | always (first action of a profile)                    | new day: daily record, history; first session: prologue       |
-| `startLevel { level }`                              | 0       | level open, no active round, no blocking beat         | start a run and its first playable activity; level-start beat |
-| `startActivity { activity }`                        | 0       | `level` (index ≤ next), `arena`, `snack`, `placement` | start a round                                                 |
-| `answer { value, elapsedMs }`                       | 1       | a problem is on screen                                | grade, Leitner move, coins, re-ask job, next problem          |
-| `placementAnswer { value, elapsedMs }`              | 1       | in the placement round                                | grade, place levels                                           |
-| `minigameMove { revision, move }`                   | 0       | a minigame board is active                            | reduce the board; completion credits and pays                 |
-| `hint`                                              | 0       | a problem is on screen, not yet hinted                | mark hinted (shell shows the model)                           |
-| `endRound { reason: done/quit/time-up/time-limit }` | 0       | `done`: round finished; others: round active          | close or end the round; cancel pending re-asks                |
-| `buy { item }`                                      | 0       | item available, not owned, affordable                 | pay, grant (`buy:<item>`)                                     |
-| `equip { dragon, slot, item                         | null }` | 0                                                     | dragon owned; item owned and fits the slot                    | dress the dragon                                  |
-| `claimQuest { quest }`                              | 0       | quest done and unclaimed                              | pay the quest coins                                           |
-| `openGift`                                          | 0       | daily gift ready                                      | weighted grant from `rewards`                                 |
-| `storyChoice { beat, node, revision, choice         | null }` | 0                                                     | the pending beat, current node and revision                   | advance (or skip a skippable beat); grant rewards |
-| `setSetting { setting }`                            | 0       | values in range                                       | `dailyGoal`, `arena`, `unlockAhead`                           |
+| Action                                              | Turns   | Legal when                                                                            | Effect                                                                                       |
+| --------------------------------------------------- | ------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `startSession { day: 'YYYY-MM-DD' }`                | 0       | always (first action of a profile)                                                    | new day: daily record, history; first session: prologue                                      |
+| `startLevel { level }`                              | 0       | level open, no active round, no blocking beat                                         | start a run and its first playable activity; level-start beat                                |
+| `startActivity { activity }`                        | 0       | `level` (index ≤ next), `arena`, `snack`, `placement`                                 | start a round                                                                                |
+| `answer { value, elapsedMs }`                       | 1       | a problem is on screen                                                                | grade, Leitner move, coins, re-ask job, next problem                                         |
+| `placementAnswer { value, elapsedMs }`              | 1       | in the placement round                                                                | grade, place levels                                                                          |
+| `minigameMove { revision, move }`                   | 0       | a minigame board is active                                                            | reduce the board; completion credits and pays                                                |
+| `hint`                                              | 0       | a problem is on screen, not yet hinted                                                | mark hinted (shell shows the model)                                                          |
+| `endRound { reason: done/quit/time-up/time-limit }` | 0       | `done`: round finished; `quit`, `time-limit`: round active; `time-up`: the Arena only | close or end the round; cancel pending re-asks; only a finished round completes its activity |
+| `buy { item }`                                      | 0       | item available, not owned, affordable                                                 | pay, grant (`buy:<item>`)                                                                    |
+| `equip { dragon, slot, item                         | null }` | 0                                                                                     | dragon owned; item owned and fits the slot                                                   | dress the dragon                                  |
+| `claimQuest { quest }`                              | 0       | quest done and unclaimed                                                              | pay the quest coins                                                                          |
+| `openGift`                                          | 0       | daily gift ready                                                                      | weighted grant from `rewards`                                                                |
+| `storyChoice { beat, node, revision, choice         | null }` | 0                                                                                     | the pending beat, current node and revision                                                  | advance (or skip a skippable beat); grant rewards |
+| `setSetting { setting }`                            | 0       | values in range                                                                       | `dailyGoal`, `arena`, `unlockAhead`                                                          |
 
 - **Rejections** are `RuntimeError`s with stable `code`s: `no-session`, `invalid-day`,
   `story-pending`, `round-active`, `unknown-level`, `locked-level`, `no-level`, `locked-activity`,
-  `no-problem`, `wrong-action`, `already-hinted`, `no-round`, `round-finished`, `unknown-item`,
+  `no-problem`, `wrong-action`, `already-hinted`, `no-round`, `round-finished`, `not-timed`, `unknown-item`,
   `owned`, `insufficient-coins`, `unknown-dragon`, `not-owned`, `wrong-slot`, `gift-not-ready`,
   `story-choice`, `invalid-setting`, `not-implemented`. The shell localizes by `code`
   (`error.<code>` in `en.ui.json`) and never shows diagnostic text to a child.

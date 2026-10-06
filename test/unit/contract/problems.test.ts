@@ -125,6 +125,8 @@ describe('expected answers', () => {
       { kind: 'equation', left: op('sub', num(3), num(5)), right: BLANK },
       { kind: 'equation', left: op('div', num(7), num(2)), right: BLANK },
       { kind: 'equation', left: op('mul', BLANK, num(5)), right: num(12) },
+      { kind: 'equation', left: op('div', num(0), BLANK), right: num(5) },
+      { kind: 'equation', left: op('div', num(0), op('sub', BLANK, num(3))), right: num(2) },
       { kind: 'compare', left: BLANK, right: num(3) },
       {
         kind: 'term',
