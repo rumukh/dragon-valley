@@ -36,3 +36,17 @@ export function placeholders(text: string): string[] {
 export function hasMessage(key: string): key is MessageKey {
   return Object.prototype.hasOwnProperty.call(en, key);
 }
+
+/**
+ * A message about a count, from its singular or plural key: "You got 1 coin!", "You got 5
+ * coins!". The count is passed to the message as `{count}`.
+ */
+export function plural(
+  t: Translate,
+  count: number,
+  one: MessageKey,
+  other: MessageKey,
+  values: MessageValues = {},
+): string {
+  return t(count === 1 ? one : other, { ...values, count });
+}

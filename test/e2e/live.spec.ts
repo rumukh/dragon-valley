@@ -11,6 +11,7 @@ import { expect, test } from './support/fixtures';
 import {
   answerWrongly,
   chooseSetting,
+  expectNextProblem,
   feedbackAfter,
   finishRound,
   goOn,
@@ -134,6 +135,8 @@ test('a round speaks its feedback, the typed answer, coins and the result', asyn
   );
   await expectHeard(page, 'announcer-polite', /^You got \d+ coins?!$/);
 
+  // The praise stays a moment; the round goes on with the next problem.
+  await expectNextProblem(page);
   await finishRound(page, 'keyboard');
   await expectHeard(page, 'announcer-polite', 'The dragons saw what you know!');
 

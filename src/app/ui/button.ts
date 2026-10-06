@@ -19,6 +19,11 @@ export interface ButtonOptions {
   icon?: IconName;
   /** Show only the icon; the label stays as the accessible name. */
   iconOnly?: boolean;
+  /**
+   * A tool beside an answer (Read aloud, Show me): pressing it with a pointer leaves keyboard
+   * focus where it was, so Enter still sends the answer being typed.
+   */
+  keepsFocus?: boolean;
   testId?: string;
 }
 
@@ -47,6 +52,7 @@ export function candyButton(options: ButtonOptions): HTMLButtonElement {
     button.replaceChildren(h('span', { text: options.label }));
   }
   if (options.testId) button.dataset['testid'] = options.testId;
+  if (options.keepsFocus) button.addEventListener('mousedown', (event) => event.preventDefault());
   return button;
 }
 

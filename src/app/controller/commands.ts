@@ -31,10 +31,43 @@ export class CommandRejectedError extends Error {
   }
 }
 
+/**
+ * For actions that only move the child on (the next story line, a level's start): one the game
+ * took but could not save yet counts as done, since the save indicator says "Not saved" and
+ * offers Retry. Refusals still reject.
+ */
+export async function taken(sent: Promise<unknown>): Promise<void> {
+  try {
+    await sent;
+  } catch (error) {
+    if (error instanceof CommandRejectedError && error.accepted) return;
+    throw error;
+  }
+}
+
 export type Dispatch<A> = (action: A) => Promise<DispatchReceipt>;
 
+/** Resolves once the action is shown; see `CommandController.captureSend`. */
+export type Send<A> = (action: A) => Promise<void>;
+
+/**
+ * How long feedback waits for a save before it is shown anyway. A healthy save takes a few
+ * milliseconds; a slow device must not make the child wait for praise, and a failing save that
+ * reports within this time keeps its answer held (no praise for what is not stored).
+ */
+export const SAVE_PATIENCE_MS = 250;
+
 export interface CommandController<A> {
+  /** A dispatcher bound to the current view that resolves once the action is durably saved. */
   capture(): Dispatch<A>;
+  /**
+   * A dispatcher bound to the current view for actions the child waits on (an answer, a move,
+   * the next line): it resolves when the action is saved, or once it is committed if the save
+   * takes longer than `SAVE_PATIENCE_MS` (the view already shows its outcome; the save goes on
+   * and the save indicator tracks it). It rejects when the action is refused, or with
+   * `accepted: true` when its save failed within that time.
+   */
+  captureSend(): Send<A>;
   retry(): Promise<void>;
   resume(reason: string): Promise<void>;
   continueAccepted(): Promise<void>;
@@ -91,19 +124,72 @@ export function createCommandController<S, A, V, C>(
   });
   void continueAccepted().catch(onError);
 
+  // The runtime takes one command at a time and refuses one sent while another is still being
+  // saved; commands sent meanwhile wait for it here instead.
+  let inFlight: Promise<unknown> = Promise.resolve();
+
+  const run = (
+    action: A,
+    epoch: number,
+    revision: number,
+    onCommitted: (committed: boolean) => void,
+  ): Promise<DispatchReceipt> => {
+    const go = async (): Promise<DispatchReceipt> => {
+      await inFlight;
+      if (disposed || epoch !== generation) throw new StaleCommandError();
+      const before = host.getStatus().revision;
+      // The runtime commits and publishes the new view before it starts the save.
+      const pending = host.dispatch(action, { expectedRevision: revision });
+      onCommitted(host.getStatus().revision !== before);
+      const result = await pending;
+      if (!result.ok) {
+        if (result.error.code === 'stale-action') throw new StaleCommandError();
+        throw new CommandRejectedError(result.error, result.progress.accepted);
+      }
+      return result.value;
+    };
+    const sent = go();
+    inFlight = sent.then(
+      () => undefined,
+      () => undefined,
+    );
+    return sent;
+  };
+
   return {
     capture() {
       const revision = host.getStatus().revision;
       const epoch = generation;
-      return async (action) => {
-        if (disposed || epoch !== generation) throw new StaleCommandError();
-        const result = await host.dispatch(action, { expectedRevision: revision });
-        if (!result.ok) {
-          if (result.error.code === 'stale-action') throw new StaleCommandError();
-          throw new CommandRejectedError(result.error, result.progress.accepted);
-        }
-        return result.value;
+      return (action) => {
+        if (disposed || epoch !== generation) return Promise.reject(new StaleCommandError());
+        return run(action, epoch, revision, () => undefined);
       };
+    },
+    captureSend() {
+      const revision = host.getStatus().revision;
+      const epoch = generation;
+      return (action) =>
+        new Promise<void>((resolve, reject) => {
+          if (disposed || epoch !== generation) {
+            reject(new StaleCommandError());
+            return;
+          }
+          let patience: ReturnType<typeof setTimeout> | undefined;
+          run(action, epoch, revision, (committed) => {
+            // A slow save does not hold up what the child sees.
+            if (committed) patience = setTimeout(resolve, SAVE_PATIENCE_MS);
+          }).then(
+            () => {
+              clearTimeout(patience);
+              resolve();
+            },
+            (error: unknown) => {
+              // After the patience ran out, a failed save is the save indicator's business.
+              clearTimeout(patience);
+              reject(error);
+            },
+          );
+        });
     },
     async retry() {
       failed = false;

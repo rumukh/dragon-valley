@@ -11,6 +11,7 @@
 import { createHotspotList, hitHotspot, logicalPoint } from '@aegis/browser/ui';
 import type { Hotspot } from '@aegis/browser/ui';
 import type { LevelCard, RegionView } from '../../rules/contract';
+import { taken } from '../controller/commands';
 import { findLevel, findRegion } from '../game/view';
 import { levelPositions, loadValleyMap } from '../game/map';
 import type { MapPoint, ValleyMap } from '../game/map';
@@ -48,10 +49,14 @@ interface Camera {
   readonly height: number;
 }
 
-/** Percent position of a map point inside a camera rectangle. */
+/**
+ * Where a point of the map falls inside a camera rectangle, as percentages (`--x`, `--y`). The
+ * stylesheet places each kind of button from them so that it always stays inside the picture's
+ * frame, at any screen size, text size or zoom (screens.css, "Valley map").
+ */
 function place(element: HTMLElement, point: MapPoint, camera: Camera): void {
-  element.style.left = `${((point.x - camera.x) / camera.width) * 100}%`;
-  element.style.top = `${((point.y - camera.y) / camera.height) * 100}%`;
+  element.style.setProperty('--x', `${((point.x - camera.x) / camera.width) * 100}%`);
+  element.style.setProperty('--y', `${((point.y - camera.y) / camera.height) * 100}%`);
 }
 
 /** A picture of the map seen through a camera rectangle (the whole map, or one region). */
@@ -335,10 +340,12 @@ export function levelScreen(app: App, keeperId: string, levelId: string): Screen
         size: 'big',
         testId: 'level-play',
         onPress: async () => {
-          await active.commands.capture()(
-            resume !== null
-              ? { type: 'startActivity', activity: { kind: 'level', index: resume } }
-              : { type: 'startLevel', level: levelId },
+          await taken(
+            active.commands.captureSend()(
+              resume !== null
+                ? { type: 'startActivity', activity: { kind: 'level', index: resume } }
+                : { type: 'startLevel', level: levelId },
+            ),
           );
           await app.continueGame(keeperId);
         },

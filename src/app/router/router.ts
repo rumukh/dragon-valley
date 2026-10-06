@@ -127,7 +127,11 @@ export function createRouter(options: RouterOptions): Router {
       cancelInput: () => undefined,
       focus: () => {
         const target = screen.focusTarget?.() ?? screen.element.querySelector<HTMLElement>('h1');
-        if (target && !target.hasAttribute('tabindex')) target.tabIndex = -1;
+        // Only a heading or a container needs tabindex -1 to take focus; a control keeps its
+        // place in the Tab order.
+        if (target && !target.hasAttribute('tabindex') && target.tabIndex < 0) {
+          target.tabIndex = -1;
+        }
         return target ?? undefined;
       },
     });

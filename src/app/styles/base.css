@@ -28,7 +28,9 @@ body {
   font-size: 1rem;
   line-height: 1.4;
   color: var(--dv-ink, #2a2140);
-  overflow-wrap: anywhere;
+  /* Words and numbers stay whole: a box is never narrower than its longest word, and only a
+     word wider than the whole screen may break. */
+  overflow-wrap: break-word;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -84,8 +86,9 @@ svg {
   box-shadow: 0 0 0 0.1em var(--dv-card);
 }
 
-/* Headings and screens receive focus programmatically (screen changes); no ring for those. */
-[tabindex='-1']:focus {
+/* Headings and screens receive focus programmatically (screen changes); no ring for those.
+   Controls always show their ring, whatever their tabindex. */
+:where(h1, h2, h3, p, div, section, main, article, header)[tabindex='-1']:focus {
   outline: none;
   box-shadow: none;
 }

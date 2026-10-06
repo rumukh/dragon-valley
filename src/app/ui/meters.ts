@@ -2,6 +2,7 @@
  * Progress meters, stars and the coin counter: each states its value in words as well as in
  * shape and color, so no reading depends on color alone.
  */
+import { plural } from '../i18n/messages';
 import { artIcon } from './art';
 import { h } from './dom';
 import { coinIcon } from './icons';
@@ -136,7 +137,10 @@ export function createCoinCounter(kit: UiKit, initial: number): CoinCounterView 
     current = value;
     number.textContent = String(value);
     element.dataset['value'] = String(value);
-    element.setAttribute('aria-label', kit.t('coins.label', { count: value }));
+    element.setAttribute(
+      'aria-label',
+      plural(kit.t, value, 'coins.label.one', 'coins.label.other'),
+    );
   };
   show(initial);
 
@@ -190,7 +194,7 @@ export function createCoinCounter(kit: UiKit, initial: number): CoinCounterView 
         ],
         { duration: 380, easing: EASE_OUT },
       );
-      kit.announcer.announce(kit.t('coins.earned', { count: amount }));
+      kit.announcer.announce(plural(kit.t, amount, 'coins.earned.one', 'coins.earned.other'));
     },
   };
 }
