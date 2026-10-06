@@ -108,15 +108,15 @@ fact is new and the keypad once it has strengthened (§6.3).
 New dragons: Bubbles, Sunny, Goldie (the first egg is one of these three; the others arrive in
 level 2), Mirror and Puff (level 3). Boss: the Bridge Troll. Accent: buttercup yellow.
 
-| Level               | Title                | Focus                               | Activities                                                                            |
-| ------------------- | -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------- |
-| `sunny-meadow.1`    | Equal Groups         | Meaning of ×: groups, arrays, ×2    | Egg Grid (×2, ×5; 3); Feeding Time (×2; 8; choice)                                    |
-| `sunny-meadow.2`    | Twos and Fives       | ×2, ×5, swapping factors            | Feeding Time (×2, ×5; 10; choice); Memory Match (6 pairs)                             |
-| `sunny-meadow.3`    | Tens, Ones and Zeros | ×10, rules for ×1 and ×0            | Feeding Time (×0, ×1, ×10; 10; auto); Number Trail (×10)                              |
-| `sunny-meadow.4`    | Sharing Fairly       | Division by 2, 5, 10; fact families | Egg Grid (2); Fact Family Nest (2, 5, 10; 3); Feeding Time (÷ and missing factor; 10) |
-| `sunny-meadow.5`    | Meadow Mix           | Mixed review                        | Feeding Time (all meadow facts; 12; keypad); Memory Match (÷)                         |
-| `sunny-meadow.6`    | Meadow Stories       | Equal groups, sharing, "N more"     | Riddle Scrolls (6, pick the operation)                                                |
-| `sunny-meadow.boss` | The Bridge Troll     | Region mix                          | Boss (meter 15; cap 20)                                                               |
+| Level               | Title                | Focus                               | Activities                                                                                     |
+| ------------------- | -------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `sunny-meadow.1`    | Equal Groups         | Meaning of ×: groups, arrays, ×2    | Egg Grid (×2, ×5, ×10; 3); Feeding Time (×2, ×5, ×10; 8; choice): the first egg's table (§6.3) |
+| `sunny-meadow.2`    | Twos and Fives       | ×2, ×5, swapping factors            | Feeding Time (×2, ×5; 10; choice); Memory Match (6 pairs)                                      |
+| `sunny-meadow.3`    | Tens, Ones and Zeros | ×10, rules for ×1 and ×0            | Feeding Time (×0, ×1, ×10; 10; auto); Number Trail (×10)                                       |
+| `sunny-meadow.4`    | Sharing Fairly       | Division by 2, 5, 10; fact families | Egg Grid (2); Fact Family Nest (2, 5, 10; 3); Feeding Time (÷ and missing factor; 10)          |
+| `sunny-meadow.5`    | Meadow Mix           | Mixed review                        | Feeding Time (all meadow facts; 12; keypad); Memory Match (÷)                                  |
+| `sunny-meadow.6`    | Meadow Stories       | Equal groups, sharing, "N more"     | Riddle Scrolls (6, pick the operation)                                                         |
+| `sunny-meadow.boss` | The Bridge Troll     | Region mix                          | Boss (meter 15; cap 20)                                                                        |
 
 ### 3.2 Whispering Woods (`whispering-woods`): ×3 and ×4
 
@@ -302,15 +302,20 @@ A dragon is hungry; each correct answer throws a fruit into its mouth (chomp!).
 
 Flip two cards; pairs are fact ↔ product (`7 · 8` ↔ `56`), fact ↔ quotient, × ↔ ÷ of a family, or
 term ↔ example. Mismatches stay face-up until the child taps "Turn back" (explicit `clear`), with no
-timer. `options.pairs` 3-8 (default 6). Board config: `cards: { id, pair, labelKey, backLabelKey }[]`;
-moves `{ type: 'select', card }` and `{ type: 'clear' }`. Completion: all pairs matched. Coins per
-board; first-try pairs count as fast.
+timer. `options.pairs` 3-8 (default 6). Board config: `cards: { id, pair, labelKey, backLabelKey }[]`
+with notation-agnostic face labels (`fact:mul:7x8`, `num:56`, `term:product`; backs `card:back`,
+contract §11.1); moves `{ type: 'select', card }` and `{ type: 'clear' }`. Completion: all pairs
+matched. A coin per pair; pairs found before any mismatch on the board count as fast (the built-in
+board keeps no per-card history, so this is the implementation of "first-try pairs").
 
 ### 5.3 Number Trail (`number-trail`): built-in `ordering`
 
 Skip-count along a path: place the multiples of a table in order or fill the gaps (`options.length`
 5-12, `options.gaps` 1-6). Config `items: { id, labelKey }[]`, `solution: string[]`; moves
 `{ type: 'place', item, index }` and `{ type: 'submit' }`. An incorrect submission stays editable.
+The trail counts the table from `1 · n`; the gap numbers are stones dealt in a shuffled order (never
+already right) and the child orders them into the gaps. A right trail credits its facts (`k · n`)
+and earns a coin per stone.
 
 ### 5.4 Egg Grid (`egg-grid`): custom `dv.egg-grid`
 
@@ -318,15 +323,18 @@ Build an array of eggs for a product: choose rows × columns (tap or drag to res
 Every rectangle with the right number of eggs is accepted; the board lists the rectangles found
 (`3 × 4`, `4 × 3`, `2 × 6`…), showing commutativity and factor pairs. Strategy variants split the
 grid with a coloured line (5 + 1 groups for ×6, 10 − 1 for ×9, double-double for ×4 and ×8).
-Config: `{ product, maxSide, split: 'none' | 'five-plus' | 'ten-minus' | 'double' }`; moves
-`{ type: 'set', rows, columns }` and `{ type: 'submit' }`. Uses `createPlacement` for drag.
+Config: `{ product, maxSide, split: 'none' | 'five-plus' | 'ten-minus' | 'double', find }` (`split`
+from the activity option; `find` rectangles complete the board, set by the rules to all of them);
+moves `{ type: 'set', rows, columns }` and `{ type: 'submit' }`. Each new rectangle earns a coin and
+credits its fact when it belongs to the activity's skills. Uses `createPlacement` for drag.
 
 ### 5.5 Fact Family Nest (`fact-family`): custom `dv.fact-family`
 
 Three numbers sit in a nest (for example 6, 7, 42). Complete four equations: `6 · 7 = 42`,
 `7 · 6 = 42`, `42 : 6 = 7`, `42 : 7 = 6` by dragging the numbers into the blanks. Config
 `{ a, b, product }`; moves `{ type: 'fill', equation: 0-3, slot: 0-2, value }` and `{ type: 'submit' }`.
-Credits the four related fact items on completion (first try = correct).
+Credits the four related fact items on completion: as correct (ok) when the first check was all
+right, as correct but slow (no box move) after more checks. A coin per equation.
 
 ### 5.6 Sharing Feast (`sharing-feast`): custom `dv.sharing-feast`
 
@@ -380,7 +388,9 @@ of known facts against your own best. The shell keeps the time and ends the roun
 - **Placement** ("Show the dragons what you know!") walks a ladder of skills
   (`placement.steps`), 2-4 problems per step, 12-24 problems in total. It stops early and gently
   after `stopAfterMisses` misses in a row. Passing a step (`passAccuracy`) marks its levels as placed:
-  completed with one star, replayable for more. Parents can re-run it.
+  completed with one star, replayable for more. Parents can re-run it. It never places the first
+  level (every child plays it and hatches the first egg there) or a boss level; starting a level
+  instead of the check skips it.
 
 ## 6. Adaptive learning engine
 
@@ -421,7 +431,12 @@ Response buckets come from `elapsedMs` measured by the shell (paused time exclud
   _(`knownShare` = 70)_. The learning share moves between 10 % and 50 % with rolling accuracy over the
   last 20 answers _(`minLearningShare`, `maxLearningShare`, `window`)_.
 - No immediate repeats: an item is not served again within 2 problems _(`noRepeatWithin`)_, re-asks
-  excepted. Tables are interleaved.
+  excepted, and inside each tier items not served in this round come first (known items: also
+  not practised today). Tables are interleaved.
+- **The focus egg** (detail added in the implementation): learning draws prefer facts of the
+  chosen first egg while it is an egg (else the oldest egg owned) that were never answered right.
+  Practice warms the egg, which is how the first Feeding Time hatches the first egg whichever
+  table the child chose (§4.1); Sunny Meadow 1 therefore serves ×2, ×5 and ×10.
 - All draws use named PRNG streams: `problems` (items and problem shapes), `distractors` (choice
   options and their order), `rewards` (gifts, quests), `words` (names and objects in stories). Streams
   are independent, so a reward draw never changes the next problem.
@@ -461,6 +476,8 @@ table dragon, the 21 facts of its table in both orders).
 
 **Kindness rules.** Dragons never shrink; mastery that fades only makes panes need polishing and
 dragons hungry. A dragon with at least one due fact is **hungry for snacks** _(`hungry.minDue`)_.
+A fact practised today is never due again the same day, so a dragon is not hungry on the day it
+hatched and a pane needs polishing only from a later day on.
 
 ### 6.6 Distractors
 
