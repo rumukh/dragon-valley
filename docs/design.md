@@ -75,19 +75,20 @@ that grew, stickers earned. It is generated from data, not authored text.
 | `clockwork`    | Clockwork               | Brass dragon whose gears turn in order: order of operations.                           |
 | `seven-headed` | The Seven-Headed Dragon | The finale. Seven heads, seven sneezes, one per curriculum strand.                     |
 
-Bosses (folk-tale, friendly; nobody gets hurt):
+Bosses (folk-tale, friendly; nobody gets hurt). The mood is the boss's won pose in the art
+(`BOSS_MOOD` in `src/app/art`), which the content's `bosses[].mood` matches:
 
-| ID               | Boss                          | Region           | Mood to fill | How you win them over                                    |
-| ---------------- | ----------------------------- | ---------------- | ------------ | -------------------------------------------------------- |
-| `bridge-troll`   | The Bridge Troll              | Sunny Meadow     | laughing     | Answers tickle him until he rolls over laughing          |
-| `forest-witch`   | The Forest Witch (_Ježibaba_) | Whispering Woods | sleepy       | Counting sheep in threes and fours sends her to sleep    |
-| `krakonos`       | Krakonoš, the Mountain Spirit | Fire Mountain    | happy        | Warm the mountain with sixes and sevens; he smiles       |
-| `gnome-king`     | The Gnome King (_permoníci_)  | Crystal Caves    | laughing     | Sorting gems in eights and nines makes him giggle        |
-| `water-goblin`   | The Water Goblin (_vodník_)   | Sharing Lake     | happy        | Fair sharing frees the fruit he keeps in teacups         |
-| `lake-nymphs`    | The Lake Nymphs               | Leftover Lagoon  | sleepy       | Counting leftover pearls is their lullaby                |
-| `friendly-giant` | The Friendly Giant            | Giant's Peaks    | happy        | Big-number answers earn a giant handshake                |
-| `golem`          | The Golem                     | Riddle Ruins     | happy        | Give him instructions in the right order                 |
-| `seven-headed`   | The Seven-Headed Dragon       | Dragon Castle    | happy        | Cure each head's sneeze with a different kind of problem |
+| ID               | Boss                          | Region           | Mood to fill | How you win them over                                                 |
+| ---------------- | ----------------------------- | ---------------- | ------------ | --------------------------------------------------------------------- |
+| `bridge-troll`   | The Bridge Troll              | Sunny Meadow     | laughing     | Answers tickle him until he rolls over laughing                       |
+| `forest-witch`   | The Forest Witch (_Ježibaba_) | Whispering Woods | happy        | Solve her puzzles in threes and fours; she agrees, shares gingerbread |
+| `krakonos`       | Krakonoš, the Mountain Spirit | Fire Mountain    | laughing     | Warm the mountain with sixes and sevens until he laughs               |
+| `gnome-king`     | The Gnome King (_permoníci_)  | Crystal Caves    | happy        | Sort his gems in eights and nines; he agrees and dances               |
+| `water-goblin`   | The Water Goblin (_vodník_)   | Sharing Lake     | happy        | Fair sharing frees the fruit he keeps in teacups                      |
+| `lake-nymphs`    | The Lake Nymphs               | Leftover Lagoon  | laughing     | Count their leftover pearls; they laugh and dance                     |
+| `friendly-giant` | The Friendly Giant            | Giant's Peaks    | sleepy       | Big-number answers calm him until he falls asleep, smiling            |
+| `golem`          | The Golem                     | Riddle Ruins     | happy        | Give him instructions in the right order                              |
+| `seven-headed`   | The Seven-Headed Dragon       | Dragon Castle    | happy        | Cure each head's sneeze with a different kind of problem              |
 
 ## 3. World and levels
 
@@ -99,6 +100,14 @@ with spaced review of earlier ones (`reviewShare`).
 Level IDs are `<region>.<n>` and `<region>.boss`. Unlock: each lesson needs the previous one
 completed; each region's level 1 needs the previous region's boss. Parents can unlock regions
 ahead; the placement check can place out of levels the child already knows (they stay replayable).
+
+New eggs (detail added in the implementation): a region's first new dragon's egg comes with the
+region's welcome story at the start of level 1, and the second with level 1's completion, so each
+egg is warmed by its own table and hatches in "its" level (Clover in Whispering Woods 1, Petal in 2;
+Ember and Rainbow; Crystal and Starry; Pearl, Boulder and Clockwork in their regions' level 1).
+Sunny Meadow 3's story likewise brings Mirror's and Puff's eggs as the level starts. A region's
+eggs are also rewards of its boss level (eggs already owned stay as they are), for a child who
+skipped a level.
 
 Activity notation below: _kind (skills, count, input)_. "Auto" input means multiple choice while a
 fact is new and the keypad once it has strengthened (§6.3).
@@ -196,15 +205,15 @@ remainder < divisor. A 2-digit quotient with remainder is 4th-grade material and
 New dragon: Boulder. Boss: the Friendly Giant. All results within 1000. 2-digit × 1-digit by
 decomposition (`14 · 3 = 10 · 3 + 4 · 3`); 2-digit : 1-digit without remainder.
 
-| Level               | Title              | Focus                                  | Activities                                               |
-| ------------------- | ------------------ | -------------------------------------- | -------------------------------------------------------- |
-| `giants-peaks.1`    | Giant Steps        | × 10 and × 100 (`34 · 10`, `7 · 100`)  | Feeding Time (×10, ×100; 10; auto); Number Trail (×10)   |
-| `giants-peaks.2`    | Tens Times         | Tens × 1-digit (`30 · 3`, `40 · 6`)    | Egg Grid (ten-rods); Feeding Time (tens; 10; auto)       |
-| `giants-peaks.3`    | Break It Apart     | 2-digit × 1-digit without carry        | Feeding Time (no carry; 10; choice)                      |
-| `giants-peaks.4`    | Carry the Boulder  | 2-digit × 1-digit with carry           | Feeding Time (carry; 10; keypad)                         |
-| `giants-peaks.5`    | Split the Load     | 2-digit : 1-digit (`48 : 4`, `96 : 8`) | Sharing Feast (big; 3); Feeding Time (2d : 1d; 10; auto) |
-| `giants-peaks.6`    | Peak Stories       | Word problems with bigger numbers      | Riddle Scrolls (6)                                       |
-| `giants-peaks.boss` | The Friendly Giant | Region mix + review                    | Boss (meter 18)                                          |
+| Level               | Title              | Focus                                  | Activities                                                       |
+| ------------------- | ------------------ | -------------------------------------- | ---------------------------------------------------------------- |
+| `giants-peaks.1`    | Giant Steps        | × 10 and × 100 (`34 · 10`, `7 · 100`)  | Feeding Time (×10, ×100; 10; auto); Number Trail (×10)           |
+| `giants-peaks.2`    | Tens Times         | Tens × 1-digit (`30 · 3`, `40 · 6`)    | Number Trail (tens: 30, 60, 90 …); Feeding Time (tens; 10; auto) |
+| `giants-peaks.3`    | Break It Apart     | 2-digit × 1-digit without carry        | Feeding Time (no carry; 10; choice)                              |
+| `giants-peaks.4`    | Carry the Boulder  | 2-digit × 1-digit with carry           | Feeding Time (carry; 10; keypad)                                 |
+| `giants-peaks.5`    | Split the Load     | 2-digit : 1-digit (`48 : 4`, `96 : 8`) | Sharing Feast (big; 3); Feeding Time (2d : 1d; 10; auto)         |
+| `giants-peaks.6`    | Peak Stories       | Word problems with bigger numbers      | Riddle Scrolls (6)                                               |
+| `giants-peaks.boss` | The Friendly Giant | Region mix + review                    | Boss (meter 18)                                                  |
 
 ### 3.8 Riddle Ruins (`riddle-ruins`): order, brackets, comparison, words
 
@@ -256,9 +265,14 @@ order:
 1. a pending story beat;
 2. the placement check, if not done yet;
 3. **snack time** for hungry dragons (their due reviews), at the start of the day;
-4. the next glowing level (or the next activity of a level in progress);
-5. the **gift chest**, once the daily goal is reached;
-6. free play (any open level, the Arena, the Market, the Album).
+4. the next glowing level (or the next activity of a level in progress), until a level is done
+   today;
+5. a **minigame for variety**, once, if the day had none yet: a minigame of the furthest finished
+   level, replayed on its own (`startLevel { level, activity }`, which never completes the level
+   again);
+6. the **gift chest**, once the daily goal is reached;
+7. the next glowing level again;
+8. free play (any open level, the Arena, the Market, the Album).
 
 After the daily goal the dragons get **sleepy** (an expression, never a lock). Play can continue.
 The parent sets the goal and an optional time limit; when the limit is reached the shell ends the
@@ -381,7 +395,10 @@ types its result, and the expression shrinks, until one number is left. Config
 Fill the boss's mood meter (laughing, sleepy or happy) with correct answers; misses never lower it.
 Problems mix the region's skills with spaced review of earlier skills (`boss.reviewShare`, default
 20 %). The round ends when the meter is full; as a kindness cap it also ends after `count` problems
-(the meter fills with a final flourish), so no child is stuck. Retry any time for more stars.
+(the meter fills with a final flourish), so no child is stuck. Retry any time for more stars. A
+boss with several `heads` (the Seven-Headed Dragon: 7 heads, 21 answers, no review share) shares
+the meter evenly between them and is won over one head after another, each head with the next
+skill of the boss activity: ×, ÷, remainders, big numbers, order of operations, comparison, words.
 
 ### 5.11 Lightning Arena (`arena`, optional)
 
@@ -539,14 +556,17 @@ pipeline, so new stickers need no new art.
 | Page             | Stickers                                                                                                                                                    |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Sunny Meadow     | First Hatch, Show What You Know, Meadow Explorer, Meadow Star, Troll Tickler, Ten in a Row, Dressed Up                                                      |
-| Whispering Woods | Clover Hatched, Petal Pair, Double Double (×4 at silver), Woods Explorer, Witch's Nap, Three Days                                                           |
-| Fire Mountain    | Ember Hatched, Rainbow Hatched, Hot Streak (15 in a row), Mountain Explorer, Krakonoš Smiles, Week Warrior (5 days in a week)                               |
-| Crystal Caves    | Crystal Hatched, Starry Hatched, Finger Trick (×9 at silver), Cave Explorer, Gnome Giggles, Coin Collector (500 coins)                                      |
-| Sharing Lake     | Fair Sharer (30 division facts at bronze), First Youngling, Lake Explorer, Goblin's Teacups, Quest Helper (10 quests)                                       |
-| Leftover Lagoon  | Pearl Hatched, Leftover Expert (remainders at silver), Lagoon Explorer, Nymph Lullaby, Ten Days                                                             |
-| Giant's Peaks    | Boulder Hatched, Big Numbers, Peak Explorer, Giant's Handshake, Arena Runner (Arena best 20), First Adult                                                   |
-| Riddle Ruins     | Clockwork Hatched, Bracket Boss, Ruins Explorer, Golem's Orders, Word Wizard (all six terms), Twenty Days                                                   |
+| Whispering Woods | Clover Hatched, Petal Hatched, Double Double (×4 at silver), Woods Explorer, The Witch's Gingerbread, Three Days                                            |
+| Fire Mountain    | Ember Hatched, Rainbow Hatched, Hot Streak (15 in a row), Mountain Explorer, Krakonoš Laughs, Week Warrior (5 days in a week)                               |
+| Crystal Caves    | Crystal Hatched, Starry Hatched, Finger Trick (×9 at silver), Cave Explorer, The Gnome King's Dance, Coin Collector (500 coins)                             |
+| Sharing Lake     | Fair Sharer (30 division facts at bronze), First Youngling, Lake Explorer, The Goblin's Teacups, Quest Helper (10 quests)                                   |
+| Leftover Lagoon  | Pearl Hatched, Leftover Expert (remainders at silver), Lagoon Explorer, The Nymph Dance, Ten Days                                                           |
+| Giant's Peaks    | Boulder Hatched, Big Numbers (carrying at bronze), Peak Explorer, The Giant's Nap, Arena Runner (Arena best 20), First Grown-Up Dragon                      |
+| Riddle Ruins     | Clockwork Hatched, Bracket Boss (brackets at silver), Ruins Explorer, The Golem's Orders, Word Wizard (all six terms), Twenty Days                          |
 | Dragon Castle    | Half the Window (61 panes silver), Golden Window (121 panes gold), First Crown, Castle Explorer, Seven Heads Cured, Every Table (all table dragons hatched) |
+
+Sticker icons are art icons or cosmetics (a hatch sticker is an egg in the dragon's signature
+colour; an explorer sticker the region's emblem; a boss sticker a shield with the boss's token).
 
 ### 7.4 Daily quests and the gift chest
 

@@ -61,20 +61,16 @@ describe('the sample content pack', () => {
     expect(outcome.value.schemaVersion).toBe(1);
   });
 
-  it('is the Region 1 skeleton: Sunny Meadow, six lessons and the Bridge Troll', () => {
+  it('is the v1 valley: nine regions, 50 lessons, nine bosses and every dragon', () => {
     const data = fresh().data;
-    expect(data.regions.map((r) => r.id)).toEqual(['sunny-meadow']);
-    expect(data.levels.filter((l) => l.kind === 'lesson')).toHaveLength(6);
-    expect(data.levels.filter((l) => l.kind === 'boss').map((l) => l.boss)).toEqual([
-      'bridge-troll',
-    ]);
-    expect(data.dragons.map((d) => d.id).sort()).toEqual([
-      'bubbles',
-      'goldie',
-      'mirror',
-      'puff',
-      'sunny',
-    ]);
+    const byOrder = [...data.regions].sort((a, b) => a.order - b.order);
+    expect(byOrder.map((r) => r.id)).toEqual([...CANONICAL_REGION_IDS]);
+    expect(data.levels.filter((l) => l.kind === 'lesson')).toHaveLength(50);
+    const bossLevels = byOrder.map((r) =>
+      data.levels.filter((l) => l.region === r.id && l.kind === 'boss').map((l) => l.boss),
+    );
+    expect(bossLevels).toEqual(CANONICAL_BOSS_IDS.map((boss) => [boss]));
+    expect(data.dragons.map((d) => d.id).sort()).toEqual([...CANONICAL_DRAGON_IDS].sort());
   });
 
   it('uses only canonical region, dragon and boss IDs', () => {
@@ -102,10 +98,13 @@ describe('the sample content pack', () => {
     expect(items).toContain('mul:2x2');
   });
 
-  it('reports the objectives later regions must still cover', () => {
-    const gaps = curriculumGaps(fresh().data).map((gap) => gap.objective);
-    expect(gaps).toContain('obj.mul.table-6-7');
-    expect(gaps).not.toContain('obj.mul.table-2-5-10');
+  it('covers every objective with a lesson and a boss level, and reports a gap', () => {
+    expect(curriculumGaps(fresh().data)).toEqual([]);
+    // giants-peaks.2 is the only lesson for tens times a one-digit number.
+    const pack = fresh();
+    const tens = pack.data.levels.find((l) => l.id === 'giants-peaks.2')!;
+    tens.objectives = tens.objectives.filter((o) => o !== 'obj.big.tens');
+    expect(curriculumGaps(pack.data)).toEqual([{ objective: 'obj.big.tens', missing: ['level'] }]);
   });
 });
 
@@ -255,6 +254,45 @@ describe('content validation reports authoring mistakes', () => {
     const pack = fresh() as unknown as { data: Record<string, unknown> };
     pack.data['extra'] = true;
     expect(validateContent(pack, contentRegistration).ok).toBe(false);
+  });
+
+  it('rejects a many-headed boss whose meter does not share evenly between the heads', () => {
+    const pack = fresh();
+    pack.data.bosses.find((b) => b.id === 'seven-headed')!.meter = 20;
+    expectDiagnostic(pack, 'invalid-content', 'seven-headed');
+  });
+
+  it('rejects a many-headed boss level with fewer skills than heads', () => {
+    const pack = fresh();
+    const level = pack.data.levels.find((l) => l.id === 'dragon-castle.boss')!;
+    level.activities[0]!.skills = level.activities[0]!.skills.slice(0, 6);
+    expectDiagnostic(pack, 'invalid-content', 'dragon-castle.boss');
+  });
+
+  it('rejects a second finale boss', () => {
+    const pack = fresh();
+    pack.data.bosses.find((b) => b.id === 'golem')!.finale = true;
+    expectDiagnostic(pack, 'invalid-content', 'bosses');
+  });
+
+  it('rejects a mastery sticker for an unknown skill', () => {
+    const pack = fresh();
+    const sticker = pack.data.stickers.find((s) => s.criteria.kind === 'skill-mastered')!;
+    sticker.criteria = { kind: 'skill-mastered', skill: 'no-such-skill', level: 'gold', share: 50 };
+    expectDiagnostic(pack, 'missing-reference', sticker.id);
+  });
+
+  it('rejects an unknown Memory Match mode or Feeding Time draw', () => {
+    const match = fresh();
+    const memory = match.data.levels.find((l) => l.id === 'sunny-meadow.2')!.activities[1]!;
+    memory.options = { pairs: 6, match: 'colour' };
+    expectDiagnostic(match, 'invalid-content', 'sunny-meadow.2');
+
+    const draw = fresh();
+    draw.data.levels.find((l) => l.id === 'sunny-meadow.2')!.activities[0]!.options = {
+      draw: 'random',
+    };
+    expectDiagnostic(draw, 'invalid-content', 'sunny-meadow.2');
   });
 });
 

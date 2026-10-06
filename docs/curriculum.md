@@ -6,8 +6,8 @@ ID**, the levels and boss that teach it, the bounds the generators must respect,
 conventions, and an English-Czech glossary for parents.
 
 The objective IDs are data: `content/dragon-valley.content.json` declares them under `objectives`,
-levels list the objectives they teach, and `scripts/validate-content.mjs` reports any objective
-without a lesson or without a boss level (a gate once the v1 content is complete). A test keeps this
+levels list the objectives they teach, and `scripts/validate-content.mjs --strict-coverage` (part of
+`npm run verify`) fails on any objective without a lesson or without a boss level. A test keeps this
 document's ID table and the content pack's objectives in step.
 
 ## 1. Sources and scope
