@@ -847,6 +847,16 @@
   background: var(--dv-paper);
 }
 
+/* The empty place of the sign a story asks for: a round, dashed hole the sign tiles fill. */
+.dv-problem__slot {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  border: 0.07em dashed var(--dv-primary-deep);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--dv-primary) 14%, var(--dv-paper));
+}
+
 /* Models after a miss: dots in rows and columns, or equal groups with leftovers as rings. */
 .dv-model {
   display: grid;

@@ -7,8 +7,17 @@ import { readFileSync } from 'node:fs';
 import { parseContentJson, requireValue } from '@aegis/runtime';
 import { describe, expect, it } from 'vitest';
 import { createGameHost } from '../../../src/rules/adapter';
-import { BLANK, contentRegistration, num, op } from '../../../src/rules/contract';
-import type { DragonView, GameAction, GameView } from '../../../src/rules/contract';
+import { BLANK, contentRegistration, expectedAnswer, num, op } from '../../../src/rules/contract';
+import type {
+  AnswerValue,
+  DragonView,
+  GameAction,
+  GameView,
+  MinigameRoundView,
+  ProblemRoundView,
+  ProblemView,
+} from '../../../src/rules/contract';
+import { problemTokens } from '../../../src/app/math/notation';
 import {
   adventureFor,
   answerKindOf,
@@ -17,6 +26,7 @@ import {
   findLevel,
   growthOf,
   resultsNext,
+  stepChoices,
   weekdayIndex,
 } from '../../../src/app/game/view';
 
@@ -74,6 +84,49 @@ describe('answer kinds', () => {
     expect(answerKindOf(story, 'operation')).toBe('operation');
     expect(answerKindOf(story, 'answer')).toBe('number');
   });
+
+  it('answer a story’s operation step with the four signs, whatever the view offers', () => {
+    const fact = { kind: 'equation', left: op('mul', num(5), num(4)), right: BLANK } as const;
+    const story = {
+      kind: 'word',
+      template: 'word.x',
+      vars: {},
+      model: fact,
+      operation: 'mul',
+    } as const;
+    const numbers: AnswerValue[] = [20, 16, 25, 9].map((value) => ({ kind: 'number', value }));
+    const signs = (choices: AnswerValue[] | null) =>
+      choices?.map((choice) => (choice.kind === 'operation' ? choice.operation : choice.kind));
+    const at = (patch: Partial<ProblemView>): ProblemView => ({
+      index: 1,
+      item: 'word:equal-groups',
+      problem: story,
+      input: 'choice',
+      choices: numbers,
+      step: 'operation',
+      reask: false,
+      hinted: false,
+      ...patch,
+    });
+    // The answer step's numbers (what the rules serve today) are not offered for the sign.
+    expect(signs(stepChoices(at({})))).toEqual(['add', 'sub', 'mul', 'div']);
+    // Nor does the keypad: a sign cannot be typed.
+    expect(signs(stepChoices(at({ input: 'keypad', choices: null })))).toEqual([
+      'add',
+      'sub',
+      'mul',
+      'div',
+    ]);
+    // Sign choices from the rules are used as they come.
+    const offered: AnswerValue[] = [
+      { kind: 'operation', operation: 'div' },
+      { kind: 'operation', operation: 'mul' },
+    ];
+    expect(signs(stepChoices(at({ choices: offered })))).toEqual(['div', 'mul']);
+    // The answer step uses the view's choices, or the keypad.
+    expect(stepChoices(at({ step: 'answer' }))).toEqual(numbers);
+    expect(stepChoices(at({ step: 'answer', input: 'keypad', choices: null }))).toBeNull();
+  });
 });
 
 describe('the hub after the first egg', () => {
@@ -127,6 +180,126 @@ describe('a level run', () => {
       resume: 0,
     });
     expect(resultsNext(view())).toEqual({ kind: 'done' });
+  });
+});
+
+type Act = (action: GameAction) => Promise<void>;
+
+/**
+ * Plays whatever the view asks for, always right, until the run or round is closed again: story
+ * beats are skipped (or the first open choice taken), problems get their expected answer and Egg
+ * Grid boards get their rectangles.
+ */
+async function playThrough(view: () => GameView, act: Act): Promise<void> {
+  for (let step = 0; step < 600; step++) {
+    const current = view();
+    if (current.screen === 'story') {
+      const story = current.story!;
+      const choice = story.skippable
+        ? null
+        : (story.choices.find((option) => option.enabled)?.id ?? null);
+      await act({
+        type: 'storyChoice',
+        beat: story.beat,
+        node: story.node,
+        revision: story.revision,
+        choice,
+      });
+      continue;
+    }
+    if (current.screen === 'results') {
+      const next = resultsNext(current);
+      if (next.kind === 'done') {
+        await act({ type: 'endRound', reason: 'done' });
+        return;
+      }
+      await act({ type: 'startActivity', activity: { kind: 'level', index: next.index } });
+      continue;
+    }
+    if (current.screen !== 'round') return;
+    const round = current.round!;
+    if (round.type === 'problems') {
+      const problem = round.problem!;
+      const value = requireValue(expectedAnswer(problem.problem, problem.step));
+      await act(
+        round.activity === 'placement'
+          ? { type: 'placementAnswer', value, elapsedMs: 1500 }
+          : { type: 'answer', value, elapsedMs: 1500 },
+      );
+      continue;
+    }
+    const board = round.current;
+    if (board.kind !== 'egg-grid') throw new Error(`No player for ${board.kind} boards.`);
+    const rows = Array.from({ length: board.maxSide }, (_, index) => index + 1).find(
+      (side) =>
+        board.product % side === 0 &&
+        board.product / side <= board.maxSide &&
+        !board.found.some((found) => found.rows === side),
+    )!;
+    const set = { type: 'set', rows, columns: board.product / rows };
+    await act({ type: 'minigameMove', revision: round.minigame.revision, move: set });
+    const after = view().round as MinigameRoundView;
+    await act({
+      type: 'minigameMove',
+      revision: after.minigame.revision,
+      move: { type: 'submit' },
+    });
+  }
+  throw new Error('The run did not finish.');
+}
+
+describe('a Riddle Scrolls story on the real rules', () => {
+  it('asks for the sign with an empty sign slot and sign tiles, then for the number', async () => {
+    const { view, act } = await firstSession();
+    // A right placement check places levels 2-5; level 1 is played; level 6 opens.
+    await act({ type: 'startActivity', activity: { kind: 'placement' } });
+    await playThrough(view, act);
+    await act({ type: 'startLevel', level: 'sunny-meadow.1' });
+    await playThrough(view, act);
+    await act({ type: 'startLevel', level: 'sunny-meadow.6' });
+    let current = view();
+    if (current.screen === 'story') {
+      const story = current.story!;
+      await act({
+        type: 'storyChoice',
+        beat: story.beat,
+        node: story.node,
+        revision: story.revision,
+        choice: null,
+      });
+      current = view();
+    }
+    const round = current.round as ProblemRoundView;
+    expect(round.activity).toBe('riddle-scrolls');
+    const asked = round.problem!;
+    expect(asked.problem.kind).toBe('word');
+    expect(asked.step).toBe('operation');
+    expect(answerKindOf(asked.problem, asked.step)).toBe('operation');
+    // The sign is left out of the sum, and the tiles are signs, whatever the view carries.
+    const tokens = problemTokens(asked.problem, 'czech', asked.step);
+    expect(tokens.filter((token) => token.kind === 'slot')).toHaveLength(1);
+    expect(tokens.some((token) => token.kind === 'sign' && token.text !== '=')).toBe(false);
+    const signs = stepChoices(asked)!;
+    expect(signs.map((choice) => choice.kind)).toEqual([
+      'operation',
+      'operation',
+      'operation',
+      'operation',
+    ]);
+    const sign = requireValue(expectedAnswer(asked.problem, 'operation'));
+    expect(signs).toContainEqual(sign);
+
+    await act({ type: 'answer', value: sign, elapsedMs: 2000 });
+    const next = (view().round as ProblemRoundView).problem!;
+    expect(next.index).toBe(asked.index);
+    expect(next.step).toBe('answer');
+    // Now the sum shows its sign, and the number is chosen or typed.
+    expect(
+      problemTokens(next.problem, 'czech', next.step).some((token) => token.kind === 'slot'),
+    ).toBe(false);
+    const numbers = stepChoices(next);
+    if (numbers) expect(numbers.every((choice) => choice.kind !== 'operation')).toBe(true);
+    else expect(next.input).toBe('keypad');
   });
 });
 

@@ -3,20 +3,26 @@
  * of "=" kept on one line, the asked-about number of a term question marked), and the words
  * and labels of answer choices.
  */
-import type { AnswerValue, Problem } from '../../rules/contract';
+import type { AnswerValue, Problem, ProblemStep } from '../../rules/contract';
 import { formatAnswer, problemTokens } from '../math/notation';
 import type { Notation } from '../math/notation';
 import type { MessageKey, Translate } from '../i18n/messages';
 import { speakAnswer } from '../speech/verbalizer';
 import { h } from '../ui/dom';
 
-export function problemElement(problem: Problem, notation: Notation, spoken: string): HTMLElement {
+export function problemElement(
+  problem: Problem,
+  notation: Notation,
+  spoken: string,
+  step: ProblemStep = 'answer',
+): HTMLElement {
   const line = h('p', {
     className: 'dv-problem',
     testId: 'problem',
+    dataset: { step },
     attributes: { 'aria-label': spoken },
   });
-  const tokens = problemTokens(problem, notation);
+  const tokens = problemTokens(problem, notation, step);
   // Each side of "=" stays on one line; a long problem wraps only at the equals sign.
   let part = h('span', { className: 'dv-problem__part' });
   const parts = [part];
@@ -26,17 +32,19 @@ export function problemElement(problem: Problem, notation: Notation, spoken: str
       part = h('span', { className: 'dv-problem__part' });
       parts.push(part);
     }
-    length += token.kind === 'blank' ? 2 : token.text.length + 1;
+    length += token.kind === 'blank' || token.kind === 'slot' ? 2 : token.text.length + 1;
     const highlighted = token.kind === 'number' && token.highlight === true;
     part.append(
       token.kind === 'blank'
         ? h('span', { className: 'dv-problem__blank', text: '?' })
-        : h('span', {
-            className: highlighted
-              ? 'dv-problem__number dv-problem__number--asked'
-              : `dv-problem__${token.kind}`,
-            text: token.text,
-          }),
+        : token.kind === 'slot'
+          ? h('span', { className: 'dv-problem__slot', testId: 'problem-slot' })
+          : h('span', {
+              className: highlighted
+                ? 'dv-problem__number dv-problem__number--asked'
+                : `dv-problem__${token.kind}`,
+              text: token.text,
+            }),
     );
   }
   line.dataset['size'] = length > 14 ? 's' : length > 10 ? 'm' : 'l';

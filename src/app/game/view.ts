@@ -4,13 +4,16 @@
  * boss's pose, what the Daily Adventure button does and where results lead. No rules live here:
  * every decision the game makes is already in the view; these only choose how to show it.
  */
+import { OPERATORS } from '../../rules/contract';
 import type {
+  AnswerValue,
   DragonStage,
   DragonView,
   GameView,
   LevelCard,
   Problem,
   ProblemStep,
+  ProblemView,
   RegionView,
 } from '../../rules/contract';
 
@@ -30,6 +33,21 @@ export function answerKindOf(problem: Problem, step: ProblemStep): AnswerKind {
     case 'equation':
       return 'number';
   }
+}
+
+/**
+ * The choice tiles for a problem at its current step, or `null` for the keypad. A story's
+ * operation step is always answered with the four signs, whatever the input mode: the sign
+ * cannot be typed, and the choices the view carries may be meant for the answer step.
+ */
+export function stepChoices(problem: ProblemView): AnswerValue[] | null {
+  if (answerKindOf(problem.problem, problem.step) === 'operation') {
+    const offered = (problem.choices ?? []).filter((choice) => choice.kind === 'operation');
+    return offered.length > 0
+      ? offered
+      : OPERATORS.map((operation): AnswerValue => ({ kind: 'operation', operation }));
+  }
+  return problem.input === 'choice' && problem.choices ? problem.choices : null;
 }
 
 export function findRegion(view: GameView, regionId: string): RegionView | undefined {
