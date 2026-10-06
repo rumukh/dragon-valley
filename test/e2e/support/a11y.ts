@@ -6,36 +6,40 @@
  * Serious and critical axe violations fail the test. Moderate and minor ones are attached to
  * the report as advice (docs/qa/accessibility.md collects them for the release review).
  * A violation that is a tracked defect owned by another session is listed in KNOWN_AXE with
- * its defect ID; remove the entry when the fix lands.
+ * its defect ID (support/known-issues.ts): it is reported as a known defect instead of failing,
+ * on the engines the defect lists. Remove the entry when the fix lands.
  */
 import AxeBuilder from '@axe-core/playwright';
 import type { Page, TestInfo } from '@playwright/test';
 import { expect } from './fixtures';
-import type { Engine } from './known-issues';
+import { DEFECTS, defectApplies, engineOf } from './known-issues';
+import type { Defect, DefectId } from './known-issues';
 
 export const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 
 export interface KnownAxe {
-  readonly id: string;
+  readonly defect: DefectId;
+  /** The axe rule id. */
   readonly rule: string;
+  /** Matched against the node's axe target (a CSS selector). */
   readonly target: RegExp;
-  readonly engines?: readonly Engine[];
-  readonly reason: string;
 }
 
-export const KNOWN_AXE: readonly KnownAxe[] = [];
+export const KNOWN_AXE: readonly KnownAxe[] = [
+  { defect: 'DV-QA-14', rule: 'scrollable-region-focusable', target: /\.dv-results__celebrations/ },
+];
 
 export interface AxeOutcome {
   /** Serious or critical violations that are not known defects: each must be fixed. */
   readonly blocking: string[];
-  /** Moderate or minor violations, and tolerated known defects. */
+  /** Moderate or minor violations (tracked defects are annotated as known defects instead). */
   readonly advisory: string[];
 }
 
 /** Run axe on the page and attach the full result as `axe-<state>.json`. */
 export async function audit(page: Page, testInfo: TestInfo, state: string): Promise<AxeOutcome> {
   const results = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
-  const engine = testInfo.project.use.browserName ?? 'chromium';
+  const engine = engineOf(testInfo);
   const blocking: string[] = [];
   const advisory: string[] = [];
   for (const violation of results.violations) {
@@ -46,10 +50,15 @@ export async function audit(page: Page, testInfo: TestInfo, state: string): Prom
         (entry) =>
           entry.rule === violation.id &&
           entry.target.test(target) &&
-          (!entry.engines || entry.engines.includes(engine as Engine)),
+          defectApplies(testInfo, entry.defect),
       );
-      if (known) advisory.push(`${line} [known ${known.id}: ${known.reason}]`);
-      else if (violation.impact === 'serious' || violation.impact === 'critical') {
+      if (known) {
+        const defect: Defect = DEFECTS[known.defect];
+        testInfo.annotations.push({
+          type: 'known defect',
+          description: `${known.defect} (${defect.severity}, ${defect.owner}) on ${state}: ${line}`,
+        });
+      } else if (violation.impact === 'serious' || violation.impact === 'critical') {
         blocking.push(line);
       } else advisory.push(line);
     }

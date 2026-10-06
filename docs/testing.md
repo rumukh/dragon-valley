@@ -98,8 +98,9 @@ browsers; `$env:DV_E2E_ALL_ENGINES = '1'` runs Chromium, WebKit and Firefox wher
 builds are installed. CI runs one job per engine with `DV_E2E_AUDIT=1`; WebKit, about twice as slow
 as the others on a hosted runner, runs in three parallel jobs, one per part of the suite
 (`DV_E2E_PART`, `support/parts.ts`): `walks` (`screens`, `reflow`), `rounds` (`input`,
-`persistence`, `recovery`, `settings`) and `rest` (every other spec, including any new one). Each
-job takes 6-9 minutes, two workers each; the slowest bounds the run (CI `e2e (...)` jobs).
+`persistence`, `recovery`, `settings`) and `rest` (every other spec, including any new one). With
+two workers per job, a run takes about 7½ minutes: Chromium 7m12s, Firefox 7m31s and the WebKit
+parts 5m38s-5m50s on the hosted runner (installation included).
 
 ```
 npm run test:e2e                                   # everything, system Edge
@@ -166,7 +167,8 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
 ### Known defects and the job summary
 
 A defect found by the suite is written up in [qa/defects.md](qa/defects.md) and registered in
-`support/known-issues.ts` (`DEFECTS`, plus `KNOWN_LAYOUT` for layout findings). The test states the
+`support/known-issues.ts` (`DEFECTS`, plus `KNOWN_LAYOUT` for layout findings; axe findings in
+`KNOWN_AXE`, `support/a11y.ts`). The test states the
 behaviour the game should have and wraps that one assertion in `unlessKnown(...)`: while the defect
 reproduces the test records it and carries on; when the fix lands the assertion passes and the
 summary lists the marker as "fixed?" so it can be removed. A defect seen on one engine only lists

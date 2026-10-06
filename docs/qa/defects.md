@@ -4,13 +4,14 @@ Product defects found by the end-to-end suite, reported to the coordinator for r
 is pinned by a test that states the behaviour the game should have; while the defect reproduces,
 the test records it (a `known defect` annotation in the report and the CI job summary) and goes on,
 and once a fix lands the same assertion passes and the summary lists the marker as "fixed?" so it
-can be removed. The registry is `DEFECTS` (and `KNOWN_LAYOUT` for layout findings) in
-`test/e2e/support/known-issues.ts`.
+can be removed. The registry is `DEFECTS` (with `KNOWN_LAYOUT` for layout findings) in
+`test/e2e/support/known-issues.ts`, and `KNOWN_AXE` in `test/e2e/support/a11y.ts` for axe
+findings.
 
 Severity: **blocker** stops a release; **major** breaks a promised behaviour for some children or
 devices; **minor** is a rough edge. Engines: all three unless stated. Found against `main` at
 `5848964` (S3 phase 2, the Region 1 vertical slice); DV-QA-13 and DV-QA-06's phone egg labels on
-CI at `373a5d2`.
+CI at `373a5d2`; DV-QA-14 at `5a9c633` (#17).
 
 | ID       | Severity | Owner | Summary                                                                     |
 | -------- | -------- | ----- | --------------------------------------------------------------------------- |
@@ -23,12 +24,13 @@ CI at `373a5d2`.
 | DV-QA-09 | major    | S3    | After a click on Read aloud, Enter re-reads instead of sending the answer   |
 | DV-QA-10 | major    | S3    | 200 % text on a phone: the hub and Egg Grid scroll sideways                 |
 | DV-QA-11 | minor    | S3    | Map and road hotspots are cut off by the picture frame                      |
-| DV-QA-12 | minor    | S3    | Placement results celebrate the prologue's egg as "A new egg"               |
-| DV-QA-13 | major    | S3    | WebKit: a keeper's Text size 200 % does not show when the keeper opens      |
+| DV-QA-13 | minor    | S3    | WebKit: a keeper's hub at 200 % text opens at normal size                   |
+| DV-QA-14 | major    | S3    | The results' scrolling celebrations cannot be reached by keyboard           |
 
 DV-QA-03 (Enter ignored when a round opened on a keypad problem) and DV-QA-07 (a missed tile's
 badge pushing the round sideways at 200 %) were found against the phase-1 shell and no longer
-reproduce after #13; their tests stay as regression checks.
+reproduce after #13; DV-QA-12 (the placement results celebrating the prologue's egg as "A new
+egg") was fixed by #17. Their tests stay as regression checks.
 
 ## DV-QA-01 (minor, S3): the held answer is never acknowledged after Retry
 
@@ -141,36 +143,47 @@ reproduce after #13; their tests stay as regression checks.
   `test/e2e/reflow.spec.ts` (`text-200` and zoom); screenshot
   `out/qa-screens/<engine>/phone/13-map.png`.
 
-## DV-QA-12 (minor, S3): the placement results celebrate the prologue's egg again
-
-- **Repro**: a new keeper chooses the blue egg (Bubbles) in the prologue (the hub shows it in the
-  nest), then takes the placement check.
-- **Expected**: the results list the eggs the check unlocked (Sunny, Goldie, Mirror, Puff).
-- **Actual**: they also say "A new egg: Bubbles". The rules grant the first egg once, at the
-  choice (`grantEgg` is idempotent); the shell's event inbox carries that earlier `egg.received`
-  into the next results screen.
-- **Evidence**: `test/e2e/persistence.spec.ts` › "a finished round is kept…".
-
-## DV-QA-13 (major, S3; WebKit): a keeper's Text size 200 % does not show when the keeper opens
+## DV-QA-13 (minor, S3; WebKit): a keeper's hub at 200 % text opens at normal size
 
 - **Repro** (WebKit; seen in Playwright's WebKit on the Ubuntu CI runner): make a keeper, go back
   to the keepers, grown-ups' area, Settings, Text size **200%**, close the grown-ups' area and
   play as that keeper.
-- **Expected**: the hub and everything after it at 200 % (root font size 48 px).
-- **Actual**: `<html>` carries `--aegis-text-scale: 2` from the moment the keeper opens (the
-  trace's DOM snapshots show it), yet `getComputedStyle(html).fontSize` stays `24px` and the hub
-  is drawn at normal size: the failure screenshot taken seconds later still shows 100 % text. The
-  root font size is `calc(var(--dv-reading, 24px) * var(--aegis-text-scale, 1))` (`base.css`), and
-  the SDK's `applyPresentationPreferences` changes only that custom property on `<html>`; WebKit
-  does not recompute the root's font size from it until something else restyles `<html>`. It does
-  not reproduce in Chromium, Firefox or WebKit on Windows, and `settings.spec.ts`, which changes
-  Reduce motion at the same time (an attribute on `<html>`), sees 48 px everywhere.
+- **Expected**: the hub opens at 200 % (root font size 48 px), like everything after it.
+- **Actual** (CI at `373a5d2`): `<html>` carries `--aegis-text-scale: 2` from the moment the
+  keeper opens (the trace's DOM snapshots show it), yet `getComputedStyle(html).fontSize` was
+  `24px` as the hub showed, and the failure screenshot, taken just after, shows the hub at 100 %
+  text. The root font size is `calc(var(--dv-reading, 24px) * var(--aegis-text-scale, 1))`
+  (`base.css`), and the SDK's `applyPresentationPreferences` changes only that custom property on
+  `<html>`; WebKit recomputes the root's font size from it late. On `5a9c633` (#17) the size
+  reached 48 px within five seconds; the test now records the size as the hub shows and how long
+  it takes to catch up (`DV-QA-13 evidence`), which settles the severity. Not seen in Chromium,
+  Firefox or WebKit on Windows; `settings.spec.ts`, which changes Reduce motion at the same time
+  (an attribute on `<html>`), always sees 48 px.
 - **Likely fix** (S3, in `applyPresentation`): also mirror the scale in an attribute on `<html>`
   (for example `data-text-scale`), or set the root `font-size` itself, so WebKit restyles the
-  root; an SDK note: `applyPresentationPreferences` could do the same for every consumer.
-- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…": when the size stays at
-  24 px it attaches `DV-QA-13 evidence` (what `<html>` says before and after a no-op restyle, also
-  in the job summary), then restyles `<html>` itself so the rest of the walk still checks 200 %.
+  root at once; an SDK note: `applyPresentationPreferences` could do the same for every consumer.
+- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…": the size as the hub shows,
+  then (if it is not 48 px) what `<html>` says, frame by frame until it catches up (or, after five
+  seconds, whether a passing attribute restyles it), attached and in the job summary.
+
+## DV-QA-14 (major, S3): the results' scrolling celebrations cannot be reached by keyboard
+
+- **Repro**: on a tablet (1180 × 820) or a phone, a new keeper takes the placement check to its
+  results: six celebrations (four new eggs, two stickers) do not fit, and the list scrolls inside
+  the card (#17: "the results card scrolls its celebrations inside itself").
+- **Expected**: everything on the screen can be reached by keyboard (WCAG 2.1.1).
+- **Actual**: axe `scrollable-region-focusable` (serious) at `.dv-results__celebrations`, in all
+  three engines: the `<div class="dv-results__celebrations" data-many="true">` has
+  `overflow-y: auto` (`screens.css`, `.dv-results__card > .dv-results__celebrations`) but no
+  focusable content and no `tabindex`, so the celebrations below the card's fold (here "New
+  sticker: Show …") cannot be scrolled into view without a pointer where the browser does not
+  focus scrollers by itself (Safari does not; recent Chromium and Firefox do). Desktop is not
+  affected (the list fits).
+- **Likely fix**: make the scrolling list a focusable, named region: `tabindex="0"`,
+  `role="region"` and an `aria-label` from the catalog (for example "What you got"), with the
+  usual focus ring; or let it grow and scroll the card as a whole, keeping the button in view.
+- **Evidence**: `test/e2e/screens.spec.ts` stop `11-round-results` (tablet and phone, all three
+  engines); screenshot `out/qa-screens/<engine>/tablet/11-round-results.png`.
 
 ## Observations for design review (not defects)
 
@@ -183,7 +196,7 @@ reproduce after #13; their tests stay as regression checks.
 - Strict durability makes feedback wait for the save: on a heavily loaded machine (Firefox,
   Windows, parallel tests) one answer took over 8 s to show "Yes!". On real devices this is
   usually instant; the performance budgets in PR C will measure it.
-- axe reports only moderate findings: `region` (toasts, the announcer and the boot status sit
-  outside landmarks) and `page-has-heading-one` on the startup failure screen.
+- Apart from DV-QA-14, axe reports only moderate findings: `region` (toasts, the announcer and the
+  boot status sit outside landmarks) and `page-has-heading-one` on the startup failure screen.
 - Remainder mode (`4 r 3` / `4 R 3`) cannot be reached in play until Region 6 content lands; the
   keypad logic is unit-tested and the e2e parity check covers number mode.

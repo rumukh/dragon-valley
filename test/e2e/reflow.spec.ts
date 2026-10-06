@@ -47,41 +47,51 @@ async function expectReadingSize(page: Page, pixels: number): Promise<void> {
 }
 
 /**
- * DV-QA-13 (WebKit): <html> carries the keeper's text scale but keeps the old font size. Attach
- * what the page says, then restyle <html> with a passing attribute (which the game never reads)
- * so the rest of the test still checks the screens at 200 %.
+ * DV-QA-13 (WebKit): the hub showed while <html> already carried the keeper's text scale but
+ * still had the old font size. Record what the page says and how long the size takes to catch
+ * up by itself, frame by frame; if it does not within five seconds, record whether a passing
+ * attribute (which the game never reads) restyles <html>, so the rest of the test still checks
+ * the screens at 200 %.
  */
-async function restyleStaleRoot(page: Page, testInfo: TestInfo): Promise<void> {
-  const seen = await page.evaluate(async () => {
+async function staleRootEvidence(page: Page, testInfo: TestInfo, opened: number): Promise<void> {
+  const seen = await page.evaluate(async (deadline) => {
     const root = document.documentElement;
     const size = (): string => getComputedStyle(root).fontSize;
     const frame = (): Promise<void> =>
-      new Promise((resolve) => requestAnimationFrame(() => resolve()));
+      new Promise((resolve) => {
+        requestAnimationFrame(() => resolve());
+        setTimeout(resolve, 50);
+      });
     const greeting = document.querySelector('[data-testid="hub-greeting"]');
     const evidence: Record<string, string> = {
       userAgent: navigator.userAgent,
       inlineTextScale: root.style.getPropertyValue('--aegis-text-scale'),
       computedTextScale: getComputedStyle(root).getPropertyValue('--aegis-text-scale').trim(),
-      computedReading: getComputedStyle(root).getPropertyValue('--dv-reading').trim(),
       rootFontSize: size(),
       greetingFontSize: greeting ? getComputedStyle(greeting).fontSize : 'no greeting',
     };
-    await frame();
-    await frame();
-    evidence['afterTwoFrames'] = size();
-    root.style.setProperty('--aegis-text-scale', evidence['inlineTextScale'] ?? '');
-    evidence['afterSettingTheSameScale'] = size();
-    root.setAttribute('data-qa-restyle', '');
-    evidence['afterAnAttributeChange'] = size();
-    root.removeAttribute('data-qa-restyle');
-    evidence['afterRemovingIt'] = size();
+    const started = performance.now();
+    let frames = 0;
+    while (size() !== '48px' && performance.now() - started < deadline) {
+      await frame();
+      frames += 1;
+    }
+    const waited = Math.round(performance.now() - started);
+    evidence['caughtUp'] =
+      size() === '48px' ? `after ${waited} ms (${frames} frames)` : `not within ${waited} ms`;
+    if (size() !== '48px') {
+      root.setAttribute('data-qa-restyle', '');
+      evidence['afterAnAttributeChange'] = size();
+      root.removeAttribute('data-qa-restyle');
+    }
     return evidence;
-  });
+  }, 5_000);
+  const evidence = { openedAt: `${opened}px`, ...seen };
   await testInfo.attach('DV-QA-13 evidence', {
-    body: JSON.stringify(seen, null, 2),
+    body: JSON.stringify(evidence, null, 2),
     contentType: 'application/json',
   });
-  testInfo.annotations.push({ type: 'DV-QA-13 evidence', description: JSON.stringify(seen) });
+  testInfo.annotations.push({ type: 'DV-QA-13 evidence', description: JSON.stringify(evidence) });
 }
 
 test("a keeper's text at 200 %: the hub and a whole round reflow at every size", async ({
@@ -94,9 +104,12 @@ test("a keeper's text at 200 %: the hub and a whole round reflow at every size",
   await chooseSetting(page, 'setting-text-200');
   await closeGrownUps(page);
   await playAs(page, 1, 'Ada');
-  await unlessKnown(testInfo, 'DV-QA-13', () => expectReadingSize(page, 48));
-  if ((await readingSize(page)) !== 48) {
-    await restyleStaleRoot(page, testInfo);
+  const opened = await readingSize(page);
+  await unlessKnown(testInfo, 'DV-QA-13', async () => {
+    expect(opened, "the hub opens at the keeper's 200 % (a 48 px root)").toBe(48);
+  });
+  if (opened !== 48) {
+    await staleRootEvidence(page, testInfo, opened);
     await expectReadingSize(page, 48);
   }
 

@@ -28,7 +28,6 @@ import {
   round,
   startPlacement,
 } from './support/app';
-import { unlessKnown } from './support/known-issues';
 import { readTokens, written } from './support/problem';
 
 /** The purse once the coins have finished flying in (two equal readings in a row). */
@@ -84,12 +83,15 @@ test('a finished round is kept: its coins survive a reload and it is not asked a
   await expect(page.getByTestId('results-summary')).toContainText(
     `${answers.length} of ${answers.length} right.`,
   );
-  await unlessKnown(test.info(), 'DV-QA-12', async () => {
-    await expect(
-      page.getByTestId('celebrate-egg').filter({ hasText: 'Bubbles' }),
-      'the egg chosen in the prologue is not a new egg here',
-    ).toHaveCount(0, { timeout: 1000 });
-  });
+  // DV-QA-12, fixed in #17: the egg chosen in the prologue was celebrated again as new.
+  await expect(
+    page.getByTestId('celebrate-egg').first(),
+    'the eggs the check unlocked are celebrated',
+  ).toBeAttached();
+  await expect(
+    page.getByTestId('celebrate-egg').filter({ hasText: 'Bubbles' }),
+    'the egg chosen in the prologue is not a new egg here',
+  ).toHaveCount(0);
   await expectSaved(page);
   const coins = await settledCoins(page);
   await expect(page.getByTestId('results-coins')).toHaveText(/^You got \d+ coins!$/);

@@ -95,18 +95,18 @@ export const DEFECTS = {
     title:
       "Map and road hotspots are cut off by the picture's frame: on a phone the one awake place's label, \"Sunny Meadow\", is clipped at the left edge; at 200 % text or zoom level 1's marker and the boss are clipped too.",
   },
-  'DV-QA-12': {
-    owner: 'S3',
-    severity: 'minor',
-    title:
-      'The placement results celebrate "A new egg: Bubbles" for the egg the child chose in the prologue minutes before: the event inbox carries earlier events into the next results.',
-  },
   'DV-QA-13': {
     owner: 'S3',
-    severity: 'major',
+    severity: 'minor',
     engines: ['webkit'],
     title:
-      "In WebKit a keeper's Text size 200 % does not show when the keeper opens: <html> gets --aegis-text-scale: 2, but the root font size stays 24 px and the hub is drawn at normal size until something else restyles <html>.",
+      'In WebKit on Linux the hub of a keeper with Text size 200 % opens at normal size: as it shows, <html> already carries --aegis-text-scale: 2 but its font size is still 24 px (still 24 px in the failure screenshot at 373a5d2; the test records how long it lags).',
+  },
+  'DV-QA-14': {
+    owner: 'S3',
+    severity: 'major',
+    title:
+      "The results card's celebrations scroll inside the card, but the scrolling list cannot take keyboard focus (axe scrollable-region-focusable, serious): on a tablet or phone a keyboard user cannot reach the eggs and stickers below its edge.",
   },
 } as const satisfies Record<string, Defect>;
 
@@ -162,7 +162,7 @@ export function engineOf(testInfo: TestInfo): string {
 }
 
 /** Whether `id` can show on this test's engine (an engine-specific defect stays strict elsewhere). */
-function appliesHere(testInfo: TestInfo, id: DefectId): boolean {
+export function defectApplies(testInfo: TestInfo, id: DefectId): boolean {
   const engines: readonly string[] | undefined = (DEFECTS[id] as Defect).engines;
   return engines === undefined || engines.includes(engineOf(testInfo));
 }
@@ -179,7 +179,7 @@ export function knownLayout(
       (entry) =>
         entry.where.test(where) &&
         entry.problem.test(problem) &&
-        appliesHere(testInfo, entry.defect),
+        defectApplies(testInfo, entry.defect),
     );
     if (!known) {
       unknown.push(problem);
@@ -206,7 +206,7 @@ export async function unlessKnown(
   assertion: () => Promise<void>,
 ): Promise<void> {
   const defect: Defect = DEFECTS[id];
-  if (!appliesHere(testInfo, id)) {
+  if (!defectApplies(testInfo, id)) {
     await assertion();
     return;
   }
