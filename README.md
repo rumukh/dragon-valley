@@ -7,6 +7,39 @@ Hatch and raise a dragon for every times table, light up the Magic Window fact b
 Seven-Headed Dragon in the finale.
 
 Built as a standalone consumer of the [Aegis](https://github.com/rumukh/aegis-engine) action-driven SDK
-(`@aegis/core`, `@aegis/runtime`, `@aegis/narrative`, `@aegis/browser`).
+(`@aegis/core`, `@aegis/runtime`, `@aegis/narrative`, `@aegis/browser`), vendored as pinned tarballs.
 
 **Status:** under construction. The approved design and delivery plan is in [`docs/plan.md`](docs/plan.md).
+
+## Develop
+
+Requirements: Node 24 and npm 11. On the corporate development machine npm goes through the proxy in
+`.npmrc`; see [`docs/sdk-update.md`](docs/sdk-update.md) before changing dependencies.
+
+```powershell
+npm ci
+npm run serve        # build, watch and serve at http://127.0.0.1:4320/ (refresh after "rebuilt")
+npm run verify       # the gate: build, typecheck, lint, format, content, tests, lockfile
+npm run test:e2e     # Playwright smoke through the system Edge (or Chrome: DV_BROWSER_CHANNEL=chrome)
+npm run build -- --base /dragon-valley/   # the GitHub Pages build in dist-site/
+```
+
+After any `npm install`, run `npm run lockfile:fix` (the lockfile keeps public registry URLs so CI
+can install).
+
+## Layout
+
+| Path            | What                                                                           |
+| --------------- | ------------------------------------------------------------------------------ |
+| `src/rules/`    | Deterministic, DOM-free game rules and the domain contract (`contract/`)       |
+| `src/app/`      | Browser shell: DOM/SVG screens, audio, speech, saves, offline worker (`sw.ts`) |
+| `content/`      | Data: content pack, history of shipped packs, catalogs                         |
+| `assets/`       | Runtime art, audio and fonts with provenance                                   |
+| `scripts/`      | Node tooling: build, serve, verify, content validation, lockfile               |
+| `test/`         | Vitest unit/trace/tooling tests and Playwright end-to-end tests (`e2e/`)       |
+| `vendor/aegis/` | The pinned SDK tarball set and its artifact manifest                           |
+| `docs/`         | Plan, design, curriculum, contract, architecture, testing, assets, SDK update  |
+
+## License
+
+MIT. Fonts are OFL; art and audio carry recorded provenance (see `docs/assets.md`).
