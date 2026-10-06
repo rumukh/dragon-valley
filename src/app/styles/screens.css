@@ -275,14 +275,220 @@
   outline-offset: 0.12em;
 }
 
-/* ---- Hub ------------------------------------------------------------------------------- */
+/* ---- Scenes ---------------------------------------------------------------------------- */
 
-.dv-hub__stage {
+/* Screens drawn over one of S4's background scenes: the picture fills the screen behind. */
+.dv-story,
+.dv-round,
+.dv-results,
+.dv-level {
+  position: relative;
+  isolation: isolate;
+}
+
+.dv-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dv-backdrop__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 100%;
+  user-select: none;
+}
+
+.dv-dragon-art,
+.dv-boss-art,
+.dv-hatch-art,
+.dv-sticker-art,
+.dv-cosmetic-art {
+  display: block;
+  height: auto;
+}
+
+.dv-dragon-art--small {
+  width: 4.5em;
+}
+
+/* ---- Story ----------------------------------------------------------------------------- */
+
+.dv-story {
+  justify-content: flex-end;
+}
+
+.dv-story__stage {
+  display: grid;
+  align-items: end;
+  gap: clamp(8px, 2vw, 24px);
+  width: min(100%, 64em);
+  margin: auto auto 0;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-story__stage {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+
+.dv-story__figure {
+  justify-self: center;
+}
+
+.dv-story__figure svg {
+  width: min(18rem, 38vh, 70vw);
+  filter: drop-shadow(0 0.6rem 0.7rem color-mix(in srgb, var(--dv-shadow) 28%, transparent));
+}
+
+.dv-story__card {
+  display: grid;
+  gap: 1em;
+}
+
+.dv-story__text {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6em;
+}
+
+.dv-story__line {
+  flex: 1;
+  max-width: none;
+  font-size: min(1.5rem, 6vw);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.dv-story__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7em;
+}
+
+.dv-egg-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 1.6vw, 18px);
+  width: 100%;
+}
+
+.dv-egg-choice {
+  position: relative;
   display: grid;
   justify-items: center;
-  align-content: center;
-  gap: clamp(10px, 2vh, 20px);
+  align-content: end;
+  gap: 0.4em;
+  min-height: var(--dv-target);
+  padding: 0.7em 0.5em 0.8em;
+  border: 0.12em solid var(--dv-line);
+  border-radius: 1.3em;
+  font-weight: 700;
+  color: var(--dv-ink);
+  background: var(--dv-paper);
+  box-shadow: 0 0.26em 0 var(--dv-line-strong);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 110ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dv-egg-choice svg {
+  width: min(100%, 7rem);
+}
+
+.dv-egg-choice:hover:not(:disabled) svg {
+  transform: rotate(-4deg);
+}
+
+.dv-egg-choice:active:not(:disabled) {
+  transform: translateY(0.18em);
+  box-shadow: 0 0.08em 0 var(--dv-line-strong);
+}
+
+.dv-egg-choice:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.dv-egg-choice__label {
+  text-align: center;
+}
+
+/* ---- Hub ------------------------------------------------------------------------------- */
+
+.dv-hub__layout {
+  display: grid;
+  align-items: center;
+  gap: clamp(12px, 2.4vw, 32px);
   flex: 1;
+  width: min(100%, 64em);
+  margin-inline: auto;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-hub__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.dv-hub__nest {
+  display: grid;
+  justify-items: center;
+  gap: 0.6em;
+  text-align: center;
+}
+
+.dv-hub__dragon svg {
+  width: min(17rem, 40vh, 72vw);
+  filter: drop-shadow(0 0.5rem 0.6rem color-mix(in srgb, var(--dv-shadow) 24%, transparent));
+}
+
+.dv-hub__dragon[data-stage='egg'] svg {
+  width: min(9rem, 24vh, 46vw);
+}
+
+.dv-hub__dragon-name {
+  padding: 0.2em 0.9em;
+  border-radius: 1em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+}
+
+.dv-hub__nest .dv-meter,
+.dv-hub__goal .dv-meter {
+  width: min(100%, 22em);
+  padding: 0.5em 0.8em;
+  border-radius: 1em;
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+}
+
+.dv-hub__others {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-hub__other {
+  display: grid;
+  justify-items: center;
+  gap: 0.2em;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.dv-hub__today {
+  display: grid;
+  justify-items: center;
+  gap: 1em;
   text-align: center;
 }
 
@@ -290,74 +496,225 @@
   font-size: min(2.2rem, 9vw);
 }
 
-.dv-hub__egg {
-  width: min(12rem, 34vh, 60vw);
-  filter: drop-shadow(0 0.5rem 0.6rem color-mix(in srgb, var(--dv-shadow) 24%, transparent));
+.dv-hub__adventure {
+  display: grid;
+  justify-items: center;
+  width: 100%;
 }
 
-.dv-hub__toasty {
-  min-height: 1.4em;
+.dv-hub__goal {
+  display: grid;
+  justify-items: center;
+  gap: 0.6em;
+  width: min(100%, 24em);
+}
+
+.dv-hub__places {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6em;
+}
+
+/* Days played this week: a filled disc for a played day, an empty ring otherwise. */
+.dv-week {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.3em;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-week__day {
+  display: grid;
+  justify-items: center;
+  gap: 0.2em;
+  font-size: 0.8rem;
   font-weight: 700;
-  color: var(--dv-sun-deep);
+  color: var(--dv-ink-soft);
 }
 
-.dv-hub .dv-meter {
-  padding: 0.5em 0.8em;
-  border-radius: 1em;
-  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+.dv-week__mark {
+  width: 1.4em;
+  height: 1.4em;
+  border: 0.14em solid var(--dv-line-strong);
+  border-radius: 50%;
+  background: var(--dv-card);
 }
 
-/* ---- Round ----------------------------------------------------------------------------- */
+.dv-week__day[data-practised='true'] .dv-week__mark {
+  border-color: var(--dv-success-deep);
+  background: var(--dv-success);
+}
+
+.dv-week__day[data-today='true'] .dv-week__name {
+  color: var(--dv-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 0.12em;
+  text-underline-offset: 0.18em;
+}
+
+.dv-gift__art svg {
+  width: 6rem;
+  margin-inline: auto;
+}
+
+/* ---- Rounds ---------------------------------------------------------------------------- */
+
+.dv-round__header {
+  display: grid;
+  gap: 0.3em;
+  min-width: 0;
+}
 
 .dv-round__title {
-  display: flex;
-  align-items: center;
+  font-size: 1.1rem;
 }
 
-.dv-round__title .dv-meter {
+.dv-round__header .dv-meter {
   padding: 0.35em 0.7em;
   border-radius: 1em;
   background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
 }
 
-.dv-round__play {
-  display: grid;
-  gap: clamp(12px, 2vw, 24px);
-  align-items: start;
-  width: min(100%, 64em);
-  margin-inline: auto;
+.dv-round__streak:empty {
+  display: none;
 }
 
-.dv-round__left,
-.dv-round__right {
+.dv-round__streak {
+  padding: 0.2em 0.7em;
+  border-radius: 1em;
+  font-weight: 700;
+  color: var(--dv-sun-deep);
+  background: var(--dv-paper);
+}
+
+.dv-round__play {
   display: grid;
-  gap: clamp(10px, 1.6vw, 18px);
-  justify-items: center;
-  min-width: 0;
+  align-content: center;
+  gap: clamp(12px, 2vw, 24px);
+  flex: 1;
+  width: min(100%, 72em);
+  margin-inline: auto;
 }
 
 @media (min-width: 900px) and (orientation: landscape) {
   .dv-round__play {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.25fr) minmax(0, 1fr);
     align-items: center;
-    flex: 1;
+  }
+
+  .dv-round--boss .dv-round__play {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr);
   }
 }
 
-.dv-round__egg {
-  width: min(7rem, 20vh);
-  transform-origin: 50% 100%;
+.dv-round__cast {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.5em;
+  min-width: 0;
+}
+
+.dv-round__dragon svg {
+  width: min(15rem, 34vh, 40vw);
+}
+
+.dv-round__dragon[data-stage='egg'] svg {
+  width: min(7.5rem, 20vh, 30vw);
+}
+
+.dv-round--boss .dv-round__dragon svg {
+  width: min(9rem, 22vh, 26vw);
+}
+
+.dv-round__boss svg {
+  width: min(14rem, 32vh, 36vw);
+}
+
+.dv-round__board,
+.dv-round__input {
+  display: grid;
+  justify-items: center;
+  gap: clamp(10px, 1.6vw, 18px);
+  min-width: 0;
 }
 
 .dv-problem-card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6em;
+  display: grid;
+  justify-items: center;
+  gap: 0.5em;
   width: 100%;
   border-radius: 1.4em;
   border-width: 0.12em;
   background: var(--dv-card);
+}
+
+.dv-problem-card__line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+}
+
+.dv-round__story {
+  max-width: 30em;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.dv-round__story[hidden],
+.dv-round__note:empty,
+.dv-round__hint:empty,
+.dv-round__model:empty {
+  display: none;
+}
+
+.dv-round__note {
+  font-weight: 700;
+  color: var(--dv-info-deep);
+  text-align: center;
+}
+
+.dv-round__prompt {
+  font-weight: 700;
+  text-align: center;
+}
+
+.dv-round__answer {
+  width: 100%;
+}
+
+.dv-feedback__lead {
+  font-weight: 700;
+}
+
+.dv-feedback__fact {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Things that fly from an answer to a dragon or a boss (on the fixed effects layer). */
+.dv-flyer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--size, 48px);
+  height: var(--size, 48px);
+  pointer-events: none;
+}
+
+.dv-flyer > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.dv-flyer__sparkle {
+  color: var(--dv-sun);
 }
 
 .dv-problem {
@@ -418,51 +775,6 @@
   background: var(--dv-paper);
 }
 
-.dv-round__prompt {
-  font-weight: 700;
-  text-align: center;
-}
-
-.dv-round__answer {
-  width: 100%;
-}
-
-.dv-round__model:empty {
-  display: none;
-}
-
-.dv-reactor[data-react='happy'] {
-  animation: dv-ui-hop 560ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.dv-reactor[data-react='curious'] {
-  animation: dv-ui-tilt 760ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes dv-ui-hop {
-  0% {
-    transform: translateY(0);
-  }
-  35% {
-    transform: translateY(-16%);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes dv-ui-tilt {
-  0% {
-    transform: rotate(0deg);
-  }
-  40% {
-    transform: rotate(-10deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
-}
-
 /* Models after a miss: dots in rows and columns, or equal groups with leftovers as rings. */
 .dv-model {
   display: grid;
@@ -479,10 +791,17 @@
   color: var(--dv-ink-soft);
 }
 
+/* Dots shrink for tall pictures, so a whole array fits beside the problem. */
 .dv-model__array {
+  --dot: min(0.7em, calc(26vh / var(--rows, 1) - 0.28em));
   display: grid;
-  grid-template-columns: repeat(var(--columns, 1), 0.7em);
+  grid-template-columns: repeat(var(--columns, 1), var(--dot));
   gap: 0.28em;
+}
+
+.dv-model__array .dv-model__dot {
+  width: var(--dot);
+  height: var(--dot);
 }
 
 .dv-model__dot {
@@ -521,32 +840,390 @@
   box-shadow: inset 0 0 0 0.12em var(--dv-miss-deep);
 }
 
-/* Results */
-.dv-results {
+/* ---- Minigames ------------------------------------------------------------------------- */
+
+.dv-minigame__card {
   display: grid;
   justify-items: center;
-  align-content: center;
   gap: 1rem;
-  flex: 1;
+  width: min(100%, 56em);
+  margin: auto;
+}
+
+.dv-minigame__status {
+  max-width: none;
+  font-size: 1.15rem;
+  font-weight: 700;
   text-align: center;
 }
 
-.dv-results h2 {
-  font-size: min(2.6rem, 11vw);
+.dv-minigame__board {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  width: 100%;
 }
 
-.dv-results__egg {
-  width: min(9rem, 26vh);
-  transform-origin: 50% 100%;
-  filter: drop-shadow(0 0.4rem 0.5rem color-mix(in srgb, var(--dv-shadow) 24%, transparent));
+.dv-match-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(7.5em, 28vw), 1fr));
+  gap: 0.7em;
+  width: 100%;
+}
+
+/* Memory cards: face down, open, matched (check) or not a pair ("?"). */
+.dv-card-tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: max(var(--dv-target), 4.2em);
+  padding: 0.4em;
+  border: 0.12em solid var(--dv-primary-deep);
+  border-radius: 1em;
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow: 0 0.2em 0 var(--dv-line-strong);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.dv-card-tile[data-state='hidden'] {
+  background:
+    radial-gradient(circle at 30% 30%, var(--dv-primary-soft) 0 18%, transparent 19%),
+    radial-gradient(circle at 70% 70%, var(--dv-primary-soft) 0 18%, transparent 19%),
+    var(--dv-primary);
+}
+
+.dv-card-tile[data-state='matched'] {
+  border-color: var(--dv-success-deep);
+  color: var(--dv-success-deep);
+  background: var(--dv-success-soft);
+}
+
+.dv-card-tile[data-state='miss'] {
+  border-color: var(--dv-miss-deep);
+  color: var(--dv-miss-deep);
+  background: var(--dv-miss-soft);
+}
+
+.dv-card-tile:disabled {
+  cursor: default;
+}
+
+.dv-card-tile__badge {
+  position: absolute;
+  top: -0.45em;
+  right: -0.45em;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.dv-minigame__actions {
+  display: flex;
+  justify-content: center;
+}
+
+.dv-nest-builder {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.dv-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.4em 0.6em;
+  border-radius: 1em;
+  background: var(--dv-paper);
+}
+
+.dv-stepper__label {
+  font-weight: 700;
+}
+
+.dv-stepper__value {
+  min-width: 1.6em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dv-nest {
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 1), 1.5em);
+  gap: 0.35em;
+  padding: 0.9em 1.1em;
+  border: 0.14em solid var(--dv-line-strong);
+  border-radius: 50% / 34%;
+  background: var(--dv-paper-deep);
+}
+
+.dv-nest__egg {
+  width: 1.5em;
+  height: 1.9em;
+  border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
+  background: var(--dv-card);
+  box-shadow: inset -0.15em -0.2em 0 var(--dv-line);
+}
+
+.dv-nest__size {
+  font-weight: 700;
+}
+
+.dv-nest__found {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-nest__found li {
+  padding: 0.3em 0.7em;
+  border-radius: 1em;
+  font-weight: 700;
+  color: var(--dv-success-deep);
+  background: var(--dv-success-soft);
+}
+
+/* ---- Results --------------------------------------------------------------------------- */
+
+.dv-results__card {
+  display: grid;
+  justify-items: center;
+  gap: clamp(0.4rem, 1.6vh, 0.9rem);
+  width: min(100%, 38em);
+  margin: auto;
+  text-align: center;
+}
+
+.dv-results__title {
+  font-size: min(2.4rem, 10vw);
+}
+
+.dv-results__level,
+.dv-results__summary {
+  font-weight: 700;
 }
 
 .dv-results__coins {
-  font-weight: 700;
-  color: var(--dv-sun-deep);
   padding: 0.3em 0.9em;
   border-radius: 1em;
+  font-weight: 700;
+  color: var(--dv-sun-deep);
   background: var(--dv-paper);
+}
+
+.dv-results__celebrations {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.dv-celebrate {
+  display: grid;
+  justify-items: center;
+  gap: 0.4em;
+  margin: 0;
+  font-weight: 700;
+}
+
+.dv-celebrate svg {
+  width: min(6.5rem, 16vh);
+}
+
+.dv-celebrate--hatch svg {
+  width: min(11rem, 26vh);
+}
+
+/* ---- Valley map, region road and level card ------------------------------------------ */
+
+.dv-map,
+.dv-road {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: var(--aspect, 16 / 10);
+  width: min(100%, calc((100dvh - 9rem) * 1.6));
+  margin-inline: auto;
+  border-radius: 1.4em;
+  background: var(--dv-sky);
+  box-shadow: 0 0.6em 1.4em color-mix(in srgb, var(--dv-shadow) 22%, transparent);
+}
+
+.dv-map__image,
+.dv-road__image {
+  position: absolute;
+  max-width: none;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+.dv-map__places,
+.dv-road__nodes {
+  position: absolute;
+  inset: 0;
+}
+
+.dv-map__place {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: var(--dv-target);
+  padding: 0.3em 0.9em 0.3em 0.35em;
+  border: 0.1em solid var(--dv-line);
+  border-radius: 2em;
+  font: inherit;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow: 0 0.2em 0 var(--dv-line-strong);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.dv-map__emblem {
+  width: 2em;
+  height: 2em;
+}
+
+.dv-map__asleep {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 2.4em;
+  height: 2.4em;
+  border-radius: 50%;
+  color: var(--dv-ink-muted);
+  background: color-mix(in srgb, var(--dv-paper) 80%, transparent);
+  transform: translate(-50%, -50%);
+}
+
+.dv-map__asleep svg {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.dv-road__node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: max(var(--dv-target), 3.4em);
+  height: max(var(--dv-target), 3.4em);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.dv-road__node > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.dv-road__node--boss {
+  width: 5.4em;
+  height: 5.4em;
+}
+
+.dv-road__node:disabled {
+  cursor: default;
+}
+
+.dv-road__number {
+  position: absolute;
+  right: -0.3em;
+  bottom: -0.3em;
+  display: grid;
+  place-items: center;
+  min-width: 1.5em;
+  height: 1.5em;
+  border-radius: 1em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--dv-card);
+  background: var(--dv-ink);
+}
+
+/* The next level breathes (a gentle scale, off with reduced motion). */
+.dv-road__node[data-glowing='true'] > svg {
+  animation: dv-ui-breathe 2.2s ease-in-out infinite;
+}
+
+@keyframes dv-ui-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.dv-level__card {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  width: min(100%, 34em);
+  margin: auto;
+  text-align: center;
+}
+
+.dv-level__title {
+  font-size: min(2.2rem, 9vw);
+}
+
+.dv-level__boss svg {
+  width: min(10rem, 26vh);
+}
+
+.dv-level__activities {
+  display: grid;
+  gap: 0.5em;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-level__activity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0.5em 0.8em;
+  border: 0.08em solid var(--dv-line);
+  border-radius: 0.9em;
+  font-weight: 700;
+  background: var(--dv-paper);
+}
+
+.dv-level__activity[data-done='true'] {
+  border-color: var(--dv-success);
+  color: var(--dv-success-deep);
+}
+
+.dv-level__icon {
+  width: 1.8em;
+  height: 1.8em;
+}
+
+.dv-level__done {
+  width: 1.2em;
+  height: 1.2em;
 }
 
 /* ---- Grown-ups ------------------------------------------------------------------------- */

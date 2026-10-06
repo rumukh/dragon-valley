@@ -7,10 +7,15 @@
  * gradients and clip paths, and removing one would break the other.
  */
 import { renderAvatar } from '../art/characters/avatars';
-import { renderDragon } from '../art/dragon';
-import type { DragonRenderOptions } from '../art/dragon';
+import { renderBoss } from '../art/characters/bosses';
+import type { BossState } from '../art/characters/bosses';
+import { renderDragon, renderHatch } from '../art/dragon';
+import type { DragonRenderOptions, Outfit } from '../art/dragon';
 import { renderIcon } from '../art/icons';
-import type { KeeperAvatar } from '../../rules/contract/ids';
+import { renderCosmeticIcon } from '../art/cosmetics/icon';
+import { renderSticker } from '../art/stickers';
+import type { StickerSpec } from '../art/stickers';
+import type { DragonExpression, DragonView, KeeperAvatar } from '../../rules/contract';
 
 let serial = 0;
 
@@ -57,5 +62,59 @@ export function dragonArt(
 ): SVGSVGElement {
   const node = svgElement(renderDragon({ ...options, idPrefix: nextPrefix('dragon') }));
   node.classList.add(...className.split(' '));
+  return node;
+}
+
+/** The art rig's outfit for a dragon's slots (empty slots left out). */
+export function outfitOf(outfit: Readonly<Record<string, string | null>>): Outfit {
+  const worn: Record<string, string> = {};
+  for (const [slot, item] of Object.entries(outfit)) if (item !== null) worn[slot] = item;
+  return worn as Outfit;
+}
+
+/** A dragon from the game view, in its stage and outfit. */
+export function viewDragonArt(
+  dragon: DragonView,
+  options: { expression?: DragonExpression; framing?: 'stage' | 'fit'; className?: string } = {},
+): SVGSVGElement {
+  return dragonArt(
+    {
+      dragon: dragon.rig,
+      stage: dragon.stage,
+      expression: options.expression ?? dragon.expression,
+      outfit: outfitOf(dragon.outfit),
+      framing: options.framing ?? 'fit',
+    },
+    options.className,
+  );
+}
+
+/** The hatch sequence (wobble, cracks, pop, hatchling); it plays once when inserted. */
+export function hatchArt(rig: string, className = 'dv-hatch-art'): SVGSVGElement {
+  const node = svgElement(renderHatch({ dragon: rig, idPrefix: nextPrefix('hatch') }));
+  node.classList.add(...className.split(' '));
+  return node;
+}
+
+export function bossArt(id: string, pose: BossState, className = 'dv-boss-art'): SVGSVGElement {
+  const node = svgElement(renderBoss(id, pose, { idPrefix: nextPrefix('boss') }));
+  node.classList.add(...className.split(' '));
+  return node;
+}
+
+export function stickerArt(
+  spec: Omit<StickerSpec, 'idPrefix'>,
+  className = 'dv-sticker-art',
+): SVGSVGElement {
+  const node = svgElement(renderSticker({ ...spec, idPrefix: nextPrefix('sticker') }));
+  node.classList.add(...className.split(' '));
+  return node;
+}
+
+/** One cosmetic on its own (market tiles, gifts, the dressing room). */
+export function cosmeticIconArt(assetId: string, className = 'dv-cosmetic-art'): SVGSVGElement {
+  const node = svgElement(renderCosmeticIcon(assetId, { idPrefix: nextPrefix('cosmetic') }));
+  node.classList.add(...className.split(' '));
+  node.setAttribute('aria-hidden', 'true');
   return node;
 }

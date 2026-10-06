@@ -1,0 +1,41 @@
+/**
+ * Response time for one problem, as the rules need it: from the moment the problem is shown to
+ * the moment the answer is sent, without the time the game was paused or hidden
+ * (docs/design.md §6.2), and capped at the contract's `MAX_ELAPSED_MS`.
+ */
+import { MAX_ELAPSED_MS } from '../../rules/contract';
+
+export interface ResponseTimer {
+  /** Start timing a new problem (running, unless the game is paused right now). */
+  start(): void;
+  pause(): void;
+  resume(): void;
+  /** Whole milliseconds of play since `start`, excluding pauses, at most `MAX_ELAPSED_MS`. */
+  elapsed(): number;
+}
+
+export function createResponseTimer(now: () => number = () => performance.now()): ResponseTimer {
+  let started = now();
+  let pausedTotal = 0;
+  let pausedAt: number | null = null;
+  return {
+    start() {
+      started = now();
+      pausedTotal = 0;
+      if (pausedAt !== null) pausedAt = started;
+    },
+    pause() {
+      if (pausedAt === null) pausedAt = now();
+    },
+    resume() {
+      if (pausedAt === null) return;
+      pausedTotal += now() - pausedAt;
+      pausedAt = null;
+    },
+    elapsed() {
+      const end = pausedAt ?? now();
+      const value = Math.round(end - started - pausedTotal);
+      return Math.min(MAX_ELAPSED_MS, Math.max(0, value));
+    },
+  };
+}

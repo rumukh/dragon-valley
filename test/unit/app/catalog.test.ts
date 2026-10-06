@@ -6,7 +6,15 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { CHILD_PROFILE, tokenizeWords } from '@aegis/narrative';
 import { describe, expect, it } from 'vitest';
-import { KEEPER_AVATARS, NOTATIONS } from '../../../src/rules/contract';
+import {
+  ACTIVITY_KINDS,
+  DRAGON_EXPRESSIONS,
+  DRAGON_STAGES,
+  KEEPER_AVATARS,
+  NOTATIONS,
+  TERMS,
+} from '../../../src/rules/contract';
+import { RULE_ERROR_CODES } from '../../../src/app/game/errors';
 import { createTranslator, EN_UI as en, placeholders } from '../../../src/app/i18n/messages';
 import type { MessageKey } from '../../../src/app/i18n/messages';
 
@@ -19,6 +27,16 @@ const DYNAMIC_PREFIXES = [
   'parent.tab.',
   'parent.settings.notation.',
   'editor.problem.',
+  'activity.',
+  'stage.',
+  'grow.',
+  'expression.',
+  'boss.meter.',
+  'boss.pose.',
+  'term.',
+  'results.grew.',
+  'day.',
+  ...RULE_ERROR_CODES.map((code) => `error.${code}`),
 ];
 
 const keys = Object.keys(en) as MessageKey[];
@@ -75,6 +93,27 @@ describe('English catalog', () => {
     for (const avatar of KEEPER_AVATARS) expect(en).toHaveProperty(`avatar.${avatar}`);
     for (const notation of NOTATIONS)
       expect(en).toHaveProperty(`parent.settings.notation.${notation}`);
+  });
+
+  it('names every activity, stage, expression, term, boss mood, weekday and rule refusal', () => {
+    const expected = [
+      ...ACTIVITY_KINDS.map((kind) => `activity.${kind}`),
+      ...DRAGON_STAGES.map((stage) => `stage.${stage}`),
+      ...DRAGON_STAGES.filter((stage) => stage !== 'egg').flatMap((stage) => [
+        `grow.${stage}`,
+        `results.grew.${stage}`,
+      ]),
+      ...DRAGON_EXPRESSIONS.map((expression) => `expression.${expression}`),
+      ...TERMS.map((term) => `term.${term}`),
+      ...['laughing', 'sleepy', 'happy'].map((mood) => `boss.meter.${mood}`),
+      ...['start', 'warming', 'won'].map((pose) => `boss.pose.${pose}`),
+      ...['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].flatMap((day) => [
+        `day.${day}`,
+        `day.short.${day}`,
+      ]),
+      ...RULE_ERROR_CODES.map((code) => `error.${code}`),
+    ];
+    for (const key of expected) expect(en, key).toHaveProperty([key]);
   });
 
   it('fills placeholders and refuses to invent missing values', () => {

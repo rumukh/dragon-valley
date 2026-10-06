@@ -19,6 +19,8 @@ export function createMeter(options: {
   value: number;
   valueText(value: number, max: number): string;
   testId?: string;
+  /** Show only the value; the label stays for assistive technology. */
+  compact?: boolean;
 }): MeterView {
   const fill = h('span', { className: 'dv-meter__fill' });
   const valueLabel = h('span', { className: 'dv-meter__value' });
@@ -39,7 +41,15 @@ export function createMeter(options: {
         'aria-valuemax': String(options.max),
       },
     },
-    h('span', { className: 'dv-meter__label' }, h('span', { text: options.label }), valueLabel),
+    h(
+      'span',
+      { className: 'dv-meter__label' },
+      h('span', {
+        ...(options.compact ? { className: 'dv-visually-hidden' } : {}),
+        text: options.label,
+      }),
+      valueLabel,
+    ),
     track,
   );
   const update = (value: number): void => {

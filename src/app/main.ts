@@ -1,6 +1,6 @@
 /**
- * Boot. Readiness is real: the boot status turns "ready" only after the content pack was
- * loaded and validated, the family record was read, the reading font loaded (or its short wait
+ * Boot. Readiness is real: the boot status turns "ready" only after the content pack and its
+ * strings were loaded and validated, the family record was read, the reading font loaded (or its short wait
  * ran out), and the first screen is mounted and painted. The audio manifest is read first (a
  * missing or broken one means a silent game, never a failed boot). Nothing is exposed on
  * `window`, and nothing is written to the console.
@@ -8,13 +8,13 @@
 import { requireValue, schema } from '@aegis/runtime';
 import { applyPresentationPreferences } from '@aegis/browser/ui';
 import { loadAudioMap } from './audio/manifest';
-import { loadContent } from './content/load';
+import { loadContent, loadContentText } from './content/load';
 import { loadFonts } from './design/fonts';
 import { applyTokens } from './design/tokens';
 import { createTranslator } from './i18n/messages';
 import { DEFAULT_PRESENTATION } from './persistence/preferences';
 import { RecoveryRequired } from './persistence/recovery';
-import { PREVIEW_GAME } from './preview/adapter';
+import { dragonValleyGame } from './game/definition';
 import type { ScreenEntry } from './router/router';
 import { createScreens } from './screens';
 import { createApp } from './shell/app';
@@ -79,14 +79,20 @@ async function boot(): Promise<void> {
     return;
   }
   const fonts = loadFonts(env.baseUrl);
-  const content = loadContent(env.baseUrl);
+  const content = loadContent(env.baseUrl).then(async (pack) => ({
+    pack,
+    text: await loadContentText(env.baseUrl, pack.data),
+  }));
   // Keep a rejection handled until it is settled below.
   content.catch(() => undefined);
   const audioMap = await loadAudioMap(env.baseUrl);
-  const app = createApp({ env, root, game: PREVIEW_GAME, audioMap });
+  const app = createApp({ env, root, audioMap });
   app.screens = createScreens(app);
   const [pack, family] = await Promise.allSettled([content, app.family.open()]);
-  if (pack.status === 'fulfilled') app.markContent(pack.value.revision);
+  if (pack.status === 'fulfilled') {
+    app.useContent(dragonValleyGame(pack.value.pack), pack.value.text);
+    app.markContent(pack.value.pack.revision);
+  }
   // A broken pack stops the game for everyone; a broken family record asks for a grown-up.
   let first: ScreenEntry;
   if (pack.status === 'rejected') first = app.screens.error(pack.reason);

@@ -1,0 +1,139 @@
+/**
+ * Small, pure readings of the game view for screens: what kind of answer a problem takes, where
+ * a level sits on the map, which dragon the hub features and how far it is from growing, the
+ * boss's pose, what the Daily Adventure button does and where results lead. No rules live here:
+ * every decision the game makes is already in the view; these only choose how to show it.
+ */
+import type {
+  DragonStage,
+  DragonView,
+  GameView,
+  LevelCard,
+  Problem,
+  ProblemStep,
+  RegionView,
+} from '../../rules/contract';
+
+export type AnswerKind = 'number' | 'remainder' | 'relation' | 'operation' | 'term';
+
+/** The answer a problem takes at a step (structure only; the rules know the right one). */
+export function answerKindOf(problem: Problem, step: ProblemStep): AnswerKind {
+  switch (problem.kind) {
+    case 'divrem':
+      return 'remainder';
+    case 'compare':
+      return 'relation';
+    case 'term':
+      return 'term';
+    case 'word':
+      return step === 'operation' ? 'operation' : answerKindOf(problem.model, 'answer');
+    case 'equation':
+      return 'number';
+  }
+}
+
+export function findRegion(view: GameView, regionId: string): RegionView | undefined {
+  return view.hub.regions.find((region) => region.id === regionId);
+}
+
+export function findLevel(
+  view: GameView,
+  levelId: string,
+): { readonly region: RegionView; readonly level: LevelCard } | undefined {
+  for (const region of view.hub.regions) {
+    const level = region.levels.find((candidate) => candidate.id === levelId);
+    if (level) return { region, level };
+  }
+  return undefined;
+}
+
+/** The dragon the hub shows big: the first egg's dragon while it is owned, else the first one. */
+export function featuredDragon(view: GameView): DragonView | undefined {
+  const first = view.onboarding.firstEgg;
+  return view.dragons.find((dragon) => dragon.id === first) ?? view.dragons[0];
+}
+
+export interface Growth {
+  /** The stage the dragon grows into next. */
+  readonly next: DragonStage;
+  /** Progress toward it on the requirement's scale (percent of the dragon's facts). */
+  readonly value: number;
+  readonly max: number;
+}
+
+/** How far a dragon is from its next stage, or null when it is crowned. */
+export function growthOf(dragon: DragonView): Growth | null {
+  const next = dragon.next;
+  if (!next) return null;
+  const current = dragon.mastery[next.mastery];
+  return { next: next.stage, value: Math.min(current, next.share), max: next.share };
+}
+
+export type BossPose = 'start' | 'warming' | 'won';
+
+/** The boss's pose for its meter: the challenge, about half way, and won over. */
+export function bossPose(
+  meter: { readonly value: number; readonly target: number } | null,
+  complete: boolean,
+): BossPose {
+  if (complete || (meter !== null && meter.target > 0 && meter.value >= meter.target)) {
+    return 'won';
+  }
+  if (meter !== null && meter.target > 0 && meter.value * 2 >= meter.target) return 'warming';
+  return 'start';
+}
+
+export type Adventure =
+  | { readonly kind: 'level'; readonly level: string; readonly resume: number | null }
+  | { readonly kind: 'snack'; readonly dragon: string | null }
+  | { readonly kind: 'placement' }
+  | { readonly kind: 'gift' }
+  | { readonly kind: 'story' }
+  | { readonly kind: 'map' };
+
+/**
+ * What the Daily Adventure button does now (docs/design.md §4.2). A level already in progress
+ * resumes at its next activity instead of starting over.
+ */
+export function adventureFor(view: GameView): Adventure {
+  const next = view.hub.next;
+  switch (next.kind) {
+    case 'level': {
+      const run = view.run;
+      const resume =
+        run !== null && run.level === next.level && run.result === null ? run.next : null;
+      return { kind: 'level', level: next.level, resume };
+    }
+    case 'snack':
+      return { kind: 'snack', dragon: next.dragon };
+    case 'placement':
+      return { kind: 'placement' };
+    case 'gift':
+      return { kind: 'gift' };
+    case 'story':
+      return { kind: 'story' };
+    case 'free-play':
+      return { kind: 'map' };
+  }
+}
+
+export type ResultsNext =
+  { readonly kind: 'activity'; readonly index: number } | { readonly kind: 'done' };
+
+/** After a finished round: the level's next activity, or back to the valley. */
+export function resultsNext(view: GameView): ResultsNext {
+  const done: ResultsNext = { kind: 'done' };
+  const { round, run } = view;
+  if (!round || round.status !== 'complete' || round.source.kind !== 'level') return done;
+  if (round.endReason === 'quit' || round.endReason === 'time-limit') return done;
+  if (!run || run.result !== null || run.next >= run.activities.length) return done;
+  return { kind: 'activity', index: run.next };
+}
+
+/** A local calendar date `YYYY-MM-DD` as the weekday index used by `daily.week` (Monday = 0). */
+export function weekdayIndex(day: string): number {
+  const [year, month, date] = day.split('-').map(Number) as [number, number, number];
+  // Days since Monday 1970-01-05, counted in UTC so no time zone can shift the date.
+  const days = Math.floor(Date.UTC(year, month - 1, date) / 86_400_000);
+  return (((days - 4) % 7) + 7) % 7;
+}

@@ -5,7 +5,8 @@
  *
  * One keeper plays at a time. Opening a keeper loads their preferences and game session,
  * applies their presentation preferences (text size, reduced motion, volumes), binds the
- * visibility pause, and routes live commit events to sounds. Closing undoes all of it.
+ * visibility pause, routes live commit events to sounds and keeps them briefly for the screens
+ * that celebrate them. Closing undoes all of it.
  */
 import { IndexedDbSaveStorage } from '@aegis/browser/indexeddb';
 import type { SaveStorage } from '@aegis/browser/save';
@@ -20,19 +21,20 @@ import {
   StaleCommandError,
 } from '../controller/commands';
 import type { CommandController } from '../controller/commands';
-import { createTranslator } from '../i18n/messages';
+import { createTranslator, hasMessage } from '../i18n/messages';
 import { createOfflineInstaller } from '../parent/offline';
 import type { OfflineInstaller } from '../parent/offline';
 import { profileSeed, SAVE_DATABASE } from '../../rules/contract';
+import type { GameAction, GameEvent } from '../../rules/contract';
+import type { ContentText } from '../content/text';
+import type { DvGame, DvSession } from '../game/definition';
 import { findKeeper } from '../persistence/family';
 import type { Keeper } from '../persistence/family';
 import { openGameSession } from '../persistence/game-session';
-import type { GameDefinition, GameSession } from '../persistence/game-session';
 import { DEFAULT_PREFERENCES } from '../persistence/preferences';
 import type { ChildPreferences } from '../persistence/preferences';
 import { RecoveryRequired } from '../persistence/recovery';
 import { FamilyStore, PreferencesStore } from '../persistence/stores';
-import type { PreviewAction, PreviewContent, PreviewState, PreviewView } from '../preview/adapter';
 import { createRouter } from '../router/router';
 import type { Router, ScreenEntry } from '../router/router';
 import { createReadAloud } from '../speech/read-aloud';
@@ -43,6 +45,14 @@ import { createKeyboard } from '../ui/keyboard';
 import type { UiKit } from '../ui/kit';
 import { createToaster } from '../ui/toast';
 
+/** Live events kept for screens; older ones fall off (they only drive one-shot celebrations). */
+const MAX_INBOX = 64;
+
+/** The router key of a keeper's play screen. */
+export function playKey(keeperId: string): string {
+  return `play:${keeperId}`;
+}
+
 export interface AppEnvironment {
   /** Deployment base path, e.g. `/dragon-valley/`. */
   readonly base: string;
@@ -52,14 +62,20 @@ export interface AppEnvironment {
   readonly revision: string;
 }
 
-export type PreviewSession = GameSession<PreviewState, PreviewAction, PreviewView, PreviewContent>;
-export type PreviewGame = GameDefinition<PreviewState, PreviewAction, PreviewView, PreviewContent>;
+/**
+ * Live game events since a screen last took them, oldest first. Events are one-shots: a restore
+ * empties the inbox, and screens rebuild from the view.
+ */
+export interface EventInbox {
+  take(types?: readonly string[]): GameEvent[];
+}
 
 export interface ActiveKeeper {
   readonly keeper: Keeper;
-  readonly game: PreviewSession;
-  readonly commands: CommandController<PreviewAction>;
+  readonly game: DvSession;
+  readonly commands: CommandController<GameAction>;
   readonly preferences: PreferencesStore;
+  readonly events: EventInbox;
 }
 
 export type ParentTab = 'keepers' | 'settings' | 'data' | 'offline' | 'about';
@@ -68,8 +84,11 @@ export interface Screens {
   title(): ScreenEntry;
   keepers(): ScreenEntry;
   editor(keeperId: string | null): ScreenEntry;
-  hub(keeperId: string): ScreenEntry;
-  round(keeperId: string): ScreenEntry;
+  /** The game: whatever the view requires now (story, round, results), else the hub. */
+  play(keeperId: string): ScreenEntry;
+  map(keeperId: string): ScreenEntry;
+  region(keeperId: string, regionId: string): ScreenEntry;
+  level(keeperId: string, levelId: string): ScreenEntry;
   parent(tab?: ParentTab, keeperId?: string): ScreenEntry;
   recovery(problem: RecoveryRequired): ScreenEntry;
   error(error: unknown): ScreenEntry;
@@ -84,12 +103,17 @@ export interface App {
   readonly audio: GameAudio;
   readonly speech: ReadAloud;
   readonly offline: OfflineInstaller;
-  readonly game: PreviewGame;
+  /** The game definition and its content strings, set once at boot by `useContent`. */
+  readonly game: DvGame;
+  readonly text: ContentText;
+  useContent(game: DvGame, text: ContentText): void;
   screens: Screens;
   active(): ActiveKeeper | null;
   /** Open a keeper's session (closing any other); throws `RecoveryRequired`. */
   openKeeper(keeperId: string): Promise<ActiveKeeper>;
   closeKeeper(): Promise<void>;
+  /** Show what the game needs next: back to the keeper's play screen, rebuilt from the view. */
+  continueGame(keeperId: string): Promise<void>;
   /** Apply a keeper's presentation preferences, or the defaults with null. */
   applyPresentation(preferences: ChildPreferences | null): void;
   /** Read text aloud with the active keeper's voice, if read-aloud is available and on. */
@@ -106,7 +130,6 @@ export interface App {
 export interface AppOptions {
   readonly env: AppEnvironment;
   readonly root: HTMLElement;
-  readonly game: PreviewGame;
   readonly audioMap: AudioMap;
   readonly storage?: SaveStorage;
 }
@@ -136,6 +159,12 @@ export function createApp(options: AppOptions): App {
   const storage = options.storage ?? new IndexedDbSaveStorage(SAVE_DATABASE);
   const family = new FamilyStore(storage);
   const offline = createOfflineInstaller({ baseUrl: env.baseUrl, revision: env.revision });
+
+  let content: { readonly game: DvGame; readonly text: ContentText } | null = null;
+  const requireContent = (): { readonly game: DvGame; readonly text: ContentText } => {
+    if (!content) throw new Error('The game content is not loaded.');
+    return content;
+  };
 
   type OpenKeeper = ActiveKeeper & { release(): Promise<void> };
   let active: OpenKeeper | null = null;
@@ -201,7 +230,7 @@ export function createApp(options: AppOptions): App {
     const task = (async (): Promise<OpenKeeper> => {
       const preferences = new PreferencesStore(storage, keeper.id);
       await preferences.open();
-      const game = await openGameSession(storage, options.game, {
+      const game = await openGameSession(storage, requireContent().game, {
         id: keeper.id,
         seed: profileSeed(keeper.id),
       });
@@ -218,14 +247,31 @@ export function createApp(options: AppOptions): App {
           void commands.resume(reason).catch((error) => app.reportError(error));
         },
       );
+      const inbox: GameEvent[] = [];
+      const events: EventInbox = {
+        take(types) {
+          const wanted = (event: GameEvent): boolean => !types || types.includes(event.type);
+          const taken = inbox.filter(wanted);
+          for (let index = inbox.length - 1; index >= 0; index--) {
+            if (wanted(inbox[index]!)) inbox.splice(index, 1);
+          }
+          return taken;
+        },
+      };
       const unsubscribeCommits = game.host.subscribeCommits((commit) => {
-        for (const event of commit.events) audio.cue(event.type, cueContext(event.data));
+        for (const event of commit.events) {
+          audio.cue(event.type, cueContext(event.data));
+          inbox.push(event as unknown as GameEvent);
+          if (inbox.length > MAX_INBOX) inbox.shift();
+        }
       });
       const unsubscribeRestore = game.host.subscribe((_view, reason) => {
-        if (reason === 'restore') {
-          audio.clear();
-          stopSpeech();
-        }
+        if (reason !== 'restore') return;
+        audio.clear();
+        stopSpeech();
+        inbox.length = 0;
+        // The play screen shows what the restored game needs, never what it showed before.
+        if (router.currentKey() === playKey(keeper.id)) void router.refresh();
       });
       const unsubscribePreferences = preferences.subscribe((value) => applyPresentation(value));
       applyPresentation(preferences.current());
@@ -234,6 +280,7 @@ export function createApp(options: AppOptions): App {
         game,
         commands,
         preferences,
+        events,
         async release() {
           unsubscribePreferences();
           unsubscribeRestore();
@@ -273,7 +320,9 @@ export function createApp(options: AppOptions): App {
       audio.cue('ui.blocked');
       if (code === 'paused') toasts.show(t('toast.paused'));
       else if (code !== 'checkpoint-blocked' && code !== 'busy') {
-        toasts.show(t('toast.failed'), { tone: 'warning' });
+        // Rule rejections have child-friendly lines by code; diagnostics never reach the screen.
+        const key = `error.${code}`;
+        toasts.show(hasMessage(key) ? t(key) : t('toast.failed'), { tone: 'warning' });
       }
       return;
     }
@@ -291,11 +340,22 @@ export function createApp(options: AppOptions): App {
     audio,
     speech,
     offline,
-    game: options.game,
+    get game() {
+      return requireContent().game;
+    },
+    get text() {
+      return requireContent().text;
+    },
+    useContent(game, text) {
+      content = { game, text };
+    },
     screens: undefined as unknown as Screens,
     active: () => active,
     openKeeper,
     closeKeeper,
+    async continueGame(keeperId) {
+      if (!(await router.backTo(playKey(keeperId)))) await router.push(app.screens.play(keeperId));
+    },
     applyPresentation,
     speak(text) {
       const current = active?.preferences.current();

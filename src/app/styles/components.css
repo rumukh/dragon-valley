@@ -376,6 +376,12 @@
   margin-inline: auto;
 }
 
+/* Four choices sit two by two, so none is left alone on a row. */
+.dv-tiles:has(> :nth-child(4):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 18em);
+}
+
 .dv-tile {
   position: relative;
   display: grid;
@@ -826,9 +832,20 @@
 }
 
 .dv-feedback[data-kind='miss'] {
+  flex-wrap: wrap;
   color: var(--dv-miss-deep);
   background: var(--dv-miss-soft);
   border-color: var(--dv-miss);
+}
+
+/* After a miss: the badge and "Almost!" on one line, the right fact below, then the button. */
+.dv-feedback[data-kind='miss'] .dv-feedback__fact,
+.dv-feedback[data-kind='miss'] .dv-button {
+  flex-basis: 100%;
+}
+
+.dv-feedback[data-kind='miss'] .dv-button {
+  flex: 0 0 auto;
 }
 
 .dv-feedback[data-kind='info'] {
