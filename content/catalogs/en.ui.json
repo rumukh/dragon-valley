@@ -164,6 +164,7 @@
   "recovery.family": "The list of keepers on this device could not be opened.",
   "recovery.game": "{name}'s saved game could not be opened.",
   "recovery.preferences": "{name}'s settings could not be opened.",
+  "recovery.content": "It was saved with an older version of the game, which this device could not load. Connect to the internet, then try opening it again.",
   "recovery.unchanged": "Nothing was changed or deleted.",
   "recovery.unavailable": "The browser is not letting Dragon Valley use its storage. Private windows often do this.",
   "recovery.export": "Save the stored data to a file",

@@ -558,7 +558,7 @@ const PAINTERS: {
 export function minigameScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
   const host = active.game.host;
-  const data = app.game.content.data;
+  const data = active.game.content().data;
   const first = minigameRound(host.getView())!;
   const kind = first.current?.kind;
   const levelId = first.source.kind === 'level' ? first.source.level : null;

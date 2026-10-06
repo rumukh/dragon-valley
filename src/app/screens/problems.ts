@@ -67,7 +67,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   const text = app.text;
   const host = active.game.host;
   const keeperId = active.keeper.id;
-  const data = app.game.content.data;
+  const data = active.game.content().data;
   const first = problemRound(host.getView())!;
   const activity = first.activity;
   const placement = activity === 'placement';

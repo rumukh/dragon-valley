@@ -10,9 +10,11 @@
  *   throwaway probe host with the exact content revision it pinned. Only then does the real
  *   host restore it, passing `durableRevision` because the record was read back from storage.
  * - Anything that fails becomes `RecoveryRequired`: the original bytes stay untouched.
- * - Old saves restore with their own content pack; `activateLatestContent()` moves them to the
- *   newest pack at a safe boundary (the hub, never mid-round) through the adapter's own
- *   `activateContent` migration.
+ * - Old saves restore with their own content pack: one the definition holds, or one fetched on
+ *   demand (`loadHistory`: the build's `content/history/<revision>.json`). Then
+ *   `activateLatestContent()` moves them to the newest pack at a safe boundary (the hub, never
+ *   mid-round) through the adapter's own `activateContent` migration. A pinned pack that cannot
+ *   be fetched, or does not match the save, leaves the save untouched for recovery.
  */
 import { createSaveCheckpoint } from '@aegis/browser/checkpoint';
 import { exportSave, importSave, SaveService } from '@aegis/browser/save';
@@ -21,11 +23,14 @@ import { createRuntimeHost, isRuntimeSnapshot, requireValue, RuntimeFault } from
 import type { ContentPack, RuntimeAdapter, RuntimeHost, RuntimeSnapshot } from '@aegis/runtime';
 import { deriveSaveIndicator } from './save-status';
 import type { SaveIndicator } from './save-status';
-import { recoveryFor } from './recovery';
+import { ContentUnavailable, recoveryFor } from './recovery';
 
 export const ENGINE_ID = 'aegis-runtime';
 export const ENGINE_SNAPSHOT_VERSION = 1;
 export const ENGINE_REVISION = 'runtime-1';
+
+/** A revision a shipped pack can be named by: `content/history/<revision>.json`. */
+export const SHIPPED_REVISION = /^(?!.*\.\.)[0-9A-Za-z][0-9A-Za-z._+-]{0,63}$/;
 
 export interface GameDefinition<S, A, V, C> {
   /** The save namespace, e.g. `dragon-valley`. */
@@ -33,8 +38,13 @@ export interface GameDefinition<S, A, V, C> {
   readonly adapter: RuntimeAdapter<S, A, V, C>;
   /** The newest content pack; new games start on it. */
   readonly content: ContentPack<C>;
-  /** Every older shipped pack, so a save restores with the exact revision it pinned. */
+  /** Older shipped packs at hand, so a save restores with the exact revision it pinned. */
   readonly history?: readonly ContentPack<C>[];
+  /**
+   * An older shipped pack, fetched when a save pins a revision that is not at hand; it rejects
+   * when the build has no such pack. Without it, only `content` and `history` can restore.
+   */
+  readonly loadHistory?: (revision: string) => Promise<ContentPack<C>>;
 }
 
 export interface GameProfile {
@@ -49,6 +59,8 @@ export interface GameSession<S, A, V, C> {
   readonly policy: SavePolicy<RuntimeSnapshot, null>;
   indicator(): SaveIndicator;
   subscribeIndicator(listener: (indicator: SaveIndicator) => void): () => void;
+  /** The content pack the game is on now: an older save's own pack until it is upgraded. */
+  content(): ContentPack<C>;
   /** The acknowledged stored envelope, or undefined when nothing was saved yet. */
   storedText(): Promise<string | undefined>;
   /** Validate and install a save envelope (from a backup), then store it durably. */
@@ -67,39 +79,60 @@ export function gamePolicy<S, A, V, C>(
   profileId: string,
 ): SavePolicy<RuntimeSnapshot, null> {
   const known = new Set(packs(game).map((pack) => pack.revision));
+  const fetchable = game.loadHistory !== undefined;
   return {
     gameId: game.gameId,
     profileId,
     schemaVersion: game.adapter.stateVersion,
     engineId: ENGINE_ID,
     engineSnapshotVersion: ENGINE_SNAPSHOT_VERSION,
-    acceptsContent: (revision) => known.has(revision),
+    // A revision the build may still have is checked for real once the save is validated.
+    acceptsContent: (revision) =>
+      known.has(revision) || (fetchable && SHIPPED_REVISION.test(revision)),
     validateState: (value) => isRuntimeSnapshot(value),
     validateResume: (value): value is null => value === null,
     isCurrentState: isRuntimeSnapshot,
   };
 }
 
-function packFor<S, A, V, C>(
+/** The pack a save pins: one at hand, or the build's archived copy, checked to be that pack. */
+export async function packFor<S, A, V, C>(
   game: GameDefinition<S, A, V, C>,
   revision: string,
-): ContentPack<C> | undefined {
-  return packs(game).find((pack) => pack.revision === revision);
+): Promise<ContentPack<C>> {
+  const held = packs(game).find((pack) => pack.revision === revision);
+  if (held) return held;
+  if (!game.loadHistory || !SHIPPED_REVISION.test(revision)) {
+    throw new ContentUnavailable(revision);
+  }
+  let pack: ContentPack<C>;
+  try {
+    pack = await game.loadHistory(revision);
+  } catch (cause) {
+    throw new ContentUnavailable(revision, { cause });
+  }
+  if (pack.id !== game.content.id || pack.revision !== revision) {
+    throw new ContentUnavailable(revision);
+  }
+  return pack;
 }
 
-/** Restore a snapshot into a throwaway host: the full adapter, content and reference checks. */
+/**
+ * Restore a snapshot into a throwaway host with the pack it pinned: the full adapter, content
+ * and reference checks. Resolves to that pack.
+ */
 export async function validateSnapshot<S, A, V, C>(
   game: GameDefinition<S, A, V, C>,
   snapshot: RuntimeSnapshot,
-): Promise<void> {
-  const content = packFor(game, snapshot.content.revision);
-  if (!content) throw new RangeError('The save pins a content revision this build lacks.');
+): Promise<ContentPack<C>> {
+  const content = await packFor(game, snapshot.content.revision);
   const probe = createRuntimeHost({ adapter: game.adapter, content, seed: 'probe' });
   try {
     requireValue(await probe.restore(snapshot));
   } finally {
     await probe.dispose();
   }
+  return content;
 }
 
 export async function openGameSession<S, A, V, C>(
@@ -109,11 +142,14 @@ export async function openGameSession<S, A, V, C>(
 ): Promise<GameSession<S, A, V, C>> {
   const policy = gamePolicy(game, profile.id);
   const saves = new SaveService<RuntimeSnapshot, null>(storage, policy);
-  const validate = (snapshot: RuntimeSnapshot): Promise<void> => validateSnapshot(game, snapshot);
+  const validate = async (snapshot: RuntimeSnapshot): Promise<void> => {
+    await validateSnapshot(game, snapshot);
+  };
   let saved;
+  let start = game.content;
   try {
     saved = await saves.load();
-    if (saved) await validate(saved.state);
+    if (saved) start = await validateSnapshot(game, saved.state);
   } catch (cause) {
     throw await recoveryFor('game', storage, policy, cause, validate);
   }
@@ -127,17 +163,22 @@ export async function openGameSession<S, A, V, C>(
     engine: { id: ENGINE_ID, snapshotVersion: ENGINE_SNAPSHOT_VERSION, revision: ENGINE_REVISION },
     resume: null,
   }));
-  const start = saved ? packFor(game, saved.state.content.revision) : game.content;
-  if (!start) throw new RangeError('The validated save lost its content pack.');
   const host = createRuntimeHost({
     adapter: game.adapter,
     content: start,
     seed: profile.seed,
     checkpoint,
   });
-  for (const pack of packs(game)) {
-    if (pack.revision !== start.revision) requireValue(host.stageContent(pack));
-  }
+  /** Every pack the host holds, by revision: the one it started on and those staged beside it. */
+  const installed = new Map<string, ContentPack<C>>([[start.revision, start]]);
+  const install = (pack: ContentPack<C>): ContentPack<C> => {
+    const held = installed.get(pack.revision);
+    if (held) return held;
+    requireValue(host.stageContent(pack));
+    installed.set(pack.revision, pack);
+    return pack;
+  };
+  for (const pack of packs(game)) install(pack);
   if (saved) {
     const restored = await host.restore(saved.state, { durableRevision: saved.state.revision });
     if (!restored.ok) {
@@ -171,6 +212,9 @@ export async function openGameSession<S, A, V, C>(
       listener(indicator());
       return () => listeners.delete(listener);
     },
+    content() {
+      return installed.get(host.inspect().content.revision) ?? game.content;
+    },
     async storedText() {
       const status = host.getStatus();
       if (status.durableRevision === null) return undefined;
@@ -182,7 +226,7 @@ export async function openGameSession<S, A, V, C>(
     },
     async importEnvelope(text) {
       const candidate = importSave(text, policy);
-      await validate(candidate.state);
+      install(await validateSnapshot(game, candidate.state));
       requireValue(await host.restore(candidate.state));
       requireValue(await host.retryCheckpoint());
     },
@@ -190,8 +234,7 @@ export async function openGameSession<S, A, V, C>(
       if (host.inspect().content.revision === game.content.revision) return false;
       const status = host.getStatus();
       if (status.pendingAction !== null || status.checkpoint !== 'idle') return false;
-      const staged = requireValue(host.stageContent(game.content));
-      const result = await host.activateContent(staged, 'boundary');
+      const result = await host.activateContent(install(game.content), 'boundary');
       if (result.ok) return true;
       if (result.error.code === 'unsafe-boundary' || result.error.code === 'pending-jobs') {
         return false;

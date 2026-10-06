@@ -301,7 +301,7 @@ export function levelScreen(app: App, keeperId: string, levelId: string): Screen
       const active = await app.openKeeper(keeperId);
       const view = active.game.host.getView();
       const found = findLevel(view, levelId);
-      const content = app.game.content.data.levels.find((level) => level.id === levelId);
+      const content = active.game.content().data.levels.find((level) => level.id === levelId);
       if (!found || !content) throw new Error(`Unknown level ${levelId}.`);
       const { level, region } = found;
       const run = view.run;
@@ -364,7 +364,7 @@ export function levelScreen(app: App, keeperId: string, levelId: string): Screen
         'main',
         { className: 'dv-level', testId: 'screen-level', dataset: { level: levelId } },
         backdrop(
-          app.game.content.data.regions.find((r) => r.id === region.id)?.background ??
+          active.game.content().data.regions.find((r) => r.id === region.id)?.background ??
             'sunny-meadow',
         ),
         topBar({

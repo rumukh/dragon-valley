@@ -124,7 +124,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       case 'snack':
         return t('hub.adventure.snack');
       case 'minigame': {
-        const level = app.game.content.data.levels.find((l) => l.id === adventure.level);
+        const level = active.game.content().data.levels.find((l) => l.id === adventure.level);
         const kind = level?.activities[adventure.activity]?.kind;
         const found = findLevel(current, adventure.level);
         return t('hub.adventure.minigame', {
@@ -190,7 +190,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
     const opened = active.events.take(['gift.opened']).at(-1);
     if (opened?.type !== 'gift.opened') return;
     const grant = opened.data.grant;
-    const content = app.game.content.data;
+    const content = active.game.content().data;
     await openModal<null>(app.kit, {
       label: t('gift.heading'),
       testId: 'gift-dialog',
