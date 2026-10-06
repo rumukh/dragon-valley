@@ -5,8 +5,8 @@
  * cannot be fetched, the save waits untouched on the recovery screen, and "Try opening again"
  * opens it once the pack is back in reach.
  *
- * The site serves its pack under a newer revision, and S2b's Region 1 slice pack (the deployed
- * `1.0.0`) as the archived one; the keeper loads S2b's real slice save as a backup file.
+ * The keeper loads S2b's real save of the deployed Region 1 slice (content 1.0.0) as a backup;
+ * the build serves the current pack and the archived 1.0.0 one as shipped.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -14,6 +14,7 @@ import type { Page, TestInfo } from '@playwright/test';
 import { expect, test } from './support/fixtures';
 import {
   boot,
+  bootStatus,
   closeGrownUps,
   createFirstKeeper,
   expectCoins,
@@ -27,24 +28,20 @@ import {
 } from './support/app';
 import { gameKey, readHistory } from './support/storage';
 
-const NEWER = '1.99.0';
+const ARCHIVED = '1.0.0';
 
-interface Slice {
-  readonly pack: string;
-  readonly backup: string;
-  readonly coins: number;
-}
-
-function slice(testInfo: TestInfo): Slice {
+/** S2b's slice save as a backup file, and the coins it holds. */
+function sliceBackup(testInfo: TestInfo): { readonly text: string; readonly coins: number } {
   const root = testInfo.config.configFile ? dirname(testInfo.config.configFile) : process.cwd();
-  const fixtures = join(root, 'test', 'migration', 'fixtures');
-  const snapshot = JSON.parse(readFileSync(join(fixtures, 'slice-save.json'), 'utf8'));
-  const envelope = {
+  const file = join(root, 'test', 'migration', 'fixtures', 'slice-save.json');
+  const snapshot = JSON.parse(readFileSync(file, 'utf8'));
+  expect(snapshot.content.revision).toBe(ARCHIVED);
+  const game = {
     format: 'aegis.save',
     formatVersion: 1,
     gameId: 'dragon-valley',
     profileId: 'slice',
-    contentRevision: snapshot.content.revision,
+    contentRevision: ARCHIVED,
     schemaVersion: snapshot.stateVersion,
     engine: { id: 'aegis-runtime', snapshotVersion: 1, revision: 'runtime-1' },
     revision: 1,
@@ -55,28 +52,13 @@ function slice(testInfo: TestInfo): Slice {
     format: 'dragon-valley-backup',
     version: 1,
     keeper: { name: 'Slice', avatar: 'keeper-3' },
-    game: envelope,
+    game,
     preferences: null,
   };
   return {
-    pack: readFileSync(join(fixtures, 'slice.content.json'), 'utf8'),
-    backup: JSON.stringify(backup),
+    text: JSON.stringify(backup),
     coins: snapshot.world.resources['aegis.runtime.state'].coins,
   };
-}
-
-/** The site after an update: its pack under a newer revision, the slice pack archived. */
-async function serveUpdate(page: Page, pack: string, archived: () => boolean): Promise<void> {
-  await page.route('**/content/history/1.0.0.json', (route) =>
-    archived()
-      ? route.fulfill({ status: 200, contentType: 'application/json', body: pack })
-      : route.fulfill({ status: 404, contentType: 'text/plain', body: 'Not found' }),
-  );
-  await page.route('**/content/dragon-valley.content.json', async (route) => {
-    const response = await route.fetch();
-    const current = await response.json();
-    await route.fulfill({ response, json: { ...current, revision: NEWER } });
-  });
 }
 
 /** Load a backup file into keeper 1 through the grown-ups' area. */
@@ -92,36 +74,42 @@ async function loadBackup(page: Page, text: string, name: string): Promise<void>
   await closeGrownUps(page);
 }
 
+/** The content revision keeper 1's stored save pins. */
 async function pinnedRevision(page: Page): Promise<string> {
   const history = await readHistory(page, await gameKey(page, 'profile-1'));
   return JSON.parse(history!.current!.payload).contentRevision as string;
 }
 
+async function currentRevision(page: Page): Promise<string> {
+  const revision = await bootStatus(page).getAttribute('data-content-revision');
+  expect(revision, 'the build ships a pack newer than the archived one').not.toBe(ARCHIVED);
+  return revision!;
+}
+
 test('a save from before an update opens on its own pack and moves to the newest at the hub', async ({
   page,
 }, testInfo) => {
-  const { pack, backup, coins } = slice(testInfo);
-  await serveUpdate(page, pack, () => true);
+  const backup = sliceBackup(testInfo);
   await boot(page);
-  await expect(page.getByTestId('boot-status')).toHaveAttribute('data-content-revision', NEWER);
+  const current = await currentRevision(page);
   await createFirstKeeper(page, { name: 'Ema' });
   await leaveHub(page);
 
-  await loadBackup(page, backup, 'Ema');
-  expect(await pinnedRevision(page), 'the backup keeps the pack it was played with').toBe('1.0.0');
+  await loadBackup(page, backup.text, 'Ema');
+  expect(await pinnedRevision(page), 'the backup keeps the pack it was played with').toBe(ARCHIVED);
 
   await keeperCard(page, 1).click();
   await expectHub(page, 'Ema');
-  await expectCoins(page, coins, 'the slice save keeps its coins');
+  await expectCoins(page, backup.coins, 'the slice save keeps its coins');
   await expect
     .poll(() => pinnedRevision(page), { message: 'moved to the newest pack' })
-    .toBe(NEWER);
+    .toBe(current);
 
   await reload(page);
   await playFromTitle(page);
   await keeperCard(page, 1).click();
   await expectHub(page, 'Ema');
-  await expectCoins(page, coins);
+  await expectCoins(page, backup.coins);
 });
 
 test('a save whose archived pack is out of reach waits for a grown-up, then opens', async ({
@@ -135,26 +123,31 @@ test('a save whose archived pack is out of reach waits for a grown-up, then open
       'the archived pack is out of reach on purpose',
     );
   }
-  const { pack, backup } = slice(testInfo);
-  let archived = true;
-  await serveUpdate(page, pack, () => archived);
+  const backup = sliceBackup(testInfo);
+  let reachable = true;
+  await page.route(`**/content/history/${ARCHIVED}.json`, (route) =>
+    reachable
+      ? route.continue()
+      : route.fulfill({ status: 404, contentType: 'text/plain', body: 'Not found' }),
+  );
   await boot(page);
+  const current = await currentRevision(page);
   await createFirstKeeper(page, { name: 'Bo' });
   await leaveHub(page);
-  await loadBackup(page, backup, 'Bo');
+  await loadBackup(page, backup.text, 'Bo');
 
-  archived = false;
+  reachable = false;
   await reload(page);
   await playFromTitle(page);
   await keeperCard(page, 1).click();
   await expectScreen(page, 'recovery');
   await expect(page.getByTestId('recovery-content')).toBeVisible();
-  expect(await pinnedRevision(page), 'nothing was changed').toBe('1.0.0');
+  expect(await pinnedRevision(page), 'nothing was changed').toBe(ARCHIVED);
 
-  archived = true;
+  reachable = true;
   await page.getByTestId('recovery-retry').click();
   await expectScreen(page, 'keepers');
   await keeperCard(page, 1).click();
   await expectHub(page, 'Bo');
-  await expect.poll(() => pinnedRevision(page)).toBe(NEWER);
+  await expect.poll(() => pinnedRevision(page)).toBe(current);
 });

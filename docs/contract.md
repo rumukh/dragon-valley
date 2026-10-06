@@ -299,29 +299,35 @@ compose). Sound IDs are not in content: the shell maps events to sounds from S5'
 
 - A save pins the exact pack it was played with: pack ID, revision and content hash (the runtime
   refuses to restore a save against any other pack).
-- **Every content change merged after a release bumps `revision`** (semver-like: patch for balance or
-  text, minor for new levels or regions). Before the first release the pack stays `1.0.0`.
-- **Every shipped revision is archived** byte-for-byte as `content/history/<revision>.json` and
-  shipped with the site. A revision string is never reused for different content (tests and the
-  validator enforce it).
+- **Every content change merged to `main` bumps `revision`** (MAJOR.MINOR.PATCH: patch for balance
+  or text, minor for new levels or regions) with `npm run content:bump -- <revision>`
+  ([content.md §1](content.md#1-files-and-revisions)): `main` deploys, so its pack is what saves
+  pin. The Region 1 slice went live as `1.0.0` (main `373a5d2`); v1 is `1.1.0`.
+- **Every deployed revision is archived** byte-for-byte as `content/history/<revision>.json` and
+  shipped with the site. A revision string is never reused for different content: every
+  revision's content hash is pinned (`REVISIONS` in `test/unit/contract/content.test.ts`), so
+  changed content under a pinned revision, or a changed archive, fails the tests, and the validator
+  refuses a current revision archived with other content. Every catalog key an archived pack uses
+  stays in the catalog (the validator checks).
 - **The schema only grows compatibly.** Every archived pack must stay valid under the current
   `contentRegistration`, so `CONTENT_SCHEMA_VERSION` stays 1 and changes are limited to new union
   variants (new activity kinds, generators, criteria) and new optional fields
   (`objectWithOptional`). Anything else needs a coordinator decision and a history plan.
 - **Content IDs are append-only.** New content adds regions, levels, skills, dragons, cosmetics and
   stickers; it does not rename or delete them.
-- **Upgrade path** (plan §3.4): create the host with the save's archived pack, `restore` the save,
-  `stageContent(current)`, then at the hub (`canActivateContent`: no round, no pending beat, no
-  pending jobs) `activateContent(current, 'boundary')`. The adapter's `activateContent` carries
-  progress forward; with append-only IDs v1 needs no transformation, and a revision that retires an
-  ID must migrate the state there. `test/migration/content-1.1.test.ts` proves this: a 1.0 save
-  restored in a new process with its pack, a 1.1 fixture pack (`test/migration/fixtures/`, an
-  island with one level) refused mid-round and activated at the hub with all progress carried
-  forward, and the old save still restoring against its own revision.
-  `test/migration/slice-save.test.ts` does the same with a real save made by the deployed Region 1
-  slice's rules on its pack (main `373a5d2`, fixtures `slice-save.json` and `slice.content.json`):
-  the current rules restore it exactly as saved, and it moves to the v1 content at the hub, which
-  needs a new revision (a different pack under the same revision is refused).
+- **Upgrade path** (plan §3.4), as the shell does it (`src/app/persistence/game-session.ts`):
+  create the host with the save's pack (the archived one for an old save), stage the current pack,
+  `restore` the save, then at the hub (`canActivateContent`: no round, no pending beat, no pending
+  jobs) `activateContent(current, 'boundary')`. The adapter's `activateContent` carries progress
+  forward; with append-only IDs no transformation is needed, and a revision that retires an ID
+  must migrate the state there. `test/migration/slice-save.test.ts` proves it with a real save made
+  by the deployed Region 1 slice's rules on its pack (fixture `slice-save.json`): refused by the
+  current pack alone, restored exactly as saved with `content/history/1.0.0.json`, and moved to
+  `1.1.0` at the hub with all progress unchanged (the v1 content under `1.0.0` is refused as
+  `content-revision-reused`). `test/migration/next-revision.test.ts` does the same for the next
+  release (a fixture island under the next minor revision, `test/migration/fixtures/island.json`):
+  refused mid-round, activated at the hub with all progress carried forward, an old save still
+  restoring against its own revision.
 - **State compatibility.** New state fields are optional (`objectWithOptional`) with a default
   that old saves get by omission, so every save keeps restoring under newer rules without bumping
   `STATE_VERSION` (the day counters `daily.levels` and `daily.minigames` are the first such fields).

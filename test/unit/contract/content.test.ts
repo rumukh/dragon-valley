@@ -8,7 +8,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { parseContentJson, validateContent } from '@aegis/runtime';
+import { parseContentJson, validateContent, dataHash } from '@aegis/runtime';
 import type { RuntimeDiagnostic } from '@aegis/runtime';
 import {
   CANONICAL_BOSS_IDS,
@@ -38,6 +38,17 @@ interface Pack {
 }
 const fresh = (): Pack => JSON.parse(packText);
 
+/**
+ * Every content revision merged to main, with the content hash a save made on it pins (the
+ * runtime's `dataHash` of the pack; literal values, docs/content.md §1). An archived pack never
+ * changes, and a content change needs a revision of its own: `npm run content:bump -- <revision>`
+ * archives the deployed pack, then pin the new revision here.
+ */
+const REVISIONS: Readonly<Record<string, string>> = {
+  '1.0.0': 'af91e14b281b7452', // the Region 1 slice, deployed from main 373a5d2
+  '1.1.0': 'e2acbc7228348abd', // v1: the nine regions
+};
+
 function diagnostics(pack: Pack): readonly RuntimeDiagnostic[] {
   const outcome = validateContent(pack, contentRegistration, 'test.json');
   return outcome.ok ? [] : outcome.error.diagnostics;
@@ -52,12 +63,12 @@ function expectDiagnostic(pack: Pack, code: string, recordId?: string): void {
 }
 
 describe('the sample content pack', () => {
-  it('validates under the registration and is the 1.0.0 dragon-valley pack', () => {
+  it('validates under the registration and is a pinned revision of the dragon-valley pack', () => {
     const outcome = parseContentJson(packText, contentRegistration, 'dragon-valley.content.json');
     expect(outcome.ok, JSON.stringify(outcome.ok ? null : outcome.error.diagnostics)).toBe(true);
     if (!outcome.ok) return;
     expect(outcome.value.id).toBe(CONTENT_PACK_ID);
-    expect(outcome.value.revision).toBe('1.0.0');
+    expect(Object.keys(REVISIONS)).toContain(outcome.value.revision);
     expect(outcome.value.schemaVersion).toBe(1);
   });
 
@@ -312,11 +323,52 @@ describe('cross-file references', () => {
 describe('content history', () => {
   const historyDir = join(root, 'content', 'history');
   const shipped = readdirSync(historyDir).filter((name) => name.endsWith('.json'));
+  const archived = (name: string): Pack => JSON.parse(readFileSync(join(historyDir, name), 'utf8'));
+  const order = (revision: string): number[] => revision.split('.').map(Number);
+  const older = (a: string, b: string): boolean => {
+    const [x, y] = [order(a), order(b)];
+    const at = x.findIndex((part, i) => part !== y[i]);
+    return at >= 0 && x[at]! < y[at]!;
+  };
 
-  it('archives exactly the shipped revisions (none before the v1 release)', () => {
-    // The release-v1 work copies the shipped pack to content/history/1.0.0.json and updates
-    // this list; every later content release adds its revision here (docs/contract.md).
-    expect(shipped).toEqual([]);
+  it('archives every revision merged to main before the current one', () => {
+    const current = fresh().revision;
+    expect([...shipped].sort()).toEqual(
+      Object.keys(REVISIONS)
+        .filter((revision) => revision !== current)
+        .map((revision) => `${revision}.json`)
+        .sort(),
+    );
+    for (const name of shipped) {
+      expect(older(archived(name).revision, current), `${name} is older than ${current}`).toBe(
+        true,
+      );
+    }
+  });
+
+  it('pins the current pack to its revision: changed content needs a new revision', () => {
+    const current = fresh();
+    const hash = dataHash(current);
+    expect(
+      hash,
+      `the content of revision ${current.revision} is new (hash ${hash}): run ` +
+        '`npm run content:bump -- <next revision>` and pin the new revision and its hash in ' +
+        'REVISIONS (docs/content.md §1)',
+    ).toBe(REVISIONS[current.revision]);
+  });
+
+  it('never changes an archived pack: saves made on it pin its hash', () => {
+    for (const name of shipped) {
+      const pack = archived(name);
+      expect(dataHash(pack), name).toBe(REVISIONS[pack.revision]);
+    }
+  });
+
+  it('keeps every catalog key an archived pack uses: a restored old save still shows them', () => {
+    for (const name of shipped) {
+      const lost = collectCatalogKeys(archived(name).data).filter(({ key }) => !(key in catalog));
+      expect(lost, name).toEqual([]);
+    }
   });
 
   it('keeps every shipped pack valid under the current schema, named by its revision', () => {

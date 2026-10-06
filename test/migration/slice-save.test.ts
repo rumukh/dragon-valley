@@ -1,12 +1,14 @@
 /**
  * A save from the deployed Region 1 slice: main 373a5d2's rules on its pack (content 1.0.0, Sunny
- * Meadow only), kept as fixtures (`slice-save.json`, the snapshot of its last commit; and
- * `slice.content.json`, the pack byte for byte; made by playing that build with the trace harness).
+ * Meadow only), made by playing that build with the trace harness (`fixtures/slice-save.json`,
+ * the snapshot of its last commit). Its pack ships as `content/history/1.0.0.json`, byte for byte.
  *
- * The v1 rules must restore it with its own pack exactly as saved, and move it to the v1 content
- * at the hub with all progress carried forward. Its second day began under the slice, before the
- * day's level and minigame counters existed: they count from 0. The v1 content needs a revision of
- * its own: a pack with the same revision and different content can never be installed beside it.
+ * The current rules restore it the way the shell does (src/app/persistence/game-session.ts): a
+ * host on the save's own pack with the current pack staged beside it, then, at the hub, the
+ * current pack activated. Exactly as saved, then with every bit of progress carried forward. Its
+ * second day began under the slice, before the day's level and minigame counters existed: they
+ * count from 0. The v1 content needed a revision of its own: a pack with the same revision and
+ * different content can never be installed beside the old one.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -20,21 +22,16 @@ import { PERFECT, Player, loadPack, root } from '../traces/support';
 // room on a busy machine (Vitest's default is 60 s per test).
 vi.setConfig({ testTimeout: 300_000 });
 
-const fixture = (name: string) => join('test', 'migration', 'fixtures', name);
-const slice = loadPack(fixture('slice.content.json'));
+const slice = loadPack(join('content', 'history', '1.0.0.json'));
 const save = JSON.parse(
-  readFileSync(join(root, fixture('slice-save.json')), 'utf8'),
+  readFileSync(join(root, 'test', 'migration', 'fixtures', 'slice-save.json'), 'utf8'),
 ) as RuntimeSnapshot;
 const current = loadPack();
-/** The v1 content under a revision of its own, as a content change after a deploy needs. */
-const v1: ContentPack<ContentData> = {
-  ...(JSON.parse(JSON.stringify(current)) as ContentPack<ContentData>),
-  revision: '1.1.0',
-};
 
-/** A player whose host restored the slice save (with the slice's pack installed). */
+/** A player whose host restored the slice save as the shell does: its own pack, current staged. */
 async function restored(): Promise<Player> {
   const player = new Player(PERFECT, 'slice', undefined, slice);
+  expect(player.host.stageContent(current).ok, 'the current pack staged beside it').toBe(true);
   const outcome = await player.host.restore(save);
   expect(outcome.ok, outcome.ok ? '' : outcome.error.code).toBe(true);
   player.turn = player.host.inspect().turn;
@@ -42,13 +39,29 @@ async function restored(): Promise<Player> {
 }
 
 describe('a save from the deployed Region 1 slice', () => {
-  it('restores under the v1 rules with its own pack, exactly as saved', async () => {
-    expect(save.content).toMatchObject({ id: 'dragon-valley', revision: '1.0.0' });
+  it('restores under the current rules with its archived pack, exactly as saved', async () => {
+    expect(save.content).toMatchObject({
+      id: 'dragon-valley',
+      revision: '1.0.0',
+      hash: 'af91e14b281b7452',
+    });
+    expect(dataHash(slice), 'content/history/1.0.0.json is the pack it was saved with').toBe(
+      'af91e14b281b7452',
+    );
     expect(
       slice.data.regions.map((r) => r.id),
       'the slice is Sunny Meadow only',
     ).toEqual(['sunny-meadow']);
+
+    const withoutHistory = new Player(PERFECT, 'slice');
+    const refused = await withoutHistory.host.restore(save);
+    expect(refused.ok ? 'restored' : refused.error.code, 'the current pack alone').toBe(
+      'incompatible-save',
+    );
+    await withoutHistory.dispose();
+
     const player = await restored();
+    expect(player.host.inspect().content.revision).toBe('1.0.0');
     expect(player.host.hash(), 'the restored game is the saved game').toBe(dataHash(save));
     const state = player.state();
     expect(state.daily, 'its day began before the day counters existed').not.toHaveProperty(
@@ -67,15 +80,21 @@ describe('a save from the deployed Region 1 slice', () => {
     await player.dispose();
   });
 
-  it('moves to the v1 content at the hub with every bit of progress, under a new revision', async () => {
+  it('moves to content 1.1.0 at the hub with every bit of progress, as the shell does', async () => {
     const player = await restored();
     const before = player.state();
-    const reused = player.host.stageContent(current);
-    expect(reused.ok ? 'staged' : reused.error.code, 'same revision, different content').toBe(
+    const unbumped: ContentPack<ContentData> = {
+      ...(JSON.parse(JSON.stringify(current)) as ContentPack<ContentData>),
+      revision: '1.0.0',
+    };
+    const reused = player.host.stageContent(unbumped);
+    expect(reused.ok ? 'staged' : reused.error.code, 'the v1 content under 1.0.0').toBe(
       'content-revision-reused',
     );
-    expect(player.host.stageContent(v1).ok).toBe(true);
-    const activated = await player.host.activateContent(v1, 'boundary');
+
+    expect(player.view().screen, 'the save is at the hub').toBe('hub');
+    expect(player.host.stageContent(current).ok, 'staging it again is harmless').toBe(true);
+    const activated = await player.host.activateContent(current, 'boundary');
     expect(activated.ok, activated.ok ? '' : activated.error.code).toBe(true);
     expect(player.host.inspect().content.revision).toBe('1.1.0');
     expect(player.state(), 'progress carried forward unchanged').toEqual(before);

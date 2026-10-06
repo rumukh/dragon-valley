@@ -4,9 +4,9 @@
  * saved, and the newest pack is activated at the hub. A pack that cannot be fetched, or is not the
  * pack the save pinned, leaves the save untouched for recovery ("Try opening again" fetches it
  * again). First with the tiny counting game, then with a real save of the deployed Region 1
- * slice on the v1 content (S2b's fixtures in test/migration/fixtures).
+ * slice on the v1 content (the archived content/history/1.0.0.json and S2b's slice save).
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { exportSave, MemorySaveStorage } from '@aegis/browser/save';
 import { parseContentJson, requireValue } from '@aegis/runtime';
@@ -29,7 +29,6 @@ import {
 import type { GameDefinition } from '../../../src/app/persistence/game-session';
 import { RecoveryRequired } from '../../../src/app/persistence/recovery';
 import { contentRegistration, GAME_ID, profileSeed } from '../../../src/rules/contract';
-import type { ContentData } from '../../../src/rules/contract';
 import type { CountAction, CountContent, CountState, CountView } from './fixtures';
 import { COUNT_GAME, COUNT_V1, COUNT_V2, countAdapter, PROFILE_A, PROFILE_B } from './fixtures';
 
@@ -180,22 +179,19 @@ describe('archived packs', () => {
 });
 
 describe('a save of the deployed Region 1 slice on the v1 content', () => {
-  const fixture = (name: string) => join('test', 'migration', 'fixtures', name);
-  const sliceText = readFileSync(fixture('slice.content.json'), 'utf8');
+  const archived = (revision: string) => join('content', 'history', `${revision}.json`);
+  const sliceText = readFileSync(archived('1.0.0'), 'utf8');
   const slice = requireValue(parseContentJson(sliceText, contentRegistration, 'slice'));
-  const snapshot = JSON.parse(readFileSync(fixture('slice-save.json'), 'utf8')) as RuntimeSnapshot;
-  const current = requireValue(
+  const snapshot = JSON.parse(
+    readFileSync(join('test', 'migration', 'fixtures', 'slice-save.json'), 'utf8'),
+  ) as RuntimeSnapshot;
+  const v1: DvPack = requireValue(
     parseContentJson(
       readFileSync(join('content', 'dragon-valley.content.json'), 'utf8'),
       contentRegistration,
       'current',
     ),
   );
-  /** The v1 content under a revision of its own, as shipping it after the slice requires. */
-  const v1: DvPack = {
-    ...(structuredClone(current) as ContentPack<ContentData>),
-    revision: '1.1.0',
-  };
 
   function site(online: () => boolean): { fetcher: Fetcher; fetched: string[] } {
     const fetched: string[] = [];
@@ -235,18 +231,26 @@ describe('a save of the deployed Region 1 slice on the v1 content', () => {
     await storage.compareAndSwap(policy, 0, { revision: 1, payload });
   }
 
-  it('has the content strings an old save can show before its upgrade', () => {
+  it('has every content string an archived pack can show, under a revision of its own', () => {
     const catalog = parseContentCatalog(
       JSON.parse(readFileSync(join('content', 'catalogs', 'en.content.json'), 'utf8')),
     );
-    expect(slice.revision).toBe('1.0.0');
-    // v1 renamed region titles to `region.<id>.name`. The slice's own `region.sunny-meadow` is
-    // only shown on the map, the album and with a newly opened region, none of which an old
-    // save reaches before it moves to the newest pack at the hub; every other string must stay.
-    const shownOnlyAfterUpgrade = new Set(['region.sunny-meadow']);
-    expect(
-      missingContentKeys(slice.data, catalog).filter((key) => !shownOnlyAfterUpgrade.has(key)),
-    ).toEqual([]);
+    expect(slice.revision).toBe(snapshot.content.revision);
+    expect(v1.revision, 'the v1 content is not the slice').not.toBe(slice.revision);
+    const shipped = readdirSync(join('content', 'history')).filter((name) =>
+      name.endsWith('.json'),
+    );
+    expect(shipped).toContain('1.0.0.json');
+    for (const name of shipped) {
+      const pack = requireValue(
+        parseContentJson(
+          readFileSync(join('content', 'history', name), 'utf8'),
+          contentRegistration,
+          name,
+        ),
+      );
+      expect(missingContentKeys(pack.data, catalog), name).toEqual([]);
+    }
   });
 
   it('restores with the archived slice pack and lands on the v1 valley at the hub', async () => {
@@ -275,7 +279,7 @@ describe('a save of the deployed Region 1 slice on the v1 content', () => {
     await session.close();
 
     const stored = await storage.read(gamePolicy(game, 'profile-1'));
-    expect(JSON.parse(stored.current!.payload).contentRevision).toBe('1.1.0');
+    expect(JSON.parse(stored.current!.payload).contentRevision).toBe(v1.revision);
     const reopened = await openGameSession(storage, game, {
       id: 'profile-1',
       seed: profileSeed('profile-1'),
