@@ -417,10 +417,14 @@
 
 /* ---- Hub ------------------------------------------------------------------------------- */
 
+/* One column on phones (dragon, today's card, week, places); on a landscape tablet the dragon,
+   its week and the places stand beside today's card, so the whole hub fits on one screen. */
 .dv-hub__layout {
   display: grid;
-  align-items: center;
-  gap: clamp(12px, 2.4vw, 32px);
+  grid-template-areas: 'nest' 'today' 'week' 'places';
+  align-content: center;
+  justify-items: center;
+  gap: clamp(10px, 1.8vh, 24px) clamp(12px, 2.4vw, 32px);
   flex: 1;
   width: min(100%, 64em);
   margin-inline: auto;
@@ -428,14 +432,30 @@
 
 @media (min-width: 900px) and (orientation: landscape) {
   .dv-hub__layout {
+    grid-template-areas:
+      'nest today'
+      'week today'
+      'places today';
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
   }
 }
 
-.dv-hub__side {
-  display: grid;
-  justify-items: center;
-  gap: 0.8em;
+.dv-hub__layout > .dv-hub__nest {
+  grid-area: nest;
+}
+
+.dv-hub__layout > .dv-hub__today {
+  grid-area: today;
+  align-self: center;
+}
+
+.dv-hub__layout > .dv-hub__week {
+  grid-area: week;
+}
+
+.dv-hub__layout > .dv-hub__places {
+  grid-area: places;
 }
 
 .dv-hub__week {
@@ -635,6 +655,15 @@
   min-width: 0;
 }
 
+/* On a landscape tablet the activity's name and its progress share one line. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-round__header {
+    grid-template-columns: auto minmax(9em, 15em);
+    align-items: center;
+    column-gap: 0.8em;
+  }
+}
+
 .dv-round__title {
   font-size: 1.1rem;
 }
@@ -679,10 +708,18 @@
 
 .dv-round__cast {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: center;
   gap: 0.5em;
   min-width: 0;
+}
+
+/* The picture behind a problem gets its own line under the dragon (and the boss). */
+.dv-round__cast > .dv-round__model {
+  display: grid;
+  justify-items: center;
+  flex-basis: 100%;
 }
 
 .dv-round__dragon svg {
@@ -1225,13 +1262,31 @@
 }
 /* ---- Results --------------------------------------------------------------------------- */
 
+/* The results screen is exactly one screen tall: the card shrinks to fit, its list of
+   celebrations scrolls inside it, and the button onward always stays in view. */
+.dv-results.dv-screen {
+  height: 100vh;
+  height: 100dvh;
+}
+
 .dv-results__card {
-  display: grid;
-  justify-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: clamp(0.4rem, 1.6vh, 0.9rem);
   width: min(100%, 38em);
+  min-height: 0;
   margin: auto;
+  overflow-y: auto;
   text-align: center;
+}
+
+.dv-results__card > * {
+  flex-shrink: 0;
+}
+
+.dv-results__card > .dv-button {
+  margin-top: auto;
 }
 
 .dv-results__title {
@@ -1251,17 +1306,31 @@
   background: var(--dv-paper);
 }
 
+.dv-results__card > .dv-results__celebrations {
+  flex: 0 1 auto;
+  min-height: 4.5rem;
+  padding-bottom: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* The list fades out at its lower edge, so a list that goes on looks like it goes on. */
+  mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent);
+}
+
 .dv-results__celebrations {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
+  width: 100%;
+  padding: 0.2rem;
 }
 
 .dv-celebrate {
   display: grid;
   justify-items: center;
+  align-content: start;
   gap: 0.4em;
+  max-width: 11em;
   margin: 0;
   font-weight: 700;
 }

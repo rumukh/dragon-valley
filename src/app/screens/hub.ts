@@ -407,7 +407,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
     h(
       'div',
       { className: 'dv-hub__layout' },
-      h('div', { className: 'dv-hub__side' }, nest, weekSlot),
+      nest,
       h(
         'section',
         { className: 'dv-card dv-hub__today' },
@@ -415,8 +415,9 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
         adventureSlot,
         goalSlot,
         questSlot,
-        places,
       ),
+      weekSlot,
+      places,
     ),
   );
 

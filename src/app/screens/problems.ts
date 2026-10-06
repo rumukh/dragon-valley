@@ -711,7 +711,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     h(
       'section',
       { className: 'dv-round__play' },
-      h('div', { className: 'dv-round__cast' }, dragonSlot, ...(boss ? [bossSlot] : [])),
+      // The picture behind a problem stands with the dragon, so the problem, its feedback and
+      // the answers keep their places on one screen.
+      h('div', { className: 'dv-round__cast' }, dragonSlot, ...(boss ? [bossSlot] : []), modelSlot),
       h(
         'div',
         { className: 'dv-round__board' },
@@ -724,7 +726,6 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
           h('div', { className: 'dv-problem-card__tools' }, speakerSlot, hintSlot),
         ),
         feedback,
-        modelSlot,
       ),
       h('div', { className: 'dv-round__input' }, prompt, answerSlot),
     ),
