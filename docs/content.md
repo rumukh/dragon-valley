@@ -174,8 +174,9 @@ previous boss is won over.
 
 - **Cosmetics** `{ id, slot, assetId, nameKey, price, unlock }`: `assetId` must be an ID in
   `assets/art/catalog.json` (S4); `unlock` is the level that puts it in Glimmer's Market (`null`
-  for from the start). Prices by tier: 15-25 starter, 30-45 regions 2-4, 50-80 later and boss
-  rewards. A cosmetic that a level grants still appears in the market (as owned).
+  for from the start). Prices by tier (the 1.2.0 economy, design §7.2): 15-25 starters, 175-325
+  Sunny Meadow, rising by region to 600. A cosmetic that a level grants still appears in the market
+  (as owned).
 - **Stickers** `{ id, nameKey, page, criteria, icon, color, frame }`: one album page per region;
   `icon` is an art icon ID (items, fruits, map nodes, glyphs, region emblems) or a cosmetic ID,
   `frame` one of S4's sticker frames, `color` a `#rrggbb` colour (S4's composer renders the three;
@@ -319,7 +320,7 @@ Whispering Woods 2 and 3 and ÷3/÷4 (3, 67 %) Whispering Woods 4 (20 problems a
 | `dragon-castle.3` Seven Sneezes Practice     | Feeding Time (`mul-all`, `div-all`, `rem-mixed`, `mul2d1d-carry`, `order-mixed`, `compare-expression`, `word-castle`; 14), Riddle Scrolls (`word-castle`; 4) |                                                                                      |
 | `dragon-castle.boss` The Seven-Headed Dragon | Boss (`mul-all`, `div-all`, `rem-mixed`, `mul2d1d-carry`, `order-mixed`, `compare-expression`, `word-castle`; 28)                                            | meter 21 (7 heads), happy; egg The Seven-Headed Dragon (hatches at once); Gold Medal |
 
-Market: 42 cosmetics, 13 from the start or Sunny Meadow (15-60 coins), then two to five per
-region (30-45 coins in regions 2-4, 50-80 later), each boss level giving one (hats, a pearl
-necklace from the nymphs, the gold medal at the finale). Quests: six from the start, six more with
-bigger targets unlocking in regions 2-4.
+Market: 42 cosmetics, 13 from the start or Sunny Meadow (starters 15-25, Sunny Meadow 175-325
+coins), then two to five per region (rising from 375 to 600 coins), each boss level giving one
+(hats, a pearl necklace from the nymphs, the gold medal at the finale). Quests: six from the start,
+six more with bigger targets unlocking in regions 2-4.

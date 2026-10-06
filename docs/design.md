@@ -462,15 +462,22 @@ machine. Time enters only as data (`startSession.day`, `answer.elapsedMs`).
 
 ### 6.2 Leitner boxes
 
-| Response            | Box move                 |
-| ------------------- | ------------------------ |
-| Correct, fast or OK | up one box (max 5)       |
-| Correct, slow       | stays                    |
-| Wrong               | back to box 1, invisibly |
+A correct answer moves its fact up a box: spaced retrieval is what the boxes reward. Only an answer
+slower than "ok" (below) stays where it is. Fluency is tracked separately, by gold (§6.5), crowned
+dragons and three stars, which all need fast answers.
 
-Intervals until due, by box 0-5: **0, 0, 1, 2, 4, 8 days** _(balance `leitner.intervals`)_.
+| Response                         | Box move                 |
+| -------------------------------- | ------------------------ |
+| Correct, fast or OK              | up one box (max 5)       |
+| Correct, slower than OK ("slow") | stays                    |
+| Wrong                            | back to box 1, invisibly |
 
-Response buckets come from `elapsedMs` measured by the shell (paused time excluded):
+Intervals until due, by box 0-5: **0, 1, 2, 4, 8, 16 days** _(balance `leitner.intervals`; doubled after the learner simulation, docs/balance-report.md)_.
+
+Response buckets come from `elapsedMs` measured by the shell (paused time excluded). The learner
+simulation tried a wider "ok" (9 s and 11 s) and withdrew it: with the rules' protection of a
+struggling child, it promoted that child's steady answers faster than its memory kept them
+(docs/balance-report.md).
 
 | Input  | Fast                                   | OK                            | Slow      |
 | ------ | -------------------------------------- | ----------------------------- | --------- |
@@ -598,27 +605,44 @@ All values are balance data. Coins are earned only by playing; nothing is bought
 
 ### 7.1 Coins
 
-| Source                           | Coins (default)                 |
-| -------------------------------- | ------------------------------- |
-| Correct answer                   | 1                               |
-| Streak bonus                     | +2 at every 5 correct in a row  |
-| Lesson stars (first time each)   | 5 / 10 / 15 for stars 1 / 2 / 3 |
-| Boss level stars                 | 10 / 20 / 30                    |
-| Boss defeated (first time)       | 30                              |
-| Placement check done             | 10                              |
-| Daily quest                      | 5-10 each (3 quests a day)      |
-| Daily gift (when not a cosmetic) | 10-25                           |
+| Source                         | Coins (default)                |
+| ------------------------------ | ------------------------------ |
+| Correct answer                 | 1                              |
+| Streak bonus                   | +1 at every 5 correct in a row |
+| Lesson stars (first time each) | 2 / 4 / 6 for stars 1 / 2 / 3  |
+| Boss level stars               | 4 / 8 / 12                     |
+| Boss defeated (first time)     | 15                             |
+| Placement check done           | 10                             |
+| Daily quest                    | 2-5 each (3 quests a day)      |
+| Daily gift                     | 2-6                            |
 
-A typical 15-minute session earns roughly 50-80 coins.
+A typical 15-minute session earns roughly 50-80 coins, most of it from right answers (the average
+child of the learner simulation earns about 60 a session once the valley is done; the 1.2.0
+economy in docs/balance-report.md).
 
 ### 7.2 Glimmer's Market
 
 About 40 cosmetics in five slots (the art catalog publishes 42): **head** (hats, crowns), **neck**
 (scarves, bows, medals), **eyes** (glasses, goggles, masks), **wings** (wing paints) and **nest**
-(nest decorations). Prices by tier: 15-25 (starter), 30-45 (region 2-4), 50-80 (later regions and
-boss rewards). Items unlock into the market as regions open (`cosmetic.unlock`). Ownership uses the
-`@aegis/narrative` idempotent cosmetic grants; a bought item can be worn by **any** dragon, and each
-dragon keeps its own outfit (one item per slot).
+(nest decorations). Items unlock into the market as regions open (`cosmetic.unlock`); a level's own
+reward items are given, not sold. Ownership uses the `@aegis/narrative` idempotent cosmetic grants;
+a bought item can be worn by **any** dragon, and each dragon keeps its own outfit (one item per
+slot).
+
+Prices are set so that a child keeps getting something new for most of the school year, about
+every five sessions, rather than emptying the market with the valley:
+
+| Tier                             | Price   |
+| -------------------------------- | ------- |
+| Starters (from the start)        | 15-25   |
+| Sunny Meadow                     | 175-325 |
+| Whispering Woods, Fire Mountain  | 375-475 |
+| Crystal Caves, Sharing Lake      | 475-575 |
+| Leftover Lagoon to Dragon Castle | 590-600 |
+
+Every child can buy a starter in its first session. The average child of the learner simulation
+still has something to save for after about 110 sessions; more cosmetics (a later art batch) would
+let the market last longer at the same pace.
 
 ### 7.3 Stickers (about 50, one album page per region)
 
@@ -645,8 +669,9 @@ colour; an explorer sticker the region's emblem; a boss sticker a shield with th
 Each day three quests are drawn (`rewards` stream, weighted by `quest.weight`, from unlocked
 templates): give N right answers, give N quick answers, feed N snacks, play a mini-game, finish a
 level, get N right in a row. The **gift chest** opens after the daily goal (default 30 correct
-answers): a weighted draw between an unowned, available cosmetic (weight 3) and 10-25 coins (weight
-1); it always gives something.
+answers) and gives 2-6 coins (`balance.gift`: cosmetic weight 0, coins weight 1). It can also give
+an unowned cosmetic when the cosmetic weight is above 0; the 1.2.0 economy keeps cosmetics for
+levels and the market, so the market lasts (docs/balance-report.md).
 
 ### 7.5 Printables
 
