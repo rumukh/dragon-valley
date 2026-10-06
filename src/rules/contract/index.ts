@@ -9,6 +9,7 @@ export * from './schema';
 export * from './problems';
 export * from './notation';
 export * from './skills';
+export * from './minigames';
 export * from './content';
 export * from './state';
 export * from './actions';

@@ -14,6 +14,7 @@ import {
   evaluate,
   expectedAnswer,
   formatAnswer,
+  formatFace,
   formatProblem,
   group,
   mulFactId,
@@ -246,5 +247,27 @@ describe('notation', () => {
         right: BLANK,
       }),
     ).toBe('(2 · 3) + 4 = ?');
+  });
+
+  it('renders minigame card faces in either notation', () => {
+    expect(formatFace({ kind: 'expr', expr: op('mul', num(7), num(8)) })).toBe('7 · 8');
+    expect(formatFace({ kind: 'expr', expr: op('div', num(56), num(7)) }, 'international')).toBe(
+      '56 ÷ 7',
+    );
+    expect(formatFace({ kind: 'answer', answer: { kind: 'number', value: 56 } })).toBe('56');
+    expect(
+      formatFace({
+        kind: 'sentence',
+        sentence: { op: 'div', left: 23, right: 5, result: 4, remainder: 3 },
+        highlight: 'remainder',
+      }),
+    ).toBe('23 : 5 = 4 r 3');
+    expect(
+      formatFace({
+        kind: 'sentence',
+        sentence: { op: 'mul', left: 6, right: 7, result: 42, remainder: null },
+        highlight: null,
+      }),
+    ).toBe('6 · 7 = 42');
   });
 });

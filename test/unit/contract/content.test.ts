@@ -199,6 +199,7 @@ describe('cross-file references', () => {
     const ids = collectArtIds(data).map((ref) => ref.id);
     expect(ids).toContain('sunny-meadow');
     expect(ids).toContain('bubbles');
+    expect(ids, 'story scenes are background IDs').toContain('castle-hall');
     expect(checkArtCatalog(data, ids)).toEqual([]);
     const withoutRig = ids.filter((id) => id !== 'bubbles');
     expect(checkArtCatalog(data, withoutRig).map((d) => d.recordId)).toEqual(['bubbles']);

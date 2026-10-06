@@ -43,6 +43,7 @@ export const EVENTS = {
   storyAdvanced: 'story.advanced',
   finaleCompleted: 'finale.completed',
   minigameCompleted: 'minigame.completed',
+  arenaFinished: 'arena.finished',
 } as const;
 
 export type EventType = (typeof EVENTS)[keyof typeof EVENTS];
@@ -79,6 +80,8 @@ export interface EventPayloads {
   'story.advanced': { beat: string; node: string; finished: boolean };
   'finale.completed': Record<string, never>;
   'minigame.completed': { round: string; board: number };
+  /** A Lightning Arena race ran to its end: right answers, the personal best, a new record? */
+  'arena.finished': { score: number; best: number; record: boolean };
 }
 
 export type CoinReason =

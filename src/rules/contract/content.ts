@@ -16,6 +16,7 @@ import { COSMETIC_SLOTS, DRAGON_STAGES } from './ids';
 import type { CosmeticSlot, DragonStage } from './ids';
 import { INPUT_MODES, LEVEL_ACTIVITY_KINDS, OPERATORS, STRANDS, isMinigameKind } from './kinds';
 import type { InputMode, LevelActivityKind, Operator, Strand, WordFamily } from './kinds';
+import { EGG_GRID_SPLITS } from './minigames';
 import { MAX_PROBLEM_NUMBER } from './problems';
 import {
   artId,
@@ -394,7 +395,7 @@ export const ACTIVITY_OPTION_SCHEMAS: Readonly<
   boss: {},
   'memory-match': { pairs: int(3, 8) },
   'number-trail': { length: int(5, 12), gaps: int(1, 6) },
-  'egg-grid': {},
+  'egg-grid': { split: oneOf(EGG_GRID_SPLITS) },
   'fact-family': {},
   'sharing-feast': {},
   'golem-orders': {},
@@ -408,7 +409,7 @@ export const ACTIVITY_OPTION_DEFAULTS: Readonly<
   boss: {},
   'memory-match': { pairs: 6 },
   'number-trail': { length: 10, gaps: 3 },
-  'egg-grid': {},
+  'egg-grid': { split: 'none' },
   'fact-family': {},
   'sharing-feast': {},
   'golem-orders': {},
@@ -1136,7 +1137,10 @@ export function collectCatalogKeys(data: Read<ContentData>): { key: string; wher
   return keys;
 }
 
-/** Every art catalog ID a pack refers to (backgrounds, rigs, cosmetics, sticker parts). */
+/**
+ * Every art catalog ID a pack refers to: backgrounds, rigs, cosmetics, sticker parts, and the
+ * scenes of story beats (scene IDs are background IDs: `castle-hall`, `valley-map`, a region ID).
+ */
 export function collectArtIds(data: Read<ContentData>): { id: string; where: string }[] {
   const art: { id: string; where: string }[] = [];
   data.regions.forEach((r) => art.push({ id: r.background, where: `region ${r.id} background` }));
@@ -1145,6 +1149,11 @@ export function collectArtIds(data: Read<ContentData>): { id: string; where: str
   for (const s of data.stickers) {
     art.push({ id: s.icon, where: `sticker ${s.id} icon` });
     art.push({ id: s.frame, where: `sticker ${s.id} frame` });
+  }
+  for (const beat of data.story.beats) {
+    for (const scene of beat.graph.catalogs.scene) {
+      art.push({ id: scene, where: `story beat ${beat.id} scene` });
+    }
   }
   return art;
 }
