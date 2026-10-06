@@ -22,7 +22,8 @@ a golden is a pinned literal, never self-referential; every test is mutation-che
 7. **lockfile**: canonical registry URLs.
 
 CI then audits the record again outside npm (`node scripts/verify.mjs --audit`), so a lost exit code
-cannot turn a failed gate green. The e2e job runs Playwright on Chromium, WebKit and Firefox.
+cannot turn a failed gate green. The e2e jobs run the QA suite (§5) on Chromium, WebKit and Firefox,
+one engine per job.
 
 ## 2. Rules for every test
 
@@ -89,24 +90,101 @@ Assertions (thresholds in the test file):
   goal is met);
 - the first session hatches the first egg for every bot.
 
-## 5. Browser end-to-end (Playwright)
+## 5. Browser end-to-end (Playwright): the QA suite (S6)
 
-Locally Playwright drives the system Microsoft Edge (`DV_BROWSER_CHANNEL=chrome` for Chrome) and
-never downloads browsers; CI installs Chromium, WebKit and Firefox. The web server builds the site at
-the Pages base `/dragon-valley/`.
+`test/e2e/` runs the built site at the Pages base `/dragon-valley/` in a real browser. Locally it
+drives the system Microsoft Edge (`DV_BROWSER_CHANNEL=chrome` for Chrome) and never downloads
+browsers; `$env:DV_E2E_ALL_ENGINES = '1'` runs Chromium, WebKit and Firefox where Playwright's own
+builds are installed. CI runs one engine per job (`e2e (chromium)`, `e2e (webkit)`,
+`e2e (firefox)`) with `DV_E2E_AUDIT=1`.
 
-Today: the smoke test (boot with zero console errors, zero failed or cross-origin requests, the rules
-reach the prologue in every engine, the CSP is declared). The S6 suite adds:
+```
+npm run test:e2e                                   # everything, system Edge
+npm run test:e2e -- input.spec.ts --headed         # one spec, watching
+$env:DV_E2E_ALL_ENGINES = '1'; npm run test:e2e -- --project=webkit
+```
 
-- first-run onboarding to the first hatch;
-- one round by keyboard and one by touch emulation;
-- save, reload and resume, including a failed checkpoint and retry;
-- the parent gate and the notation switch;
-- read-aloud with a mocked local voice;
-- offline install and an offline reload with the origin denied;
-- zero outbound requests and zero console errors throughout;
-- 200 % text and reduced motion;
-- screenshots at tablet, desktop and phone sizes for human review.
+### Guards on every test
+
+Every spec imports `test` and `expect` from `test/e2e/support/fixtures.ts`. Its automatic `guard`
+fixture watches the whole browser context and fails the test on any **console message** (of any
+level: the game writes none), **uncaught error**, **failed or 4xx/5xx request**, **request to
+another origin**, **outbound link or URL** in the page (a MutationObserver from the first parsed
+node: links, forms, media, embeds, `mailto:`/`tel:`), **`window.open`**, **beacon, socket or peer
+connection**, **CSP violation** or **navigation away**. A request the browser cancels (its page
+moved on, or the audio service dropped a sound it no longer needs) is only noted. A test that
+provokes a finding on purpose says so with `guard.allow(kind, pattern, reason)`; every finding and
+allowance is attached to the report as `qa-guard.json`. `harness.spec.ts` plants each kind of fault
+and proves the guard, the axe audit, the layout checks and the answer oracle all see it.
+
+### What the suite covers
+
+| Spec                  | Evidence                                                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `smoke.spec.ts`       | Boot at the Pages base with a validated pack and the same-origin CSP (S1/S3's original smoke, kept)                                                                                                                                                                                                                                                                                                                  |
+| `profiles.spec.ts`    | S3's flows on the real rules: prologue and first egg kept after a reload, the placement check by keyboard, the gate, notation, a rule setting, a rename, Escape pauses                                                                                                                                                                                                                                               |
+| `first-run.spec.ts`   | Title → Play → editor (kind name and picture checks, Czech names, tidy spaces) → the prologue line by line, Skip, the first egg (cannot be skipped) → hub with the egg in the nest and the placement check offered; the prologue is told once; Back keeps nothing                                                                                                                                                    |
+| `keepers.spec.ts`     | Four keepers in fixed slots, no fifth; rename and new picture survive a reload; removal only behind the gate and a confirmation, and it erases the keeper's game and settings; a freed slot starts empty                                                                                                                                                                                                             |
+| `persistence.spec.ts` | A reload mid-round reopens the round on the same problem with the same coins; a finished check keeps its coins and is not asked again; keepers never share progress; a new keeper starts fresh                                                                                                                                                                                                                       |
+| `recovery.spec.ts`    | A failed save shows "Not saved" + Retry and holds the answer, Retry stores it exactly once (a reload resumes right after it); "Not saved" is the truth after a reload; a second window gets "Open in another window" + Reopen with the newer save; damaged family, game and settings records ask a grown-up (exact bytes export, previous copy, confirmed erase); unopenable storage offers only "Try opening again" |
+| `gate.spec.ts`        | Two-digit × two-digit questions (no multiples of ten, no repeated digits, never the same twice); a wrong answer asks again with no lockout; hold by Space; early release; Escape and Back return focus                                                                                                                                                                                                               |
+| `settings.spec.ts`    | The notation switch on every problem of the placement check (`6 · 2 = ?`, `14 : 2 = ?`, `5 · ? = 20` and their praise vs `×`, `÷`), per keeper, read aloud identically (an independent words oracle); settings persist per keeper; text size and reduced motion apply only while that keeper plays                                                                                                                   |
+| `read-aloud.spec.ts`  | A stand-in speech engine: only local English voices are used or listed (never the remote default, never Czech); the words match the written problem; auto-read; pause cancels speech; no local voice hides the button and the grown-ups' area says why; late voices appear                                                                                                                                           |
+| `input.spec.ts`       | Keypad and keyboard parity step by step (leading zero, six digits, delete); Enter sends the answer after keys were tapped, when a round reopens, and after Read aloud; choice tiles by typing, arrows (wrapping), Enter and Space; a whole check by touch; the pause dialog                                                                                                                                          |
+| `offline.spec.ts`     | Install for offline play (progress, Installed, newest version), then with the test's own server shut down the worker serves the game, a keeper plays the check and saves, and a cold start keeps the coins; emulated offline mode too (not WebKit, which fails navigations before the worker); no service worker says so                                                                                             |
+| `reflow.spec.ts`      | A keeper at 200 % text through the hub, the placement check and the valley (map, road, level card, choice tiles, Egg Grid, collections) at tablet, desktop and phone sizes; every screen at 200 % browser zoom                                                                                                                                                                                                       |
+| `motion.spec.ts`      | Flying coins and moving art without a preference (the control); none of it with the device's reduced motion or a keeper's own Reduce motion                                                                                                                                                                                                                                                                          |
+| `keyboard.spec.ts`    | Tab order forward and back on each screen (editor, prologue, eggs, hub, keypad, keepers, grown-ups), a visible focus ring on every stop, focus on each new screen's heading or answer area; dialogs keep focus inside and give it back                                                                                                                                                                               |
+| `live.spec.ts`        | Live regions announce a miss and its fact, typed digits, praise, coins, results and toasts politely, a failed save assertively, and each region exists before it speaks                                                                                                                                                                                                                                              |
+| `screens.spec.ts`     | Every screen and state at three sizes: screenshots for review ([qa/screens.md](qa/screens.md)), axe (no serious or critical WCAG 2.2 A/AA violation) and the layout checks                                                                                                                                                                                                                                           |
+| `harness.spec.ts`     | The checks themselves see planted faults; the answer oracle solves hand-written problems in both notations                                                                                                                                                                                                                                                                                                           |
+
+### How the tests drive the game
+
+- **Through the screen only.** Helpers in `support/app.ts` act as a child or grown-up would
+  (test IDs are handles, never private state). Answers come from `support/problem.ts`, an
+  independent oracle that parses the rendered problem (either notation, brackets, an answer box
+  anywhere, remainders) and works it out with its own arithmetic.
+- **Faults from outside.** `support/storage.ts` damages stored records the way a failing disk
+  would (the intact copy kept as "previous") and installs IndexedDB faults before the game starts
+  (writes that fail like a full disk, storage that will not open like some private windows).
+  `support/speech.ts` replaces the speech engine with recorded voices.
+- **Named waits only.** Feedback is observed in the page (`feedbackAfter`), so a half-second
+  "Yes!" is never missed; there are no fixed sleeps except where a duration is the subject (the
+  gate's two-second hold).
+- **Layout checks** (`support/layout.ts`): no sideways scrolling (naming the element that sticks
+  out), no control outside the viewport or cut off by a clipping parent, every control at least
+  48 × 48 px (a radio or switch measured by its label), no word broken in the middle.
+- **Accessibility** (`support/a11y.ts`): axe-core with the WCAG 2.2 A/AA and best-practice rules;
+  serious and critical violations fail, moderate and minor ones are attached as advice and listed
+  in the job summary.
+
+### Known defects and the job summary
+
+A defect found by the suite is written up in [qa/defects.md](qa/defects.md) and registered in
+`support/known-issues.ts` (`DEFECTS`, plus `KNOWN_LAYOUT` for layout findings). The test states the
+behaviour the game should have and wraps that one assertion in `unlessKnown(...)`: while the defect
+reproduces the test records it and carries on; when the fix lands the assertion passes and the
+summary lists the marker as "fixed?" so it can be removed. Nothing unlisted is tolerated.
+
+`support/qa-reporter.ts` writes `test-results/qa-summary.md` and the GitHub job summary: totals,
+known defects still reproducing, markers that no longer reproduce, and axe advice by rule. With
+`DV_E2E_AUDIT=1` it also fails the run if a spec file did not run in a project or a test was
+skipped without a reason.
+
+### Artifacts
+
+Each CI job uploads `qa-screens-<engine>` (screenshots and contact sheets, 30 days) and
+`playwright-report-<engine>` (the HTML report with every axe result and guard report attached,
+`qa-summary.md`, `results.json`), plus traces when something failed.
+
+### Adding a test
+
+Import from `./support/fixtures`, drive through `support/app.ts`, compute answers with
+`support/problem.ts`, give every assertion a label that reads as a bug report, and plant the
+fault once (by hand, or in `harness.spec.ts` for a new kind of check) to watch it go red. New
+screens join a walk in `support/tour.ts`, so they get screenshots, axe and the layout checks for
+free; add their stops to [qa/screens.md](qa/screens.md).
 
 ## 6. Human checkpoints
 
