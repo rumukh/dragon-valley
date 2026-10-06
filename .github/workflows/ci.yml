@@ -58,11 +58,19 @@ jobs:
         run: node scripts/verify.mjs --audit .verify-report.json
 
   e2e:
-    name: e2e smoke (chromium, webkit, firefox)
+    name: e2e (${{ matrix.engine }})
     runs-on: ubuntu-latest
+    # One engine per job, in parallel: the whole suite (flows, accessibility, keyboard, reflow,
+    # reduced motion, offline, read-aloud and the screenshot walks) takes a few minutes each.
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit, firefox]
     env:
       NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+      # test/e2e/support/qa-reporter.ts: every spec must run, no unexplained skips.
+      DV_E2E_AUDIT: '1'
 
     steps:
       - uses: actions/checkout@v4
@@ -77,18 +85,41 @@ jobs:
 
       # Hosted runners download Playwright's own engines; the development machine uses the system
       # Edge/Chrome channel instead (see playwright.config.ts).
-      - name: Install browsers
-        run: npx playwright install --with-deps chromium webkit firefox
+      - name: Install ${{ matrix.engine }}
+        run: npx playwright install --with-deps ${{ matrix.engine }}
 
-      - name: End-to-end smoke on three engines
-        run: npx playwright test
+      # Every test runs under the global guards (no console output, no failed or foreign
+      # requests, no outbound links), and the job summary lists known defects and axe advice
+      # (docs/testing.md §5).
+      - name: End-to-end and accessibility on ${{ matrix.engine }}
+        run: npx playwright test --project=${{ matrix.engine }}
 
+      # Screens for human review at tablet, desktop and phone sizes (docs/qa/screens.md).
+      - name: Upload the screens for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-screens-${{ matrix.engine }}
+          path: out/qa-screens/
+          if-no-files-found: warn
+          retention-days: 30
+
+      # The HTML report carries every axe result and guard report as attachments.
       - name: Upload the Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.engine }}
+          path: |
+            playwright-report/
+            test-results/qa-summary.md
+            test-results/results.json
+          retention-days: 14
+
+      - name: Upload failure traces
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: |
-            playwright-report/
-            test-results/
+          name: playwright-traces-${{ matrix.engine }}
+          path: test-results/
           retention-days: 14
