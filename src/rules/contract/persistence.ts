@@ -23,6 +23,9 @@ export const MAX_PROFILES = 4;
 export const PROFILE_IDS = ['profile-1', 'profile-2', 'profile-3', 'profile-4'] as const;
 export type ProfileId = (typeof PROFILE_IDS)[number];
 
+/** The `SaveService` profile ID of the single family record (profiles, names, avatars). */
+export const FAMILY_PROFILE_ID = 'family';
+
 /** Longest child name shown on a profile card. */
 export const MAX_PROFILE_NAME_LENGTH = 16;
 
