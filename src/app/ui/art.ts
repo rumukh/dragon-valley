@@ -103,8 +103,13 @@ export function hatchArt(rig: string, className = 'dv-hatch-art'): SVGSVGElement
   return node;
 }
 
-export function bossArt(id: string, pose: BossState, className = 'dv-boss-art'): SVGSVGElement {
-  const node = svgElement(renderBoss(id, pose, { idPrefix: nextPrefix('boss') }));
+export function bossArt(
+  id: string,
+  pose: BossState,
+  className = 'dv-boss-art',
+  animated = true,
+): SVGSVGElement {
+  const node = svgElement(renderBoss(id, pose, { idPrefix: nextPrefix('boss'), animated }));
   node.classList.add(...className.split(' '));
   return node;
 }

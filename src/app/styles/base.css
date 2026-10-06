@@ -141,15 +141,16 @@ svg {
 }
 
 .dv-screen[data-entering='true'] {
-  animation: dv-ui-screen-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: dv-ui-screen-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Screens settle down into place: moving up from below would stretch the page's scrollable
-   area for a moment and flash a scrollbar (shifting the layout on classic scrollbars). */
+   area for a moment and flash a scrollbar (shifting the layout on classic scrollbars). They
+   start partly visible, so even a slow first frame never shows an empty screen. */
 @keyframes dv-ui-screen-in {
   from {
-    opacity: 0;
-    transform: translateY(-10px);
+    opacity: 0.45;
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
