@@ -1,0 +1,463 @@
+import { polar } from '../svg/num';
+import { M, L, Q, roundRectD, roundStarD, smoothClosedD } from '../svg/path';
+import { h } from '../svg/xml';
+import { clover, snowflake } from '../glyphs';
+import { linearGradient, type Ctx } from './ctx';
+import { belly, bellyPathD, bodyPathD } from './parts';
+import { CX } from './skeleton';
+import { gear } from './wings';
+import type { MarkingStyle } from './types';
+
+const RAINBOW = ['#ff5a5f', '#ff9f40', '#ffd93d', '#5ccc6b', '#4aa8ff', '#5b6cf0', '#a66cf0'];
+
+function has(ctx: Ctx, m: MarkingStyle): boolean {
+  return ctx.recipe.markings.includes(m);
+}
+
+function rainbowBelly(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const d = bellyPathD(ctx);
+  const clip = ctx.def('belly-clip', (id) => h('clipPath', { id }, h('path', { d })));
+  const top = b.cy - b.ry;
+  const step = (b.ry * 2) / 7;
+  let stripes = '';
+  RAINBOW.forEach((c, i) => {
+    stripes += h('rect', {
+      x: b.cx - b.rx - 2,
+      y: top + i * step - 0.5,
+      width: b.rx * 2 + 4,
+      height: step + 1,
+      fill: c,
+    });
+  });
+  return h(
+    'g',
+    { class: 'dv-belly dv-rainbow' },
+    h(
+      'g',
+      { 'clip-path': `url(#${clip})` },
+      stripes,
+      h('ellipse', {
+        cx: b.cx - b.rx * 0.35,
+        cy: b.cy - b.ry * 0.45,
+        rx: b.rx * 0.22,
+        ry: b.ry * 0.3,
+        fill: '#ffffff',
+        opacity: 0.3,
+      }),
+    ),
+    h('path', { d, fill: 'none', stroke: ctx.paint.line, 'stroke-width': ctx.W * 0.7 }),
+  );
+}
+
+function clockFace(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const r = Math.min(b.rx, b.ry) * 0.86;
+  const cy = b.cy + b.ry * 0.04;
+  let ticks = '';
+  for (let i = 0; i < 12; i++) {
+    const a = -90 + i * 30;
+    const long = i % 3 === 0;
+    const p0 = polar(b.cx, cy, r * (long ? 0.66 : 0.76), a);
+    const p1 = polar(b.cx, cy, r * 0.9, a);
+    ticks += M(p0.x, p0.y) + L(p1.x, p1.y);
+  }
+  return h(
+    'g',
+    { class: 'dv-clock' },
+    h('circle', {
+      cx: b.cx,
+      cy,
+      r,
+      fill: '#fffbe8',
+      stroke: ctx.paint.accentLine,
+      'stroke-width': ctx.W * 0.7,
+    }),
+    h('path', {
+      d: ticks,
+      stroke: ctx.paint.accentShade,
+      'stroke-width': ctx.W * 0.7,
+      'stroke-linecap': 'round',
+    }),
+    h('circle', { cx: b.cx, cy, r: r * 0.08, fill: ctx.paint.accentShade }),
+  );
+}
+
+function tenFrame(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const cols = 5;
+  const slot = Math.min((b.rx * 1.62) / cols, (b.ry * 1.2) / 2);
+  const w = slot * cols;
+  const hgt = slot * 2;
+  const x0 = b.cx - w / 2;
+  const y0 = b.cy - hgt / 2 + b.ry * 0.05;
+  let cells = '';
+  let stars = '';
+  for (let r = 0; r < 2; r++) {
+    for (let c = 0; c < cols; c++) {
+      const i = r * cols + c;
+      const cx = x0 + slot * (c + 0.5);
+      const cy = y0 + slot * (r + 0.5);
+      cells += h('circle', { cx, cy, r: slot * 0.44, fill: '#1c1a52', opacity: 0.35 });
+      if (i < 9) {
+        stars += h('path', {
+          d: roundStarD(cx, cy, 5, slot * 0.44, slot * 0.21, -90, 0.2),
+          fill: '#ffd84d',
+          stroke: '#8a5a00',
+          'stroke-width': ctx.W * 0.32,
+          'stroke-linejoin': 'round',
+        });
+      } else {
+        stars += h('path', {
+          d: roundStarD(cx, cy, 5, slot * 0.4, slot * 0.19, -90, 0.2),
+          fill: 'none',
+          stroke: '#ffd84d',
+          'stroke-width': ctx.W * 0.32,
+          'stroke-dasharray': `${(slot * 0.12).toFixed(2)} ${(slot * 0.1).toFixed(2)}`,
+          'stroke-linejoin': 'round',
+          opacity: 0.85,
+        });
+      }
+    }
+  }
+  return h(
+    'g',
+    { class: 'dv-ten-frame' },
+    h('path', {
+      d: roundRectD(
+        x0 - slot * 0.12,
+        y0 - slot * 0.12,
+        w + slot * 0.24,
+        hgt + slot * 0.24,
+        slot * 0.35,
+      ),
+      fill: '#2a2878',
+      opacity: 0.55,
+    }),
+    cells,
+    stars,
+  );
+}
+
+function mirrorBelly(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const d = bellyPathD(ctx);
+  const clip = ctx.def('belly-clip', (id) => h('clipPath', { id }, h('path', { d })));
+  const glass = linearGradient(
+    ctx,
+    'mirror-grad',
+    [
+      [0, '#f4fbff'],
+      [0.5, '#cfe8fb'],
+      [1, '#9ec6ea'],
+    ],
+    { x: b.cx - b.rx, y: b.cy - b.ry },
+    { x: b.cx + b.rx, y: b.cy + b.ry },
+  );
+  return h(
+    'g',
+    { class: 'dv-belly dv-mirror' },
+    h('path', { d, fill: glass }),
+    h(
+      'g',
+      { 'clip-path': `url(#${clip})` },
+      h('path', {
+        d:
+          M(b.cx - b.rx * 0.9, b.cy + b.ry * 0.1) +
+          L(b.cx - b.rx * 0.1, b.cy - b.ry * 0.9) +
+          M(b.cx - b.rx * 0.55, b.cy + b.ry * 0.55) +
+          L(b.cx + b.rx * 0.45, b.cy - b.ry * 0.6),
+        stroke: '#ffffff',
+        'stroke-width': b.rx * 0.18,
+        'stroke-linecap': 'round',
+        opacity: 0.75,
+      }),
+    ),
+    h('path', { d, fill: 'none', stroke: ctx.paint.horn, 'stroke-width': ctx.W * 1.6 }),
+    h('path', { d, fill: 'none', stroke: ctx.paint.line, 'stroke-width': ctx.W * 0.5 }),
+  );
+}
+
+function zeroMedallion(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const cx = b.cx;
+  const cy = b.cy - b.ry * 0.38;
+  const r = b.rx * 0.36;
+  const ribbon =
+    M(cx - r * 0.8, cy - r * 1.9) + L(cx, cy - r * 0.95) + L(cx + r * 0.8, cy - r * 1.9);
+  const W = ctx.W * 0.75;
+  return h(
+    'g',
+    { class: 'dv-medal' },
+    h('path', {
+      d: ribbon,
+      fill: 'none',
+      stroke: '#e0335a',
+      'stroke-width': r * 0.32,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    }),
+    h('ellipse', {
+      cx,
+      cy,
+      rx: r * 0.82,
+      ry: r,
+      fill: 'none',
+      stroke: '#9a5a00',
+      'stroke-width': r * 0.48 + W * 2,
+    }),
+    h('ellipse', {
+      cx,
+      cy,
+      rx: r * 0.82,
+      ry: r,
+      fill: 'none',
+      stroke: '#ffd23f',
+      'stroke-width': r * 0.48,
+    }),
+    h('path', {
+      d:
+        M(cx - r * 0.8, cy - r * 0.35) +
+        Q(cx - r * 0.75, cy - r * 0.95, cx - r * 0.2, cy - r * 1.05),
+      fill: 'none',
+      stroke: '#fff6cf',
+      'stroke-width': r * 0.14,
+      'stroke-linecap': 'round',
+    }),
+  );
+}
+
+function placeValue(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const u = b.rx * 0.11;
+  const line = ctx.paint.bellyLine;
+  const W = ctx.W * 0.55;
+  const x0 = b.cx - b.rx * 0.62;
+  const y0 = b.cy - b.ry * 0.45;
+  let grid = '';
+  const side = u * 5;
+  for (let i = 1; i < 5; i++) {
+    grid +=
+      M(x0 + (side * i) / 5, y0) +
+      L(x0 + (side * i) / 5, y0 + side) +
+      M(x0, y0 + (side * i) / 5) +
+      L(x0 + side, y0 + (side * i) / 5);
+  }
+  const rodX = x0 + side + u * 0.9;
+  let rod = '';
+  for (let i = 1; i < 5; i++)
+    rod += M(rodX, y0 + (side * i) / 5) + L(rodX + u, y0 + (side * i) / 5);
+  const cubeX = rodX + u * 1.9;
+  const cubeY = y0 + side - u;
+  return h(
+    'g',
+    { class: 'dv-place-value', opacity: 0.8 },
+    h('rect', {
+      x: x0,
+      y: y0,
+      width: side,
+      height: side,
+      rx: 2,
+      fill: ctx.paint.bellyShade,
+      stroke: line,
+      'stroke-width': W,
+    }),
+    h('path', { d: grid, stroke: line, 'stroke-width': W * 0.6, opacity: 0.7 }),
+    h('rect', {
+      x: rodX,
+      y: y0,
+      width: u,
+      height: side,
+      rx: 2,
+      fill: ctx.paint.bellyShade,
+      stroke: line,
+      'stroke-width': W,
+    }),
+    h('path', { d: rod, stroke: line, 'stroke-width': W * 0.6, opacity: 0.7 }),
+    h('rect', {
+      x: cubeX,
+      y: cubeY,
+      width: u,
+      height: u,
+      rx: 2,
+      fill: ctx.paint.bellyShade,
+      stroke: line,
+      'stroke-width': W,
+    }),
+  );
+}
+
+function gears(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const r1 = b.rx * 0.44;
+  const r2 = b.rx * 0.32;
+  const r3 = b.rx * 0.24;
+  const c1 = { x: b.cx - b.rx * 0.22, y: b.cy + b.ry * 0.18 };
+  const c2 = { x: c1.x + (r1 + r2) * 0.86, y: c1.y - (r1 + r2) * 0.42 };
+  const c3 = { x: c2.x - (r2 + r3) * 0.3, y: c2.y - (r2 + r3) * 0.94 };
+  return h(
+    'g',
+    { class: 'dv-gears' },
+    gear(ctx, c3.x, c3.y, r3, 7, 'dv-gear dv-gear-3', ctx.paint.accent2),
+    gear(ctx, c2.x, c2.y, r2, 9, 'dv-gear dv-gear-2', ctx.paint.accent),
+    gear(ctx, c1.x, c1.y, r1, 12, 'dv-gear dv-gear-1', ctx.paint.accent2),
+  );
+}
+
+function bubbleSpots(ctx: Ctx): string {
+  const { top, w, h: bh } = ctx.sk.body;
+  const d = bodyPathD(ctx);
+  const clip = ctx.def('body-clip', (id) => h('clipPath', { id }, h('path', { d })));
+  let spots = '';
+  for (const s of [-1, 1]) {
+    for (const [dx, dy] of [
+      [0.4, 0.42],
+      [0.43, 0.56],
+    ] as const) {
+      spots += h('circle', {
+        cx: CX + s * w * dx,
+        cy: top + bh * dy,
+        r: w * 0.045,
+        fill: ctx.paint.bodyShade,
+        opacity: 0.55,
+      });
+      spots += h('circle', {
+        cx: CX + s * w * dx - w * 0.012,
+        cy: top + bh * dy - w * 0.014,
+        r: w * 0.014,
+        fill: '#ffffff',
+        opacity: 0.7,
+      });
+    }
+  }
+  return h('g', { 'clip-path': `url(#${clip})` }, spots);
+}
+
+function freckles(ctx: Ctx): string {
+  const c = ctx.sk.cheek;
+  let out = '';
+  for (const s of [-1, 1]) {
+    for (const [dx, dy] of [
+      [-0.35, -0.1],
+      [0.05, 0.25],
+      [0.4, -0.05],
+    ] as const) {
+      out += h('circle', {
+        cx: CX + s * (c.dx + dx * c.rx),
+        cy: c.y + dy * c.ry,
+        r: c.ry * 0.16,
+        fill: ctx.paint.accentShade,
+        opacity: 0.6,
+      });
+    }
+  }
+  return out;
+}
+
+function moss(ctx: Ctx): string {
+  const hd = ctx.sk.head;
+  const { top, w } = ctx.sk.body;
+  const blob = (cx: number, cy: number, r: number): string =>
+    h('path', {
+      d: smoothClosedD(
+        [0, 60, 120, 180, 240, 300].map((a, i) => polar(cx, cy, r * (i % 2 ? 0.75 : 1), a)),
+        1,
+      ),
+      fill: '#7fae4f',
+      stroke: '#3f6b2a',
+      'stroke-width': ctx.W * 0.5,
+    });
+  return h(
+    'g',
+    { class: 'dv-moss' },
+    blob(hd.cx - hd.rx * 0.32, hd.cy - hd.ry * 0.78, hd.rx * 0.2),
+    blob(CX - w * 0.36, top + 14, w * 0.09),
+    blob(CX + w * 0.38, top + 22, w * 0.07),
+  );
+}
+
+function scales(ctx: Ctx): string {
+  const { top, w, h: bh } = ctx.sk.body;
+  let d = '';
+  for (const s of [-1, 1]) {
+    for (const [dx, dy] of [
+      [0.36, 0.5],
+      [0.42, 0.62],
+      [0.33, 0.66],
+    ] as const) {
+      const x = CX + s * w * dx;
+      const y = top + bh * dy;
+      d += M(x - 7, y) + Q(x, y + 7, x + 7, y);
+    }
+  }
+  return h('path', {
+    d,
+    fill: 'none',
+    stroke: ctx.paint.line,
+    'stroke-width': ctx.W * 0.45,
+    opacity: 0.35,
+    'stroke-linecap': 'round',
+  });
+}
+
+/** Belly layer (replaces the plain belly when a marking defines its own belly). */
+export function bellyLayer(ctx: Ctx): string {
+  if (has(ctx, 'rainbow-belly')) return rainbowBelly(ctx);
+  if (has(ctx, 'mirror-belly')) return mirrorBelly(ctx);
+  const plain =
+    has(ctx, 'clock-belly') ||
+    has(ctx, 'snowflake-belly') ||
+    has(ctx, 'ten-frame-stars') ||
+    has(ctx, 'clover-spots') ||
+    has(ctx, 'gears') ||
+    has(ctx, 'place-value') ||
+    has(ctx, 'zero-medallion');
+  let out = belly(ctx, undefined, !plain);
+  if (has(ctx, 'clock-belly')) out += clockFace(ctx);
+  if (has(ctx, 'snowflake-belly')) {
+    const b = ctx.sk.belly;
+    const r = Math.min(b.rx, b.ry) * 0.82;
+    out += h(
+      'g',
+      { class: 'dv-snowflake' },
+      snowflake(b.cx, b.cy, r, 8, ctx.paint.accent, ctx.W * 1.5),
+      snowflake(b.cx, b.cy, r, 8, '#ffffff', ctx.W * 0.7),
+    );
+  }
+  if (has(ctx, 'ten-frame-stars')) out += tenFrame(ctx);
+  if (has(ctx, 'clover-spots')) {
+    const b = ctx.sk.belly;
+    out += h(
+      'g',
+      { class: 'dv-clover' },
+      clover(
+        b.cx,
+        b.cy + b.ry * 0.08,
+        Math.min(b.rx, b.ry) * 0.62,
+        ctx.paint.accent,
+        ctx.paint.accentLine,
+        ctx.W * 0.7,
+      ),
+    );
+  }
+  if (has(ctx, 'gears')) out += gears(ctx);
+  if (has(ctx, 'place-value')) out += placeValue(ctx);
+  if (has(ctx, 'zero-medallion')) out += zeroMedallion(ctx);
+  return out;
+}
+
+/** Marks painted over the body (spots, scales). */
+export function bodyMarks(ctx: Ctx): string {
+  let out = '';
+  if (has(ctx, 'bubble-spots')) out += bubbleSpots(ctx);
+  if (has(ctx, 'scales')) out += scales(ctx);
+  return out;
+}
+
+/** Marks painted on the head (freckles, moss). */
+export function headMarks(ctx: Ctx): string {
+  let out = '';
+  if (has(ctx, 'freckles')) out += freckles(ctx);
+  if (has(ctx, 'moss')) out += moss(ctx);
+  return out;
+}

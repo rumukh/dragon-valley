@@ -1,0 +1,61 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "petal",
+  "name": "Petal",
+  "kind": "table",
+  "table": 4,
+  "mnemonic": "A flower dragon with 4 wings: two pairs. Times 4 is double the double.",
+  "colors": {
+    "body": "#ff8fc0",
+    "shade": "#d6578f",
+    "belly": "#fff2c6",
+    "wing": "#ffc4de",
+    "horn": "#fff3d6",
+    "accent": "#ff6fa8",
+    "iris": "#8a2a5e",
+    "cheek": "#ff5e95"
+  },
+  "build": {
+    "chub": 0.5,
+    "head": 1,
+    "snout": 0.95,
+    "body": 1
+  },
+  "horns": {
+    "style": "curved",
+    "count": 2,
+    "length": 0.7
+  },
+  "ears": {
+    "style": "petal",
+    "size": 1
+  },
+  "wings": {
+    "style": "petal",
+    "count": 4,
+    "size": 0.95
+  },
+  "tail": {
+    "count": 1,
+    "tip": "flower",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "flower",
+    "count": 4
+  },
+  "markings": [
+    "belly-plates"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#ffd6e8",
+    "accent": "#ff86b9",
+    "pattern": "flowers"
+  }
+}

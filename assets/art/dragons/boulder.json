@@ -1,0 +1,61 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "boulder",
+  "name": "Boulder",
+  "kind": "special",
+  "mnemonic": "A big stone dragon for big numbers. Carved on its belly: a hundred, a ten and a one.",
+  "colors": {
+    "body": "#a39a90",
+    "shade": "#6e655e",
+    "belly": "#d9d0c4",
+    "wing": "#8f857c",
+    "horn": "#ece4d4",
+    "accent": "#8a8076",
+    "iris": "#3f6b2a",
+    "cheek": "#e8a39a"
+  },
+  "build": {
+    "chub": 1,
+    "head": 1,
+    "snout": 1.05,
+    "body": 1.08
+  },
+  "horns": {
+    "style": "ram",
+    "count": 2,
+    "length": 0.9
+  },
+  "ears": {
+    "style": "none",
+    "size": 1
+  },
+  "wings": {
+    "style": "stone",
+    "count": 2,
+    "size": 0.8
+  },
+  "tail": {
+    "count": 1,
+    "tip": "rock",
+    "length": 0.95
+  },
+  "spikes": {
+    "style": "stone",
+    "where": "tail",
+    "count": 3
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "place-value",
+    "moss"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#bdb3a7",
+    "accent": "#8a8076",
+    "pattern": "speckles"
+  }
+}

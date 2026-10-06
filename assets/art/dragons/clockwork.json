@@ -1,0 +1,63 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "clockwork",
+  "name": "Clockwork",
+  "kind": "special",
+  "mnemonic": "A clockwork dragon whose gears turn in order, one after another, just like the order of operations.",
+  "colors": {
+    "body": "#d4874a",
+    "shade": "#9a5226",
+    "belly": "#f4d69a",
+    "wing": "#e7b552",
+    "horn": "#f7e3ae",
+    "accent": "#e8b84f",
+    "accent2": "#f6dc8f",
+    "iris": "#1f7f74",
+    "cheek": "#ff9f80"
+  },
+  "build": {
+    "chub": 0.5,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "straight",
+    "count": 2,
+    "length": 0.8
+  },
+  "ears": {
+    "style": "frill",
+    "size": 0.8
+  },
+  "wings": {
+    "style": "gear",
+    "count": 2,
+    "size": 0.95
+  },
+  "tail": {
+    "count": 1,
+    "tip": "gear",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "gears"
+  ],
+  "features": [
+    "wind-key"
+  ],
+  "egg": {
+    "base": "#e7a76a",
+    "accent": "#b8742a",
+    "pattern": "gears"
+  }
+}

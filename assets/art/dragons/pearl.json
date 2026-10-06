@@ -1,0 +1,63 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "pearl",
+  "name": "Pearl",
+  "kind": "special",
+  "mnemonic": "A shell dragon who shares pearls fairly. Pearls that cannot be shared are the leftovers: the remainder.",
+  "colors": {
+    "body": "#f6dcea",
+    "shade": "#cf98b8",
+    "belly": "#fff8fb",
+    "wing": "#ffe8f2",
+    "horn": "#fffaf2",
+    "accent": "#ff9fb8",
+    "accent2": "#d9f2ec",
+    "iris": "#a8457a",
+    "cheek": "#ff9fbf"
+  },
+  "build": {
+    "chub": 0.55,
+    "head": 1,
+    "snout": 0.95,
+    "body": 1
+  },
+  "horns": {
+    "style": "nub",
+    "count": 2,
+    "length": 0.8
+  },
+  "ears": {
+    "style": "shell",
+    "size": 1
+  },
+  "wings": {
+    "style": "shell",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "pearl",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "shell",
+    "count": 0
+  },
+  "markings": [
+    "belly-plates"
+  ],
+  "features": [
+    "pearl-pile"
+  ],
+  "egg": {
+    "base": "#fbe8f1",
+    "accent": "#e9a8c8",
+    "pattern": "scallops"
+  }
+}

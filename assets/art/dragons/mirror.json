@@ -1,0 +1,65 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "mirror",
+  "name": "Mirror",
+  "kind": "table",
+  "table": 1,
+  "mnemonic": "A silver dragon with a shiny mirror belly and a reflection. Times 1 stays the same, just like a reflection.",
+  "colors": {
+    "body": "#cfd8e8",
+    "shade": "#8d9ab8",
+    "belly": "#eef3fa",
+    "wing": "#dde6f3",
+    "horn": "#f7fbff",
+    "accent": "#9fb3d6",
+    "accent2": "#ffffff",
+    "iris": "#3d78d8",
+    "cheek": "#ffb0c4"
+  },
+  "build": {
+    "chub": 0.45,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "straight",
+    "count": 2,
+    "length": 1
+  },
+  "ears": {
+    "style": "frill",
+    "size": 1
+  },
+  "wings": {
+    "style": "bat",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "spade",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "mirror-belly"
+  ],
+  "features": [
+    "reflection",
+    "shine"
+  ],
+  "egg": {
+    "base": "#d9e2ef",
+    "accent": "#ffffff",
+    "pattern": "shine"
+  }
+}

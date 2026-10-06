@@ -1,0 +1,63 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "sunny",
+  "name": "Sunny",
+  "kind": "table",
+  "table": 5,
+  "mnemonic": "A sunshine dragon with a five-ray sun crest and a clock-hand tail. A clock counts in fives: 5, 10, 15 minutes.",
+  "colors": {
+    "body": "#ffd84a",
+    "shade": "#eea21f",
+    "belly": "#fff4c2",
+    "wing": "#ffbf47",
+    "horn": "#fff3d0",
+    "accent": "#ff9a1f",
+    "accent2": "#ffe98a",
+    "iris": "#9a5200",
+    "cheek": "#ff9a6b"
+  },
+  "build": {
+    "chub": 0.55,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "none",
+    "count": 0,
+    "length": 1
+  },
+  "ears": {
+    "style": "none",
+    "size": 1
+  },
+  "wings": {
+    "style": "bat",
+    "count": 2,
+    "size": 0.92
+  },
+  "tail": {
+    "count": 1,
+    "tip": "clock-hand",
+    "length": 1.05
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "sun",
+    "count": 5
+  },
+  "markings": [
+    "clock-belly",
+    "freckles"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#fff1a8",
+    "accent": "#ff9f1c",
+    "pattern": "sun"
+  }
+}

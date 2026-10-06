@@ -1,0 +1,61 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "starry",
+  "name": "Starry",
+  "kind": "table",
+  "table": 9,
+  "mnemonic": "A night dragon with 9 stars in 10 places: one place is empty. Times 9 is 10 groups minus 1 group.",
+  "colors": {
+    "body": "#3d3b94",
+    "shade": "#23216a",
+    "belly": "#5e62c9",
+    "wing": "#2d2b7d",
+    "horn": "#fff0a8",
+    "accent": "#ffd84d",
+    "iris": "#e6a500",
+    "cheek": "#ff8fc8"
+  },
+  "build": {
+    "chub": 0.5,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "crescent",
+    "count": 2,
+    "length": 0.9
+  },
+  "ears": {
+    "style": "frill",
+    "size": 0.9
+  },
+  "wings": {
+    "style": "bat",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "star",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "ten-frame-stars"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#3d3b94",
+    "accent": "#ffd84d",
+    "pattern": "stars"
+  }
+}
