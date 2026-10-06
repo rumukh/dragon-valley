@@ -68,27 +68,37 @@ of every snapshot.
 ## 4. Learner-simulation bots
 
 Deterministic synthetic learners play the real rules for simulated weeks, producing measurable
-proxies for "fun" and "learning". Each bot is a seeded model of answering: per-item probability of a
-correct answer rising with practice and spacing, response times by bucket.
+proxies for "fun" and "learning". Each bot is a seeded model of answering: per-fact strength rising
+with practice and fading with days without it (more slowly after spaced successes and for facts
+known from 2nd grade), the chance of a right answer rising with it, and response times by how well
+the fact comes to mind (`test/sim/learners.ts`). The driver (`test/sim/driver.ts`) plays the real
+adapter through `createRuntimeHost` one day after another, following the Daily Adventure, and
+records what a parent would see.
 
-| Bot        | Model                                                         |
-| ---------- | ------------------------------------------------------------- |
-| perfect    | always correct and fast                                       |
-| average    | learns facts in a few exposures; forgets slowly; ok speed     |
-| struggling | needs many exposures; forgets quickly; slow; often misses 6-9 |
-| slow       | accurate but slow (tests fluency rules and keypad timing)     |
+| Bot        | Model                                                                                  |
+| ---------- | -------------------------------------------------------------------------------------- |
+| perfect    | always right and quick, plays every day                                                |
+| average    | knows the 2nd-grade tables, learns a fact in a few exposures, forgets slowly           |
+| struggling | shaky on the 2nd-grade tables, needs many exposures, forgets quickly, slow and clumsy  |
+| slow       | learns like the average child but is never quick (tests fluency rules and keypad time) |
 
-Assertions (thresholds in the test file):
+The named checks (`test/sim/report.ts`, each label carries what it measured):
 
-- success rate per round stays in the 70-90 % band for average and struggling bots;
-- the average bot crowns every table dragon within N simulated days;
-- the struggling bot still completes a level, earns coins and a sticker every session, and its
-  dragons never shrink;
-- no due fact goes unreviewed for more than its interval plus a grace period;
-- no dead ends: every level becomes reachable; every boss is beatable;
-- reward pacing stays inside targets (coins per session, stickers per week, a gift every day the
-  goal is met);
-- the first session hatches the first egg for every bot.
+- success per session stays in the 70-90 % band for the average and struggling bots;
+- the average bot grows every times-table dragon to adult within 12 weeks;
+- every bot earns coins every session and, except the perfect one, sees progress every week;
+- no known fact waits more than a week past its review day;
+- no dead ends: every level is completed and every boss won over;
+- reward pacing stays inside targets (coins per session, a gift every day the goal is met, the
+  market not emptied in the first three weeks, every egg hatched within five sessions);
+- the first session hatches the first egg for every bot; the slow bot earns silver but never gold.
+
+A simulated day costs about a hundred commits, so the long runs live outside the gate:
+`node scripts/simulate.mjs --days 84 --check` runs the four bots for 12 weeks in parallel
+processes, writes `out/simulation/report.md` and fails when a check fails (`--balance file.json`
+simulates a changed balance block). The gate runs only the bots' model tests, the checks against
+synthetic reports and a short first session (`test/sim/*.test.ts`). The measured results, the
+model's assumptions and the balance decisions are in [balance-report.md](balance-report.md).
 
 ## 5. Browser end-to-end (Playwright): the QA suite (S6)
 
