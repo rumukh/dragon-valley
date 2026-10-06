@@ -425,8 +425,20 @@ export async function expectNextProblem(page: Page): Promise<void> {
   ).toBeAttached({ timeout: 20_000 });
 }
 
+/**
+ * Wait out a "Yes!" still on screen: its problem is answered and the next one is on its way (the
+ * coins fly, then the round pauses). Reading the screen before then would read the old problem.
+ */
+async function awaitOpenProblem(page: Page): Promise<void> {
+  await expect(
+    results(page).or(page.locator('[data-testid="feedback"]:not([data-kind="correct"])')),
+    'no "Yes!" is still waiting to move on',
+  ).toBeAttached({ timeout: 20_000 });
+}
+
 /** Answer the problem on screen correctly and wait for the next problem or the results. */
 export async function answerCorrectly(page: Page, via: Via): Promise<AnswerValue> {
+  await awaitOpenProblem(page);
   const answer = await readAnswer(page);
   const kind = await feedbackAfter(page, () => giveAnswer(page, answer, via));
   expect(kind, `the right answer ${JSON.stringify(answer)} is praised`).toBe('correct');
@@ -439,6 +451,7 @@ export async function answerCorrectly(page: Page, via: Via): Promise<AnswerValue
  * its picture until the child goes on (`goOn`).
  */
 export async function answerWrongly(page: Page, via: Via): Promise<AnswerValue> {
+  await awaitOpenProblem(page);
   const right = await readAnswer(page);
   const wrong = await wrongAnswerFor(page, right);
   const kind = await feedbackAfter(page, () => giveAnswer(page, wrong, via));
