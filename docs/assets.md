@@ -1,9 +1,9 @@
 # Assets: art and audio pipelines and provenance
 
 This is the umbrella policy for every non-code file the game ships. The pipelines themselves are
-documented by their owners: [art.md](art.md) (S4: dragon rig, icons, cosmetics, backgrounds) and
-[audio.md](audio.md) (S5: synthesis recipes, SFX, music). The domain IDs that key assets are in
-[contract.md](contract.md).
+documented by their owners: [art.md](art.md) (S4: dragon rig, icons, cosmetics, backgrounds),
+[audio.md](audio.md) (S5: synthesis recipes, SFX, music) and [app.md](app.md) (S3: the reading
+font, §7). The domain IDs that key assets are in [contract.md](contract.md).
 
 ## 1. Layout
 
@@ -13,7 +13,7 @@ documented by their owners: [art.md](art.md) (S4: dragon rig, icons, cosmetics, 
 | `assets/backgrounds/`            | region, map and castle backgrounds (SVG first, painted later)     | S4     |
 | `src/app/art/`                   | DOM-free SVG generators (rig, cosmetics, icons) used by the shell | S4     |
 | `assets/audio/`                  | `manifest.json`, synthesized SFX and music, recipes               | S5     |
-| `assets/fonts/`                  | Andika (SIL OFL) with its `OFL.txt`                               | S3     |
+| `assets/fonts/`                  | DV Reading, a renamed Andika subset (SIL OFL), `OFL.txt`          | S3     |
 | `scripts/art/`, `scripts/audio/` | the generators                                                    | S4, S5 |
 
 ## 2. What ships
