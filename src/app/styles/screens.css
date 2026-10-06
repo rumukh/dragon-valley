@@ -1279,14 +1279,81 @@
   width: min(4rem, 10vh);
 }
 
-/* A hatching is the hero of the card: its own row, big. */
-.dv-celebrate--hatch {
-  flex-basis: 100%;
+/* ---- Hatch celebration ----------------------------------------------------------------- */
+
+/* The egg fills the screen: the caption above, the hatchling's name card and "Hooray!" below,
+   their places kept while the egg hatches so nothing jumps when they appear. */
+.dv-hatch-stage {
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  justify-items: center;
+  align-items: center;
+  gap: clamp(6px, 1.4vh, 16px);
+  min-height: 0;
+  overflow-y: auto;
+  text-align: center;
 }
 
-.dv-celebrate--hatch svg {
-  width: min(16rem, 32vh);
-  margin-block: -12% -4%;
+.dv-hatch-stage__caption {
+  max-width: none;
+  padding: 0.2em 0.9em;
+  border-radius: 1em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+}
+
+.dv-hatch-stage__caption:empty {
+  visibility: hidden;
+}
+
+.dv-hatch-stage__art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+/* As big as the screen allows once the caption, name card and button have their room. */
+.dv-hatch-stage__dragon {
+  width: auto;
+  height: clamp(10rem, calc(100dvh - 17.5rem), 30rem);
+  max-width: 100%;
+  overflow: visible;
+}
+
+.dv-hatch-stage__card {
+  display: grid;
+  justify-items: center;
+  gap: 0.2em;
+  padding: 0.5em 1.6em 0.7em;
+  border: 0.12em solid var(--dv-line);
+  border-radius: 1.4em;
+  background: var(--dv-card);
+  box-shadow: 0 0.5em 1.2em color-mix(in srgb, var(--dv-shadow) 20%, transparent);
+  transition:
+    opacity 240ms ease-out,
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dv-hatch-stage__name {
+  font-size: min(2.6rem, 10vw);
+}
+
+.dv-hatch-stage__line {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--dv-ink-soft);
+}
+
+.dv-hatch-stage[data-revealed='false'] .dv-hatch-stage__card {
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.dv-hatch-stage[data-revealed='false'] > .dv-button {
+  visibility: hidden;
 }
 
 /* ---- Valley map, region road and level card ------------------------------------------ */

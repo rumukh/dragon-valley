@@ -1,22 +1,25 @@
 /**
- * After a round: what the child achieved and what is next. A finished level shows its stars
- * (one by one, with their sounds) and confetti; a finished activity of a longer level shows how
- * it went and what comes next. Celebrations come from the round's live events, never replayed
- * history: an egg hatching (S4's hatch sequence), a dragon growing, a new egg, a new sticker, a
- * new region. A round stopped by the grown-ups' time limit ends with a kind goodbye.
+ * After a round: what the child achieved and what is next. An egg that hatched gets its own
+ * full-size celebration first (screens/hatch.ts), one dragon at a time. Then a finished level
+ * shows its stars (one by one, with their sounds) and confetti; a finished activity of a longer
+ * level shows how it went and what comes next. Celebrations come from the round's live events,
+ * never replayed history: a dragon growing, a new egg, a new sticker, a new region. Long lists
+ * scroll inside the card, so the button onward is always in view. A round stopped by the
+ * grown-ups' time limit ends with a kind goodbye.
  */
 import type { GameEvent, GameView } from '../../rules/contract';
 import type { StickerFrame } from '../art/stickers';
 import { resultsNext } from '../game/view';
 import type { MessageKey } from '../i18n/messages';
 import { candyButton } from '../ui/button';
-import { dragonArt, hatchArt, stickerArt, viewDragonArt } from '../ui/art';
+import { dragonArt, stickerArt, viewDragonArt } from '../ui/art';
 import { confetti } from '../ui/confetti';
 import { h } from '../ui/dom';
 import { createCoinCounter, createStars } from '../ui/meters';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
 import { createSaveStatus, topBar } from './common';
+import { hatchCelebration } from './hatch';
 import { backdrop } from './scene';
 
 const CELEBRATED = [
@@ -120,22 +123,15 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
   }
 
   // ---- celebrations -------------------------------------------------------------------------
+  // Hatching has its own full-size celebration before the results (screens/hatch.ts).
+  const hatched = [
+    ...new Set(
+      events.flatMap((event) => (event.type === 'dragon.hatched' ? [event.data.dragon] : [])),
+    ),
+  ].flatMap((id) => view.dragons.filter((dragon) => dragon.id === id));
   const celebrations: Node[] = [];
   for (const event of events) {
     switch (event.type) {
-      case 'dragon.hatched': {
-        const dragon = data.dragons.find((candidate) => candidate.id === event.data.dragon);
-        if (!dragon) break;
-        celebrations.push(
-          h(
-            'figure',
-            { className: 'dv-celebrate dv-celebrate--hatch', testId: 'celebrate-hatch' },
-            hatchArt(dragon.rig),
-            h('figcaption', { text: t('results.hatched', { name: text(dragon.nameKey) }) }),
-          ),
-        );
-        break;
-      }
       case 'dragon.grew': {
         const dragon = view.dragons.find((candidate) => candidate.id === event.data.dragon);
         if (!dragon) break;
@@ -254,6 +250,16 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
   });
   parts.push(proceed);
 
+  const card = h(
+    'section',
+    { className: 'dv-card dv-results__card', testId: 'round-results' },
+    ...parts,
+  );
+  const stage = hatched.length > 0 ? hatchCelebration(app, hatched) : null;
+  card.hidden = stage !== null;
+  heading.tabIndex = -1;
+  let disposed = false;
+
   const element = h(
     'main',
     {
@@ -265,8 +271,18 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
       data.regions.find((region) => region.id === level?.region)?.background ?? 'sunny-meadow',
     ),
     topBar({ tools: [coins.element, saveStatus.element], onError: app.kit.onError }),
-    h('section', { className: 'dv-card dv-results__card', testId: 'round-results' }, ...parts),
+    ...(stage ? [stage.element] : []),
+    card,
   );
+
+  const showResults = (): void => {
+    const spoken = [headline, levelDone ? t('results.stars', { count: levelDone.stars }) : '']
+      .filter(Boolean)
+      .join(' ');
+    app.kit.announcer.announce(spoken);
+    if (stars) void stars.reveal();
+    if (levelDone && !timeUp) void confetti(app.kit.fx);
+  };
 
   return {
     element,
@@ -274,16 +290,26 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
     field: 'valley',
     region: level?.region ?? null,
     music: 'results',
-    focusTarget: () => heading,
+    focusTarget: () => stage?.focusTarget ?? heading,
     mounted() {
-      const spoken = [headline, levelDone ? t('results.stars', { count: levelDone.stars }) : '']
-        .filter(Boolean)
-        .join(' ');
-      app.kit.announcer.announce(spoken);
-      if (stars) void stars.reveal();
-      if (levelDone && !timeUp) void confetti(app.kit.fx);
+      if (!stage) {
+        showResults();
+        return;
+      }
+      void stage
+        .play()
+        .then(() => {
+          if (disposed) return;
+          stage.element.remove();
+          card.hidden = false;
+          heading.focus();
+          showResults();
+        })
+        .catch(app.kit.onError);
     },
     dispose() {
+      disposed = true;
+      stage?.dispose();
       saveStatus.dispose();
     },
   };
