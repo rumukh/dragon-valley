@@ -31,6 +31,7 @@ export {
   BOSS_IDS,
   BOSS_STATES,
   BOSS_OUTCOME,
+  BOSS_MOOD,
   type BossState,
   type BossOptions,
 } from './characters/bosses';

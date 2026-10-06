@@ -4,6 +4,7 @@
  * about half way along the boss meter, `won` is the happy ending.
  */
 import { CANONICAL_BOSS_IDS } from '../../../rules/contract/ids';
+import type { BossMood } from '../../../rules/contract/content';
 import { polar } from '../svg/num';
 import { M, L, Q, C, roundRectD, roundStarD, eggD, heartD, polyD } from '../svg/path';
 import { h, svgDoc, ids as scoped } from '../svg/xml';
@@ -44,6 +45,20 @@ export const BOSS_OUTCOME: Record<string, 'laugh' | 'sleep' | 'agree'> = {
   golem: 'agree',
   'seven-headed': 'agree',
 };
+
+const MOOD_OF_OUTCOME = {
+  laugh: 'laughing',
+  sleep: 'sleepy',
+  agree: 'happy',
+} as const satisfies Record<(typeof BOSS_OUTCOME)[string], BossMood>;
+
+/**
+ * The same ending in the content contract's vocabulary: the `won` pose shows this mood, so a
+ * content pack's `bosses[].mood` must match it.
+ */
+export const BOSS_MOOD: Readonly<Record<string, BossMood>> = Object.fromEntries(
+  Object.entries(BOSS_OUTCOME).map(([id, outcome]) => [id, MOOD_OF_OUTCOME[outcome]]),
+);
 
 type P = (n: string) => string;
 
