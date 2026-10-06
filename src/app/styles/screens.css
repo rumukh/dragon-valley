@@ -932,9 +932,9 @@
 
 .dv-match-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(7.5em, 28vw), 1fr));
+  grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr));
   gap: 0.7em;
-  width: 100%;
+  width: min(100%, calc(var(--cols, 4) * 9em));
 }
 
 /* Memory cards: face down, open, matched (check) or not a pair ("?"). */
@@ -1455,6 +1455,264 @@
   height: 1.2em;
 }
 
+/* ---- Collections: Market, Dragon Den, Sticker Album, Magic Window ---------------------- */
+
+.dv-collection__title {
+  font-size: min(1.8rem, 8vw);
+}
+
+.dv-collection__card,
+.dv-den,
+.dv-album__page,
+.dv-window {
+  width: min(100%, 60em);
+  margin-inline: auto;
+}
+
+.dv-shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(10em, 100%), 1fr));
+  gap: 0.8em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-shelf__item {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 0.35em;
+  padding: 0.7em;
+  border: 0.1em solid var(--dv-line);
+  border-radius: 1.1em;
+  text-align: center;
+  background: var(--dv-paper);
+}
+
+.dv-shelf__item[data-owned='true'] {
+  border-color: var(--dv-success);
+}
+
+.dv-shelf__art {
+  width: 5em;
+}
+
+.dv-shelf__name {
+  font-weight: 700;
+}
+
+.dv-shelf__price,
+.dv-shelf__owned {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-weight: 700;
+}
+
+.dv-shelf__owned {
+  min-height: var(--dv-target);
+  color: var(--dv-success-deep);
+}
+
+.dv-shelf__coin,
+.dv-shelf__owned svg {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.dv-den {
+  display: grid;
+  gap: 1em;
+}
+
+.dv-den__dragons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em;
+}
+
+.dv-den__dragon,
+.dv-den__item {
+  display: grid;
+  justify-items: center;
+  gap: 0.2em;
+  min-width: var(--dv-target);
+  min-height: var(--dv-target);
+  padding: 0.3em 0.5em;
+  border: 0.12em solid var(--dv-line);
+  border-radius: 1em;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--dv-ink);
+  background: var(--dv-paper);
+  cursor: pointer;
+}
+
+.dv-den__dragon[aria-pressed='true'],
+.dv-den__item[aria-pressed='true'] {
+  border-color: var(--dv-primary-deep);
+  background: var(--dv-primary-soft);
+  box-shadow: 0 0 0 0.12em var(--dv-primary);
+}
+
+.dv-den__stage {
+  display: grid;
+  gap: 1em;
+  align-items: start;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-den__stage {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  }
+}
+
+.dv-den__preview {
+  display: grid;
+  justify-items: center;
+}
+
+.dv-den__preview svg {
+  width: min(15rem, 34vh, 70vw);
+}
+
+.dv-den__name {
+  font-weight: 700;
+}
+
+.dv-den__slots {
+  display: grid;
+  gap: 0.6em;
+}
+
+.dv-den__slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0;
+  padding: 0.4em 0.6em;
+  border: 0.08em solid var(--dv-line);
+  border-radius: 1em;
+}
+
+.dv-den__slot legend {
+  padding-inline: 0.3em;
+  font-weight: 700;
+}
+
+.dv-den__art {
+  width: 2.6em;
+}
+
+.dv-den__empty {
+  font-size: 0.85rem;
+  color: var(--dv-ink-soft);
+}
+
+.dv-album__page {
+  display: grid;
+  gap: 0.8em;
+}
+
+.dv-album__page h2 {
+  font-size: 1.2rem;
+}
+
+.dv-album__stickers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(8em, 100%), 1fr));
+  gap: 0.8em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-album__sticker {
+  display: grid;
+  justify-items: center;
+  gap: 0.3em;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dv-album__sticker svg {
+  width: 5em;
+}
+
+.dv-album__sticker[data-earned='false'] {
+  color: var(--dv-ink-muted);
+}
+
+.dv-album__empty {
+  display: grid;
+  place-items: center;
+  width: 5em;
+  height: 5em;
+  border: 0.14em dashed var(--dv-line-strong);
+  border-radius: 50%;
+}
+
+.dv-album__empty svg {
+  width: 1.6em;
+}
+
+.dv-window {
+  display: grid;
+  justify-items: center;
+  gap: 1em;
+}
+
+.dv-window__art {
+  display: block;
+  width: auto;
+  height: min(60vh, 34rem);
+  max-width: 100%;
+}
+
+.dv-window__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6em 1.2em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-weight: 700;
+}
+
+.dv-window__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+
+.dv-window__swatch {
+  width: 1.1em;
+  height: 1.1em;
+  border: 0.1em solid var(--dv-mastery-lead);
+  border-radius: 0.25em;
+}
+
+.dv-window__legend [data-level='gold'] .dv-window__swatch {
+  background: var(--dv-mastery-gold);
+}
+
+.dv-window__legend [data-level='silver'] .dv-window__swatch {
+  background: var(--dv-mastery-silver);
+}
+
+.dv-window__legend [data-level='bronze'] .dv-window__swatch {
+  background: var(--dv-mastery-bronze);
+}
+
+.dv-window__legend [data-level='dim'] .dv-window__swatch {
+  background: var(--dv-mastery-dim);
+}
 /* ---- Grown-ups ------------------------------------------------------------------------- */
 
 .dv-gate__question {

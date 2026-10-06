@@ -89,6 +89,10 @@ export interface Screens {
   map(keeperId: string): ScreenEntry;
   region(keeperId: string, regionId: string): ScreenEntry;
   level(keeperId: string, levelId: string): ScreenEntry;
+  market(keeperId: string): ScreenEntry;
+  den(keeperId: string): ScreenEntry;
+  album(keeperId: string): ScreenEntry;
+  window(keeperId: string): ScreenEntry;
   parent(tab?: ParentTab, keeperId?: string): ScreenEntry;
   recovery(problem: RecoveryRequired): ScreenEntry;
   error(error: unknown): ScreenEntry;

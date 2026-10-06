@@ -47,6 +47,14 @@ interface BoardPainter {
 
 // ---- Memory Match ---------------------------------------------------------------------------
 
+/** Columns for a deck: full rows where possible (12 cards are 4 × 3, 10 are 5 × 2). */
+export function matchColumns(cards: number): number {
+  if (cards <= 4) return Math.max(1, cards);
+  if (cards === 6 || cards === 9) return 3;
+  if (cards === 10 || cards === 15) return 5;
+  return 4;
+}
+
 function memoryMatch(context: BoardContext): BoardPainter {
   const { app } = context;
   const t = app.kit.t;
@@ -67,6 +75,7 @@ function memoryMatch(context: BoardContext): BoardPainter {
     }
     matchedBefore = board.matched;
     grid.dataset['count'] = String(board.cards.length);
+    grid.style.setProperty('--cols', String(matchColumns(board.cards.length)));
     grid.replaceChildren(
       ...board.cards.map((card, index) => {
         const state = card.matched
@@ -410,7 +419,7 @@ function factFamily(context: BoardContext): BoardPainter {
         );
         button.addEventListener('click', () => {
           app.kit.cue('ui.tap');
-          picked = picked === value ? null : value;
+          picked = value;
           paint();
         });
         return button;
@@ -439,7 +448,8 @@ function factFamily(context: BoardContext): BoardPainter {
           );
           button.addEventListener('click', () => {
             app.kit.cue('ui.tap');
-            if (picked !== null) {
+            // The picked number fills the box; tapping a box that already holds it empties it.
+            if (picked !== null && picked !== value) {
               const value = picked;
               void context
                 .move({ type: 'fill', equation: index, slot: position, value })

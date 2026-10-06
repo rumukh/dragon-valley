@@ -27,6 +27,7 @@ const LOCAL = new Set([
   '--dot',
   '--size',
   '--aspect',
+  '--cols',
 ]);
 
 function files(directory: string, extension: string): string[] {

@@ -2,6 +2,7 @@
  * The screen registry the shell navigates with, so screens never import one another.
  */
 import type { App, Screens } from '../shell/app';
+import { albumScreen, denScreen, marketScreen, windowScreen } from './collections';
 import { editorScreen } from './editor';
 import { keepersScreen } from './keepers';
 import { levelScreen, mapScreen, regionScreen } from './map';
@@ -19,6 +20,10 @@ export function createScreens(app: App): Screens {
     map: (keeperId) => mapScreen(app, keeperId),
     region: (keeperId, regionId) => regionScreen(app, keeperId, regionId),
     level: (keeperId, levelId) => levelScreen(app, keeperId, levelId),
+    market: (keeperId) => marketScreen(app, keeperId),
+    den: (keeperId) => denScreen(app, keeperId),
+    album: (keeperId) => albumScreen(app, keeperId),
+    window: (keeperId) => windowScreen(app, keeperId),
     parent: (tab, keeperId) => parentScreen(app, tab, keeperId),
     recovery: (problem) => recoveryScreen(app, problem),
     error: (error) => errorScreen(app, error),
