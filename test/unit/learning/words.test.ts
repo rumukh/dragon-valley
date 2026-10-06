@@ -117,6 +117,12 @@ describe('word-problem English', () => {
       expect(textOf(t), t.id).toMatch(/That is \{times\} times as many as/);
       expect(t.operation, t.id).toBe('div');
     }
+    // Parents see objectives and skills too: no content string uses the phrase.
+    expect(
+      Object.entries(catalog)
+        .filter(([, text]) => /times fewer/i.test(text))
+        .map(([key]) => key),
+    ).toEqual([]);
   });
 
   it('pairs each multiplicative comparison with its additive twin, word for word', () => {
