@@ -17,8 +17,8 @@ import { PERFECT, Player, trajectoryDigest } from './support';
 import type { Adapter } from './support';
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '99031f163c0ef971';
-const GOLDEN_TRAJECTORY = '67a48dc96fd70394';
+const GOLDEN_HASH = 'e8247696ab7bc89a';
+const GOLDEN_TRAJECTORY = '8a0ba3fc8e71d60a';
 
 const SEED = 'golden-region-one';
 const LEVELS = [
@@ -120,6 +120,10 @@ function checks(o: Observation): Record<string, boolean> {
       : Object.entries(o.stages[i - 1]!).every(([id, stage]) => rank(stages[id]!) >= rank(stage)),
   );
   const count = (kind: string) => activities.filter((a) => a === kind).length;
+  const eggAt = (dragon: string) =>
+    p.events.find((e) => e.type === 'egg.received' && JSON.stringify(e.data).includes(dragon));
+  const levelAt = (level: string) =>
+    p.events.find((e) => e.type === 'level.completed' && JSON.stringify(e.data).includes(level));
   return {
     'every step was accepted at the expected logical turn': p.failures.length === 0,
     'going straight to the map skipped the placement check':
@@ -132,8 +136,11 @@ function checks(o: Observation): Record<string, boolean> {
       count('number-trail') === 1 &&
       count('fact-family') === 1 &&
       p.count('minigame.completed') === 3 + 1 + 1 + 2 + 3 + 1,
-    'the eggs arrived as designed: the choice, then levels 2 and 3':
-      JSON.stringify(eggs) === '["bubbles","sunny","goldie","mirror","puff"]',
+    'the eggs arrived as designed: the choice, level 2, then the story of level 3':
+      JSON.stringify(eggs) === '["bubbles","sunny","goldie","mirror","puff"]' &&
+      ['mirror', 'puff'].every(
+        (dragon) => eggAt(dragon)!.revision < levelAt('sunny-meadow.3')!.revision,
+      ),
     'the first egg hatched before the first level was over':
       hatchedAt !== undefined &&
       firstLevelAt !== undefined &&

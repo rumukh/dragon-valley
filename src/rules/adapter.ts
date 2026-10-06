@@ -447,6 +447,7 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
             slot: action.slot,
             item: action.item,
           });
+          awardStickers(ctx);
         },
       }),
       command('claimQuest', {

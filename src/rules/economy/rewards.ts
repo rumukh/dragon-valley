@@ -103,6 +103,12 @@ function criterionMet(
       return state.coinsEarned >= criteria.count;
     case 'cosmetics-owned':
       return state.cosmetics.owned.length >= criteria.count;
+    case 'dragons-dressed':
+      return (
+        Object.values(state.dragons).filter((dragon) =>
+          Object.values(dragon.outfit).some((item) => item !== null),
+        ).length >= criteria.count
+      );
     case 'arena-best':
       return state.arena.best >= criteria.count;
     case 'quests-claimed':

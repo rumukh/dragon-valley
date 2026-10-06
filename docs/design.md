@@ -106,7 +106,8 @@ fact is new and the keypad once it has strengthened (§6.3).
 ### 3.1 Sunny Meadow (`sunny-meadow`): review of 2nd grade
 
 New dragons: Bubbles, Sunny, Goldie (the first egg is one of these three; the others arrive in
-level 2), Mirror and Puff (level 3). Boss: the Bridge Troll. Accent: buttercup yellow.
+level 2), Mirror and Puff (level 3: their eggs come with a short story as it starts, so its ×0 and
+×1 practice warms them). Boss: the Bridge Troll. Accent: buttercup yellow.
 
 | Level               | Title                | Focus                               | Activities                                                                                     |
 | ------------------- | -------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------- |
@@ -326,7 +327,10 @@ grid with a coloured line (5 + 1 groups for ×6, 10 − 1 for ×9, double-double
 Config: `{ product, maxSide, split: 'none' | 'five-plus' | 'ten-minus' | 'double', find }` (`split`
 from the activity option; `find` rectangles complete the board, set by the rules to all of them);
 moves `{ type: 'set', rows, columns }` and `{ type: 'submit' }`. Each new rectangle earns a coin and
-credits its fact when it belongs to the activity's skills. Uses `createPlacement` for drag.
+credits its fact when it belongs to the activity's skills. Uses `createPlacement` for drag. Products
+come from facts of the activity's skills with both factors at least 2 (a `1 × 5` "array" is only a
+line of eggs), and a round's boards go from easy to hard: board _k_ of _n_ takes the _k_-th band of
+the round's products, smallest first.
 
 ### 5.5 Fact Family Nest (`fact-family`): custom `dv.fact-family`
 
@@ -354,8 +358,10 @@ retrieval like any other item (`compare:*` buckets).
 ### 5.8 Riddle Scrolls (`riddle-scrolls`): word problems
 
 A scroll unrolls with a short story (🔊 read-aloud). With `options.pickOperation` (default true)
-the child first picks the operation (+, −, ·, :) and then answers the number. A wrong operation pick
-counts as a miss for the item and shows the right operation. Families: equal groups, sharing,
+the child first picks the operation and then answers the number: the operation step always offers
+the four operations, + − · : in that order, and the number step its own options (or the keypad). A
+wrong operation pick counts as a miss for the item and shows the right operation. Families: equal
+groups, sharing,
 grouping, N times as many in both directions ("Tom has 3 times as many" and "Tom has 12. That is 3
 times as many as Eva has", Czech _N-krát více_ and _N-krát méně_; the stories never say "N times
 fewer", see [curriculum.md](curriculum.md) §6), N more, N fewer, leftovers, two-step. Additive
@@ -392,7 +398,9 @@ of known facts against your own best. The shell keeps the time and ends the roun
   after `stopAfterMisses` misses in a row. Passing a step (`passAccuracy`) marks its levels as placed:
   completed with one star, replayable for more. Parents can re-run it. It never places the first
   level (every child plays it and hatches the first egg there) or a boss level; starting a level
-  instead of the check skips it.
+  instead of the check skips it. Answers count like any answer (the facts are seen, the chosen
+  egg warms); placed levels give their eggs and cosmetics, but stickers only reward what the child
+  did (Dressed Up needs a dragon wearing something).
 
 ## 6. Adaptive learning engine
 
@@ -436,9 +444,16 @@ Response buckets come from `elapsedMs` measured by the shell (paused time exclud
   excepted, and inside each tier items not served in this round come first (known items: also
   not practised today). Tables are interleaved.
 - **The focus egg** (detail added in the implementation): learning draws prefer facts of the
-  chosen first egg while it is an egg (else the oldest egg owned) that were never answered right.
-  Practice warms the egg, which is how the first Feeding Time hatches the first egg whichever
-  table the child chose (§4.1); Sunny Meadow 1 therefore serves ×2, ×5 and ×10.
+  chosen first egg while it is an egg (else the oldest egg owned) that were never answered right,
+  among eggs whose table the round practises: `2 · 0` belongs to Puff's set but is only a stray
+  fact in a round of twos, so that round warms Bubbles, not Puff. Practice warms the egg, which is
+  how the first Feeding Time hatches the first egg whichever table the child chose (§4.1); Sunny
+  Meadow 1 therefore serves ×2, ×5 and ×10. The placement check also warms it: every other problem
+  of a step is one of the chosen egg's facts when the step practises its table.
+- **Rule facts** (refinement after the first playtest): `n · 0`, `n · 1` (either order), `0 : n` and
+  `n : 1` follow a rule rather than being remembered one by one. A round whose own tables do not
+  include 0 or 1 serves at most one of them, so they never crowd out the facts the round is about;
+  Sunny Meadow 3 ("Tens, Ones and Zeros") and the meadow reviews still practise them freely.
 - All draws use named PRNG streams: `problems` (items and problem shapes), `distractors` (choice
   options and their order), `rewards` (gifts, quests), `words` (names and objects in stories). Streams
   are independent, so a reward draw never changes the next problem.

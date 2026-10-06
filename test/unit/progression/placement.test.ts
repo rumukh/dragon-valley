@@ -95,6 +95,55 @@ describe('the placement check as played', () => {
     await player.dispose();
   });
 
+  it('warms the chosen egg and counts its facts exactly, without announcing it again', async () => {
+    const player = new Player(PERFECT, 'placement-egg');
+    await player.act({ type: 'startSession', day: '2026-10-06' });
+    await player.choose(null);
+    await player.choose('sunny');
+    const eggsBefore = player.count('egg.received');
+    const served: string[] = [];
+    const seen = new Set<string>();
+    player.host.subscribeCommits(({ view }) => {
+      const round = view.round;
+      if (round?.type !== 'problems' || !round.problem) return;
+      if (!seen.has(`${round.problem.index}`)) served.push(round.problem.item);
+      seen.add(`${round.problem.index}`);
+    });
+    await player.act({ type: 'startActivity', activity: { kind: 'placement' } });
+    await player.playRound();
+    const fives = (item: string) => /^mul:(5x\d+|\d+x5)$/.test(item);
+    expect(
+      [served[0], served[2]].every((item) => item !== undefined && fives(item)),
+      `every other problem of the first step is a fact of the sunny egg: ${served.join(' ')}`,
+    ).toBe(true);
+    const sunny = player.view().dragons.find((d) => d.id === 'sunny')!;
+    expect(sunny.next, 'exact counts, not rounded percentages').toEqual({
+      stage: 'hatchling',
+      share: 30,
+      mastery: 'seen',
+      have: new Set(served.filter(fives)).size,
+      need: 7,
+    });
+    const eggs = player.data('egg.received').slice(eggsBefore);
+    expect(eggs, 'the chosen egg is not announced again').not.toContainEqual({ dragon: 'sunny' });
+    expect(eggs).toContainEqual({ dragon: 'bubbles' });
+    await player.dispose();
+  });
+
+  it('gives no sticker for something the child did not do: Dressed Up waits for dressing', async () => {
+    const player = await newChild();
+    await player.act({ type: 'startActivity', activity: { kind: 'placement' } });
+    await player.playRound();
+    await player.act({ type: 'endRound', reason: 'done' });
+    expect(player.state().cosmetics.owned, 'a placed level gave a scarf').toContain(
+      'scarf-striped',
+    );
+    expect(player.state().stickers['first-outfit'], 'but nobody is dressed yet').toBeUndefined();
+    await player.act({ type: 'equip', dragon: 'bubbles', slot: 'neck', item: 'scarf-striped' });
+    expect(player.data('sticker.earned')).toContainEqual({ sticker: 'first-outfit' });
+    await player.dispose();
+  });
+
   it('stops after three misses in a row and places nothing, kindly', async () => {
     const player = await newChild({ ...PERFECT, right: () => false });
     await player.act({ type: 'startActivity', activity: { kind: 'placement' } });

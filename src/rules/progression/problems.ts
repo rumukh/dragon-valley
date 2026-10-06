@@ -12,13 +12,16 @@
  */
 import { requireValue } from '@aegis/runtime';
 import type { DeepReadonly, RandomStream } from '@aegis/runtime';
-import { EVENTS, expectedAnswer, firstStep, sameAnswer } from '../contract';
+import { EVENTS, OPERATORS, expectedAnswer, firstStep, sameAnswer } from '../contract';
 import type {
   AnswerValue,
   InputMode,
   PlacementProgress,
+  Problem,
   ProblemActivityKind,
   ProblemRound,
+  ProblemStep,
+  ResolvedInputMode,
   RoundSource,
   Skill,
 } from '../contract';
@@ -27,12 +30,14 @@ import { creditItem } from '../learning/credit';
 import { digits, responseBucket } from '../learning/items';
 import {
   blockedRecent,
-  focusItems,
+  isRuleFact,
   pickArena,
   pickDue,
   pickMixed,
   pickPlacement,
   pickSnack,
+  roundFocus,
+  roundTables,
 } from '../learning/selection';
 import { recordAnswer } from '../economy/daily';
 import { earnCoins } from '../economy/rewards';
@@ -142,23 +147,36 @@ function reviewItems(
     .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
+/** The round's own skill records. */
+function skillsOf(data: Data, ids: readonly string[]): DeepReadonly<Skill>[] {
+  return data.skills.filter((skill) => ids.includes(skill.id));
+}
+
 function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomStream): string {
   const state = ctx.state;
   const data = ctx.content.data;
   const blocked = blockedRecent(round.recent, data.balance.mix.noRepeatWithin);
   if (round.placement !== null) {
     const step = data.placement.steps[round.placement.step]!;
-    return pickPlacement({
-      state,
-      pool: index.get(step.skill) ?? [],
-      blocked: round.recent,
-      random,
-    });
+    const pool = index.get(step.skill) ?? [];
+    // Every other problem of a step prefers the chosen egg's facts (a table the step practises).
+    const focus =
+      round.placement.stepAsked % 2 === 0
+        ? roundFocus(state, data, index, pool, skillsOf(data, [step.skill]))
+        : null;
+    return pickPlacement({ state, pool, blocked: round.recent, random, focus });
   }
-  const pool = itemsOf(playableSkills(data, round.skills, index), index);
+  const skills = skillsOf(data, round.skills);
+  const tables = roundTables(skills);
+  let pool = itemsOf(playableSkills(data, round.skills, index), index);
   const served = round.recent;
   if (round.activity === 'snack') return pickSnack({ state, pool, blocked, served, random });
   if (round.activity === 'arena') return pickArena({ state, pool, blocked, served, random });
+  if (!tables.has(0) && !tables.has(1) && served.some(isRuleFact)) {
+    // At most one rule fact (× 0, × 1, 0 : n, n : 1) in a round that is not about them.
+    const rest = pool.filter((item) => !isRuleFact(item));
+    if (rest.length > 0) pool = rest;
+  }
   if (round.activity === 'boss' && round.source.kind === 'level') {
     const source = round.source;
     const level = data.levels.find((l) => l.id === source.level);
@@ -183,9 +201,28 @@ function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomS
     pool,
     blocked,
     served,
-    focus: focusItems(state, data, index, pool),
+    focus: roundFocus(state, data, index, pool, skills),
     random,
   });
+}
+
+/** The operation step of a story always offers the four operations, in this order: + − · :. */
+const OPERATION_CHOICES: readonly AnswerValue[] = OPERATORS.map((operation): AnswerValue => ({
+  kind: 'operation',
+  operation,
+}));
+
+/** Choices for a problem's step: the operations, else answer options for choice input. */
+function choicesAt(
+  ctx: Ctx,
+  problem: Problem,
+  step: ProblemStep,
+  input: ResolvedInputMode,
+): AnswerValue[] | null {
+  if (step === 'operation') return [...OPERATION_CHOICES];
+  return input === 'choice'
+    ? choicesFor(problem, ctx.content.data.balance.input.choices, ctx.random('distractors'))
+    : null;
 }
 
 /** Serve the next problem: a fired re-ask first, else a fresh draw. */
@@ -207,6 +244,7 @@ export function serveNext(ctx: Ctx, index: Index): void {
         ? 'choice'
         : 'keypad'
       : round.input;
+  const step = firstStep(problem);
   round.asked += 1;
   round.recent = [...round.recent, item].slice(-RECENT_LIMIT);
   round.current = {
@@ -214,11 +252,8 @@ export function serveNext(ctx: Ctx, index: Index): void {
     item,
     problem,
     input,
-    choices:
-      input === 'choice'
-        ? choicesFor(problem, data.balance.input.choices, ctx.random('distractors'))
-        : null,
-    step: firstStep(problem),
+    choices: choicesAt(ctx, problem, step, input),
+    step,
     reask: queued !== undefined,
     hinted: false,
   };
@@ -232,7 +267,12 @@ export function gradeAnswer(ctx: Ctx, value: AnswerValue, elapsedMs: number): vo
   const expected = requireValue(expectedAnswer(current.problem, current.step));
   const correct = sameAnswer(value, expected);
   if (current.step === 'operation' && correct) {
-    round.current = { ...current, step: 'answer' };
+    // The right operation: on to the number, with its own choices.
+    round.current = {
+      ...current,
+      step: 'answer',
+      choices: choicesAt(ctx, current.problem, 'answer', current.input),
+    };
     round.feedback = {
       index: current.index,
       item: current.item,

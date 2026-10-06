@@ -60,7 +60,8 @@ activities and boards for minigames.
 
 - `auto` input is multiple choice while a fact is new (box 0-1) and the keypad from box 2.
 - Minigame boards draw their facts from the activity's skills: Memory Match needs at least two
-  facts with different values, Egg Grid a fact with a product of at least 2, Fact Family a fact
+  facts with different values, Egg Grid a fact with both factors at least 2 (its boards go from
+  small products to big ones over the round), Fact Family a fact
   with two different factors of at least 2, Number Trail a skill with a table (or divisor) of at
   least 2. An activity that cannot make a board is skipped.
 - An activity whose generator is not implemented yet is skipped in a level run (the level still
@@ -91,7 +92,11 @@ Learning draws prefer the **focus egg**: the chosen first egg while it is still 
 oldest egg owned, among facts of the round never answered right. Practice warms the egg, so a
 level whose skills include an egg's table hatches it quickly. Sunny Meadow 1 therefore lists
 ×2, ×5 and ×10 (`mul-2-5-10`): whichever first egg the child chose, its table is what the level
-serves, and the egg hatches in the first session (design §4.1).
+serves, and the egg hatches in the first session (design §4.1). Only an egg whose table the round
+practises is warmed: Puff's `2 · 0` is a stray fact in a round of twos. Sunny Meadow 3's story
+gives Mirror's and Puff's eggs as the level starts, so its ×0 and ×1 practice warms them (the eggs
+stay its completion reward too, for a child placed out of the level; an owned egg is never given
+twice).
 
 ## 5. The placement check
 
@@ -113,7 +118,9 @@ a step, `stopAfterMisses` misses in a row or `maxProblems` answers end it. Rules
   rewards. A cosmetic that a level grants still appears in the market (as owned).
 - **Stickers** `{ id, nameKey, page, criteria, icon, color, frame }`: one album page per region;
   `icon` and `frame` are art IDs (frames arrive with S4's sticker work), `color` is `#rrggbb`.
-  Criteria kinds are listed in contract §7.1.
+  Criteria kinds are listed in contract §7.1. A sticker named for something the child does must
+  use a criterion only that action meets: Dressed Up is `dragons-dressed`, not `cosmetics-owned`,
+  because placed levels and level rewards also give cosmetics.
 - **Quests** `{ id, titleKey, goal, target, coins, weight, unlock }`: three are drawn a day,
   weighted, never two with the same goal, only from templates whose `unlock` level is complete.
   A goal the child cannot reach on a given day (for example `feed-hungry` before any dragon can be
@@ -132,15 +139,15 @@ each is granted once.
 
 ## 8. Sunny Meadow as shipped
 
-| Level               | Activities                                                                                        | Rewards                     |
-| ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------- |
-| `sunny-meadow.1`    | Egg Grid (×2, ×5, ×10; 3 boards), Feeding Time (same; 8; choice)                                  | stars                       |
-| `sunny-meadow.2`    | Feeding Time (×2, ×5; 10; choice), Memory Match (×2, ×5; 6 pairs)                                 | eggs Bubbles, Sunny, Goldie |
-| `sunny-meadow.3`    | Feeding Time (×0, ×1, ×10; 10; auto), Number Trail (×10)                                          | eggs Mirror, Puff           |
-| `sunny-meadow.4`    | Egg Grid (×2, ×5; 2), Fact Family Nest (÷2, ÷5, ÷10; 3), Feeding Time (÷ and missing factors; 10) | striped scarf               |
-| `sunny-meadow.5`    | Feeding Time (all meadow ×, ÷; 12; keypad), Memory Match (÷; 6 pairs)                             |                             |
-| `sunny-meadow.6`    | Riddle Scrolls (6) (skipped until the `word` generator ships)                                     |                             |
-| `sunny-meadow.boss` | The Bridge Troll: meter 15, cap 20, laughing                                                      | party hat, 30 boss coins    |
+| Level               | Activities                                                                                        | Rewards                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `sunny-meadow.1`    | Egg Grid (×2, ×5, ×10; 3 boards), Feeding Time (same; 8; choice)                                  | stars                                   |
+| `sunny-meadow.2`    | Feeding Time (×2, ×5; 10; choice), Memory Match (×2, ×5; 6 pairs)                                 | eggs Bubbles, Sunny, Goldie             |
+| `sunny-meadow.3`    | Feeding Time (×0, ×1, ×10; 10; auto), Number Trail (×10)                                          | eggs Mirror, Puff (story, at the start) |
+| `sunny-meadow.4`    | Egg Grid (×2, ×5; 2), Fact Family Nest (÷2, ÷5, ÷10; 3), Feeding Time (÷ and missing factors; 10) | striped scarf                           |
+| `sunny-meadow.5`    | Feeding Time (all meadow ×, ÷; 12; keypad), Memory Match (÷; 6 pairs)                             |                                         |
+| `sunny-meadow.6`    | Riddle Scrolls (6) (skipped until the `word` generator ships)                                     |                                         |
+| `sunny-meadow.boss` | The Bridge Troll: meter 15, cap 20, laughing                                                      | party hat, 30 boss coins                |
 
 Placement ladder: ×2/×5 (4 problems, 75 %) places level 2, ×0/×1/×10 (3, 100 %) level 3,
 ÷2/÷5/÷10 (3, 67 %) level 4, missing factors (3, 67 %) level 5. Market: 13 cosmetics from 15 to

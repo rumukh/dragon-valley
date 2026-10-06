@@ -11,7 +11,7 @@ import type { DeepReadonly, JsonValue } from '@aegis/runtime';
 import { ACTIVITY_OPTION_DEFAULTS, EVENTS } from '../contract';
 import type { MinigameActivityKind, MinigameRound, RoundSource } from '../contract';
 import { creditItem } from '../learning/credit';
-import { focusItems } from '../learning/selection';
+import { roundFocus } from '../learning/selection';
 import { earnCoins } from '../economy/rewards';
 import { MINIGAMES, boardCredits, makeBoard } from '../minigames/boards';
 import type { Options } from '../minigames/boards';
@@ -36,19 +36,28 @@ export function boardOptions(data: Data, activity: MinigameActivityKind, source:
 function nextBoard(
   ctx: Ctx,
   index: Index,
-  round: { id: string; activity: MinigameActivityKind; source: RoundSource; skills: string[] },
+  round: {
+    id: string;
+    activity: MinigameActivityKind;
+    source: RoundSource;
+    skills: string[];
+    boards: number;
+  },
   board: number,
   previous: DeepReadonly<MinigameDefinition> | null,
 ): { definition: MinigameDefinition; state: MinigameState } {
   const data = ctx.content.data;
   const pool = itemsOf(round.skills, index);
+  const skills = data.skills.filter((skill) => round.skills.includes(skill.id));
   const id = `${round.id}.b${board}`;
   const definition = makeBoard({
     activity: round.activity,
     id,
+    board,
+    boards: round.boards,
     pool,
-    focus: focusItems(ctx.state, data, index, pool),
-    skills: data.skills.filter((skill) => round.skills.includes(skill.id)),
+    focus: roundFocus(ctx.state, data, index, pool, skills),
+    skills,
     options: boardOptions(data, round.activity, round.source),
     previous,
     state: ctx.state,

@@ -21,7 +21,8 @@
  * (docs/design.md §4.1). Then new items and weak items share the draws.
  */
 import type { DeepReadonly, RandomStream } from '@aegis/runtime';
-import type { Dragon } from '../contract';
+import { parseItemId } from '../contract';
+import type { Dragon, Skill } from '../contract';
 import { isDue } from './items';
 import type { Data, ReadState } from '../types';
 
@@ -79,22 +80,62 @@ export function eggsByAge(state: ReadState, data: Data): DeepReadonly<Dragon>[] 
 /**
  * The focus egg's facts among `pool` that were never answered correctly (those are what warms
  * an egg: hatching needs facts answered right at least once), from the oldest owned egg that
- * still has some; `null` when no egg can be warmed by this round.
+ * still has some; `null` when no egg can be warmed by this round. With `tables` (the round's own
+ * times tables), a table dragon's egg is warmed only by a round that practises its table: Puff's
+ * `2 · 0` is only a stray fact of the twos, so a round of twos warms Bubbles, not Puff.
  */
 export function focusItems(
   state: ReadState,
   data: Data,
   index: ReadonlyMap<string, readonly string[]>,
   pool: readonly string[],
+  tables?: ReadonlySet<number>,
 ): string[] | null {
   const available = new Set(pool);
   for (const egg of eggsByAge(state, data)) {
+    if (tables !== undefined && egg.table !== null && !tables.has(egg.table)) continue;
     const items = [...new Set(egg.skills.flatMap((skill) => index.get(skill) ?? []))].filter(
       (item) => available.has(item) && (state.items[item]?.correct ?? 0) === 0,
     );
     if (items.length > 0) return items.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   }
   return null;
+}
+
+/** The times tables a round practises: its skills' tables, divisors and missing-factor tables. */
+export function roundTables(skills: readonly DeepReadonly<Skill>[]): Set<number> {
+  const tables = new Set<number>();
+  for (const skill of skills) {
+    if (skill.generator === 'mul.fact' || skill.generator === 'mul.missing') {
+      skill.params.tables.forEach((table) => tables.add(table));
+    } else if (skill.generator === 'div.fact') {
+      skill.params.divisors.forEach((divisor) => tables.add(divisor));
+    }
+  }
+  return tables;
+}
+
+/** The focus for a round of `skills`: an egg whose table the round practises (focusItems). */
+export function roundFocus(
+  state: ReadState,
+  data: Data,
+  index: ReadonlyMap<string, readonly string[]>,
+  pool: readonly string[],
+  skills: readonly DeepReadonly<Skill>[],
+): string[] | null {
+  return focusItems(state, data, index, pool, roundTables(skills));
+}
+
+/**
+ * Rule facts follow a rule instead of being remembered one by one: `n · 0`, `n · 1` (either
+ * order), `0 : n` and `n : 1`. A round whose own tables do not include 0 or 1 serves at most one
+ * of them (docs/design.md §6.3), so they never crowd out the facts the round is about.
+ */
+export function isRuleFact(item: string): boolean {
+  const parsed = parseItemId(item);
+  if (parsed?.kind === 'mul') return parsed.a <= 1 || parsed.b <= 1;
+  if (parsed?.kind === 'div') return parsed.dividend === 0 || parsed.divisor === 1;
+  return false;
 }
 
 /** The recently served items that may not be served again yet (none when `window` is 0). */
@@ -227,17 +268,24 @@ export function pickSnack(options: {
   return random.pick(prefer(candidates, (item) => !served.includes(item)));
 }
 
-/** Placement: an item of the step's skill not asked yet in this round, new items first. */
+/**
+ * Placement: an item of the step's skill not asked yet in this round, new items first; with
+ * `focus` (every other problem of a step), the chosen egg's facts first, so a child who knows
+ * them warms the egg already in the check.
+ */
 export function pickPlacement(options: {
   state: ReadState;
   pool: readonly string[];
   blocked: readonly string[];
   random: RandomStream;
+  focus?: readonly string[] | null;
 }): string {
-  const { state, random } = options;
+  const { state, random, focus } = options;
   const candidates = withoutRecent(options.pool, options.blocked);
   const fresh = candidates.filter((item) => state.items[item] === undefined);
-  return random.pick(fresh.length > 0 ? fresh : candidates);
+  const from = fresh.length > 0 ? fresh : candidates;
+  const focused = focus ? from.filter((item) => focus.includes(item)) : [];
+  return random.pick(focused.length > 0 ? focused : from);
 }
 
 /** The Arena: facts answered right before, not served in this race yet, else anything. */

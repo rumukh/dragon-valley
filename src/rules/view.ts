@@ -266,7 +266,18 @@ function dragonViews(
         hungry,
         dueItems: due,
         outfit: { ...owned.outfit },
-        next: rule ? { stage: rule.stage, share: rule.share, mastery: rule.mastery } : null,
+        next: rule
+          ? {
+              stage: rule.stage,
+              share: rule.share,
+              mastery: rule.mastery,
+              have: items.filter((item) => atLeast(state.items[item], rule.mastery, data.balance))
+                .length,
+              // The share rounded up: shareAt rounds down, so this many reach `share` percent.
+              need:
+                (rule.share * items.length + 99 - ((rule.share * items.length + 99) % 100)) / 100,
+            }
+          : null,
       };
     });
 }

@@ -25,8 +25,8 @@ import type { Adapter } from './support';
  * pinned as literals. Re-pin only for a deliberate rules or content change, with the reason and
  * the old and new values in the commit message (docs/testing.md, "When a golden moves").
  */
-const GOLDEN_HASH = '4a85e807d2c3c2fd';
-const GOLDEN_TRAJECTORY = '82d63fa1b1405b89';
+const GOLDEN_HASH = '15b83e6a575603e6';
+const GOLDEN_TRAJECTORY = '7fad6753f79cc9c5';
 
 const SEED = 'golden-first-session';
 const PLACEMENT_MISS = 6;

@@ -176,6 +176,8 @@ export type StickerCriteria =
   | { kind: 'week-days'; count: number }
   | { kind: 'coins-earned'; count: number }
   | { kind: 'cosmetics-owned'; count: number }
+  /** count owned dragons wearing at least one cosmetic (dressed by the child). */
+  | { kind: 'dragons-dressed'; count: number }
   | { kind: 'arena-best'; count: number }
   | { kind: 'quests-claimed'; count: number }
   | { kind: 'placement-done' }
@@ -470,6 +472,7 @@ const stickerCriteriaSchema: Schema<StickerCriteria> = schema.union(
   schema.object({ kind: schema.literal('week-days'), count: int(1, 7) }),
   schema.object({ kind: schema.literal('coins-earned'), count: int(1, 1_000_000) }),
   schema.object({ kind: schema.literal('cosmetics-owned'), count: int(1, 1000) }),
+  schema.object({ kind: schema.literal('dragons-dressed'), count: int(1, 100) }),
   schema.object({ kind: schema.literal('arena-best'), count: int(1, 1000) }),
   schema.object({ kind: schema.literal('quests-claimed'), count: int(1, 10_000) }),
   schema.object({ kind: schema.literal('placement-done') }),
