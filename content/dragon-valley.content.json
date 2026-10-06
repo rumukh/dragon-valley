@@ -891,8 +891,82 @@
           "word.name.ela",
           "word.name.kuba",
           "word.name.maya",
-          "word.name.leo"
+          "word.name.leo",
+          "word.name.eva",
+          "word.name.adam",
+          "word.name.nela",
+          "word.name.filip",
+          "word.name.klara",
+          "word.name.ondra"
         ]
+      },
+      {
+        "id": "girls",
+        "kind": "name",
+        "entries": [
+          "word.name.anna",
+          "word.name.ela",
+          "word.name.maya",
+          "word.name.eva",
+          "word.name.nela",
+          "word.name.klara"
+        ]
+      },
+      {
+        "id": "boys",
+        "kind": "name",
+        "entries": [
+          "word.name.tom",
+          "word.name.kuba",
+          "word.name.leo",
+          "word.name.adam",
+          "word.name.filip",
+          "word.name.ondra"
+        ]
+      },
+      {
+        "id": "fruit",
+        "kind": "thing",
+        "entries": [
+          "word.thing.apple",
+          "word.thing.pear",
+          "word.thing.plum",
+          "word.thing.cherry",
+          "word.thing.apricot",
+          "word.thing.strawberry"
+        ]
+      },
+      {
+        "id": "treats",
+        "kind": "thing",
+        "entries": [
+          "word.thing.bun",
+          "word.thing.cookie",
+          "word.thing.pancake",
+          "word.thing.dumpling",
+          "word.thing.muffin"
+        ]
+      },
+      {
+        "id": "school",
+        "kind": "thing",
+        "entries": [
+          "word.thing.pencil",
+          "word.thing.crayon",
+          "word.thing.sticker",
+          "word.thing.marble",
+          "word.thing.card"
+        ]
+      },
+      {
+        "id": "treasure",
+        "kind": "thing",
+        "entries": ["word.thing.gem", "word.thing.crystal", "word.thing.coin", "word.thing.pearl"]
+      },
+      {
+        "id": "pond",
+        "kind": "thing",
+        "entries": ["word.thing.fish", "word.thing.frog", "word.thing.duck", "word.thing.snail"]
       }
     ],
     "wordTemplates": [
@@ -928,6 +1002,618 @@
             "right": {
               "kind": "var",
               "name": "eggs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.bikes",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.bikes",
+        "vars": {
+          "bikes": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "wheels": {
+            "kind": "int",
+            "min": 2,
+            "max": 2
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "bikes"
+            },
+            "right": {
+              "kind": "var",
+              "name": "wheels"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.stars",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.stars",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "stars": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "points": {
+            "kind": "int",
+            "min": 5,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "stars"
+            },
+            "right": {
+              "kind": "var",
+              "name": "points"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.crayons",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.crayons",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "packs": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 10,
+            "max": 10
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "packs"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.baskets",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.baskets",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "baskets": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "each": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "baskets"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.clovers",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.clovers",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "clovers": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "leaves": {
+            "kind": "int",
+            "min": 3,
+            "max": 3
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "clovers"
+            },
+            "right": {
+              "kind": "var",
+              "name": "leaves"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.dragons",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.dragons",
+        "vars": {
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "legs": {
+            "kind": "int",
+            "min": 4,
+            "max": 4
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "legs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.eggs",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.eggs",
+        "vars": {
+          "boxes": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 6,
+            "max": 6
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "boxes"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.weeks",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.weeks",
+        "vars": {
+          "days": {
+            "kind": "int",
+            "min": 7,
+            "max": 7
+          },
+          "weeks": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "weeks"
+            },
+            "right": {
+              "kind": "var",
+              "name": "days"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.beetles",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.beetles",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "beetles": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "legs": {
+            "kind": "int",
+            "min": 6,
+            "max": 6
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "beetles"
+            },
+            "right": {
+              "kind": "var",
+              "name": "legs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.rainbows",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.rainbows",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "colours": {
+            "kind": "int",
+            "min": 7,
+            "max": 7
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "colours"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.spiders",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.spiders",
+        "vars": {
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "legs": {
+            "kind": "int",
+            "min": 8,
+            "max": 8
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "legs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.gems",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.gems",
+        "vars": {
+          "rows": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 9,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "rows"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.market",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.market",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "bags": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "bags"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.tickets",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.tickets",
+        "vars": {
+          "tens": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          },
+          "price": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "tens"
+              },
+              "right": {
+                "kind": "num",
+                "value": 10
+              }
+            }
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "price"
+            },
+            "right": {
+              "kind": "var",
+              "name": "count"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.pencils",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.pencils",
+        "vars": {
+          "each": {
+            "kind": "int",
+            "min": 10,
+            "max": 10
+          },
+          "packs": {
+            "kind": "int",
+            "min": 11,
+            "max": 60
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "packs"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.books",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.books",
+        "vars": {
+          "pages": {
+            "kind": "int",
+            "min": 100,
+            "max": 100
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "pages"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.trucks",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.trucks",
+        "vars": {
+          "each": {
+            "kind": "int",
+            "min": 12,
+            "max": 48
+          },
+          "trucks": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "each"
+            },
+            "right": {
+              "kind": "var",
+              "name": "trucks"
             }
           }
         },
@@ -986,6 +1672,1193 @@
         "operation": "div"
       },
       {
+        "id": "word.sharing.friends",
+        "family": "sharing",
+        "textKey": "word.sharing.friends",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "half": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "half"
+              },
+              "right": {
+                "kind": "num",
+                "value": 2
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "num",
+              "value": 2
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.pancakes",
+        "family": "sharing",
+        "textKey": "word.sharing.pancakes",
+        "vars": {
+          "plates": {
+            "kind": "int",
+            "min": 3,
+            "max": 4
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "plates"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "plates"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.plums",
+        "family": "sharing",
+        "textKey": "word.sharing.plums",
+        "vars": {
+          "dragons": {
+            "kind": "int",
+            "min": 6,
+            "max": 7
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "dragons"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "dragons"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.gnomes",
+        "family": "sharing",
+        "textKey": "word.sharing.gnomes",
+        "vars": {
+          "gnomes": {
+            "kind": "int",
+            "min": 8,
+            "max": 9
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "gnomes"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "gnomes"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.class",
+        "family": "sharing",
+        "textKey": "word.sharing.class",
+        "vars": {
+          "children": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "children"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "school"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "children"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.books",
+        "family": "sharing",
+        "textKey": "word.sharing.books",
+        "vars": {
+          "classes": {
+            "kind": "int",
+            "min": 2,
+            "max": 4
+          },
+          "each": {
+            "kind": "int",
+            "min": 11,
+            "max": 24
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "classes"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "classes"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.giant",
+        "family": "sharing",
+        "textKey": "word.sharing.giant",
+        "vars": {
+          "friends": {
+            "kind": "int",
+            "min": 5,
+            "max": 6
+          },
+          "each": {
+            "kind": "int",
+            "min": 10,
+            "max": 16
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "friends"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "friends"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.bags",
+        "family": "grouping",
+        "textKey": "word.grouping.bags",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "girls"
+          },
+          "bags": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "bags"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.teams",
+        "family": "grouping",
+        "textKey": "word.grouping.teams",
+        "vars": {
+          "size": {
+            "kind": "int",
+            "min": 3,
+            "max": 4
+          },
+          "teams": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "teams"
+              },
+              "right": {
+                "kind": "var",
+                "name": "size"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "size"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.eggs",
+        "family": "grouping",
+        "textKey": "word.grouping.eggs",
+        "vars": {
+          "each": {
+            "kind": "int",
+            "min": 6,
+            "max": 6
+          },
+          "boxes": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "boxes"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.holiday",
+        "family": "grouping",
+        "textKey": "word.grouping.holiday",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "week": {
+            "kind": "int",
+            "min": 7,
+            "max": 7
+          },
+          "weeks": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "days": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "weeks"
+              },
+              "right": {
+                "kind": "var",
+                "name": "week"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "days"
+            },
+            "right": {
+              "kind": "var",
+              "name": "week"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.spiders",
+        "family": "grouping",
+        "textKey": "word.grouping.spiders",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "each": {
+            "kind": "int",
+            "min": 8,
+            "max": 8
+          },
+          "spiders": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "legs": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "spiders"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "legs"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.chests",
+        "family": "grouping",
+        "textKey": "word.grouping.chests",
+        "vars": {
+          "each": {
+            "kind": "int",
+            "min": 9,
+            "max": 9
+          },
+          "chests": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "chests"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.market",
+        "family": "grouping",
+        "textKey": "word.grouping.market",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "boys"
+          },
+          "each": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "bags": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "bags"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "treats"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.giant",
+        "family": "grouping",
+        "textKey": "word.grouping.giant",
+        "vars": {
+          "size": {
+            "kind": "int",
+            "min": 3,
+            "max": 6
+          },
+          "groups": {
+            "kind": "int",
+            "min": 10,
+            "max": 16
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "groups"
+              },
+              "right": {
+                "kind": "var",
+                "name": "size"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "size"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.times-as-many.fruit",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.fruit",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 4
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-as-many.sparks",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.sparks",
+        "vars": {
+          "small": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 6,
+            "max": 7
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-as-many.treasure",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.treasure",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 8,
+            "max": 9
+          },
+          "things": {
+            "kind": "word",
+            "list": "treasure"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-as-many.pond",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.pond",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "pond"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-as-many.savings",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.savings",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 11,
+            "max": 30
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-fewer.fruit",
+        "family": "times-fewer",
+        "textKey": "word.times-fewer.fruit",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "times"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.times-fewer.scales",
+        "family": "times-fewer",
+        "textKey": "word.times-fewer.scales",
+        "vars": {
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 6,
+            "max": 7
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "times"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.times-fewer.treasure",
+        "family": "times-fewer",
+        "textKey": "word.times-fewer.treasure",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 8,
+            "max": 9
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "times"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "treasure"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.times-fewer.pond",
+        "family": "times-fewer",
+        "textKey": "word.times-fewer.pond",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "times"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
         "id": "word.more-than.flowers",
         "family": "more-than",
         "textKey": "word.more-than.flowers",
@@ -1025,6 +2898,948 @@
           }
         },
         "operation": "add"
+      },
+      {
+        "id": "word.more-than.fruit",
+        "family": "more-than",
+        "textKey": "word.more-than.fruit",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": "add"
+      },
+      {
+        "id": "word.more-than.inverse",
+        "family": "more-than",
+        "textKey": "word.more-than.inverse",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "more"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": "sub"
+      },
+      {
+        "id": "word.more-than.plums",
+        "family": "more-than",
+        "textKey": "word.more-than.plums",
+        "vars": {
+          "eaten": {
+            "kind": "int",
+            "min": 6,
+            "max": 20
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "var",
+              "name": "eaten"
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": "add"
+      },
+      {
+        "id": "word.fewer-than.fruit",
+        "family": "fewer-than",
+        "textKey": "word.fewer-than.fruit",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "total": {
+            "kind": "int",
+            "min": 6,
+            "max": 20
+          },
+          "fewer": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "fewer"
+            }
+          }
+        },
+        "operation": "sub"
+      },
+      {
+        "id": "word.fewer-than.inverse",
+        "family": "fewer-than",
+        "textKey": "word.fewer-than.inverse",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "fewer": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "fewer"
+            }
+          }
+        },
+        "operation": "add"
+      },
+      {
+        "id": "word.fewer-than.class",
+        "family": "fewer-than",
+        "textKey": "word.fewer-than.class",
+        "vars": {
+          "count": {
+            "kind": "int",
+            "min": 10,
+            "max": 16
+          },
+          "fewer": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "fewer"
+            }
+          }
+        },
+        "operation": "sub"
+      },
+      {
+        "id": "word.leftover.bags",
+        "family": "leftover",
+        "textKey": "word.leftover.bags",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "girls"
+          },
+          "size": {
+            "kind": "int",
+            "min": 3,
+            "max": 5
+          },
+          "full": {
+            "kind": "int",
+            "min": 1,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 2
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.leftover.boats",
+        "family": "leftover",
+        "textKey": "word.leftover.boats",
+        "vars": {
+          "size": {
+            "kind": "int",
+            "min": 5,
+            "max": 9
+          },
+          "full": {
+            "kind": "int",
+            "min": 1,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 4
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.leftover.necklaces",
+        "family": "leftover",
+        "textKey": "word.leftover.necklaces",
+        "vars": {
+          "size": {
+            "kind": "int",
+            "min": 6,
+            "max": 9
+          },
+          "full": {
+            "kind": "int",
+            "min": 1,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 5
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.leftover.plates",
+        "family": "leftover",
+        "textKey": "word.leftover.plates",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "boys"
+          },
+          "size": {
+            "kind": "int",
+            "min": 2,
+            "max": 4
+          },
+          "full": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 1
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "treats"
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.leftover.album",
+        "family": "leftover",
+        "textKey": "word.leftover.album",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "size": {
+            "kind": "int",
+            "min": 6,
+            "max": 10
+          },
+          "full": {
+            "kind": "int",
+            "min": 1,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 5
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.two-step.bags",
+        "family": "two-step",
+        "textKey": "word.two-step.bags",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "bags": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "each": {
+            "kind": "int",
+            "min": 3,
+            "max": 10
+          },
+          "eaten": {
+            "kind": "int",
+            "min": 1,
+            "max": 5
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "eaten"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "bags"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "eaten"
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.tickets",
+        "family": "two-step",
+        "textKey": "word.two-step.tickets",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "price": {
+            "kind": "int",
+            "min": 5,
+            "max": 20
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "paid": {
+            "kind": "int",
+            "min": 100,
+            "max": 100
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "paid"
+            },
+            "right": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "price"
+              },
+              "right": {
+                "kind": "var",
+                "name": "count"
+              }
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.chairs",
+        "family": "two-step",
+        "textKey": "word.two-step.chairs",
+        "vars": {
+          "rows": {
+            "kind": "int",
+            "min": 3,
+            "max": 9
+          },
+          "each": {
+            "kind": "int",
+            "min": 5,
+            "max": 10
+          },
+          "kids": {
+            "kind": "int",
+            "min": 10,
+            "max": 40
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "rows"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "kids"
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.bowls",
+        "family": "two-step",
+        "textKey": "word.two-step.bowls",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "girls"
+          },
+          "plums": {
+            "kind": "int",
+            "min": 5,
+            "max": 20
+          },
+          "pears": {
+            "kind": "int",
+            "min": 5,
+            "max": 20
+          },
+          "bowls": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "group",
+              "inner": {
+                "kind": "op",
+                "op": "add",
+                "left": {
+                  "kind": "var",
+                  "name": "plums"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "pears"
+                }
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "bowls"
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.pocket",
+        "family": "two-step",
+        "textKey": "word.two-step.pocket",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "start": {
+            "kind": "int",
+            "min": 30,
+            "max": 100
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "price": {
+            "kind": "int",
+            "min": 3,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "school"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "start"
+            },
+            "right": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "count"
+              },
+              "right": {
+                "kind": "var",
+                "name": "price"
+              }
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.stickers",
+        "family": "two-step",
+        "textKey": "word.two-step.stickers",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "packs": {
+            "kind": "int",
+            "min": 2,
+            "max": 6
+          },
+          "each": {
+            "kind": "int",
+            "min": 5,
+            "max": 10
+          },
+          "given": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "packs"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "given"
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.garden",
+        "family": "two-step",
+        "textKey": "word.two-step.garden",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "rows": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          },
+          "each": {
+            "kind": "int",
+            "min": 3,
+            "max": 10
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "rows"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": null
       }
     ],
     "placement": {

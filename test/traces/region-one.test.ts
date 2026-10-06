@@ -17,8 +17,8 @@ import { PERFECT, Player, trajectoryDigest } from './support';
 import type { Adapter } from './support';
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = 'e66145c9d4a8ea7d';
-const GOLDEN_TRAJECTORY = '1f771f4f080030dd';
+const GOLDEN_HASH = '99031f163c0ef971';
+const GOLDEN_TRAJECTORY = '67a48dc96fd70394';
 
 const SEED = 'golden-region-one';
 const LEVELS = [

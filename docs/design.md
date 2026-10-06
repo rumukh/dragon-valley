@@ -137,15 +137,15 @@ New dragons: Clover (level 1), Petal (level 2). Boss: the Forest Witch.
 New dragons: Ember (level 1), Rainbow (level 2). Boss: Krakonoš. Strategy pictures: "5 groups + 1
 group" and "5 groups + 2 groups".
 
-| Level                | Title            | Focus                             | Activities                                                       |
-| -------------------- | ---------------- | --------------------------------- | ---------------------------------------------------------------- |
-| `fire-mountain.1`    | Ember's Spikes   | ×6 = 5 groups + 1 group           | Egg Grid (×6 split 5 + 1); Feeding Time (×6; 8; choice)          |
-| `fire-mountain.2`    | Rainbow Stripes  | ×7 = 5 groups + 2 groups          | Egg Grid (×7 split 5 + 2); Feeding Time (×7; 10; choice)         |
-| `fire-mountain.3`    | Hot Recall       | ×6, ×7 recall                     | Feeding Time (×6, ×7; 12; keypad); Number Trail (×7)             |
-| `fire-mountain.4`    | Sharing the Fire | ÷6, ÷7, missing factors           | Fact Family Nest (6, 7); Feeding Time (÷ and missing factor; 10) |
-| `fire-mountain.5`    | Mountain Mix     | Review ×2-×7                      | Feeding Time (mix; 12; auto); Memory Match                       |
-| `fire-mountain.6`    | Mountain Stories | "N times as many / N times fewer" | Riddle Scrolls (6)                                               |
-| `fire-mountain.boss` | Krakonoš         | Region mix + review               | Boss (meter 18)                                                  |
+| Level                | Title            | Focus                              | Activities                                                       |
+| -------------------- | ---------------- | ---------------------------------- | ---------------------------------------------------------------- |
+| `fire-mountain.1`    | Ember's Spikes   | ×6 = 5 groups + 1 group            | Egg Grid (×6 split 5 + 1); Feeding Time (×6; 8; choice)          |
+| `fire-mountain.2`    | Rainbow Stripes  | ×7 = 5 groups + 2 groups           | Egg Grid (×7 split 5 + 2); Feeding Time (×7; 10; choice)         |
+| `fire-mountain.3`    | Hot Recall       | ×6, ×7 recall                      | Feeding Time (×6, ×7; 12; keypad); Number Trail (×7)             |
+| `fire-mountain.4`    | Sharing the Fire | ÷6, ÷7, missing factors            | Fact Family Nest (6, 7); Feeding Time (÷ and missing factor; 10) |
+| `fire-mountain.5`    | Mountain Mix     | Review ×2-×7                       | Feeding Time (mix; 12; auto); Memory Match                       |
+| `fire-mountain.6`    | Mountain Stories | "N times as many", both directions | Riddle Scrolls (6)                                               |
+| `fire-mountain.boss` | Krakonoš         | Region mix + review                | Boss (meter 18)                                                  |
 
 ### 3.4 Crystal Caves (`crystal-caves`): ×8 and ×9
 
@@ -171,7 +171,7 @@ No new dragons; the table dragons grow to youngling with division. Boss: the Wat
 | `sharing-lake.1`    | Fair Shares        | Division as sharing and grouping, all tables | Sharing Feast (5); Feeding Time (÷ all; 10; choice) |
 | `sharing-lake.2`    | Missing Pieces     | Missing factor `? · 6 = 42`                  | Feeding Time (missing factor; 12; auto)             |
 | `sharing-lake.3`    | Fact Family Island | × and : as one family                        | Fact Family Nest (all; 4); Memory Match (× ↔ ÷)     |
-| `sharing-lake.4`    | Times as Many      | N times as many / N times fewer              | Riddle Scrolls (times-as-many, times-fewer; 6)      |
+| `sharing-lake.4`    | Times as Many      | "N times as many", both directions           | Riddle Scrolls (`times-as-many`, `times-fewer`; 6)  |
 | `sharing-lake.5`    | More or Times?     | "N more" versus "N times as many"            | Riddle Scrolls (contrast; 6); Compare Stones (6)    |
 | `sharing-lake.6`    | Lake Mix           | All division, review                         | Feeding Time (÷ all; 14; keypad)                    |
 | `sharing-lake.boss` | The Water Goblin   | Division mix + review                        | Boss (meter 20)                                     |
@@ -356,9 +356,11 @@ retrieval like any other item (`compare:*` buckets).
 A scroll unrolls with a short story (🔊 read-aloud). With `options.pickOperation` (default true)
 the child first picks the operation (+, −, ·, :) and then answers the number. A wrong operation pick
 counts as a miss for the item and shows the right operation. Families: equal groups, sharing,
-grouping, N times as many, N times fewer, N more, N fewer, leftovers, two-step. Additive families are
-included on purpose: "3 more" versus "3 times as many" is the classic confusion, so Sunny Meadow 6,
-Sharing Lake 5 and the bosses contrast them.
+grouping, N times as many in both directions ("Tom has 3 times as many" and "Tom has 12. That is 3
+times as many as Eva has", Czech _N-krát více_ and _N-krát méně_; the stories never say "N times
+fewer", see [curriculum.md](curriculum.md) §6), N more, N fewer, leftovers, two-step. Additive
+families are included on purpose: "3 more" versus "3 times as many" is the classic confusion, so
+Sunny Meadow 6, Sharing Lake 5 and the bosses contrast them.
 
 ### 5.9 Golem Orders (`golem-orders`): custom `dv.golem-orders`
 

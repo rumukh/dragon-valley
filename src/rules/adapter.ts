@@ -6,7 +6,7 @@
  * jobs, coins, eggs, dragon growth, stickers, the market, outfits, rule settings, state
  * validation and the full view.
  *
- * Level runs skip activities whose generators are not implemented yet.
+ * Level runs skip activities this build cannot play yet (minigame boards not implemented).
  */
 import { createRuntimeHost, failure, requireValue, schema, success } from '@aegis/runtime';
 import type {

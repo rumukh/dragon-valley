@@ -8,7 +8,8 @@
  *    unlock reachability, skill pools, activity options, balance sanity).
  * 2. Every catalog key the pack uses exists in content/catalogs/en.content.json; every catalog is
  *    a flat string map; word-problem placeholders match their template variables.
- * 3. Story lines keep to the child profile's sentence length (@aegis/narrative CHILD_PROFILE).
+ * 3. Story lines and word-problem sentences keep to the child profile's sentence length
+ *    (@aegis/narrative CHILD_PROFILE), word problems counted with their longest names and things.
  * 4. Every shipped pack in content/history/ is valid under the current schema and named by its
  *    revision; the current revision is not reused for different content.
  * 5. Art references (backgrounds, rigs, cosmetics, sticker icons and frames) are checked against
@@ -57,6 +58,35 @@ export { CHILD_PROFILE, tokenizeWords } from '@aegis/narrative';`,
 /** @param {string} path */
 function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'));
+}
+
+/**
+ * The most words a word-problem sentence can have once its placeholders are filled: a number is
+ * one word, a name or thing as many words as its longest catalog text (both plural forms of a
+ * thing count). Placeholders are replaced by stand-in words so that "{name}'s" stays one word.
+ * @param {string} sentence
+ * @param {{ vars: Record<string, { kind: string; list?: string; word?: string }> }} template
+ * @param {readonly { id: string; kind: string; entries: readonly string[] }[]} lists
+ * @param {Record<string, string>} english
+ * @param {{ tokenizeWords: (text: string) => string[] }} contract
+ */
+export function wordProblemWords(sentence, template, lists, english, contract) {
+  /** @param {string} name */
+  const longest = (name) => {
+    const v = template.vars[name];
+    const word = v?.kind === 'form' && v.word !== undefined ? template.vars[v.word] : v;
+    const list = lists.find((l) => l.id === word?.list);
+    if (!list) return 1;
+    const keys =
+      list.kind === 'thing'
+        ? list.entries.flatMap((e) => [`${e}.one`, `${e}.other`])
+        : list.entries;
+    return Math.max(1, ...keys.map((key) => contract.tokenizeWords(english[key] ?? '').length));
+  };
+  const filled = sentence.replace(/\{([A-Za-z][A-Za-z0-9_]*)\}/g, (_whole, name) =>
+    Array.from({ length: longest(name) }, () => 'x').join(' '),
+  );
+  return contract.tokenizeWords(filled).length;
 }
 
 /**
@@ -137,7 +167,7 @@ export async function validateContentTree(options = {}) {
   for (const template of data.wordTemplates) {
     const text = english[template.textKey];
     if (text === undefined) continue;
-    const placeholders = [...text.matchAll(/\{([A-Za-z][A-Za-z0-9_]*)\}/g)].map((m) => m[1]);
+    const placeholders = [...text.matchAll(/\{([A-Za-z][A-Za-z0-9_]*)\}/g)].map((m) => m[1] ?? '');
     for (const name of placeholders) {
       if (!(name in template.vars))
         errors.push(`${template.textKey}: placeholder {${name}} is not a template variable`);
@@ -154,6 +184,18 @@ export async function validateContentTree(options = {}) {
             `${key}: "${sentence.trim()}" has ${words} words (max ${contract.CHILD_PROFILE.maxWordsPerSentence})`,
           );
         }
+      }
+    }
+  }
+  for (const template of data.wordTemplates) {
+    const text = english[template.textKey];
+    if (text === undefined) continue;
+    for (const sentence of text.split(/[.!?]+/)) {
+      const words = wordProblemWords(sentence, template, data.wordLists, english, contract);
+      if (words > contract.CHILD_PROFILE.maxWordsPerSentence) {
+        errors.push(
+          `${template.textKey}: "${sentence.trim()}" can have ${words} words (max ${contract.CHILD_PROFILE.maxWordsPerSentence})`,
+        );
       }
     }
   }

@@ -230,10 +230,18 @@ export type TemplateExpr =
   | { kind: 'op'; op: Operator; left: TemplateExpr; right: TemplateExpr }
   | { kind: 'group'; inner: TemplateExpr };
 
+/**
+ * A template variable. `int` is a whole number drawn from `problems` in `min..max`. `word` is an
+ * entry drawn from `words` out of a word list: a name's catalog key, or a thing's plural form
+ * `<key>.other`. `calc` is computed from numeric vars. `form` is the thing drawn for the `word`
+ * var in the form that agrees with the number in the `count` var: `<key>.one` exactly when it
+ * is 1, else `<key>.other`, so both "1 apple" and "3 apples" read correctly.
+ */
 export type WordVar =
   | { kind: 'int'; min: number; max: number }
   | { kind: 'word'; list: string }
-  | { kind: 'calc'; expr: TemplateExpr };
+  | { kind: 'calc'; expr: TemplateExpr }
+  | { kind: 'form'; word: string; count: string };
 
 export type WordModel =
   | { kind: 'value'; expr: TemplateExpr }
@@ -243,7 +251,8 @@ export type WordModel =
  * A word-problem template. `textKey` is a catalog string with `{placeholders}` naming `vars`;
  * `model` is the arithmetic the story asks for; `operation` is the operation the child picks
  * first (Riddle Scrolls), or `null`. Generators draw `int` vars from `problems` and `word` vars
- * from `words`, compute `calc` vars, and reject draws whose model is not a valid problem.
+ * from `words`, compute `calc` and `form` vars, and reject draws whose model is not a valid
+ * problem.
  */
 export interface WordTemplate {
   id: string;
@@ -497,6 +506,7 @@ const wordTemplateSchema: Schema<WordTemplate> = schema.object({
       ),
       schema.object({ kind: schema.literal('word'), list: contentId }),
       schema.object({ kind: schema.literal('calc'), expr: templateExprSchema }),
+      schema.object({ kind: schema.literal('form'), word: contentId, count: contentId }),
     ),
   ),
   model: schema.union(
@@ -936,18 +946,54 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
     if (items.length === 0)
       problem(id, 'params', 'The skill can never produce a problem.', 'empty-skill');
   }
+  const listKinds = new Map(data.wordLists.map((w) => [w.id, w.kind]));
   for (const template of data.wordTemplates) {
-    const defined = new Set(Object.keys(template.vars));
+    const vars = template.vars;
+    const numeric = (name: string) => vars[name]?.kind === 'int' || vars[name]?.kind === 'calc';
     const used = [
-      ...Object.values(template.vars).flatMap((v) =>
-        v.kind === 'calc' ? templateVars(v.expr) : [],
-      ),
+      ...Object.values(vars).flatMap((v) => (v.kind === 'calc' ? templateVars(v.expr) : [])),
       ...(template.model.kind === 'value'
         ? templateVars(template.model.expr)
         : [...templateVars(template.model.dividend), ...templateVars(template.model.divisor)]),
     ];
     for (const name of used) {
-      if (!defined.has(name)) problem(template.id, 'model', `Undefined variable "${name}".`);
+      if (vars[name] === undefined) problem(template.id, 'model', `Undefined variable "${name}".`);
+      else if (!numeric(name)) problem(template.id, 'model', `Variable "${name}" is not a number.`);
+    }
+    for (const [name, v] of Object.entries(vars)) {
+      if (v.kind !== 'form') continue;
+      const word = vars[v.word];
+      if (word?.kind !== 'word' || listKinds.get(word.list) !== 'thing') {
+        problem(template.id, `vars.${name}.word`, 'A form var names a word var over a thing list.');
+      }
+      if (!numeric(v.count)) {
+        problem(template.id, `vars.${name}.count`, 'A form var agrees with an int or calc var.');
+      }
+    }
+    // Calculated vars are computed in dependency order, so they must not depend on each other in
+    // a cycle (undefined names are reported above and do not block).
+    const resolved = new Set(Object.keys(vars).filter((name) => vars[name]?.kind !== 'calc'));
+    for (let progress = true; progress;) {
+      progress = false;
+      for (const [name, v] of Object.entries(vars)) {
+        const ready =
+          v.kind === 'calc' &&
+          !resolved.has(name) &&
+          templateVars(v.expr).every((n) => resolved.has(n) || vars[n] === undefined);
+        if (ready) {
+          resolved.add(name);
+          progress = true;
+        }
+      }
+    }
+    for (const name of Object.keys(vars)) {
+      if (!resolved.has(name)) {
+        problem(
+          template.id,
+          `vars.${name}`,
+          'Calculated variables depend on each other in a cycle.',
+        );
+      }
     }
     if (template.model.kind === 'divrem' && template.family !== 'leftover') {
       problem(template.id, 'family', 'Only leftover templates may use a divrem model.');
