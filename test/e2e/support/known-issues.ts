@@ -36,6 +36,8 @@ export interface Defect {
   readonly owner: Owner;
   readonly severity: Severity;
   readonly title: string;
+  /** Only these engines show it; on the others its assertions stay strict. */
+  readonly engines?: readonly Engine[];
 }
 
 export const DEFECTS = {
@@ -67,7 +69,7 @@ export const DEFECTS = {
     owner: 'S3',
     severity: 'major',
     title:
-      'At 200 % text, words and numbers break inside: two-digit choice tiles stack their digits ("1" over "8"), the keypad\'s OK splits into "O/K", and the hub\'s adventure button, "Today\'s goal", level-card activities and Egg Grid labels break mid-word.',
+      'Words and numbers break inside narrow boxes: at 200 % text two-digit choice tiles stack their digits ("1" over "8"), the keypad\'s OK splits into "O/K", and the hub\'s adventure button, "Today\'s goal", level-card activities and Egg Grid labels break mid-word; on a phone the prologue\'s egg labels break even at normal size ("bubbl/y", "golde/n").',
   },
   'DV-QA-08': {
     owner: 'S3',
@@ -99,6 +101,13 @@ export const DEFECTS = {
     title:
       'The placement results celebrate "A new egg: Bubbles" for the egg the child chose in the prologue minutes before: the event inbox carries earlier events into the next results.',
   },
+  'DV-QA-13': {
+    owner: 'S3',
+    severity: 'major',
+    engines: ['webkit'],
+    title:
+      "In WebKit a keeper's Text size 200 % does not show when the keeper opens: <html> gets --aegis-text-scale: 2, but the root font size stays 24 px and the hub is drawn at normal size until something else restyles <html>.",
+  },
 } as const satisfies Record<string, Defect>;
 
 export type DefectId = keyof typeof DEFECTS;
@@ -128,6 +137,12 @@ export const KNOWN_LAYOUT: readonly KnownLayout[] = [
     problem: /^the word ".+" breaks as ".+" in </,
   },
   {
+    // Even at normal size the three eggs share a phone's width (WebKit, and Chromium on Linux).
+    defect: 'DV-QA-06',
+    where: /^05-story-eggs \(phone portrait\)$/,
+    problem: /^the word ".+" breaks as ".+" in <span story-choice-[a-z]+>/,
+  },
+  {
     defect: 'DV-QA-10',
     where: /^text-200\/(06-hub|12-hub-after|17-egg-grid) \(phone portrait\)$/,
     problem: /^the page scrolls sideways|sticks out of the 390px viewport/,
@@ -140,6 +155,18 @@ export const KNOWN_LAYOUT: readonly KnownLayout[] = [
   },
 ];
 
+/** The engine a test runs on: its project's browser (Edge and Chrome channels are Chromium). */
+export function engineOf(testInfo: TestInfo): string {
+  const use = testInfo.project.use;
+  return use.browserName ?? use.defaultBrowserType ?? 'chromium';
+}
+
+/** Whether `id` can show on this test's engine (an engine-specific defect stays strict elsewhere). */
+function appliesHere(testInfo: TestInfo, id: DefectId): boolean {
+  const engines: readonly string[] | undefined = (DEFECTS[id] as Defect).engines;
+  return engines === undefined || engines.includes(engineOf(testInfo));
+}
+
 /** Split layout problems into unknown ones (failures) and known defects (annotated). */
 export function knownLayout(
   testInfo: TestInfo,
@@ -149,7 +176,10 @@ export function knownLayout(
   const unknown: string[] = [];
   for (const problem of problems) {
     const known = KNOWN_LAYOUT.find(
-      (entry) => entry.where.test(where) && entry.problem.test(problem),
+      (entry) =>
+        entry.where.test(where) &&
+        entry.problem.test(problem) &&
+        appliesHere(testInfo, entry.defect),
     );
     if (!known) {
       unknown.push(problem);
@@ -167,7 +197,8 @@ export function knownLayout(
 /**
  * Run `assertion` (the behaviour the game should have). If it fails and `id` is a listed
  * defect, record that the defect still reproduces instead of failing; if it passes, record
- * that the marker can be removed.
+ * that the marker can be removed. A defect listed for some engines only fails as usual on the
+ * others.
  */
 export async function unlessKnown(
   testInfo: TestInfo,
@@ -175,6 +206,10 @@ export async function unlessKnown(
   assertion: () => Promise<void>,
 ): Promise<void> {
   const defect: Defect = DEFECTS[id];
+  if (!appliesHere(testInfo, id)) {
+    await assertion();
+    return;
+  }
   try {
     await assertion();
     testInfo.annotations.push({

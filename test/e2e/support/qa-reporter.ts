@@ -89,6 +89,7 @@ class QaSummary implements Reporter {
     const defects = new Map<string, Set<string>>();
     const fixed = new Map<string, Set<string>>();
     const advice = new Map<string, number>();
+    const evidence: string[] = [];
     for (const { test, run } of this.results) {
       const project = projectOf(test);
       for (const note of notes(test, run)) {
@@ -102,6 +103,8 @@ class QaSummary implements Reporter {
           defects.set(head, (defects.get(head) ?? new Set()).add(project));
         } else if (note.type === 'defect fixed?') {
           fixed.set(description, (fixed.get(description) ?? new Set()).add(project));
+        } else if (/^DV-QA-\d+ evidence$/.test(note.type)) {
+          evidence.push(`- ${note.type} _(${project})_: \`${description.replace(/`/g, "'")}\``);
         } else if (note.type === 'axe advisory') {
           const rule = / ([a-z0-9-]+ \((?:minor|moderate|serious|critical|unknown)\)) at /.exec(
             description,
@@ -124,6 +127,9 @@ class QaSummary implements Reporter {
     lines.push('### Known defects that still reproduce', '');
     if (defects.size === 0) lines.push('None.');
     for (const [head, set] of [...defects].sort()) lines.push(`- ${head}${where(set)}`);
+    if (evidence.length) {
+      lines.push('', '### Evidence the tests recorded for defects', '', ...evidence.sort());
+    }
     lines.push('', '### Defect markers that did not reproduce (fixed?)', '');
     if (fixed.size === 0) lines.push('None.');
     for (const [description, set] of [...fixed].sort()) lines.push(`- ${description}${where(set)}`);
