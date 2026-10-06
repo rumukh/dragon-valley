@@ -99,10 +99,14 @@ describe('scripts/build.mjs', () => {
     ).rejects.toThrow(/Forbidden module in a browser bundle: "node:fs"/);
   });
 
-  it('rejects a site whose bytes drift from its resource graph', () => {
+  it('rejects a site whose bytes drift from its resource graph, even at the same length', () => {
     const copy = join(directory, 'tampered');
     cpSync(site.directory, copy, { recursive: true });
-    writeFileSync(join(copy, 'app.js'), readFileSync(join(copy, 'app.js'), 'utf8') + '\n//');
+    const original = readFileSync(join(copy, 'app.js'), 'utf8');
+    const tampered = (original.startsWith('/') ? ' ' : '/') + original.slice(1);
+    expect(tampered.length, 'the tamper keeps the byte count').toBe(original.length);
+    expect(tampered).not.toBe(original);
+    writeFileSync(join(copy, 'app.js'), tampered);
     expect(() => verifySite(copy)).toThrow(/app\.js/);
   });
 
