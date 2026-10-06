@@ -50,6 +50,12 @@ import { createToaster } from '../ui/toast';
 /** Live events kept for screens; older ones fall off (they only drive one-shot celebrations). */
 const MAX_INBOX = 64;
 
+/**
+ * Events whose sounds belong to a celebration screen, which cues them in time with its picture
+ * (the hatch fanfare lands when the shell pops), instead of when the answer is committed.
+ */
+const CELEBRATION_SOUNDS: ReadonlySet<string> = new Set(['dragon.hatched']);
+
 /** The router key of a keeper's play screen. */
 export function playKey(keeperId: string): string {
   return `play:${keeperId}`;
@@ -276,8 +282,11 @@ export function createApp(options: AppOptions): App {
         },
       };
       const unsubscribeCommits = game.host.subscribeCommits((commit) => {
+        // A new round starts a new results story: what came before it (the first egg chosen in
+        // the story, an earlier round's sticker) is not celebrated again at this round's end.
+        if (commit.events.some((event) => event.type === 'round.started')) inbox.length = 0;
         for (const event of commit.events) {
-          audio.cue(event.type, cueContext(event.data));
+          if (!CELEBRATION_SOUNDS.has(event.type)) audio.cue(event.type, cueContext(event.data));
           inbox.push(event as unknown as GameEvent);
           if (inbox.length > MAX_INBOX) inbox.shift();
         }

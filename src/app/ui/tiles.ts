@@ -21,6 +21,8 @@ export interface TilesOptions {
   onChoose(choice: TileChoice): void | Promise<void>;
   /** Let typed digits select a tile (number answers). */
   digitSelect?: boolean;
+  /** The labels are single signs (+ − · : < > =), drawn bigger than numbers. */
+  signs?: boolean;
   testIdPrefix?: string;
 }
 
@@ -79,17 +81,20 @@ export function createTiles(kit: UiKit, options: TilesOptions): TilesView {
   const blocked = new Set<number>();
 
   const tiles = options.choices.map((choice, index) => {
-    const tile = h('button', {
-      className: 'dv-tile',
-      text: choice.label,
-      testId: `${prefix}-${choice.id}`,
-      attributes: {
-        type: 'button',
-        tabindex: index === 0 ? '0' : '-1',
-        'aria-pressed': 'false',
-        ...(choice.ariaLabel ? { 'aria-label': choice.ariaLabel } : {}),
+    const tile = h(
+      'button',
+      {
+        className: 'dv-tile',
+        testId: `${prefix}-${choice.id}`,
+        attributes: {
+          type: 'button',
+          tabindex: index === 0 ? '0' : '-1',
+          'aria-pressed': 'false',
+          ...(choice.ariaLabel ? { 'aria-label': choice.ariaLabel } : {}),
+        },
       },
-    });
+      options.signs ? h('span', { className: 'dv-tile__sign', text: choice.label }) : choice.label,
+    );
     tile.addEventListener('click', () => choose(index));
     tile.addEventListener('focus', () => setCurrent(index, false));
     return tile;

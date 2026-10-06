@@ -8,7 +8,13 @@
  * to be fixed. A board this build cannot draw shows a kind message and a way back.
  */
 import { formatExpr, formatFace, num, op, OPERATOR_SYMBOLS } from '../../rules/contract';
-import type { BoardView, GameView, MinigameMove, MinigameRoundView } from '../../rules/contract';
+import type {
+  BoardView,
+  EggGridSplit,
+  GameView,
+  MinigameMove,
+  MinigameRoundView,
+} from '../../rules/contract';
 import type { MessageKey } from '../i18n/messages';
 import { numberToWords } from '../speech/numbers';
 import { speakFace } from '../speech/verbalizer';
@@ -232,6 +238,20 @@ function numberTrail(context: BoardContext): BoardPainter {
 
 // ---- Egg Grid -------------------------------------------------------------------------------
 
+/** Where the board's strategy picture splits the rows of a nest (after how many rows). */
+export function eggSplit(split: EggGridSplit | undefined, rows: number): number | null {
+  if (split === 'five-plus' && rows > 5) return 5;
+  if (split === 'double' && rows % 2 === 0 && rows >= 2) return rows / 2;
+  return null;
+}
+
+/**
+ * Egg Grid: a field of nest spots, maxSide × maxSide. Tapping a spot builds the nest up to it
+ * (5 rows of 7 is one tap); the steppers do the same from the keyboard. The nest is described in
+ * words ("5 rows of 7"), and its total is only told by Check: a right nest, or a hint after a
+ * wrong one ("5 rows of 8 make 40. We need 35."), so the board is not a guessing game against a
+ * counter.
+ */
 function eggGrid(context: BoardContext): BoardPainter {
   const { app } = context;
   const t = app.kit.t;
@@ -241,12 +261,17 @@ function eggGrid(context: BoardContext): BoardPainter {
   let columns = Math.max(1, first.columns);
 
   const goal = h('p', { className: 'dv-nest__goal', testId: 'egg-goal' });
-  const nest = h('div', {
-    className: 'dv-nest',
-    testId: 'egg-nest',
+  const sentence = h('p', {
+    className: 'dv-nest__sentence',
+    testId: 'egg-sentence',
+    attributes: { 'aria-live': 'polite' },
+  });
+  // A picture for pointing at: the steppers below are the same control for the keyboard.
+  const grid = h('div', {
+    className: 'dv-egg-grid',
+    testId: 'egg-grid',
     attributes: { 'aria-hidden': 'true' },
   });
-  const size = h('p', { className: 'dv-nest__size', testId: 'egg-size' });
   const found = h('ul', {
     className: 'dv-nest__found',
     testId: 'egg-found',
@@ -257,16 +282,24 @@ function eggGrid(context: BoardContext): BoardPainter {
     columns: h('span', { className: 'dv-stepper__value', testId: 'egg-columns-value' }),
   };
 
+  const build = (nextRows: number, nextColumns: number): void => {
+    const max = context.board('egg-grid')?.maxSide ?? 10;
+    rows = Math.min(max, Math.max(1, nextRows));
+    columns = Math.min(max, Math.max(1, nextColumns));
+    app.kit.cue('ui.tap');
+    draw();
+  };
+
+  grid.addEventListener('click', (event) => {
+    const spot = event.target instanceof Element ? event.target.closest('[data-row]') : null;
+    if (!(spot instanceof HTMLElement)) return;
+    build(Number(spot.dataset['row']), Number(spot.dataset['column']));
+  });
+
   const stepper = (which: 'rows' | 'columns'): HTMLElement => {
     const label = t(which === 'rows' ? 'egg.rows' : 'egg.columns');
-    const change = (delta: number): void => {
-      const board = context.board('egg-grid');
-      const max = board?.maxSide ?? 10;
-      if (which === 'rows') rows = Math.min(max, Math.max(1, rows + delta));
-      else columns = Math.min(max, Math.max(1, columns + delta));
-      app.kit.cue('ui.tap');
-      draw();
-    };
+    const change = (delta: number): void =>
+      which === 'rows' ? build(rows + delta, columns) : build(rows, columns + delta);
     return h(
       'div',
       { className: 'dv-stepper', attributes: { role: 'group', 'aria-label': label } },
@@ -295,33 +328,45 @@ function eggGrid(context: BoardContext): BoardPainter {
     );
   };
 
-  /** The nest as built so far, with the board's strategy split drawn between rows. */
+  /** "5 rows of 7", "1 row of 9". */
+  const nest = (nestRows: number, nestColumns: number): string =>
+    t(nestRows === 1 ? 'egg.nest.one' : 'egg.nest.other', {
+      rows: nestRows,
+      columns: nestColumns,
+    });
+
+  /** The field of spots with the nest built so far and the board's strategy picture. */
   const draw = (): void => {
     const board = context.board('egg-grid');
+    const side = board?.maxSide ?? 10;
     values.rows.textContent = String(rows);
     values.columns.textContent = String(columns);
-    const split =
-      board?.split === 'five-plus' && rows > 5
-        ? 5
-        : board?.split === 'double' && rows % 2 === 0 && rows >= 2
-          ? rows / 2
-          : null;
-    const eggs: Node[] = [];
-    for (let row = 0; row < rows; row++) {
-      if (split !== null && row === split) eggs.push(h('span', { className: 'dv-nest__split' }));
-      for (let column = 0; column < columns; column++) {
-        eggs.push(h('span', { className: 'dv-nest__egg' }));
+    sentence.textContent = nest(rows, columns);
+    const split = eggSplit(board?.split, rows);
+    // Nine rows as "ten rows, one crossed out": the tenth row's eggs are shown missing.
+    const tenMinus = board?.split === 'ten-minus' && rows === 9 && side >= 10;
+    const spots: Node[] = [];
+    for (let row = 1; row <= side; row++) {
+      if (split !== null && row === split + 1) {
+        spots.push(h('span', { className: 'dv-egg-grid__split' }));
+      }
+      for (let column = 1; column <= side; column++) {
+        const state =
+          row <= rows && column <= columns
+            ? 'egg'
+            : tenMinus && row === 10 && column <= columns
+              ? 'missing'
+              : 'empty';
+        spots.push(
+          h('span', {
+            className: 'dv-egg-grid__spot',
+            dataset: { row: String(row), column: String(column), state },
+          }),
+        );
       }
     }
-    if (board?.split === 'ten-minus' && rows === 9) {
-      eggs.push(h('span', { className: 'dv-nest__split' }));
-      for (let column = 0; column < columns; column++) {
-        eggs.push(h('span', { className: 'dv-nest__egg dv-nest__egg--missing' }));
-      }
-    }
-    nest.style.setProperty('--columns', String(columns));
-    nest.replaceChildren(...eggs);
-    size.textContent = t('egg.size', { count: rows * columns });
+    grid.style.setProperty('--side', String(side));
+    grid.replaceChildren(...spots);
   };
 
   const paint = (): void => {
@@ -333,13 +378,22 @@ function eggGrid(context: BoardContext): BoardPainter {
       rows = Math.max(1, board.rows);
       columns = Math.max(1, board.columns);
     }
+    const latest = board.found[board.found.length - 1];
     context.status(
-      board.last === 'found'
-        ? t('egg.found', { left: board.find - board.found.length })
+      board.last === 'found' && latest
+        ? t('egg.found', {
+            nest: nest(latest.rows, latest.columns),
+            product: board.product,
+            left: board.find - board.found.length,
+          })
         : board.last === 'again'
-          ? t('egg.again')
+          ? t('egg.again', { nest: nest(board.rows, board.columns) })
           : board.last === 'wrong'
-            ? t('egg.wrong', { product: board.product })
+            ? t('egg.wrong', {
+                nest: nest(board.rows, board.columns),
+                total: board.rows * board.columns,
+                product: board.product,
+              })
             : t('egg.how'),
     );
     goal.textContent = t('egg.goal', { product: board.product, count: board.find });
@@ -369,13 +423,17 @@ function eggGrid(context: BoardContext): BoardPainter {
   return {
     element: h(
       'div',
-      { className: 'dv-minigame__board' },
-      goal,
-      h('div', { className: 'dv-nest-builder' }, stepper('rows'), stepper('columns')),
-      nest,
-      size,
-      check,
-      found,
+      { className: 'dv-minigame__board dv-egg-board' },
+      h('div', { className: 'dv-egg-board__field' }, grid),
+      h(
+        'div',
+        { className: 'dv-egg-board__panel' },
+        goal,
+        sentence,
+        h('div', { className: 'dv-nest-builder' }, stepper('rows'), stepper('columns')),
+        check,
+        found,
+      ),
     ),
     paint,
     focus: () => check,

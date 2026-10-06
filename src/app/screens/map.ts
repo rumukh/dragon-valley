@@ -224,7 +224,13 @@ export function regionScreen(app: App, keeperId: string, regionId: string): Scre
             },
           },
           level.kind === 'boss' && region.boss
-            ? bossArt(region.boss.id, region.boss.defeated ? 'won' : 'start', 'dv-road__boss')
+            ? // A small boss on the road stands still; it comes alive on its own level.
+              bossArt(
+                region.boss.id,
+                region.boss.defeated ? 'won' : 'start',
+                'dv-road__boss',
+                false,
+              )
             : artIcon(nodeIcon(level), accent ? { accent } : {}),
           number === null
             ? null

@@ -417,10 +417,14 @@
 
 /* ---- Hub ------------------------------------------------------------------------------- */
 
+/* One column on phones (dragon, today's card, week, places); on a landscape tablet the dragon,
+   its week and the places stand beside today's card, so the whole hub fits on one screen. */
 .dv-hub__layout {
   display: grid;
-  align-items: center;
-  gap: clamp(12px, 2.4vw, 32px);
+  grid-template-areas: 'nest' 'today' 'week' 'places';
+  align-content: center;
+  justify-items: center;
+  gap: clamp(10px, 1.8vh, 24px) clamp(12px, 2.4vw, 32px);
   flex: 1;
   width: min(100%, 64em);
   margin-inline: auto;
@@ -428,14 +432,30 @@
 
 @media (min-width: 900px) and (orientation: landscape) {
   .dv-hub__layout {
+    grid-template-areas:
+      'nest today'
+      'week today'
+      'places today';
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
   }
 }
 
-.dv-hub__side {
-  display: grid;
-  justify-items: center;
-  gap: 0.8em;
+.dv-hub__layout > .dv-hub__nest {
+  grid-area: nest;
+}
+
+.dv-hub__layout > .dv-hub__today {
+  grid-area: today;
+  align-self: center;
+}
+
+.dv-hub__layout > .dv-hub__week {
+  grid-area: week;
+}
+
+.dv-hub__layout > .dv-hub__places {
+  grid-area: places;
 }
 
 .dv-hub__week {
@@ -635,6 +655,15 @@
   min-width: 0;
 }
 
+/* On a landscape tablet the activity's name and its progress share one line. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-round__header {
+    grid-template-columns: auto minmax(9em, 15em);
+    align-items: center;
+    column-gap: 0.8em;
+  }
+}
+
 .dv-round__title {
   font-size: 1.1rem;
 }
@@ -679,10 +708,18 @@
 
 .dv-round__cast {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: center;
   gap: 0.5em;
   min-width: 0;
+}
+
+/* The picture behind a problem gets its own line under the dragon (and the boss). */
+.dv-round__cast > .dv-round__model {
+  display: grid;
+  justify-items: center;
+  flex-basis: 100%;
 }
 
 .dv-round__dragon svg {
@@ -845,6 +882,16 @@
   border-radius: 0.25em;
   color: var(--dv-ink-muted);
   background: var(--dv-paper);
+}
+
+/* The empty place of the sign a story asks for: a round, dashed hole the sign tiles fill. */
+.dv-problem__slot {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  border: 0.07em dashed var(--dv-primary-deep);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--dv-primary) 14%, var(--dv-paper));
 }
 
 /* Models after a miss: dots in rows and columns, or equal groups with leftovers as rings. */
@@ -1025,28 +1072,124 @@
   text-align: center;
 }
 
-.dv-nest {
+/* Egg Grid: the field of nest spots beside its controls on a tablet, above them on a phone. */
+.dv-egg-board {
   display: grid;
-  grid-template-columns: repeat(var(--columns, 1), 1.25em);
-  gap: 0.3em;
-  padding: 0.9em 1.2em;
-  border: 0.14em solid var(--dv-line-strong);
-  border-radius: 1.6em;
-  background: var(--dv-paper-deep);
+  justify-items: center;
+  align-items: center;
+  gap: clamp(10px, 2vh, 20px) clamp(14px, 2.6vw, 32px);
 }
 
-.dv-nest__egg {
-  width: 1.25em;
-  height: 1.6em;
+/* On a landscape tablet the field takes the card's whole height on the left, and the status
+   line sits above the controls on the right, so ten rows of spots fit without scrolling. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-minigame__card:has(> .dv-egg-board) {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'field status'
+      'field panel';
+    align-items: center;
+    column-gap: clamp(14px, 2.6vw, 32px);
+  }
+
+  .dv-minigame__card > .dv-egg-board {
+    display: contents;
+  }
+
+  .dv-minigame__card:has(> .dv-egg-board) > .dv-minigame__status {
+    grid-area: status;
+    align-self: end;
+  }
+
+  .dv-egg-board__field {
+    grid-area: field;
+  }
+
+  .dv-egg-board__panel {
+    grid-area: panel;
+    align-self: start;
+  }
+}
+
+.dv-egg-board__panel {
+  display: grid;
+  justify-items: center;
+  gap: clamp(8px, 1.6vh, 16px);
+  min-width: 0;
+}
+
+/* Spots are sized from the screen: on a phone the controls stand below the field, on a
+   landscape tablet ten rows of spots fill the card's height beside them. */
+.dv-egg-grid {
+  --cell: min(
+    clamp(26px, calc((100dvh - 26rem) / var(--side, 10)), 3.2rem),
+    calc((100vw - 4rem) / var(--side, 10))
+  );
+  display: grid;
+  grid-template-columns: repeat(var(--side, 10), var(--cell));
+  padding: 0.35em;
+  border: 0.14em solid var(--dv-line-strong);
+  border-radius: 1.2em;
+  background: var(--dv-paper-deep);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-egg-grid {
+    --cell: min(
+      clamp(26px, calc((100dvh - 11.5rem) / var(--side, 10)), 3.2rem),
+      calc((60vw - 4rem) / var(--side, 10))
+    );
+  }
+}
+
+.dv-egg-grid__spot {
+  display: grid;
+  place-items: center;
+  height: var(--cell);
+}
+
+/* An empty spot is a small dot; a spot in the nest holds an egg; never color alone. */
+.dv-egg-grid__spot::before {
+  content: '';
+  width: 22%;
+  height: 22%;
+  border-radius: 50%;
+  background: var(--dv-line-strong);
+}
+
+.dv-egg-grid__spot[data-state='egg']::before {
+  width: 62%;
+  height: 80%;
   border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
   background: var(--dv-card);
   box-shadow:
-    inset -0.15em -0.2em 0 var(--dv-line),
+    inset -0.12em -0.16em 0 var(--dv-line),
     0 0 0 0.06em var(--dv-line-strong);
 }
 
-.dv-nest__size {
+.dv-egg-grid__spot[data-state='missing']::before {
+  width: 62%;
+  height: 80%;
+  border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
+  background: transparent;
+  box-shadow: inset 0 0 0 0.1em var(--dv-miss-deep);
+}
+
+.dv-egg-grid__split {
+  grid-column: 1 / -1;
+  height: 0;
+  margin-block: 0.1em;
+  border-top: 0.16em dashed var(--dv-primary-deep);
+}
+
+.dv-nest__sentence {
+  max-width: none;
+  font-size: 1.5rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .dv-nest__goal {
@@ -1074,17 +1217,6 @@
   font-weight: 700;
   color: var(--dv-success-deep);
   background: var(--dv-success-soft);
-}
-
-.dv-nest__split {
-  grid-column: 1 / -1;
-  height: 0;
-  border-top: 0.16em dashed var(--dv-primary-deep);
-}
-
-.dv-nest__egg--missing {
-  background: transparent;
-  box-shadow: inset 0 0 0 0.12em var(--dv-miss-deep);
 }
 
 /* Number Trail: stones along a path; fixed ones are flat, movable ones are buttons. */
@@ -1215,13 +1347,31 @@
 }
 /* ---- Results --------------------------------------------------------------------------- */
 
+/* The results screen is exactly one screen tall: the card shrinks to fit, its list of
+   celebrations scrolls inside it, and the button onward always stays in view. */
+.dv-results.dv-screen {
+  height: 100vh;
+  height: 100dvh;
+}
+
 .dv-results__card {
-  display: grid;
-  justify-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: clamp(0.4rem, 1.6vh, 0.9rem);
   width: min(100%, 38em);
+  min-height: 0;
   margin: auto;
+  overflow-y: auto;
   text-align: center;
+}
+
+.dv-results__card > * {
+  flex-shrink: 0;
+}
+
+.dv-results__card > .dv-button {
+  margin-top: auto;
 }
 
 .dv-results__title {
@@ -1241,17 +1391,31 @@
   background: var(--dv-paper);
 }
 
+.dv-results__card > .dv-results__celebrations {
+  flex: 0 1 auto;
+  min-height: 4.5rem;
+  padding-bottom: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* The list fades out at its lower edge, so a list that goes on looks like it goes on. */
+  mask-image: linear-gradient(to bottom, black calc(100% - 1rem), transparent);
+}
+
 .dv-results__celebrations {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
+  width: 100%;
+  padding: 0.2rem;
 }
 
 .dv-celebrate {
   display: grid;
   justify-items: center;
+  align-content: start;
   gap: 0.4em;
+  max-width: 11em;
   margin: 0;
   font-weight: 700;
 }
@@ -1269,14 +1433,81 @@
   width: min(4rem, 10vh);
 }
 
-/* A hatching is the hero of the card: its own row, big. */
-.dv-celebrate--hatch {
-  flex-basis: 100%;
+/* ---- Hatch celebration ----------------------------------------------------------------- */
+
+/* The egg fills the screen: the caption above, the hatchling's name card and "Hooray!" below,
+   their places kept while the egg hatches so nothing jumps when they appear. */
+.dv-hatch-stage {
+  flex: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  justify-items: center;
+  align-items: center;
+  gap: clamp(6px, 1.4vh, 16px);
+  min-height: 0;
+  overflow-y: auto;
+  text-align: center;
 }
 
-.dv-celebrate--hatch svg {
-  width: min(16rem, 32vh);
-  margin-block: -12% -4%;
+.dv-hatch-stage__caption {
+  max-width: none;
+  padding: 0.2em 0.9em;
+  border-radius: 1em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+}
+
+.dv-hatch-stage__caption:empty {
+  visibility: hidden;
+}
+
+.dv-hatch-stage__art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+/* As big as the screen allows once the caption, name card and button have their room. */
+.dv-hatch-stage__dragon {
+  width: auto;
+  height: clamp(10rem, calc(100dvh - 17.5rem), 30rem);
+  max-width: 100%;
+  overflow: visible;
+}
+
+.dv-hatch-stage__card {
+  display: grid;
+  justify-items: center;
+  gap: 0.2em;
+  padding: 0.5em 1.6em 0.7em;
+  border: 0.12em solid var(--dv-line);
+  border-radius: 1.4em;
+  background: var(--dv-card);
+  box-shadow: 0 0.5em 1.2em color-mix(in srgb, var(--dv-shadow) 20%, transparent);
+  transition:
+    opacity 240ms ease-out,
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dv-hatch-stage__name {
+  font-size: min(2.6rem, 10vw);
+}
+
+.dv-hatch-stage__line {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--dv-ink-soft);
+}
+
+.dv-hatch-stage[data-revealed='false'] .dv-hatch-stage__card {
+  opacity: 0;
+  transform: scale(0.85);
+}
+
+.dv-hatch-stage[data-revealed='false'] > .dv-button {
+  visibility: hidden;
 }
 
 /* ---- Valley map, region road and level card ------------------------------------------ */

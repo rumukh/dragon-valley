@@ -78,6 +78,28 @@ export interface RouterOptions {
 
 type Mode = 'push' | 'replace' | 'reset' | 'back' | 'refresh' | 'backTo';
 
+/**
+ * Longest wait for a new screen's pictures (its backdrop and map) before it replaces the old
+ * screen anyway. Meanwhile the old screen stays in view, so a change of screen never shows an
+ * empty sky while a big picture is still being prepared.
+ */
+export const PICTURE_WAIT_MS = 320;
+
+async function picturesReady(element: HTMLElement, timeoutMs: number): Promise<void> {
+  const images = [...element.querySelectorAll('img')].filter(
+    (image) => typeof image.decode === 'function',
+  );
+  if (images.length === 0) return;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  await Promise.race([
+    Promise.all(images.map((image) => image.decode().catch(() => undefined))),
+    new Promise<void>((resolve) => {
+      timer = setTimeout(resolve, timeoutMs);
+    }),
+  ]);
+  clearTimeout(timer);
+}
+
 export function createRouter(options: RouterOptions): Router {
   const { stage, kit } = options;
   let stack: ScreenStack<ScreenEntry> | undefined;
@@ -155,6 +177,11 @@ export function createRouter(options: RouterOptions): Router {
       showFallback(error);
       return;
     }
+    if (token !== serial) {
+      if (screen.dispose) safely(() => screen.dispose!());
+      return;
+    }
+    await picturesReady(screen.element, PICTURE_WAIT_MS);
     if (token !== serial) {
       if (screen.dispose) safely(() => screen.dispose!());
       return;

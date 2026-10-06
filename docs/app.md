@@ -61,7 +61,10 @@ cannot interleave screens).
 
 Mounting goes through the SDK's `replaceProjection` (stops speech and one-shot audio, clears
 announcements, moves focus to the screen's heading or chosen target) after
-`assertChildSafeView` checks the candidate tree (no outbound links, no embeds). A screen
+`assertChildSafeView` checks the candidate tree (no outbound links, no embeds). Before the swap
+the router waits up to 320 ms (`PICTURE_WAIT_MS`) for the new screen's pictures (its backdrop,
+the map) to be decoded while the old screen stays in view, so a change of screen never shows an
+empty sky. A screen
 declares its title, background field, region accent and **music state**; the shell then sets the
 document title, the region accent (`--dv-accent*`), the music and a navigation sound. Escape is
 offered to the screen (the round pauses). A screen that fails to build lands on the error screen.
@@ -150,8 +153,13 @@ gets kind, specific help after a miss.
   Motion uses transform and opacity only and stops with `prefers-reduced-motion` or the child's
   own setting (`data-reduced-motion` on `<html>`). A control's face lifts on hover and sinks when
   pressed while its hit area stays at rest, so an edge never jitters or loses a click. Screens
-  settle in from above, so a transition never flashes a scrollbar. Everything reflows at 200 %
-  text and on a phone in portrait.
+  settle in from above in 200 ms, starting partly visible (a slow first frame never shows an
+  empty screen), so a transition never flashes a scrollbar. Everything reflows at 200 %
+  text and on a phone in portrait. On a landscape tablet (1180 × 820, 1024 × 768) the game
+  screens fit without page scrolling: the hub sets the dragon, its week and the places beside
+  today's card; the results card scrolls its celebrations inside itself with the button onward
+  always in view; a round's title and progress share a line and the picture behind a problem
+  stands under the dragon.
 - **Feedback never relies on colour alone**: correct is green + check + happy egg; a miss is
   warm orange + `?` + a curious egg + "Almost! Let's look…", with the visual model shown first.
   Term questions mark the asked-about number with a marker **and** an underline.
@@ -264,15 +272,20 @@ the hub, activates newer content. After an action that changes what the game sho
 calls `app.continueGame(id)`, which returns to the play entry and rebuilds it; maps, level cards
 and collections open on top of it. A restore rebuilds it from the restored view. Live commit
 events are kept briefly in the keeper's **event inbox** for the screens that celebrate them
-(the closing line of a beat, hatching, stickers, a finished board, the Arena's score); a restore
-empties it, so nothing is ever replayed.
+(the closing line of a beat, hatching, stickers, a finished board, the Arena's score); a round's
+start empties it (results celebrate only that round), a restore empties it too, so nothing is
+ever replayed. Stickers earned outside a round (dressing a dragon, a quest, the gift) get a
+toast where they were earned.
 
 - **Story** (`story.ts`): the beat's scene (S4 backgrounds; scene ids are background ids), old
-  Glimmer or the boss of a boss level, one line at a time with read-aloud, Next and Skip. The
+  Glimmer or the boss of a boss level, one line at a time with read-aloud, Next and Skip.
+  Glimmer's face follows the line (curious, sleepy, happy, proud; `lineExpression` in
+  `scene.ts` keeps them for the version-1 lines until the story data carries a mood). The
   first-egg beat offers its choices as three eggs. A beat's last line ends it in the rules, so it
   arrives as `story.advanced` and is shown from the content graph before moving on.
 - **Hub** (`hub.ts`): the featured dragon (the first egg's) with the facts it still needs for its
-  next stage, the other dragons, the week's played days (a habit view, never a streak), today's
+  next stage (the rules' exact `next.have` of `next.need`), the other dragons, the week's played
+  days (a habit view, never a streak), today's
   goal and quests (with their claim buttons), the gift chest and one **Daily Adventure** button
   that does what `hub.next` suggests (placement, snack, the next level or the level in
   progress, the gift, or free play on the map). Places: the valley map, Market, Dragon Den,
@@ -292,13 +305,24 @@ empties it, so nothing is ever replayed.
   picture until the child goes on; re-asks show the picture first and the hint shows it on
   request. Response time excludes paused and hidden time. Placement answers with
   `placementAnswer` and shows its ladder steps; the Arena runs the shell's one-minute race and
-  ends with `endRound{ reason: 'time-up' }`.
-- **Minigames** (`minigames.ts`): Memory Match, Number Trail, Egg Grid (with its strategy split
-  and an always-visible goal) and Fact Family Nest on the rules' typed boards
-  (`MinigameRoundView.current`, faces through the contract's `formatFace`), every move tagged
-  with the board revision. A finished board cheers on `minigame.completed`.
-- **Results** (`results.ts`): stars, the score, coins, and the round's celebrations: hatching (S4's
-  hatch sequence), growing, new eggs, stickers, regions, the Arena's best. Then the level's next
+  ends with `endRound{ reason: 'time-up' }`. A Riddle Scrolls story first asks for its sign: the
+  sum is drawn with an empty sign slot (`5 ○ 4 = ?`; a leftover story asks only `23 ○ 5 = ?`),
+  read as "Five, which sign, four, equals what?", and answered with the four sign tiles
+  (`stepChoices`: whatever the input mode); a right sign is a chirp, then the number is asked.
+  Sign tiles draw their sign half as big again.
+- **Minigames** (`minigames.ts`): Memory Match, Number Trail, Egg Grid and Fact Family Nest on
+  the rules' typed boards (`MinigameRoundView.current`, faces through the contract's
+  `formatFace`), every move tagged with the board revision. A finished board cheers on
+  `minigame.completed`. The Egg Grid is a field of `maxSide × maxSide` spots beside its
+  controls: one tap builds the nest up to that spot (the steppers do the same from the
+  keyboard), the nest is told in words ("5 rows of 7") and only Check tells its total ("Yes! 5
+  rows of 7 is 35.", or after a wrong nest "5 rows of 8 is 40. We need 35."); the strategy
+  pictures (five-plus, double, ten-minus) are drawn on the field.
+- **Results** (`results.ts`): an egg that hatched first gets its own full-size celebration
+  (`hatch.ts`), one dragon at a time: S4's hatch sequence cropped to the egg and drawn big, the
+  hatch sounds started so the fanfare lands on the pop (not when the answer was committed),
+  confetti, the name card and "Hooray!". Then stars, the score, coins, and the round's other
+  celebrations: growing, new eggs, stickers, regions, the Arena's best. Then the level's next
   activity, or back to the valley.
 - **Collections** (`collections.ts`): Glimmer's Market (`buy`), the Dragon Den (`equip`, eggs only
   in the nest), the Sticker Album and the Magic Window (S4's window with a legend).
@@ -322,17 +346,19 @@ Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.t
 - **Browser** (`test/e2e/profiles.spec.ts`, Playwright): a new keeper's prologue, first egg and
   hub, kept after a reload; the placement check by keyboard with a kind miss, results and saved
   coins after a reload; the grown-ups' gate; notation, a rule setting, a rename and the pause
-  dialog. CI runs Chromium, WebKit and Firefox. Locally the default project is the installed
+  dialog; a tablet screen (1180 × 820, 1024 × 768) holding the hub, the Egg Grid (built by
+  tapping, totals told by Check) and the results without page scrolling. CI runs Chromium,
+  WebKit and Firefox. Locally the default project is the installed
   Edge; `$env:DV_E2E_ALL_ENGINES = '1'; npm run test:e2e` runs all three (set `DV_E2E_PORT` to a
   free port when another checkout already serves 4321).
 
 ## 16. Phase 3 and later
 
-The remaining activities (Riddle Scrolls once the `word` generator lands, Compare Stones, Sharing
-Feast, Golem Orders), the Dragon Diary, the grown-ups' progress dashboard (window, tables,
-hardest facts, trend), printables (flashcards and certificates through `@aegis/narrative`
-`layoutPrint` / `renderPrintHtml`), `fx.*` cues for the remaining moments, and a persisted
-per-day time limit (today it counts per page load).
+The remaining activities (Compare Stones and Riddle Scrolls visuals, Sharing Feast, Golem
+Orders), the Dragon Diary, the grown-ups' progress dashboard (window, tables, hardest facts,
+trend), printables (flashcards and certificates through `@aegis/narrative` `layoutPrint` /
+`renderPrintHtml`), `fx.*` cues for the remaining moments, and a persisted per-day time limit
+(today it counts per page load).
 
 ## 17. SDK notes
 

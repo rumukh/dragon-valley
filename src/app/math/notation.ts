@@ -19,19 +19,34 @@ import {
   OPERATOR_SYMBOLS,
   REMAINDER_SYMBOLS,
 } from '../../rules/contract';
-import type { AnswerValue, Expr, Notation, Problem } from '../../rules/contract';
+import type {
+  AnswerValue,
+  DivRemProblem,
+  EquationProblem,
+  Expr,
+  Notation,
+  Problem,
+  ProblemStep,
+} from '../../rules/contract';
 
 export { DEFAULT_NOTATION, formatAnswer, formatProblem, NOTATIONS };
 export type { Notation };
 
-/** A rendered piece of a problem, so the DOM can style numbers, signs and answer boxes. */
+/**
+ * A rendered piece of a problem, so the DOM can style numbers, signs and answer boxes. A `slot`
+ * is the empty place of the sign the child is asked to choose (a story's operation step).
+ */
 export type Token =
   | { readonly kind: 'number'; readonly text: string; readonly highlight?: boolean }
   | { readonly kind: 'sign'; readonly text: string }
   | { readonly kind: 'bracket'; readonly text: string }
-  | { readonly kind: 'blank' };
+  | { readonly kind: 'blank' }
+  | { readonly kind: 'slot' };
 
-function exprTokens(expr: Expr, notation: Notation, out: Token[]): void {
+/** How an empty sign slot is written in plain text. */
+export const SLOT_SYMBOL = '\u25cb';
+
+function exprTokens(expr: Expr, notation: Notation, out: Token[], slot = false): void {
   switch (expr.kind) {
     case 'num':
       out.push({ kind: 'number', text: String(expr.value) });
@@ -55,13 +70,44 @@ function exprTokens(expr: Expr, notation: Notation, out: Token[]): void {
         }
       };
       side(expr.left, 'left');
-      out.push({ kind: 'sign', text: OPERATOR_SYMBOLS[notation][expr.op] });
+      out.push(
+        slot ? { kind: 'slot' } : { kind: 'sign', text: OPERATOR_SYMBOLS[notation][expr.op] },
+      );
       side(expr.right, 'right');
     }
   }
 }
 
-export function problemTokens(problem: Problem, notation: Notation = DEFAULT_NOTATION): Token[] {
+/**
+ * A story's model while the child picks its operation: the operation's sign is an empty slot
+ * (`5 ○ 4 = ?`), and a leftover story asks only `23 ○ 5 = ?`, since its "r ?" would give the
+ * sign away.
+ */
+function operationTokens(model: EquationProblem | DivRemProblem, notation: Notation): Token[] {
+  const out: Token[] = [];
+  if (model.kind === 'divrem') {
+    out.push(
+      { kind: 'number', text: String(model.dividend) },
+      { kind: 'slot' },
+      { kind: 'number', text: String(model.divisor) },
+      { kind: 'sign', text: '=' },
+      { kind: 'blank' },
+    );
+    return out;
+  }
+  const leftHasSign = model.left.kind === 'op';
+  exprTokens(model.left, notation, out, leftHasSign);
+  out.push({ kind: 'sign', text: '=' });
+  exprTokens(model.right, notation, out, !leftHasSign && model.right.kind === 'op');
+  return out;
+}
+
+/** The problem as tokens; at a story's `operation` step its sign is left out (a `slot`). */
+export function problemTokens(
+  problem: Problem,
+  notation: Notation = DEFAULT_NOTATION,
+  step: ProblemStep = 'answer',
+): Token[] {
   const out: Token[] = [];
   switch (problem.kind) {
     case 'equation':
@@ -87,7 +133,9 @@ export function problemTokens(problem: Problem, notation: Notation = DEFAULT_NOT
       return out;
     case 'word':
       // The story is catalog text the screen shows above; the tokens are its arithmetic.
-      return problemTokens(problem.model, notation);
+      return step === 'operation' && problem.operation !== null
+        ? operationTokens(problem.model, notation)
+        : problemTokens(problem.model, notation);
     case 'term': {
       const { sentence, highlight } = problem;
       const number = (value: number, part: typeof highlight): Token => ({
@@ -127,7 +175,13 @@ export function formatSolved(
       : [formatAnswer(answer, notation)];
   let next = 0;
   return problemTokens(problem, notation)
-    .map((token) => (token.kind === 'blank' ? (fills[next++] ?? '?') : token.text))
+    .map((token) =>
+      token.kind === 'blank'
+        ? (fills[next++] ?? '?')
+        : token.kind === 'slot'
+          ? SLOT_SYMBOL
+          : token.text,
+    )
     .join(' ')
     .replace(/\( /g, '(')
     .replace(/ \)/g, ')');

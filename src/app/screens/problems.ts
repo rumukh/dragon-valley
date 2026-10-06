@@ -21,7 +21,7 @@ import type {
 import { getDragonAnchors } from '../art/dragon';
 import { CommandRejectedError } from '../controller/commands';
 import { createResponseTimer } from '../game/timer';
-import { answerKindOf, bossPose, featuredDragon } from '../game/view';
+import { answerKindOf, bossPose, featuredDragon, stepChoices } from '../game/view';
 import type { BossPose } from '../game/view';
 import type { MessageKey } from '../i18n/messages';
 import { modelFor } from '../math/model';
@@ -54,6 +54,8 @@ const FRUITS = ['apple', 'pear', 'plum', 'cherries', 'berries'] as const;
 export const ARENA_SECONDS = 60;
 const ARENA_MISS_MS = 1500;
 const CORRECT_PAUSE_MS = 1100;
+/** How long a right sign stays marked before the story asks for the number. */
+const OPERATION_PAUSE_MS = 900;
 
 function problemRound(view: GameView): ProblemRoundView | null {
   return view.round?.type === 'problems' ? view.round : null;
@@ -276,7 +278,8 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
 
   const spokenProblem = (problem: ProblemView): string => {
     const words = storyText(problem.problem);
-    return words ? `${words} ${speakProblem(problem.problem)}` : speakProblem(problem.problem);
+    const question = speakProblem(problem.problem, problem.step);
+    return words ? `${words} ${question}` : question;
   };
 
   const hintButton = (problem: ProblemView): HTMLElement[] => {
@@ -341,10 +344,25 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     after: GameView,
     source: Element,
   ): Promise<void> => {
-    const fact =
-      asked.step === 'operation'
-        ? t('round.operationRight', { operation: answerSpoken(result.expected, t) })
-        : t('round.correct', { fact: formatSolved(asked.problem, result.given, notation()) });
+    if (asked.step === 'operation') {
+      // The right sign is a step on the way, not an answer: no fruit yet, just a happy chirp.
+      setFeedback(
+        'correct',
+        h('span', {
+          text: t('round.operationRight', { operation: answerSpoken(result.expected, t) }),
+        }),
+      );
+      if (chosenTile) tiles?.setState(chosenTile, 'correct');
+      app.kit.cue('fx.dragon-happy');
+      await wait(prefersReducedMotion() ? 500 : OPERATION_PAUSE_MS);
+      if (disposed) return;
+      busy = false;
+      await advance();
+      return;
+    }
+    const fact = t('round.correct', {
+      fact: formatSolved(asked.problem, result.given, notation()),
+    });
     setFeedback('correct', h('span', { text: fact }));
     hintSlot.replaceChildren();
     if (chosenTile) tiles?.setState(chosenTile, 'correct');
@@ -424,7 +442,13 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       h('span', { className: 'dv-feedback__fact', testId: 'feedback-fact', text: solved }),
       next,
     );
-    if (asked.step !== 'operation') showModel(asked.problem);
+    if (asked.step === 'operation') {
+      // Show the story's sum with its sign in place, and its picture.
+      problemSlot.replaceChildren(
+        problemElement(asked.problem, notation(), speakProblem(asked.problem, 'answer'), 'answer'),
+      );
+    }
+    showModel(asked.problem);
     if (arena) {
       next.hidden = true;
       setTimeout(() => {
@@ -434,8 +458,12 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       }, ARENA_MISS_MS);
       return;
     }
-    if (active.preferences.current().autoRead && asked.step !== 'operation') {
-      app.speak(`${t('round.miss')} ${speakSolved(asked.problem, result.expected)}`);
+    if (active.preferences.current().autoRead) {
+      app.speak(
+        asked.step === 'operation'
+          ? `${t('round.miss')} ${solved}`
+          : `${t('round.miss')} ${speakSolved(asked.problem, result.expected)}`,
+      );
     }
     next.focus();
   };
@@ -459,7 +487,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     story.textContent = words;
     story.hidden = words === '';
     const spoken = spokenProblem(problem);
-    problemSlot.replaceChildren(problemElement(problem.problem, notation(), spoken));
+    problemSlot.replaceChildren(problemElement(problem.problem, notation(), spoken, problem.step));
     speakerSlot.replaceChildren(...speakerButton(app, active, () => spokenProblem(problem)));
     note.textContent = problem.reask ? t('round.reask') : '';
     if (problem.reask || problem.hinted) showModel(problem.problem);
@@ -467,12 +495,13 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     hintSlot.replaceChildren(...hintButton(problem));
 
     const kind = answerKindOf(problem.problem, problem.step);
-    if (problem.input === 'choice' && problem.choices) {
+    const choices = stepChoices(problem);
+    if (choices) {
       prompt.textContent = t(kind === 'operation' ? 'round.chooseOperation' : 'round.choose');
-      const choices = problem.choices;
       tiles = createTiles(app.kit, {
         label: t('round.choices'),
         digitSelect: kind === 'number',
+        signs: kind === 'operation' || kind === 'relation',
         choices: choices.map((answer) => ({
           id: answerId(answer),
           label: answerLabel(answer, notation(), t),
@@ -683,7 +712,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     h(
       'section',
       { className: 'dv-round__play' },
-      h('div', { className: 'dv-round__cast' }, dragonSlot, ...(boss ? [bossSlot] : [])),
+      // The picture behind a problem stands with the dragon, so the problem, its feedback and
+      // the answers keep their places on one screen.
+      h('div', { className: 'dv-round__cast' }, dragonSlot, ...(boss ? [bossSlot] : []), modelSlot),
       h(
         'div',
         { className: 'dv-round__board' },
@@ -696,7 +727,6 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
           h('div', { className: 'dv-problem-card__tools' }, speakerSlot, hintSlot),
         ),
         feedback,
-        modelSlot,
       ),
       h('div', { className: 'dv-round__input' }, prompt, answerSlot),
     ),

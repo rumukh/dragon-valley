@@ -8,6 +8,7 @@ import {
   formatProblem,
   formatSolved,
   problemTokens,
+  SLOT_SYMBOL,
 } from '../../../src/app/math/notation';
 import { BLANK, group, num, op } from '../../../src/rules/contract';
 import type { Problem, TermProblem } from '../../../src/rules/contract';
@@ -54,6 +55,13 @@ const story: Problem = {
   vars: { baskets: 3, apples: 4 },
   model: { kind: 'equation', left: op('mul', num(3), num(4)), right: BLANK },
   operation: 'mul',
+};
+const leftoverStory: Problem = {
+  kind: 'word',
+  template: 'word.leftover.bags',
+  vars: { total: 23, size: 5 },
+  model: { kind: 'divrem', dividend: 23, divisor: 5 },
+  operation: 'div',
 };
 describe('notation', () => {
   it('writes Czech school notation by default', () => {
@@ -102,6 +110,22 @@ describe('notation', () => {
     expect(formatSolved(story, { kind: 'number', value: 12 }, 'international')).toBe('3 × 4 = 12');
     expect(formatAnswer({ kind: 'operation', operation: 'div' })).toBe(':');
     expect(formatAnswer({ kind: 'operation', operation: 'div' }, 'international')).toBe('÷');
+  });
+
+  it('leaves the sign out while a story asks which sign it needs', () => {
+    const text = (tokens: ReturnType<typeof problemTokens>) =>
+      tokens
+        .map((token) =>
+          token.kind === 'blank' ? '?' : token.kind === 'slot' ? SLOT_SYMBOL : token.text,
+        )
+        .join(' ');
+    expect(text(problemTokens(story, 'czech', 'operation'))).toBe('3 ○ 4 = ?');
+    expect(text(problemTokens(story, 'czech', 'answer'))).toBe('3 · 4 = ?');
+    // A leftover story would give its sign away with "r ?", so it asks only the sum.
+    expect(text(problemTokens(leftoverStory, 'international', 'operation'))).toBe('23 ○ 5 = ?');
+    expect(text(problemTokens(leftoverStory, 'international', 'answer'))).toBe('23 ÷ 5 = ? R ?');
+    // Problems without an operation step ignore the step.
+    expect(text(problemTokens(fact, 'czech', 'operation'))).toBe('7 · 8 = ?');
   });
 });
 
@@ -192,6 +216,15 @@ describe('read-aloud', () => {
     );
     expect(speakAnswer({ kind: 'operation', operation: 'mul' })).toBe('multiplying');
     expect(speakAnswer({ kind: 'operation', operation: 'div' })).toBe('dividing');
+  });
+
+  it('asks for the missing sign at a story’s operation step', () => {
+    expect(speakProblem(story, 'operation')).toBe('Three, which sign, four, equals what?');
+    expect(speakProblem(story, 'answer')).toBe('Three times four equals what?');
+    expect(speakProblem(leftoverStory, 'operation')).toBe(
+      'Twenty-three, which sign, five, equals what?',
+    );
+    expect(speakProblem(fact, 'operation')).toBe('Seven times eight equals what?');
   });
 
   it('speaks both notations with the same words', () => {

@@ -28,6 +28,8 @@ const LOCAL = new Set([
   '--size',
   '--aspect',
   '--cols',
+  '--cell',
+  '--side',
 ]);
 
 function files(directory: string, extension: string): string[] {

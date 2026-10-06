@@ -450,6 +450,12 @@
   opacity: 0.55;
 }
 
+/* Sign tiles (+ − · : and < > =): the signs are small glyphs, so they are drawn bigger. */
+.dv-tile__sign {
+  font-size: 1.5em;
+  line-height: 1;
+}
+
 .dv-badge {
   position: absolute;
   top: -0.5em;

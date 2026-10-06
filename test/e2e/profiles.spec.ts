@@ -1,9 +1,10 @@
 /**
  * The first flows of the game on every engine, on the real rules: a new keeper's prologue and
  * first egg, the placement check by keyboard (keypad, a kind miss, results, saved coins after a
- * reload), the grown-ups' gate, and the settings (notation, a rule setting, a rename) with the
- * pause dialog. Every test also proves no console errors, no page errors and no request to
- * another origin.
+ * reload), the grown-ups' gate, the settings (notation, a rule setting, a rename) with the
+ * pause dialog, and a tablet screen that holds the hub, the Egg Grid (nests built by tapping,
+ * totals told by Check) and the results without page scrolling. Every test also proves no
+ * console errors, no page errors and no request to another origin.
  *
  * S3 wrote these for its screens; S6 owns test/e2e and the broad suite.
  */
@@ -272,5 +273,105 @@ test('grown-ups switch the math signs, set the daily goal and rename; Escape pau
   await expect(page.getByTestId('pause-dialog')).toBeVisible();
   await page.getByTestId('pause-resume').click();
   await expect(page.getByTestId('pause-dialog')).toHaveCount(0);
+  expectClean(seen);
+});
+
+/** Everything is on the screen: the page itself never scrolls. */
+async function expectNoPageScroll(page: Page, where: string): Promise<void> {
+  const { scroll, height } = await page.evaluate(() => ({
+    scroll: document.documentElement.scrollHeight,
+    height: window.innerHeight,
+  }));
+  expect(scroll, `${where} needs page scrolling`).toBeLessThanOrEqual(height);
+}
+
+test('a tablet screen holds the hub, the Egg Grid and the results; nests are tapped', async ({
+  page,
+  baseURL,
+}) => {
+  // A whole level's first activity on every engine: slow on WebKit and on busy machines.
+  test.slow();
+  const seen = observe(page, baseURL!);
+  await page.setViewportSize({ width: 1180, height: 820 });
+  await boot(page);
+  await createKeeper(page, 'Ema', 'keeper-1');
+  await expectNoPageScroll(page, 'the hub at 1180 × 820');
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await expectNoPageScroll(page, 'the hub at 1024 × 768');
+
+  // Sunny Meadow 1 from the valley map (playing a level skips the placement check).
+  await page.getByTestId('hub-map').click();
+  await page.getByTestId('map-region-sunny-meadow').click();
+  await page.getByTestId('level-sunny-meadow.1').click();
+  await page.getByTestId('level-play').click();
+  // The region's welcome comes first.
+  await page.getByTestId('story-skip').click();
+  const grid = page.getByTestId('egg-grid');
+  await expect(grid).toBeVisible();
+  await expectNoPageScroll(page, 'the Egg Grid at 1024 × 768');
+
+  // One tap builds a nest; it is told in words, and only Check tells its total.
+  const status = page.getByTestId('minigame-status');
+  await grid.locator('[data-row="1"][data-column="1"]').click();
+  await expect(page.getByTestId('egg-sentence')).toHaveText('1 row of 1');
+  await grid.locator('[data-row="3"][data-column="4"]').click();
+  await expect(page.getByTestId('egg-sentence')).toHaveText('3 rows of 4');
+  await expect(status).not.toContainText('12');
+  const product = Number(/of (\d+) eggs/.exec(await page.getByTestId('egg-goal').innerText())![1]);
+  await page.getByTestId('egg-check').click();
+  await expect(status).toContainText(
+    product === 12 ? 'Yes! 3 rows of 4 is 12.' : `3 rows of 4 is 12. We need ${product}.`,
+    { timeout: 15_000 },
+  );
+
+  // Every rectangle of every board, by tapping its far corner. The board is read in one go,
+  // without waiting on elements: the results screen replaces it when the round is over.
+  const board = () =>
+    page.evaluate(() => ({
+      over: document.querySelector('[data-testid="screen-results"]') !== null,
+      goal: document.querySelector('[data-testid="egg-goal"]')?.textContent ?? '',
+      found: [...document.querySelectorAll('[data-testid="egg-found"] li')].map((item) =>
+        (item.textContent ?? '').replace(/\s/g, ''),
+      ),
+    }));
+  for (let move = 0; move < 30; move++) {
+    const before = await board();
+    if (before.over) break;
+    const eggs = Number(/of (\d+) eggs/.exec(before.goal)![1]);
+    const rows = [2, 3, 4, 5, 6, 7, 8, 9, 10].find(
+      (side) =>
+        eggs % side === 0 &&
+        eggs / side >= 2 &&
+        eggs / side <= 10 &&
+        !before.found.includes(`${side}·${eggs / side}`),
+    );
+    expect(rows, `a nest of ${eggs} left to find (found ${before.found.join(', ')})`).toBeDefined();
+    await grid.locator(`[data-row="${rows}"][data-column="${eggs / rows!}"]`).click();
+    await page.getByTestId('egg-check').click();
+    // The nest is found: the list grows, the next board comes, or the round is over.
+    await expect
+      .poll(
+        async () => {
+          const after = await board();
+          return after.over ||
+            after.goal !== before.goal ||
+            after.found.length > before.found.length
+            ? 'moved'
+            : 'waiting';
+        },
+        { timeout: 20_000 },
+      )
+      .toBe('moved');
+  }
+
+  // A hatch is celebrated on its own first; then the results fit the screen too.
+  const results = page.getByTestId('screen-results');
+  await expect(results).toBeVisible();
+  for (let hatch = 0; hatch < 3; hatch++) {
+    if (!(await page.getByTestId('hatch-celebration').isVisible())) break;
+    await page.getByTestId('hatch-continue').click({ timeout: 10_000 });
+  }
+  await expect(page.getByTestId('results-continue')).toBeVisible();
+  await expectNoPageScroll(page, 'the results at 1024 × 768');
   expectClean(seen);
 });

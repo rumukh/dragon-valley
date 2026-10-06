@@ -13,9 +13,12 @@ import { needsGroup } from '../../rules/contract';
 import type {
   AnswerValue,
   CardFace,
+  DivRemProblem,
+  EquationProblem,
   Expr,
   Operator,
   Problem,
+  ProblemStep,
   Relation,
   Term,
   TermProblem,
@@ -52,6 +55,8 @@ export const TERM_WORDS: Readonly<Record<Term, string>> = {
 };
 
 const BLANK_WORD = 'what';
+/** Spoken for the empty sign of a story's operation step. */
+const SLOT_WORDS = 'which sign';
 
 function bracketed(words: string): string {
   return `open bracket, ${words}, close bracket`;
@@ -98,7 +103,7 @@ function termQuestion(problem: TermProblem): string {
 }
 
 /** The question as a child reads it: "Seven times eight equals what?" */
-export function speakProblem(problem: Problem): string {
+export function speakProblem(problem: Problem, step: ProblemStep = 'answer'): string {
   switch (problem.kind) {
     case 'equation':
       return sentence(`${speakExpr(problem.left)} equals ${speakExpr(problem.right)}`, '?');
@@ -113,10 +118,32 @@ export function speakProblem(problem: Problem): string {
         '?',
       );
     case 'word':
-      return speakProblem(problem.model);
+      return step === 'operation' && problem.operation !== null
+        ? speakOperationStep(problem.model)
+        : speakProblem(problem.model);
     case 'term':
       return `${sentence(termSentence(problem), '.')} ${sentence(termQuestion(problem), '?')}`;
   }
+}
+
+/** A story's model with its sign still to choose: "Five, which sign, four, equals what?" */
+function speakOperationStep(model: EquationProblem | DivRemProblem): string {
+  if (model.kind === 'divrem') {
+    return sentence(
+      `${numberToWords(model.dividend)}, ${SLOT_WORDS}, ${numberToWords(model.divisor)}, equals what`,
+      '?',
+    );
+  }
+  const side = (expr: Expr): string =>
+    expr.kind === 'op'
+      ? `${speakExpr(expr.left)}, ${SLOT_WORDS}, ${speakExpr(expr.right)},`
+      : speakExpr(expr);
+  return sentence(
+    model.left.kind === 'op'
+      ? `${side(model.left)} equals ${speakExpr(model.right)}`
+      : `${speakExpr(model.left)} equals ${side(model.right)}`,
+    '?',
+  ).replace(/,\?$/, '?');
 }
 
 export function speakAnswer(answer: AnswerValue): string {
