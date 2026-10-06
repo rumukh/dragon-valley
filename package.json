@@ -39,6 +39,7 @@
     "@aegis/runtime": "file:vendor/aegis/0.0.0-local.r5949a7fa1a34.d2c83c1814069db10/aegis-runtime-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.19.0",

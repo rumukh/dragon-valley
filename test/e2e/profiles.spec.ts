@@ -8,7 +8,7 @@
  *
  * S3 wrote these for its screens; S6 owns test/e2e and the broad suite.
  */
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/fixtures';
 import type { Page } from '@playwright/test';
 
 interface Observations {
