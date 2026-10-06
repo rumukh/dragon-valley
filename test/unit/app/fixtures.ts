@@ -115,5 +115,20 @@ export class FlakyStorage extends MemorySaveStorage {
   }
 }
 
+/** Storage whose writes wait until the test lets them through (a slow disk). */
+export class SlowStorage extends MemorySaveStorage {
+  held = false;
+  private waiting: (() => void)[] = [];
+  override async compareAndSwap(key: SaveKey, expected: number, next: StoredSave): Promise<void> {
+    if (this.held) await new Promise<void>((resolve) => this.waiting.push(resolve));
+    return super.compareAndSwap(key, expected, next);
+  }
+  /** Lets every waiting write finish. */
+  release(): void {
+    this.held = false;
+    for (const resolve of this.waiting.splice(0)) resolve();
+  }
+}
+
 export const PROFILE_A = { id: 'profile-1', seed: profileSeed('profile-1') };
 export const PROFILE_B = { id: 'profile-2', seed: profileSeed('profile-2') };

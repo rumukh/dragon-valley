@@ -4,16 +4,24 @@
  * validated restore with recovery, backups and content activation at a boundary.
  */
 import { MemorySaveStorage } from '@aegis/browser/save';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   CommandRejectedError,
   createCommandController,
+  SAVE_PATIENCE_MS,
   StaleCommandError,
 } from '../../../src/app/controller/commands';
 import { rebind } from '../../../src/app/persistence/backup';
 import { gamePolicy, openGameSession } from '../../../src/app/persistence/game-session';
 import { RecoveryRequired } from '../../../src/app/persistence/recovery';
-import { COUNT_GAME, COUNT_GAME_V2, FlakyStorage, PROFILE_A, PROFILE_B } from './fixtures';
+import {
+  COUNT_GAME,
+  COUNT_GAME_V2,
+  FlakyStorage,
+  PROFILE_A,
+  PROFILE_B,
+  SlowStorage,
+} from './fixtures';
 
 const noErrors = (error: unknown): void => {
   throw error;
@@ -88,6 +96,71 @@ describe('game session', () => {
     await expect(stale({ type: 'note' })).rejects.toBeInstanceOf(StaleCommandError);
     commands.dispose();
     await expect(commands.capture()({ type: 'note' })).rejects.toBeInstanceOf(StaleCommandError);
+    await session.close();
+  });
+
+  it('shows a sent action once it is saved, or once taken when the save is slow', async () => {
+    const storage = new SlowStorage();
+    const session = await openGameSession(storage, COUNT_GAME, PROFILE_A);
+    const commands = createCommandController(session.host, noErrors);
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      storage.held = true;
+      let shown = false;
+      const sending = commands
+        .captureSend()({ type: 'tick', turns: 1 })
+        .then(() => (shown = true));
+      // Taken at once, but the slow save holds it back for the patience only.
+      await vi.advanceTimersByTimeAsync(SAVE_PATIENCE_MS - 1);
+      expect(shown).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      await sending;
+      expect(shown).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+    // Committed and shown, not yet durable: the save indicator says so.
+    expect(session.host.getView().count).toBe(1);
+    expect(session.host.getStatus().durableRevision).not.toBe(session.host.getStatus().revision);
+    expect(session.indicator().kind).toBe('saving');
+
+    // The next action waits for that save instead of being refused as busy.
+    let second = false;
+    const next = commands
+      .captureSend()({ type: 'tick', turns: 1 })
+      .then(() => (second = true));
+    await Promise.resolve();
+    expect(second).toBe(false);
+    storage.release();
+    await next;
+    expect(session.host.getView().count).toBe(2);
+    await commands.capture()({ type: 'note' });
+    expect(session.indicator()).toEqual({ kind: 'saved' });
+    commands.dispose();
+    await session.close();
+  });
+
+  it('holds a sent action whose save failed at once, and lets Retry store it', async () => {
+    const storage = new FlakyStorage();
+    const session = await openGameSession(storage, COUNT_GAME, PROFILE_A);
+    const commands = createCommandController(session.host, noErrors);
+    storage.failures = 1;
+    // The game took the action, but nothing is praised for what is not stored.
+    const held = await commands
+      .captureSend()({ type: 'tick', turns: 1 })
+      .catch((error: unknown) => error);
+    expect(held).toBeInstanceOf(CommandRejectedError);
+    expect((held as CommandRejectedError).accepted).toBe(true);
+    expect(session.host.getView().count).toBe(1);
+    expect(session.indicator().kind).toBe('failed');
+    const blocked = await commands
+      .captureSend()({ type: 'note' })
+      .catch((error: unknown) => error);
+    expect((blocked as CommandRejectedError).error.code).toBe('checkpoint-blocked');
+    await commands.retry();
+    expect(session.indicator()).toEqual({ kind: 'saved' });
+    await commands.captureSend()({ type: 'note' });
+    commands.dispose();
     await session.close();
   });
 

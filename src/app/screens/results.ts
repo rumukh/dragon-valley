@@ -7,8 +7,9 @@
  * scroll inside the card, so the button onward is always in view. A round stopped by the
  * grown-ups' time limit ends with a kind goodbye.
  */
-import type { GameEvent, GameView } from '../../rules/contract';
+import type { GameAction, GameEvent, GameView } from '../../rules/contract';
 import type { StickerFrame } from '../art/stickers';
+import { taken } from '../controller/commands';
 import { resultsNext } from '../game/view';
 import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
@@ -234,7 +235,10 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
     size: 'big',
     testId: 'results-continue',
     onPress: async () => {
-      const dispatch = active.commands.capture();
+      // Going on does not wait for a slow save; a rest closes the game, so it waits for the
+      // save first.
+      const send = timeUp ? active.commands.capture() : active.commands.captureSend();
+      const dispatch = (action: GameAction): Promise<void> => taken(send(action));
       if (next.kind === 'activity') {
         await dispatch({ type: 'startActivity', activity: { kind: 'level', index: next.index } });
       } else {

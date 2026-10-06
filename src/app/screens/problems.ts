@@ -19,7 +19,7 @@ import type {
   ProblemView,
 } from '../../rules/contract';
 import { getDragonAnchors } from '../art/dragon';
-import { CommandRejectedError } from '../controller/commands';
+import { CommandRejectedError, taken } from '../controller/commands';
 import { createResponseTimer } from '../game/timer';
 import { answerKindOf, bossPose, featuredDragon, stepChoices } from '../game/view';
 import type { BossPose } from '../game/view';
@@ -162,7 +162,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   let keypad: KeypadView | undefined;
   let shown: ProblemView | null = null;
   let chosenTile: string | undefined;
-  let dispatch = active.commands.capture();
+  let send = active.commands.captureSend();
   let busy = false;
   let pausedByDialog = false;
   let disposed = false;
@@ -293,7 +293,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
         size: 'small',
         testId: 'round-hint',
         onPress: async () => {
-          await active.commands.capture()({ type: 'hint' });
+          await taken(active.commands.captureSend()({ type: 'hint' }));
           hintSlot.replaceChildren();
           showModel(problem.problem);
           app.kit.announcer.announce(t('round.hintShown'));
@@ -303,6 +303,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     ];
   };
 
+  /** An answer the game took but could not save yet: its feedback waits for Retry. */
+  let held: { asked: ProblemView; before: GameView; source: Element } | null = null;
+
   const submit = async (value: AnswerValue, source: Element): Promise<void> => {
     if (busy || !shown) return;
     busy = true;
@@ -310,21 +313,39 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     const asked = shown;
     const before = host.getView();
     try {
-      await dispatch(
+      // Feedback comes as soon as the answer is saved, or once it is taken if saving is slow.
+      await send(
         placement
           ? { type: 'placementAnswer', value, elapsedMs: timer.elapsed() }
           : { type: 'answer', value, elapsedMs: timer.elapsed() },
       );
     } catch (error) {
       busy = false;
-      dispatch = active.commands.capture();
+      send = active.commands.captureSend();
       setInputDisabled(false);
+      if (error instanceof CommandRejectedError && error.accepted) {
+        // Taken but not saved: no praise for what is not stored. The save says "Not saved"
+        // and offers Retry; once it is saved, this answer gets its feedback.
+        held = { asked, before, source };
+        return;
+      }
       if (error instanceof CommandRejectedError && error.error.code === 'checkpoint-blocked') {
         setFeedback('info', h('span', { text: t('round.saveBlocked') }));
         return;
       }
       throw error;
     }
+    await showOutcome(asked, before, source);
+  };
+
+  /** The feedback of an answer the game has taken: praise or a kind look at the right fact. */
+  const showOutcome = async (
+    asked: ProblemView,
+    before: GameView,
+    source: Element,
+  ): Promise<void> => {
+    busy = true;
+    setInputDisabled(true);
     const after = host.getView();
     const round = problemRound(after);
     const result = round?.feedback;
@@ -337,6 +358,14 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     if (result.correct) await onCorrect(asked, result, before, after, source);
     else onMiss(asked, result, after);
   };
+
+  // Retry stored a held answer: now it gets its feedback.
+  const unsubscribeSaved = active.game.subscribeIndicator((indicator) => {
+    if (indicator.kind !== 'saved' || !held || disposed) return;
+    const { asked, before, source } = held;
+    held = null;
+    void showOutcome(asked, before, source).catch(app.kit.onError);
+  });
 
   const onCorrect = async (
     asked: ProblemView,
@@ -536,7 +565,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       });
       answerSlot.replaceChildren(keypad.element);
     }
-    dispatch = active.commands.capture();
+    send = active.commands.captureSend();
     timer.start();
     if (pausedByDialog || document.visibilityState === 'hidden') timer.pause();
   };
@@ -754,6 +783,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       releaseInput();
       document.removeEventListener('visibilitychange', onVisibility);
       unsubscribeVoices();
+      unsubscribeSaved();
       saveStatus.dispose();
     },
   };

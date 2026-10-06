@@ -11,6 +11,7 @@
 import { createHotspotList, hitHotspot, logicalPoint } from '@aegis/browser/ui';
 import type { Hotspot } from '@aegis/browser/ui';
 import type { LevelCard, RegionView } from '../../rules/contract';
+import { taken } from '../controller/commands';
 import { findLevel, findRegion } from '../game/view';
 import { levelPositions, loadValleyMap } from '../game/map';
 import type { MapPoint, ValleyMap } from '../game/map';
@@ -335,10 +336,12 @@ export function levelScreen(app: App, keeperId: string, levelId: string): Screen
         size: 'big',
         testId: 'level-play',
         onPress: async () => {
-          await active.commands.capture()(
-            resume !== null
-              ? { type: 'startActivity', activity: { kind: 'level', index: resume } }
-              : { type: 'startLevel', level: levelId },
+          await taken(
+            active.commands.captureSend()(
+              resume !== null
+                ? { type: 'startActivity', activity: { kind: 'level', index: resume } }
+                : { type: 'startLevel', level: levelId },
+            ),
           );
           await app.continueGame(keeperId);
         },

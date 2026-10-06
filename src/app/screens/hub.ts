@@ -4,7 +4,8 @@
  * practised days (a habit view, never a streak), and one big Daily Adventure button that does
  * what the game suggests next (docs/design.md §4.2). The valley map is one tap away.
  */
-import type { GameView } from '../../rules/contract';
+import type { GameAction, GameView } from '../../rules/contract';
+import { taken } from '../controller/commands';
 import { adventureFor, featuredDragon, findLevel, growthOf, weekdayIndex } from '../game/view';
 import type { Adventure } from '../game/view';
 import { plural } from '../i18n/messages';
@@ -134,7 +135,9 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
   };
 
   const go = async (adventure: Adventure): Promise<void> => {
-    const dispatch = active.commands.capture();
+    // The next screen does not wait for a slow save; the save indicator tracks it.
+    const send = active.commands.captureSend();
+    const dispatch = (action: GameAction): Promise<void> => taken(send(action));
     switch (adventure.kind) {
       case 'level':
         await dispatch(
