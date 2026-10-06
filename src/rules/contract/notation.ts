@@ -17,6 +17,7 @@
 import { needsGroup } from './problems';
 import type { AnswerValue, Expr, Problem } from './problems';
 import type { Operator, Relation } from './kinds';
+import type { CardFace } from './minigames';
 
 export const NOTATIONS = ['czech', 'international'] as const;
 export type Notation = (typeof NOTATIONS)[number];
@@ -86,5 +87,20 @@ export function formatAnswer(answer: AnswerValue, notation: Notation = DEFAULT_N
       return OPERATOR_SYMBOLS[notation][answer.operation];
     case 'term':
       return answer.term;
+  }
+}
+
+/** Text of a minigame card or stone face (minigames.ts). Highlights are the shell's styling. */
+export function formatFace(face: CardFace, notation: Notation = DEFAULT_NOTATION): string {
+  switch (face.kind) {
+    case 'expr':
+      return formatExpr(face.expr, notation);
+    case 'answer':
+      return formatAnswer(face.answer, notation);
+    case 'sentence':
+      return formatProblem(
+        { kind: 'term', sentence: face.sentence, highlight: 'result' },
+        notation,
+      );
   }
 }

@@ -214,7 +214,7 @@ export interface LevelRun {
 }
 
 export interface StoryState {
-  /** Narrative state per started beat. */
+  /** Narrative state of the beat in progress (a finished beat keeps only its ID in `done`). */
   beats: Record<string, NarrativeState>;
   /** The beat the shell should present now, if any. */
   pending: string | null;

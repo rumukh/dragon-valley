@@ -17,6 +17,7 @@ import type {
   ResolvedInputMode,
 } from './kinds';
 import type { BossMood, DragonKind, QuestGoal } from './content';
+import type { BoardView } from './minigames';
 import type { AnswerValue, Problem, ProblemStep } from './problems';
 import type { Feedback, RoundEndReason, RoundSource, RuleSettings } from './state';
 
@@ -147,6 +148,9 @@ export interface ProblemRoundView {
   coins: number;
   /** The dragon being fed or cheering, and its expression hint. */
   dragon: { id: string; expression: DragonExpression } | null;
+  /** The placement check's ladder (only for `activity: 'placement'`): the step being asked
+   * (0-based; equal to `steps` once the ladder is done) and the levels placed so far. */
+  placement: { step: number; steps: number; placed: string[] } | null;
 }
 
 export interface MinigameRoundView {
@@ -156,10 +160,14 @@ export interface MinigameRoundView {
   source: RoundSource;
   status: 'active' | 'complete';
   endReason: RoundEndReason | null;
+  /** Boards completed so far, and boards in the round. */
   board: number;
   boards: number;
-  /** `projectMinigame` output for the current board (hidden faces are absent). */
+  /** `projectMinigame` output for the current board (hidden faces are absent). The `revision`
+   * is what `minigameMove.revision` must carry. */
   minigame: { definition: string; status: string; revision: number; view: JsonValue };
+  /** The current board as a typed view (minigames.ts); render from this. */
+  current: BoardView;
   coins: number;
 }
 
