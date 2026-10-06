@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="referrer" content="no-referrer" />
     <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#8fd3ff" />
     <meta name="dv-base" content="%DV_BASE%" />
     <meta name="dv-offline-revision" content="%DV_OFFLINE_REVISION%" />
     <title>Dragon Valley</title>
@@ -14,7 +15,12 @@
     <script type="module" src="./app.js"></script>
   </head>
   <body>
-    <div id="app" aria-busy="true"></div>
+    <div id="app" aria-busy="true">
+      <div class="dv-splash" data-testid="splash">
+        <div class="dv-splash-egg" aria-hidden="true"></div>
+        <p class="dv-splash-title">Dragon Valley</p>
+      </div>
+    </div>
     <noscript>Dragon Valley needs JavaScript to run.</noscript>
   </body>
 </html>

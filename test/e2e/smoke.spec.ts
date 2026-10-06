@@ -50,8 +50,9 @@ test('the game boots at the Pages base with no errors and only same-origin reque
 
   await page.goto('./');
   await expect(page.getByTestId('boot-status')).toHaveAttribute('data-state', 'ready');
-  // The rules ran in this browser: a first session leaves the prologue story on screen.
-  await expect(page.getByTestId('boot-status')).toHaveAttribute('data-screen', 'story');
+  // The shell opens on its title screen once the content pack was loaded and validated in this
+  // browser (the rules run when a keeper plays; test/e2e/profiles.spec.ts covers that).
+  await expect(page.getByTestId('boot-status')).toHaveAttribute('data-screen', 'title');
   await expect(page.getByTestId('boot-status')).toHaveAttribute('data-content-revision', '1.0.0');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dragon Valley');
   await expect(page.locator('#app')).not.toHaveAttribute('aria-busy', 'true');
