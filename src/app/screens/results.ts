@@ -211,7 +211,10 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
         'div',
         {
           className: 'dv-results__celebrations',
+          testId: 'results-celebrations',
           dataset: { many: String(celebrations.length > 3) },
+          // A list that may scroll inside the card can be reached and scrolled by keyboard.
+          attributes: { role: 'region', 'aria-label': t('results.rewards'), tabindex: '0' },
         },
         ...celebrations,
       ),
