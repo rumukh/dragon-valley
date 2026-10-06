@@ -1,9 +1,11 @@
 /**
- * First flows of the app shell on every engine: making a keeper, reloading, the warm-up round
- * by keyboard (choice tiles, keypad, remainder mode), the grown-ups' gate and settings.
- * Every test also proves no console errors, no page errors and no request to another origin.
+ * The first flows of the game on every engine, on the real rules: a new keeper's prologue and
+ * first egg, the placement check by keyboard (keypad, a kind miss, results, saved coins after a
+ * reload), the grown-ups' gate, and the settings (notation, a rule setting, a rename) with the
+ * pause dialog. Every test also proves no console errors, no page errors and no request to
+ * another origin.
  *
- * S3 wrote these for the phase-1 shell; S6 owns test/e2e from here on.
+ * S3 wrote these for its screens; S6 owns test/e2e and the broad suite.
  */
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
@@ -41,6 +43,7 @@ async function boot(page: Page): Promise<void> {
   await expect(page.getByTestId('boot-status')).toHaveAttribute('data-state', 'ready');
 }
 
+/** Make a keeper, skip the prologue and choose the blue egg: the hub is next. */
 async function createKeeper(page: Page, name: string, avatar: string): Promise<void> {
   await page.getByTestId('title-play').click();
   await expect(page.getByTestId('screen-editor')).toBeVisible();
@@ -48,9 +51,28 @@ async function createKeeper(page: Page, name: string, avatar: string): Promise<v
   await page.getByTestId(`avatar-${avatar}`).click();
   await expect(page.getByTestId(`avatar-${avatar}`).locator('input')).toBeChecked();
   await page.getByTestId('keeper-save').click();
+  await expect(page.getByTestId('screen-story')).toBeVisible();
+  await page.getByTestId('story-skip').click();
+  await page.getByTestId('story-choice-bubbles').click();
+  await page.getByTestId('story-next').click();
   await expect(page.getByTestId('hub-greeting')).toHaveText(`Hello, ${name}!`);
 }
 
+/** The answer to a problem as written (×, :, a missing factor), worked out independently. */
+function solve(written: string): number {
+  const text = written.replace(/\s+/g, '');
+  const pairs: [RegExp, (a: number, b: number) => number][] = [
+    [/^(\d+)[·×](\d+)=\?$/, (a, b) => a * b],
+    [/^(\d+)[:÷](\d+)=\?$/, (a, b) => a / b],
+    [/^\?[·×](\d+)=(\d+)$/, (a, b) => b / a],
+    [/^(\d+)[·×]\?=(\d+)$/, (a, b) => b / a],
+  ];
+  for (const [pattern, answer] of pairs) {
+    const match = pattern.exec(text);
+    if (match) return answer(Number(match[1]), Number(match[2]));
+  }
+  throw new Error(`No oracle for ${written}`);
+}
 async function openGrownUps(page: Page, options: { wrongFirst?: boolean } = {}): Promise<void> {
   await page.getByTestId('grownups').click();
   const hold = page.getByTestId('gate-hold');
@@ -79,73 +101,95 @@ async function openGrownUps(page: Page, options: { wrongFirst?: boolean } = {}):
   await expect(page.getByTestId('screen-parent')).toBeVisible();
 }
 
-test('a new family creates a keeper, reaches the hub, and keeps the keeper after a reload', async ({
+test('a new keeper hears the prologue, chooses an egg and keeps it after a reload', async ({
   page,
   baseURL,
 }) => {
+  // A whole flow through the story and the grown-ups' gate: slow on WebKit and on busy machines.
+  test.slow();
   const seen = observe(page, baseURL!);
   await boot(page);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dragon Valley');
-  await createKeeper(page, 'Šárka', 'keeper-3');
+  await page.getByTestId('title-play').click();
+  await page.getByTestId('keeper-name').fill('Šárka');
+  await page.getByTestId('avatar-keeper-3').click();
+  await page.getByTestId('keeper-save').click();
+
+  // The prologue, line by line; the egg choice cannot be skipped.
+  await expect(page.getByTestId('story-line')).toContainText('Seven-Headed Dragon');
+  await page.getByTestId('story-next').click();
+  await expect(page.getByTestId('story-line')).toContainText('Magic Window');
+  await page.getByTestId('story-skip').click();
+  await expect(page.getByTestId('story-line')).toContainText('first egg');
+  await expect(page.getByTestId('story-skip')).toHaveCount(0);
+  await page.getByTestId('story-choice-sunny').click();
+  await expect(page.getByTestId('story-line')).toContainText('Great choice');
+  await page.getByTestId('story-next').click();
+
+  await expect(page.getByTestId('hub-greeting')).toHaveText('Hello, Šárka!');
+  await expect(page.getByTestId('hub-dragon')).toHaveAttribute('data-dragon', 'sunny');
   await expect(page.getByTestId('save-status')).toHaveAttribute('data-state', 'saved');
-  await expect(page.getByTestId('coins')).toHaveAttribute('data-value', '0');
 
   await page.reload();
   await expect(page.getByTestId('boot-status')).toHaveAttribute('data-state', 'ready');
   await page.getByTestId('title-play').click();
-  await expect(page.getByTestId('screen-keepers')).toBeVisible();
   const card = page.getByTestId('keeper-profile-1');
   await expect(card).toContainText('Šárka');
   await card.click();
   await expect(page.getByTestId('hub-greeting')).toHaveText('Hello, Šárka!');
-  await expect(page.getByTestId('save-status')).toHaveAttribute('data-state', 'saved');
+  await expect(page.getByTestId('hub-dragon')).toHaveAttribute('data-dragon', 'sunny');
   expectClean(seen);
 });
 
-test('the warm-up round plays by keyboard, saves every answer and survives a reload', async ({
+test('the placement check plays by keyboard, is kind after a miss and survives a reload', async ({
   page,
   baseURL,
 }) => {
+  // The check asks 12 to 24 problems with their feedback: a long flow on every engine.
+  test.slow();
   const seen = observe(page, baseURL!);
   await boot(page);
   await createKeeper(page, 'Tom', 'keeper-5');
-  await page.getByTestId('hub-practice').click();
+  await expect(page.getByTestId('hub-adventure')).toContainText('Show the dragons');
+  await page.getByTestId('hub-adventure').click();
+  await expect(page.getByTestId('screen-round')).toHaveAttribute('data-placement', 'true');
+
+  // A miss first: orange "?", the right fact and its picture; the child goes on when ready.
   const problem = page.getByTestId('problem');
-  await expect(problem).toHaveText('2·4=?');
-
-  // Typed digits pick the matching tile; Enter chooses it.
-  await page.keyboard.press('8');
-  await page.keyboard.press('Enter');
-  await expect(page.getByTestId('feedback')).toHaveAttribute('data-kind', 'correct');
-  await expect(page.getByTestId('feedback')).toContainText('2 · 4 = 8');
-  await expect(problem).toHaveText('5·3=?');
-
-  // A miss is kind: orange "?" feedback, a picture model, and the same problem again.
-  await page.keyboard.press('8');
+  const first = solve(await problem.innerText());
+  await page.keyboard.type(String(first + 1));
   await page.keyboard.press('Enter');
   await expect(page.getByTestId('feedback')).toHaveAttribute('data-kind', 'miss');
-  await expect(page.getByTestId('model')).toHaveAttribute('data-kind', 'array');
-  await expect(page.getByTestId('choice-8')).toBeDisabled();
-  await page.getByTestId('choice-15').click();
-  await expect(problem).toHaveText('10·6=?');
+  await expect(page.getByTestId('feedback-fact')).toContainText(`= ${first}`);
+  await page.getByTestId('feedback-next').click();
 
-  // The keypad takes physical keys and on-screen keys alike.
-  await page.keyboard.type('6');
-  await page.getByTestId('keypad-0').click();
-  await page.keyboard.press('Enter');
-  await expect(problem).toHaveText('23:5=?r?');
-
-  // Remainder mode: quotient, then r to move to the remainder.
-  await page.keyboard.type('4');
-  await page.keyboard.press('r');
-  await page.keyboard.type('3');
-  await page.keyboard.press('Enter');
-  await expect(page.getByTestId('round-results')).toBeVisible();
-  await expect(page.getByTestId('stars')).toHaveAttribute('data-earned', '2');
-  await expect(page.getByTestId('coins')).toHaveAttribute('data-value', '4');
+  // Then right answers by keyboard until the check ends.
+  for (let step = 0; step < 30; step++) {
+    if (await page.getByTestId('screen-results').isVisible()) break;
+    if (await page.getByTestId('feedback-next').isVisible()) {
+      await page.getByTestId('feedback-next').click();
+      continue;
+    }
+    // The next problem is ready once the feedback is gone (or the check has ended).
+    await expect(
+      page
+        .getByTestId('screen-results')
+        .or(page.locator('[data-testid="feedback"][data-kind="none"]')),
+    ).toBeAttached();
+    if (await page.getByTestId('screen-results').isVisible()) break;
+    const written = await problem.innerText();
+    await page.keyboard.type(String(solve(written)));
+    await page.keyboard.press('Enter');
+    await expect(page.getByTestId('feedback')).not.toHaveAttribute('data-kind', 'none');
+  }
+  await expect(page.getByTestId('screen-results')).toBeVisible();
   await expect(page.getByTestId('save-status')).toHaveAttribute('data-state', 'saved');
+  const coins = await page.getByTestId('coins').getAttribute('data-value');
+  expect(Number(coins)).toBeGreaterThan(0);
+  await page.getByTestId('results-continue').click();
+  await expect(page.getByTestId('screen-hub')).toBeVisible();
 
-  // Every control on the round meets the child-safe 48 px target.
+  // Every control on the hub meets the child-safe 48 px target.
   for (const button of await page.locator('main button:visible').all()) {
     const box = (await button.boundingBox())!;
     expect(Math.round(box.width), await button.innerText()).toBeGreaterThanOrEqual(48);
@@ -156,15 +200,15 @@ test('the warm-up round plays by keyboard, saves every answer and survives a rel
   await expect(page.getByTestId('boot-status')).toHaveAttribute('data-state', 'ready');
   await page.getByTestId('title-play').click();
   await page.getByTestId('keeper-profile-1').click();
-  await expect(page.getByTestId('coins')).toHaveAttribute('data-value', '4');
-  await expect(page.getByTestId('egg-warmth')).toHaveAttribute('aria-valuenow', '100');
+  await expect(page.getByTestId('coins')).toHaveAttribute('data-value', coins!);
   expectClean(seen);
 });
-
 test('the grown-ups gate opens only after a full hold and a right answer', async ({
   page,
   baseURL,
 }) => {
+  // A whole flow through the story and the grown-ups' gate: slow on WebKit and on busy machines.
+  test.slow();
   const seen = observe(page, baseURL!);
   await boot(page);
   await createKeeper(page, 'Ema', 'keeper-1');
@@ -189,10 +233,12 @@ test('the grown-ups gate opens only after a full hold and a right answer', async
   expectClean(seen);
 });
 
-test('grown-ups switch the math signs and rename a keeper, and Escape pauses a round', async ({
+test('grown-ups switch the math signs, set the daily goal and rename; Escape pauses', async ({
   page,
   baseURL,
 }) => {
+  // A whole flow through the story and the grown-ups' gate: slow on WebKit and on busy machines.
+  test.slow();
   const seen = observe(page, baseURL!);
   await boot(page);
   await createKeeper(page, 'Ema', 'keeper-1');
@@ -206,6 +252,9 @@ test('grown-ups switch the math signs and rename a keeper, and Escape pauses a r
     'aria-pressed',
     'true',
   );
+  // A rule setting goes to the keeper's game as an action.
+  await page.getByTestId('setting-goal-20').click();
+  await expect(page.getByTestId('setting-goal-20')).toHaveAttribute('aria-pressed', 'true');
   await page.getByTestId('parent-tab-keepers').click();
   await page.getByTestId('parent-edit-profile-1').click();
   await page.getByTestId('keeper-name').fill('Emička');
@@ -216,8 +265,9 @@ test('grown-ups switch the math signs and rename a keeper, and Escape pauses a r
 
   await page.getByTestId('keeper-profile-1').click();
   await expect(page.getByTestId('hub-greeting')).toHaveText('Hello, Emička!');
-  await page.getByTestId('hub-practice').click();
-  await expect(page.getByTestId('problem')).toHaveText('2×4=?');
+  await expect(page.getByTestId('daily-goal')).toHaveAttribute('aria-valuemax', '20');
+  await page.getByTestId('hub-adventure').click();
+  await expect(page.getByTestId('problem')).toContainText(/[×÷]/);
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('pause-dialog')).toBeVisible();
   await page.getByTestId('pause-resume').click();

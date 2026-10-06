@@ -8,6 +8,8 @@ import { CHILD_PROFILE, tokenizeWords } from '@aegis/narrative';
 import { describe, expect, it } from 'vitest';
 import {
   ACTIVITY_KINDS,
+  COSMETIC_SLOTS,
+  MASTERY_LEVELS,
   DRAGON_EXPRESSIONS,
   DRAGON_STAGES,
   KEEPER_AVATARS,
@@ -36,6 +38,8 @@ const DYNAMIC_PREFIXES = [
   'term.',
   'results.grew.',
   'day.',
+  'slot.',
+  'window.',
   ...RULE_ERROR_CODES.map((code) => `error.${code}`),
 ];
 
@@ -112,6 +116,8 @@ describe('English catalog', () => {
         `day.short.${day}`,
       ]),
       ...RULE_ERROR_CODES.map((code) => `error.${code}`),
+      ...COSMETIC_SLOTS.map((slot) => `slot.${slot}`),
+      ...MASTERY_LEVELS.map((level) => `window.${level}`),
     ];
     for (const key of expected) expect(en, key).toHaveProperty([key]);
   });
