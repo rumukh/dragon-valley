@@ -183,9 +183,11 @@ square view box, for Glimmer's Market tiles and stickers.
 - **Fruit** for Feeding Time: `apple`, `plum`, `pear`, `cherries`, `berries`.
 - **Map nodes**: `node-locked`, `node-open`, `node-current`, `node-stars-1..3` (`accent` tints
   open/current nodes with the region color).
-- **UI glyphs** drawn in `currentColor` (theme them with CSS `color`): `lock`, `check`, `question`,
-  `speaker`, `settings`, `parent`, `home`, `back`, `next`, `close`, `print`, `hint`, `music`,
-  `sound-off`.
+- **UI glyphs** drawn only in `currentColor` (theme them with CSS `color`; details such as the
+  printer's light are cut-outs, never a fixed color): `lock`, `check`, `question`, `speaker`,
+  `settings`, `parent`, `home`, `back`, `next`, `close`, `print`, `hint`, `music`, `sound-off`,
+  `pause`, `play`, `plus`, `pencil`, `download`, `upload`, `trash`, `warning`, `retry`,
+  `backspace`, `shield`.
 - **Region emblems**: `emblem-<region-id>` for all nine regions.
 
 `renderAvatar('keeper-1' … 'keeper-8', { size, idPrefix, title, frame })` renders eight diverse,
