@@ -144,14 +144,28 @@ describe('the hub after the first egg', () => {
   });
 
   it('measures growth in facts toward the next stage', async () => {
-    const { view } = await firstSession();
+    const { view, act } = await firstSession();
     const egg = featuredDragon(view())!;
     const growth = growthOf(egg)!;
     expect(growth.next).toBe('hatchling');
-    expect(growth.value).toBe(0);
-    expect(growth.max).toBeGreaterThan(0);
+    expect(growth.have).toBe(0);
+    // Bubbles (×2) hatches at 30 % of its 21 facts answered right once: 7 facts.
+    expect(growth.need).toBe(7);
     const crowned = { ...egg, next: null } as DragonView;
     expect(growthOf(crowned)).toBeNull();
+    // One right answer is one fact, counted exactly (a rounded share would still say 0).
+    await act({ type: 'startActivity', activity: { kind: 'placement' } });
+    const round = view().round as ProblemRoundView;
+    const asked = round.problem!;
+    await act({
+      type: 'placementAnswer',
+      value: requireValue(expectedAnswer(asked.problem, asked.step)),
+      elapsedMs: 1500,
+    });
+    const after = growthOf(view().dragons.find((dragon) => dragon.id === egg.id)!)!;
+    const twoTimes = /^mul:(2x\d+|\d+x2)$/.test(asked.item);
+    expect(after.have).toBe(twoTimes ? 1 : 0);
+    expect(after.need).toBe(7);
   });
 });
 

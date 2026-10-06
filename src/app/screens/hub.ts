@@ -4,7 +4,7 @@
  * practised days (a habit view, never a streak), and one big Daily Adventure button that does
  * what the game suggests next (docs/design.md §4.2). The valley map is one tap away.
  */
-import type { DragonView, GameView } from '../../rules/contract';
+import type { GameView } from '../../rules/contract';
 import { adventureFor, featuredDragon, findLevel, growthOf, weekdayIndex } from '../game/view';
 import type { Adventure } from '../game/view';
 import type { MessageKey } from '../i18n/messages';
@@ -15,7 +15,7 @@ import { h } from '../ui/dom';
 import { createCoinCounter, createMeter } from '../ui/meters';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
-import { createSaveStatus, keeperBadge, topBar } from './common';
+import { createSaveStatus, keeperBadge, toastStickers, topBar } from './common';
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -25,17 +25,6 @@ const PLACES = {
   album: { label: 'hub.album', icon: 'book' },
   window: { label: 'hub.window', icon: 'window' },
 } as const;
-
-/** Facts a dragon has toward its next stage, and how many it needs. */
-export function growthFacts(dragon: DragonView): { have: number; need: number } | null {
-  const growth = growthOf(dragon);
-  if (!growth) return null;
-  const items = dragon.mastery.items;
-  return {
-    have: Math.floor((growth.value * items) / 100),
-    need: Math.max(1, Math.ceil((growth.max * items) / 100)),
-  };
-}
 
 export function hubScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
@@ -60,7 +49,6 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       return;
     }
     const name = text(featured.nameKey);
-    const facts = growthFacts(featured);
     const parts: Node[] = [
       h(
         'div',
@@ -81,12 +69,12 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       }),
     ];
     const growth = growthOf(featured);
-    if (growth && facts) {
+    if (growth) {
       parts.push(
         createMeter({
           label: t(`grow.${growth.next}` as MessageKey, { name }),
-          max: facts.need,
-          value: Math.min(facts.have, facts.need),
+          max: growth.need,
+          value: growth.have,
           valueText: (value, max) => t('grow.facts', { value, max }),
           testId: 'dragon-growth',
         }).element,
@@ -166,6 +154,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       case 'gift':
         await dispatch({ type: 'openGift' });
         await showGift();
+        toastStickers(app, active);
         return app.router.refresh();
       case 'story':
         return app.continueGame(keeperId);
@@ -315,6 +304,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
                                 type: 'claimQuest',
                                 quest: quest.id,
                               });
+                              toastStickers(app, active);
                             },
                             onError: app.kit.onError,
                           })

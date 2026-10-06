@@ -23,7 +23,7 @@ import { icon } from '../ui/icons';
 import { createCoinCounter } from '../ui/meters';
 import type { Screen, ScreenEntry } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
-import { createSaveStatus, topBar } from './common';
+import { createSaveStatus, toastStickers, topBar } from './common';
 
 /** The common frame of a collection screen: Back, a title, the coins and the save status. */
 function collection(
@@ -104,6 +104,7 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
               onPress: async () => {
                 await active.commands.capture()({ type: 'buy', item: entry.id });
                 app.kit.toasts.show(t('market.bought', { item: name }));
+                toastStickers(app, active);
                 paint();
               },
               onError: app.kit.onError,
@@ -238,7 +239,10 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
                 if (worn === id) return;
                 void active.commands
                   .capture()({ type: 'equip', dragon: dragon.id, slot, item: id })
-                  .then(paint, app.kit.onError);
+                  .then(() => {
+                    toastStickers(app, active);
+                    paint();
+                  }, app.kit.onError);
               });
               return button;
             };

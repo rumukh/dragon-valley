@@ -137,6 +137,22 @@ export function keeperBadge(keeper: Keeper, large = false): HTMLElement {
   );
 }
 
+/**
+ * Stickers an action outside a round just earned (dressing a dragon earns "Dressed Up", quests
+ * and gifts can earn others): one toast each. Their sound already played with the commit.
+ */
+export function toastStickers(app: App, active: ActiveKeeper): void {
+  const stickers = app.game.content.data.stickers;
+  for (const event of active.events.take(['sticker.earned'])) {
+    if (event.type !== 'sticker.earned') continue;
+    const sticker = stickers.find((candidate) => candidate.id === event.data.sticker);
+    if (!sticker) continue;
+    app.kit.toasts.show(app.kit.t('results.sticker', { name: app.text(sticker.nameKey) }), {
+      tone: 'success',
+    });
+  }
+}
+
 /** The device's local calendar day, `YYYY-MM-DD`: time enters the game only as data. */
 export function localDay(now: Date = new Date()): string {
   const pad = (value: number): string => String(value).padStart(2, '0');

@@ -74,17 +74,20 @@ export function featuredDragon(view: GameView): DragonView | undefined {
 export interface Growth {
   /** The stage the dragon grows into next. */
   readonly next: DragonStage;
-  /** Progress toward it on the requirement's scale (percent of the dragon's facts). */
-  readonly value: number;
-  readonly max: number;
+  /** Facts of the dragon's set at the needed mastery, and how many the next stage needs. */
+  readonly have: number;
+  readonly need: number;
 }
 
-/** How far a dragon is from its next stage, or null when it is crowned. */
+/**
+ * How far a dragon is from its next stage ("4 of 7 facts"), from the rules' exact counts, or
+ * null when it is crowned.
+ */
 export function growthOf(dragon: DragonView): Growth | null {
   const next = dragon.next;
   if (!next) return null;
-  const current = dragon.mastery[next.mastery];
-  return { next: next.stage, value: Math.min(current, next.share), max: next.share };
+  const need = Math.max(1, next.need);
+  return { next: next.stage, have: Math.min(next.have, need), need };
 }
 
 export type BossPose = 'start' | 'warming' | 'won';

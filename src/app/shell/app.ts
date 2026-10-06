@@ -282,6 +282,9 @@ export function createApp(options: AppOptions): App {
         },
       };
       const unsubscribeCommits = game.host.subscribeCommits((commit) => {
+        // A new round starts a new results story: what came before it (the first egg chosen in
+        // the story, an earlier round's sticker) is not celebrated again at this round's end.
+        if (commit.events.some((event) => event.type === 'round.started')) inbox.length = 0;
         for (const event of commit.events) {
           if (!CELEBRATION_SOUNDS.has(event.type)) audio.cue(event.type, cueContext(event.data));
           inbox.push(event as unknown as GameEvent);
