@@ -86,7 +86,11 @@ export function atLeast(
   return ORDER.indexOf(masteryLevel(item, balance)) >= ORDER.indexOf(level);
 }
 
-/** A known item (answered correctly before) whose review day has come. */
+/**
+ * A known item (answered correctly before) whose review day has come and that was not already
+ * practised today: an item seen today is never "due" again the same day, so a dragon is not
+ * hungry minutes after it hatched and a pane needs polishing only from a later day on.
+ */
 export function isDue(item: DeepReadonly<ItemState> | undefined, day: DayNumber): boolean {
-  return item !== undefined && item.correct > 0 && item.due <= day;
+  return item !== undefined && item.correct > 0 && item.due <= day && item.lastDay < day;
 }
