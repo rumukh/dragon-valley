@@ -501,6 +501,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       tiles = createTiles(app.kit, {
         label: t('round.choices'),
         digitSelect: kind === 'number',
+        signs: kind === 'operation' || kind === 'relation',
         choices: choices.map((answer) => ({
           id: answerId(answer),
           label: answerLabel(answer, notation(), t),
