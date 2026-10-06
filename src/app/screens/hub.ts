@@ -211,6 +211,21 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
   };
 
   const paintAdventure = (current: GameView): void => {
+    if (active.timeIsUp()) {
+      // The grown-ups' time limit is used up: a kind goodbye instead of a new adventure.
+      adventureSlot.replaceChildren(
+        h('p', { className: 'dv-hub__rest', testId: 'hub-rest', text: t('hub.rest') }),
+        candyButton({
+          label: t('results.goodbye'),
+          icon: 'home',
+          variant: 'sun',
+          testId: 'hub-goodbye',
+          onPress: () => app.router.reset(app.screens.keepers()),
+          onError: app.kit.onError,
+        }),
+      );
+      return;
+    }
     const adventure = adventureFor(current);
     adventureSlot.replaceChildren(
       candyButton({

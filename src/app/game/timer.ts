@@ -39,3 +39,32 @@ export function createResponseTimer(now: () => number = () => performance.now())
     },
   };
 }
+
+/**
+ * Time played since a keeper's game was opened in this page, without the time it was hidden or
+ * paused: the measure behind the grown-ups' optional time limit.
+ */
+export interface PlayClock {
+  pause(): void;
+  resume(): void;
+  /** Whole milliseconds played. */
+  elapsed(): number;
+}
+
+export function createPlayClock(now: () => number = () => performance.now()): PlayClock {
+  let total = 0;
+  let since: number | null = now();
+  return {
+    pause() {
+      if (since === null) return;
+      total += now() - since;
+      since = null;
+    },
+    resume() {
+      if (since === null) since = now();
+    },
+    elapsed() {
+      return Math.round(total + (since === null ? 0 : now() - since));
+    },
+  };
+}

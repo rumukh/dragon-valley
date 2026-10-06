@@ -408,5 +408,17 @@
   "hub.market": "Market",
   "hub.den": "Dragon Den",
   "hub.album": "Stickers",
-  "hub.window": "Magic Window"
+  "hub.window": "Magic Window",
+  "hub.rest": "Time for a rest! Your dragons will wait for you.",
+  "parent.settings.timeLimit": "Time limit for one sitting",
+  "parent.settings.timeLimitOff": "No limit",
+  "parent.settings.minutes": "{count} min",
+  "parent.rules.heading": "Game settings for {name}",
+  "parent.rules.notYet": "These settings appear after {name} plays for the first time.",
+  "parent.rules.dailyGoal": "Daily goal (right answers)",
+  "parent.rules.arena": "Lightning Arena (a one-minute race, after the Bridge Troll)",
+  "parent.rules.placement": "Run the placement check again",
+  "parent.rules.placementStarted": "The placement check starts the next time {name} plays.",
+  "parent.rules.unlock": "Open regions early",
+  "parent.rules.saved": "Game setting saved."
 }

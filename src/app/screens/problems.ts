@@ -170,6 +170,8 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   let raceTimer: ReturnType<typeof setInterval> | undefined;
   let timeUp = false;
   let raceEnded = false;
+  // The grown-ups' time limit ends a round gently, between problems.
+  let restTime = false;
 
   const releaseInput = (): void => {
     tiles?.dispose();
@@ -542,10 +544,30 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     return tiles?.element.querySelector<HTMLElement>('button:not(:disabled)') ?? null;
   };
 
+  const endForRest = async (): Promise<void> => {
+    clearInterval(restTimer);
+    releaseInput();
+    if (problemRound(host.getView())?.status === 'active') {
+      await active.commands.capture()({ type: 'endRound', reason: 'time-limit' });
+    }
+    await app.continueGame(keeperId);
+  };
+  const checkRest = (): void => {
+    if (restTime || arena || !active.timeIsUp()) return;
+    restTime = true;
+    if (!busy) void endForRest().catch(app.kit.onError);
+  };
+  const restTimer = setInterval(checkRest, 5000);
+
   /** Show the next problem, or leave for the results when the round is over. */
   const advance = async (): Promise<void> => {
     if (timeUp) {
       await endRace();
+      return;
+    }
+    checkRest();
+    if (restTime) {
+      await endForRest();
       return;
     }
     const view = host.getView();
@@ -697,6 +719,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     dispose() {
       disposed = true;
       clearInterval(raceTimer);
+      clearInterval(restTimer);
       releaseInput();
       document.removeEventListener('visibilitychange', onVisibility);
       unsubscribeVoices();

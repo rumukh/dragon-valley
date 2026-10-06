@@ -575,9 +575,23 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
 
   const painter = kind ? PAINTERS[kind](context) : null;
 
+  /** The grown-ups' time limit ends the round gently, between moves. */
+  const endForRest = async (): Promise<boolean> => {
+    clearInterval(restTimer);
+    if (minigameRound(host.getView())?.status === 'active') {
+      await active.commands.capture()({ type: 'endRound', reason: 'time-limit' });
+    }
+    await app.continueGame(active.keeper.id);
+    return false;
+  };
+  const restTimer = setInterval(() => {
+    if (!busy && !disposed && active.timeIsUp()) void endForRest().catch(app.kit.onError);
+  }, 5000);
+
   /** Redraw after a move: cheer a finished board, or leave once the round is over. */
   const afterMove = async (): Promise<boolean> => {
     if (disposed) return false;
+    if (active.timeIsUp()) return endForRest();
     const view = host.getView();
     const round = minigameRound(view);
     coins.set(view.coins);
@@ -656,6 +670,7 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     focusTarget: () => painter?.focus() ?? heading,
     dispose() {
       disposed = true;
+      clearInterval(restTimer);
       saveStatus.dispose();
     },
   };

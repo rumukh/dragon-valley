@@ -243,6 +243,11 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
       } else {
         await dispatch({ type: 'endRound', reason: 'done' });
       }
+      if (timeUp) {
+        // Time for a rest: back to the keepers, the game saved and closed.
+        await app.router.reset(app.screens.keepers());
+        return;
+      }
       await app.continueGame(keeperId);
     },
     onError: app.kit.onError,

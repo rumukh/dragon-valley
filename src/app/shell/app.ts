@@ -28,6 +28,8 @@ import { profileSeed, SAVE_DATABASE } from '../../rules/contract';
 import type { GameAction, GameEvent } from '../../rules/contract';
 import type { ContentText } from '../content/text';
 import type { DvGame, DvSession } from '../game/definition';
+import { createPlayClock } from '../game/timer';
+import type { PlayClock } from '../game/timer';
 import { findKeeper } from '../persistence/family';
 import type { Keeper } from '../persistence/family';
 import { openGameSession } from '../persistence/game-session';
@@ -76,6 +78,10 @@ export interface ActiveKeeper {
   readonly commands: CommandController<GameAction>;
   readonly preferences: PreferencesStore;
   readonly events: EventInbox;
+  /** Time played in this page (hidden time excluded), for the grown-ups' time limit. */
+  readonly clock: PlayClock;
+  /** True once the keeper's time limit (if any) is used up. */
+  timeIsUp(): boolean;
 }
 
 export type ParentTab = 'keepers' | 'settings' | 'data' | 'offline' | 'about';
@@ -171,6 +177,7 @@ export function createApp(options: AppOptions): App {
   };
 
   type OpenKeeper = ActiveKeeper & { release(): Promise<void> };
+  const clocks = new Map<string, PlayClock>();
   let active: OpenKeeper | null = null;
   let opening: Promise<OpenKeeper> | null = null;
 
@@ -239,15 +246,21 @@ export function createApp(options: AppOptions): App {
         seed: profileSeed(keeper.id),
       });
       const commands = createCommandController(game.host, (error) => app.reportError(error));
+      // One clock per keeper and page, so closing and reopening a keeper keeps counting.
+      const clock = clocks.get(keeper.id) ?? createPlayClock();
+      clocks.set(keeper.id, clock);
+      clock.resume();
       const unbindVisibility = bindVisibilityPause(
         document,
         (reason) => {
           game.host.pause(reason);
+          clock.pause();
           audio.pause();
           stopSpeech();
         },
         (reason) => {
           audio.resume();
+          clock.resume();
           void commands.resume(reason).catch((error) => app.reportError(error));
         },
       );
@@ -285,7 +298,13 @@ export function createApp(options: AppOptions): App {
         commands,
         preferences,
         events,
+        clock,
+        timeIsUp() {
+          const limit = preferences.current().timeLimit;
+          return limit !== null && clock.elapsed() >= limit * 60_000;
+        },
         async release() {
+          clock.pause();
           unsubscribePreferences();
           unsubscribeRestore();
           unsubscribeCommits();

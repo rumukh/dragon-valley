@@ -616,6 +616,12 @@
   font-weight: 700;
 }
 
+.dv-hub__rest {
+  max-width: 22em;
+  font-weight: 700;
+  text-align: center;
+}
+
 .dv-gift__art svg {
   width: 6rem;
   margin-inline: auto;
@@ -1777,6 +1783,21 @@
 
 .dv-parent__keeper {
   font-size: 1.1rem;
+}
+
+.dv-parent__rules {
+  display: grid;
+  gap: 0.9em;
+  padding-top: 0.8em;
+  border-top: 0.1em solid var(--dv-line);
+}
+
+.dv-parent__rules h3 {
+  font-size: 1.1rem;
+}
+
+.dv-parent__rules > .dv-button {
+  justify-self: start;
 }
 
 .dv-offline-status {
