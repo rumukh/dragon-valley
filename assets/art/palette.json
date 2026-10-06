@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "name": "Dragon Valley storybook palette",
+  "description": "Master palette for Dragon Valley. Bright storybook colors, warm cream paper, deep plum ink instead of black, one accent per region. The UI design system adopts these tokens; art derives shading by mixing toward warm cream (light) and deep plum (dark).",
+  "ink": {
+    "ink": "#2a2140",
+    "inkSoft": "#4f4669",
+    "inkMuted": "#6b6385",
+    "inkInverse": "#fff8ec"
+  },
+  "surface": {
+    "paper": "#fff8ec",
+    "paperDeep": "#f7ead2",
+    "card": "#ffffff",
+    "line": "#e8d9bd",
+    "lineStrong": "#c9b48f",
+    "night": "#1f1a3d",
+    "nightSoft": "#2e2758",
+    "shadow": "#2a2140"
+  },
+  "brand": {
+    "primary": "#6a4ce0",
+    "primaryDeep": "#4f33c2",
+    "primarySoft": "#e9e3ff",
+    "sun": "#ffc53d",
+    "sunDeep": "#8a5a00",
+    "coral": "#ff7a59",
+    "sky": "#8fd3ff",
+    "meadow": "#7ccf5a"
+  },
+  "feedback": {
+    "success": "#22a45d",
+    "successDeep": "#167a43",
+    "successSoft": "#ddf5e6",
+    "miss": "#f08a24",
+    "missDeep": "#a85400",
+    "missSoft": "#ffecd6",
+    "info": "#2f8fe8",
+    "infoDeep": "#1c64b0",
+    "infoSoft": "#dbebfc"
+  },
+  "mastery": {
+    "dim": "#4a4f72",
+    "bronze": "#d98a3d",
+    "silver": "#cfe0f2",
+    "gold": "#ffcf33",
+    "polish": "#a39882",
+    "lead": "#2f2746"
+  },
+  "regions": {
+    "sunny-meadow": { "name": "Buttercup", "accent": "#ffc53d", "deep": "#8a5a00", "soft": "#fff3d1", "onAccent": "ink" },
+    "whispering-woods": { "name": "Fern", "accent": "#3aa65b", "deep": "#1f7a3f", "soft": "#dff3e5", "onAccent": "ink" },
+    "fire-mountain": { "name": "Ember", "accent": "#f26a2e", "deep": "#b23f12", "soft": "#fde3d6", "onAccent": "ink" },
+    "crystal-caves": { "name": "Amethyst", "accent": "#8b5cf6", "deep": "#6236d6", "soft": "#ece4ff", "onAccent": "white" },
+    "sharing-lake": { "name": "Lake", "accent": "#2d8ce6", "deep": "#1b5fae", "soft": "#dbebfc", "onAccent": "ink" },
+    "leftover-lagoon": { "name": "Lagoon", "accent": "#13b2a6", "deep": "#08706a", "soft": "#d4f3f0", "onAccent": "ink" },
+    "giants-peaks": { "name": "Heather", "accent": "#e35d9b", "deep": "#a8326c", "soft": "#fbe1ee", "onAccent": "ink" },
+    "riddle-ruins": { "name": "Moss", "accent": "#93a83a", "deep": "#5f6e14", "soft": "#eef2d6", "onAccent": "ink" },
+    "dragon-castle": { "name": "Royal", "accent": "#d93a57", "deep": "#a8203e", "soft": "#fbdde3", "onAccent": "white" }
+  },
+  "rainbow": ["#ff5a5f", "#ff9f40", "#ffd93d", "#5ccc6b", "#4aa8ff", "#5b6cf0", "#a66cf0"],
+  "fruit": {
+    "apple": "#e8423f",
+    "plum": "#6a3f9e",
+    "pear": "#c9d64a",
+    "cherry": "#d7263d",
+    "berry": "#4f5fd0",
+    "leaf": "#4caf50",
+    "stem": "#7a5230"
+  },
+  "dragonSignature": {
+    "puff": "#b9b0ea",
+    "mirror": "#a9b6cc",
+    "bubbles": "#3a9cf0",
+    "clover": "#4fbf66",
+    "petal": "#ff86b9",
+    "sunny": "#ffd23a",
+    "ember": "#ff5f3d",
+    "rainbow": "#a66cf0",
+    "crystal": "#6fd3f5",
+    "starry": "#3d3b94",
+    "goldie": "#f2b42c",
+    "pearl": "#f2c9dd",
+    "boulder": "#9a8f86",
+    "clockwork": "#c9773a",
+    "seven-headed": "#8a63e8",
+    "glimmer": "#5fb3c4"
+  },
+  "accessiblePairs": [
+    { "fg": "ink.ink", "bg": "surface.paper", "min": 7, "use": "Body text on paper" },
+    { "fg": "ink.ink", "bg": "surface.card", "min": 7, "use": "Body text on cards" },
+    { "fg": "ink.ink", "bg": "surface.paperDeep", "min": 7, "use": "Body text on deep paper" },
+    { "fg": "ink.inkSoft", "bg": "surface.paper", "min": 7, "use": "Secondary text" },
+    { "fg": "ink.inkMuted", "bg": "surface.paper", "min": 4.5, "use": "Hints and captions" },
+    { "fg": "ink.inkMuted", "bg": "surface.paperDeep", "min": 4.5, "use": "Captions on deep paper" },
+    { "fg": "ink.inkInverse", "bg": "surface.night", "min": 7, "use": "Text on night panels" },
+    { "fg": "brand.sun", "bg": "surface.night", "min": 4.5, "use": "Highlights on night panels" },
+    { "fg": "surface.card", "bg": "brand.primary", "min": 4.5, "use": "Primary button label" },
+    { "fg": "surface.card", "bg": "brand.primaryDeep", "min": 7, "use": "Pressed primary button label" },
+    { "fg": "ink.ink", "bg": "brand.sun", "min": 7, "use": "Sun button label" },
+    { "fg": "ink.ink", "bg": "brand.primarySoft", "min": 7, "use": "Text on primary tint" },
+    { "fg": "feedback.successDeep", "bg": "surface.paper", "min": 4.5, "use": "Correct text" },
+    { "fg": "surface.card", "bg": "feedback.successDeep", "min": 4.5, "use": "Label on correct badge" },
+    { "fg": "surface.card", "bg": "feedback.success", "min": 3, "use": "Check icon on green (graphics)" },
+    { "fg": "feedback.successDeep", "bg": "feedback.successSoft", "min": 4.5, "use": "Correct banner" },
+    { "fg": "feedback.missDeep", "bg": "surface.paper", "min": 4.5, "use": "Almost text" },
+    { "fg": "ink.ink", "bg": "feedback.miss", "min": 4.5, "use": "Label on orange badge" },
+    { "fg": "feedback.missDeep", "bg": "feedback.missSoft", "min": 4.5, "use": "Almost banner" },
+    { "fg": "feedback.infoDeep", "bg": "surface.paper", "min": 4.5, "use": "Info text" },
+    { "fg": "feedback.infoDeep", "bg": "feedback.infoSoft", "min": 4.5, "use": "Info banner" },
+    { "fg": "brand.sunDeep", "bg": "surface.paper", "min": 4.5, "use": "Coin counts and gold text" }
+  ]
+}

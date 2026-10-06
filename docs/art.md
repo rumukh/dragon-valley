@@ -1,0 +1,223 @@
+# Dragon Valley art
+
+Art direction, the master palette, and the API of the art modules (`src/app/art/**`). Every
+renderer is a **pure, deterministic function that returns an SVG string**: no DOM, no clock, no
+`Math.random`, no platform trigonometry. The same options always give byte-identical markup on every
+OS (pinned by golden digests in `test/unit/art/dragon.test.ts`).
+
+## 1. Art direction
+
+- **Bright storybook, "toy vinyl" finish.** Rounded shapes, soft radial shading (light top-left,
+  shade bottom-right), a glossy highlight, and a **deep hue-tinted outline instead of black**.
+  Shadows lean toward deep plum (`#2a1b45`), highlights toward warm cream (`#fff8e6`), so every
+  color family stays harmonious.
+- **Cute, not babyish.** Big glossy eyes with two highlights, small snouts, blush, one tiny fang.
+  Hatchlings follow the baby schema (huge head, stubby wings); adults are taller with longer tails
+  and bigger wings. Nothing is scary: no claws pointing at the viewer, no sharp teeth rows.
+- **Every dragon is its own mnemonic**, readable at 64 px and charming at 512 px:
+
+  | Table | Dragon    | What the child can see and count                                                   |
+  | ----- | --------- | ---------------------------------------------------------------------------------- |
+  | ×0    | Puff      | Cloud-puff body, blows a smoke ring shaped like **0** ("poof!")                    |
+  | ×1    | Mirror    | Silver mirror belly and a **reflection** under its feet: stays the same            |
+  | ×2    | Bubbles   | **Two tails**, bubbles in pairs, spots in pairs: doubles                           |
+  | ×3    | Clover    | **3 horns**, 3 leaf spikes, a three-leaf clover on the belly and the tail          |
+  | ×4    | Petal     | **4 petal wings** (two pairs: double the double), four-petal flower crest          |
+  | ×5    | Sunny     | **5-ray sun crest**, a clock face belly and a **clock-hand tail** (5-minute steps) |
+  | ×6    | Ember     | **5 flames** on the tail **+ 1** flame on the tip                                  |
+  | ×7    | Rainbow   | **7 rainbow stripes** on the belly                                                 |
+  | ×8    | Crystal   | **8-point snowflake** on the belly (double, double, double)                        |
+  | ×9    | Starry    | A ten-frame of stars with **9 stars and 1 empty place** (10 − 1)                   |
+  | ×10   | Goldie    | A crown with **10 points** and a gold **0** medal (add a zero)                     |
+  | r     | Pearl     | Shares pearls fairly: a neat pile plus **one leftover pearl**                      |
+  | 100s  | Boulder   | Stone dragon with a hundred-square, a ten-rod and a one-cube carved on its belly   |
+  | ( )   | Clockwork | Three gears that **turn one after another**, in order                              |
+
+  Eggs hint at their hatchling (Puff's egg has clouds and a 0, Ember's has 5 + 1 flames, Starry's
+  has 9 stars and one empty star, and so on).
+
+- **Region accents** give each place one signature color (palette `regions`); dragons are drawn in
+  their own colors so they stay recognisable everywhere.
+
+## 2. Master palette (`assets/art/palette.json`)
+
+The UI design system adopts these tokens. Groups:
+
+| Group                                 | Tokens                                                                                                     |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `ink`                                 | `ink` (body text), `inkSoft`, `inkMuted` (captions), `inkInverse` (text on night)                          |
+| `surface`                             | `paper` (app background), `paperDeep`, `card`, `line`, `lineStrong`, `night`, `nightSoft`, `shadow`        |
+| `brand`                               | `primary` (buttons, white label), `primaryDeep`, `primarySoft`, `sun`, `sunDeep`, `coral`, `sky`, `meadow` |
+| `feedback`                            | `success*` (correct: green + check), `miss*` (almost: orange + ?), `info*`                                 |
+| `mastery`                             | Magic Window glass: `dim`, `bronze`, `silver`, `gold`, plus `polish` and `lead`                            |
+| `regions.<id>`                        | `accent` (decoration), `deep` (text/icons on paper), `soft` (tinted surfaces), `onAccent`                  |
+| `rainbow`, `fruit`, `dragonSignature` | Shared art colors; `dragonSignature.<id>` tints dragon cards                                               |
+
+`accessiblePairs` lists every text/background pair the UI may use with its minimum WCAG ratio;
+`test/unit/art/palette.test.ts` recomputes them. Rules of thumb:
+
+- Body text: `ink` on `paper`/`card`/`paperDeep` (≥ 12:1). Captions: `inkMuted` (≥ 4.5:1).
+- Buttons: `brand.primary` with a white label (5.6:1); `brand.sun` with an `ink` label.
+- Region accent fills take **large text only** (≥ 24 px or bold ≥ 19 px) in the `onAccent` color
+  (≥ 3:1); for normal text use `deep` on `paper` or `soft` (≥ 4.5:1).
+- Feedback never relies on color alone: pair `success` with the check glyph and `miss` with the
+  `?` (icons `badge-correct`, `badge-almost`).
+
+## 3. Dragon rig API (`src/app/art/dragon`, re-exported from `src/app/art`)
+
+```ts
+import { renderDragon, getDragonAnchors, renderHatch, ANIMATIONS_CSS } from '../art';
+
+const svg: string = renderDragon({
+  dragon: 'ember', // catalog id, or a DragonRecipe object
+  stage: 'youngling', // 'egg' | 'hatchling' | 'youngling' | 'adult' | 'crowned'
+  expression: 'happy', // 'idle' | 'happy' | 'curious' | 'eating' | 'sleepy' | 'proud'
+  outfit: {
+    head: 'hat-wizard',
+    neck: 'scarf-striped',
+    eyes: 'glasses-star',
+    wings: 'paint-stars',
+    nest: 'nest-pillow',
+  },
+  idPrefix: 'dragon-ember-1', // REQUIRED to be unique per instance on a page
+  framing: 'stage', // 'stage' (default) | 'fit'
+  animated: true, // adds class dv-animated (default true)
+  warmth: 0.7, // eggs only: <0.3 frosty, >=0.5 glowing, >=0.85 cracking
+  condition: 'sneezy', // seven-headed only: 'sneezy' | 'cured' (default 'cured')
+  title: 'Ember the fire dragon', // accessible name; omit for decorative (aria-hidden)
+  size: 256, // optional width/height attributes
+  embedStyles: false, // true embeds ANIMATIONS_CSS (standalone files)
+});
+container.innerHTML = svg; // our own generated markup: no user input is interpolated
+```
+
+- **Framing.** `stage` uses a shared `0 0 512 512` canvas with the feet on y = 470, scaled per
+  stage (`STAGE_SCALE`: egg 0.56, hatchling 0.62, youngling 0.78, adult/crowned 0.9), so a dragon
+  visibly grows in the nest or hub. `fit` crops a square around the drawing for cards and
+  64 px thumbnails.
+- **ids.** Every internal id is `<idPrefix>-<name>`. Two SVGs with the same prefix on one page
+  will collide; use e.g. `dragon-${profileSlot}-${dragonId}`. The prefix must match
+  `/^[A-Za-z][A-Za-z0-9_-]{0,63}$/`.
+- **Root attributes.** `<svg class="dv-dragon dv-animated" data-dragon data-stage data-expression>`.
+  Switching expression means re-rendering (cheap: 18 KB on average, up to about 60 KB for the
+  Seven-Headed Dragon, about 0.5 ms per render in Node).
+- **Expressions** change the face, arm pose (cheer, paw on chin, holding food, hands on hips),
+  head pose and props (`zZ` when sleepy, sparkles when happy, a glow when proud). Poses are
+  static transforms, so reduced motion still shows them.
+- **Crowned** adds a royal crown, golden aura and twinkles. An equipped **head cosmetic wins over
+  the crown** (the aura stays); hats also hide head-top crests (Goldie's crown, Petal's flower).
+- **Seven-Headed Dragon**: seven personalities (sleepy, giggly, grumpy, brave, shy, curious,
+  dreamy). `condition: 'sneezy'` gives red noses, watery eyes, a scarf and sneeze puffs.
+- **Glimmer** (the guide) renders with `renderDragon({ dragon: 'glimmer', stage: 'adult', ... })`:
+  spectacles, beard, bushy brows and a shawl.
+
+### Anchors
+
+`getDragonAnchors({ dragon, stage, framing, outfit? })` returns points in the **SVG viewBox
+coordinates** (rest pose) for overlays: `head` (hat line, width = head width), `eyes`, `neck`,
+`mouth` (target for Feeding Time fruit arcs), `belly`, `nest` (ground centre), `wingL`, `wingR`,
+`top` (speech bubbles, hearts, coins). Convert to page pixels with the element's bounding box
+(the SVG uses `xMidYMid meet`, like `@aegis/browser/ui` `logicalPoint`).
+
+### Hatch sequence
+
+`renderHatch({ dragon, idPrefix })` returns one SVG that plays **wobble → cracks → pop →
+hatchling reveal** once when inserted (3.6 s, `HATCH_DURATION_MS`). Re-insert the markup to
+replay. Without CSS or with reduced motion it shows the hatchling immediately.
+
+### Animation classes (`ANIMATIONS_CSS` / `src/app/art/dragon/animations.css`)
+
+Include the stylesheet once per page (import the `.css` in the bundle, or inject
+`ANIMATIONS_CSS`). Transform and opacity only. Everything is scoped to `.dv-animated` and stops
+under `prefers-reduced-motion: reduce` or `[data-reduced-motion="true"]` on any ancestor (the
+shell already sets it on `<html>`).
+
+| Class                           | Motion                                          | When                |
+| ------------------------------- | ----------------------------------------------- | ------------------- |
+| `dv-breathe`                    | breathing (scale from the feet)                 | always              |
+| `dv-lid`                        | blink                                           | open eyes           |
+| `dv-wing-l`, `dv-wing-r` (`…2`) | wing flap (faster when happy, slow when sleepy) | always              |
+| `dv-tail`, `dv-tail-l`          | tail sway                                       | always              |
+| `dv-bounce` + `dv-shadow`       | happy hop with squash and a shrinking shadow    | `happy`             |
+| `dv-head`                       | curious tilt / eating nod                       | `curious`, `eating` |
+| `dv-jaw`                        | chewing                                         | `eating`            |
+| `dv-z`                          | floating zZ                                     | `sleepy`            |
+| `dv-glow`                       | warm pulsing glow                               | `proud`             |
+| `dv-aura`, `dv-sparkle`         | aura pulse and twinkles                         | `crowned`           |
+| `dv-gear-1..3`                  | gears turn one after another                    | Clockwork           |
+| `dv-egg`, `dv-egg-glow`         | occasional wiggle, warm glow                    | eggs                |
+| `dv-hatch-*`                    | the hatch sequence                              | `renderHatch`       |
+
+Every animated element's resting state is correct without CSS, so static thumbnails and
+reduced motion never show a half-blink or a hidden part.
+
+## 4. Cosmetics (`src/app/art/cosmetics`)
+
+42 cosmetics keyed by asset id in five slots, listed in `COSMETICS` and the catalog:
+**head** (10 hats), **neck** (8), **eyes** (8 glasses and masks), **wings** (8 wing paints) and
+**nest** (8 decorations). They sit on rig anchors, so every cosmetic fits every dragon at every
+stage (eggs show only the nest). Ownership, prices and unlocks are content (S2), not art.
+
+## 5. Icons and avatars
+
+`renderIcon(id, { size, idPrefix, title, accent })` renders any id in `ICON_IDS` on a 64 × 64 grid:
+
+- **Items** (full color): `coin`, `star-filled`, `star-empty`, `chest-closed`, `chest-open`, `egg`,
+  `badge-correct`, `badge-almost`.
+- **Fruit** for Feeding Time: `apple`, `plum`, `pear`, `cherries`, `berries`.
+- **Map nodes**: `node-locked`, `node-open`, `node-current`, `node-stars-1..3` (`accent` tints
+  open/current nodes with the region color).
+- **UI glyphs** drawn in `currentColor` (theme them with CSS `color`): `lock`, `check`, `question`,
+  `speaker`, `settings`, `parent`, `home`, `back`, `next`, `close`, `print`, `hint`, `music`,
+  `sound-off`.
+- **Region emblems**: `emblem-<region-id>` for all nine regions.
+
+`renderAvatar('keeper-1' … 'keeper-8', { size, idPrefix, title, frame })` renders eight diverse,
+gender-neutral keepers as round badges (120 × 120 grid).
+
+## 6. The catalog (`assets/art/catalog.json`)
+
+Generated from `src/app/art/catalog.ts` by `npm run art:build`; a test fails if it is stale.
+Content references art **only by these ids**:
+
+```jsonc
+{
+  "schemaVersion": 1,
+  "dragonStages": [...], "dragonExpressions": [...], "cosmeticSlots": [...],
+  "dragons": [{ "id": "ember", "name": "Ember", "kind": "table", "table": 6,
+                "homeRegion": "fire-mountain", "signature": "#ff5f3d",
+                "mnemonic": "...", "recipe": "assets/art/dragons/ember.json" }],
+  "characters": [{ "id": "glimmer", "kind": "guide", "render": "renderDragon", ... }],
+  "cosmetics": [{ "id": "hat-wizard", "slot": "head", "name": "Wizard Hat" }],
+  "avatars": [{ "id": "keeper-1" }],
+  "icons": { "items": [...], "fruits": [...], "mapNodes": [...], "glyphs": [...], "emblems": [...] },
+  "regions": [{ "id": "sunny-meadow", "accent": "#ffc53d", "deep": "...", "soft": "...",
+                "onAccent": "ink", "emblem": "emblem-sunny-meadow" }]
+}
+```
+
+Names in the catalog are English defaults for tooling; player-facing strings belong in the
+content catalogs. The second art PR adds `bosses`, `stickers`, `magicWindow` and `backgrounds`
+sections in the same style.
+
+## 7. Recipes (`assets/art/dragons/<id>.json`)
+
+A recipe is data: colors (`body`, `belly`, `wing`, `horn`, `accent`, `iris`, `cheek`, optional
+`shade`, `accent2`), `build` proportions, `horns`, `ears`, `wings` (style and 2 or 4 wings),
+`tail` (1 or 2 tails and a tip), `spikes`, `crest`, `markings`, `features` and the `egg` design.
+`parseRecipe` validates strictly (unknown fields fail). To add a dragon: add a recipe, import it
+in `src/app/art/dragon/recipes.ts`, add its signature color to the palette, run
+`npm run art:build` and `npm run art:gallery`, and review the sheets.
+
+## 8. Pipeline
+
+| Command               | What it does                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `npm run art:build`   | Regenerates `catalog.json`, `animations.css` (and the background SVGs)                                              |
+| `npm run art:check`   | Fails if a generated artifact is stale                                                                              |
+| `npm run art:gallery` | Writes `out/art-gallery/index.html` and PNG contact sheets via headless Edge (`DV_EDGE` overrides the browser path) |
+| `npm run art:goldens` | Re-pins the golden digests after an intentional, reviewed art change                                                |
+
+**Child safety** (tested for every render): no `<script>`, no `foreignObject`, no event
+handlers, no external `href`/`url()`, no fonts or `@import`, no images; only local `#id`
+references, all of which resolve.

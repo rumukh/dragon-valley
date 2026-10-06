@@ -20,9 +20,17 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "validate:content": "node scripts/validate-content.mjs",
+    "audio:build": "node scripts/audio/build.mjs",
+    "audio:verify": "node scripts/audio/verify.mjs",
+    "audio:report": "node scripts/audio/report.mjs",
+    "audio:audition": "node scripts/audio/audition.mjs",
     "lockfile:check": "node scripts/canonicalise-lockfile.mjs",
     "lockfile:fix": "node scripts/canonicalise-lockfile.mjs --write",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "art:build": "node scripts/art/build-art.mjs",
+    "art:check": "node scripts/art/build-art.mjs --check",
+    "art:gallery": "node scripts/art/gallery.mjs",
+    "art:goldens": "node scripts/art/goldens.mjs"
   },
   "dependencies": {
     "@aegis/browser": "file:vendor/aegis/0.0.0-local.r5949a7fa1a34.d2c83c1814069db10/aegis-browser-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz",

@@ -1,0 +1,65 @@
+{
+  "id": "purchase",
+  "title": "Item purchased",
+  "description": "A coin clink, then a celesta E5-C6 \"da-ding!\" and a few sparkles.",
+  "category": "feedback",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 2401,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 0.9,
+  "loudness": { "measure": "momentary", "target": -15 },
+  "instruments": {
+    "ping": { "extends": "coinPing" },
+    "bell": { "extends": "celesta" },
+    "sparkle": { "extends": "sparkle" }
+  },
+  "tracks": [
+    {
+      "name": "clink",
+      "db": -3,
+      "sends": { "room": -14 },
+      "voices": [
+        { "instrument": "ping", "at": 0, "pitch": "A6", "velocity": 0.85 },
+        { "instrument": "ping", "at": 0.05, "pitch": "E7", "velocity": 0.7 }
+      ]
+    },
+    {
+      "name": "bell",
+      "sends": { "room": -11 },
+      "voices": [
+        { "instrument": "bell", "at": 0.12, "pitch": "E5", "velocity": 0.75 },
+        { "instrument": "bell", "at": 0.22, "pitch": "C6", "velocity": 0.95 }
+      ]
+    },
+    {
+      "name": "sparkle",
+      "db": -11,
+      "sends": { "room": -6 },
+      "scatter": {
+        "instrument": "sparkle",
+        "count": 3,
+        "start": 0.3,
+        "end": 0.6,
+        "distribution": "even",
+        "jitter": 0.5,
+        "pitches": ["E7", "G7", "C8"],
+        "order": "cycle",
+        "db": [-6, 0]
+      }
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 1,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

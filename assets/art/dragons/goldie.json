@@ -1,0 +1,61 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "goldie",
+  "name": "Goldie",
+  "kind": "table",
+  "table": 10,
+  "mnemonic": "A golden dragon with a 10-point crown and a 0 medal. Times 10: add a zero!",
+  "colors": {
+    "body": "#f6b93a",
+    "shade": "#c27d12",
+    "belly": "#fff0bd",
+    "wing": "#ffd46a",
+    "horn": "#fff6dc",
+    "accent": "#e8a21a",
+    "iris": "#7a3f00",
+    "cheek": "#ff9f7a"
+  },
+  "build": {
+    "chub": 0.55,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "none",
+    "count": 0,
+    "length": 1
+  },
+  "ears": {
+    "style": "frill",
+    "size": 1
+  },
+  "wings": {
+    "style": "bat",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "spade",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "crown10",
+    "count": 10
+  },
+  "markings": [
+    "zero-medallion"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#ffd76a",
+    "accent": "#e8a21a",
+    "pattern": "crown"
+  }
+}

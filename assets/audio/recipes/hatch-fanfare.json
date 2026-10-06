@@ -1,0 +1,130 @@
+{
+  "id": "hatch-fanfare",
+  "title": "Dragon hatches (fanfare)",
+  "description": "Harp glissando up the pentatonic, a warm brass \"ta-ta-TAAA\" landing on C major with a soft boom, and glockenspiel sparkles.",
+  "category": "feedback",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 1601,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 3,
+  "fanfare": true,
+  "loudness": { "measure": "momentary", "target": -15 },
+  "instruments": {
+    "harp": { "extends": "harp" },
+    "brass": { "extends": "brass" },
+    "timp": {
+      "pitch": "C3",
+      "sources": [
+        {
+          "type": "additive",
+          "partials": [
+            { "ratio": 1, "db": 0, "t60": 0.9 },
+            { "ratio": 1.5, "db": -5, "t60": 0.6 },
+            { "ratio": 1.98, "db": -8, "t60": 0.45 },
+            { "ratio": 2.44, "db": -13, "t60": 0.3 }
+          ]
+        },
+        {
+          "type": "noise",
+          "color": "pink",
+          "db": -10,
+          "filters": [{ "type": "lowpass", "freq": 900 }],
+          "env": { "points": [[0, 1], [0.03, 0, 3]] }
+        }
+      ],
+      "pitchEnv": [[0, 0.6], [0.06, 0, 2]],
+      "amp": { "a": 0.002, "d": 0, "s": 1, "r": 0.2 },
+      "minGate": 1
+    },
+    "glock": { "extends": "glock" },
+    "sparkle": { "extends": "sparkle" }
+  },
+  "tracks": [
+    {
+      "name": "gliss",
+      "db": 3,
+      "sends": { "room": -10 },
+      "voices": [
+        { "instrument": "harp", "at": 0, "pitch": "C4", "velocity": 0.6 },
+        { "instrument": "harp", "at": 0.035, "pitch": "D4", "velocity": 0.6437499999999999 },
+        { "instrument": "harp", "at": 0.07, "pitch": "E4", "velocity": 0.6875 },
+        { "instrument": "harp", "at": 0.10500000000000001, "pitch": "G4", "velocity": 0.73125 },
+        { "instrument": "harp", "at": 0.14, "pitch": "A4", "velocity": 0.7749999999999999 },
+        { "instrument": "harp", "at": 0.17500000000000002, "pitch": "C5", "velocity": 0.81875 },
+        {
+          "instrument": "harp",
+          "at": 0.21000000000000002,
+          "pitch": "D5",
+          "velocity": 0.8624999999999999
+        },
+        { "instrument": "harp", "at": 0.24500000000000002, "pitch": "E5", "velocity": 0.90625 },
+        { "instrument": "harp", "at": 0.28, "pitch": "G5", "velocity": 0.95 }
+      ]
+    },
+    {
+      "name": "brass",
+      "db": -1,
+      "sends": { "room": -10 },
+      "voices": [
+        { "instrument": "brass", "at": 0.36, "gate": 0.1, "pitch": "G4", "velocity": 0.8 },
+        { "instrument": "brass", "at": 0.5, "gate": 0.1, "pitch": "G4", "velocity": 0.85 },
+        { "instrument": "brass", "at": 0.66, "gate": 1.45, "pitch": "C4", "velocity": 0.95 },
+        { "instrument": "brass", "at": 0.66, "gate": 1.45, "pitch": "G4", "velocity": 0.95 },
+        { "instrument": "brass", "at": 0.66, "gate": 1.45, "pitch": "C5", "velocity": 0.95 },
+        { "instrument": "brass", "at": 0.66, "gate": 1.45, "pitch": "E5", "velocity": 0.95 }
+      ]
+    },
+    {
+      "name": "timp",
+      "db": -4,
+      "sends": { "room": -12 },
+      "voices": [{ "instrument": "timp", "at": 0.66, "velocity": 0.9 }]
+    },
+    {
+      "name": "glock",
+      "db": -2,
+      "sends": { "room": -8 },
+      "voices": [
+        { "instrument": "glock", "at": 0.7, "pitch": "G5", "velocity": 0.7 },
+        {
+          "instrument": "glock",
+          "at": 0.7799999999999999,
+          "pitch": "C6",
+          "velocity": 0.7666666666666666
+        },
+        { "instrument": "glock", "at": 0.86, "pitch": "E6", "velocity": 0.8333333333333334 },
+        { "instrument": "glock", "at": 0.94, "pitch": "G6", "velocity": 0.9 }
+      ]
+    },
+    {
+      "name": "sparkle",
+      "db": -6,
+      "sends": { "room": -6 },
+      "scatter": {
+        "instrument": "sparkle",
+        "count": 10,
+        "start": 0.95,
+        "end": 2.2,
+        "distribution": "even",
+        "jitter": 0.7,
+        "pitches": ["C7", "D7", "E7", "G7"],
+        "db": [-8, 0],
+        "detune": 5
+      }
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 1.6,
+      "size": 0.8,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

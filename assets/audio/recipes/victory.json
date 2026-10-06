@@ -1,0 +1,142 @@
+{
+  "id": "victory",
+  "title": "Victory (results and finale)",
+  "description": "A short festive village-band loop at 144 BPM in C major (so level-complete and the stars land in key): a bright brass tune, bubbling marimba, tuba and accordion polka 'oom-pah' (a nod back to the valley dance), brushes and sparkles. A: C F G7 C; B: Am F D7 G7 climbs; A2 returns and leads straight back in.",
+  "category": "music",
+  "kind": "music",
+  "bus": "music",
+  "seed": 3401,
+  "sampleRate": 22050,
+  "oversample": 2,
+  "tempo": 144,
+  "meter": [4, 4],
+  "key": "C major",
+  "form": ["A", "B", "A2"],
+  "sectionBars": { "A": 4, "B": 4, "A2": 4 },
+  "loudness": { "measure": "integrated", "target": -23 },
+  "seam": { "search": [-0.42, 0] },
+  "chords": {
+    "A": "C | F | G7 | C",
+    "B": "Am | F | D7 | G7",
+    "A2": "C | F | G7 | C"
+  },
+  "instruments": {
+    "brass": { "extends": "brass" },
+    "marimba": { "extends": "marimba", "minGate": 0.35 },
+    "accordion": { "extends": "accordion" },
+    "tuba": { "extends": "tuba" },
+    "kick": { "extends": "kickSoft" },
+    "brush": { "extends": "brush" },
+    "shaker": { "extends": "shaker" },
+    "glock": { "extends": "glock" },
+    "ting": { "extends": "triangleTing", "pitch": "C7" }
+  },
+  "tracks": [
+    {
+      "name": "brass",
+      "instrument": "brass",
+      "db": -2,
+      "sends": { "hall": -11 },
+      "humanize": { "time": 0.005, "velocity": 0.05 },
+      "phrases": {
+        "A": "f C5:q E5:e G5:e C6:q G5:q | A5:q. G5:e F5:q A5:q | G5:q. F5:e D5:q B4:q | C5:h r:q G4:q",
+        "B": "mf E5:e E5:e A5:e A5:e C6:q A5:q | F5:e F5:e A5:e A5:e C6:q A5:q | F#5:q A5:q D6:q C6:q | B5:q. A5:e G5:q F5:q",
+        "A2": "f C5:q E5:e G5:e C6:q G5:q | A5:q. G5:e F5:q A5:q | G5:e A5:e B5:e D6:e F6:q D6:q | C6:h. G4:q'"
+      }
+    },
+    {
+      "name": "marimba",
+      "instrument": "marimba",
+      "db": -4,
+      "sends": { "hall": -11 },
+      "humanize": { "time": 0.004, "velocity": 0.06 },
+      "pattern": {
+        "type": "arp",
+        "step": 0.5,
+        "order": [0, 1, 2, 3, 2, 1, 2, 1],
+        "voicing": { "low": "C5", "high": "C6", "size": 3 },
+        "velocity": [0.75, 0.5, 0.6, 0.65, 0.5, 0.45, 0.55, 0.45],
+        "gate": 0.9
+      }
+    },
+    {
+      "name": "pah",
+      "instrument": "accordion",
+      "db": -8,
+      "sends": { "hall": -14 },
+      "humanize": { "time": 0.004, "velocity": 0.04 },
+      "pattern": {
+        "type": "comp",
+        "voicing": { "low": "A3", "high": "E5", "size": 3 },
+        "steps": [
+          { "beat": 2, "len": 0.5, "velocity": 0.7 },
+          { "beat": 4, "len": 0.5, "velocity": 0.65 }
+        ]
+      }
+    },
+    {
+      "name": "tuba",
+      "instrument": "tuba",
+      "db": -6,
+      "gate": 0.65,
+      "sends": { "hall": -18 },
+      "humanize": { "time": 0.004, "velocity": 0.04 },
+      "phrases": {
+        "A": "C3:q r:q G2:q r:q | F2:q r:q C3:q r:q | G2:q r:q D3:q r:q | C3:q r:q G2:q r:q",
+        "B": "A2:q r:q E2:q r:q | F2:q r:q C3:q r:q | D3:q r:q A2:q r:q | G2:q r:q B2:q r:q",
+        "A2": "C3:q r:q G2:q r:q | F2:q r:q C3:q r:q | G2:q r:q D3:q r:q | C3:q r:q G2:q G2:q'"
+      }
+    },
+    {
+      "name": "kick",
+      "instrument": "kick",
+      "db": -11,
+      "steps": { "grid": "q", "pattern": "7-6-" }
+    },
+    {
+      "name": "brush",
+      "instrument": "brush",
+      "db": -4,
+      "sends": { "hall": -12 },
+      "humanize": { "time": 0.003, "velocity": 0.06 },
+      "steps": { "grid": "q", "pattern": "-7-7" }
+    },
+    {
+      "name": "shaker",
+      "instrument": "shaker",
+      "db": -11,
+      "humanize": { "time": 0.003, "velocity": 0.08 },
+      "steps": { "grid": "e", "pattern": "64546454" }
+    },
+    {
+      "name": "glock",
+      "instrument": "glock",
+      "db": -12,
+      "sends": { "hall": -8 },
+      "phrases": {
+        "A": "G6:q r:h. | r:w | r:w | r:w",
+        "B": "E6:q r:h. | r:w | r:w | r:w",
+        "A2": "G6:q r:h. | r:w | r:w | C7:q r:h."
+      }
+    },
+    {
+      "name": "ting",
+      "instrument": "ting",
+      "db": -21,
+      "sends": { "hall": -8 },
+      "steps": { "grid": "w", "pattern": { "A": "4---", "A2": "4---" } }
+    }
+  ],
+  "buses": {
+    "hall": {
+      "type": "reverb",
+      "decay": 1.4,
+      "size": 0.85,
+      "damping": 6500,
+      "predelay": 0.015,
+      "lowcut": 250,
+      "highcut": 7500
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 40, "q": 0.7 }] }
+}

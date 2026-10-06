@@ -1,0 +1,671 @@
+/* Dragon Valley art animations. Generated from src/app/art/dragon/animations.ts - do not edit. */
+.dv-animated .dv-breathe,
+.dv-animated .dv-bounce,
+.dv-animated .dv-head,
+.dv-animated .dv-lid,
+.dv-animated .dv-jaw,
+.dv-animated [class^='dv-wing-'],
+.dv-animated .dv-tail,
+.dv-animated .dv-tail-l,
+.dv-animated .dv-glow,
+.dv-animated .dv-aura,
+.dv-animated .dv-gear,
+.dv-animated .dv-key,
+.dv-animated .dv-egg,
+.dv-animated .dv-egg-glow,
+.dv-animated .dv-propeller,
+.dv-animated .dv-lantern-glow,
+.dv-animated .dv-hatch-egg,
+.dv-animated .dv-hatch-top,
+.dv-animated .dv-hatch-baby,
+.dv-animated .dv-hatch-burst,
+.dv-animated .dv-sneeze,
+.dv-animated .dv-neck-sway {
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+.dv-animated .dv-sparkle,
+.dv-animated .dv-twinkle,
+.dv-animated .dv-shadow,
+.dv-animated .dv-z,
+.dv-animated .dv-smoke-ring,
+.dv-animated .dv-bubble,
+.dv-animated .dv-leftover,
+.dv-animated .dv-puff {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+/* idle life: breathing, blinking, wings, tail */
+.dv-animated .dv-breathe {
+  animation: dv-breathe 3.2s ease-in-out infinite;
+}
+.dv-animated .dv-lid {
+  animation: dv-blink 4.8s linear infinite;
+}
+.dv-animated .dv-eye-r .dv-lid {
+  animation-delay: 0.04s;
+}
+.dv-animated .dv-wing-l,
+.dv-animated .dv-wing-r {
+  animation: dv-flap 2.8s ease-in-out infinite;
+}
+.dv-animated .dv-wing-l2,
+.dv-animated .dv-wing-r2 {
+  animation: dv-flap 2.8s ease-in-out -0.5s infinite;
+}
+.dv-animated .dv-tail,
+.dv-animated .dv-tail-l {
+  animation: dv-sway 3.6s ease-in-out infinite;
+}
+.dv-animated .dv-tail-l {
+  animation-delay: -1.8s;
+}
+
+@keyframes dv-breathe {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(0.994, 1.022);
+  }
+}
+@keyframes dv-blink {
+  0%,
+  92% {
+    opacity: 0;
+    transform: scaleY(0.1);
+  }
+  94.5% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  97% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  99%,
+  100% {
+    opacity: 0;
+    transform: scaleY(0.1);
+  }
+}
+@keyframes dv-flap {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-9deg);
+  }
+}
+@keyframes dv-sway {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+}
+
+/* happy: bounce with squash, flappy wings, twinkles */
+.dv-animated[data-expression='happy'] .dv-bounce {
+  animation: dv-bounce 0.9s cubic-bezier(0.3, 0, 0.4, 1) infinite;
+}
+.dv-animated[data-expression='happy'] .dv-shadow {
+  animation: dv-shadow 0.9s cubic-bezier(0.3, 0, 0.4, 1) infinite;
+}
+.dv-animated[data-expression='happy'] .dv-wing-l,
+.dv-animated[data-expression='happy'] .dv-wing-r,
+.dv-animated[data-expression='happy'] .dv-wing-l2,
+.dv-animated[data-expression='happy'] .dv-wing-r2 {
+  animation-duration: 0.45s;
+}
+.dv-animated[data-expression='happy'] .dv-tail,
+.dv-animated[data-expression='happy'] .dv-tail-l {
+  animation-duration: 0.9s;
+}
+@keyframes dv-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.03, 0.96);
+  }
+  15% {
+    transform: translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-22px) scale(0.98, 1.03);
+  }
+  85% {
+    transform: translateY(0) scale(1, 1);
+  }
+}
+@keyframes dv-shadow {
+  0%,
+  15%,
+  85%,
+  100% {
+    transform: scale(1);
+    opacity: 0.16;
+  }
+  50% {
+    transform: scale(0.82);
+    opacity: 0.1;
+  }
+}
+
+/* curious: gentle head tilt on top of the resting tilt */
+.dv-animated[data-expression='curious'] .dv-head {
+  animation: dv-tilt 2.6s ease-in-out infinite;
+}
+@keyframes dv-tilt {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-5deg);
+  }
+}
+
+/* eating: chewing jaw and a little nod */
+.dv-animated[data-expression='eating'] .dv-jaw {
+  animation: dv-chew 0.42s ease-in-out infinite;
+}
+.dv-animated[data-expression='eating'] .dv-head {
+  animation: dv-nod 0.84s ease-in-out infinite;
+}
+@keyframes dv-chew {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.4);
+  }
+}
+@keyframes dv-nod {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(2.5deg);
+  }
+}
+
+/* sleepy: slow breath, drooping wings, floating zZ */
+.dv-animated[data-expression='sleepy'] .dv-breathe {
+  animation-duration: 5s;
+}
+.dv-animated[data-expression='sleepy'] .dv-wing-l,
+.dv-animated[data-expression='sleepy'] .dv-wing-r,
+.dv-animated[data-expression='sleepy'] .dv-wing-l2,
+.dv-animated[data-expression='sleepy'] .dv-wing-r2 {
+  animation-duration: 6s;
+}
+.dv-animated[data-expression='sleepy'] .dv-tail,
+.dv-animated[data-expression='sleepy'] .dv-tail-l {
+  animation-duration: 7s;
+}
+.dv-animated .dv-z {
+  animation: dv-z 3s ease-in-out infinite both;
+}
+.dv-animated .dv-z-2 {
+  animation-delay: 1s;
+}
+.dv-animated .dv-z-3 {
+  animation-delay: 2s;
+}
+@keyframes dv-z {
+  0% {
+    opacity: 0;
+    transform: translate(-6px, 10px) scale(0.6);
+  }
+  25% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(8px, -18px) scale(1.1);
+  }
+}
+
+/* proud: puffed chest and a warm pulsing glow */
+.dv-animated .dv-glow {
+  animation: dv-glow 2.4s ease-in-out infinite;
+}
+@keyframes dv-glow {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+/* crowned: aura pulse and twinkling sparkles */
+.dv-animated .dv-aura {
+  animation: dv-aura 4s ease-in-out infinite;
+}
+.dv-animated .dv-sparkle,
+.dv-animated .dv-twinkle {
+  animation: dv-twinkle 2.2s ease-in-out infinite;
+}
+.dv-animated .dv-sparkle-2,
+.dv-animated .dv-twinkle-2 {
+  animation-delay: -0.7s;
+}
+.dv-animated .dv-sparkle-3,
+.dv-animated .dv-twinkle-3 {
+  animation-delay: -1.4s;
+}
+.dv-animated .dv-sparkle-4 {
+  animation-delay: -0.35s;
+}
+.dv-animated .dv-sparkle-5 {
+  animation-delay: -1.05s;
+}
+.dv-animated .dv-sparkle-6 {
+  animation-delay: -1.75s;
+}
+@keyframes dv-aura {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+@keyframes dv-twinkle {
+  0%,
+  100% {
+    transform: scale(0.45);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* mnemonic features */
+.dv-animated .dv-smoke-ring {
+  animation: dv-ring 3.6s ease-in-out infinite;
+}
+.dv-animated .dv-puff {
+  animation: dv-puff 3.6s ease-in-out infinite;
+}
+.dv-animated .dv-bubble {
+  animation: dv-bob 3s ease-in-out infinite;
+}
+.dv-animated .dv-bubble-2 {
+  animation-delay: -1.5s;
+}
+.dv-animated .dv-gear-1 {
+  animation: dv-gear-1 3s ease-in-out infinite;
+}
+.dv-animated .dv-gear-2 {
+  animation: dv-gear-2 3s ease-in-out infinite;
+}
+.dv-animated .dv-gear-3 {
+  animation: dv-gear-3 3s ease-in-out infinite;
+}
+.dv-animated .dv-gear-wing {
+  animation: dv-spin 8s linear infinite;
+}
+.dv-animated .dv-key {
+  animation: dv-key 2.4s ease-in-out infinite;
+}
+.dv-animated .dv-leftover {
+  animation: dv-roll 3.2s ease-in-out infinite;
+}
+@keyframes dv-ring {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-4px, -8px) scale(1.05);
+  }
+}
+@keyframes dv-puff {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+}
+@keyframes dv-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes dv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes dv-gear-1 {
+  0% {
+    transform: rotate(0deg);
+  }
+  30%,
+  100% {
+    transform: rotate(90deg);
+  }
+}
+@keyframes dv-gear-2 {
+  0%,
+  33% {
+    transform: rotate(0deg);
+  }
+  63%,
+  100% {
+    transform: rotate(-120deg);
+  }
+}
+@keyframes dv-gear-3 {
+  0%,
+  66% {
+    transform: rotate(0deg);
+  }
+  96%,
+  100% {
+    transform: rotate(154deg);
+  }
+}
+@keyframes dv-key {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.25);
+  }
+}
+@keyframes dv-roll {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(-6px) rotate(-40deg);
+  }
+}
+
+/* eggs: an occasional wiggle; warm eggs glow */
+.dv-animated .dv-egg {
+  animation: dv-wiggle 4.5s ease-in-out infinite;
+}
+.dv-animated .dv-egg-glow {
+  animation: dv-glow 2.6s ease-in-out infinite;
+}
+@keyframes dv-wiggle {
+  0%,
+  70%,
+  100% {
+    transform: rotate(0deg);
+  }
+  74% {
+    transform: rotate(4deg);
+  }
+  80% {
+    transform: rotate(-4deg);
+  }
+  86% {
+    transform: rotate(2deg);
+  }
+  90% {
+    transform: rotate(0deg);
+  }
+}
+
+/* cosmetics */
+.dv-animated .dv-propeller {
+  animation: dv-propeller 0.7s linear infinite;
+}
+.dv-animated .dv-lantern-glow {
+  animation: dv-glow 1.8s ease-in-out infinite;
+}
+@keyframes dv-propeller {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(-1);
+  }
+}
+
+/* seven-headed dragon: swaying necks and sneezes */
+.dv-animated .dv-neck-sway {
+  animation: dv-sway 3.4s ease-in-out infinite;
+}
+.dv-animated .dv-neck-sway-2 {
+  animation-delay: -0.5s;
+}
+.dv-animated .dv-neck-sway-3 {
+  animation-delay: -1s;
+}
+.dv-animated .dv-neck-sway-4 {
+  animation-delay: -1.5s;
+}
+.dv-animated .dv-neck-sway-5 {
+  animation-delay: -2s;
+}
+.dv-animated .dv-neck-sway-6 {
+  animation-delay: -2.5s;
+}
+.dv-animated .dv-neck-sway-7 {
+  animation-delay: -3s;
+}
+.dv-animated .dv-sneeze {
+  animation: dv-sneeze 2.8s ease-in-out infinite;
+}
+@keyframes dv-sneeze {
+  0%,
+  60%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  70% {
+    transform: translate(0, -6px) rotate(-6deg);
+  }
+  76% {
+    transform: translate(4px, 4px) rotate(8deg);
+  }
+  84% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+/* hatch sequence (once): wobble -> cracks -> pop -> hatchling reveal */
+.dv-animated.dv-hatch .dv-hatch-egg {
+  animation: dv-hatch-wobble 3.6s ease-in-out 1 both;
+}
+.dv-animated.dv-hatch .dv-hatch-crack-1 {
+  animation: dv-hatch-crack-1 3.6s linear 1 both;
+}
+.dv-animated.dv-hatch .dv-hatch-crack-2 {
+  animation: dv-hatch-crack-2 3.6s linear 1 both;
+}
+.dv-animated.dv-hatch .dv-hatch-crack-3 {
+  animation: dv-hatch-crack-3 3.6s linear 1 both;
+}
+.dv-animated.dv-hatch .dv-hatch-top {
+  animation: dv-hatch-top 3.6s cubic-bezier(0.2, 0.7, 0.3, 1) 1 both;
+}
+.dv-animated.dv-hatch .dv-hatch-bottom {
+  animation: dv-hatch-bottom 3.6s ease-in 1 both;
+}
+.dv-animated.dv-hatch .dv-hatch-burst {
+  animation: dv-hatch-burst 3.6s ease-out 1 both;
+}
+.dv-animated.dv-hatch .dv-hatch-baby {
+  animation: dv-hatch-baby 3.6s cubic-bezier(0.22, 1, 0.36, 1) 1 both;
+}
+@keyframes dv-hatch-wobble {
+  0% {
+    transform: rotate(0deg);
+  }
+  8% {
+    transform: rotate(3deg);
+  }
+  16% {
+    transform: rotate(-3deg);
+  }
+  24% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(5deg);
+  }
+  36% {
+    transform: rotate(-5deg);
+  }
+  42% {
+    transform: rotate(6deg);
+  }
+  48% {
+    transform: rotate(-6deg);
+  }
+  52%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes dv-hatch-crack-1 {
+  0%,
+  22% {
+    opacity: 0;
+  }
+  24%,
+  54% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes dv-hatch-crack-2 {
+  0%,
+  34% {
+    opacity: 0;
+  }
+  36%,
+  54% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes dv-hatch-crack-3 {
+  0%,
+  44% {
+    opacity: 0;
+  }
+  46%,
+  54% {
+    opacity: 1;
+  }
+  56%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes dv-hatch-top {
+  0%,
+  53% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-70px, -150px) rotate(-50deg);
+  }
+  82%,
+  100% {
+    opacity: 0;
+    transform: translate(-110px, -120px) rotate(-90deg);
+  }
+}
+@keyframes dv-hatch-bottom {
+  0%,
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  96%,
+  100% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes dv-hatch-burst {
+  0%,
+  52% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  58% {
+    opacity: 1;
+  }
+  78%,
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+@keyframes dv-hatch-baby {
+  0%,
+  55% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  80%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* reduced motion: no animation anywhere; every element shows its resting pose */
+@media (prefers-reduced-motion: reduce) {
+  .dv-animated,
+  .dv-animated * {
+    animation: none !important;
+  }
+}
+[data-reduced-motion='true'] .dv-animated,
+[data-reduced-motion='true'] .dv-animated *,
+.dv-animated[data-reduced-motion='true'],
+.dv-animated[data-reduced-motion='true'] * {
+  animation: none !important;
+}

@@ -1,0 +1,61 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "clover",
+  "name": "Clover",
+  "kind": "table",
+  "table": 3,
+  "mnemonic": "A three-leaf forest dragon with 3 horns, 3 leaf spikes and a clover tail. Count in threes!",
+  "colors": {
+    "body": "#5dc46e",
+    "shade": "#2f8a4c",
+    "belly": "#e8f7c8",
+    "wing": "#9ddc6e",
+    "horn": "#d9b27a",
+    "accent": "#3fae5a",
+    "iris": "#7a4f12",
+    "cheek": "#ff9f9f"
+  },
+  "build": {
+    "chub": 0.5,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "branch",
+    "count": 3,
+    "length": 0.95
+  },
+  "ears": {
+    "style": "leaf",
+    "size": 1
+  },
+  "wings": {
+    "style": "leaf",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "clover",
+    "length": 1
+  },
+  "spikes": {
+    "style": "leaf",
+    "where": "tail",
+    "count": 3
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "clover-spots"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#c9efb0",
+    "accent": "#3fae5a",
+    "pattern": "clovers"
+  }
+}

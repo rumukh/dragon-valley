@@ -1,0 +1,930 @@
+{
+  "schema": "dragon-valley-audio-manifest/1",
+  "packId": "dragon-valley-audio",
+  "revision": "audio-e2a87d365b75be42",
+  "advisory": "Suggested mapping only. Domain events follow docs/plan.md section 3.3 (final names come from the domain contract); presentation cues are shell moments that are not domain events. S3 owns the actual mapping.",
+  "format": {
+    "container": "wav",
+    "encoding": "pcm-s16le",
+    "channels": 1,
+    "sampleRate": 22050
+  },
+  "totals": {
+    "sounds": 33,
+    "bytes": 6960436,
+    "seconds": 157.8,
+    "budgetBytes": 8000000
+  },
+  "buses": {
+    "effects": {
+      "defaultVolume": 1,
+      "note": "Every effect is mastered to its loudness tier, so play effects at bus volume 1.0 by default. playEffect has no per-call gain, so the mix is baked into the files."
+    },
+    "music": {
+      "defaultVolume": 1,
+      "note": "Loops are mastered 8 to 11 LU under the feedback tier (practice is quietest), so music already sits under effects at equal bus volumes. Parent settings scale down from 1.0."
+    }
+  },
+  "loudnessTargets": {
+    "feedback": {
+      "target": -15,
+      "measure": "momentary-max",
+      "use": "Answer chimes, coins, stars, stickers, unlocks, panes, gifts, fanfares"
+    },
+    "character": {
+      "target": -16,
+      "measure": "momentary-max",
+      "use": "Dragon and boss voices, eating, eggs"
+    },
+    "soft": {
+      "target": -18,
+      "measure": "momentary-max",
+      "use": "Miss, blocked and sleepy sounds: always gentle, never punishing"
+    },
+    "ui": {
+      "target": -21,
+      "measure": "momentary-max",
+      "use": "Taps, keypad and screen transitions: frequent, so quiet"
+    },
+    "music": {
+      "target": -23,
+      "measure": "integrated",
+      "use": "Valley, boss and victory loops"
+    },
+    "musicCalm": {
+      "target": -26,
+      "measure": "integrated",
+      "use": "Practice loop: unobtrusive while the child thinks"
+    }
+  },
+  "voices": {
+    "maxVoices": 16,
+    "reservedForMusic": 2,
+    "note": "createNarration allows 16 active voices by default; a crossfade holds 2 music voices. Keep effects within about 12 and throttle bursts: a dropped effect rejects with a 'limit' error, so catch it and carry on.",
+    "throttle": {
+      "coin": {
+        "minIntervalMs": 70,
+        "maxConcurrent": 3,
+        "note": "For 5 or more coins play coin-shower once instead of many coins."
+      },
+      "chime-1": {
+        "minIntervalMs": 120,
+        "maxConcurrent": 2
+      },
+      "keypad-tap": {
+        "minIntervalMs": 35,
+        "maxConcurrent": 2
+      },
+      "ui-tap": {
+        "minIntervalMs": 35,
+        "maxConcurrent": 2
+      },
+      "chomp": {
+        "minIntervalMs": 250,
+        "maxConcurrent": 1
+      },
+      "pane-light": {
+        "minIntervalMs": 150,
+        "maxConcurrent": 3
+      },
+      "sparkle-family": {
+        "minIntervalMs": 200,
+        "maxConcurrent": 2,
+        "note": "map-unlock, sticker, star-n, gift-open: do not stack more than two"
+      }
+    }
+  },
+  "sounds": [
+    {
+      "id": "blocked",
+      "title": "Gentle blocked thud",
+      "src": "assets/audio/sfx/blocked.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "soft",
+      "durationSeconds": 0.32,
+      "samples": 7056,
+      "sampleRate": 22050,
+      "bytes": 14156,
+      "sha256": "bab09209a77f8b99b863cdf6f927bfaa91e3973f950828c3717190072db4ac9d",
+      "volume": 1,
+      "loudnessLufs": -18.05,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.99,
+      "description": "A soft, muted low \"bmp\" for locked or unavailable actions: neutral, not a buzzer."
+    },
+    {
+      "id": "boss-laugh",
+      "title": "Boss laughs (friendly)",
+      "src": "assets/audio/sfx/boss-laugh.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "character",
+      "durationSeconds": 0.9,
+      "samples": 19845,
+      "sampleRate": 22050,
+      "bytes": 39734,
+      "sha256": "a56c1c90b4615cda9bb4f5d9d1075e1d703f526ee0d1472f26c4e643833cf241",
+      "volume": 1,
+      "loudnessLufs": -16,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -4,
+      "description": "A jolly bassoon \"bwa-ha-ha-hoo\" down a G major arpeggio (D4-B3-G3-D3): playful, never scary."
+    },
+    {
+      "id": "boss-won",
+      "title": "Boss won over (jingle)",
+      "src": "assets/audio/sfx/boss-won.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 3,
+      "samples": 66150,
+      "sampleRate": 22050,
+      "bytes": 132344,
+      "sha256": "1f702dc54f95b3c96a47cbd88171d23ff85d80d1530384d75e3674482a3f1e10",
+      "volume": 1,
+      "loudnessLufs": -15,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -4.81,
+      "description": "A playful A major jingle (A-C#-E-A, then B-G# resolving to A) on brass and marimba with pizzicato bass, a woodblock wink and a triangle ting."
+    },
+    {
+      "id": "boss",
+      "title": "Boss challenge",
+      "src": "assets/audio/music/boss.wav",
+      "bus": "music",
+      "loop": true,
+      "category": "music",
+      "durationSeconds": 30,
+      "samples": 661500,
+      "sampleRate": 22050,
+      "bytes": 1323044,
+      "sha256": "4b20714a6a50979291305d893f31a6a70a8c45fd777d0eed93a094b0b20c9f52",
+      "volume": 1,
+      "loudnessLufs": -23.01,
+      "loudnessMeasure": "integrated",
+      "truePeakDbtp": -6,
+      "description": "Playful, bouncy tension that is never scary: 128 BPM in A minor. A: a tiptoeing pizzicato bass walks down chromatically (A G# G F#) under a cheeky staccato bassoon tune with a tick-tock woodblock clock and finger snaps. B: the relative major, a marimba tune climbing in sequence with bassoon answers, then an E7 run back to the start.",
+      "music": {
+        "tempo": 128,
+        "meter": "4/4",
+        "bars": 16,
+        "key": "A minor",
+        "form": "A B"
+      }
+    },
+    {
+      "id": "chime-1",
+      "title": "Correct answer, streak 1",
+      "src": "assets/audio/sfx/chime-1.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1,
+      "samples": 22050,
+      "sampleRate": 22050,
+      "bytes": 44144,
+      "sha256": "395e61b2675cf97583f42c9845babd5b7bc62bc46374c6428f89c582f4476611",
+      "volume": 1,
+      "loudnessLufs": -15.04,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.59,
+      "description": "Two-note celesta \"ding-ding\", C5 to E5. Step 1 of the rising C major pentatonic streak ladder."
+    },
+    {
+      "id": "chime-2",
+      "title": "Correct answer, streak 2",
+      "src": "assets/audio/sfx/chime-2.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1,
+      "samples": 22050,
+      "sampleRate": 22050,
+      "bytes": 44144,
+      "sha256": "abf40e975a52b6bbc0a4e417181b8306b523e1a5bd33a2c537f4d87ec90cbd8e",
+      "volume": 1,
+      "loudnessLufs": -15.03,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.57,
+      "description": "Two-note celesta \"ding-ding\", D5 to G5. Step 2 of the rising C major pentatonic streak ladder."
+    },
+    {
+      "id": "chime-3",
+      "title": "Correct answer, streak 3",
+      "src": "assets/audio/sfx/chime-3.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1,
+      "samples": 22050,
+      "sampleRate": 22050,
+      "bytes": 44144,
+      "sha256": "d067aa1da5739dd3c90e953f0624e4f00a163c58539256a089972462fed4d21d",
+      "volume": 1,
+      "loudnessLufs": -15.04,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.55,
+      "description": "Two-note celesta \"ding-ding\", E5 to A5. Step 3 of the rising C major pentatonic streak ladder."
+    },
+    {
+      "id": "chime-4",
+      "title": "Correct answer, streak 4",
+      "src": "assets/audio/sfx/chime-4.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1,
+      "samples": 22050,
+      "sampleRate": 22050,
+      "bytes": 44144,
+      "sha256": "1645ed4cd83aae29f6710d214a56470ad20b1c5dc30127987232964c9ee1f08c",
+      "volume": 1,
+      "loudnessLufs": -15.05,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.53,
+      "description": "Two-note celesta \"ding-ding\", G5 to C6. Step 4 of the rising C major pentatonic streak ladder."
+    },
+    {
+      "id": "chime-5",
+      "title": "Correct answer, streak 5",
+      "src": "assets/audio/sfx/chime-5.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1.2,
+      "samples": 26460,
+      "sampleRate": 22050,
+      "bytes": 52964,
+      "sha256": "7020f7cdfc61b2eb5268720e0349dd6a252fc095f622e76c6c96699cd9e624ad",
+      "volume": 1,
+      "loudnessLufs": -15.02,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -2.13,
+      "description": "Top of the streak ladder: celesta A5 to D6, a G6 crown note and a short sparkle."
+    },
+    {
+      "id": "chomp",
+      "title": "Dragon munches fruit",
+      "src": "assets/audio/sfx/chomp.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "character",
+      "durationSeconds": 0.65,
+      "samples": 14333,
+      "sampleRate": 22050,
+      "bytes": 28710,
+      "sha256": "924d6799e67b282b83ed7ce8cce2adf6a890be11de8dbd41e0489663b982a916",
+      "volume": 1,
+      "loudnessLufs": -16.02,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.5,
+      "description": "Three juicy crunches (\"nom nom nom\") and a cartoon gulp."
+    },
+    {
+      "id": "coin-shower",
+      "title": "Coin shower",
+      "src": "assets/audio/sfx/coin-shower.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1.5,
+      "samples": 33075,
+      "sampleRate": 22050,
+      "bytes": 66194,
+      "sha256": "943da821036d94728b19cb79e5e51cb04b4142b1c42b977d5604f1dcc1a28136",
+      "volume": 1,
+      "loudnessLufs": -15,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -6.41,
+      "description": "A cascade of 16 coin pings on the C major pentatonic, dense at first and thinning out. One sound for many coins."
+    },
+    {
+      "id": "coin",
+      "title": "Coin",
+      "src": "assets/audio/sfx/coin.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 0.6,
+      "samples": 13230,
+      "sampleRate": 22050,
+      "bytes": 26504,
+      "sha256": "31209d1b732e4c16f3ef9f542b9bcf608ff426bb5f60ed119484c7e2c880ac9f",
+      "volume": 1,
+      "loudnessLufs": -15,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -2.82,
+      "description": "Two quick bright metallic pings, E6 then A6."
+    },
+    {
+      "id": "dragon-chirp",
+      "title": "Happy dragon chirp",
+      "src": "assets/audio/sfx/dragon-chirp.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "character",
+      "durationSeconds": 0.45,
+      "samples": 9923,
+      "sampleRate": 22050,
+      "bytes": 19890,
+      "sha256": "c916888b66e0dea9c64ad687a0bc1e08575e604eb877353728ece057a1d3b727",
+      "volume": 1,
+      "loudnessLufs": -16,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -7.37,
+      "description": "Two quick rising baby-dragon chirps (\"bi-deep!\"), the second with a happy flutter."
+    },
+    {
+      "id": "dragon-yawn",
+      "title": "Sleepy dragon yawn",
+      "src": "assets/audio/sfx/dragon-yawn.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "soft",
+      "durationSeconds": 1.5,
+      "samples": 33075,
+      "sampleRate": 22050,
+      "bytes": 66194,
+      "sha256": "076d7a6c4832ab2597e0beb8c4f06df1b4152ed7e14e4d544217db9fbf64a4a4",
+      "volume": 1,
+      "loudnessLufs": -18,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -9.82,
+      "description": "A small, cute \"aaah-mmm\" yawn that rises a little and sighs down."
+    },
+    {
+      "id": "egg-crack",
+      "title": "Egg cracks",
+      "src": "assets/audio/sfx/egg-crack.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "character",
+      "durationSeconds": 0.7,
+      "samples": 15435,
+      "sampleRate": 22050,
+      "bytes": 30914,
+      "sha256": "527ca74f93ff2351d8a6a0905eebcc0cee37ac480899c6a8e777e55c85ec33e2",
+      "volume": 1,
+      "loudnessLufs": -16.35,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.48,
+      "description": "A quickening run of crisp little shell crackles ending in a hollow \"crk-pop\" as the egg opens."
+    },
+    {
+      "id": "egg-wobble",
+      "title": "Egg wobbles",
+      "src": "assets/audio/sfx/egg-wobble.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "character",
+      "durationSeconds": 0.75,
+      "samples": 16538,
+      "sampleRate": 22050,
+      "bytes": 33120,
+      "sha256": "1a739449292c0007195ad6219c0cb171ef7fe14ab8ef8f07609385e910d390de",
+      "volume": 1,
+      "loudnessLufs": -16.44,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.59,
+      "description": "Three hollow shell knocks (tok-tik-tok) over a soft wobbly tone as the egg rocks."
+    },
+    {
+      "id": "gift-open",
+      "title": "Gift chest opens",
+      "src": "assets/audio/sfx/gift-open.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1.5,
+      "samples": 33075,
+      "sampleRate": 22050,
+      "bytes": 66194,
+      "sha256": "dc447ed5f1392e8a9e19ff45debb3209f7e6f2bd7ec9606bcfff4506f078ef3f",
+      "volume": 1,
+      "loudnessLufs": -15.03,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.42,
+      "description": "A soft lid pop, a rising harp swirl and a celesta C major \"ta-da\" with sparkles."
+    },
+    {
+      "id": "hatch-fanfare",
+      "title": "Dragon hatches (fanfare)",
+      "src": "assets/audio/sfx/hatch-fanfare.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 3,
+      "samples": 66150,
+      "sampleRate": 22050,
+      "bytes": 132344,
+      "sha256": "039a5198c86b71adebfcca7c767d47d7a38b29dda648cf91cc6b121374a3372b",
+      "volume": 1,
+      "loudnessLufs": -15,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -4.92,
+      "description": "Harp glissando up the pentatonic, a warm brass \"ta-ta-TAAA\" landing on C major with a soft boom, and glockenspiel sparkles."
+    },
+    {
+      "id": "keypad-tap",
+      "title": "Keypad tap",
+      "src": "assets/audio/sfx/keypad-tap.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "ui",
+      "durationSeconds": 0.12,
+      "samples": 2646,
+      "sampleRate": 22050,
+      "bytes": 5336,
+      "sha256": "e64ef9e2b3fdb55bd429388d77a1b6d8bc816260eb6dd16169af6fae7e661405",
+      "volume": 1,
+      "loudnessLufs": -21.34,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.57,
+      "description": "A tiny soft \"pip\" on C6 for keypad digits: short and unobtrusive for fast typing."
+    },
+    {
+      "id": "level-complete",
+      "title": "Level complete (jingle)",
+      "src": "assets/audio/sfx/level-complete.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 3,
+      "samples": 66150,
+      "sampleRate": 22050,
+      "bytes": 132344,
+      "sha256": "b37d46b688f2ca8bb0f82eb6b2c8af204d5fb600064ae8af04eb6e0a9f42da71",
+      "volume": 1,
+      "loudnessLufs": -15,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -3.74,
+      "description": "A bright marimba and brass arpeggio G4-C5-E5-G5, a little turn over G major and a held C6 on C major (I-V-I)."
+    },
+    {
+      "id": "map-unlock",
+      "title": "New region unlocked",
+      "src": "assets/audio/sfx/map-unlock.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1.5,
+      "samples": 33075,
+      "sampleRate": 22050,
+      "bytes": 66194,
+      "sha256": "1e868a3422d14acabbd3248685a71f46cd5f25ae4e6c1dbbafce5d75bcd9453d",
+      "volume": 1,
+      "loudnessLufs": -15,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -3.38,
+      "description": "A magical harp glissando up two octaves of the pentatonic, a glassy C-G chord and drifting sparkles."
+    },
+    {
+      "id": "miss",
+      "title": "Not quite (soft and curious)",
+      "src": "assets/audio/sfx/miss.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "soft",
+      "durationSeconds": 0.55,
+      "samples": 12128,
+      "sampleRate": 22050,
+      "bytes": 24300,
+      "sha256": "9b66006dd8c6a1b7d84c68d7958a162c6be934092c725bea1a0448b607dc39e4",
+      "volume": 1,
+      "loudnessLufs": -18,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -9.31,
+      "description": "Two soft round tones, E4 then G4 with a gentle questioning rise: a curious \"hmm?\", never a buzzer."
+    },
+    {
+      "id": "pane-light",
+      "title": "Magic Window pane lights up",
+      "src": "assets/audio/sfx/pane-light.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1.3,
+      "samples": 28665,
+      "sampleRate": 22050,
+      "bytes": 57374,
+      "sha256": "0487bcb216f202ca6ae6810a8a539ca354b80815cd9eac35838f07bcd0dfcf2c",
+      "volume": 1,
+      "loudnessLufs": -15,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -6.35,
+      "description": "A glassy C6-G6 twinkle with gentle shimmer, a soft glow underneath and three tiny sparkles."
+    },
+    {
+      "id": "practice",
+      "title": "Practice (rounds)",
+      "src": "assets/audio/music/practice.wav",
+      "bus": "music",
+      "loop": true,
+      "category": "musicCalm",
+      "durationSeconds": 40,
+      "samples": 882000,
+      "sampleRate": 22050,
+      "bytes": 1764044,
+      "sha256": "29b8b2a7726127237d8a5222fc7f398847fb8d863c71eea245b3c68ecafd45ff",
+      "volume": 1,
+      "loudnessLufs": -26,
+      "loudnessMeasure": "integrated",
+      "truePeakDbtp": -10.69,
+      "description": "Calm, sparse and unobtrusive so it never competes with thinking: 72 BPM in C major (the answer chimes always fit). Soft electric piano chords and a warm pad, a quiet bass and a few kalimba notes with a gentle echo. A: Cmaj7 Am7 Dm7 G7sus4; A2 borrows a wistful F minor 6; B: Em7 Am7 Dm7 G7sus4 leads home.",
+      "music": {
+        "tempo": 72,
+        "meter": "4/4",
+        "bars": 12,
+        "key": "C major",
+        "form": "A A2 B"
+      }
+    },
+    {
+      "id": "purchase",
+      "title": "Item purchased",
+      "src": "assets/audio/sfx/purchase.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 0.9,
+      "samples": 19845,
+      "sampleRate": 22050,
+      "bytes": 39734,
+      "sha256": "ec3ba37a6a034cd9832fb9e8e9b9912c60fdbae28a95cd858c20e3a99890134f",
+      "volume": 1,
+      "loudnessLufs": -15.03,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -2.34,
+      "description": "A coin clink, then a celesta E5-C6 \"da-ding!\" and a few sparkles."
+    },
+    {
+      "id": "star-1",
+      "title": "Star 1",
+      "src": "assets/audio/sfx/star-1.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 0.9,
+      "samples": 19845,
+      "sampleRate": 22050,
+      "bytes": 39734,
+      "sha256": "9a0ceab3ba9443e5d8edfa96b7b74b8f4a09bfbe8faa05286e125c1daf9ed421",
+      "volume": 1,
+      "loudnessLufs": -15.03,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.19,
+      "description": "A quick upward swoop into a glockenspiel E6 with 3 sparkles. star-1..3 spell a rising C major arpeggio."
+    },
+    {
+      "id": "star-2",
+      "title": "Star 2",
+      "src": "assets/audio/sfx/star-2.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 0.9,
+      "samples": 19845,
+      "sampleRate": 22050,
+      "bytes": 39734,
+      "sha256": "08cd89f794c9a517f7b41f93215faa697089473f0ba7508cd6438a3bb7a334a3",
+      "volume": 1,
+      "loudnessLufs": -15.03,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -2.17,
+      "description": "A quick upward swoop into a glockenspiel G6 with 4 sparkles. star-1..3 spell a rising C major arpeggio."
+    },
+    {
+      "id": "star-3",
+      "title": "Star 3",
+      "src": "assets/audio/sfx/star-3.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 0.9,
+      "samples": 19845,
+      "sampleRate": 22050,
+      "bytes": 39734,
+      "sha256": "503e44801f7a138c76dc08bd5693f5b1758d2169a84e94ee0f6147f884d3c918",
+      "volume": 1,
+      "loudnessLufs": -15,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -3.51,
+      "description": "A quick upward swoop into a glockenspiel C7 with 6 sparkles. star-1..3 spell a rising C major arpeggio."
+    },
+    {
+      "id": "sticker",
+      "title": "Sticker earned",
+      "src": "assets/audio/sfx/sticker.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "feedback",
+      "durationSeconds": 1,
+      "samples": 22050,
+      "sampleRate": 22050,
+      "bytes": 44144,
+      "sha256": "3615d55b7ebc072496f4e13e51bec24afba872220c9821a102b003a42f30561a",
+      "volume": 1,
+      "loudnessLufs": -15.03,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.62,
+      "description": "A bubbly \"bloop\" as the sticker pops on, then a celesta G5-C6 \"ta-da\" and a few sparkles."
+    },
+    {
+      "id": "swoosh",
+      "title": "Screen swoosh",
+      "src": "assets/audio/sfx/swoosh.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "ui",
+      "durationSeconds": 0.48,
+      "samples": 10584,
+      "sampleRate": 22050,
+      "bytes": 21212,
+      "sha256": "67b3b0bfe07d289d20274a6c2533d73d5b9e338169a547ab0330979feec88dcd",
+      "volume": 1,
+      "loudnessLufs": -21,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -6.01,
+      "description": "A soft airy whoosh (filtered noise sweeping up and settling) for page and screen changes."
+    },
+    {
+      "id": "ui-tap",
+      "title": "Button tap",
+      "src": "assets/audio/sfx/ui-tap.wav",
+      "bus": "effects",
+      "loop": false,
+      "category": "ui",
+      "durationSeconds": 0.18,
+      "samples": 3969,
+      "sampleRate": 22050,
+      "bytes": 7982,
+      "sha256": "b5026d1ed88cdae496435f6cae7ab76d16eeb7a3a1a6e3f584684f9731ed8ca7",
+      "volume": 1,
+      "loudnessLufs": -21.03,
+      "loudnessMeasure": "momentary-max",
+      "truePeakDbtp": -1.83,
+      "description": "A short soft wooden \"tok\" on G5 for buttons, choices and cards."
+    },
+    {
+      "id": "valley",
+      "title": "Valley (hub and map)",
+      "src": "assets/audio/music/valley.wav",
+      "bus": "music",
+      "loop": true,
+      "category": "music",
+      "durationSeconds": 36,
+      "samples": 793800,
+      "sampleRate": 22050,
+      "bytes": 1587644,
+      "sha256": "930d2bc015edc57ad24903f5a5de92f23c223e9af2f87e25ab448ec2a48bc0f7",
+      "volume": 1,
+      "loudnessLufs": -23,
+      "loudnessMeasure": "integrated",
+      "truePeakDbtp": -10.34,
+      "description": "An original gentle folk dance in the spirit of the Czech sousedska: a lilting 3/4 at 120 BPM in F major. A: clarinet tune over tuba 'oom' and accordion 'pah-pah'. B: flute in flowing eighths over sustained accordion and cimbalom arpeggios (subdominant colour). A2: flute and clarinet in parallel thirds with a rocking cimbalom.",
+      "music": {
+        "tempo": 120,
+        "meter": "3/4",
+        "bars": 24,
+        "key": "F major",
+        "form": "A B A2"
+      }
+    },
+    {
+      "id": "victory",
+      "title": "Victory (results and finale)",
+      "src": "assets/audio/music/victory.wav",
+      "bus": "music",
+      "loop": true,
+      "category": "music",
+      "durationSeconds": 20,
+      "samples": 441000,
+      "sampleRate": 22050,
+      "bytes": 882044,
+      "sha256": "36b011a7c33337d7abab21564ba6b56efcda67c2b1fff652feee7f32b9c2ff88",
+      "volume": 1,
+      "loudnessLufs": -23,
+      "loudnessMeasure": "integrated",
+      "truePeakDbtp": -10.81,
+      "description": "A short festive village-band loop at 144 BPM in C major (so level-complete and the stars land in key): a bright brass tune, bubbling marimba, tuba and accordion polka 'oom-pah' (a nod back to the valley dance), brushes and sparkles. A: C F G7 C; B: Am F D7 G7 climbs; A2 returns and leads straight back in.",
+      "music": {
+        "tempo": 144,
+        "meter": "4/4",
+        "bars": 12,
+        "key": "C major",
+        "form": "A B A2"
+      }
+    }
+  ],
+  "events": {
+    "answer.correct": {
+      "kind": "domain",
+      "sounds": [
+        "chime-1",
+        "chime-2",
+        "chime-3",
+        "chime-4",
+        "chime-5"
+      ],
+      "select": "streak",
+      "note": "Play chime-n for the n-th correct answer in a row, holding at chime-5; any miss restarts at chime-1. The notes climb a C major pentatonic ladder, so overlapping tails always agree."
+    },
+    "answer.incorrect": {
+      "kind": "domain",
+      "sounds": [
+        "miss"
+      ],
+      "note": "A soft, curious 'hmm?' (never a buzzer), with the orange '?' and 'Almost! Let's look...'."
+    },
+    "item.promoted": {
+      "kind": "domain",
+      "sounds": [],
+      "note": "Silent: it lands on the same answer as the chime."
+    },
+    "reask.scheduled": {
+      "kind": "domain",
+      "sounds": [],
+      "note": "Silent by design."
+    },
+    "session.started": {
+      "kind": "domain",
+      "sounds": [],
+      "note": "Music state changes instead."
+    },
+    "round.completed": {
+      "kind": "domain",
+      "sounds": [],
+      "note": "Silent; level.completed carries the celebration."
+    },
+    "level.completed": {
+      "kind": "domain",
+      "sounds": [
+        "level-complete",
+        "star-1",
+        "star-2",
+        "star-3"
+      ],
+      "select": "sequence",
+      "note": "Play level-complete, then star-1, star-2, star-3 for each star earned, about 0.4 s apart as each star appears."
+    },
+    "region.unlocked": {
+      "kind": "domain",
+      "sounds": [
+        "map-unlock"
+      ]
+    },
+    "boss.defeated": {
+      "kind": "domain",
+      "sounds": [
+        "boss-won"
+      ]
+    },
+    "dragon.hatched": {
+      "kind": "domain",
+      "sounds": [
+        "egg-wobble",
+        "egg-crack",
+        "hatch-fanfare"
+      ],
+      "select": "sequence",
+      "note": "Wobble while the egg rocks, crack as the shell breaks, then the fanfare as the hatchling appears."
+    },
+    "dragon.grew": {
+      "kind": "domain",
+      "sounds": [
+        "map-unlock",
+        "dragon-chirp"
+      ],
+      "select": "sequence",
+      "note": "Magic sparkle during the growth animation, then a happy chirp."
+    },
+    "dragon.crowned": {
+      "kind": "domain",
+      "sounds": [
+        "hatch-fanfare"
+      ],
+      "note": "The biggest fanfare, reused for crowning."
+    },
+    "pane.lit": {
+      "kind": "domain",
+      "sounds": [
+        "pane-light"
+      ],
+      "note": "Several panes lighting at once: stagger them by 150 ms or more, at most 3 overlapping."
+    },
+    "coins.earned": {
+      "kind": "domain",
+      "sounds": [
+        "coin",
+        "coin-shower"
+      ],
+      "select": "amount",
+      "note": "coin for 1 to 4 coins, coin-shower for 5 or more (one sound, not many coins)."
+    },
+    "item.purchased": {
+      "kind": "domain",
+      "sounds": [
+        "purchase"
+      ]
+    },
+    "sticker.earned": {
+      "kind": "domain",
+      "sounds": [
+        "sticker"
+      ]
+    },
+    "quest.completed": {
+      "kind": "domain",
+      "sounds": [
+        "chime-5"
+      ]
+    },
+    "gift.opened": {
+      "kind": "domain",
+      "sounds": [
+        "gift-open"
+      ]
+    },
+    "finale.completed": {
+      "kind": "domain",
+      "sounds": [
+        "hatch-fanfare"
+      ],
+      "note": "Then switch the music state to finale."
+    },
+    "ui.tap": {
+      "kind": "presentation",
+      "sounds": [
+        "ui-tap"
+      ],
+      "note": "Buttons, choices, cards."
+    },
+    "ui.keypad": {
+      "kind": "presentation",
+      "sounds": [
+        "keypad-tap"
+      ],
+      "note": "On-screen keypad and typed digits."
+    },
+    "ui.navigate": {
+      "kind": "presentation",
+      "sounds": [
+        "swoosh"
+      ],
+      "note": "Screen or page transitions."
+    },
+    "ui.blocked": {
+      "kind": "presentation",
+      "sounds": [
+        "blocked"
+      ],
+      "note": "A locked level, an unaffordable item or an invalid move."
+    },
+    "fx.dragon-eating": {
+      "kind": "presentation",
+      "sounds": [
+        "chomp"
+      ],
+      "note": "Feeding Time: when the fruit reaches the dragon after a correct answer, about 0.3 s after the chime."
+    },
+    "fx.dragon-happy": {
+      "kind": "presentation",
+      "sounds": [
+        "dragon-chirp"
+      ]
+    },
+    "fx.dragon-sleepy": {
+      "kind": "presentation",
+      "sounds": [
+        "dragon-yawn"
+      ],
+      "note": "After the daily goal, when the dragons get sleepy."
+    },
+    "fx.boss-laugh": {
+      "kind": "presentation",
+      "sounds": [
+        "boss-laugh"
+      ],
+      "note": "Boss Challenge: when a correct answer fills the boss's laughing or happy meter."
+    }
+  },
+  "music": {
+    "states": {
+      "title": "valley",
+      "hub": "valley",
+      "map": "valley",
+      "market": "valley",
+      "album": "valley",
+      "round": "practice",
+      "placement": "practice",
+      "arena": "boss",
+      "boss": "boss",
+      "results": "victory",
+      "finale": "victory"
+    },
+    "crossfadeSeconds": 1.2,
+    "note": "setAtmosphere({ packId, asset, fadeSeconds: 1.2 }) on state change; the same state is idempotent. Pass null for explicit silence (for example while read-aloud speaks, or if the parent turns music off)."
+  }
+}
