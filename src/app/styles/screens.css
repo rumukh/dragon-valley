@@ -1072,28 +1072,124 @@
   text-align: center;
 }
 
-.dv-nest {
+/* Egg Grid: the field of nest spots beside its controls on a tablet, above them on a phone. */
+.dv-egg-board {
   display: grid;
-  grid-template-columns: repeat(var(--columns, 1), 1.25em);
-  gap: 0.3em;
-  padding: 0.9em 1.2em;
-  border: 0.14em solid var(--dv-line-strong);
-  border-radius: 1.6em;
-  background: var(--dv-paper-deep);
+  justify-items: center;
+  align-items: center;
+  gap: clamp(10px, 2vh, 20px) clamp(14px, 2.6vw, 32px);
 }
 
-.dv-nest__egg {
-  width: 1.25em;
-  height: 1.6em;
+/* On a landscape tablet the field takes the card's whole height on the left, and the status
+   line sits above the controls on the right, so ten rows of spots fit without scrolling. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-minigame__card:has(> .dv-egg-board) {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'field status'
+      'field panel';
+    align-items: center;
+    column-gap: clamp(14px, 2.6vw, 32px);
+  }
+
+  .dv-minigame__card > .dv-egg-board {
+    display: contents;
+  }
+
+  .dv-minigame__card:has(> .dv-egg-board) > .dv-minigame__status {
+    grid-area: status;
+    align-self: end;
+  }
+
+  .dv-egg-board__field {
+    grid-area: field;
+  }
+
+  .dv-egg-board__panel {
+    grid-area: panel;
+    align-self: start;
+  }
+}
+
+.dv-egg-board__panel {
+  display: grid;
+  justify-items: center;
+  gap: clamp(8px, 1.6vh, 16px);
+  min-width: 0;
+}
+
+/* Spots are sized from the screen: on a phone the controls stand below the field, on a
+   landscape tablet ten rows of spots fill the card's height beside them. */
+.dv-egg-grid {
+  --cell: min(
+    clamp(26px, calc((100dvh - 26rem) / var(--side, 10)), 3.2rem),
+    calc((100vw - 4rem) / var(--side, 10))
+  );
+  display: grid;
+  grid-template-columns: repeat(var(--side, 10), var(--cell));
+  padding: 0.35em;
+  border: 0.14em solid var(--dv-line-strong);
+  border-radius: 1.2em;
+  background: var(--dv-paper-deep);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-egg-grid {
+    --cell: min(
+      clamp(26px, calc((100dvh - 11.5rem) / var(--side, 10)), 3.2rem),
+      calc((60vw - 4rem) / var(--side, 10))
+    );
+  }
+}
+
+.dv-egg-grid__spot {
+  display: grid;
+  place-items: center;
+  height: var(--cell);
+}
+
+/* An empty spot is a small dot; a spot in the nest holds an egg; never color alone. */
+.dv-egg-grid__spot::before {
+  content: '';
+  width: 22%;
+  height: 22%;
+  border-radius: 50%;
+  background: var(--dv-line-strong);
+}
+
+.dv-egg-grid__spot[data-state='egg']::before {
+  width: 62%;
+  height: 80%;
   border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
   background: var(--dv-card);
   box-shadow:
-    inset -0.15em -0.2em 0 var(--dv-line),
+    inset -0.12em -0.16em 0 var(--dv-line),
     0 0 0 0.06em var(--dv-line-strong);
 }
 
-.dv-nest__size {
+.dv-egg-grid__spot[data-state='missing']::before {
+  width: 62%;
+  height: 80%;
+  border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
+  background: transparent;
+  box-shadow: inset 0 0 0 0.1em var(--dv-miss-deep);
+}
+
+.dv-egg-grid__split {
+  grid-column: 1 / -1;
+  height: 0;
+  margin-block: 0.1em;
+  border-top: 0.16em dashed var(--dv-primary-deep);
+}
+
+.dv-nest__sentence {
+  max-width: none;
+  font-size: 1.5rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .dv-nest__goal {
@@ -1121,17 +1217,6 @@
   font-weight: 700;
   color: var(--dv-success-deep);
   background: var(--dv-success-soft);
-}
-
-.dv-nest__split {
-  grid-column: 1 / -1;
-  height: 0;
-  border-top: 0.16em dashed var(--dv-primary-deep);
-}
-
-.dv-nest__egg--missing {
-  background: transparent;
-  box-shadow: inset 0 0 0 0.12em var(--dv-miss-deep);
 }
 
 /* Number Trail: stones along a path; fixed ones are flat, movable ones are buttons. */
