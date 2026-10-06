@@ -46,7 +46,9 @@
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.12.0",
+    "happy-dom": "20.14.5",
     "prettier": "^3.9.9",
+    "subset-font": "2.9.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.71.0",
     "vitest": "^3.2.7"

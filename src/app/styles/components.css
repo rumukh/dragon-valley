@@ -1,0 +1,993 @@
+/*
+ * Components: candy buttons, choice tiles, keypad, cards, top bar, save status, meters, stars,
+ * coins, dialogs, toasts, feedback and celebration layers.
+ *
+ * Interaction motion is transform and opacity only, so a press never reflows the page.
+ * Feedback never relies on color alone: every state also changes an icon, a shape or a word.
+ */
+
+/* ---- Candy buttons ---------------------------------------------------------------------- */
+
+.dv-button {
+  --face: var(--dv-primary);
+  --lip: var(--dv-primary-deep);
+  --label: var(--dv-card);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  min-height: max(var(--dv-target), 2.2em);
+  min-width: var(--dv-target);
+  max-width: 100%;
+  padding: 0.4em 1.05em 0.46em;
+  border: 0;
+  border-radius: 1.1em;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--label);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--face) 86%, var(--dv-card)) 0%,
+    var(--face) 46%,
+    var(--face) 100%
+  );
+  box-shadow:
+    0 0.26em 0 var(--lip),
+    0 0.42em 0.8em color-mix(in srgb, var(--dv-shadow) 26%, transparent);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition:
+    transform 110ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 110ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dv-button::before {
+  content: '';
+  position: absolute;
+  inset: 0.16em 0.7em auto;
+  height: 36%;
+  border-radius: 1em;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--dv-card) 52%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.dv-button > * {
+  position: relative;
+}
+
+/*
+ * The hit area stays where a control rests. The face lifts on hover and sinks when pressed, and
+ * this invisible layer moves the opposite way, so a pointer resting on the edge never makes the
+ * control jitter between hovered and not, and a press at the very edge still clicks. It never
+ * reaches beyond the resting box, so neighbours keep every pixel of theirs.
+ */
+.dv-button::after,
+.dv-tile::after,
+.dv-key::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transition: inherit;
+}
+
+.dv-button:hover::after {
+  transform: translateY(0.05em);
+}
+
+.dv-button:active::after,
+.dv-button[data-pressed='true']::after {
+  transform: translateY(-0.2em);
+}
+
+.dv-button:disabled::after,
+.dv-button[aria-disabled='true']::after {
+  transform: none;
+}
+.dv-button svg {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+
+.dv-button:hover {
+  transform: translateY(-0.05em);
+}
+
+.dv-button:active,
+.dv-button[data-pressed='true'] {
+  transform: translateY(0.2em);
+  box-shadow:
+    0 0.06em 0 var(--lip),
+    0 0.16em 0.3em color-mix(in srgb, var(--dv-shadow) 24%, transparent);
+}
+
+.dv-button:disabled,
+.dv-button[aria-disabled='true'] {
+  cursor: default;
+  filter: saturate(0.25);
+  opacity: 0.62;
+  transform: none;
+}
+
+.dv-button[aria-busy='true'] {
+  cursor: progress;
+}
+
+.dv-button--sun {
+  --face: var(--dv-sun);
+  --lip: var(--dv-sun-deep);
+  --label: var(--dv-ink);
+}
+
+.dv-button--paper {
+  --face: var(--dv-card);
+  --lip: var(--dv-line-strong);
+  --label: var(--dv-ink);
+}
+
+.dv-button--coral {
+  --face: var(--dv-coral);
+  --lip: color-mix(in srgb, var(--dv-coral) 55%, var(--dv-ink));
+  --label: var(--dv-ink);
+}
+
+.dv-button--accent {
+  --face: var(--dv-accent, var(--dv-primary));
+  --lip: var(--dv-accent-deep, var(--dv-primary-deep));
+  --label: var(--dv-on-accent, var(--dv-card));
+}
+
+.dv-button--big {
+  font-size: min(1.5rem, 7vw);
+  padding: 0.38em 1.3em 0.44em;
+  border-radius: 1.2em;
+}
+
+.dv-button--small {
+  font-size: 0.85rem;
+  padding: 0.3em 0.75em 0.36em;
+  border-radius: 0.95em;
+}
+
+.dv-button--icon {
+  padding-inline: 0.45em;
+}
+
+/* Text-only action for low-emphasis grown-up choices. */
+.dv-link-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: var(--dv-target);
+  min-width: var(--dv-target);
+  padding: 0.2em 0.4em;
+  border: 0;
+  border-radius: 0.6em;
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.dv-link-button svg {
+  width: 1.05em;
+  height: 1.05em;
+}
+
+/* ---- Hold-to-open (grown-ups' gate) ------------------------------------------------------ */
+
+.dv-hold {
+  --progress: 0;
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 0.3em;
+  width: min(9em, 70vw);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  border: 0.14em solid var(--dv-primary-deep);
+  border-radius: 50%;
+  overflow: hidden;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  font-weight: 700;
+  box-shadow: 0 0.3em 0 var(--dv-primary-deep);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+
+.dv-hold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--dv-primary-soft);
+  transform-origin: 50% 100%;
+  transform: scaleY(var(--progress));
+}
+
+.dv-hold > * {
+  position: relative;
+}
+
+.dv-hold svg {
+  width: 2.2em;
+  height: 2.2em;
+}
+
+.dv-hold[data-state='holding'] {
+  transform: translateY(0.12em);
+  box-shadow: 0 0.18em 0 var(--dv-primary-deep);
+}
+
+/* ---- Cards and panels ------------------------------------------------------------------- */
+
+.dv-card {
+  position: relative;
+  background: var(--dv-paper);
+  border: 0.08em solid var(--dv-line);
+  border-radius: 1.1em;
+  padding: clamp(14px, 2vw, 24px);
+  box-shadow: 0 0.35em 1em color-mix(in srgb, var(--dv-shadow) 16%, transparent);
+}
+
+.dv-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}
+
+.dv-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.dv-row--end {
+  justify-content: flex-end;
+}
+
+.dv-row--center {
+  justify-content: center;
+}
+
+/* ---- Top bar ---------------------------------------------------------------------------- */
+
+.dv-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.dv-topbar__title {
+  flex: 1 1 8em;
+  min-width: 0;
+}
+
+.dv-topbar__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5em;
+}
+
+/* ---- Save status ------------------------------------------------------------------------ */
+
+.dv-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: var(--dv-target);
+  padding: 0.2em 0.75em;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 0.1em solid transparent;
+}
+
+.dv-save svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
+.dv-save[data-state='none'] {
+  display: none;
+}
+
+.dv-save[data-state='saved'] {
+  color: var(--dv-success-deep);
+  background: var(--dv-success-soft);
+  border-color: color-mix(in srgb, var(--dv-success) 40%, transparent);
+}
+
+.dv-save[data-state='saving'] {
+  color: var(--dv-info-deep);
+  background: var(--dv-info-soft);
+  border-color: color-mix(in srgb, var(--dv-info) 40%, transparent);
+}
+
+.dv-save[data-state='failed'],
+.dv-save[data-state='conflict'],
+.dv-save[data-state='unavailable'] {
+  color: var(--dv-miss-deep);
+  background: var(--dv-miss-soft);
+  border-color: var(--dv-miss);
+  padding-inline-end: 0.3em;
+}
+
+.dv-save .dv-button {
+  font-size: 0.85rem;
+  min-height: calc(var(--dv-target) - 8px);
+}
+
+.dv-save__dots {
+  display: inline-flex;
+  gap: 0.15em;
+}
+
+.dv-save__dots i {
+  width: 0.3em;
+  height: 0.3em;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dv-ui-dot 900ms ease-in-out infinite;
+}
+
+.dv-save__dots i:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.dv-save__dots i:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes dv-ui-dot {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ---- Choice tiles ----------------------------------------------------------------------- */
+
+.dv-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(4.2em, 100%), 1fr));
+  gap: clamp(10px, 1.8vw, 20px);
+  width: min(100%, 26em);
+  margin-inline: auto;
+}
+
+.dv-tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: max(var(--dv-target), 3.2em);
+  padding: 0.3em 0.5em;
+  border: 0.12em solid var(--dv-line-strong);
+  border-radius: 0.9em;
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow:
+    0 0.18em 0 var(--dv-line-strong),
+    0 0.3em 0.6em color-mix(in srgb, var(--dv-shadow) 14%, transparent);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform 110ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 110ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dv-tile:hover {
+  transform: translateY(-0.04em);
+}
+
+.dv-tile:hover::after {
+  transform: translateY(0.04em);
+}
+
+.dv-tile:active {
+  transform: translateY(0.14em);
+  box-shadow: 0 0.04em 0 var(--dv-line-strong);
+}
+
+.dv-tile:active::after {
+  transform: translateY(-0.14em);
+}
+
+.dv-tile[aria-pressed='true'] {
+  border-color: var(--dv-primary);
+  background: var(--dv-primary-soft);
+  box-shadow: 0 0.18em 0 var(--dv-primary-deep);
+}
+
+.dv-tile[data-state='correct'] {
+  border-color: var(--dv-success);
+  background: var(--dv-success-soft);
+  color: var(--dv-success-deep);
+  box-shadow: 0 0.18em 0 var(--dv-success-deep);
+}
+
+.dv-tile[data-state='miss'] {
+  border-color: var(--dv-miss);
+  background: var(--dv-miss-soft);
+  color: var(--dv-miss-deep);
+  box-shadow: 0 0.18em 0 var(--dv-miss-deep);
+}
+
+.dv-tile:disabled {
+  cursor: default;
+}
+
+.dv-tile:disabled:not([data-state]) {
+  opacity: 0.55;
+}
+
+.dv-badge {
+  position: absolute;
+  top: -0.5em;
+  right: -0.5em;
+  width: 1.5em;
+  height: 1.5em;
+  font-size: 1rem;
+  filter: drop-shadow(0 0.08em 0.12em color-mix(in srgb, var(--dv-shadow) 30%, transparent));
+}
+
+.dv-badge svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Answer display and keypad ---------------------------------------------------------- */
+
+.dv-answer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-answer__field {
+  display: grid;
+  place-items: center;
+  min-width: 2.6em;
+  min-height: max(var(--dv-target), 1.7em);
+  padding: 0.1em 0.35em;
+  border: 0.1em solid var(--dv-line-strong);
+  border-radius: 0.5em;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  cursor: pointer;
+}
+
+.dv-answer__field[data-empty='true']::before {
+  content: '?';
+  color: var(--dv-ink-muted);
+}
+
+.dv-answer__field[aria-pressed='true'] {
+  border-color: var(--dv-accent, var(--dv-primary));
+  box-shadow: 0 0 0 0.1em var(--dv-accent-soft, var(--dv-primary-soft));
+}
+
+.dv-answer__sep {
+  color: var(--dv-ink-soft);
+}
+
+.dv-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(var(--dv-target), 1fr));
+  gap: clamp(8px, 1.4vw, 14px);
+  width: min(100%, 13em);
+  margin-inline: auto;
+}
+
+.dv-key {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: max(var(--dv-target), 2.1em);
+  border: 0.1em solid var(--dv-line-strong);
+  border-radius: 0.75em;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow: 0 0.16em 0 var(--dv-line-strong);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition: transform 90ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dv-key svg {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.dv-key:active,
+.dv-key[data-flash='true'] {
+  transform: translateY(0.12em);
+  box-shadow: 0 0.04em 0 var(--dv-line-strong);
+}
+
+.dv-key:active::after,
+.dv-key[data-flash='true']::after {
+  transform: translateY(-0.12em);
+}
+
+.dv-key--ok {
+  color: var(--dv-card);
+  background: var(--dv-primary);
+  border-color: var(--dv-primary-deep);
+  box-shadow: 0 0.16em 0 var(--dv-primary-deep);
+}
+
+.dv-key--ok:active,
+.dv-key--ok[data-flash='true'] {
+  box-shadow: 0 0.04em 0 var(--dv-primary-deep);
+}
+
+.dv-key--wide {
+  font-size: 0.95rem;
+}
+
+/* ---- Text fields and choices for grown-ups and naming ------------------------------------ */
+
+.dv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+
+.dv-field__label {
+  font-weight: 700;
+}
+
+.dv-field__hint {
+  color: var(--dv-ink-soft);
+  font-size: 0.85rem;
+}
+
+.dv-input {
+  min-height: max(var(--dv-target), 2em);
+  width: 100%;
+  padding: 0.25em 0.55em;
+  border: 0.1em solid var(--dv-line-strong);
+  border-radius: 0.6em;
+  background: var(--dv-card);
+  color: var(--dv-ink);
+}
+
+.dv-input:focus-visible {
+  border-color: var(--dv-primary);
+}
+
+.dv-input[aria-invalid='true'] {
+  border-color: var(--dv-miss-deep);
+}
+
+.dv-error-text {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+  color: var(--dv-miss-deep);
+  font-weight: 700;
+}
+
+.dv-error-text svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
+/* Segmented choice: a row of toggle buttons, one pressed. */
+.dv-segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+}
+
+.dv-segment {
+  min-height: var(--dv-target);
+  min-width: var(--dv-target);
+  padding: 0.2em 0.8em;
+  border: 0.1em solid var(--dv-line-strong);
+  border-radius: 999px;
+  background: var(--dv-card);
+  color: var(--dv-ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dv-segment[aria-pressed='true'] {
+  color: var(--dv-card);
+  border-color: var(--dv-primary-deep);
+  background: var(--dv-primary);
+}
+
+.dv-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8em;
+  min-height: var(--dv-target);
+  cursor: pointer;
+}
+
+.dv-switch input {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  width: 2.4em;
+  height: 1.35em;
+  min-height: 0;
+  margin: 0;
+  border-radius: 999px;
+  border: 0.1em solid var(--dv-ink-soft);
+  background: var(--dv-paper-deep);
+  cursor: pointer;
+}
+
+.dv-switch input::before {
+  content: '';
+  position: absolute;
+  top: 0.1em;
+  left: 0.1em;
+  width: 0.95em;
+  height: 0.95em;
+  border-radius: 50%;
+  background: var(--dv-ink-soft);
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dv-switch input:checked {
+  border-color: var(--dv-primary-deep);
+  background: var(--dv-primary);
+}
+
+.dv-switch input:checked::before {
+  background: var(--dv-card);
+  transform: translateX(1.05em);
+}
+
+.dv-range {
+  width: 100%;
+  min-height: var(--dv-target);
+  accent-color: var(--dv-primary);
+}
+
+.dv-select {
+  min-height: var(--dv-target);
+  max-width: 100%;
+  padding: 0.2em 0.5em;
+  border: 0.1em solid var(--dv-line-strong);
+  border-radius: 0.6em;
+  background: var(--dv-card);
+}
+
+/* ---- Meter ------------------------------------------------------------------------------ */
+
+.dv-meter {
+  display: grid;
+  gap: 0.25em;
+  width: min(100%, 16em);
+}
+
+.dv-meter__label {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5em;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.dv-meter__track {
+  position: relative;
+  height: 0.75em;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--dv-paper-deep);
+  box-shadow: inset 0 0.1em 0.2em color-mix(in srgb, var(--dv-shadow) 22%, transparent);
+}
+
+.dv-meter__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--dv-sun), var(--dv-coral));
+  transform-origin: 0 50%;
+  transform: scaleX(var(--value, 0));
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---- Stars ------------------------------------------------------------------------------ */
+
+.dv-stars {
+  display: flex;
+  justify-content: center;
+  gap: 0.3em;
+}
+
+.dv-star {
+  width: 2.6em;
+  height: 2.6em;
+}
+
+/* ---- Coins ------------------------------------------------------------------------------ */
+
+.dv-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  min-height: var(--dv-target);
+  padding: 0.15em 0.7em 0.15em 0.3em;
+  border-radius: 999px;
+  border: 0.1em solid color-mix(in srgb, var(--dv-sun-deep) 35%, transparent);
+  background: var(--dv-paper);
+  color: var(--dv-sun-deep);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-coins svg {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+.dv-coins__value {
+  display: inline-block;
+}
+
+/* Overlay for flying coins and confetti; never intercepts input. */
+.dv-fx-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dv-flying-coin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  will-change: transform, opacity;
+}
+
+.dv-confetti-piece {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0.45rem;
+  height: 0.8rem;
+  border-radius: 0.12rem;
+  will-change: transform, opacity;
+}
+
+/* ---- Feedback --------------------------------------------------------------------------- */
+
+.dv-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 2.4em;
+  padding: 0.35em 0.9em;
+  border-radius: 1em;
+  border: 0.1em solid transparent;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dv-feedback svg {
+  width: 1.4em;
+  height: 1.4em;
+  flex: none;
+}
+
+.dv-feedback[data-kind='none'] {
+  visibility: hidden;
+}
+
+.dv-feedback[data-kind='correct'] {
+  color: var(--dv-success-deep);
+  background: var(--dv-success-soft);
+  border-color: var(--dv-success);
+}
+
+.dv-feedback[data-kind='miss'] {
+  color: var(--dv-miss-deep);
+  background: var(--dv-miss-soft);
+  border-color: var(--dv-miss);
+}
+
+.dv-feedback[data-kind='info'] {
+  color: var(--dv-info-deep);
+  background: var(--dv-info-soft);
+  border-color: var(--dv-info);
+}
+
+/* ---- Dialogs ---------------------------------------------------------------------------- */
+
+.dv-dialog {
+  width: min(32em, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  padding: clamp(16px, 2.6vw, 28px);
+  border: 0.1em solid var(--dv-line);
+  border-radius: 1.2em;
+  color: var(--dv-ink);
+  background: var(--dv-paper);
+  box-shadow: 0 0.8em 2.2em color-mix(in srgb, var(--dv-shadow) 34%, transparent);
+}
+
+.dv-dialog[open] {
+  animation: dv-ui-dialog-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ::backdrop does not inherit custom properties in every engine; this is --dv-night at 55%. */
+.dv-dialog::backdrop {
+  background: rgb(31 26 61 / 0.55);
+}
+
+@keyframes dv-ui-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dv-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+}
+
+.dv-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.6em;
+  margin-top: 0.4em;
+}
+
+.dv-dialog[data-tone='warning'] {
+  border-color: var(--dv-miss);
+}
+
+/* ---- Toasts ----------------------------------------------------------------------------- */
+
+.dv-toasts {
+  position: fixed;
+  z-index: 50;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: min(30em, calc(100vw - 24px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.dv-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.45em 0.6em 0.45em 0.9em;
+  border-radius: 1em;
+  border: 0.1em solid var(--dv-line);
+  color: var(--dv-ink);
+  background: var(--dv-paper);
+  box-shadow: 0 0.4em 1em color-mix(in srgb, var(--dv-shadow) 24%, transparent);
+  font-weight: 700;
+  pointer-events: auto;
+  animation: dv-ui-toast-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dv-toast svg {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+}
+
+.dv-toast[data-tone='warning'] {
+  border-color: var(--dv-miss);
+  color: var(--dv-miss-deep);
+  background: var(--dv-miss-soft);
+}
+
+.dv-toast[data-tone='success'] {
+  border-color: var(--dv-success);
+  color: var(--dv-success-deep);
+  background: var(--dv-success-soft);
+}
+
+.dv-toast[data-leaving='true'] {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+
+@keyframes dv-ui-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- Avatars ---------------------------------------------------------------------------- */
+
+.dv-avatar {
+  width: 3.4em;
+  height: 3.4em;
+  flex: none;
+  border-radius: 50%;
+  background: var(--dv-card);
+  box-shadow:
+    0 0 0 0.12em var(--dv-card),
+    0 0.2em 0.5em color-mix(in srgb, var(--dv-shadow) 24%, transparent);
+}
+
+.dv-avatar--large {
+  width: 5em;
+  height: 5em;
+}
+
+/* ---- Speaker (read-aloud) ---------------------------------------------------------------- */
+
+.dv-speaker[data-speaking='true'] {
+  --face: var(--dv-sun);
+  --lip: var(--dv-sun-deep);
+  --label: var(--dv-ink);
+}
+
+/* ---- Art from S4's rig (dragons, eggs): sizing only; motion lives in animations.css ------- */
+
+.dv-dragon-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}

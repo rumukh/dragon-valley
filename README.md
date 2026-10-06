@@ -21,6 +21,7 @@ Built as a standalone consumer of the [Aegis](https://github.com/rumukh/aegis-en
 | [`docs/contract.md`](docs/contract.md)         | The domain contract: content pack, problems, state, actions, views, events, ownership          |
 | [`docs/architecture.md`](docs/architecture.md) | Layers, command loop, saves, offline installation, child safety, build                         |
 | [`docs/testing.md`](docs/testing.md)           | The gate, test discipline, goldens, learner bots, browser tests                                |
+| [`docs/app.md`](docs/app.md)                   | The browser application: screens, saves, input, audio, read-aloud, offline                     |
 | [`docs/assets.md`](docs/assets.md)             | Art and audio pipelines, what ships, provenance rules                                          |
 | [`docs/sdk-update.md`](docs/sdk-update.md)     | The pinned Aegis SDK and how to update it                                                      |
 
