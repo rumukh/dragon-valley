@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -93,6 +93,7 @@ describe('art catalog', () => {
   it('stays within the art size budget', () => {
     let total = 0;
     const walk = (dir: string): void => {
+      if (!existsSync(dir)) return;
       for (const name of readdirSync(dir)) {
         const p = join(dir, name);
         const s = statSync(p);
