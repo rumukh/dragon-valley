@@ -1,4 +1,4 @@
-import { f, polar, type Pt } from './num';
+import { dist, f, polar, type Pt } from './num';
 
 /** Path command builders (deterministic formatting). */
 export const M = (x: number, y: number): string => `M${f(x)} ${f(y)}`;
@@ -117,6 +117,24 @@ export function roundStarD(
     const next = pts[(i + 1) % m]!;
     const a = { x: cur.x + (prev.x - cur.x) * roundness, y: cur.y + (prev.y - cur.y) * roundness };
     const b = { x: cur.x + (next.x - cur.x) * roundness, y: cur.y + (next.y - cur.y) * roundness };
+    d += (i === 0 ? Mp(a) : Lp(a)) + Qp(cur, b);
+  }
+  return d + Z;
+}
+
+/** Closed polygon with each corner rounded, cutting `r` units (at most half an edge) along both edges. */
+export function roundPolyD(points: readonly Pt[], r: number): string {
+  const m = points.length;
+  const cut = (from: Pt, to: Pt): Pt => {
+    const len = dist(from, to);
+    const k = Math.min(r, len / 2) / len;
+    return { x: from.x + (to.x - from.x) * k, y: from.y + (to.y - from.y) * k };
+  };
+  let d = '';
+  for (let i = 0; i < m; i++) {
+    const cur = points[i]!;
+    const a = cut(cur, points[(i - 1 + m) % m]!);
+    const b = cut(cur, points[(i + 1) % m]!);
     d += (i === 0 ? Mp(a) : Lp(a)) + Qp(cur, b);
   }
   return d + Z;

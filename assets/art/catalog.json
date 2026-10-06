@@ -570,7 +570,18 @@
       "print",
       "hint",
       "music",
-      "sound-off"
+      "sound-off",
+      "pause",
+      "play",
+      "plus",
+      "pencil",
+      "download",
+      "upload",
+      "trash",
+      "warning",
+      "retry",
+      "backspace",
+      "shield"
     ],
     "emblems": [
       "emblem-sunny-meadow",

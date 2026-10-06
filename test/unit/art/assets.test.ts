@@ -67,8 +67,46 @@ describe('icons and avatars', () => {
     expect(() => renderIcon('not-an-icon')).toThrow();
   });
 
-  it('draws UI glyphs in currentColor so buttons can theme them', () => {
-    for (const id of GLYPH_ICON_IDS) expect(renderIcon(id), id).toContain('currentColor');
+  it('draws UI glyphs only in currentColor so buttons can theme them', () => {
+    for (const id of GLYPH_ICON_IDS) {
+      const svg = renderIcon(id);
+      const paints = [...svg.matchAll(/\b(?:fill|stroke|stop-color|color)="([^"]*)"/g)].map(
+        (m) => m[1],
+      );
+      expect(paints, id).toContain('currentColor');
+      for (const paint of paints)
+        expect(['currentColor', 'none'], `${id}: ${paint}`).toContain(paint);
+    }
+  });
+
+  it('provides every glyph the app shell draws', () => {
+    expect([...GLYPH_ICON_IDS]).toEqual(
+      expect.arrayContaining([
+        'check',
+        'question',
+        'back',
+        'next',
+        'lock',
+        'speaker',
+        'settings',
+        'home',
+        'close',
+        'parent',
+        'hint',
+        'print',
+        'pause',
+        'play',
+        'plus',
+        'pencil',
+        'download',
+        'upload',
+        'trash',
+        'warning',
+        'retry',
+        'backspace',
+        'shield',
+      ]),
+    );
   });
 
   it('ships the five orchard fruits for Feeding Time', () => {

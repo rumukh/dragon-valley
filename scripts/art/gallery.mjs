@@ -322,7 +322,7 @@ if (typeof art.renderIcon === 'function') {
       const small = ids.map((/** @type {string} */ id) =>
         cell(art.renderIcon(id, { size: 32, idPrefix: uid(id) }), ''),
       );
-      return grid(12, big, 96) + '<h2>32 px</h2>' + grid(30, small, 32);
+      return grid(12, big, 96) + '<h2>32 px</h2>' + grid(24, small, 32);
     },
   });
 }

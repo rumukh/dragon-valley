@@ -1,5 +1,19 @@
-import { polar } from '../svg/num';
-import { M, L, Q, C, A, eggD, roundRectD, roundStarD, circleD, polyD } from '../svg/path';
+import { cosDeg, polar, sinDeg, type Pt } from '../svg/num';
+import {
+  M,
+  L,
+  Q,
+  C,
+  A,
+  Mp,
+  Lp,
+  eggD,
+  roundRectD,
+  roundStarD,
+  roundPolyD,
+  circleD,
+  polyD,
+} from '../svg/path';
 import { h, svgDoc, ids as scoped } from '../svg/xml';
 import { lighten, outlineOf } from '../svg/color';
 import { gearD, sparkleD } from '../glyphs';
@@ -47,6 +61,17 @@ export const GLYPH_ICON_IDS = [
   'hint',
   'music',
   'sound-off',
+  'pause',
+  'play',
+  'plus',
+  'pencil',
+  'download',
+  'upload',
+  'trash',
+  'warning',
+  'retry',
+  'backspace',
+  'shield',
 ] as const;
 
 export const FRUIT_IDS = ['apple', 'plum', 'pear', 'cherries', 'berries'] as const;
@@ -79,6 +104,13 @@ const glyph = (w = 5.5): Record<string, string | number> => ({
   stroke: 'currentColor',
   'stroke-width': w,
   'stroke-linecap': 'round',
+  'stroke-linejoin': 'round',
+});
+/** A filled glyph shape whose corners are softened by a round-joined outline of width `w`. */
+const solid = (w: number): Record<string, string | number> => ({
+  fill: 'currentColor',
+  stroke: 'currentColor',
+  'stroke-width': w,
   'stroke-linejoin': 'round',
 });
 
@@ -619,12 +651,11 @@ function glyphArt(id: string): string {
       return (
         h('path', { d: M(18, 22) + L(18, 8) + L(46, 8) + L(46, 22), ...glyph(5) }) +
         h('path', {
-          d: roundRectD(8, 22, 48, 24, 6) + roundRectD(20, 38, 24, 18, 2),
+          d: roundRectD(8, 22, 48, 24, 6) + roundRectD(20, 38, 24, 18, 2) + circleD(47, 30, 2.5),
           fill: 'currentColor',
           'fill-rule': 'evenodd',
         }) +
-        h('path', { d: M(24, 44) + L(40, 44) + M(24, 50) + L(36, 50), ...glyph(3) }) +
-        h('circle', { cx: 47, cy: 30, r: 2.5, fill: '#ffffff' })
+        h('path', { d: M(24, 44) + L(40, 44) + M(24, 50) + L(36, 50), ...glyph(3) })
       );
     case 'hint':
       return (
@@ -641,6 +672,133 @@ function glyphArt(id: string): string {
         }) +
         h('path', { d: M(23, 52) + L(41, 52) + M(26, 58) + L(38, 58), ...glyph(5) }) +
         h('path', { d: M(27, 28) + L(32, 36) + L(37, 28), ...glyph(3.5) })
+      );
+    case 'pause':
+      return h('path', {
+        d: roundRectD(15, 12, 12, 40, 5) + roundRectD(37, 12, 12, 40, 5),
+        fill: 'currentColor',
+      });
+    case 'play':
+      return h('path', { d: M(22, 13) + L(52, 32) + L(22, 51) + 'Z', ...solid(6) });
+    case 'plus':
+      return h('path', { d: M(32, 12) + L(32, 52) + M(12, 32) + L(52, 32), ...glyph(7) });
+    case 'pencil': {
+      // s runs along the pencil from its point (bottom left) to the eraser; t runs across it.
+      const K = 0.7071;
+      const p = (s: number, t: number): Pt => ({ x: 12 + (s + t) * K, y: 52 + (t - s) * K });
+      const cap = p(50, -7.5);
+      return (
+        h('path', {
+          d:
+            Mp(p(0, 0)) +
+            Lp(p(13, 7.5)) +
+            Lp(p(50, 7.5)) +
+            A(7.5, 7.5, 0, 0, 0, cap.x, cap.y) +
+            Lp(p(13, -7.5)) +
+            'Z',
+          ...glyph(5.5),
+        }) +
+        h('path', {
+          d: Mp(p(13, 7.5)) + Lp(p(13, -7.5)) + Mp(p(41, 7.5)) + Lp(p(41, -7.5)),
+          ...glyph(5),
+        }) +
+        h('path', { d: polyD([p(0, 0), p(6.5, 3.75), p(6.5, -3.75)]), ...solid(3) })
+      );
+    }
+    case 'download':
+    case 'upload':
+      return (
+        h('path', {
+          d:
+            id === 'download'
+              ? M(32, 9) + L(32, 39) + M(19.5, 27) + L(32, 39.5) + L(44.5, 27)
+              : M(32, 42) + L(32, 10) + M(19.5, 22.5) + L(32, 10) + L(44.5, 22.5),
+          ...glyph(6.5),
+        }) +
+        h('path', {
+          d: M(10, 39) + L(10, 50) + Q(10, 55, 15, 55) + L(49, 55) + Q(54, 55, 54, 50) + L(54, 39),
+          ...glyph(6),
+        })
+      );
+    case 'trash':
+      return (
+        h('path', {
+          d: M(10, 16) + L(54, 16) + M(24.5, 15) + L(26, 9) + L(38, 9) + L(39.5, 15),
+          ...glyph(5.5),
+        }) +
+        h('path', {
+          d:
+            M(15.5, 23) +
+            L(18.5, 50.5) +
+            Q(19, 56, 24.5, 56) +
+            L(39.5, 56) +
+            Q(45, 56, 45.5, 50.5) +
+            L(48.5, 23),
+          ...glyph(5.5),
+        }) +
+        h('path', { d: M(27.5, 30) + L(28.3, 48) + M(36.5, 30) + L(35.7, 48), ...glyph(4.5) })
+      );
+    case 'warning':
+      return (
+        h('path', {
+          d: roundPolyD(
+            [
+              { x: 32, y: 8 },
+              { x: 57.5, y: 52 },
+              { x: 6.5, y: 52 },
+            ],
+            6,
+          ),
+          ...glyph(5.5),
+        }) +
+        h('path', { d: M(32, 23) + L(32, 36), ...glyph(6.5) }) +
+        h('circle', { cx: 32, cy: 44.5, r: 3.6, fill: 'currentColor' })
+      );
+    case 'retry': {
+      // A clockwise arrow: the arc runs from 15deg round to 300deg and the head carries on.
+      const r = 19.5;
+      const start = polar(32, 33, r, 15);
+      const end = polar(32, 33, r, 300);
+      const dir = { x: -sinDeg(300), y: cosDeg(300) };
+      const head = (along: number, side: number): Pt => ({
+        x: end.x + dir.x * along - dir.y * side,
+        y: end.y + dir.y * along + dir.x * side,
+      });
+      return (
+        h('path', { d: M(start.x, start.y) + A(r, r, 0, 1, 1, end.x, end.y), ...glyph(6) }) +
+        h('path', { d: polyD([head(7, 0), head(-3, 8.5), head(-3, -8.5)]), ...solid(3) })
+      );
+    }
+    case 'backspace':
+      return (
+        h('path', {
+          d: roundPolyD(
+            [
+              { x: 22, y: 13 },
+              { x: 56, y: 13 },
+              { x: 56, y: 51 },
+              { x: 22, y: 51 },
+              { x: 7, y: 32 },
+            ],
+            5,
+          ),
+          ...glyph(5.5),
+        }) + h('path', { d: M(32, 25) + L(46, 39) + M(46, 25) + L(32, 39), ...glyph(5.5) })
+      );
+    case 'shield':
+      return (
+        h('path', {
+          d:
+            M(32, 7) +
+            C(39, 11, 46, 13, 53, 13.5) +
+            L(53, 29) +
+            C(53, 43, 44.5, 52.5, 32, 58) +
+            C(19.5, 52.5, 11, 43, 11, 29) +
+            L(11, 13.5) +
+            C(18, 13, 25, 11, 32, 7) +
+            'Z',
+          ...glyph(5.5),
+        }) + h('path', { d: M(22.5, 32.5) + L(29.5, 39.5) + L(42, 26), ...glyph(6) })
       );
     default:
       return '';
