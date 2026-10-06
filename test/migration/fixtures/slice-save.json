@@ -1,0 +1,483 @@
+{
+  "format": "aegis-runtime/1",
+  "adapter": "dragon-valley",
+  "stateVersion": 1,
+  "content": {
+    "id": "dragon-valley",
+    "revision": "1.0.0",
+    "schemaVersion": 1,
+    "hash": "af91e14b281b7452"
+  },
+  "seed": "slice-save",
+  "revision": 57,
+  "turn": 21,
+  "world": {
+    "version": 1,
+    "tick": 0,
+    "entities": [],
+    "resources": {
+      "aegis.runtime.state": {
+        "day": 20733,
+        "firstDay": 20732,
+        "sessions": 2,
+        "daysPracticed": 2,
+        "onboarding": {
+          "firstEgg": "sunny",
+          "placement": "done"
+        },
+        "items": {
+          "mul:10x5": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:5x10": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:5x9": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:8x2": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:10x4": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:0x10": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:10x9": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "div:50:10": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "div:70:10": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "div:100:10": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "div:0:5": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 0,
+            "recent": ["miss"],
+            "lastDay": 20732
+          },
+          "div:4:2": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "div:40:5": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:3x5": {
+            "box": 2,
+            "due": 20733,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "fast"],
+            "lastDay": 20732
+          },
+          "mul:5x3": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20732
+          },
+          "mul:3x10": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20732
+          },
+          "mul:5x6": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20732
+          },
+          "mul:6x5": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20732
+          },
+          "mul:10x3": {
+            "box": 2,
+            "due": 20733,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "fast"],
+            "lastDay": 20732
+          },
+          "mul:2x10": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20732
+          },
+          "mul:4x5": {
+            "box": 2,
+            "due": 20733,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "fast"],
+            "lastDay": 20732
+          },
+          "mul:5x4": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20732
+          },
+          "mul:10x2": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20732
+          },
+          "mul:2x9": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:9x2": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:2x4": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:0x2": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          },
+          "mul:2x6": {
+            "box": 1,
+            "due": 20732,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["fast"],
+            "lastDay": 20732
+          }
+        },
+        "levels": {
+          "sunny-meadow.2": {
+            "stars": 1,
+            "bestAccuracy": 0,
+            "plays": 0,
+            "placed": true,
+            "paidStars": 0
+          },
+          "sunny-meadow.3": {
+            "stars": 1,
+            "bestAccuracy": 0,
+            "plays": 0,
+            "placed": true,
+            "paidStars": 0
+          },
+          "sunny-meadow.4": {
+            "stars": 1,
+            "bestAccuracy": 0,
+            "plays": 0,
+            "placed": true,
+            "paidStars": 0
+          },
+          "sunny-meadow.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          }
+        },
+        "bosses": {},
+        "dragons": {
+          "sunny": {
+            "stage": "hatchling",
+            "obtainedDay": 20732,
+            "stageDay": 20732,
+            "outfit": {
+              "head": "hat-straw",
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "bubbles": {
+            "stage": "hatchling",
+            "obtainedDay": 20732,
+            "stageDay": 20732,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "goldie": {
+            "stage": "hatchling",
+            "obtainedDay": 20732,
+            "stageDay": 20732,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "mirror": {
+            "stage": "egg",
+            "obtainedDay": 20732,
+            "stageDay": 20732,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "puff": {
+            "stage": "egg",
+            "obtainedDay": 20732,
+            "stageDay": 20732,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          }
+        },
+        "coins": 81,
+        "coinsEarned": 101,
+        "cosmetics": {
+          "schema": 1,
+          "owned": ["scarf-striped", "hat-straw"],
+          "claims": [
+            {
+              "id": "level:sunny-meadow.4:scarf-striped",
+              "item": "scarf-striped"
+            },
+            {
+              "id": "buy:hat-straw",
+              "item": "hat-straw"
+            }
+          ],
+          "equipped": []
+        },
+        "stickers": {
+          "streak-ten": {
+            "day": 20732
+          },
+          "show-what-you-know": {
+            "day": 20732
+          },
+          "first-hatch": {
+            "day": 20732
+          },
+          "meadow-first-steps": {
+            "day": 20732
+          },
+          "first-outfit": {
+            "day": 20732
+          }
+        },
+        "daily": {
+          "day": 20733,
+          "answers": 0,
+          "correct": 0,
+          "fast": 0,
+          "goal": 30,
+          "quests": [
+            {
+              "id": "minigame-1@20733",
+              "template": "minigame-1",
+              "progress": 0,
+              "claimed": false
+            },
+            {
+              "id": "level-1@20733",
+              "template": "level-1",
+              "progress": 0,
+              "claimed": false
+            },
+            {
+              "id": "fast-10@20733",
+              "template": "fast-10",
+              "progress": 0,
+              "claimed": false
+            }
+          ],
+          "gift": "locked"
+        },
+        "history": [
+          {
+            "day": 20732,
+            "answers": 21,
+            "correct": 20,
+            "fast": 20
+          },
+          {
+            "day": 20733,
+            "answers": 0,
+            "correct": 0,
+            "fast": 0
+          }
+        ],
+        "arena": {
+          "best": 0,
+          "plays": 0
+        },
+        "questsClaimed": 3,
+        "bestStreak": 10,
+        "story": {
+          "beats": {},
+          "pending": null,
+          "queue": [],
+          "done": ["beat.prologue", "beat.first-egg", "beat.meadow-welcome"]
+        },
+        "run": null,
+        "round": null,
+        "roundCounter": 3,
+        "settings": {
+          "dailyGoal": 30,
+          "arena": true,
+          "unlockAhead": []
+        },
+        "finale": {
+          "day": null
+        }
+      }
+    },
+    "prng": {
+      "s": [1482095931, 1978574192, 3909613433, 2127312397]
+    },
+    "allocator": {
+      "slots": [],
+      "free": []
+    }
+  },
+  "streams": {
+    "distractors": {
+      "s": [3331714356, 4288557864, 1293817940, 2692302001]
+    },
+    "problems": {
+      "s": [3614063588, 964071353, 974146434, 2415196021]
+    },
+    "rewards": {
+      "s": [2034159114, 3599806440, 3839236926, 856599954]
+    },
+    "words": {
+      "s": [3300635176, 2784888531, 2976825616, 1947770794]
+    }
+  },
+  "pending": null,
+  "jobs": [],
+  "claims": ["story:beat.first-egg:first-egg.sunny"],
+  "consumedJobs": [],
+  "phase": {
+    "id": "hub",
+    "instance": 6,
+    "enteredTurn": 21,
+    "allowance": 0
+  },
+  "nextAction": 58,
+  "nextJob": 1,
+  "nextPhase": 7
+}
