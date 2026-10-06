@@ -1,0 +1,11 @@
+{
+  "app.title": "Dragon Valley",
+  "app.subtitle": "A Times-Table Adventure",
+  "app.greeting.1": "Hello, Keeper! The dragon eggs are getting warm.",
+  "app.greeting.2": "Welcome, Keeper! Glimmer is polishing the Magic Window.",
+  "app.greeting.3": "Hi, Keeper! Something is wiggling inside an egg.",
+  "app.building": "The valley is still being built. Come back soon!",
+  "app.ready": "Ready",
+  "app.summary": "Levels ready so far: {levels}.",
+  "app.startupFailure": "Dragon Valley could not start. Please ask a grown-up to reload the page."
+}

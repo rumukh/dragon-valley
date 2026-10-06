@@ -11,6 +11,19 @@ Built as a standalone consumer of the [Aegis](https://github.com/rumukh/aegis-en
 
 **Status:** under construction. The approved design and delivery plan is in [`docs/plan.md`](docs/plan.md).
 
+## Documentation
+
+| Document                                       | What it covers                                                                                 |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| [`docs/plan.md`](docs/plan.md)                 | The approved design and delivery plan                                                          |
+| [`docs/design.md`](docs/design.md)             | The full game design: story, 9 regions and 59 levels, activities, adaptive engine, economy, UX |
+| [`docs/curriculum.md`](docs/curriculum.md)     | Czech 3rd-grade objectives, their levels and bosses, bounds, notation, glossary                |
+| [`docs/contract.md`](docs/contract.md)         | The domain contract: content pack, problems, state, actions, views, events, ownership          |
+| [`docs/architecture.md`](docs/architecture.md) | Layers, command loop, saves, offline installation, child safety, build                         |
+| [`docs/testing.md`](docs/testing.md)           | The gate, test discipline, goldens, learner bots, browser tests                                |
+| [`docs/assets.md`](docs/assets.md)             | Art and audio pipelines, what ships, provenance rules                                          |
+| [`docs/sdk-update.md`](docs/sdk-update.md)     | The pinned Aegis SDK and how to update it                                                      |
+
 ## Develop
 
 Requirements: Node 24 and npm 11. On the corporate development machine npm goes through the proxy in

@@ -50,6 +50,9 @@ test('the game boots at the Pages base with no errors and only same-origin reque
 
   await page.goto('./');
   await expect(page.getByTestId('boot-status')).toHaveAttribute('data-state', 'ready');
+  // The rules ran in this browser: a first session leaves the prologue story on screen.
+  await expect(page.getByTestId('boot-status')).toHaveAttribute('data-screen', 'story');
+  await expect(page.getByTestId('boot-status')).toHaveAttribute('data-content-revision', '1.0.0');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dragon Valley');
   await expect(page.locator('#app')).not.toHaveAttribute('aria-busy', 'true');
   await page.waitForLoadState('networkidle');

@@ -1,0 +1,1536 @@
+{
+  "id": "dragon-valley",
+  "revision": "1.0.0",
+  "schemaVersion": 1,
+  "data": {
+    "objectives": [
+      {
+        "id": "obj.mul.meaning",
+        "strand": "meaning",
+        "titleKey": "objective.mul.meaning"
+      },
+      {
+        "id": "obj.mul.commutative",
+        "strand": "meaning",
+        "titleKey": "objective.mul.commutative"
+      },
+      {
+        "id": "obj.mul.rules-0-1",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.rules-0-1"
+      },
+      {
+        "id": "obj.mul.table-2-5-10",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.table-2-5-10"
+      },
+      {
+        "id": "obj.mul.table-3-4",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.table-3-4"
+      },
+      {
+        "id": "obj.mul.table-6-7",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.table-6-7"
+      },
+      {
+        "id": "obj.mul.table-8-9",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.table-8-9"
+      },
+      {
+        "id": "obj.mul.fluency",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.fluency"
+      },
+      {
+        "id": "obj.div.meaning",
+        "strand": "division",
+        "titleKey": "objective.div.meaning"
+      },
+      {
+        "id": "obj.div.tables",
+        "strand": "division",
+        "titleKey": "objective.div.tables"
+      },
+      {
+        "id": "obj.div.fact-families",
+        "strand": "division",
+        "titleKey": "objective.div.fact-families"
+      },
+      {
+        "id": "obj.div.missing-factor",
+        "strand": "division",
+        "titleKey": "objective.div.missing-factor"
+      },
+      {
+        "id": "obj.rem.divide",
+        "strand": "remainder",
+        "titleKey": "objective.rem.divide"
+      },
+      {
+        "id": "obj.rem.word",
+        "strand": "remainder",
+        "titleKey": "objective.rem.word"
+      },
+      {
+        "id": "obj.big.mul-10-100",
+        "strand": "beyond-tables",
+        "titleKey": "objective.big.mul-10-100"
+      },
+      {
+        "id": "obj.big.tens",
+        "strand": "beyond-tables",
+        "titleKey": "objective.big.tens"
+      },
+      {
+        "id": "obj.big.mul-2d1d",
+        "strand": "beyond-tables",
+        "titleKey": "objective.big.mul-2d1d"
+      },
+      {
+        "id": "obj.big.div-2d1d",
+        "strand": "beyond-tables",
+        "titleKey": "objective.big.div-2d1d"
+      },
+      {
+        "id": "obj.order.precedence",
+        "strand": "order-of-operations",
+        "titleKey": "objective.order.precedence"
+      },
+      {
+        "id": "obj.order.brackets",
+        "strand": "order-of-operations",
+        "titleKey": "objective.order.brackets"
+      },
+      {
+        "id": "obj.compare.expressions",
+        "strand": "comparison",
+        "titleKey": "objective.compare.expressions"
+      },
+      {
+        "id": "obj.word.equal-groups",
+        "strand": "word-problems",
+        "titleKey": "objective.word.equal-groups"
+      },
+      {
+        "id": "obj.word.times-more-fewer",
+        "strand": "word-problems",
+        "titleKey": "objective.word.times-more-fewer"
+      },
+      {
+        "id": "obj.word.more-fewer-contrast",
+        "strand": "word-problems",
+        "titleKey": "objective.word.more-fewer-contrast"
+      },
+      {
+        "id": "obj.word.two-step",
+        "strand": "word-problems",
+        "titleKey": "objective.word.two-step"
+      },
+      {
+        "id": "obj.terms.mul",
+        "strand": "terminology",
+        "titleKey": "objective.terms.mul"
+      },
+      {
+        "id": "obj.terms.div",
+        "strand": "terminology",
+        "titleKey": "objective.terms.div"
+      }
+    ],
+    "regions": [
+      {
+        "id": "sunny-meadow",
+        "order": 1,
+        "titleKey": "region.sunny-meadow",
+        "unlock": {
+          "after": []
+        },
+        "boss": "bridge-troll",
+        "background": "sunny-meadow"
+      }
+    ],
+    "levels": [
+      {
+        "id": "sunny-meadow.1",
+        "region": "sunny-meadow",
+        "order": 1,
+        "titleKey": "level.sunny-meadow.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-2-5"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["mul-2"],
+            "count": 8,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.meadow-welcome",
+        "objectives": ["obj.mul.meaning", "obj.mul.table-2-5-10"]
+      },
+      {
+        "id": "sunny-meadow.2",
+        "region": "sunny-meadow",
+        "order": 2,
+        "titleKey": "level.sunny-meadow.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.1"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-2-5"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["mul-2-5"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["bubbles", "sunny", "goldie"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-2-5-10", "obj.mul.commutative"]
+      },
+      {
+        "id": "sunny-meadow.3",
+        "region": "sunny-meadow",
+        "order": 3,
+        "titleKey": "level.sunny-meadow.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.2"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-0-1-10"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "number-trail",
+            "skills": ["mul-10"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "length": 10,
+              "gaps": 3
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["mirror", "puff"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.rules-0-1", "obj.mul.table-2-5-10"]
+      },
+      {
+        "id": "sunny-meadow.4",
+        "region": "sunny-meadow",
+        "order": 4,
+        "titleKey": "level.sunny-meadow.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.3"]
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-2-5"],
+            "count": 2,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "fact-family",
+            "skills": ["div-2-5-10"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["div-2-5-10", "missing-2-5-10"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["scarf-striped"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.commutative", "obj.div.meaning", "obj.div.fact-families"]
+      },
+      {
+        "id": "sunny-meadow.5",
+        "region": "sunny-meadow",
+        "order": 5,
+        "titleKey": "level.sunny-meadow.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.4"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-meadow", "div-2-5-10"],
+            "count": 12,
+            "input": "keypad",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["div-2-5-10"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-2-5-10", "obj.mul.rules-0-1", "obj.div.tables"]
+      },
+      {
+        "id": "sunny-meadow.6",
+        "region": "sunny-meadow",
+        "order": 6,
+        "titleKey": "level.sunny-meadow.6",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.5"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-meadow"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.word.equal-groups", "obj.word.more-fewer-contrast"]
+      },
+      {
+        "id": "sunny-meadow.boss",
+        "region": "sunny-meadow",
+        "order": 7,
+        "titleKey": "level.sunny-meadow.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["sunny-meadow.6"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": ["mul-meadow", "div-2-5-10", "missing-2-5-10"],
+            "count": 20,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": [],
+          "cosmetics": ["hat-party"]
+        },
+        "boss": "bridge-troll",
+        "storyBeat": "beat.bridge-troll",
+        "objectives": [
+          "obj.mul.meaning",
+          "obj.mul.commutative",
+          "obj.mul.rules-0-1",
+          "obj.mul.table-2-5-10",
+          "obj.div.meaning",
+          "obj.div.fact-families",
+          "obj.word.equal-groups"
+        ]
+      }
+    ],
+    "skills": [
+      {
+        "id": "mul-0",
+        "titleKey": "skill.mul-0",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [0],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-1",
+        "titleKey": "skill.mul-1",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [1],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-2",
+        "titleKey": "skill.mul-2",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [2],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-5",
+        "titleKey": "skill.mul-5",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [5],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-10",
+        "titleKey": "skill.mul-10",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-2-5",
+        "titleKey": "skill.mul-2-5",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [2, 5],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-0-1-10",
+        "titleKey": "skill.mul-0-1-10",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [0, 1, 10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-meadow",
+        "titleKey": "skill.mul-meadow",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [0, 1, 2, 5, 10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-1",
+        "titleKey": "skill.div-1",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [1],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "div-2",
+        "titleKey": "skill.div-2",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [2],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "div-5",
+        "titleKey": "skill.div-5",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [5],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "div-10",
+        "titleKey": "skill.div-10",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [10],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "div-2-5-10",
+        "titleKey": "skill.div-2-5-10",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [2, 5, 10],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "missing-2-5-10",
+        "titleKey": "skill.missing-2-5-10",
+        "generator": "mul.missing",
+        "params": {
+          "tables": [2, 5, 10],
+          "factors": [0, 10],
+          "position": "both"
+        }
+      },
+      {
+        "id": "word-meadow",
+        "titleKey": "skill.word-meadow",
+        "generator": "word",
+        "params": {
+          "templates": ["word.equal-groups.nests", "word.sharing.berries", "word.more-than.flowers"]
+        }
+      }
+    ],
+    "dragons": [
+      {
+        "id": "puff",
+        "kind": "table",
+        "table": 0,
+        "nameKey": "dragon.puff",
+        "region": "sunny-meadow",
+        "rig": "puff",
+        "skills": ["mul-0"],
+        "divisionSkills": [],
+        "boss": "bridge-troll"
+      },
+      {
+        "id": "mirror",
+        "kind": "table",
+        "table": 1,
+        "nameKey": "dragon.mirror",
+        "region": "sunny-meadow",
+        "rig": "mirror",
+        "skills": ["mul-1"],
+        "divisionSkills": ["div-1"],
+        "boss": "bridge-troll"
+      },
+      {
+        "id": "bubbles",
+        "kind": "table",
+        "table": 2,
+        "nameKey": "dragon.bubbles",
+        "region": "sunny-meadow",
+        "rig": "bubbles",
+        "skills": ["mul-2"],
+        "divisionSkills": ["div-2"],
+        "boss": "bridge-troll"
+      },
+      {
+        "id": "sunny",
+        "kind": "table",
+        "table": 5,
+        "nameKey": "dragon.sunny",
+        "region": "sunny-meadow",
+        "rig": "sunny",
+        "skills": ["mul-5"],
+        "divisionSkills": ["div-5"],
+        "boss": "bridge-troll"
+      },
+      {
+        "id": "goldie",
+        "kind": "table",
+        "table": 10,
+        "nameKey": "dragon.goldie",
+        "region": "sunny-meadow",
+        "rig": "goldie",
+        "skills": ["mul-10"],
+        "divisionSkills": ["div-10"],
+        "boss": "bridge-troll"
+      }
+    ],
+    "bosses": [
+      {
+        "id": "bridge-troll",
+        "region": "sunny-meadow",
+        "nameKey": "boss.bridge-troll",
+        "mood": "laughing",
+        "meter": 15,
+        "reviewShare": 20
+      }
+    ],
+    "cosmetics": [
+      {
+        "id": "hat-flower-crown",
+        "slot": "head",
+        "assetId": "hat-flower-crown",
+        "nameKey": "cosmetic.hat-flower-crown",
+        "price": 20,
+        "unlock": null
+      },
+      {
+        "id": "scarf-striped",
+        "slot": "neck",
+        "assetId": "scarf-striped",
+        "nameKey": "cosmetic.scarf-striped",
+        "price": 15,
+        "unlock": null
+      },
+      {
+        "id": "glasses-round",
+        "slot": "eyes",
+        "assetId": "glasses-round",
+        "nameKey": "cosmetic.glasses-round",
+        "price": 25,
+        "unlock": null
+      },
+      {
+        "id": "paint-stars",
+        "slot": "wings",
+        "assetId": "paint-stars",
+        "nameKey": "cosmetic.paint-stars",
+        "price": 40,
+        "unlock": "sunny-meadow.3"
+      },
+      {
+        "id": "nest-flowers",
+        "slot": "nest",
+        "assetId": "nest-flowers",
+        "nameKey": "cosmetic.nest-flowers",
+        "price": 30,
+        "unlock": "sunny-meadow.2"
+      },
+      {
+        "id": "hat-party",
+        "slot": "head",
+        "assetId": "hat-party",
+        "nameKey": "cosmetic.hat-party",
+        "price": 60,
+        "unlock": "sunny-meadow.boss"
+      }
+    ],
+    "stickers": [
+      {
+        "id": "first-hatch",
+        "nameKey": "sticker.first-hatch",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": null,
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#f7b955",
+        "frame": "frame-round"
+      },
+      {
+        "id": "show-what-you-know",
+        "nameKey": "sticker.show-what-you-know",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "placement-done"
+        },
+        "icon": "star-filled",
+        "color": "#5bb8f5",
+        "frame": "frame-round"
+      },
+      {
+        "id": "meadow-first-steps",
+        "nameKey": "sticker.meadow-first-steps",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "sunny-meadow.1",
+          "stars": 1
+        },
+        "icon": "emblem-sunny-meadow",
+        "color": "#8bd36b",
+        "frame": "frame-round"
+      },
+      {
+        "id": "meadow-three-stars",
+        "nameKey": "sticker.meadow-three-stars",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "sunny-meadow.5",
+          "stars": 3
+        },
+        "icon": "node-stars-3",
+        "color": "#ffd23f",
+        "frame": "frame-star"
+      },
+      {
+        "id": "streak-ten",
+        "nameKey": "sticker.streak-ten",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "streak",
+          "count": 10
+        },
+        "icon": "badge-correct",
+        "color": "#ff8c42",
+        "frame": "frame-round"
+      },
+      {
+        "id": "first-outfit",
+        "nameKey": "sticker.first-outfit",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "cosmetics-owned",
+          "count": 1
+        },
+        "icon": "hat-party",
+        "color": "#c77dff",
+        "frame": "frame-round"
+      },
+      {
+        "id": "troll-giggles",
+        "nameKey": "sticker.troll-giggles",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "bridge-troll"
+        },
+        "icon": "chest-open",
+        "color": "#6ccff6",
+        "frame": "frame-shield"
+      }
+    ],
+    "quests": [
+      {
+        "id": "correct-20",
+        "titleKey": "quest.correct-20",
+        "goal": "correct-answers",
+        "target": 20,
+        "coins": 10,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "fast-10",
+        "titleKey": "quest.fast-10",
+        "goal": "fast-answers",
+        "target": 10,
+        "coins": 10,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "snack-5",
+        "titleKey": "quest.snack-5",
+        "goal": "feed-hungry",
+        "target": 5,
+        "coins": 8,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "minigame-1",
+        "titleKey": "quest.minigame-1",
+        "goal": "play-minigame",
+        "target": 1,
+        "coins": 5,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "level-1",
+        "titleKey": "quest.level-1",
+        "goal": "finish-level",
+        "target": 1,
+        "coins": 10,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "streak-8",
+        "titleKey": "quest.streak-8",
+        "goal": "best-streak",
+        "target": 8,
+        "coins": 10,
+        "weight": 5,
+        "unlock": null
+      }
+    ],
+    "wordLists": [
+      {
+        "id": "names",
+        "kind": "name",
+        "entries": [
+          "word.name.anna",
+          "word.name.tom",
+          "word.name.ela",
+          "word.name.kuba",
+          "word.name.maya",
+          "word.name.leo"
+        ]
+      }
+    ],
+    "wordTemplates": [
+      {
+        "id": "word.equal-groups.nests",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.nests",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "nests": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "eggs": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "nests"
+            },
+            "right": {
+              "kind": "var",
+              "name": "eggs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.sharing.berries",
+        "family": "sharing",
+        "textKey": "word.sharing.berries",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "baskets": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "baskets"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "baskets"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.more-than.flowers",
+        "family": "more-than",
+        "textKey": "word.more-than.flowers",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "picked": {
+            "kind": "int",
+            "min": 2,
+            "max": 20
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "var",
+              "name": "picked"
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": "add"
+      }
+    ],
+    "placement": {
+      "steps": [
+        {
+          "skill": "mul-2-5",
+          "problems": 4,
+          "passAccuracy": 75,
+          "levels": ["sunny-meadow.1", "sunny-meadow.2"]
+        },
+        {
+          "skill": "mul-0-1-10",
+          "problems": 3,
+          "passAccuracy": 100,
+          "levels": ["sunny-meadow.3"]
+        },
+        {
+          "skill": "div-2-5-10",
+          "problems": 3,
+          "passAccuracy": 100,
+          "levels": ["sunny-meadow.4"]
+        }
+      ],
+      "minProblems": 6,
+      "maxProblems": 24,
+      "stopAfterMisses": 3
+    },
+    "story": {
+      "beats": [
+        {
+          "id": "beat.prologue",
+          "trigger": {
+            "kind": "first-session"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.prologue",
+            "revision": "1",
+            "start": "prologue-1",
+            "catalogs": {
+              "scene": ["castle"],
+              "text": [
+                "story.prologue.1",
+                "story.next",
+                "story.prologue.2",
+                "story.prologue.3",
+                "story.prologue.4"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "prologue-1",
+                "scene": "castle",
+                "text": "story.prologue.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "prologue-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "prologue-2",
+                "scene": "castle",
+                "text": "story.prologue.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "prologue-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "prologue-3",
+                "scene": "castle",
+                "text": "story.prologue.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "prologue-4",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "prologue-4",
+                "scene": "castle",
+                "text": "story.prologue.4",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.first-egg",
+          "trigger": {
+            "kind": "after-beat",
+            "beat": "beat.prologue"
+          },
+          "skippable": false,
+          "graph": {
+            "schema": 1,
+            "id": "story.first-egg",
+            "revision": "1",
+            "start": "choose",
+            "catalogs": {
+              "scene": ["valley"],
+              "text": [
+                "story.first-egg.choose",
+                "story.first-egg.bubbles",
+                "story.first-egg.sunny",
+                "story.first-egg.goldie",
+                "story.first-egg.chosen"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["first-egg.bubbles", "first-egg.sunny", "first-egg.goldie"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-bubbles",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "first-egg.bubbles"
+              },
+              {
+                "id": "claim-sunny",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "first-egg.sunny"
+              },
+              {
+                "id": "claim-goldie",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "first-egg.goldie"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "choose",
+                "scene": "valley",
+                "text": "story.first-egg.choose",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "bubbles",
+                    "text": "story.first-egg.bubbles",
+                    "to": "chosen",
+                    "guard": null,
+                    "effects": ["claim-bubbles"]
+                  },
+                  {
+                    "id": "sunny",
+                    "text": "story.first-egg.sunny",
+                    "to": "chosen",
+                    "guard": null,
+                    "effects": ["claim-sunny"]
+                  },
+                  {
+                    "id": "goldie",
+                    "text": "story.first-egg.goldie",
+                    "to": "chosen",
+                    "guard": null,
+                    "effects": ["claim-goldie"]
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "chosen",
+                "scene": "valley",
+                "text": "story.first-egg.chosen",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.meadow-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sunny-meadow.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.meadow-welcome",
+            "revision": "1",
+            "start": "meadow-welcome-1",
+            "catalogs": {
+              "scene": ["meadow"],
+              "text": ["story.meadow-welcome.1", "story.next", "story.meadow-welcome.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "meadow-welcome-1",
+                "scene": "meadow",
+                "text": "story.meadow-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "meadow-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "meadow-welcome-2",
+                "scene": "meadow",
+                "text": "story.meadow-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.bridge-troll",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sunny-meadow.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.bridge-troll",
+            "revision": "1",
+            "start": "bridge-troll-1",
+            "catalogs": {
+              "scene": ["bridge"],
+              "text": [
+                "story.bridge-troll.1",
+                "story.next",
+                "story.bridge-troll.2",
+                "story.bridge-troll.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "bridge-troll-1",
+                "scene": "bridge",
+                "text": "story.bridge-troll.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "bridge-troll-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "bridge-troll-2",
+                "scene": "bridge",
+                "text": "story.bridge-troll.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "bridge-troll-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "bridge-troll-3",
+                "scene": "bridge",
+                "text": "story.bridge-troll.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.troll-laughs",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "bridge-troll"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.troll-laughs",
+            "revision": "1",
+            "start": "troll-laughs-1",
+            "catalogs": {
+              "scene": ["bridge"],
+              "text": ["story.troll-laughs.1", "story.next", "story.troll-laughs.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "troll-laughs-1",
+                "scene": "bridge",
+                "text": "story.troll-laughs.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "troll-laughs-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "troll-laughs-2",
+                "scene": "bridge",
+                "text": "story.troll-laughs.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        }
+      ],
+      "rewards": [
+        {
+          "reward": "first-egg.bubbles",
+          "grant": {
+            "kind": "egg",
+            "dragon": "bubbles"
+          }
+        },
+        {
+          "reward": "first-egg.sunny",
+          "grant": {
+            "kind": "egg",
+            "dragon": "sunny"
+          }
+        },
+        {
+          "reward": "first-egg.goldie",
+          "grant": {
+            "kind": "egg",
+            "dragon": "goldie"
+          }
+        }
+      ]
+    },
+    "balance": {
+      "leitner": {
+        "intervals": [0, 0, 1, 2, 4, 8]
+      },
+      "response": {
+        "choice": {
+          "fastMs": 2500,
+          "okMs": 6000
+        },
+        "keypad": {
+          "fastMs": 3500,
+          "okMs": 8000,
+          "perExtraDigitMs": 700
+        }
+      },
+      "input": {
+        "keypadFromBox": 2,
+        "choices": 4
+      },
+      "mix": {
+        "successTarget": 82,
+        "knownShare": 70,
+        "minLearningShare": 10,
+        "maxLearningShare": 50,
+        "window": 20,
+        "noRepeatWithin": 2
+      },
+      "reask": {
+        "delay": 3,
+        "maxPerRound": 2
+      },
+      "coins": {
+        "correct": 1,
+        "streakEvery": 5,
+        "streakBonus": 2,
+        "bossDefeated": 30,
+        "placementDone": 10
+      },
+      "stars": {
+        "twoStars": {
+          "accuracy": 80
+        },
+        "threeStars": {
+          "accuracy": 95,
+          "fastShare": 60
+        }
+      },
+      "mastery": {
+        "goldBox": 5,
+        "goldFast": 2,
+        "goldOfLast": 3
+      },
+      "growth": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 60,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 90,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "daily": {
+        "goalAnswers": 30,
+        "goalMin": 10,
+        "goalMax": 100,
+        "quests": 3,
+        "historyDays": 60
+      },
+      "gift": {
+        "coinsMin": 10,
+        "coinsMax": 25,
+        "cosmeticWeight": 3,
+        "coinsWeight": 1
+      },
+      "arena": {
+        "unlockAfter": "sunny-meadow.boss",
+        "maxProblems": 60
+      },
+      "hungry": {
+        "minDue": 1
+      }
+    }
+  }
+}
