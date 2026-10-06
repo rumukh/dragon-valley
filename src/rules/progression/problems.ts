@@ -25,7 +25,7 @@ import type {
   RoundSource,
   Skill,
 } from '../contract';
-import { canGenerate, choicesFor, problemFor } from '../learning/generate';
+import { canGenerate, choicesFor, keypadPossible, problemFor } from '../learning/generate';
 import { creditItem } from '../learning/credit';
 import { digits, responseBucket } from '../learning/items';
 import {
@@ -50,6 +50,11 @@ export const ROUND_ALLOWANCE = 1_000_000;
 /** Items remembered per round (the state schema's cap), for no-repeat and served-first draws. */
 const RECENT_LIMIT = 20;
 
+/** Integer division rounded down for non-negative operands. */
+function quotient(a: number, b: number): number {
+  return (a - (a % b)) / b;
+}
+
 export type Index = ReadonlyMap<string, readonly string[]>;
 
 export function activeProblemRound(ctx: Ctx): ProblemRound | null {
@@ -69,16 +74,23 @@ export function playableSkills(data: Data, skills: readonly string[], index: Ind
   });
 }
 
-/** A playable skill that can practise `item`: the round's own first, else any in the pack. */
+/**
+ * A playable skill that can practise `item`: the round's own first, else any in the pack. When
+ * several of the round's skills own the item (a division fact is also a missing-factor item),
+ * `random` picks one of them, so every skill of the activity is served.
+ */
 export function skillFor(
   data: Data,
   skills: readonly string[],
   item: string,
   index: Index,
+  random?: RandomStream,
 ): DeepReadonly<Skill> | undefined {
   const owns = (id: string) => index.get(id)?.includes(item) ?? false;
-  const own = playableSkills(data, skills, index).find(owns);
-  if (own !== undefined) return skillById(data, own);
+  const own = playableSkills(data, skills, index).filter(owns);
+  if (own.length > 0) {
+    return skillById(data, own.length > 1 && random ? random.pick(own) : own[0]!);
+  }
   return data.skills.find((skill) => canGenerate(skill) && owns(skill.id));
 }
 
@@ -152,6 +164,14 @@ function skillsOf(data: Data, ids: readonly string[]): DeepReadonly<Skill>[] {
   return data.skills.filter((skill) => ids.includes(skill.id));
 }
 
+/** The level activity a round plays, if it comes from a level. */
+function roundActivity(data: Data, round: DeepReadonly<ProblemRound>) {
+  const source = round.source;
+  return source.kind === 'level'
+    ? data.levels.find((l) => l.id === source.level)?.activities[source.activity]
+    : undefined;
+}
+
 function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomStream): string {
   const state = ctx.state;
   const data = ctx.content.data;
@@ -177,10 +197,23 @@ function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomS
     const rest = pool.filter((item) => !isRuleFact(item));
     if (rest.length > 0) pool = rest;
   }
-  if (round.activity === 'boss' && round.source.kind === 'level') {
-    const source = round.source;
+  const source = round.source;
+  const activity = roundActivity(data, round);
+  if (round.activity === 'feeding' && activity?.options['draw'] === 'weakest') {
+    return pickSnack({ state, pool, blocked, served, random });
+  }
+  if (round.activity === 'boss' && source.kind === 'level') {
     const level = data.levels.find((l) => l.id === source.level);
-    const share = data.bosses.find((b) => b.id === level?.boss)?.reviewShare ?? 0;
+    const boss = data.bosses.find((b) => b.id === level?.boss);
+    const heads = boss?.heads ?? 1;
+    if (heads > 1 && round.meter !== null && activity !== undefined) {
+      // One head after another: head k is won over with the activity's k-th skill.
+      const head = Math.min(heads - 1, quotient(round.meter.value * heads, round.meter.target));
+      const own = playableSkills(data, [activity.skills[head] ?? ''], index);
+      const headPool = own.length > 0 ? itemsOf(own, index) : pool;
+      return pickMixed({ state, data, pool: headPool, blocked, served, focus: null, random });
+    }
+    const share = boss?.reviewShare ?? 0;
     if (random.int(0, 100) < share) {
       const review = reviewItems(state, data, new Set(pool), index).filter(
         (item) => !blocked.includes(item),
@@ -235,15 +268,25 @@ export function serveNext(ctx: Ctx, index: Index): void {
   const item = queued ?? chooseItem(ctx, round, index, problems);
   const skillIds =
     round.placement !== null ? [data.placement.steps[round.placement.step]!.skill] : round.skills;
-  const skill = skillFor(data, skillIds, item, index)!;
-  const problem = problemFor(skill, item, { problems, words: ctx.random('words'), data });
+  const skill = skillFor(data, skillIds, item, index, problems)!;
+  let problem = problemFor(skill, item, { problems, words: ctx.random('words'), data });
+  if (
+    problem.kind === 'word' &&
+    round.activity === 'riddle-scrolls' &&
+    roundActivity(data, round)?.options['pickOperation'] === false
+  ) {
+    // Riddle Scrolls without the operation step: the story is answered directly.
+    problem = { ...problem, operation: null };
+  }
   const box = ctx.state.items[item]?.box ?? 0;
-  const input =
+  const resolved =
     round.input === 'auto'
       ? box < data.balance.input.keypadFromBox
         ? 'choice'
         : 'keypad'
       : round.input;
+  // Comparisons and terms cannot be typed: they are answered by choice whatever the input mode.
+  const input = resolved === 'keypad' && !keypadPossible(problem) ? 'choice' : resolved;
   const step = firstStep(problem);
   round.asked += 1;
   round.recent = [...round.recent, item].slice(-RECENT_LIMIT);

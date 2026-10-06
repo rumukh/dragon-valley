@@ -9,9 +9,9 @@
  * the boss, region unlocks, story beats, quests, growth and stickers.
  */
 import type { DeepReadonly } from '@aegis/runtime';
-import { EVENTS, isMinigameKind } from '../contract';
+import { ACTIVITY_OPTION_DEFAULTS, EVENTS, isMinigameKind } from '../contract';
 import type { Level, MinigameActivityKind, ProblemActivityKind, RoundEndReason } from '../contract';
-import { questProgress } from '../economy/daily';
+import { countToday, questProgress } from '../economy/daily';
 import { awardStickers, earnCoins, grantEgg, grantItem } from '../economy/rewards';
 import { canMakeBoard } from '../minigames/boards';
 import { triggerBeats } from '../story/beats';
@@ -39,7 +39,8 @@ export function canPlay(
   if (activity === undefined) return false;
   if (isMinigameKind(activity.kind)) {
     const skills = data.skills.filter((skill) => activity.skills.includes(skill.id));
-    return canMakeBoard(activity.kind, itemsOf(activity.skills, index), skills);
+    const options = { ...ACTIVITY_OPTION_DEFAULTS[activity.kind], ...activity.options };
+    return canMakeBoard(activity.kind, itemsOf(activity.skills, index), skills, options);
   }
   return playableSkills(data, activity.skills, index).length > 0;
 }
@@ -101,7 +102,10 @@ export function completeRound(ctx: Ctx, index: Index, reason: RoundEndReason): v
   if (round.type === 'problems' && round.activity === 'arena' && finished) {
     finishArena(ctx, round);
   }
-  if (round.type === 'minigame' && finished) questProgress(ctx, 'play-minigame', 1);
+  if (round.type === 'minigame' && finished) {
+    questProgress(ctx, 'play-minigame', 1);
+    countToday(ctx, 'minigames');
+  }
   const run = ctx.state.run;
   if (round.source.kind === 'level' && run && run.level === round.source.level) {
     const activity = round.source.activity;
@@ -181,11 +185,13 @@ export function completeLevel(ctx: Ctx, index: Index): void {
   }
   ctx.emit(EVENTS.levelCompleted, { level: level.id, stars, firstTime });
   questProgress(ctx, 'finish-level', 1);
+  countToday(ctx, 'levels');
   if (level.boss && !ctx.state.bosses[level.boss]) {
     ctx.state.bosses[level.boss] = { defeatedDay: ctx.state.day ?? 0 };
     earnCoins(ctx, data.balance.coins.bossDefeated, 'boss');
     ctx.emit(EVENTS.bossDefeated, { boss: level.boss });
     triggerBeats(ctx, (t) => t.kind === 'boss-defeated' && t.boss === level.boss);
+    if (data.bosses.find((b) => b.id === level.boss)?.finale === true) completeFinale(ctx);
   }
   for (const region of openRegions(ctx.state, data)) {
     if (!regionsBefore.includes(region)) ctx.emit(EVENTS.regionUnlocked, { region });
@@ -193,6 +199,25 @@ export function completeLevel(ctx: Ctx, index: Index): void {
   triggerBeats(ctx, (t) => t.kind === 'level-complete' && t.level === level.id);
   applyGrowth(ctx, index);
   awardStickers(ctx);
+}
+
+/**
+ * The finale: the Seven-Headed Dragon is cured. The day is recorded, the finale beats play, and
+ * the finale dragon (its egg came with the boss level's rewards) hatches at once.
+ */
+function completeFinale(ctx: Ctx): void {
+  if (ctx.state.finale.day !== null) return;
+  const day = ctx.state.day ?? 0;
+  ctx.state.finale.day = day;
+  ctx.emit(EVENTS.finaleCompleted, {});
+  for (const dragon of ctx.content.data.dragons.filter((d) => d.kind === 'finale')) {
+    const owned = ctx.state.dragons[dragon.id];
+    if (owned?.stage !== 'egg') continue;
+    owned.stage = 'hatchling';
+    owned.stageDay = day;
+    ctx.emit(EVENTS.dragonHatched, { dragon: dragon.id });
+  }
+  triggerBeats(ctx, (t) => t.kind === 'finale');
 }
 
 /** Close a finished round (and a finished run) to return to the map. */

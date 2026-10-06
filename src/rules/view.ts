@@ -10,6 +10,7 @@ import {
   TABLE_MAX,
   allDivFactIds,
   allMulFactIds,
+  isMinigameKind,
   isoDay,
   parseItemId,
   weekday,
@@ -36,7 +37,15 @@ import { atLeast, isDue, masteryLevel } from './learning/items';
 import { MINIGAMES, boardView } from './minigames/boards';
 import { arenaProblem } from './progression/arena';
 import { dragonFacts, dueItems, hungryDragons, itemsOf, shareAt } from './progression/dragons';
-import { levelStatus, nextLevel, percentOf, regionOpen } from './progression/levels';
+import {
+  isComplete,
+  levelStatus,
+  levelsInMapOrder,
+  nextLevel,
+  percentOf,
+  regionOpen,
+} from './progression/levels';
+import { canPlay } from './progression/rounds';
 import { availableCosmetics } from './economy/rewards';
 import { storyView } from './story/beats';
 import type { Data, Read, ReadState } from './types';
@@ -51,20 +60,49 @@ function screenOf(state: ReadState): Screen {
 /**
  * The Daily Adventure's next step (docs/design.md §4.2): a pending story beat, the placement
  * check while it is pending, snack time for hungry dragons at the start of the day, the next
- * glowing level, the gift once the goal is reached, else free play.
+ * glowing level until one is done today, then once a minigame replay if the day had none, the gift
+ * once the goal is reached, more levels, else free play.
  */
-function nextStep(state: ReadState, data: Data, hungry: readonly string[]): NextStep {
+function nextStep(
+  state: ReadState,
+  data: Data,
+  hungry: readonly string[],
+  index: ReadonlyMap<string, readonly string[]>,
+): NextStep {
   if (state.story.pending !== null) return { kind: 'story', beat: state.story.pending };
   if (state.onboarding.placement === 'pending' && data.placement.steps.length > 0) {
     return { kind: 'placement' };
   }
-  if (hungry.length > 0 && state.daily !== null && state.daily.answers === 0) {
+  const daily = state.daily !== null && state.daily.day === state.day ? state.daily : null;
+  if (hungry.length > 0 && daily !== null && daily.answers === 0) {
     return { kind: 'snack', dragon: null };
   }
+  const levelsToday = daily?.levels ?? 0;
   const level = nextLevel(state, data);
+  if (level !== null && levelsToday === 0) return { kind: 'level', level };
+  if (daily !== null && levelsToday > 0 && (daily.minigames ?? 0) === 0) {
+    const replay = minigameReplay(state, data, index);
+    if (replay !== null) return { kind: 'minigame', ...replay };
+  }
+  if (daily?.gift === 'ready') return { kind: 'gift' };
   if (level !== null) return { kind: 'level', level };
-  if (state.daily?.gift === 'ready') return { kind: 'gift' };
   return { kind: 'free-play' };
+}
+
+/** A minigame activity of the furthest completed level, to replay for variety. */
+function minigameReplay(
+  state: ReadState,
+  data: Data,
+  index: ReadonlyMap<string, readonly string[]>,
+): { level: string; activity: number } | null {
+  const completed = levelsInMapOrder(data).filter((level) => isComplete(state, level.id));
+  for (const level of completed.reverse()) {
+    const activity = level.activities.findIndex(
+      (a, i) => isMinigameKind(a.kind) && canPlay(data, level, i, index),
+    );
+    if (activity !== -1) return { level: level.id, activity };
+  }
+  return null;
 }
 
 function hubView(
@@ -92,6 +130,7 @@ function hubView(
                 nameKey: boss.nameKey,
                 mood: boss.mood,
                 defeated: state.bosses[boss.id] !== undefined,
+                heads: boss.heads ?? 1,
               }
             : null,
           levels: data.levels
@@ -109,7 +148,7 @@ function hubView(
             })),
         };
       }),
-    next: nextStep(state, data, hungry),
+    next: nextStep(state, data, hungry, index),
     hungry,
     arena: {
       available: arenaProblem(state, data, index) === null,
