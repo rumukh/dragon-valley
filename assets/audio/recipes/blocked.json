@@ -1,0 +1,51 @@
+{
+  "id": "blocked",
+  "title": "Gentle blocked thud",
+  "description": "A soft, muted low \"bmp\" for locked or unavailable actions: neutral, not a buzzer.",
+  "category": "soft",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 2801,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 0.32,
+  "loudness": { "measure": "momentary", "target": -18 },
+  "instruments": {
+    "thud": {
+      "pitch": "G3",
+      "sources": [
+        { "type": "osc", "wave": "sine" },
+        { "type": "osc", "wave": "triangle", "db": -12 },
+        {
+          "type": "noise",
+          "color": "brown",
+          "db": -6,
+          "filters": [{ "type": "lowpass", "freq": 600 }],
+          "env": { "points": [[0, 0], [0.002, 1], [0.05, 0, 3]] }
+        }
+      ],
+      "filters": [{ "type": "lowpass", "freq": 900, "q": 0.6 }],
+      "pitchEnv": [[0, 3], [0.08, -5, 2]],
+      "amp": { "a": 0.003, "d": 0.16, "s": 0, "dCurve": 4 }
+    }
+  },
+  "tracks": [
+    {
+      "name": "thud",
+      "sends": { "room": -18 },
+      "voices": [{ "instrument": "thud", "at": 0, "velocity": 0.9 }]
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 0.6,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 80, "q": 0.7 }] }
+}

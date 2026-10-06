@@ -51,21 +51,20 @@ export function deepMerge(base, over) {
   return out;
 }
 
-/** Resolve `extends` chains against the patch library (and the recipe's own instruments). */
-export function resolvePatch(spec, patches, local = {}, depth = 0) {
+/** Resolve an `extends` chain against the shared patch library. */
+export function resolvePatch(spec, patches, depth = 0) {
   if (!spec || !spec.extends) return spec;
   if (depth > 8) throw new Error('Patch inheritance too deep');
-  const parentName = spec.extends;
-  const parent = local[parentName] ?? patches[parentName];
-  if (!parent) throw new Error(`Unknown patch "${parentName}"`);
-  return deepMerge(resolvePatch(parent, patches, local, depth + 1), without(spec, 'extends'));
+  const parent = patches[spec.extends];
+  if (!parent) throw new Error(`Unknown patch "${spec.extends}"`);
+  return deepMerge(resolvePatch(parent, patches, depth + 1), without(spec, 'extends'));
 }
 
-/** Recipe with every instrument and voice patch resolved: the complete description of the sound. */
+/** Recipe with every instrument patch resolved: the complete description of the sound. */
 export function resolveRecipe(recipe, patches) {
   const instruments = {};
   for (const [name, spec] of Object.entries(recipe.instruments || {})) {
-    instruments[name] = resolvePatch(spec, patches, recipe.instruments);
+    instruments[name] = resolvePatch(spec, patches);
   }
   return { ...recipe, instruments };
 }
@@ -411,16 +410,17 @@ export function renderRecipe(rawRecipe, patches) {
   dcBlock(master, fsOut, 12, circular);
 
   // Loudness normalisation with a soft limiter and a true-peak ceiling. The limiter may shave at
-  // most `maxLimitDb` off the loudest peak; quieter-than-target results are reported, not forced.
+  // most `maxLimitDb` off the loudest peak (one-shots: brief attack transients; loops: almost
+  // nothing); quieter-than-target results are reported, not forced.
   const ceiling = recipe.ceilingDbtp ?? -1;
   const limiterOpts = {
     ceilingDb: ceiling - 0.6,
     kneeDb: 2,
-    lookaheadMs: 1.5,
-    releaseMs: 60,
+    lookaheadMs: isMusic ? 3 : 2,
+    releaseMs: isMusic ? 120 : 30,
     ...(recipe.master?.limiter || {}),
   };
-  const maxLimitDb = recipe.master?.maxLimitDb ?? 4;
+  const maxLimitDb = recipe.master?.maxLimitDb ?? (isMusic ? 2 : 6);
   let rawPeak = 0;
   for (let i = 0; i < lengthOut; i++)
     rawPeak = Math.max(rawPeak, master[i] < 0 ? -master[i] : master[i]);

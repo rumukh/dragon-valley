@@ -1,0 +1,169 @@
+{
+  "$comment": "Source for assets/audio/manifest.json. The build merges this with the measured sounds. Event names follow docs/plan.md section 3.3; S1's domain contract finalises them and S3 owns the real mapping, so everything here is advisory.",
+  "packId": "dragon-valley-audio",
+  "sampleRate": 22050,
+  "advisory": "Suggested mapping only. Domain events follow docs/plan.md section 3.3 (final names come from the domain contract); presentation cues are shell moments that are not domain events. S3 owns the actual mapping.",
+  "buses": {
+    "effects": {
+      "defaultVolume": 1,
+      "note": "Every effect is mastered to its loudness tier, so play effects at bus volume 1.0 by default. playEffect has no per-call gain, so the mix is baked into the files."
+    },
+    "music": {
+      "defaultVolume": 1,
+      "note": "Loops are mastered 8 to 11 LU under the feedback tier (practice is quietest), so music already sits under effects at equal bus volumes. Parent settings scale down from 1.0."
+    }
+  },
+  "loudnessTargets": {
+    "feedback": {
+      "target": -15,
+      "measure": "momentary-max",
+      "use": "Answer chimes, coins, stars, stickers, unlocks, panes, gifts, fanfares"
+    },
+    "character": {
+      "target": -16,
+      "measure": "momentary-max",
+      "use": "Dragon and boss voices, eating, eggs"
+    },
+    "soft": {
+      "target": -18,
+      "measure": "momentary-max",
+      "use": "Miss, blocked and sleepy sounds: always gentle, never punishing"
+    },
+    "ui": {
+      "target": -21,
+      "measure": "momentary-max",
+      "use": "Taps, keypad and screen transitions: frequent, so quiet"
+    },
+    "music": {
+      "target": -23,
+      "measure": "integrated",
+      "use": "Valley, boss and victory loops"
+    },
+    "musicCalm": {
+      "target": -26,
+      "measure": "integrated",
+      "use": "Practice loop: unobtrusive while the child thinks"
+    }
+  },
+  "voices": {
+    "maxVoices": 16,
+    "reservedForMusic": 2,
+    "note": "createNarration allows 16 active voices by default; a crossfade holds 2 music voices. Keep effects within about 12 and throttle bursts: a dropped effect rejects with a 'limit' error, so catch it and carry on.",
+    "throttle": {
+      "coin": { "minIntervalMs": 70, "maxConcurrent": 3, "note": "For 5 or more coins play coin-shower once instead of many coins." },
+      "chime-1": { "minIntervalMs": 120, "maxConcurrent": 2 },
+      "keypad-tap": { "minIntervalMs": 35, "maxConcurrent": 2 },
+      "ui-tap": { "minIntervalMs": 35, "maxConcurrent": 2 },
+      "chomp": { "minIntervalMs": 250, "maxConcurrent": 1 },
+      "pane-light": { "minIntervalMs": 150, "maxConcurrent": 3 },
+      "sparkle-family": {
+        "minIntervalMs": 200,
+        "maxConcurrent": 2,
+        "note": "map-unlock, sticker, star-n, gift-open: do not stack more than two"
+      }
+    }
+  },
+  "events": {
+    "answer.correct": {
+      "kind": "domain",
+      "sounds": ["chime-1", "chime-2", "chime-3", "chime-4", "chime-5"],
+      "select": "streak",
+      "note": "Play chime-n for the n-th correct answer in a row, holding at chime-5; any miss restarts at chime-1. The notes climb a C major pentatonic ladder, so overlapping tails always agree."
+    },
+    "answer.incorrect": {
+      "kind": "domain",
+      "sounds": ["miss"],
+      "note": "A soft, curious 'hmm?' (never a buzzer), with the orange '?' and 'Almost! Let's look...'."
+    },
+    "item.promoted": { "kind": "domain", "sounds": [], "note": "Silent: it lands on the same answer as the chime." },
+    "reask.scheduled": { "kind": "domain", "sounds": [], "note": "Silent by design." },
+    "session.started": { "kind": "domain", "sounds": [], "note": "Music state changes instead." },
+    "round.completed": { "kind": "domain", "sounds": [], "note": "Silent; level.completed carries the celebration." },
+    "level.completed": {
+      "kind": "domain",
+      "sounds": ["level-complete", "star-1", "star-2", "star-3"],
+      "select": "sequence",
+      "note": "Play level-complete, then star-1, star-2, star-3 for each star earned, about 0.4 s apart as each star appears."
+    },
+    "region.unlocked": { "kind": "domain", "sounds": ["map-unlock"] },
+    "boss.defeated": { "kind": "domain", "sounds": ["boss-won"] },
+    "dragon.hatched": {
+      "kind": "domain",
+      "sounds": ["egg-wobble", "egg-crack", "hatch-fanfare"],
+      "select": "sequence",
+      "note": "Wobble while the egg rocks, crack as the shell breaks, then the fanfare as the hatchling appears."
+    },
+    "dragon.grew": {
+      "kind": "domain",
+      "sounds": ["map-unlock", "dragon-chirp"],
+      "select": "sequence",
+      "note": "Magic sparkle during the growth animation, then a happy chirp."
+    },
+    "dragon.crowned": {
+      "kind": "domain",
+      "sounds": ["hatch-fanfare"],
+      "note": "The biggest fanfare, reused for crowning."
+    },
+    "pane.lit": {
+      "kind": "domain",
+      "sounds": ["pane-light"],
+      "note": "Several panes lighting at once: stagger them by 150 ms or more, at most 3 overlapping."
+    },
+    "coins.earned": {
+      "kind": "domain",
+      "sounds": ["coin", "coin-shower"],
+      "select": "amount",
+      "note": "coin for 1 to 4 coins, coin-shower for 5 or more (one sound, not many coins)."
+    },
+    "item.purchased": { "kind": "domain", "sounds": ["purchase"] },
+    "sticker.earned": { "kind": "domain", "sounds": ["sticker"] },
+    "quest.completed": { "kind": "domain", "sounds": ["chime-5"] },
+    "gift.opened": { "kind": "domain", "sounds": ["gift-open"] },
+    "finale.completed": {
+      "kind": "domain",
+      "sounds": ["hatch-fanfare"],
+      "note": "Then switch the music state to finale."
+    },
+    "ui.tap": { "kind": "presentation", "sounds": ["ui-tap"], "note": "Buttons, choices, cards." },
+    "ui.keypad": { "kind": "presentation", "sounds": ["keypad-tap"], "note": "On-screen keypad and typed digits." },
+    "ui.navigate": { "kind": "presentation", "sounds": ["swoosh"], "note": "Screen or page transitions." },
+    "ui.blocked": {
+      "kind": "presentation",
+      "sounds": ["blocked"],
+      "note": "A locked level, an unaffordable item or an invalid move."
+    },
+    "fx.fruitEaten": {
+      "kind": "presentation",
+      "sounds": ["chomp"],
+      "note": "Feeding Time: when the fruit reaches the dragon after a correct answer, about 0.3 s after the chime."
+    },
+    "fx.dragonHappy": { "kind": "presentation", "sounds": ["dragon-chirp"] },
+    "fx.dragonSleepy": {
+      "kind": "presentation",
+      "sounds": ["dragon-yawn"],
+      "note": "After the daily goal, when the dragons get sleepy."
+    },
+    "fx.bossLaugh": {
+      "kind": "presentation",
+      "sounds": ["boss-laugh"],
+      "note": "Boss Challenge: when a correct answer fills the boss's laughing or happy meter."
+    }
+  },
+  "music": {
+    "states": {
+      "title": "valley",
+      "hub": "valley",
+      "map": "valley",
+      "market": "valley",
+      "album": "valley",
+      "round": "practice",
+      "placement": "practice",
+      "arena": "boss",
+      "boss": "boss",
+      "results": "victory",
+      "finale": "victory"
+    },
+    "crossfadeSeconds": 1.2,
+    "note": "setAtmosphere({ packId, asset, fadeSeconds: 1.2 }) on state change; the same state is idempotent. Pass null for explicit silence (for example while read-aloud speaks, or if the parent turns music off)."
+  }
+}

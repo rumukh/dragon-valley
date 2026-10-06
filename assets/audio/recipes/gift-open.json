@@ -1,0 +1,85 @@
+{
+  "id": "gift-open",
+  "title": "Gift chest opens",
+  "description": "A soft lid pop, a rising harp swirl and a celesta C major \"ta-da\" with sparkles.",
+  "category": "feedback",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 2301,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 1.5,
+  "loudness": { "measure": "momentary", "target": -15 },
+  "instruments": {
+    "lid": {
+      "extends": "kickSoft",
+      "pitch": "G2",
+      "amp": { "a": 0.0015, "d": 0.1, "s": 0, "r": 0.02, "dCurve": 4 }
+    },
+    "pop": { "extends": "snap", "pitch": "C5" },
+    "harp": { "extends": "harp" },
+    "bell": { "extends": "celesta" },
+    "glock": { "extends": "glock" },
+    "sparkle": { "extends": "sparkle" }
+  },
+  "tracks": [
+    {
+      "name": "lid",
+      "db": -4,
+      "voices": [
+        { "instrument": "lid", "at": 0, "velocity": 0.8 },
+        { "instrument": "pop", "at": 0, "velocity": 0.7 }
+      ]
+    },
+    {
+      "name": "swirl",
+      "sends": { "room": -9 },
+      "voices": [
+        { "instrument": "harp", "at": 0.08, "pitch": "G5", "velocity": 0.5 },
+        { "instrument": "harp", "at": 0.13, "pitch": "A5", "velocity": 0.56 },
+        { "instrument": "harp", "at": 0.18, "pitch": "C6", "velocity": 0.62 },
+        { "instrument": "harp", "at": 0.23000000000000004, "pitch": "D6", "velocity": 0.68 },
+        { "instrument": "harp", "at": 0.28, "pitch": "E6", "velocity": 0.74 },
+        { "instrument": "harp", "at": 0.33, "pitch": "G6", "velocity": 0.8 }
+      ]
+    },
+    {
+      "name": "tada",
+      "sends": { "room": -10 },
+      "voices": [
+        { "instrument": "bell", "at": 0.42, "pitch": "C6", "velocity": 0.9 },
+        { "instrument": "bell", "at": 0.42, "pitch": "E6", "velocity": 0.9 },
+        { "instrument": "bell", "at": 0.42, "pitch": "G6", "velocity": 0.9 },
+        { "instrument": "glock", "at": 0.45, "pitch": "C7", "velocity": 0.75 }
+      ]
+    },
+    {
+      "name": "sparkle",
+      "db": -10,
+      "sends": { "room": -5 },
+      "scatter": {
+        "instrument": "sparkle",
+        "count": 8,
+        "start": 0.45,
+        "end": 1.2,
+        "distribution": "even",
+        "jitter": 0.7,
+        "pitches": ["C7", "E7", "G7", "A7"],
+        "db": [-8, 0],
+        "detune": 5
+      }
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 1.5,
+      "size": 0.75,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

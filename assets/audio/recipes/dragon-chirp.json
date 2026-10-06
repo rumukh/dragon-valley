@@ -1,0 +1,52 @@
+{
+  "id": "dragon-chirp",
+  "title": "Happy dragon chirp",
+  "description": "Two quick rising baby-dragon chirps (\"bi-deep!\"), the second with a happy flutter.",
+  "category": "character",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 2201,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 0.45,
+  "loudness": { "measure": "momentary", "target": -16 },
+  "instruments": { "voice": { "extends": "voiceCute" }},
+  "tracks": [
+    {
+      "name": "chirp",
+      "sends": { "room": -16 },
+      "voices": [
+        {
+          "instrument": "voice",
+          "at": 0,
+          "gate": 0.08,
+          "pitch": "F5",
+          "velocity": 0.85,
+          "pitchEnv": [[0, -4], [0.07, 5, 2]]
+        },
+        {
+          "instrument": "voice",
+          "at": 0.13,
+          "gate": 0.15,
+          "pitch": "A5",
+          "velocity": 0.95,
+          "pitchEnv": [[0, -5], [0.09, 6, 2], [0.16, 4]],
+          "vibrato": { "rate": 11, "depth": 0.4, "delay": 0.06, "fade": 0.05 },
+          "formant": { "vowels": [[0, "i"], [0.12, "e"]], "size": 1.5, "q": 6, "mix": 0.85, "db": 4 }
+        }
+      ]
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 0.7,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

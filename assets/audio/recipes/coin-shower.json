@@ -1,0 +1,45 @@
+{
+  "id": "coin-shower",
+  "title": "Coin shower",
+  "description": "A cascade of 16 coin pings on the C major pentatonic, dense at first and thinning out. One sound for many coins.",
+  "category": "feedback",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 1402,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 1.5,
+  "loudness": { "measure": "momentary", "target": -15 },
+  "instruments": { "ping": { "extends": "coinPing" }},
+  "tracks": [
+    {
+      "name": "shower",
+      "sends": { "room": -14 },
+      "scatter": {
+        "instrument": "ping",
+        "count": 16,
+        "start": 0,
+        "end": 1.05,
+        "distribution": "decelerate",
+        "shape": 1.6,
+        "jitter": 0.6,
+        "pitches": ["C6", "D6", "E6", "G6", "A6", "C7"],
+        "db": [-9, 0],
+        "velocity": [0.6, 1],
+        "detune": 7
+      }
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 1.1,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}
