@@ -189,6 +189,7 @@
   "hub.adventure.gift": "Open your gift!",
   "hub.adventure.story": "Hear the story",
   "hub.adventure.map": "Explore the valley",
+  "hub.adventure.minigame": "Play again: {game}",
   "hub.goal": "Today's goal",
   "hub.goalValue": "{value} of {max} right answers",
   "hub.week": "This week",
