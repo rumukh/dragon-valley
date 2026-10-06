@@ -186,6 +186,71 @@ describe('content validation reports authoring mistakes', () => {
     expectDiagnostic(pack, 'missing-reference', 'never-claimed');
   });
 
+  describe('word templates', () => {
+    /** A pack with a thing list and a template whose `fruit` agrees with `count`. */
+    const withForm = (): Pack => {
+      const pack = fresh();
+      pack.data.wordLists.push({ id: 'test-fruit', kind: 'thing', entries: ['word.name.anna'] });
+      pack.data.wordTemplates.push({
+        id: 'test.form',
+        family: 'equal-groups',
+        textKey: 'word.equal-groups.nests',
+        vars: {
+          count: { kind: 'int', min: 1, max: 5 },
+          each: { kind: 'int', min: 2, max: 5 },
+          total: {
+            kind: 'calc',
+            expr: {
+              kind: 'op',
+              op: 'mul',
+              left: { kind: 'var', name: 'count' },
+              right: { kind: 'var', name: 'each' },
+            },
+          },
+          fruits: { kind: 'word', list: 'test-fruit' },
+          fruit: { kind: 'form', word: 'fruits', count: 'count' },
+          name: { kind: 'word', list: 'names' },
+        },
+        model: { kind: 'value', expr: { kind: 'var', name: 'total' } },
+        operation: 'mul',
+      });
+      return pack;
+    };
+    const template = (pack: Pack) => pack.data.wordTemplates.find((t) => t.id === 'test.form')!;
+
+    it('accepts a form var that makes a thing agree with a count', () => {
+      expect(diagnostics(withForm())).toEqual([]);
+    });
+
+    it('rejects a form var over a name list or a missing word var', () => {
+      const names = withForm();
+      template(names).vars['fruit'] = { kind: 'form', word: 'name', count: 'count' };
+      expectDiagnostic(names, 'invalid-content', 'test.form');
+
+      const missing = withForm();
+      template(missing).vars['fruit'] = { kind: 'form', word: 'nothing', count: 'count' };
+      expectDiagnostic(missing, 'invalid-content', 'test.form');
+    });
+
+    it('rejects a form var whose count is not a number', () => {
+      const pack = withForm();
+      template(pack).vars['fruit'] = { kind: 'form', word: 'fruits', count: 'name' };
+      expectDiagnostic(pack, 'invalid-content', 'test.form');
+    });
+
+    it('rejects a word var used as a number', () => {
+      const pack = withForm();
+      template(pack).model = { kind: 'value', expr: { kind: 'var', name: 'name' } };
+      expectDiagnostic(pack, 'invalid-content', 'test.form');
+    });
+
+    it('rejects calculated vars that depend on each other in a cycle', () => {
+      const pack = withForm();
+      template(pack).vars['count'] = { kind: 'calc', expr: { kind: 'var', name: 'total' } };
+      expectDiagnostic(pack, 'invalid-content', 'test.form');
+    });
+  });
+
   it('rejects an unknown field (schemas are strict)', () => {
     const pack = fresh() as unknown as { data: Record<string, unknown> };
     pack.data['extra'] = true;

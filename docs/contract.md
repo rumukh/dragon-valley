@@ -202,7 +202,7 @@ by `contentRegistration` (`parseContentJson(text, contentRegistration, file)`).
 | `stickers`      | `id`, `nameKey`, `page` (region), `criteria`, `icon` (art ID), `color` (`#rrggbb`), `frame` (art ID)                                                                                                                               |
 | `quests`        | `id`, `titleKey`, `goal`, `target`, `coins`, `weight`, `unlock`                                                                                                                                                                    |
 | `wordLists`     | `id`, `kind: name/thing`, `entries` (catalog keys; things have `.one` / `.other` plural forms)                                                                                                                                     |
-| `wordTemplates` | `id`, `family`, `textKey` (with `{placeholders}`), `vars` (`int` / `word` / `calc`), `model` (`value` or `divrem` over template expressions), `operation`                                                                          |
+| `wordTemplates` | `id`, `family`, `textKey` (with `{placeholders}`), `vars` (`int` / `word` / `calc` / `form`), `model` (`value` or `divrem` over template expressions), `operation`                                                                 |
 | `placement`     | `steps: { skill, problems, passAccuracy, levels }[]`, `minProblems`, `maxProblems`, `stopAfterMisses`                                                                                                                              |
 | `story`         | `beats: { id, trigger, skippable, graph }[]` (each graph a `@aegis/narrative` `NarrativeGraph`, validated by `validateNarrative`) and `rewards: { reward, grant }[]`                                                               |
 | `balance`       | every tunable number (§7.3)                                                                                                                                                                                                        |
@@ -216,14 +216,23 @@ by `contentRegistration` (`parseContentJson(text, contentRegistration, file)`).
 `level-complete {level}`, `boss-defeated {boss}`, `finale`. **Grants**: `egg {dragon}`,
 `coins {amount}`, `cosmetic {item}`.
 
+**Word-template variables**: `int {min, max}` (a whole number drawn from `problems`),
+`word {list}` (an entry drawn from `words`: a name's catalog key, or a thing's plural form
+`<key>.other`), `calc {expr}` (computed from numeric variables) and `form {word, count}` (the thing
+drawn for `word` in the form that agrees with the number in `count`: `<key>.one` exactly when it
+is 1, else `<key>.other`). A generated `WordProblem.vars` therefore holds numbers and catalog keys
+only; the shell shows numbers as digits and looks every string up in the catalog.
+
 ### 7.2 Validation (`validateContentData`)
 
 Beyond the strict schemas (unknown fields are rejected), a pack is valid only if:
 
 - every ID is unique in its collection and every reference resolves (diagnostics name the record
   and field: `duplicate-id`, `missing-reference`);
-- every skill can produce at least one item (`empty-skill`); word templates use only defined
-  variables, and only `leftover` templates use a remainder model;
+- every skill can produce at least one item (`empty-skill`); word templates use only defined,
+  numeric variables in expressions, `form` variables name a thing-list `word` variable and a
+  numeric count, `calc` variables do not depend on each other in a cycle, and only `leftover`
+  templates use a remainder model;
 - activity options belong to their kind; minigames use `input: 'auto'`; Compare Stones is never
   keypad; a boss level ends with its boss activity and lessons have none;
 - map order is unique per region and per level; the region boss has a boss level;
