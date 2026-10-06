@@ -368,18 +368,28 @@
 
 /* ---- Choice tiles ----------------------------------------------------------------------- */
 
+/* Tiles share a row while their labels fit and wrap onto more rows when they do not (big text,
+   long numbers): a tile is never narrower than its label, so "18" never splits. */
 .dv-tiles {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(4.2em, 100%), 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: clamp(10px, 1.8vw, 20px);
   width: min(100%, 26em);
   margin-inline: auto;
 }
 
+.dv-tiles > .dv-tile {
+  flex: 1 1 4.2em;
+}
+
 /* Four choices sit two by two, so none is left alone on a row. */
 .dv-tiles:has(> :nth-child(4):last-child) {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   width: min(100%, 18em);
+}
+
+.dv-tiles:has(> :nth-child(4):last-child) > .dv-tile {
+  flex-basis: 40%;
 }
 
 .dv-tile {
@@ -697,6 +707,8 @@
 }
 
 .dv-select {
+  flex: 1 1 12em;
+  min-width: 0;
   min-height: var(--dv-target);
   max-width: 100%;
   padding: 0.2em 0.5em;
@@ -709,14 +721,17 @@
 
 .dv-meter {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.25em;
   width: min(100%, 16em);
 }
 
+/* The name and the value share a line while they fit, and wrap with big text. */
 .dv-meter__label {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.5em;
+  gap: 0 0.5em;
   font-weight: 700;
   font-size: 0.9rem;
 }

@@ -422,6 +422,7 @@
 .dv-hub__layout {
   display: grid;
   grid-template-areas: 'nest' 'today' 'week' 'places';
+  grid-template-columns: minmax(0, 1fr);
   align-content: center;
   justify-items: center;
   gap: clamp(10px, 1.8vh, 24px) clamp(12px, 2.4vw, 32px);
@@ -526,6 +527,7 @@
 
 .dv-hub__today {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   gap: 0.7em;
   text-align: center;
@@ -555,9 +557,11 @@
   gap: 0.6em;
 }
 
-/* Days played this week: a filled disc for a played day, an empty ring otherwise. */
+/* Days played this week: a filled disc for a played day, an empty ring otherwise. With big
+   text on a narrow screen the days wrap onto a second line. */
 .dv-week {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 0.3em;
   width: 100%;
@@ -963,6 +967,7 @@
 
 .dv-minigame__card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   gap: 1rem;
   width: min(100%, 56em);
@@ -1050,12 +1055,17 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 1rem;
+  max-width: 100%;
 }
 
+/* A stepper's name takes its own line when its buttons would not fit beside it. */
 .dv-stepper {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.5em;
+  max-width: 100%;
   padding: 0.4em 0.6em;
   border-radius: 1em;
   background: var(--dv-paper);
@@ -1075,6 +1085,7 @@
 /* Egg Grid: the field of nest spots beside its controls on a tablet, above them on a phone. */
 .dv-egg-board {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   align-items: center;
   gap: clamp(10px, 2vh, 20px) clamp(14px, 2.6vw, 32px);
@@ -1113,8 +1124,10 @@
 
 .dv-egg-board__panel {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: center;
   gap: clamp(8px, 1.6vh, 16px);
+  width: 100%;
   min-width: 0;
 }
 
@@ -1193,7 +1206,7 @@
 }
 
 .dv-nest__goal {
-  max-width: none;
+  max-width: 100%;
   padding: 0.3em 0.9em;
   border-radius: 1em;
   font-size: 1.15rem;
@@ -1969,14 +1982,19 @@
   justify-content: flex-start;
 }
 
+/* One column that never grows wider than the screen: a long voice name or a row of buttons
+   wraps or shrinks instead of pushing the page sideways. */
 .dv-parent__panel {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 
 .dv-parent__section {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.9em;
+  min-width: 0;
 }
 
 .dv-parent__section > .dv-button,
@@ -2018,7 +2036,9 @@
 
 .dv-parent__rules {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.9em;
+  min-width: 0;
   padding-top: 0.8em;
   border-top: 0.1em solid var(--dv-line);
 }
