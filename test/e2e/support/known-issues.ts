@@ -75,7 +75,7 @@ export const DEFECTS = {
     owner: 'S3',
     severity: 'major',
     title:
-      "The router gives every screen's focus target tabindex=-1 (router.ts, mount: focus), so the editor's name field and the error screen's button drop out of the Tab order: Tab and Shift+Tab never return to them, and their focus ring is hidden.",
+      "The router gives every screen's focus target tabindex=-1 (router.ts, mount: focus), so the editor's name field and the error screen's button drop out of the Tab order (Tab and Shift+Tab never return to them) and lose the focus ring ([tabindex='-1']:focus): after a name problem the name field is focused with nothing to show it but the caret.",
   },
   'DV-QA-09': {
     owner: 'S3',
@@ -107,6 +107,13 @@ export const DEFECTS = {
     severity: 'major',
     title:
       "The results card's celebrations scroll inside the card, but the scrolling list cannot take keyboard focus (axe scrollable-region-focusable, serious): on a tablet or phone a keyboard user cannot reach the eggs and stickers below its edge.",
+  },
+  'DV-QA-15': {
+    owner: 'S3',
+    severity: 'minor',
+    engines: ['webkit'],
+    title:
+      "In WebKit (Safari) the keeper pictures lose their focus ring once an arrow key moves the choice: WebKit does not match :focus-visible on a radio focused by an arrow key (a plain page does the same), and the ring is drawn only for :focus-visible. The moving 'chosen' ring still marks the picture.",
   },
 } as const satisfies Record<string, Defect>;
 

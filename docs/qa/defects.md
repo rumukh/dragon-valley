@@ -11,7 +11,7 @@ findings.
 Severity: **blocker** stops a release; **major** breaks a promised behaviour for some children or
 devices; **minor** is a rough edge. Engines: all three unless stated. Found against `main` at
 `5848964` (S3 phase 2, the Region 1 vertical slice); DV-QA-13 and DV-QA-06's phone egg labels on
-CI at `373a5d2`; DV-QA-14 at `5a9c633` (#17).
+CI at `373a5d2`; DV-QA-14 at `5a9c633` (#17); DV-QA-15 at `061e433`.
 
 | ID       | Severity | Owner | Summary                                                                     |
 | -------- | -------- | ----- | --------------------------------------------------------------------------- |
@@ -20,12 +20,13 @@ CI at `373a5d2`; DV-QA-14 at `5a9c633` (#17).
 | DV-QA-04 | minor    | S3    | Retry in the "Not saved" pill is 40 px tall                                 |
 | DV-QA-05 | major    | S3    | Grown-ups' Settings scroll sideways on a phone                              |
 | DV-QA-06 | major    | S3    | Words and numbers break inside (200 % tiles "1" over "8"; phone egg labels) |
-| DV-QA-08 | major    | S3    | Screen focus targets drop out of the Tab order (`tabindex=-1`)              |
+| DV-QA-08 | major    | S3    | Screen focus targets drop out of the Tab order and lose their ring          |
 | DV-QA-09 | major    | S3    | After a click on Read aloud, Enter re-reads instead of sending the answer   |
 | DV-QA-10 | major    | S3    | 200 % text on a phone: the hub and Egg Grid scroll sideways                 |
 | DV-QA-11 | minor    | S3    | Map and road hotspots are cut off by the picture frame                      |
 | DV-QA-13 | minor    | S3    | WebKit: a keeper's hub at 200 % text first shows at normal size             |
 | DV-QA-14 | major    | S3    | The results' scrolling celebrations cannot be reached by keyboard           |
+| DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys      |
 
 DV-QA-03 (Enter ignored when a round opened on a keypad problem) and DV-QA-07 (a missed tile's
 badge pushing the round sideways at 200 %) were found against the phase-1 shell and no longer
@@ -107,8 +108,26 @@ egg") was fixed by #17. Their tests stay as regression checks.
 - **Actual**: `src/app/router/router.ts` (`mount`, `focus`) gives the screen's focus target
   `tabindex="-1"` when it has none (right for headings), which takes inputs and buttons out of
   sequential navigation for good, and `[tabindex='-1']:focus` in `base.css` hides their ring.
-- **Evidence**: `test/e2e/keyboard.spec.ts` › "a keyboard alone makes a keeper…" and "the error
-  screen offers its one button to the keyboard".
+- **What a keyboard-only child can still do** (checked on `061e433`, the live site, in all three
+  engines): the name **can** be typed. The field has focus when the editor opens, and every name
+  problem ("Please type a name.", too long, odd signs, taken) puts focus back into it; Enter in
+  it sends the form. What they cannot do is come back to it: once they Tab on to the pictures to
+  choose one, a typo can be fixed only by sending the form (a valid name is saved as typed and
+  renamed later, where the field again has focus on arrival) or by leaving the editor. The same
+  goes for renaming.
+- **The ring, measured by pixels**: the game's ring (outline and halo) never shows on the name
+  field. On arrival only its border turns violet. After a name problem the border is the error
+  orange whether the field is focused or not (`.dv-input[aria-invalid='true']` comes after
+  `.dv-input:focus-visible`), so the focused field shows nothing but the caret: 0 pixels change
+  around it when focus leaves.
+- **Likely fix** (one line): add `tabindex="-1"` only to targets that cannot take focus by
+  themselves, e.g. `if (target && target.tabIndex < 0 && !target.hasAttribute('tabindex'))`
+  (inputs and buttons have `tabIndex` 0, headings -1). That restores both the Tab order and the
+  ring.
+- **Evidence**: `test/e2e/keyboard.spec.ts` › "a keyboard alone makes a keeper…", "the keeper
+  editor by keyboard alone › the name can always be typed…" (arrival, Shift+Tab, both problems,
+  the ring by pixels before and after a problem) and "the error screen offers its one button to
+  the keyboard".
 
 ## DV-QA-09 (major, S3): Enter after a click on Read aloud re-reads the problem
 
@@ -188,6 +207,25 @@ egg") was fixed by #17. Their tests stay as regression checks.
 - **Evidence**: `test/e2e/screens.spec.ts` stop `11-round-results` (tablet and phone, all three
   engines); screenshot `out/qa-screens/<engine>/tablet/11-round-results.png`.
 
+## DV-QA-15 (minor, S3; WebKit): the keeper pictures lose their focus ring under the arrow keys
+
+- **Repro** (Safari, or Playwright's WebKit 26.6): in the keeper editor, Tab to the pictures (the
+  focused picture shows its dark ring), then press an arrow key.
+- **Expected**: the picture the arrow moved to shows the focus ring, as in Chromium and Firefox.
+- **Actual**: no focus ring; only the violet "chosen" ring and dot, which move with the choice.
+  WebKit does not match `:focus-visible` on a radio that an arrow key focused, and the pictures
+  draw their ring only for it (`.dv-avatar-choice:has(input:focus-visible)`, `screens.css`). It is
+  WebKit's own behaviour: a plain page with three radios does the same (focus-visible true after
+  Tab, false after each arrow that moves, true again after a key press that does not move). The
+  choice is still visible and the next Tab or Shift+Tab brings the ring back, hence minor.
+- **Likely fix**: show the ring while the keyboard is in use, not only for `:focus-visible`: for
+  example mark the picker on an arrow keydown and unmark it on pointerdown, and style
+  `.dv-avatar-picker[data-keys] .dv-avatar-choice:has(input:focus)`. (The pictures are the only
+  native radio group in the game; the grown-ups' choices are buttons.)
+- **Evidence**: `test/e2e/keyboard.spec.ts` › "the keeper editor by keyboard alone › the pictures
+  are one named radio group…" (the ring by pixels after the arrows; strict in Chromium and
+  Firefox).
+
 ## Observations for design review (not defects)
 
 - A new keeper's placement results also award "Dressed Up" (criterion: owns one cosmetic) before
@@ -203,3 +241,13 @@ egg") was fixed by #17. Their tests stay as regression checks.
   boot status sit outside landmarks) and `page-has-heading-one` on the startup failure screen.
 - Remainder mode (`4 r 3` / `4 R 3`) cannot be reached in play until Region 6 content lands; the
   keypad logic is unit-tested and the e2e parity check covers number mode.
+- The keeper pictures are a sound radio group for keyboards and screen readers: the group is named
+  "Pick your keeper", each radio by its description ("A short bob and a star pin"), the checked
+  state is exposed, Tab enters at the chosen picture, arrows and Space choose, and the choice is
+  the keeper's picture afterwards (Chromium and Firefox wrap at the ends, WebKit stops: native).
+  Each radio is a 1 px transparent input in the middle of its picture, so a click or tap anywhere
+  else lands on the label, which checks it (fine). A screen reader exploring by touch lands on the
+  label too, not the radio: Chromium's accessibility hit test at 20 % / 30 % of a picture finds a
+  nameless `LabelText`; only the exact centre finds the radio. A double tap on the label still
+  checks it, but VoiceOver and TalkBack were not tried; stretching the transparent input over the
+  whole picture (inset 0, above the art) would make every touch land on the radio itself.
