@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "description": "Provenance of every background. The committed SVG versions are original vector art generated deterministically from TypeScript; painted versions are pending (the image-generation service was not available when the SVGs were made).",
+  "backgrounds": [
+    {
+      "id": "valley-map",
+      "file": "assets/backgrounds/valley-map.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (map.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/valley-map.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "sunny-meadow",
+      "file": "assets/backgrounds/sunny-meadow.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-a.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/sunny-meadow.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "whispering-woods",
+      "file": "assets/backgrounds/whispering-woods.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-a.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/whispering-woods.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "fire-mountain",
+      "file": "assets/backgrounds/fire-mountain.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-a.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/fire-mountain.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "crystal-caves",
+      "file": "assets/backgrounds/crystal-caves.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-a.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/crystal-caves.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "sharing-lake",
+      "file": "assets/backgrounds/sharing-lake.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-a.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/sharing-lake.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "leftover-lagoon",
+      "file": "assets/backgrounds/leftover-lagoon.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-b.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/leftover-lagoon.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "giants-peaks",
+      "file": "assets/backgrounds/giants-peaks.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-b.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/giants-peaks.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "riddle-ruins",
+      "file": "assets/backgrounds/riddle-ruins.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-b.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/riddle-ruins.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "dragon-castle",
+      "file": "assets/backgrounds/dragon-castle.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-b.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/dragon-castle.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "castle-hall",
+      "file": "assets/backgrounds/castle-hall.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (S4)",
+      "generator": "src/app/art/backgrounds (scenes-b.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/castle-hall.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    }
+  ]
+}
