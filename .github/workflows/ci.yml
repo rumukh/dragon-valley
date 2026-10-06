@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows is the development host; Ubuntu proves the rules, digests and golden hashes are
+        # byte-identical across operating systems.
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    # A guard against a hang, not a performance assertion (a healthy run takes a few minutes).
+    timeout-minutes: 30
+
+    # The committed .npmrc pins the corporate npm proxy, which is correct on the development
+    # machine and unreachable from a hosted runner. An environment variable outranks a project
+    # .npmrc, so this selects the public registry for every npm invocation in the job, including
+    # npm started from inside `npm run verify`. The other half: package-lock.json keeps canonical
+    # https://registry.npmjs.org/ URLs (npm ci fetches the lockfile's own URLs).
+    # test/tooling/lockfile-registry.test.ts enforces both; `npm run lockfile:fix` repairs it.
+    env:
+      NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # The one gate, exactly as run locally: build, typecheck (rules, app, worker, tests), lint,
+      # format check, content validation, unit/trace/tooling tests and the lockfile check.
+      - name: Verify
+        run: npm run verify
+
+      # A second, independent path to red. scripts/verify.mjs records every step it ran; this
+      # step re-reads that record outside npm, so a lost exit code cannot turn a failure green.
+      - name: Audit that every verify step ran and passed
+        if: always()
+        run: node scripts/verify.mjs --audit .verify-report.json
+
+  e2e:
+    name: e2e smoke (chromium, webkit, firefox)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Hosted runners download Playwright's own engines; the development machine uses the system
+      # Edge/Chrome channel instead (see playwright.config.ts).
+      - name: Install browsers
+        run: npx playwright install --with-deps chromium webkit firefox
+
+      - name: End-to-end smoke on three engines
+        run: npx playwright test
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
