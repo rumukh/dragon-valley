@@ -9,23 +9,30 @@ nothing is imported from an engine checkout, and the engine repository is never 
 
 | Field          | Value                                                               |
 | -------------- | ------------------------------------------------------------------- |
-| Engine commit  | `5949a7fa1a34bf66a054220585a0d05699c61d70` (aegis-engine `main`)    |
-| SDK version    | `0.0.0-local.r5949a7fa1a34.d2c83c1814069db10`                       |
-| Source digest  | `2c83c1814069db10a5cd009793fcc36898b06492b1302232005db9294302708d`  |
+| Engine commit  | `0abd61b5a679020bfb66bf4db24888df9e339d4d` (aegis-engine `main`)    |
+| SDK version    | `0.0.0-local.r0abd61b5a679.da726c53afdf74c5f`                       |
+| Source digest  | `a726c53afdf74c5f8752981cc8928ea9922358be313552b2923f1ad8affd614d`  |
 | Packed with    | Node v24.18.0, npm 11.16.0, TypeScript 5.9.3 (Windows)              |
 | Consumer check | `npm run test:consumer` passed (all 12 checks, both reference labs) |
 
 | Tarball (`vendor/aegis/<version>/`)                               | SHA-256                                                            |
 | ----------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `aegis-core-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz`      | `e27f8c31a9c29a24165bfa6c89fafdfc720b19d5c82d730e48f1c98ff01c1faf` |
-| `aegis-runtime-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz`   | `6994cd7fb6181383f594f280f0d02645e1e834ca6962ed89727d342ccb3155e9` |
-| `aegis-narrative-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz` | `82042bb0719fd7191621d15d3d681c6c36e542d97f6be3655c4777122be56efd` |
-| `aegis-browser-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz`   | `755263410d8b794fb06299052be3bf8f4673ae7cafcf36857693f8729fcd6a42` |
+| `aegis-core-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz`      | `16612c186b2371e93ceeb1565953e7b7d9326126d321c8d12b7c5cf2ae69c7ae` |
+| `aegis-runtime-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz`   | `72aac3d1218da81b086c81f57e516d2d61bd6874f6b79c69039effc7ec140384` |
+| `aegis-narrative-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz` | `c9e3165983190533bac07ceee14366b5a2f5daf9d4a3b20fd6588c4fa1630b29` |
+| `aegis-browser-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz`   | `5194c4775178dd4cc587177b91d9026e87e40abda9499077e60e980e20116885` |
 
 `vendor/aegis/<version>/artifacts.json` is the packer's own manifest (tarball names, SHA-256, npm
 integrity, the full source inventory and tool versions). `test/tooling/vendor-sdk.test.ts` checks
 every tarball against both that manifest and the literal pin above, checks that `package.json`,
 `package-lock.json` and `node_modules` all name exactly this set, and fails on any extra file.
+
+### Pin history
+
+| Engine commit | Date       | Why                                                                                                                                                                                       |
+| ------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0abd61b`     | 2026-10-07 | Runtime performance (aegis-engine#7): each content pack is frozen and hashed once instead of on every read and commit. Snapshots and hashes are unchanged; every golden trace stayed put. |
+| `5949a7f`     | 2026-10-06 | First pin.                                                                                                                                                                                |
 
 ## Procedure
 

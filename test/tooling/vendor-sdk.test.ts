@@ -2,10 +2,10 @@
  * The vendored Aegis SDK is exactly the approved, complete tarball set.
  *
  * Provenance of the expected values: PINNED was copied by hand from the `npm run pack:sdk` output
- * at aegis-engine commit 5949a7f (also recorded in vendor/aegis/<version>/artifacts.json and in
+ * at aegis-engine commit 0abd61b (also recorded in vendor/aegis/<version>/artifacts.json and in
  * docs/sdk-update.md). It is a literal on purpose: the tarballs and artifacts.json are compared
  * with each other *and* with this pin, so replacing both consistently with a different SDK still
- * fails here until someone deliberately re-pins (docs/sdk-update.md, step 6).
+ * fails here until someone deliberately re-pins (docs/sdk-update.md, step 4).
  */
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -13,13 +13,13 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const PINNED = {
-  revision: '5949a7fa1a34bf66a054220585a0d05699c61d70',
-  version: '0.0.0-local.r5949a7fa1a34.d2c83c1814069db10',
+  revision: '0abd61b5a679020bfb66bf4db24888df9e339d4d',
+  version: '0.0.0-local.r0abd61b5a679.da726c53afdf74c5f',
   sha256: {
-    '@aegis/core': 'e27f8c31a9c29a24165bfa6c89fafdfc720b19d5c82d730e48f1c98ff01c1faf',
-    '@aegis/runtime': '6994cd7fb6181383f594f280f0d02645e1e834ca6962ed89727d342ccb3155e9',
-    '@aegis/narrative': '82042bb0719fd7191621d15d3d681c6c36e542d97f6be3655c4777122be56efd',
-    '@aegis/browser': '755263410d8b794fb06299052be3bf8f4673ae7cafcf36857693f8729fcd6a42',
+    '@aegis/core': '16612c186b2371e93ceeb1565953e7b7d9326126d321c8d12b7c5cf2ae69c7ae',
+    '@aegis/runtime': '72aac3d1218da81b086c81f57e516d2d61bd6874f6b79c69039effc7ec140384',
+    '@aegis/narrative': 'c9e3165983190533bac07ceee14366b5a2f5daf9d4a3b20fd6588c4fa1630b29',
+    '@aegis/browser': '5194c4775178dd4cc587177b91d9026e87e40abda9499077e60e980e20116885',
   } as Record<string, string>,
 } as const;
 
