@@ -330,9 +330,10 @@
   padding-inline-end: 0.3em;
 }
 
+/* Retry is the one thing the child is told to tap: a full-size target. */
 .dv-save .dv-button {
   font-size: 0.85rem;
-  min-height: calc(var(--dv-target) - 8px);
+  min-height: var(--dv-target);
 }
 
 .dv-save__dots {
