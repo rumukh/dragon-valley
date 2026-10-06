@@ -225,7 +225,11 @@ export function createApp(options: AppOptions): App {
 
   const applyPresentation = (preferences: ChildPreferences | null): void => {
     const chosen = preferences ?? DEFAULT_PREFERENCES;
-    applyPresentationPreferences(document.documentElement, chosen.presentation);
+    const root = document.documentElement;
+    applyPresentationPreferences(root, chosen.presentation);
+    // The SDK sets only the --aegis-text-scale property; WebKit can keep the root's old font
+    // size for a while after that. An attribute change makes every engine restyle it at once.
+    root.dataset['textScale'] = String(chosen.presentation.textScale);
     audio.setVolumes(chosen.presentation.volumes);
   };
 
