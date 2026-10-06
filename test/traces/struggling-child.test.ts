@@ -10,7 +10,7 @@
  *
  * Named checks first; the golden hash and trajectory are change detectors checked last.
  */
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 import type { ContentPack } from '@aegis/runtime';
 import { dragonValleyAdapter } from '../../src/rules/adapter';
 import { DRAGON_STAGES, dayNumber } from '../../src/rules/contract';
@@ -18,9 +18,13 @@ import type { ContentData, GameView } from '../../src/rules/contract';
 import { Player, loadPack, trajectoryDigest } from './support';
 import type { Adapter, Style } from './support';
 
+// Whole sessions are replayed here, one commit at a time with the full content pack: give them
+// room on a busy machine (Vitest's default is 60 s per test).
+vi.setConfig({ testTimeout: 300_000 });
+
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '49e05f3451b924f7';
-const GOLDEN_TRAJECTORY = '97c98832bdf30970';
+const GOLDEN_HASH = 'f39caa4392518e49';
+const GOLDEN_TRAJECTORY = 'bd4a5278176c2324';
 
 const SEED = 'golden-struggling-child';
 const STRUGGLING: Style = {

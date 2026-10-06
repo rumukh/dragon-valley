@@ -14,8 +14,10 @@ import { dragonValleyAdapter } from '../../src/rules/adapter';
 import { contentRegistration } from '../../src/rules/contract';
 import type {
   AnswerValue,
+  CardFace,
   ContentData,
   Expr,
+  ExprPath,
   GameAction,
   GameView,
   MinigameMove,
@@ -98,7 +100,19 @@ export function oracle(problem: Problem, step: 'operation' | 'answer'): AnswerVa
     const [a, b] = [evaluate(problem.left), evaluate(problem.right)];
     return { kind: 'relation', relation: a < b ? 'lt' : a > b ? 'gt' : 'eq' };
   }
-  throw new Error(`no oracle for ${problem.kind}`);
+  if (problem.kind === 'term') {
+    const { sentence, highlight } = problem;
+    const named =
+      highlight === 'remainder'
+        ? 'remainder'
+        : sentence.op === 'mul'
+          ? highlight === 'result'
+            ? 'product'
+            : 'factor'
+          : ({ left: 'dividend', right: 'divisor', result: 'quotient' } as const)[highlight];
+    return { kind: 'term', term: named };
+  }
+  throw new Error(`no oracle for ${(problem as Problem).kind}`);
 }
 
 /** A wrong answer a child could give: another offered choice, or one more. */
@@ -113,6 +127,66 @@ export function wrongAnswer(view: ProblemRoundView): AnswerValue {
   if (other) return other;
   if (right.kind === 'number') return { kind: 'number', value: right.value + 1 };
   throw new Error('no wrong answer');
+}
+
+/**
+ * What makes two Memory Match cards a pair, worked out from their faces: a value (`7 · 8` and
+ * `56`; `23 : 5` and `4 r 3`), a fact family (`6 · 7 = 42` and `42 : 7 = 6`) or a term (`product`
+ * and a sentence with its product highlighted).
+ */
+export function pairKey(face: CardFace): string {
+  if (face.kind === 'answer') {
+    const answer = face.answer;
+    if (answer.kind === 'number') return `${answer.value}`;
+    if (answer.kind === 'remainder') return `${answer.quotient}r${answer.remainder}`;
+    if (answer.kind === 'term') return `term:${answer.term}`;
+    throw new Error(`no pair for an answer of kind ${answer.kind}`);
+  }
+  if (face.kind === 'expr') {
+    const expr = face.expr;
+    if (expr.kind === 'op' && expr.op === 'div') {
+      const [a, b] = [evaluate(expr.left), evaluate(expr.right)];
+      const left = a % b;
+      return left === 0 ? `${a / b}` : `${(a - left) / b}r${left}`;
+    }
+    return `${evaluate(expr)}`;
+  }
+  const { sentence, highlight } = face;
+  if (highlight === null)
+    return `family:${sentence.op === 'mul' ? sentence.result : sentence.left}`;
+  if (highlight === 'remainder') return 'term:remainder';
+  if (sentence.op === 'mul') return highlight === 'result' ? 'term:product' : 'term:factor';
+  return `term:${{ left: 'dividend', right: 'divisor', result: 'quotient' }[highlight]}`;
+}
+
+/** The operation a child does first: inside brackets, then · and :, then + and −, leftmost. */
+export function firstOperation(expr: Expr): ExprPath {
+  const plain = (node: Expr): boolean =>
+    node.kind === 'num' || (node.kind === 'group' && plain(node.inner));
+  const found: { path: ExprPath; rank: number }[] = [];
+  const visit = (node: Expr, path: ExprPath, inside: boolean): void => {
+    if (node.kind === 'group') return visit(node.inner, [...path, 'inner'], true);
+    if (node.kind !== 'op') return;
+    visit(node.left, [...path, 'left'], inside);
+    if (plain(node.left) && plain(node.right)) {
+      found.push({
+        path,
+        rank: (inside ? 0 : 2) + (node.op === 'mul' || node.op === 'div' ? 0 : 1),
+      });
+    }
+    visit(node.right, [...path, 'right'], inside);
+  };
+  visit(expr, [], false);
+  const best = Math.min(...found.map((f) => f.rank));
+  return found.find((f) => f.rank === best)!.path;
+}
+
+function at(expr: Expr, path: ExprPath): Expr {
+  return path.reduce<Expr>((node, step) => {
+    if (step === 'inner' && node.kind === 'group') return node.inner;
+    if (step !== 'inner' && node.kind === 'op') return node[step];
+    throw new Error('no such node');
+  }, expr);
 }
 
 export interface Recorded {
@@ -179,6 +253,7 @@ export class Player {
 
   /** One traced step; a rejection is recorded as a failure (and returns false). */
   async act(action: GameAction): Promise<boolean> {
+    await this.breathe();
     const turns = action.type === 'answer' || action.type === 'placementAnswer' ? 1 : 0;
     const trace = await runCommandTrace(this.host, [
       { action, ruleIds: [action.type], expectedTurn: this.turn + turns },
@@ -189,6 +264,17 @@ export class Player {
     }
     this.turn += turns;
     return true;
+  }
+
+  private steps = 0;
+
+  /**
+   * Every few steps, let the test runner's own messages through: a long trace otherwise keeps the
+   * worker busy in microtasks for minutes (each commit takes tens of milliseconds with the whole
+   * v1 pack), and the runner's RPC to the worker times out. Scheduling only; no game effect.
+   */
+  private async breathe(): Promise<void> {
+    if (++this.steps % 10 === 0) await new Promise((resolve) => setImmediate(resolve));
   }
 
   /** A step that must be rejected with `code` (and change nothing). */
@@ -284,14 +370,11 @@ export class Player {
       await this.move({ type: 'submit' });
     } else if (board.kind === 'memory-match') {
       const seen = new Map<string, string>();
-      const face = (id: string) => {
+      const keyOf = (id: string) => {
         const view = this.view().round as MinigameRoundView;
         if (view.current.kind !== 'memory-match') return '';
-        return JSON.stringify(view.current.cards.find((c) => c.id === id)?.face);
-      };
-      const valueOf = (text: string): number => {
-        const parsed = JSON.parse(text);
-        return parsed.kind === 'answer' ? parsed.answer.value : evaluate(parsed.expr);
+        const face = view.current.cards.find((c) => c.id === id)?.face;
+        return face ? pairKey(face) : '';
       };
       for (let guard = 0; guard < 200 && still(); guard++) {
         const view = (this.view().round as MinigameRoundView).current;
@@ -303,10 +386,10 @@ export class Player {
         const hidden = view.cards.filter((c) => !c.matched && !c.faceUp).map((c) => c.id);
         const first = hidden[0]!;
         await this.move({ type: 'select', card: first });
-        seen.set(first, face(first));
-        const want = valueOf(seen.get(first)!);
+        seen.set(first, keyOf(first));
+        const want = seen.get(first)!;
         const partner = [...seen.entries()].find(
-          ([id, text]) => id !== first && hidden.includes(id) && valueOf(text) === want,
+          ([id, key]) => id !== first && hidden.includes(id) && key === want,
         )?.[0];
         const clumsy = this.style.clumsy && guard === 0;
         const second =
@@ -314,7 +397,25 @@ export class Player {
             ? partner
             : hidden.find((id) => id !== first && !seen.has(id))!;
         await this.move({ type: 'select', card: second });
-        seen.set(second, face(second));
+        seen.set(second, keyOf(second));
+      }
+    } else if (board.kind === 'sharing-feast') {
+      const left = board.total % board.baskets;
+      const each = (board.total - left) / board.baskets;
+      if (this.style.clumsy) await this.move({ type: 'submit', each: each + 1, left });
+      for (let basket = 0; basket < board.baskets && each > 0; basket++) {
+        await this.move({ type: 'put', basket, count: each });
+      }
+      await this.move({ type: 'submit', each, left });
+    } else if (board.kind === 'golem-orders') {
+      for (let guard = 0; guard < 32 && still(); guard++) {
+        const now = (this.view().round as MinigameRoundView).current;
+        if (now.kind !== 'golem-orders') break;
+        const path = firstOperation(now.expr);
+        const value = evaluate(at(now.expr, path));
+        await this.move({ type: 'pick', path });
+        if (this.style.clumsy && guard === 0) await this.move({ type: 'answer', value: value + 1 });
+        await this.move({ type: 'answer', value });
       }
     }
   }

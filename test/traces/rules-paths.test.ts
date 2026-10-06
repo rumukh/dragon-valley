@@ -2,9 +2,13 @@
  * Rules paths beyond the golden traces: the edges a code review found broken in the walking
  * skeleton, kept as named regressions on the full rules.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { blockedRecent } from '../../src/rules/learning/selection';
 import { PERFECT, Player } from './support';
+
+// Whole sessions are replayed here, one commit at a time with the full content pack: give them
+// room on a busy machine (Vitest's default is 60 s per test).
+vi.setConfig({ testTimeout: 300_000 });
 
 async function session(seed = 'paths'): Promise<Player> {
   const player = new Player(PERFECT, seed);
