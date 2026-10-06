@@ -51,3 +51,14 @@ export {
   type StickerFrame,
   type StickerSpec,
 } from './stickers';
+export {
+  renderBackground,
+  renderBackgrounds,
+  BACKGROUND_IDS,
+  SCENE_LAYOUT,
+  MAP_HOTSPOTS,
+  MAP_LEVELS,
+  mapNodePositions,
+  HALL_WINDOW,
+  type MapHotspots,
+} from './backgrounds';

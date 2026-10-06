@@ -3,8 +3,14 @@
   "generatedBy": "scripts/art/build-art.mjs from src/app/art/catalog.ts",
   "grids": {
     "dragonCanvas": 512,
+    "bossCanvas": 512,
     "icon": 64,
-    "avatar": 120
+    "avatar": 120,
+    "sticker": 120,
+    "background": [
+      1600,
+      1000
+    ]
   },
   "dragonStages": [
     "egg",
@@ -183,6 +189,98 @@
       "kind": "guide",
       "render": "renderDragon",
       "recipe": "assets/art/dragons/glimmer.json"
+    }
+  ],
+  "bosses": [
+    {
+      "id": "bridge-troll",
+      "region": "sunny-meadow",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "laugh"
+    },
+    {
+      "id": "forest-witch",
+      "region": "whispering-woods",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "agree"
+    },
+    {
+      "id": "krakonos",
+      "region": "fire-mountain",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "laugh"
+    },
+    {
+      "id": "gnome-king",
+      "region": "crystal-caves",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "agree"
+    },
+    {
+      "id": "water-goblin",
+      "region": "sharing-lake",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "agree"
+    },
+    {
+      "id": "lake-nymphs",
+      "region": "leftover-lagoon",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "laugh"
+    },
+    {
+      "id": "friendly-giant",
+      "region": "giants-peaks",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "sleep"
+    },
+    {
+      "id": "golem",
+      "region": "riddle-ruins",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "agree"
+    },
+    {
+      "id": "seven-headed",
+      "region": "dragon-castle",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "agree"
     }
   ],
   "cosmetics": [
@@ -477,6 +575,353 @@
       "emblem-dragon-castle"
     ]
   },
+  "stickers": {
+    "frames": [
+      "circle",
+      "scallop",
+      "shield",
+      "star",
+      "hexagon",
+      "heart",
+      "ribbon",
+      "cloud"
+    ],
+    "colors": [
+      "sunny-meadow",
+      "whispering-woods",
+      "fire-mountain",
+      "crystal-caves",
+      "sharing-lake",
+      "leftover-lagoon",
+      "giants-peaks",
+      "riddle-ruins",
+      "dragon-castle",
+      "primary",
+      "sun",
+      "coral",
+      "sky",
+      "meadow",
+      "gold",
+      "silver",
+      "bronze"
+    ],
+    "content": "any icon id (icons.*) or any dragon id"
+  },
+  "magicWindow": {
+    "levels": [
+      "dim",
+      "bronze",
+      "silver",
+      "gold"
+    ],
+    "flags": [
+      "needs-polish"
+    ],
+    "multiplication": {
+      "rows": 11,
+      "cols": 11,
+      "rowMeaning": "first factor 0-10",
+      "colMeaning": "second factor 0-10"
+    },
+    "division": {
+      "rows": 10,
+      "cols": 11,
+      "rowMeaning": "divisor 1-10",
+      "colMeaning": "quotient 0-10"
+    },
+    "hallViewBox": [
+      0,
+      0,
+      600,
+      872
+    ]
+  },
+  "backgrounds": [
+    {
+      "id": "valley-map",
+      "file": "assets/backgrounds/valley-map.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "map",
+      "hotspots": "assets/backgrounds/map-hotspots.json",
+      "prompt": "assets/backgrounds/prompts/valley-map.prompt.txt"
+    },
+    {
+      "id": "sunny-meadow",
+      "file": "assets/backgrounds/sunny-meadow.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "sunny-meadow",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/sunny-meadow.prompt.txt"
+    },
+    {
+      "id": "whispering-woods",
+      "file": "assets/backgrounds/whispering-woods.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "whispering-woods",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/whispering-woods.prompt.txt"
+    },
+    {
+      "id": "fire-mountain",
+      "file": "assets/backgrounds/fire-mountain.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "fire-mountain",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/fire-mountain.prompt.txt"
+    },
+    {
+      "id": "crystal-caves",
+      "file": "assets/backgrounds/crystal-caves.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "crystal-caves",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/crystal-caves.prompt.txt"
+    },
+    {
+      "id": "sharing-lake",
+      "file": "assets/backgrounds/sharing-lake.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "sharing-lake",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/sharing-lake.prompt.txt"
+    },
+    {
+      "id": "leftover-lagoon",
+      "file": "assets/backgrounds/leftover-lagoon.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "leftover-lagoon",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/leftover-lagoon.prompt.txt"
+    },
+    {
+      "id": "giants-peaks",
+      "file": "assets/backgrounds/giants-peaks.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "giants-peaks",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/giants-peaks.prompt.txt"
+    },
+    {
+      "id": "riddle-ruins",
+      "file": "assets/backgrounds/riddle-ruins.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "riddle-ruins",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/riddle-ruins.prompt.txt"
+    },
+    {
+      "id": "dragon-castle",
+      "file": "assets/backgrounds/dragon-castle.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "dragon-castle",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/dragon-castle.prompt.txt"
+    },
+    {
+      "id": "castle-hall",
+      "file": "assets/backgrounds/castle-hall.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "hall",
+      "window": {
+        "x": 532,
+        "y": 84,
+        "width": 536,
+        "height": 779
+      },
+      "prompt": "assets/backgrounds/prompts/castle-hall.prompt.txt"
+    }
+  ],
   "regions": [
     {
       "id": "sunny-meadow",

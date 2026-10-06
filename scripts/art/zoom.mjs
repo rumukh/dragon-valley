@@ -4,7 +4,7 @@
  *   node scripts/art/zoom.mjs <name> <dragon:stage:expression[:framing]> ... [--size 190] [--cols 4]
  * Writes out/art-gallery/png/zoom-<name>.png
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, loadArt, screenshot } from './lib.mjs';
 
@@ -28,6 +28,44 @@ const cells = specs.map((spec) => {
   if (kind === 'boss') return box(art.renderBoss(a1, a2, { idPrefix: `z${i++}`, size }));
   if (kind === 'icon') return box(art.renderIcon(a1, { idPrefix: `z${i++}`, size }));
   if (kind === 'avatar') return box(art.renderAvatar(a1, { idPrefix: `z${i++}`, size }));
+  if (kind === 'bg') {
+    const svg = readFileSync(join(ROOT, 'assets', 'backgrounds', `${a1}.svg`), 'utf8').replace(
+      / width="1600" height="1000"/,
+      ` width="${size}" height="${Math.round((size * 1000) / 1600)}"`,
+    );
+    let overlay = '';
+    if (a2 === 'hot') {
+      const hot = art.MAP_HOTSPOTS;
+      overlay = `<svg viewBox="0 0 1600 1000" width="${size}" height="${Math.round((size * 1000) / 1600)}" style="position:absolute;left:0;top:0">${hot.hotspots.map((/** @type {any} */ s) => `<rect x="${s.x}" y="${s.y}" width="${s.width}" height="${s.height}" fill="none" stroke="#ff2d55" stroke-width="4" stroke-dasharray="12 8"/>`).join('')}${Object.values(
+        hot.regions,
+      )
+        .flatMap((/** @type {any} */ r) => [
+          ...r.nodes.map(
+            (/** @type {any} */ n) =>
+              `<circle cx="${n.x}" cy="${n.y}" r="13" fill="#fff" stroke="#2a2140" stroke-width="4"/>`,
+          ),
+          `<circle cx="${r.boss.x}" cy="${r.boss.y}" r="18" fill="#ff2d55" stroke="#2a2140" stroke-width="4"/>`,
+        ])
+        .join('')}</svg>`;
+    }
+    return `<div style="position:relative;display:inline-block;margin:2px">${svg}${overlay}</div>`;
+  }
+  if (kind === 'hall') {
+    const w = art.HALL_WINDOW;
+    const k = size / 1600;
+    const bg = readFileSync(join(ROOT, 'assets', 'backgrounds', 'castle-hall.svg'), 'utf8').replace(
+      / width="1600" height="1000"/,
+      ` width="${size}" height="${Math.round(size * 0.625)}"`,
+    );
+    const win = art
+      .renderMagicWindow({
+        ...art.magicWindowSamples()[Number(a1 || 2)].options,
+        idPrefix: `z${i++}`,
+        size: w.width * k,
+      })
+      .replace(/ height="[\d.]+"/, ` height="${w.height * k}"`);
+    return `<div style="position:relative;display:inline-block;margin:2px">${bg}<div style="position:absolute;left:${w.x * k}px;top:${w.y * k}px">${win}</div></div>`;
+  }
   if (kind === 'sticker')
     return box(
       art.renderSticker({ ...art.stickerSamples()[Number(a1)], idPrefix: `z${i++}`, size }),
@@ -75,5 +113,8 @@ writeFileSync(
   html,
   `<!doctype html><html data-reduced-motion="true"><body style="margin:6px;background:#fff8ec;width:${width - 12}px">${cells.join('')}</body></html>`,
 );
-screenshot(html, join(OUT, 'png', `zoom-${name}.png`), width, rows * (size + 24) + 16);
+const cellH = specs.every((s) => s.startsWith('bg:') || s.startsWith('hall'))
+  ? Math.round((size * 1000) / 1600) + 6
+  : size + 24;
+screenshot(html, join(OUT, 'png', `zoom-${name}.png`), width, rows * cellH + 16);
 console.log(`png/zoom-${name}.png`);

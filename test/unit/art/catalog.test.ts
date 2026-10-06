@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  CANONICAL_BOSS_IDS,
   CANONICAL_DRAGON_IDS,
   CANONICAL_REGION_IDS,
   COSMETIC_SLOTS,
@@ -15,6 +16,7 @@ import {
   buildCatalog,
   catalogIds,
   renderAvatar,
+  renderBoss,
   renderDragon,
   renderIcon,
 } from '../../../src/app/art';
@@ -78,6 +80,39 @@ describe('art catalog', () => {
       expect(Object.values(committed.icons).flat()).toContain(r.emblem);
     for (const c of committed.characters)
       checkChildSafe(renderDragon({ dragon: c.id, stage: 'adult' }));
+  });
+
+  it('lists every boss, background, sticker frame and Magic Window level', () => {
+    const cat = committed as unknown as {
+      bosses: Array<{ id: string; region: string; states: string[]; outcome: string }>;
+      backgrounds: Array<{
+        id: string;
+        file: string;
+        kind: string;
+        region?: string;
+        prompt: string;
+      }>;
+      stickers: { frames: string[]; colors: string[] };
+      magicWindow: { levels: string[]; flags: string[] };
+    };
+    expect(cat.bosses.map((b) => b.id)).toEqual([...CANONICAL_BOSS_IDS]);
+    expect(cat.bosses.map((b) => b.region)).toEqual([...CANONICAL_REGION_IDS]);
+    for (const b of cat.bosses) {
+      expect(b.states).toEqual(['start', 'warming', 'won']);
+      expect(['laugh', 'sleep', 'agree']).toContain(b.outcome);
+      for (const state of b.states)
+        checkChildSafe(renderBoss(b.id, state as 'start', { idPrefix: 'cb' }));
+    }
+    for (const bg of cat.backgrounds) {
+      expect(statSync(bg.file).isFile(), bg.file).toBe(true);
+      expect(statSync(bg.prompt).isFile(), bg.prompt).toBe(true);
+    }
+    expect(cat.backgrounds.filter((b) => b.kind === 'region').map((b) => b.region)).toEqual([
+      ...CANONICAL_REGION_IDS,
+    ]);
+    expect(cat.stickers.frames.length).toBeGreaterThanOrEqual(8);
+    expect(cat.magicWindow.levels).toEqual(['dim', 'bronze', 'silver', 'gold']);
+    expect(cat.magicWindow.flags).toEqual(['needs-polish']);
   });
 
   it('keeps every recipe file referenced by the catalog', () => {

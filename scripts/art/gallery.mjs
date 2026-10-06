@@ -446,7 +446,7 @@ if (existsSync(join(bgDir, 'valley-map.svg'))) {
     width: 1700,
     height: 2400,
     body: () => {
-      const ids = ['valley-map', ...art.CANONICAL_REGION_IDS_FOR_ART, 'castle-hall'];
+      const ids = art.BACKGROUND_IDS;
       const hot = existsSync(hotspotsPath) ? JSON.parse(readFileSync(hotspotsPath, 'utf8')) : null;
       return ids
         .map((/** @type {string} */ id) => {
@@ -455,6 +455,11 @@ if (existsSync(join(bgDir, 'valley-map.svg'))) {
             '<svg width="800" height="500" ',
           );
           let overlay = '';
+          if (id === 'castle-hall') {
+            const w = art.HALL_WINDOW;
+            const sample = art.magicWindowSamples()[2].options;
+            overlay = `<div style="position:absolute;left:${6 + w.x / 2}px;top:${6 + w.y / 2}px;width:${w.width / 2}px;height:${w.height / 2}px">${art.renderMagicWindow({ ...sample, idPrefix: 'hallwin', size: w.width / 2 }).replace(/ height="[\d.]+"/, ` height="${w.height / 2}"`)}</div>`;
+          }
           if (id === 'valley-map' && hot) {
             overlay = `<svg viewBox="0 0 ${hot.logical.width} ${hot.logical.height}" width="800" height="500" style="position:absolute;left:6px;top:6px">${hot.hotspots
               .map(
