@@ -15,6 +15,7 @@ import type {
 import { renderMagicWindow } from '../art/window';
 import type { PaneState } from '../art/window';
 import type { StickerFrame } from '../art/stickers';
+import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { artIcon, cosmeticIconArt, stickerArt, svgElement, viewDragonArt } from '../ui/art';
 import { candyButton } from '../ui/button';
@@ -97,7 +98,12 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
           : candyButton({
               label: entry.affordable
                 ? t('market.buy', { price: entry.price })
-                : t('market.need', { count: entry.price - host.getView().coins }),
+                : plural(
+                    t,
+                    entry.price - host.getView().coins,
+                    'market.need.one',
+                    'market.need.other',
+                  ),
               variant: entry.affordable ? 'sun' : 'paper',
               size: 'small',
               testId: `market-buy-${entry.id}`,

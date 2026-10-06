@@ -4,9 +4,11 @@
  * practised days (a habit view, never a streak), and one big Daily Adventure button that does
  * what the game suggests next (docs/design.md §4.2). The valley map is one tap away.
  */
-import type { GameView } from '../../rules/contract';
+import type { GameAction, GameView } from '../../rules/contract';
+import { taken } from '../controller/commands';
 import { adventureFor, featuredDragon, findLevel, growthOf, weekdayIndex } from '../game/view';
 import type { Adventure } from '../game/view';
+import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { openModal } from '../ui/dialog';
 import { candyButton } from '../ui/button';
@@ -133,7 +135,9 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
   };
 
   const go = async (adventure: Adventure): Promise<void> => {
-    const dispatch = active.commands.capture();
+    // The next screen does not wait for a slow save; the save indicator tracks it.
+    const send = active.commands.captureSend();
+    const dispatch = (action: GameAction): Promise<void> => taken(send(action));
     switch (adventure.kind) {
       case 'level':
         await dispatch(
@@ -182,7 +186,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
         } else if (grant.kind === 'coins') {
           body.append(
             h('div', { className: 'dv-gift__art' }, artIcon('coin')),
-            h('p', { text: t('gift.coins', { count: grant.amount }) }),
+            h('p', { text: plural(t, grant.amount, 'gift.coins.one', 'gift.coins.other') }),
           );
         } else {
           body.append(h('p', { text: t('gift.egg') }));
@@ -295,7 +299,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
                       ? h('span', { className: 'dv-quest__state', text: t('quest.claimed') })
                       : quest.done
                         ? candyButton({
-                            label: t('quest.claim', { count: quest.coins }),
+                            label: plural(t, quest.coins, 'quest.claim.one', 'quest.claim.other'),
                             variant: 'sun',
                             size: 'small',
                             testId: `quest-claim-${quest.template}`,

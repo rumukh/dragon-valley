@@ -5,6 +5,7 @@
  * rules, so it arrives as an event; the screen shows it before moving on.
  */
 import type { DragonExpression, GameEvent } from '../../rules/contract';
+import { taken } from '../controller/commands';
 import { candyButton } from '../ui/button';
 import { bossArt, dragonArt } from '../ui/art';
 import { h } from '../ui/dom';
@@ -53,20 +54,23 @@ export function storyScreen(app: App, active: ActiveKeeper): Screen {
     if (active.preferences.current().autoRead) app.speak(spoken);
   };
 
-  const dispatch = active.commands.capture();
+  // The next line follows the committed view at once; the save goes on behind it.
+  const send = active.commands.captureSend();
   let busy = false;
   const choose = async (choice: string | null): Promise<void> => {
     if (busy) return;
     busy = true;
     for (const button of actions.querySelectorAll('button')) button.disabled = true;
     app.stopSpeaking();
-    await dispatch({
-      type: 'storyChoice',
-      beat: story.beat,
-      node: story.node,
-      revision: story.revision,
-      choice,
-    });
+    await taken(
+      send({
+        type: 'storyChoice',
+        beat: story.beat,
+        node: story.node,
+        revision: story.revision,
+        choice,
+      }),
+    );
     const ended = active.events
       .take(['story.advanced'])
       .filter((event): event is StoryAdvanced => event.type === 'story.advanced')

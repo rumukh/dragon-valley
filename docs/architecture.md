@@ -123,10 +123,11 @@ All storage is local IndexedDB through `@aegis/browser` (no accounts, no cloud):
 | `npm run build -- --base /dragon-valley/` | esbuild bundle of `src/app/main.ts` and the worker, copies content and runtime assets, writes and verifies the resource graph (`dist-site/`) |
 | `npm run serve`                           | builds into `out/dev-site-*`, serves on loopback with the same CSP, rebuilds on change                                                       |
 | `npm run verify`                          | the gate: build, typecheck (rules, app, worker, tests), lint, format, content validation, Vitest, lockfile                                   |
-| `npm run test:e2e`                        | Playwright smoke at the nested Pages base (system Edge/Chrome locally; Chromium, WebKit, Firefox on CI)                                      |
+| `npm run test:e2e`                        | Playwright flows, accessibility and screenshots at the Pages base (system Edge/Chrome locally; three engines on CI)                          |
 
 CI (`.github/workflows/ci.yml`) runs the gate on Ubuntu and Windows and audits its record in a
-separate step; the e2e job runs the browser smoke on three engines. Pages
+separate step; the e2e jobs run the browser suite (`docs/testing.md` §5), one job per engine (WebKit
+in three parts). Pages
 (`.github/workflows/pages.yml`) builds with base `/dragon-valley/`, re-checks the artifact and
 deploys it. The SDK is a pinned, digest-checked tarball set (`docs/sdk-update.md`).
 

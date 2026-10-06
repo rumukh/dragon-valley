@@ -4,7 +4,7 @@
  *
  * Owned by S6 (QA) from here on; extend rather than loosen it.
  */
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/fixtures';
 import type { Page } from '@playwright/test';
 
 interface Observations {

@@ -15,6 +15,7 @@ import type {
   MinigameMove,
   MinigameRoundView,
 } from '../../rules/contract';
+import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { numberToWords } from '../speech/numbers';
 import { speakFace } from '../speech/verbalizer';
@@ -25,6 +26,7 @@ import { h } from '../ui/dom';
 import { createCoinCounter, createMeter } from '../ui/meters';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
+import { CommandRejectedError } from '../controller/commands';
 import { createSaveStatus, topBar } from './common';
 import { backdrop } from './scene';
 
@@ -396,7 +398,9 @@ function eggGrid(context: BoardContext): BoardPainter {
               })
             : t('egg.how'),
     );
-    goal.textContent = t('egg.goal', { product: board.product, count: board.find });
+    goal.textContent = plural(t, board.find, 'egg.goal.one', 'egg.goal.other', {
+      product: board.product,
+    });
     found.replaceChildren(
       ...board.found.map((rect) =>
         h('li', {
@@ -601,6 +605,8 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
   });
   let busy = false;
   let disposed = false;
+  /** A move the game took but could not save yet: the board shows it once Retry stores it. */
+  let heldMove = false;
 
   const context: BoardContext = {
     app,
@@ -615,11 +621,19 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
       if (!round || round.status !== 'active') return false;
       busy = true;
       try {
-        await active.commands.capture()({
+        // The board redraws once the move is saved, or once it is taken if saving is slow.
+        await active.commands.captureSend()({
           type: 'minigameMove',
           revision: round.minigame.revision,
           move,
         });
+      } catch (error) {
+        if (error instanceof CommandRejectedError && error.accepted) {
+          // Taken but not saved: the board shows it once Retry stores it.
+          heldMove = true;
+          return false;
+        }
+        throw error;
       } finally {
         busy = false;
       }
@@ -668,6 +682,13 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     }
     return true;
   };
+
+  // Retry stored a held move: now the board shows it.
+  const unsubscribeSaved = active.game.subscribeIndicator((indicator) => {
+    if (indicator.kind !== 'saved' || !heldMove || disposed) return;
+    heldMove = false;
+    void afterMove().catch(app.kit.onError);
+  });
 
   const quit = candyButton({
     label: t('minigame.quit'),
@@ -728,6 +749,7 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     focusTarget: () => painter?.focus() ?? heading,
     dispose() {
       disposed = true;
+      unsubscribeSaved();
       clearInterval(restTimer);
       saveStatus.dispose();
     },
