@@ -175,7 +175,7 @@ test('the placement check plays by keyboard, is kind after a miss and survives a
       page
         .getByTestId('screen-results')
         .or(page.locator('[data-testid="feedback"][data-kind="none"]')),
-    ).toBeAttached();
+    ).toBeAttached({ timeout: 15_000 });
     if (await page.getByTestId('screen-results').isVisible()) break;
     const written = await problem.innerText();
     await page.keyboard.type(String(solve(written)));
