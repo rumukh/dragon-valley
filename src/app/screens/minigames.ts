@@ -1,0 +1,677 @@
+/**
+ * Minigame rounds on the rules' typed boards (`MinigameRoundView.current`, docs/contract.md
+ * §11.1): Memory Match, Number Trail, Egg Grid and Fact Family Nest. Every move goes through the
+ * command controller with the board revision it was made against; the screen redraws from the
+ * view after each commit, cheers when a board is done (`minigame.completed`; the next board
+ * replaces it in the same commit), and moves on to the results once the round is over. Boards
+ * never punish: a mismatch, a wrong rectangle or a wrong order stays on the board, gently marked,
+ * to be fixed. A board this build cannot draw shows a kind message and a way back.
+ */
+import { formatExpr, formatFace, num, op, OPERATOR_SYMBOLS } from '../../rules/contract';
+import type { BoardView, GameView, MinigameMove, MinigameRoundView } from '../../rules/contract';
+import type { MessageKey } from '../i18n/messages';
+import { numberToWords } from '../speech/numbers';
+import { speakFace } from '../speech/verbalizer';
+import { artIcon } from '../ui/art';
+import { candyButton } from '../ui/button';
+import { confetti } from '../ui/confetti';
+import { h } from '../ui/dom';
+import { createCoinCounter, createMeter } from '../ui/meters';
+import type { Screen } from '../router/router';
+import type { ActiveKeeper, App } from '../shell/app';
+import { createSaveStatus, topBar } from './common';
+import { backdrop } from './scene';
+
+export function minigameRound(view: GameView): MinigameRoundView | null {
+  return view.round?.type === 'minigame' ? view.round : null;
+}
+
+type BoardOf<K extends BoardView['kind']> = Extract<BoardView, { kind: K }>;
+
+interface BoardContext {
+  readonly app: App;
+  readonly active: ActiveKeeper;
+  /** The current board of this kind, or null once the round has moved past it. */
+  board<K extends BoardView['kind']>(kind: K): BoardOf<K> | null;
+  /** Send one move against the current board revision; false when the round is over. */
+  move(move: MinigameMove): Promise<boolean>;
+  status(text: string): void;
+  notation(): 'czech' | 'international';
+}
+
+interface BoardPainter {
+  readonly element: HTMLElement;
+  paint(): void;
+  focus(): HTMLElement | null;
+}
+
+// ---- Memory Match ---------------------------------------------------------------------------
+
+/** Columns for a deck: full rows where possible (12 cards are 4 × 3, 10 are 5 × 2). */
+export function matchColumns(cards: number): number {
+  if (cards <= 4) return Math.max(1, cards);
+  if (cards === 6 || cards === 9) return 3;
+  if (cards === 10 || cards === 15) return 5;
+  return 4;
+}
+
+function memoryMatch(context: BoardContext): BoardPainter {
+  const { app } = context;
+  const t = app.kit.t;
+  const grid = h('div', { className: 'dv-match-grid', testId: 'match-grid' });
+  const actions = h('div', { className: 'dv-minigame__actions' });
+  let matchedBefore = context.board('memory-match')?.matched ?? 0;
+
+  const paint = (): void => {
+    const board = context.board('memory-match');
+    if (!board) return;
+    if (board.matched > matchedBefore) {
+      app.kit.cue('fx.dragon-happy');
+      context.status(t('match.pair'));
+    } else if (board.clearAvailable) {
+      context.status(t('match.notPair'));
+    } else {
+      context.status(t('match.find'));
+    }
+    matchedBefore = board.matched;
+    grid.dataset['count'] = String(board.cards.length);
+    grid.style.setProperty('--cols', String(matchColumns(board.cards.length)));
+    grid.replaceChildren(
+      ...board.cards.map((card, index) => {
+        const state = card.matched
+          ? 'matched'
+          : card.faceUp
+            ? board.clearAvailable
+              ? 'miss'
+              : 'open'
+            : 'hidden';
+        const text = card.face ? formatFace(card.face, context.notation()) : '';
+        const spoken = card.face ? speakFace(card.face) : t('match.hidden');
+        const button = h(
+          'button',
+          {
+            className: 'dv-card-tile',
+            testId: `match-card-${card.id}`,
+            dataset: { state },
+            attributes: {
+              type: 'button',
+              'aria-label': t('match.card', { number: index + 1, face: spoken }),
+            },
+          },
+          state === 'matched'
+            ? artIcon('badge-correct', { className: 'dv-card-tile__badge' })
+            : null,
+          state === 'miss' ? artIcon('badge-almost', { className: 'dv-card-tile__badge' }) : null,
+          h('span', { className: 'dv-card-tile__face', text }),
+        );
+        button.disabled = card.faceUp || card.matched || board.clearAvailable;
+        button.addEventListener('click', () => {
+          app.kit.cue('ui.tap');
+          void context.move({ type: 'select', card: card.id }).catch(app.kit.onError);
+        });
+        return button;
+      }),
+    );
+    actions.replaceChildren(
+      ...(board.clearAvailable
+        ? [
+            candyButton({
+              label: t('match.turnBack'),
+              icon: 'retry',
+              variant: 'sun',
+              testId: 'match-turn-back',
+              onPress: async () => {
+                await context.move({ type: 'clear' });
+              },
+              onError: app.kit.onError,
+            }),
+          ]
+        : []),
+    );
+  };
+
+  return {
+    element: h('div', { className: 'dv-minigame__board' }, grid, actions),
+    paint,
+    focus: () =>
+      actions.querySelector('button') ?? grid.querySelector<HTMLElement>('button:not(:disabled)'),
+  };
+}
+
+// ---- Number Trail ---------------------------------------------------------------------------
+
+function numberTrail(context: BoardContext): BoardPainter {
+  const { app } = context;
+  const t = app.kit.t;
+  const trail = h('ol', { className: 'dv-trail', testId: 'trail' });
+  let selected: string | null = null;
+
+  const paint = (): void => {
+    const board = context.board('number-trail');
+    if (!board) return;
+    if (selected && !board.stones.some((stone) => stone.id === selected)) selected = null;
+    context.status(
+      board.submitted
+        ? t('trail.notYet')
+        : selected
+          ? t('trail.where')
+          : t('trail.goal', { step: board.step }),
+    );
+    trail.replaceChildren(
+      ...board.path.map((position, index) => {
+        if (position.gap === null) {
+          return h(
+            'li',
+            { className: 'dv-trail__stop' },
+            h('span', {
+              className: 'dv-trail__stone dv-trail__stone--fixed',
+              text: String(position.value ?? ''),
+              attributes: { 'aria-label': t('trail.fixed', { value: position.value ?? 0 }) },
+            }),
+          );
+        }
+        const gap = position.gap;
+        const stone = board.stones[gap];
+        const button = h(
+          'button',
+          {
+            className: 'dv-trail__stone',
+            testId: `trail-stone-${stone?.id ?? gap}`,
+            dataset: { selected: String(stone?.id === selected) },
+            attributes: {
+              type: 'button',
+              'aria-pressed': String(stone?.id === selected),
+              'aria-label': t('trail.stone', {
+                value: stone ? numberToWords(stone.value) : '',
+                place: index + 1,
+              }),
+            },
+          },
+          stone ? String(stone.value) : '?',
+        );
+        button.addEventListener('click', () => {
+          app.kit.cue('ui.tap');
+          if (!stone) return;
+          if (selected === null) {
+            selected = stone.id;
+            paint();
+            return;
+          }
+          if (selected === stone.id) {
+            selected = null;
+            paint();
+            return;
+          }
+          const item = selected;
+          selected = null;
+          void context.move({ type: 'place', item, index: gap }).catch(app.kit.onError);
+        });
+        return h('li', { className: 'dv-trail__stop' }, button);
+      }),
+    );
+  };
+
+  const check = candyButton({
+    label: t('board.check'),
+    icon: 'check',
+    variant: 'sun',
+    testId: 'trail-check',
+    onPress: async () => {
+      selected = null;
+      await context.move({ type: 'submit' });
+    },
+    onError: app.kit.onError,
+  });
+
+  return {
+    element: h('div', { className: 'dv-minigame__board' }, trail, check),
+    paint,
+    focus: () => trail.querySelector<HTMLElement>('button') ?? check,
+  };
+}
+
+// ---- Egg Grid -------------------------------------------------------------------------------
+
+function eggGrid(context: BoardContext): BoardPainter {
+  const { app } = context;
+  const t = app.kit.t;
+  const first = context.board('egg-grid')!;
+  let product = first.product;
+  let rows = Math.max(1, first.rows);
+  let columns = Math.max(1, first.columns);
+
+  const goal = h('p', { className: 'dv-nest__goal', testId: 'egg-goal' });
+  const nest = h('div', {
+    className: 'dv-nest',
+    testId: 'egg-nest',
+    attributes: { 'aria-hidden': 'true' },
+  });
+  const size = h('p', { className: 'dv-nest__size', testId: 'egg-size' });
+  const found = h('ul', {
+    className: 'dv-nest__found',
+    testId: 'egg-found',
+    attributes: { 'aria-label': t('egg.foundList') },
+  });
+  const values: Record<'rows' | 'columns', HTMLElement> = {
+    rows: h('span', { className: 'dv-stepper__value', testId: 'egg-rows-value' }),
+    columns: h('span', { className: 'dv-stepper__value', testId: 'egg-columns-value' }),
+  };
+
+  const stepper = (which: 'rows' | 'columns'): HTMLElement => {
+    const label = t(which === 'rows' ? 'egg.rows' : 'egg.columns');
+    const change = (delta: number): void => {
+      const board = context.board('egg-grid');
+      const max = board?.maxSide ?? 10;
+      if (which === 'rows') rows = Math.min(max, Math.max(1, rows + delta));
+      else columns = Math.min(max, Math.max(1, columns + delta));
+      app.kit.cue('ui.tap');
+      draw();
+    };
+    return h(
+      'div',
+      { className: 'dv-stepper', attributes: { role: 'group', 'aria-label': label } },
+      h('span', { className: 'dv-stepper__label', text: label }),
+      candyButton({
+        label: t('egg.less', { what: label }),
+        icon: 'minus',
+        iconOnly: true,
+        variant: 'paper',
+        size: 'small',
+        testId: `egg-${which}-less`,
+        onPress: () => change(-1),
+        onError: app.kit.onError,
+      }),
+      values[which],
+      candyButton({
+        label: t('egg.more', { what: label }),
+        icon: 'plus',
+        iconOnly: true,
+        variant: 'paper',
+        size: 'small',
+        testId: `egg-${which}-more`,
+        onPress: () => change(1),
+        onError: app.kit.onError,
+      }),
+    );
+  };
+
+  /** The nest as built so far, with the board's strategy split drawn between rows. */
+  const draw = (): void => {
+    const board = context.board('egg-grid');
+    values.rows.textContent = String(rows);
+    values.columns.textContent = String(columns);
+    const split =
+      board?.split === 'five-plus' && rows > 5
+        ? 5
+        : board?.split === 'double' && rows % 2 === 0 && rows >= 2
+          ? rows / 2
+          : null;
+    const eggs: Node[] = [];
+    for (let row = 0; row < rows; row++) {
+      if (split !== null && row === split) eggs.push(h('span', { className: 'dv-nest__split' }));
+      for (let column = 0; column < columns; column++) {
+        eggs.push(h('span', { className: 'dv-nest__egg' }));
+      }
+    }
+    if (board?.split === 'ten-minus' && rows === 9) {
+      eggs.push(h('span', { className: 'dv-nest__split' }));
+      for (let column = 0; column < columns; column++) {
+        eggs.push(h('span', { className: 'dv-nest__egg dv-nest__egg--missing' }));
+      }
+    }
+    nest.style.setProperty('--columns', String(columns));
+    nest.replaceChildren(...eggs);
+    size.textContent = t('egg.size', { count: rows * columns });
+  };
+
+  const paint = (): void => {
+    const board = context.board('egg-grid');
+    if (!board) return;
+    if (board.product !== product) {
+      // A new board (the next product): start the nest again from what the board says.
+      product = board.product;
+      rows = Math.max(1, board.rows);
+      columns = Math.max(1, board.columns);
+    }
+    context.status(
+      board.last === 'found'
+        ? t('egg.found', { left: board.find - board.found.length })
+        : board.last === 'again'
+          ? t('egg.again')
+          : board.last === 'wrong'
+            ? t('egg.wrong', { product: board.product })
+            : t('egg.how'),
+    );
+    goal.textContent = t('egg.goal', { product: board.product, count: board.find });
+    found.replaceChildren(
+      ...board.found.map((rect) =>
+        h('li', {
+          text: formatExpr(op('mul', num(rect.rows), num(rect.columns)), context.notation()),
+        }),
+      ),
+    );
+    draw();
+  };
+
+  const check = candyButton({
+    label: t('board.check'),
+    icon: 'check',
+    variant: 'sun',
+    testId: 'egg-check',
+    onPress: async () => {
+      if (await context.move({ type: 'set', rows, columns })) {
+        await context.move({ type: 'submit' });
+      }
+    },
+    onError: app.kit.onError,
+  });
+
+  return {
+    element: h(
+      'div',
+      { className: 'dv-minigame__board' },
+      goal,
+      h('div', { className: 'dv-nest-builder' }, stepper('rows'), stepper('columns')),
+      nest,
+      size,
+      check,
+      found,
+    ),
+    paint,
+    focus: () => check,
+  };
+}
+
+// ---- Fact Family Nest -----------------------------------------------------------------------
+
+function factFamily(context: BoardContext): BoardPainter {
+  const { app } = context;
+  const t = app.kit.t;
+  const nest = h('div', {
+    className: 'dv-family__nest',
+    testId: 'family-nest',
+    attributes: { role: 'group', 'aria-label': t('family.nest') },
+  });
+  const equations = h('ol', { className: 'dv-family__equations', testId: 'family-equations' });
+  let picked: number | null = null;
+
+  const paint = (): void => {
+    const board = context.board('fact-family');
+    if (!board) return;
+    context.status(
+      board.submitted
+        ? t('family.notYet')
+        : picked === null
+          ? t('family.pick')
+          : t('family.place', { value: picked }),
+    );
+    nest.replaceChildren(
+      ...board.numbers.map((value) => {
+        const button = h(
+          'button',
+          {
+            className: 'dv-family__number',
+            testId: `family-number-${value}`,
+            dataset: { picked: String(picked === value) },
+            attributes: { type: 'button', 'aria-pressed': String(picked === value) },
+          },
+          String(value),
+        );
+        button.addEventListener('click', () => {
+          app.kit.cue('ui.tap');
+          picked = value;
+          paint();
+        });
+        return button;
+      }),
+    );
+    equations.replaceChildren(
+      ...board.equations.map((equation, index) => {
+        const sign = OPERATOR_SYMBOLS[context.notation()][equation.op];
+        const slot = (position: number): HTMLElement => {
+          const value = equation.slots[position] ?? null;
+          const button = h(
+            'button',
+            {
+              className: 'dv-family__slot',
+              testId: `family-slot-${index}-${position}`,
+              dataset: { empty: String(value === null) },
+              attributes: {
+                type: 'button',
+                'aria-label':
+                  value === null
+                    ? t('family.empty')
+                    : t('family.filled', { value: numberToWords(value) }),
+              },
+            },
+            value === null ? '' : String(value),
+          );
+          button.addEventListener('click', () => {
+            app.kit.cue('ui.tap');
+            // The picked number fills the box; tapping a box that already holds it empties it.
+            if (picked !== null && picked !== value) {
+              const value = picked;
+              void context
+                .move({ type: 'fill', equation: index, slot: position, value })
+                .catch(app.kit.onError);
+            } else if (value !== null) {
+              void context
+                .move({ type: 'fill', equation: index, slot: position, value: null })
+                .catch(app.kit.onError);
+            }
+          });
+          return button;
+        };
+        const state =
+          equation.correct === true ? 'correct' : equation.correct === false ? 'miss' : 'open';
+        return h(
+          'li',
+          { className: 'dv-family__equation', dataset: { state } },
+          slot(0),
+          h('span', { className: 'dv-family__sign', text: sign }),
+          slot(1),
+          h('span', { className: 'dv-family__sign', text: '=' }),
+          slot(2),
+          state === 'correct'
+            ? artIcon('badge-correct', { className: 'dv-family__badge' })
+            : state === 'miss'
+              ? artIcon('badge-almost', { className: 'dv-family__badge' })
+              : null,
+        );
+      }),
+    );
+  };
+
+  const check = candyButton({
+    label: t('board.check'),
+    icon: 'check',
+    variant: 'sun',
+    testId: 'family-check',
+    onPress: async () => {
+      picked = null;
+      await context.move({ type: 'submit' });
+    },
+    onError: app.kit.onError,
+  });
+
+  return {
+    element: h('div', { className: 'dv-minigame__board dv-family' }, nest, equations, check),
+    paint,
+    focus: () => nest.querySelector('button') ?? check,
+  };
+}
+
+// ---- the screen -----------------------------------------------------------------------------
+
+const PAINTERS: {
+  readonly [K in BoardView['kind']]: (context: BoardContext) => BoardPainter;
+} = {
+  'memory-match': memoryMatch,
+  'number-trail': numberTrail,
+  'egg-grid': eggGrid,
+  'fact-family': factFamily,
+};
+
+export function minigameScreen(app: App, active: ActiveKeeper): Screen {
+  const t = app.kit.t;
+  const host = active.game.host;
+  const data = app.game.content.data;
+  const first = minigameRound(host.getView())!;
+  const kind = first.current?.kind;
+  const levelId = first.source.kind === 'level' ? first.source.level : null;
+  const level = levelId ? data.levels.find((candidate) => candidate.id === levelId) : undefined;
+  const region = data.regions.find((candidate) => candidate.id === level?.region);
+  const saveStatus = createSaveStatus(app, active);
+  const coins = createCoinCounter(app.kit, host.getView().coins);
+  const heading = h('h1', {
+    className: 'dv-round__title',
+    text: t(`activity.${first.activity}` as MessageKey),
+  });
+  const progress = createMeter({
+    label: t(`activity.${first.activity}` as MessageKey),
+    max: first.boards,
+    value: first.board,
+    valueText: (value, max) =>
+      t('minigame.boards', { current: Math.min(value + 1, max), total: max }),
+    testId: 'minigame-progress',
+    compact: true,
+  });
+  const status = h('p', {
+    className: 'dv-minigame__status',
+    testId: 'minigame-status',
+    attributes: { role: 'status' },
+  });
+  let busy = false;
+  let disposed = false;
+
+  const context: BoardContext = {
+    app,
+    active,
+    board<K extends BoardView['kind']>(wanted: K): BoardOf<K> | null {
+      const current = minigameRound(host.getView())?.current;
+      return current?.kind === wanted ? (current as BoardOf<K>) : null;
+    },
+    async move(move) {
+      if (busy) return false;
+      const round = minigameRound(host.getView());
+      if (!round || round.status !== 'active') return false;
+      busy = true;
+      try {
+        await active.commands.capture()({
+          type: 'minigameMove',
+          revision: round.minigame.revision,
+          move,
+        });
+      } finally {
+        busy = false;
+      }
+      return afterMove();
+    },
+    status(text) {
+      status.textContent = text;
+    },
+    notation: () => active.preferences.current().notation,
+  };
+
+  const painter = kind ? PAINTERS[kind](context) : null;
+
+  /** The grown-ups' time limit ends the round gently, between moves. */
+  const endForRest = async (): Promise<boolean> => {
+    clearInterval(restTimer);
+    if (minigameRound(host.getView())?.status === 'active') {
+      await active.commands.capture()({ type: 'endRound', reason: 'time-limit' });
+    }
+    await app.continueGame(active.keeper.id);
+    return false;
+  };
+  const restTimer = setInterval(() => {
+    if (!busy && !disposed && active.timeIsUp()) void endForRest().catch(app.kit.onError);
+  }, 5000);
+
+  /** Redraw after a move: cheer a finished board, or leave once the round is over. */
+  const afterMove = async (): Promise<boolean> => {
+    if (disposed) return false;
+    if (active.timeIsUp()) return endForRest();
+    const view = host.getView();
+    const round = minigameRound(view);
+    coins.set(view.coins);
+    const completed = active.events.take(['minigame.completed']);
+    if (view.screen !== 'round' || !round || round.status !== 'active') {
+      await app.continueGame(active.keeper.id);
+      return false;
+    }
+    progress.update(round.board);
+    painter?.paint();
+    if (completed.length > 0) {
+      app.kit.cue('fx.dragon-happy');
+      app.kit.announcer.announce(t('board.done'));
+      status.textContent = t('board.done');
+      void confetti(app.kit.fx);
+    }
+    return true;
+  };
+
+  const quit = candyButton({
+    label: t('minigame.quit'),
+    icon: 'home',
+    variant: 'paper',
+    size: 'small',
+    testId: 'minigame-quit',
+    onPress: async () => {
+      await active.commands.capture()({ type: 'endRound', reason: 'quit' });
+      await app.continueGame(active.keeper.id);
+    },
+    onError: app.kit.onError,
+  });
+
+  const body: Node[] = [status];
+  if (painter) {
+    body.push(painter.element);
+    painter.paint();
+  } else {
+    status.textContent = t('minigame.soon');
+    body.push(
+      candyButton({
+        label: t('minigame.back'),
+        icon: 'home',
+        variant: 'sun',
+        testId: 'minigame-back',
+        onPress: async () => {
+          await active.commands.capture()({ type: 'endRound', reason: 'quit' });
+          await app.continueGame(active.keeper.id);
+        },
+        onError: app.kit.onError,
+      }),
+    );
+  }
+
+  const element = h(
+    'main',
+    {
+      className: 'dv-round dv-minigame',
+      testId: 'screen-minigame',
+      dataset: { activity: first.activity },
+    },
+    backdrop(region?.background ?? 'sunny-meadow'),
+    topBar({
+      title: h('div', { className: 'dv-round__header' }, heading, progress.element),
+      tools: [coins.element, saveStatus.element, quit],
+      onError: app.kit.onError,
+    }),
+    h('section', { className: 'dv-card dv-minigame__card' }, ...body),
+  );
+
+  return {
+    element,
+    title: t(`activity.${first.activity}` as MessageKey),
+    field: 'valley',
+    region: region?.id ?? null,
+    music: 'round',
+    focusTarget: () => painter?.focus() ?? heading,
+    dispose() {
+      disposed = true;
+      clearInterval(restTimer);
+      saveStatus.dispose();
+    },
+  };
+}

@@ -54,6 +54,11 @@ export interface Router {
   back(): Promise<void>;
   /** Rebuild the current screen in place (after a preference change). */
   refresh(): Promise<void>;
+  /**
+   * Return to the nearest screen with this key, rebuilding it (everything above it is dropped).
+   * Resolves false, changing nothing, when no such screen is on the stack.
+   */
+  backTo(key: string): Promise<boolean>;
   canGoBack(): boolean;
   currentKey(): string | undefined;
   dispose(): void;
@@ -71,7 +76,7 @@ export interface RouterOptions {
   fallback(error: unknown): ScreenEntry;
 }
 
-type Mode = 'push' | 'replace' | 'reset' | 'back' | 'refresh';
+type Mode = 'push' | 'replace' | 'reset' | 'back' | 'refresh' | 'backTo';
 
 export function createRouter(options: RouterOptions): Router {
   const { stage, kit } = options;
@@ -115,12 +120,20 @@ export function createRouter(options: RouterOptions): Router {
   };
 
   const navigate = async (mode: Mode, entry?: ScreenEntry): Promise<void> => {
+    const entries = stack?.entries() ?? [];
+    const targetIndex = mode === 'backTo' && entry ? entries.lastIndexOf(entry) : -1;
     const token = ++serial;
     controller?.abort();
     const ownController = new AbortController();
     controller = ownController;
     const target =
-      mode === 'back' ? stack?.previous() : mode === 'refresh' ? stack?.current() : entry;
+      mode === 'back'
+        ? stack?.previous()
+        : mode === 'refresh'
+          ? stack?.current()
+          : mode === 'backTo'
+            ? entries[targetIndex]
+            : entry;
     if (!target) return;
     const depth = stack?.depth() ?? 0;
     const canGoBack =
@@ -130,7 +143,9 @@ export function createRouter(options: RouterOptions): Router {
           ? depth - 1 > 1
           : mode === 'reset'
             ? false
-            : depth > 1;
+            : mode === 'backTo'
+              ? targetIndex > 0
+              : depth > 1;
     stage.setAttribute('aria-busy', 'true');
     let screen: Screen;
     try {
@@ -149,8 +164,11 @@ export function createRouter(options: RouterOptions): Router {
     else if (mode === 'replace') stack.replace(target);
     else if (mode === 'reset') stack.reset(target);
     else if (mode === 'back') stack.back();
+    else if (mode === 'backTo') stack.popTo((candidate) => candidate === target);
+    const moved =
+      mode === 'push' || mode === 'back' || (mode === 'backTo' && targetIndex < depth - 1);
     try {
-      mount(screen, mode === 'push' || mode === 'back');
+      mount(screen, moved);
     } catch (error) {
       showFallback(error);
     }
@@ -182,6 +200,14 @@ export function createRouter(options: RouterOptions): Router {
     reset: (entry) => navigate('reset', entry),
     back: () => navigate('back'),
     refresh: () => navigate('refresh'),
+    async backTo(key) {
+      const entry = [...(stack?.entries() ?? [])]
+        .reverse()
+        .find((candidate) => candidate.key === key);
+      if (!entry) return false;
+      await navigate('backTo', entry);
+      return true;
+    },
     canGoBack: () => (stack?.depth() ?? 0) > 1,
     currentKey: () => stack?.current().key,
     dispose() {

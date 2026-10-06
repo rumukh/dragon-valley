@@ -31,3 +31,8 @@ export function createTranslator(catalog: Catalog = en): Translate {
 export function placeholders(text: string): string[] {
   return [...text.matchAll(/\{([A-Za-z][A-Za-z0-9_]*)\}/g)].map((match) => match[1]!);
 }
+
+/** Whether a key built at runtime (for example `error.<code>`) is in the catalog. */
+export function hasMessage(key: string): key is MessageKey {
+  return Object.prototype.hasOwnProperty.call(en, key);
+}

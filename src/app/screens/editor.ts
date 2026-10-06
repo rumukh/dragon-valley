@@ -107,7 +107,7 @@ export function editorScreen(app: App, keeperId: string | null): ScreenEntry {
         }
         showProblem(null);
         if (existing) await app.router.back();
-        else await app.router.replace(app.screens.hub(result.value.id));
+        else await app.router.replace(app.screens.play(result.value.id));
       };
 
       const save = candyButton({

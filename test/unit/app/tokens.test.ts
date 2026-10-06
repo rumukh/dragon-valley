@@ -23,6 +23,11 @@ const LOCAL = new Set([
   '--value',
   '--progress',
   '--columns',
+  '--rows',
+  '--dot',
+  '--size',
+  '--aspect',
+  '--cols',
 ]);
 
 function files(directory: string, extension: string): string[] {

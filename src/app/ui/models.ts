@@ -11,6 +11,7 @@ export function arrayModel(rows: number, columns: number, label: string): HTMLEl
     attributes: { 'aria-hidden': 'true' },
   });
   grid.style.setProperty('--columns', String(Math.max(1, columns)));
+  grid.style.setProperty('--rows', String(Math.max(1, rows)));
   for (let index = 0; index < rows * columns; index++) {
     grid.append(h('span', { className: 'dv-model__dot' }));
   }

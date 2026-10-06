@@ -7,13 +7,14 @@
  * keeper's game is open while it is shown.
  */
 import { assertChildSafeView } from '@aegis/browser/ui';
+import type { SettingChange } from '../../rules/contract';
 import type { MessageKey } from '../i18n/messages';
 import { NOTATIONS } from '../math/notation';
 import type { OfflineState } from '../parent/offline';
 import { BACKUP_MAX_BYTES } from '../persistence/backup';
 import { findKeeper, MAX_KEEPERS } from '../persistence/family';
 import type { Keeper } from '../persistence/family';
-import { TEXT_SCALES } from '../persistence/preferences';
+import { TEXT_SCALES, TIME_LIMITS } from '../persistence/preferences';
 import type { PreferencesDraft } from '../persistence/preferences';
 import { RecoveryRequired } from '../persistence/recovery';
 import { formatBytes, requestPersistence, storageReport } from '../persistence/storage';
@@ -418,6 +419,126 @@ export function parentScreen(
               draft.presentation = { ...draft.presentation, reducedMotion: value };
             },
           ),
+          h(
+            'div',
+            { className: 'dv-field' },
+            h('span', { className: 'dv-field__label', text: t('parent.settings.timeLimit') }),
+            segmented(
+              t('parent.settings.timeLimit'),
+              ['off', ...TIME_LIMITS.map(String)],
+              prefs.timeLimit === null ? 'off' : String(prefs.timeLimit),
+              (value) =>
+                value === 'off'
+                  ? t('parent.settings.timeLimitOff')
+                  : t('parent.settings.minutes', { count: value }),
+              (value) => `setting-time-${value}`,
+              (value) =>
+                change((draft) => {
+                  draft.timeLimit = value === 'off' ? null : Number(value);
+                }),
+            ),
+          ),
+          await rulesSection(keeper),
+        );
+      };
+
+      /** Settings the rules own (daily goal, Arena, placement, regions): actions on the game. */
+      const rulesSection = async (keeper: Keeper): Promise<HTMLElement> => {
+        const heading = h('h3', { text: t('parent.rules.heading', { name: keeper.name }) });
+        const active = await app.openKeeper(keeper.id);
+        const view = active.game.host.getView();
+        if (view.day === null) {
+          return h(
+            'div',
+            { className: 'dv-parent__rules', testId: 'parent-rules' },
+            heading,
+            h('p', { className: 'dv-note', text: t('parent.rules.notYet', { name: keeper.name }) }),
+          );
+        }
+        const set = async (setting: SettingChange): Promise<void> => {
+          await active.commands.capture()({ type: 'setSetting', setting });
+          app.kit.toasts.show(t('parent.rules.saved'), { tone: 'success', durationMs: 1800 });
+          await render();
+        };
+        const goals = [...new Set([10, 20, 30, 50, 100, view.settings.dailyGoal])].sort(
+          (a, b) => a - b,
+        );
+        const arena = h('input', {
+          testId: 'setting-arena',
+          attributes: { type: 'checkbox', role: 'switch' },
+        });
+        arena.checked = view.settings.arena;
+        arena.addEventListener('change', () => {
+          void set({ key: 'arena', value: arena.checked }).catch(app.kit.onError);
+        });
+        const locked = view.hub.regions.filter((region) => !region.unlocked);
+        return h(
+          'div',
+          { className: 'dv-parent__rules', testId: 'parent-rules' },
+          heading,
+          h(
+            'div',
+            { className: 'dv-field' },
+            h('span', { className: 'dv-field__label', text: t('parent.rules.dailyGoal') }),
+            segmented(
+              t('parent.rules.dailyGoal'),
+              goals.map(String),
+              String(view.settings.dailyGoal),
+              (value) => value,
+              (value) => `setting-goal-${value}`,
+              (value) => set({ key: 'dailyGoal', value: Number(value) }),
+            ),
+          ),
+          h(
+            'label',
+            { className: 'dv-switch' },
+            h('span', { text: t('parent.rules.arena') }),
+            arena,
+          ),
+          ...(locked.length > 0
+            ? [
+                h(
+                  'div',
+                  { className: 'dv-field' },
+                  h('span', { className: 'dv-field__label', text: t('parent.rules.unlock') }),
+                  ...locked.map((region) => {
+                    const input = h('input', {
+                      testId: `setting-unlock-${region.id}`,
+                      attributes: { type: 'checkbox', role: 'switch' },
+                    });
+                    input.checked = view.settings.unlockAhead.includes(region.id);
+                    input.addEventListener('change', () => {
+                      const others = view.settings.unlockAhead.filter((id) => id !== region.id);
+                      void set({
+                        key: 'unlockAhead',
+                        value: input.checked ? [...others, region.id] : others,
+                      }).catch(app.kit.onError);
+                    });
+                    return h(
+                      'label',
+                      { className: 'dv-switch' },
+                      h('span', { text: app.text(region.titleKey) }),
+                      input,
+                    );
+                  }),
+                ),
+              ]
+            : []),
+          candyButton({
+            label: t('parent.rules.placement'),
+            icon: 'retry',
+            variant: 'paper',
+            size: 'small',
+            testId: 'setting-placement',
+            onPress: async () => {
+              await active.commands.capture()({
+                type: 'startActivity',
+                activity: { kind: 'placement' },
+              });
+              app.kit.toasts.show(t('parent.rules.placementStarted', { name: keeper.name }));
+            },
+            onError: app.kit.onError,
+          }),
         );
       };
 

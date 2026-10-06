@@ -13,6 +13,11 @@ export interface ScreenStack<T> {
   replace(entry: T): void;
   /** Pop and return the new current entry, or undefined (and no change) at the root. */
   back(): T | undefined;
+  /**
+   * The nearest entry from the top that matches, after popping everything above it; undefined
+   * (and no change) when none matches.
+   */
+  popTo(match: (entry: T) => boolean): T | undefined;
   reset(entry: T): void;
 }
 
@@ -36,6 +41,14 @@ export function createScreenStack<T>(root: T): ScreenStack<T> {
       if (stack.length <= 1) return undefined;
       stack.pop();
       return stack[stack.length - 1];
+    },
+    popTo(match) {
+      for (let index = stack.length - 1; index >= 0; index--) {
+        if (!match(stack[index]!)) continue;
+        stack.length = index + 1;
+        return stack[index];
+      }
+      return undefined;
     },
     reset(entry) {
       stack.length = 0;

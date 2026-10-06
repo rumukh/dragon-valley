@@ -44,7 +44,7 @@ export function keepersScreen(app: App): ScreenEntry {
         );
         play.addEventListener('click', () => {
           app.audio.unlock();
-          void app.router.push(app.screens.hub(keeper.id)).catch(app.kit.onError);
+          void app.router.push(app.screens.play(keeper.id)).catch(app.kit.onError);
         });
         const edit = candyButton({
           label: t('keepers.edit', { name: keeper.name }),
