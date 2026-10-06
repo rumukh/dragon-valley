@@ -100,7 +100,7 @@ export const DEFECTS = {
     severity: 'minor',
     engines: ['webkit'],
     title:
-      "In WebKit on Linux a keeper's hub at 200 % text shows at normal size for a frame: as it appears, <html> already carries --aegis-text-scale: 2 but its font size is still 24 px; it catches up one frame later (37 ms on CI).",
+      "In WebKit on Linux a keeper's hub at 200 % text first shows at normal size: as it appears, <html> already carries --aegis-text-scale: 2 but its font size is still 24 px; it catches up by itself, 37 ms and 337 ms later in two CI runs.",
   },
   'DV-QA-14': {
     owner: 'S3',
