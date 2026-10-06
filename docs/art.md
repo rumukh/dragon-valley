@@ -171,6 +171,9 @@ reduced motion never show a half-blink or a hidden part.
 **nest** (8 decorations). They sit on rig anchors, so every cosmetic fits every dragon at every
 stage (eggs show only the nest). Ownership, prices and unlocks are content (S2), not art.
 
+`renderCosmeticIcon(id, { size, idPrefix, title })` draws any cosmetic on its own, centred in a
+square view box, for Glimmer's Market tiles and stickers.
+
 ## 5. Icons and avatars
 
 `renderIcon(id, { size, idPrefix, title, accent })` renders any id in `ICON_IDS` on a 64 × 64 grid:
@@ -240,10 +243,12 @@ dusty smudges (never a broken look). Every pane carries `data-op` plus `data-a`/
 `renderSticker({ frame, color, icon | dragon, stage?, idPrefix, size, title })` composes a
 die-cut sticker (120 × 120) so content can add stickers without new art:
 
-- `frame`: `circle`, `scallop`, `shield`, `star`, `hexagon`, `heart`, `ribbon`, `cloud`.
+- `frame`: `frame-round`, `frame-scallop`, `frame-shield`, `frame-star`, `frame-hexagon`,
+  `frame-heart`, `frame-ribbon`, `frame-cloud` (published in the catalog as `stickers.frames[].id`).
 - `color`: any region id, `primary`, `sun`, `coral`, `sky`, `meadow`, `gold`, `silver`,
   `bronze`, or a `#rrggbb` color.
-- `icon`: any `renderIcon` id (UI glyphs take a darker tint of the frame color); or
+- `icon`: any `renderIcon` id (UI glyphs take a darker tint of the frame color) or any cosmetic id
+  (shown as the item, e.g. `hat-party`); or
 - `dragon`: any dragon id, shown as a happy portrait (`stage` defaults to `youngling`).
 
 ## 9. Backgrounds and the valley map (`assets/backgrounds`)

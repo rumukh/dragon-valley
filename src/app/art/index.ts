@@ -13,6 +13,7 @@ export {
   renderWingPaint,
 } from './cosmetics';
 export type { CosmeticAnchors, CosmeticDef } from './cosmetics';
+export { renderCosmeticIcon, type CosmeticIconOptions } from './cosmetics/icon';
 export { PALETTE, paletteColor, regionAccent, type Palette, type RegionAccent } from './palette';
 export {
   renderIcon,

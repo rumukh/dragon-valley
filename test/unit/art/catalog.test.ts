@@ -92,7 +92,7 @@ describe('art catalog', () => {
         region?: string;
         prompt: string;
       }>;
-      stickers: { frames: string[]; colors: string[] };
+      stickers: { frames: Array<{ id: string }>; colors: string[] };
       magicWindow: { levels: string[]; flags: string[] };
     };
     expect(cat.bosses.map((b) => b.id)).toEqual([...CANONICAL_BOSS_IDS]);

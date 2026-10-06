@@ -27,6 +27,7 @@ const cells = specs.map((spec) => {
   const [kind, a1 = '', a2 = ''] = spec.split(':');
   if (kind === 'boss') return box(art.renderBoss(a1, a2, { idPrefix: `z${i++}`, size }));
   if (kind === 'icon') return box(art.renderIcon(a1, { idPrefix: `z${i++}`, size }));
+  if (kind === 'cos') return box(art.renderCosmeticIcon(a1, { idPrefix: `z${i++}`, size }));
   if (kind === 'avatar') return box(art.renderAvatar(a1, { idPrefix: `z${i++}`, size }));
   if (kind === 'bg') {
     const svg = readFileSync(join(ROOT, 'assets', 'backgrounds', `${a1}.svg`), 'utf8').replace(

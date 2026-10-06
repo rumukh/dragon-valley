@@ -111,9 +111,9 @@ export function buildCatalog(): Record<string, unknown> {
       emblems: [...REGION_EMBLEM_IDS],
     },
     stickers: {
-      frames: [...STICKER_FRAMES],
+      frames: STICKER_FRAMES.map((id) => ({ id })),
       colors: [...STICKER_COLORS],
-      content: 'any icon id (icons.*) or any dragon id',
+      content: 'icon: any icon id (icons.*) or cosmetic id; or dragon: any dragon id',
     },
     magicWindow: {
       levels: [...MASTERY_LEVELS],

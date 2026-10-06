@@ -9,6 +9,7 @@ import {
 import {
   BACKGROUND_IDS,
   BOSS_STATES,
+  COSMETICS,
   HALL_WINDOW,
   MAP_HOTSPOTS,
   MAP_LEVELS,
@@ -19,6 +20,7 @@ import {
   mapNodePositions,
   renderBackgrounds,
   renderBoss,
+  renderCosmeticIcon,
   renderMagicWindow,
   renderMasteryGrid,
   renderSticker,
@@ -90,11 +92,23 @@ describe('sticker composer', () => {
     }
   });
 
+  it('renders every cosmetic as a standalone icon and accepts cosmetics as sticker icons', () => {
+    for (const c of COSMETICS) {
+      const svg = renderCosmeticIcon(c.id, { idPrefix: `ci-${c.id}` });
+      checkChildSafe(svg);
+      expect(svg).toContain(`data-slot="${c.slot}"`);
+    }
+    checkChildSafe(
+      renderSticker({ frame: 'frame-round', color: '#c77dff', icon: 'hat-party', idPrefix: 'hp' }),
+    );
+    expect(() => renderCosmeticIcon('hat-jetpack')).toThrow();
+  });
+
   it('rejects unknown frames, colors, icons and dragons', () => {
     expect(() => renderSticker({ frame: 'blob' as never, color: 'sun', icon: 'coin' })).toThrow();
-    expect(() => renderSticker({ frame: 'circle', color: 'plaid', icon: 'coin' })).toThrow();
-    expect(() => renderSticker({ frame: 'circle', color: 'sun', icon: 'rocket' })).toThrow();
-    expect(() => renderSticker({ frame: 'circle', color: 'sun', dragon: 'nessie' })).toThrow();
+    expect(() => renderSticker({ frame: 'frame-round', color: 'plaid', icon: 'coin' })).toThrow();
+    expect(() => renderSticker({ frame: 'frame-round', color: 'sun', icon: 'rocket' })).toThrow();
+    expect(() => renderSticker({ frame: 'frame-round', color: 'sun', dragon: 'nessie' })).toThrow();
   });
 });
 

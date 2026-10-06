@@ -10,17 +10,20 @@ import { sparkleD } from '../glyphs';
 import { renderIcon, ICON_IDS } from '../icons';
 import { getDragonAnchors, renderDragon, DRAGON_RECIPES } from '../dragon';
 import { paletteColor } from '../palette';
+import { cosmeticById } from '../cosmetics';
+import { renderCosmeticIcon } from '../cosmetics/icon';
 import paletteJson from '../../../../assets/art/palette.json';
 
+/** Sticker frame ids (prefixed so they never collide with other art ids). */
 export const STICKER_FRAMES = [
-  'circle',
-  'scallop',
-  'shield',
-  'star',
-  'hexagon',
-  'heart',
-  'ribbon',
-  'cloud',
+  'frame-round',
+  'frame-scallop',
+  'frame-shield',
+  'frame-star',
+  'frame-hexagon',
+  'frame-heart',
+  'frame-ribbon',
+  'frame-cloud',
 ] as const;
 export type StickerFrame = (typeof STICKER_FRAMES)[number];
 
@@ -45,7 +48,7 @@ export interface StickerSpec {
   frame: StickerFrame;
   /** A STICKER_COLORS name or a #rrggbb color. */
   color: string;
-  /** Any renderIcon id (coin, star-filled, apple, emblem-...). Ignored when `dragon` is set. */
+  /** Any renderIcon id (coin, star-filled, apple, emblem-...) or cosmetic id (hat-party, ...). Ignored when `dragon` is set. */
   icon?: string;
   /** A dragon id: shows its portrait instead of an icon. */
   dragon?: string;
@@ -69,9 +72,9 @@ const C = 60;
 
 function frameD(frame: StickerFrame, r: number): string {
   switch (frame) {
-    case 'scallop':
+    case 'frame-scallop':
       return scallopD(C, C, r * 0.86, r * 0.86, 14, r * 0.12);
-    case 'shield':
+    case 'frame-shield':
       return (
         M(C, C - r) +
         Q(C + r * 0.55, C - r * 0.82, C + r * 0.92, C - r * 0.86) +
@@ -82,9 +85,9 @@ function frameD(frame: StickerFrame, r: number): string {
         Q(C - r * 0.55, C - r * 0.82, C, C - r) +
         'Z'
       );
-    case 'star':
+    case 'frame-star':
       return roundStarD(C, C + r * 0.06, 5, r * 1.04, r * 0.62, -90, 0.24);
-    case 'hexagon': {
+    case 'frame-hexagon': {
       const pts: Pt[] = [];
       for (let i = 0; i < 6; i++) pts.push(polar(C, C, r, -90 + i * 60));
       return smoothClosedD(
@@ -98,11 +101,11 @@ function frameD(frame: StickerFrame, r: number): string {
         0.35,
       );
     }
-    case 'heart':
+    case 'frame-heart':
       return heartD(C, C + r * 0.04, r * 2.05);
-    case 'cloud':
+    case 'frame-cloud':
       return scallopD(C, C + r * 0.04, r * 0.8, r * 0.66, 9, r * 0.2);
-    case 'ribbon':
+    case 'frame-ribbon':
       return circleD(C, C - 4, r * 0.82);
     default:
       return circleD(C, C, r * 0.94);
@@ -112,13 +115,13 @@ function frameD(frame: StickerFrame, r: number): string {
 /** Where the icon sits per frame: [cx, cy, size]. */
 function iconBox(frame: StickerFrame, r: number): [number, number, number] {
   switch (frame) {
-    case 'star':
+    case 'frame-star':
       return [C, C + r * 0.1, r * 0.92];
-    case 'heart':
+    case 'frame-heart':
       return [C, C - r * 0.04, r * 0.98];
-    case 'shield':
+    case 'frame-shield':
       return [C, C - r * 0.04, r * 1.12];
-    case 'ribbon':
+    case 'frame-ribbon':
       return [C, C - 4, r * 1.08];
     default:
       return [C, C, r * 1.2];
@@ -171,8 +174,10 @@ export function renderSticker(spec: StickerSpec): string {
     );
   } else {
     const icon = spec.icon ?? 'star-filled';
-    if (!ICON_IDS.includes(icon)) throw new Error(`Unknown sticker icon: ${icon}`);
-    const svg = renderIcon(icon, { idPrefix: `${prefix}-i` });
+    let svg: string;
+    if (ICON_IDS.includes(icon)) svg = renderIcon(icon, { idPrefix: `${prefix}-i` });
+    else if (cosmeticById(icon)) svg = renderCosmeticIcon(icon, { idPrefix: `${prefix}-c` });
+    else throw new Error(`Unknown sticker icon: ${icon}`);
     content = h('g', { color: darken(base, 0.55) }, nest(svg, ix - isz / 2, iy - isz / 2, isz));
   }
   const tail = (s: number): string =>
@@ -189,7 +194,7 @@ export function renderSticker(spec: StickerSpec): string {
       'stroke-width': 3,
       'stroke-linejoin': 'round',
     });
-  const ribbon = spec.frame === 'ribbon' ? tail(-1) + tail(1) : '';
+  const ribbon = spec.frame === 'frame-ribbon' ? tail(-1) + tail(1) : '';
   const body =
     h(
       'defs',
@@ -254,21 +259,21 @@ export function renderSticker(spec: StickerSpec): string {
 /** A varied, deterministic sample of stickers for the gallery and tests. */
 export function stickerSamples(): StickerSpec[] {
   return [
-    { frame: 'circle', color: 'sunny-meadow', icon: 'star-filled' },
-    { frame: 'scallop', color: 'whispering-woods', icon: 'emblem-whispering-woods' },
-    { frame: 'shield', color: 'fire-mountain', dragon: 'ember' },
-    { frame: 'star', color: 'gold', icon: 'coin' },
-    { frame: 'hexagon', color: 'crystal-caves', dragon: 'crystal' },
-    { frame: 'heart', color: 'giants-peaks', icon: 'apple' },
-    { frame: 'ribbon', color: 'dragon-castle', icon: 'chest-open' },
-    { frame: 'cloud', color: 'sky', dragon: 'puff' },
-    { frame: 'circle', color: 'sharing-lake', icon: 'plum' },
-    { frame: 'scallop', color: 'leftover-lagoon', dragon: 'pearl' },
-    { frame: 'shield', color: 'riddle-ruins', icon: 'emblem-riddle-ruins' },
-    { frame: 'ribbon', color: 'primary', dragon: 'goldie', stage: 'crowned' },
-    { frame: 'star', color: 'sun', dragon: 'sunny' },
-    { frame: 'hexagon', color: 'meadow', icon: 'egg' },
-    { frame: 'heart', color: 'coral', dragon: 'petal' },
-    { frame: 'cloud', color: '#9fdcff', icon: 'check' },
+    { frame: 'frame-round', color: 'sunny-meadow', icon: 'star-filled' },
+    { frame: 'frame-scallop', color: 'whispering-woods', icon: 'emblem-whispering-woods' },
+    { frame: 'frame-shield', color: 'fire-mountain', dragon: 'ember' },
+    { frame: 'frame-star', color: 'gold', icon: 'coin' },
+    { frame: 'frame-hexagon', color: 'crystal-caves', dragon: 'crystal' },
+    { frame: 'frame-heart', color: 'giants-peaks', icon: 'apple' },
+    { frame: 'frame-ribbon', color: 'dragon-castle', icon: 'chest-open' },
+    { frame: 'frame-cloud', color: 'sky', dragon: 'puff' },
+    { frame: 'frame-round', color: '#c77dff', icon: 'hat-party' },
+    { frame: 'frame-scallop', color: 'leftover-lagoon', dragon: 'pearl' },
+    { frame: 'frame-shield', color: 'riddle-ruins', icon: 'emblem-riddle-ruins' },
+    { frame: 'frame-ribbon', color: 'primary', dragon: 'goldie', stage: 'crowned' },
+    { frame: 'frame-star', color: 'sun', dragon: 'sunny' },
+    { frame: 'frame-hexagon', color: 'meadow', icon: 'egg' },
+    { frame: 'frame-heart', color: 'coral', dragon: 'petal' },
+    { frame: 'frame-cloud', color: '#9fdcff', icon: 'check' },
   ];
 }

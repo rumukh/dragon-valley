@@ -577,14 +577,30 @@
   },
   "stickers": {
     "frames": [
-      "circle",
-      "scallop",
-      "shield",
-      "star",
-      "hexagon",
-      "heart",
-      "ribbon",
-      "cloud"
+      {
+        "id": "frame-round"
+      },
+      {
+        "id": "frame-scallop"
+      },
+      {
+        "id": "frame-shield"
+      },
+      {
+        "id": "frame-star"
+      },
+      {
+        "id": "frame-hexagon"
+      },
+      {
+        "id": "frame-heart"
+      },
+      {
+        "id": "frame-ribbon"
+      },
+      {
+        "id": "frame-cloud"
+      }
     ],
     "colors": [
       "sunny-meadow",
@@ -605,7 +621,7 @@
       "silver",
       "bronze"
     ],
-    "content": "any icon id (icons.*) or any dragon id"
+    "content": "icon: any icon id (icons.*) or cosmetic id; or dragon: any dragon id"
   },
   "magicWindow": {
     "levels": [
