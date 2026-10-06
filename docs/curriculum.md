@@ -52,8 +52,8 @@ document's ID table and the content pack's objectives in step.
 | `obj.order.brackets`           | Brackets first                                                     | počítání se závorkami                                                 | M-3-1-04           |
 | `obj.compare.expressions`      | Comparing products and expressions with `<`, `>`, `=`              | porovnávání čísel a výrazů                                            | M-3-1-02           |
 | `obj.word.equal-groups`        | Word problems with equal groups and fair sharing                   | slovní úlohy na násobení a dělení                                     | M-3-1-05           |
-| `obj.word.times-more-fewer`    | "N times as many" and "N times fewer"                              | x-krát více, x-krát méně                                              | M-3-1-05           |
-| `obj.word.more-fewer-contrast` | Telling "N more / N fewer" apart from "N times as many / fewer"    | o N více/méně versus N-krát více/méně                                 | M-3-1-05           |
+| `obj.word.times-more-fewer`    | "N times as many", asked in both directions                        | x-krát více, x-krát méně                                              | M-3-1-05           |
+| `obj.word.more-fewer-contrast` | Telling "N more / N fewer" apart from "N times as many"            | o N více/méně versus N-krát více/méně                                 | M-3-1-05           |
 | `obj.word.two-step`            | Simple two-step word problems                                      | složené slovní úlohy                                                  | M-3-1-05           |
 | `obj.terms.mul`                | Terms: factor, product                                             | činitel, součin                                                       | M-3-1-04           |
 | `obj.terms.div`                | Terms: dividend, divisor, quotient, remainder                      | dělenec, dělitel, podíl, zbytek                                       | M-3-1-04           |
@@ -158,14 +158,18 @@ Shown in the parent area and used in the terminology levels. The UI uses the Eng
 | equal groups             | stejné skupiny          | 4 nests with 3 eggs each                               |
 | sharing (equal parts)    | dělení na stejné části  | 12 berries into 3 baskets                              |
 | grouping (equal amounts) | dělení po částech       | 12 berries, 3 in each basket                           |
-| N times as many          | N-krát více             | Anna has 4, Tom has 3 times as many: 12                |
-| N times fewer            | N-krát méně             | Tom has 12, Anna has 3 times fewer: 4                  |
-| N more / N fewer         | o N více / o N méně     | Anna has 4, Tom has 3 more: 7                          |
+| N times as many          | N-krát více             | Eva has 4. Tom has 3 times as many: 12                 |
+| that is N times as many  | N-krát méně             | Tom has 12. That is 3 times as many as Eva has: 4      |
+| N more / N fewer         | o N více / o N méně     | Eva has 4, Tom has 3 more: 7                           |
 | brackets                 | závorky                 | `(2 + 3) · 4`                                          |
 | order of operations      | pořadí početních výkonů | `2 + 3 · 4 = 14`                                       |
 | greater than / less than | větší než / menší než   | `7 · 8 > 50`                                           |
 | word problem             | slovní úloha            |                                                        |
 
-**Editorial note.** "N times fewer" is how Czech _N-krát méně_ is usually translated for children,
-but it is awkward English ("one third as many" is the formal form). The game uses "N times as many"
-and "N times fewer" with this glossary for parents; final wording needs editorial sign-off (plan §6).
+**Editorial ruling.** Child-facing English never says "N times fewer": it is how Czech _N-krát méně_
+is often translated for children, but it is awkward English. Both directions use "times as many":
+"Eva has 4 apples. Tom has 3 times as many. How many does Tom have?" (_N-krát více_) and "Tom has 12
+apples. That is 3 times as many as Eva has. How many does Eva have?" (_N-krát méně_), side by side
+with the additive "3 more" and "3 fewer" (_o N více / o N méně_). This glossary maps the English to
+the Czech terms for parents. The word families keep their IDs (`times-as-many`, `times-fewer`); see
+[learning.md](learning.md) for the templates.
