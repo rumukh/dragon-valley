@@ -22,8 +22,8 @@ a golden is a pinned literal, never self-referential; every test is mutation-che
 7. **lockfile**: canonical registry URLs.
 
 CI then audits the record again outside npm (`node scripts/verify.mjs --audit`), so a lost exit code
-cannot turn a failed gate green. The e2e jobs run the QA suite (§5) on Chromium, WebKit and Firefox,
-one engine per job.
+cannot turn a failed gate green. The e2e jobs run the QA suite (§5) on Chromium, WebKit and Firefox:
+one job per engine, WebKit split into three parts.
 
 ## 2. Rules for every test
 
@@ -95,13 +95,17 @@ Assertions (thresholds in the test file):
 `test/e2e/` runs the built site at the Pages base `/dragon-valley/` in a real browser. Locally it
 drives the system Microsoft Edge (`DV_BROWSER_CHANNEL=chrome` for Chrome) and never downloads
 browsers; `$env:DV_E2E_ALL_ENGINES = '1'` runs Chromium, WebKit and Firefox where Playwright's own
-builds are installed. CI runs one engine per job (`e2e (chromium)`, `e2e (webkit)`,
-`e2e (firefox)`) with `DV_E2E_AUDIT=1`.
+builds are installed. CI runs one job per engine with `DV_E2E_AUDIT=1`; WebKit, about twice as slow
+as the others on a hosted runner, runs in three parallel jobs, one per part of the suite
+(`DV_E2E_PART`, `support/parts.ts`): `walks` (`screens`, `reflow`), `rounds` (`input`,
+`persistence`, `recovery`, `settings`) and `rest` (every other spec, including any new one). Each
+job takes 6-9 minutes, two workers each; the slowest bounds the run (CI `e2e (...)` jobs).
 
 ```
 npm run test:e2e                                   # everything, system Edge
 npm run test:e2e -- input.spec.ts --headed         # one spec, watching
 $env:DV_E2E_ALL_ENGINES = '1'; npm run test:e2e -- --project=webkit
+$env:DV_E2E_PART = 'walks'; npm run test:e2e       # one part, as a CI job runs it
 ```
 
 ### Guards on every test
@@ -171,13 +175,14 @@ it (`engines`), and stays a failure everywhere else. Nothing unlisted is tolerat
 `support/qa-reporter.ts` writes `test-results/qa-summary.md` and the GitHub job summary: totals,
 known defects still reproducing (with the evidence a test recorded for them), markers that no
 longer reproduce, and axe advice by rule. With `DV_E2E_AUDIT=1` it also fails the run if a spec
-file did not run in a project or a test was skipped without a reason.
+file (of the job's part) did not run in a project or a test was skipped without a reason.
 
 ### Artifacts
 
-Each CI job uploads `qa-screens-<engine>` (screenshots and contact sheets, 30 days) and
-`playwright-report-<engine>` (the HTML report with every axe result and guard report attached,
-`qa-summary.md`, `results.json`), plus traces when something failed.
+Each CI job uploads `qa-screens-<job>` (screenshots and contact sheets, 30 days: `chromium`,
+`firefox` and `webkit-walks`, the part that takes them) and `playwright-report-<job>` (the HTML
+report with every axe result and guard report attached, `qa-summary.md`, `results.json`), plus
+`playwright-traces-<job>` when something failed.
 
 ### Adding a test
 

@@ -5,8 +5,8 @@
  * `test-results/qa-summary.md` and, on GitHub Actions, the job summary.
  *
  * With `DV_E2E_AUDIT=1` (CI) it also audits the run, as scripts/verify.mjs does for Vitest:
- * every spec file on disk must have run in every project, and a skipped test must say why.
- * Otherwise the run fails.
+ * every spec file on disk (of the selected part, test/e2e/support/parts.ts) must have run in
+ * every project, and a skipped test must say why. Otherwise the run fails.
  */
 import { appendFileSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
@@ -20,6 +20,7 @@ import type {
 } from '@playwright/test/reporter';
 import { DEFECTS } from './known-issues';
 import type { Defect } from './known-issues';
+import { partOf, selectedPart } from './parts';
 
 interface Note {
   readonly type: string;
@@ -57,9 +58,11 @@ class QaSummary implements Reporter {
   private audit(config: FullConfig, projects: readonly string[]): string[] {
     const problems: string[] = [];
     const testDir = config.projects[0]?.testDir ?? config.rootDir;
+    const part = selectedPart();
     const specs = readdirSync(testDir)
       .filter((name) => name.endsWith('.spec.ts'))
-      .map((name) => join(testDir, name));
+      .map((name) => join(testDir, name))
+      .filter((spec) => part === undefined || partOf(spec) === part);
     for (const project of projects) {
       for (const spec of specs) {
         const ran = this.results.some(
@@ -115,8 +118,9 @@ class QaSummary implements Reporter {
     }
 
     const where = (set: Set<string>): string => ` _(${[...set].sort().join(', ')})_`;
+    const part = selectedPart();
     const lines = [
-      `## Dragon Valley end-to-end: ${projects.join(', ') || 'no project'}`,
+      `## Dragon Valley end-to-end: ${projects.join(', ') || 'no project'}${part ? ` (part: ${part})` : ''}`,
       '',
       `**${result.status}**: ${count('passed')} passed, ${count('failed', 'timedOut', 'interrupted')} failed, ${count('skipped')} skipped in ${Math.round(result.duration / 1000)} s.`,
       '',
