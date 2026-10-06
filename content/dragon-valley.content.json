@@ -260,7 +260,7 @@
           "cosmetics": []
         },
         "boss": null,
-        "storyBeat": null,
+        "storyBeat": "beat.meadow-new-eggs",
         "objectives": ["obj.mul.rules-0-1", "obj.mul.table-2-5-10"]
       },
       {
@@ -805,7 +805,7 @@
         "nameKey": "sticker.first-outfit",
         "page": "sunny-meadow",
         "criteria": {
-          "kind": "cosmetics-owned",
+          "kind": "dragons-dressed",
           "count": 1
         },
         "icon": "hat-party",
@@ -4144,6 +4144,81 @@
           }
         },
         {
+          "id": "beat.meadow-new-eggs",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sunny-meadow.3"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.meadow-new-eggs",
+            "revision": "1",
+            "start": "meadow-new-eggs-1",
+            "catalogs": {
+              "scene": ["sunny-meadow"],
+              "text": ["story.meadow-new-eggs.1", "story.next", "story.meadow-new-eggs.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.mirror", "egg.puff"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-mirror",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.mirror"
+              },
+              {
+                "id": "claim-puff",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.puff"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "meadow-new-eggs-1",
+                "scene": "sunny-meadow",
+                "text": "story.meadow-new-eggs.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-mirror", "claim-puff"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "meadow-new-eggs-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "meadow-new-eggs-2",
+                "scene": "sunny-meadow",
+                "text": "story.meadow-new-eggs.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
           "id": "beat.bridge-troll",
           "trigger": {
             "kind": "level-start",
@@ -4312,6 +4387,20 @@
           "grant": {
             "kind": "egg",
             "dragon": "goldie"
+          }
+        },
+        {
+          "reward": "egg.mirror",
+          "grant": {
+            "kind": "egg",
+            "dragon": "mirror"
+          }
+        },
+        {
+          "reward": "egg.puff",
+          "grant": {
+            "kind": "egg",
+            "dragon": "puff"
           }
         }
       ]
