@@ -10,6 +10,7 @@
 import type { GameEvent, GameView } from '../../rules/contract';
 import type { StickerFrame } from '../art/stickers';
 import { resultsNext } from '../game/view';
+import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { candyButton } from '../ui/button';
 import { dragonArt, stickerArt, viewDragonArt } from '../ui/art';
@@ -117,7 +118,7 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
       h('p', {
         className: 'dv-results__coins',
         testId: 'results-coins',
-        text: t('results.coins', { count: round.coins }),
+        text: plural(t, round.coins, 'results.coins.one', 'results.coins.other'),
       }),
     );
   }

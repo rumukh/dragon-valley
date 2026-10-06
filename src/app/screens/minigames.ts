@@ -15,6 +15,7 @@ import type {
   MinigameMove,
   MinigameRoundView,
 } from '../../rules/contract';
+import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { numberToWords } from '../speech/numbers';
 import { speakFace } from '../speech/verbalizer';
@@ -396,7 +397,9 @@ function eggGrid(context: BoardContext): BoardPainter {
               })
             : t('egg.how'),
     );
-    goal.textContent = t('egg.goal', { product: board.product, count: board.find });
+    goal.textContent = plural(t, board.find, 'egg.goal.one', 'egg.goal.other', {
+      product: board.product,
+    });
     found.replaceChildren(
       ...board.found.map((rect) =>
         h('li', {

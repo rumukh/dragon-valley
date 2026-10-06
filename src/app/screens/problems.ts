@@ -23,6 +23,7 @@ import { CommandRejectedError } from '../controller/commands';
 import { createResponseTimer } from '../game/timer';
 import { answerKindOf, bossPose, featuredDragon, stepChoices } from '../game/view';
 import type { BossPose } from '../game/view';
+import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { modelFor } from '../math/model';
 import { formatSolved } from '../math/notation';
@@ -96,7 +97,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       label: t('arena.time'),
       max: ARENA_SECONDS,
       value: ARENA_SECONDS,
-      valueText: (value) => t('arena.seconds', { count: value }),
+      valueText: (value) => plural(t, value, 'arena.seconds.one', 'arena.seconds.other'),
       testId: 'arena-time',
     });
   } else if (first.placement) {
