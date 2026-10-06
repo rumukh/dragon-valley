@@ -20,27 +20,44 @@
 import { createMinigameRegistry } from '@aegis/narrative';
 import type { Json, MinigameDefinition, MinigameState } from '@aegis/narrative';
 import type { DeepReadonly, RandomStream } from '@aegis/runtime';
-import { CARD_BACK_LABEL, divFactId, mulFactId, parseCardLabel, parseItemId } from '../contract';
+import {
+  CARD_BACK_LABEL,
+  bucketId,
+  divFactId,
+  mulFactId,
+  parseCardLabel,
+  parseItemId,
+} from '../contract';
 import type {
   BoardView,
   EggGridBoard,
   EggGridSplit,
   FactFamilyBoard,
+  GolemOrdersBoard,
   MinigameActivityKind,
   ResponseBucket,
+  SharingFeastBoard,
   Skill,
+  Term,
 } from '../contract';
+import { orderProblem } from '../learning/generators/order';
 import { shuffled } from '../learning/selection';
 import { EGG_GRID_KIND, eggGridAdapter, rectangles } from './egg-grid';
 import type { EggGridConfig, EggGridState } from './egg-grid';
 import { FACT_FAMILY_KIND, factFamilyAdapter } from './fact-family';
 import type { FactFamilyConfig, FactFamilyState } from './fact-family';
+import { GOLEM_ORDERS_KIND, golemOrdersAdapter } from './golem-orders';
+import type { GolemOrdersConfig, GolemOrdersState } from './golem-orders';
+import { SHARING_FEAST_KIND, sharingFeastAdapter } from './sharing-feast';
+import type { SharingFeastConfig, SharingFeastState } from './sharing-feast';
 import type { ReadState } from '../types';
 
 /** The minigame registry of the rules: the narrative built-ins plus Dragon Valley's adapters. */
 export const MINIGAMES = createMinigameRegistry()
   .register(eggGridAdapter)
-  .register(factFamilyAdapter);
+  .register(factFamilyAdapter)
+  .register(sharingFeastAdapter)
+  .register(golemOrdersAdapter);
 
 export type Options = Readonly<Record<string, number | boolean | string>>;
 
@@ -146,14 +163,134 @@ function trailSteps(skills: readonly DeepReadonly<Skill>[]): number[] {
       skill.params.tables.forEach((table) => steps.add(table));
     } else if (skill.generator === 'div.fact') {
       skill.params.divisors.forEach((divisor) => steps.add(divisor));
+    } else if (skill.generator === 'mul.tens') {
+      // Count in whole tens: 30, 60, 90, … (tens times one digit).
+      range(skill.params.tens).forEach((tens) => steps.add(tens * 10));
     }
   }
   return [...steps].filter((step) => step >= 2).sort((a, b) => a - b);
 }
 
-/** Distinct-value fact pairs for Memory Match. */
-function matchable(pool: readonly string[]): number {
-  return new Set(pool.map((item) => factValue(item)?.value).filter((v) => v !== undefined)).size;
+/** Distinct-value pairs a Memory Match board can deal in its mode. */
+function matchable(
+  pool: readonly string[],
+  skills: readonly DeepReadonly<Skill>[],
+  mode: unknown,
+): number {
+  if (mode === 'term') {
+    const terms = skills.flatMap((s) => (s.generator === 'terms' ? s.params.terms : []));
+    return new Set(terms.filter((term) => pool.includes(bucketId('terms', term)))).size;
+  }
+  if (mode === 'family') {
+    return new Set(
+      pool.map((item) => parseItemId(item)).flatMap((p) => (p?.kind === 'mul' ? [p.product] : [])),
+    ).size;
+  }
+  const values = new Set<string>(
+    pool.flatMap((item) => {
+      const fact = factValue(item);
+      return fact === null ? [] : [`${fact.value}`];
+    }),
+  );
+  const leftovers = feasts(pool, skills).filter((source) => source.item.startsWith('rem:'));
+  for (const source of leftovers) {
+    for (const deal of source.deals) {
+      const left = deal.total % deal.baskets;
+      values.add(`${(deal.total - left) / deal.baskets}r${left}`);
+    }
+  }
+  return values.size;
+}
+
+interface Feast {
+  item: string;
+  /** Every `{ total, baskets }` this source can deal. */
+  deals: { total: number; baskets: number }[];
+}
+
+function range([low, high]: readonly [number, number] | readonly number[]): number[] {
+  const values: number[] = [];
+  for (let value = low ?? 0; value <= (high ?? -1); value++) values.push(value);
+  return values;
+}
+
+function fits(requirement: 'required' | 'allowed' | 'forbidden', holds: boolean): boolean {
+  return requirement === 'allowed' || (requirement === 'required') === holds;
+}
+
+/**
+ * What a Sharing Feast can share: division facts of the pool (no leftovers), and dividends drawn
+ * within the parameters of the round's remainder and 2-digit division skills.
+ */
+function feasts(pool: readonly string[], skills: readonly DeepReadonly<Skill>[]): Feast[] {
+  const available = new Set(pool);
+  const sources: Feast[] = [];
+  for (const item of pool) {
+    const parsed = parseItemId(item);
+    if (parsed?.kind === 'div' && parsed.divisor >= 2 && parsed.quotient >= 1) {
+      sources.push({ item, deals: [{ total: parsed.dividend, baskets: parsed.divisor }] });
+    }
+  }
+  for (const skill of skills) {
+    if (skill.generator === 'div.remainder') {
+      const { divisors, quotients, dividendMax, remainder } = skill.params;
+      for (const baskets of divisors) {
+        const item = bucketId('rem', `d${baskets}`);
+        if (!available.has(item)) continue;
+        const deals = range(quotients).flatMap((q) =>
+          range([0, baskets - 1])
+            .filter((r) => fits(remainder, r > 0) && q * baskets + r >= 1)
+            .filter((r) => q * baskets + r <= dividendMax)
+            .map((r) => ({ total: q * baskets + r, baskets })),
+        );
+        if (deals.length > 0) sources.push({ item, deals });
+      }
+    } else if (skill.generator === 'div.2d1d') {
+      const { divisors, quotients, dividendMax, regroup, remainder } = skill.params;
+      for (const regroups of [false, true]) {
+        const item = bucketId('div2d1d', regroups ? 'regroup' : 'noregroup');
+        if (!available.has(item) || !fits(regroup, regroups)) continue;
+        const deals = divisors.flatMap((baskets) =>
+          range(quotients).flatMap((q) =>
+            range([0, baskets - 1]).flatMap((r) => {
+              const total = q * baskets + r;
+              const tens = (total - (total % 10)) / 10;
+              const ok =
+                total >= 10 &&
+                total <= dividendMax &&
+                fits(remainder, r > 0) &&
+                (tens % baskets !== 0) === regroups;
+              return ok ? [{ total, baskets }] : [];
+            }),
+          ),
+        );
+        if (deals.length > 0) sources.push({ item, deals });
+      }
+    }
+  }
+  return sources;
+}
+
+type OrderSkill = Extract<DeepReadonly<Skill>, { generator: 'order.ops' }>;
+
+/** Order-of-operations skills of the round with an order item in the pool. */
+function golemSkills(
+  pool: readonly string[],
+  skills: readonly DeepReadonly<Skill>[],
+): OrderSkill[] {
+  return skills.filter(
+    (skill): skill is OrderSkill =>
+      skill.generator === 'order.ops' && orderItems(pool, skill).length > 0,
+  );
+}
+
+/** The pool's order items an order skill can produce (its `brackets` requirement). */
+function orderItems(pool: readonly string[], skill: OrderSkill): string[] {
+  return pool.filter((item) =>
+    item === 'order:brackets'
+      ? skill.params.brackets !== 'forbidden'
+      : item === 'order:no-brackets' && skill.params.brackets !== 'required',
+  );
 }
 
 /** Whether the round's items and skills can make a board of this activity. */
@@ -161,18 +298,21 @@ export function canMakeBoard(
   activity: MinigameActivityKind,
   pool: readonly string[],
   skills: readonly DeepReadonly<Skill>[],
+  options: Options = {},
 ): boolean {
   switch (activity) {
     case 'memory-match':
-      return matchable(pool) >= 2;
+      return matchable(pool, skills, options['match']) >= 2;
     case 'number-trail':
       return trailSteps(skills).length > 0;
     case 'egg-grid':
       return eggProducts(pool).length > 0;
     case 'fact-family':
       return families(pool).length > 0;
-    default:
-      return false;
+    case 'sharing-feast':
+      return feasts(pool, skills).length > 0;
+    case 'golem-orders':
+      return golemSkills(pool, skills).length > 0;
   }
 }
 
@@ -222,21 +362,123 @@ function factFamilyConfig(request: BoardRequest): FactFamilyConfig {
   return { a: family.a, b: family.b, product: family.a * family.b };
 }
 
+interface MemoryPair {
+  /** The pair ID: an item ID (`mul:7x8`), `fam:<mul item>` for a × ↔ ÷ family, `terms:<term>`,
+   * or `<bucket item>/<n>` when one bucket gives several pairs. */
+  pair: string;
+  faces: [string, string];
+  /** What makes two pairs look alike on one board (each must differ). */
+  value: string;
+}
+
+/** Fact ↔ value pairs: a fact and its product or quotient, or a remainder sum and its answer. */
+function valuePairs(request: BoardRequest): MemoryPair[] {
+  const pairs: MemoryPair[] = [];
+  for (const item of request.pool) {
+    const fact = factValue(item);
+    if (fact !== null) {
+      pairs.push({ pair: item, faces: [fact.face, `num:${fact.value}`], value: `${fact.value}` });
+    }
+  }
+  for (const source of feasts(request.pool, request.skills)) {
+    if (!source.item.startsWith('rem:')) continue;
+    source.deals.forEach((deal, n) => {
+      const left = deal.total % deal.baskets;
+      const each = (deal.total - left) / deal.baskets;
+      pairs.push({
+        pair: `${source.item}/${n}`,
+        faces: [`expr:div:${deal.total}:${deal.baskets}`, `rem:${each}:${left}`],
+        value: `${each}r${left}`,
+      });
+    });
+  }
+  return pairs;
+}
+
+/** × ↔ ÷ pairs of one family: `6 · 7 = 42` and `42 : 7 = 6`. */
+function familyPairs(request: BoardRequest): MemoryPair[] {
+  return request.pool.flatMap((item) => {
+    const parsed = parseItemId(item);
+    if (parsed?.kind !== 'mul' || parsed.a < 1 || parsed.b < 1) return [];
+    const { a, b, product } = parsed;
+    return [
+      {
+        pair: `fam:${item}`,
+        faces: [
+          `example:mul:${a}:${b}:${product}:-:none`,
+          `example:div:${product}:${b}:${a}:-:none`,
+        ],
+        value: `${product}`,
+      } satisfies MemoryPair,
+    ];
+  });
+}
+
+const TERM_HIGHLIGHT: Record<Term, { op: 'mul' | 'div'; highlight: string }> = {
+  factor: { op: 'mul', highlight: 'left' },
+  product: { op: 'mul', highlight: 'result' },
+  dividend: { op: 'div', highlight: 'left' },
+  divisor: { op: 'div', highlight: 'right' },
+  quotient: { op: 'div', highlight: 'result' },
+  remainder: { op: 'div', highlight: 'remainder' },
+};
+
+/** Term ↔ example pairs: `product` and `6 · 7 = 42` with 42 highlighted. */
+function termPairs(request: BoardRequest): MemoryPair[] {
+  const pairs: MemoryPair[] = [];
+  for (const skill of request.skills) {
+    if (skill.generator !== 'terms') continue;
+    const tables = skill.params.tables.filter((t) => t >= 2);
+    for (const term of skill.params.terms) {
+      if (!request.pool.includes(bucketId('terms', term)) || tables.length === 0) continue;
+      const a = request.random.pick(tables);
+      const b = request.random.int(2, 10);
+      const { op, highlight } = TERM_HIGHLIGHT[term];
+      const example =
+        op === 'mul'
+          ? `example:mul:${a}:${b}:${a * b}:-:${highlight}`
+          : term === 'remainder'
+            ? `example:div:${a * b + 1}:${a}:${b}:1:${highlight}`
+            : `example:div:${a * b}:${a}:${b}:-:${highlight}`;
+      pairs.push({ pair: bucketId('terms', term), faces: [`term:${term}`, example], value: term });
+    }
+  }
+  return pairs;
+}
+
+/** Items a matched pair practised. */
+function pairItems(pair: string): string[] {
+  if (pair.startsWith('fam:')) {
+    const parsed = parseItemId(pair.slice(4));
+    return parsed?.kind === 'mul' ? [pair.slice(4), divFactId(parsed.product, parsed.b)] : [];
+  }
+  const slash = pair.indexOf('/');
+  return [slash === -1 ? pair : pair.slice(0, slash)];
+}
+
+function memoryPairs(request: BoardRequest): MemoryPair[] {
+  const mode = request.options['match'];
+  return mode === 'family'
+    ? familyPairs(request)
+    : mode === 'term'
+      ? termPairs(request)
+      : valuePairs(request);
+}
+
 function memoryConfig(request: BoardRequest): MatchingConfig {
   const wanted = Number(request.options['pairs'] ?? 6);
-  const used = new Set<number>();
-  const picks: { item: string; face: string; value: number }[] = [];
-  for (const item of shuffled(request.pool, request.random)) {
-    const fact = factValue(item);
-    if (fact === null || used.has(fact.value)) continue;
-    used.add(fact.value);
-    picks.push({ item, ...fact });
+  const used = new Set<string>();
+  const picks: MemoryPair[] = [];
+  for (const pair of shuffled(memoryPairs(request), request.random)) {
+    if (used.has(pair.value)) continue;
+    used.add(pair.value);
+    picks.push(pair);
     if (picks.length === wanted) break;
   }
   const cards = shuffled(
     picks.flatMap((pick) => [
-      { pair: pick.item, labelKey: pick.face },
-      { pair: pick.item, labelKey: `num:${pick.value}` },
+      { pair: pick.pair, labelKey: pick.faces[0] },
+      { pair: pick.pair, labelKey: pick.faces[1] },
     ]),
     request.random,
   );
@@ -281,6 +523,27 @@ export function trailShape(definitionId: string): { step: number; length: number
   return match ? { step: Number(match[1]), length: Number(match[2]) } : null;
 }
 
+function feastConfig(request: BoardRequest): SharingFeastConfig {
+  const previous = request.previous?.config as { total?: number; baskets?: number } | undefined;
+  const all = feasts(request.pool, request.skills);
+  const source = request.random.pick(all);
+  const fresh = source.deals.filter(
+    (deal) => deal.total !== previous?.total || deal.baskets !== previous?.baskets,
+  );
+  const deal = request.random.pick(fresh.length > 0 ? fresh : source.deals);
+  const leftovers = deal.total % deal.baskets !== 0 || source.item.startsWith('rem:');
+  return { total: deal.total, baskets: deal.baskets, remainder: leftovers };
+}
+
+function golemConfig(request: BoardRequest): GolemOrdersConfig {
+  const skill = request.random.pick(golemSkills(request.pool, request.skills));
+  const item = request.random.pick(orderItems(request.pool, skill));
+  const problem = orderProblem(skill.params, item, request.random);
+  if (problem.kind !== 'equation') throw new Error('An order skill gives an equation.');
+  const expr = problem.left.kind === 'blank' ? problem.right : problem.left;
+  return { expr };
+}
+
 /** Generate the next board of a round as a narrative minigame definition. */
 export function makeBoard(request: BoardRequest): MinigameDefinition {
   const definition = (kind: string, config: unknown, id = request.id): MinigameDefinition => ({
@@ -303,8 +566,10 @@ export function makeBoard(request: BoardRequest): MinigameDefinition {
       return definition(EGG_GRID_KIND, eggGridConfig(request));
     case 'fact-family':
       return definition(FACT_FAMILY_KIND, factFamilyConfig(request));
-    default:
-      throw new Error(`No board for ${request.activity}.`);
+    case 'sharing-feast':
+      return definition(SHARING_FEAST_KIND, feastConfig(request));
+    case 'golem-orders':
+      return definition(GOLEM_ORDERS_KIND, golemConfig(request));
   }
 }
 
@@ -356,7 +621,34 @@ export function boardView(
   if (definition.kind === EGG_GRID_KIND) {
     return { kind: 'egg-grid', ...(projected as unknown as Omit<EggGridBoard, 'kind'>) };
   }
+  if (definition.kind === SHARING_FEAST_KIND) {
+    return { kind: 'sharing-feast', ...(projected as unknown as Omit<SharingFeastBoard, 'kind'>) };
+  }
+  if (definition.kind === GOLEM_ORDERS_KIND) {
+    return { kind: 'golem-orders', ...(projected as unknown as Omit<GolemOrdersBoard, 'kind'>) };
+  }
   return { kind: 'fact-family', ...(projected as unknown as Omit<FactFamilyBoard, 'kind'>) };
+}
+
+/** The item a finished feast practised: a division fact, a remainder or a 2-digit division. */
+function feastItems(config: SharingFeastConfig): string[] {
+  const { total, baskets } = config;
+  const left = total % baskets;
+  const each = (total - left) / baskets;
+  const items: string[] = [];
+  if (left === 0 && each <= 10) items.push(divFactId(total, baskets));
+  if (config.remainder) items.push(bucketId('rem', `d${baskets}`));
+  if (total >= 10 && total <= 99 && each >= 10) {
+    const tens = (total - (total % 10)) / 10;
+    items.push(bucketId('div2d1d', tens % baskets !== 0 ? 'regroup' : 'noregroup'));
+  }
+  return items;
+}
+
+/** Whether an expression has brackets anywhere. */
+function hasGroup(expr: DeepReadonly<GolemOrdersConfig['expr']>): boolean {
+  if (expr.kind === 'group') return true;
+  return expr.kind === 'op' && (hasGroup(expr.left) || hasGroup(expr.right));
 }
 
 export interface BoardCredit {
@@ -386,16 +678,22 @@ export function boardCredits(
     const fresh = now.matched.filter((card) => !was.includes(card));
     const pairs = [...new Set(fresh.map((card) => config.cards.find((c) => c.id === card)!.pair))];
     const clean = now.attempts * 2 === now.matched.length;
-    for (const pair of pairs) add(pair, clean ? 'fast' : 'ok');
+    for (const pair of pairs) {
+      for (const item of pairItems(pair)) add(item, clean ? 'fast' : 'ok');
+    }
     credit.coins += pairs.length;
   } else if (definition.kind === 'ordering' && completed) {
     const config = definition.config as unknown as OrderingConfig;
     const shape = trailShape(definition.id);
     const attempts = (after.progress as unknown as OrderingState).attempts;
+    const bucket: ResponseBucket = attempts === 1 ? 'ok' : 'slow';
     for (const id of config.solution) {
       const groups = Number(id.slice(1)) + 1;
-      const fact = shape !== null && groups <= 10 && shape.step <= 10;
-      add(fact ? mulFactId(groups, shape!.step) : null, attempts === 1 ? 'ok' : 'slow');
+      if (shape === null) continue;
+      if (shape.step <= 10 && groups <= 10) add(mulFactId(groups, shape.step), bucket);
+      else if (shape.step % 10 === 0 && groups >= 2 && groups <= 9) {
+        add(bucketId('tens', `d${groups}`), bucket);
+      }
     }
     credit.coins += config.solution.length;
   } else if (definition.kind === EGG_GRID_KIND) {
@@ -416,6 +714,18 @@ export function boardCredits(
     add(small ? divFactId(product, a) : null, bucket);
     add(small ? divFactId(product, b) : null, bucket);
     credit.coins += 4;
+  } else if (definition.kind === SHARING_FEAST_KIND && completed) {
+    const config = definition.config as unknown as SharingFeastConfig;
+    const attempts = (after.progress as unknown as SharingFeastState).attempts;
+    const item = feastItems(config).find((candidate) => pool.has(candidate)) ?? null;
+    add(item, attempts === 1 ? 'ok' : 'slow');
+    credit.coins += config.baskets;
+  } else if (definition.kind === GOLEM_ORDERS_KIND && completed) {
+    const config = definition.config as unknown as GolemOrdersConfig;
+    const progress = after.progress as unknown as GolemOrdersState;
+    const item = bucketId('order', hasGroup(config.expr) ? 'brackets' : 'no-brackets');
+    add(item, progress.mistakes === 0 ? 'ok' : 'slow');
+    credit.coins += progress.steps;
   }
   return credit;
 }
