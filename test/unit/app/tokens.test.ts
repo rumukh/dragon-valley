@@ -30,6 +30,8 @@ const LOCAL = new Set([
   '--cols',
   '--cell',
   '--side',
+  '--x',
+  '--y',
 ]);
 
 function files(directory: string, extension: string): string[] {

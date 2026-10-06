@@ -1552,22 +1552,28 @@
   inset: 0;
 }
 
+/* A place's name is anchored in proportion to where it stands (left at the left edge, centred in
+   the middle, right at the right edge), so a long name or big text never leaves the frame. */
 .dv-map__place {
   position: absolute;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  translate: calc(var(--x, 50%) * -1) calc(var(--y, 50%) * -1);
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
   min-height: var(--dv-target);
+  max-width: 92%;
   padding: 0.3em 0.9em 0.3em 0.35em;
   border: 0.1em solid var(--dv-line);
   border-radius: 2em;
   font: inherit;
   font-weight: 700;
-  white-space: nowrap;
+  line-height: 1.1;
+  text-align: start;
   color: var(--dv-ink);
   background: var(--dv-card);
   box-shadow: 0 0.2em 0 var(--dv-line-strong);
-  transform: translate(-50%, -50%);
   cursor: pointer;
 }
 
@@ -1576,12 +1582,16 @@
   height: 2em;
 }
 
+/* Pins and level markers stand centred on their point, kept half their size from the edges. */
 .dv-map__asleep {
+  --size: 2.4em;
   position: absolute;
+  left: clamp(calc(var(--size) / 2), var(--x, 50%), calc(100% - var(--size) / 2));
+  top: clamp(calc(var(--size) / 2), var(--y, 50%), calc(100% - var(--size) / 2));
   display: grid;
   place-items: center;
-  width: 2.4em;
-  height: 2.4em;
+  width: var(--size);
+  height: var(--size);
   border-radius: 50%;
   color: var(--dv-ink-muted);
   background: color-mix(in srgb, var(--dv-paper) 80%, transparent);
@@ -1593,12 +1603,17 @@
   height: 1.3em;
 }
 
+/* Level markers are pictures: they follow the road's size, not the text size, so big text on
+   a small road never piles them on top of each other. */
 .dv-road__node {
+  --size: max(var(--dv-target), min(3.4em, 8vw, 11vh));
   position: absolute;
+  left: clamp(calc(var(--size) / 2), var(--x, 50%), calc(100% - var(--size) / 2));
+  top: clamp(calc(var(--size) / 2), var(--y, 50%), calc(100% - var(--size) / 2));
   display: grid;
   place-items: center;
-  width: max(var(--dv-target), 3.4em);
-  height: max(var(--dv-target), 3.4em);
+  width: var(--size);
+  height: var(--size);
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -1614,8 +1629,7 @@
 }
 
 .dv-road__node--boss {
-  width: 5.4em;
-  height: 5.4em;
+  --size: max(var(--dv-target), min(5.4em, 13vw, 18vh));
 }
 
 .dv-road__node:disabled {
