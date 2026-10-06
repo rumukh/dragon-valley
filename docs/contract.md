@@ -209,8 +209,9 @@ by `contentRegistration` (`parseContentJson(text, contentRegistration, file)`).
 
 **Sticker criteria** (`kind`): `level-complete {level, stars}`, `boss-defeated {boss}`,
 `dragon-stage {dragon | null, stage}`, `facts-mastered {family: mul/div, level, count}`,
-`streak {count}`, `days-practiced`, `week-days`, `coins-earned`, `cosmetics-owned`, `arena-best`,
-`quests-claimed`, `placement-done`, `finale`.
+`streak {count}`, `days-practiced`, `week-days`, `coins-earned`, `cosmetics-owned`,
+`dragons-dressed {count}` (dragons wearing at least one cosmetic: what the child did, so placement
+and level rewards never earn it), `arena-best`, `quests-claimed`, `placement-done`, `finale`.
 
 **Beat triggers**: `first-session`, `after-beat {beat}`, `level-start {level}`,
 `level-complete {level}`, `boss-defeated {boss}`, `finale`. **Grants**: `egg {dragon}`,
@@ -436,13 +437,16 @@ one-shots). It contains:
   placed, `glowing`); `next` (the Daily Adventure step); `hungry` dragons; arena availability.
 - `run`: the level's activities and done flags, and the level result once finished.
 - `round`: for problem rounds the progress (answered, target, correct, streak, boss meter), the
-  current `problem` (structured problem, resolved input, choices in seeded order, step, re-ask and
-  hint flags), the last `feedback` (with the expected answer for "Let's look"), coins, the dragon
+  current `problem` (structured problem, resolved input, choices, step, re-ask and hint flags:
+  at a story's `operation` step the choices are the four operations, + − · : in that order; at the
+  `answer` step answer options in seeded order for choice input, else `null`), the last `feedback` (with the expected answer for "Let's look"), coins, the dragon
   being fed with its expression, and for the placement check its ladder (`placement`: step,
   steps, levels placed so far); for minigame rounds the board count, the raw `projectMinigame`
   view (`minigame`, whose `revision` every `minigameMove` must carry) and the typed board
   `current` (§11.1).
-- `dragons`: owned dragons with stage, expression, mastery shares, hunger, outfit and next stage.
+- `dragons`: owned dragons with stage, expression, mastery shares (percent, rounded down),
+  hunger, outfit and the next stage with its exact counts (`next.have` of `mastery.items` facts at
+  the stage's mastery level, `next.need` to reach it: the shell's "4 of 7 facts").
 - `window`: the **11 × 11** Magic Window (`cells`: 121 multiplication facts, row = first factor,
   column = second factor) and the division panel (110 cells, row = divisor, column = quotient), each
   cell with `level` (`dim/bronze/silver/gold`) and `needsPolish`.

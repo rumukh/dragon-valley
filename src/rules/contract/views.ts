@@ -188,11 +188,15 @@ export interface DragonView {
   hungry: boolean;
   dueItems: number;
   outfit: Record<CosmeticSlot, string | null>;
-  /** The next stage and its requirement, or `null` when crowned. */
+  /** The next stage and its requirement, or `null` when crowned. `have` of the mastery set's
+   * `items` are at `mastery` or better and `need` must be (`share` percent, rounded up): the
+   * exact counts behind "4 of 7 facts" (the percentages above are rounded down). */
   next: {
     stage: DragonStage;
     share: number;
     mastery: 'seen' | 'bronze' | 'silver' | 'gold';
+    have: number;
+    need: number;
   } | null;
 }
 

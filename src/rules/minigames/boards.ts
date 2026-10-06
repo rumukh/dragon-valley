@@ -48,6 +48,10 @@ export interface BoardRequest {
   activity: MinigameActivityKind;
   /** The definition ID (`<round>.b<board>`), also the base of the instance ID. */
   id: string;
+  /** The board's number in its round (1-based) and the round's number of boards, when known:
+   * Egg Grid boards go from easy to hard over a round. */
+  board?: number;
+  boards?: number;
   pool: readonly string[];
   focus: readonly string[] | null;
   skills: readonly DeepReadonly<Skill>[];
@@ -84,17 +88,35 @@ function factValue(item: string): { face: string; value: number } | null {
 }
 
 /** Products an egg grid can be built for, by item. */
+/**
+ * Products an egg grid can be built for, by item: facts of two factors of at least 2, so every
+ * board has a real array to find (`1 × 5` is only a line of eggs).
+ */
 function eggProducts(pool: readonly string[]): { item: string; product: number }[] {
   return pool.flatMap((item) => {
     const parsed = parseItemId(item);
-    if (parsed?.kind === 'mul' && parsed.a >= 1 && parsed.b >= 1 && parsed.product >= 2) {
+    if (parsed?.kind === 'mul' && parsed.a >= 2 && parsed.b >= 2) {
       return [{ item, product: parsed.product }];
     }
-    if (parsed?.kind === 'div' && parsed.quotient >= 1 && parsed.dividend >= 2) {
+    if (parsed?.kind === 'div' && parsed.divisor >= 2 && parsed.quotient >= 2) {
       return [{ item, product: parsed.dividend }];
     }
     return [];
   });
+}
+
+/**
+ * The part of `sorted` (easiest first) for board `board` of `boards`: the round's boards take
+ * consecutive bands, so a round goes from easy to hard. Everything when the board is unknown.
+ */
+function band<T>(sorted: readonly T[], board?: number, boards?: number): T[] {
+  if (board === undefined || boards === undefined || boards <= 1 || sorted.length <= 1) {
+    return [...sorted];
+  }
+  const k = Math.min(Math.max(board, 1), boards) - 1;
+  const start = (k * sorted.length - ((k * sorted.length) % boards)) / boards;
+  const stop = ((k + 1) * sorted.length - (((k + 1) * sorted.length) % boards)) / boards;
+  return sorted.slice(start, Math.max(stop, start + 1));
 }
 
 /** Families with two different factors of at least 2, by item. */
@@ -170,8 +192,18 @@ function prefer<T extends { item: string }>(
 function eggGridConfig(request: BoardRequest): EggGridConfig {
   const previous = (request.previous?.config as { product?: number } | undefined)?.product;
   const choices = prefer(eggProducts(request.pool), request, (e) => e.product === previous);
+  const products = [...new Set(choices.map((choice) => choice.product))];
   const split = request.options['split'];
-  const product = request.random.pick(choices).product;
+  // Easy to hard: board k of n takes the k-th band of the round's products (smallest first),
+  // or the preferred products closest to that band.
+  const all = [...new Set(eggProducts(request.pool).map((e) => e.product))].sort((a, b) => a - b);
+  const range = band(all, request.board, request.boards);
+  const [low, high] = [range[0]!, range[range.length - 1]!];
+  const distance = (p: number) => (p < low ? low - p : p > high ? p - high : 0);
+  const nearest = Math.min(...products.map(distance));
+  const product = request.random.pick(
+    products.filter((p) => distance(p) === nearest).sort((a, b) => a - b),
+  );
   // Find every rectangle: the factor pairs and both orders of each (at most four up to 10 × 10).
   return {
     product,

@@ -7,11 +7,14 @@ import { createPrng } from '@aegis/core';
 import {
   eggsByAge,
   focusItems,
+  isRuleFact,
   itemTier,
   learningShare,
   pickLearning,
   pickMixed,
   pickSnack,
+  roundFocus,
+  roundTables,
   withoutRecent,
 } from '../../../src/rules/learning/selection';
 import { initialProfileState, skillItemIndex } from '../../../src/rules/contract';
@@ -118,6 +121,41 @@ describe('the focus egg', () => {
         pickLearning(s, ['mul:2x1', 'mul:5x1', 'mul:5x2'], ['mul:5x1', 'mul:5x2'], random),
       ).toMatch(/^mul:5x/);
     }
+  });
+
+  it('is an egg whose table the round practises, not one whose facts only stray into it', () => {
+    // Puff (×0) and Bubbles (×2) arrived the same day; a round of twos, fives and tens holds
+    // Puff's 2 · 0 and 0 · 5 too, but it warms Bubbles.
+    const s = state({ dragons: { puff: egg(DAY - 1), bubbles: egg(DAY - 1) } });
+    const pool = index.get('mul-2-5-10')!;
+    const tables = roundTables(data.skills.filter((skill) => skill.id === 'mul-2-5-10'));
+    expect([...tables].sort((a, b) => a - b)).toEqual([2, 5, 10]);
+    const zeroFact = (id: string) => /^mul:(0x\d+|\d+x0)$/.test(id);
+    expect(focusItems(s, data, index, pool)!.every(zeroFact), 'without tables: Puff').toBe(true);
+    const focus = focusItems(s, data, index, pool, tables)!;
+    expect(focus).toHaveLength(21);
+    expect(focus.every((id) => /^mul:(2x\d+|\d+x2)$/.test(id))).toBe(true);
+    const zeros = roundTables(data.skills.filter((skill) => skill.id === 'mul-0-1-10'));
+    expect(
+      focusItems(s, data, index, index.get('mul-0-1-10')!, zeros)!.every(zeroFact),
+      'a round of zeros, ones and tens warms Puff',
+    ).toBe(true);
+    const meadow = data.skills.filter((skill) => skill.id === 'mul-2-5-10');
+    expect(roundFocus(s, data, index, pool, meadow), 'rounds focus by their tables').toEqual(focus);
+  });
+});
+
+describe('rule facts', () => {
+  it('are the facts with a factor 0 or 1, and divisions of 0 or by 1', () => {
+    const rule = ['mul:0x7', 'mul:7x0', 'mul:1x9', 'mul:9x1', 'mul:0x0', 'div:0:5', 'div:7:1'];
+    const plain = ['mul:2x3', 'mul:10x10', 'div:5:5', 'div:12:3', 'rem:d5', 'word:sharing'];
+    expect(rule.filter((id) => !isRuleFact(id))).toEqual([]);
+    expect(plain.filter(isRuleFact)).toEqual([]);
+  });
+
+  it('give a round its tables: multiplication tables, divisors and missing-factor tables', () => {
+    const skills = data.skills.filter((s) => ['div-1', 'missing-2-5-10'].includes(s.id));
+    expect([...roundTables(skills)].sort((a, b) => a - b)).toEqual([1, 2, 5, 10]);
   });
 });
 

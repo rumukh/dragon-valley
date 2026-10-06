@@ -253,6 +253,26 @@ describe('Egg Grid and Fact Family boards', () => {
     expect((split.config as { split: string }).split).toBe('five-plus');
   });
 
+  it('goes from easy to hard over a round, and never deals a line of eggs', () => {
+    // The fives with both factors of at least 2: products 10, 15, …, 50, in three bands.
+    const products = [1, 2, 3].map(() => new Set<number>());
+    for (let seed = 0; seed < 30; seed++) {
+      for (const board of [1, 2, 3]) {
+        const def = makeBoard(request({ board, boards: 3, random: createPrng(`grid-${seed}`) }));
+        products[board - 1]!.add((def.config as { product: number }).product);
+      }
+    }
+    const sorted = products.map((set) => [...set].sort((a, b) => a - b));
+    expect(sorted).toEqual([
+      [10, 15, 20],
+      [25, 30, 35],
+      [40, 45, 50],
+    ]);
+    expect(canMakeBoard('egg-grid', ['mul:5x1', 'mul:1x5', 'mul:5x0'], []), '5 = 1 × 5').toBe(
+      false,
+    );
+  });
+
   it('never repeats the previous product while another is possible', () => {
     const first = makeBoard(request({ pool: ['mul:5x2', 'mul:5x3'], focus: null }));
     const second = makeBoard(request({ pool: ['mul:5x2', 'mul:5x3'], previous: first }));
