@@ -24,7 +24,7 @@ CI at `373a5d2`; DV-QA-14 at `5a9c633` (#17).
 | DV-QA-09 | major    | S3    | After a click on Read aloud, Enter re-reads instead of sending the answer   |
 | DV-QA-10 | major    | S3    | 200 % text on a phone: the hub and Egg Grid scroll sideways                 |
 | DV-QA-11 | minor    | S3    | Map and road hotspots are cut off by the picture frame                      |
-| DV-QA-13 | minor    | S3    | WebKit: a keeper's hub at 200 % text opens at normal size                   |
+| DV-QA-13 | minor    | S3    | WebKit: a keeper's hub at 200 % text shows at normal size for a frame       |
 | DV-QA-14 | major    | S3    | The results' scrolling celebrations cannot be reached by keyboard           |
 
 DV-QA-03 (Enter ignored when a round opened on a keypad problem) and DV-QA-07 (a missed tile's
@@ -143,28 +143,29 @@ egg") was fixed by #17. Their tests stay as regression checks.
   `test/e2e/reflow.spec.ts` (`text-200` and zoom); screenshot
   `out/qa-screens/<engine>/phone/13-map.png`.
 
-## DV-QA-13 (minor, S3; WebKit): a keeper's hub at 200 % text opens at normal size
+## DV-QA-13 (minor, S3; WebKit): a keeper's hub at 200 % text shows at normal size for a frame
 
-- **Repro** (WebKit; seen in Playwright's WebKit on the Ubuntu CI runner): make a keeper, go back
-  to the keepers, grown-ups' area, Settings, Text size **200%**, close the grown-ups' area and
+- **Repro** (WebKit; seen in Playwright's WebKit 26.6 on the Ubuntu CI runner): make a keeper, go
+  back to the keepers, grown-ups' area, Settings, Text size **200%**, close the grown-ups' area and
   play as that keeper.
-- **Expected**: the hub opens at 200 % (root font size 48 px), like everything after it.
-- **Actual** (CI at `373a5d2`): `<html>` carries `--aegis-text-scale: 2` from the moment the
-  keeper opens (the trace's DOM snapshots show it), yet `getComputedStyle(html).fontSize` was
-  `24px` as the hub showed, and the failure screenshot, taken just after, shows the hub at 100 %
-  text. The root font size is `calc(var(--dv-reading, 24px) * var(--aegis-text-scale, 1))`
-  (`base.css`), and the SDK's `applyPresentationPreferences` changes only that custom property on
-  `<html>`; WebKit recomputes the root's font size from it late. On `5a9c633` (#17) the size
-  reached 48 px within five seconds; the test now records the size as the hub shows and how long
-  it takes to catch up (`DV-QA-13 evidence`), which settles the severity. Not seen in Chromium,
-  Firefox or WebKit on Windows; `settings.spec.ts`, which changes Reduce motion at the same time
-  (an attribute on `<html>`), always sees 48 px.
-- **Likely fix** (S3, in `applyPresentation`): also mirror the scale in an attribute on `<html>`
-  (for example `data-text-scale`), or set the root `font-size` itself, so WebKit restyles the
-  root at once; an SDK note: `applyPresentationPreferences` could do the same for every consumer.
-- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…": the size as the hub shows,
-  then (if it is not 48 px) what `<html>` says, frame by frame until it catches up (or, after five
-  seconds, whether a passing attribute restyles it), attached and in the job summary.
+- **Expected**: the hub appears at 200 % (root font size 48 px), like everything after it.
+- **Actual**: `<html>` carries `--aegis-text-scale: 2` from the moment the keeper opens (the
+  trace's DOM snapshots show it), yet as the hub appears `getComputedStyle(html).fontSize` is
+  still `24px` (the greeting 43.2 px, its normal size). WebKit catches up one frame later: 37 ms
+  on CI at `0bd79c0` (`DV-QA-13 evidence`: `openedAt 24px`, `caughtUp after 37 ms (1 frames)`).
+  At `373a5d2` the failure screenshot, taken just after, showed the hub at normal size, so the
+  first frame can be painted at 100 % before the text doubles: a flash, not a lost setting. The
+  root font size is `calc(var(--dv-reading, 24px) * var(--aegis-text-scale, 1))` (`base.css`),
+  and the SDK's `applyPresentationPreferences` changes only that custom property on `<html>`. Not
+  seen in Chromium, Firefox or WebKit on Windows; `settings.spec.ts`, which changes Reduce motion
+  at the same time (an attribute on `<html>`), always sees 48 px at once.
+- **Likely fix** (S3, in `applyPresentation`): also set the root `font-size` itself (or mirror the
+  scale in an attribute on `<html>`, for example `data-text-scale`), so WebKit restyles the root
+  at once; an SDK note: `applyPresentationPreferences` could do the same for every consumer.
+- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…": the size as the hub
+  appears, then (if it is not 48 px) what `<html>` says and how many frames it takes to catch up
+  (or, after five seconds, whether a passing attribute restyles it), attached and in the job
+  summary.
 
 ## DV-QA-14 (major, S3): the results' scrolling celebrations cannot be reached by keyboard
 

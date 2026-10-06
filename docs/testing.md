@@ -99,8 +99,9 @@ builds are installed. CI runs one job per engine with `DV_E2E_AUDIT=1`; WebKit, 
 as the others on a hosted runner, runs in three parallel jobs, one per part of the suite
 (`DV_E2E_PART`, `support/parts.ts`): `walks` (`screens`, `reflow`), `rounds` (`input`,
 `persistence`, `recovery`, `settings`) and `rest` (every other spec, including any new one). With
-two workers per job, a run takes about 7½ minutes: Chromium 7m12s, Firefox 7m31s and the WebKit
-parts 5m38s-5m50s on the hosted runner (installation included).
+two workers per job, a run takes about 7½ minutes: Chromium 7m02s-7m12s, Firefox 6m48s-7m31s and
+the WebKit parts 5m38s-6m12s on the hosted runner, installation included (a slow Ubuntu mirror once
+stretched WebKit's system packages, `install --with-deps`, from one minute to ten).
 
 ```
 npm run test:e2e                                   # everything, system Edge
