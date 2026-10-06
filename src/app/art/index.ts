@@ -25,3 +25,29 @@ export {
 export { REGION_EMBLEM_IDS } from './icons/emblems';
 export { renderAvatar, KEEPER_AVATARS, type AvatarOptions } from './characters/avatars';
 export { buildCatalog, catalogIds, CATALOG_SCHEMA_VERSION } from './catalog';
+export {
+  renderBoss,
+  BOSS_IDS,
+  BOSS_STATES,
+  BOSS_OUTCOME,
+  type BossState,
+  type BossOptions,
+} from './characters/bosses';
+export {
+  renderMagicWindow,
+  renderMasteryGrid,
+  magicWindowLayout,
+  magicWindowSamples,
+  MASTERY_LEVELS,
+  type PaneState,
+  type MagicWindowOptions,
+  type MasteryGridOptions,
+} from './window';
+export {
+  renderSticker,
+  stickerSamples,
+  STICKER_FRAMES,
+  STICKER_COLORS,
+  type StickerFrame,
+  type StickerSpec,
+} from './stickers';

@@ -22,6 +22,36 @@ const specs = args
 const art = await loadArt();
 let i = 0;
 const cells = specs.map((spec) => {
+  const box = (/** @type {string} */ svg) =>
+    `<div style="display:inline-block;margin:2px;background:#fff;border-radius:8px;text-align:center;font:11px sans-serif">${svg}<div>${spec}</div></div>`;
+  const [kind, a1 = '', a2 = ''] = spec.split(':');
+  if (kind === 'boss') return box(art.renderBoss(a1, a2, { idPrefix: `z${i++}`, size }));
+  if (kind === 'icon') return box(art.renderIcon(a1, { idPrefix: `z${i++}`, size }));
+  if (kind === 'avatar') return box(art.renderAvatar(a1, { idPrefix: `z${i++}`, size }));
+  if (kind === 'sticker')
+    return box(
+      art.renderSticker({ ...art.stickerSamples()[Number(a1)], idPrefix: `z${i++}`, size }),
+    );
+  if (kind === 'window')
+    return box(
+      art.renderMagicWindow({
+        ...art.magicWindowSamples()[Number(a1)].options,
+        idPrefix: `z${i++}`,
+        size,
+      }),
+    );
+  if (kind === 'grid')
+    return box(
+      art.renderMasteryGrid({
+        op: a1,
+        cells:
+          art.magicWindowSamples()[Number(a2)].options[
+            a1 === 'mul' ? 'multiplication' : 'division'
+          ],
+        idPrefix: `z${i++}`,
+        size,
+      }),
+    );
   const [dragon, stage = 'adult', expression = 'idle', framing = 'fit', outfitSlot, outfitId] =
     spec.split(':');
   const outfit = outfitSlot && outfitId ? { [outfitSlot]: outfitId } : {};
