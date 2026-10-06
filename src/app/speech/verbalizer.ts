@@ -12,6 +12,7 @@
 import { needsGroup } from '../../rules/contract';
 import type {
   AnswerValue,
+  CardFace,
   Expr,
   Operator,
   Problem,
@@ -169,5 +170,21 @@ export function speakSolved(problem: Problem, answer: AnswerValue): string {
         `${termQuestion(problem).replace('what do we call ', '')} is ${speakAnswer(answer)}`,
         '.',
       );
+  }
+}
+
+/** A minigame card or stone face ("seven times eight", "fifty-six", a whole sentence). */
+export function speakFace(face: CardFace): string {
+  switch (face.kind) {
+    case 'expr':
+      return speakExpr(face.expr);
+    case 'answer':
+      return speakAnswer(face.answer);
+    case 'sentence':
+      return termSentence({
+        kind: 'term',
+        sentence: face.sentence,
+        highlight: face.highlight ?? 'result',
+      });
   }
 }

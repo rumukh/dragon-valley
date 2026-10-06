@@ -27,4 +27,12 @@ export const RULE_ERROR_CODES = [
   'story-choice',
   'invalid-setting',
   'not-implemented',
+  'no-board',
+  'stale-move',
+  'invalid-move',
+  'not-hungry',
+  'arena-locked',
+  'unknown-quest',
+  'quest-not-done',
+  'quest-claimed',
 ] as const;

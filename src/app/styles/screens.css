@@ -53,7 +53,6 @@
 
 .dv-title__glimmer {
   width: min(100%, 22rem, 46vh);
-  filter: drop-shadow(0 0.6rem 0.7rem color-mix(in srgb, var(--dv-shadow) 25%, transparent));
 }
 
 .dv-title__eggs {
@@ -65,7 +64,6 @@
 
 .dv-title__egg {
   width: clamp(3.2rem, 11vw, 5.2rem);
-  filter: drop-shadow(0 0.35rem 0.4rem color-mix(in srgb, var(--dv-shadow) 25%, transparent));
 }
 
 .dv-title__egg:nth-child(2) {
@@ -312,7 +310,7 @@
 }
 
 .dv-dragon-art--small {
-  width: 4.5em;
+  width: 3.6em;
 }
 
 /* ---- Story ----------------------------------------------------------------------------- */
@@ -341,7 +339,6 @@
 
 .dv-story__figure svg {
   width: min(18rem, 38vh, 70vw);
-  filter: drop-shadow(0 0.6rem 0.7rem color-mix(in srgb, var(--dv-shadow) 28%, transparent));
 }
 
 .dv-story__card {
@@ -435,6 +432,27 @@
   }
 }
 
+.dv-hub__side {
+  display: grid;
+  justify-items: center;
+  gap: 0.8em;
+}
+
+.dv-hub__week {
+  width: min(100%, 22em);
+  padding: 0.5em 0.8em;
+  border-radius: 1em;
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+}
+
+.dv-hub__quests {
+  width: min(100%, 24em);
+}
+
+.dv-hub__quests:empty {
+  display: none;
+}
+
 .dv-hub__nest {
   display: grid;
   justify-items: center;
@@ -443,8 +461,7 @@
 }
 
 .dv-hub__dragon svg {
-  width: min(17rem, 40vh, 72vw);
-  filter: drop-shadow(0 0.5rem 0.6rem color-mix(in srgb, var(--dv-shadow) 24%, transparent));
+  width: min(15rem, 32vh, 72vw);
 }
 
 .dv-hub__dragon[data-stage='egg'] svg {
@@ -480,20 +497,22 @@
 .dv-hub__other {
   display: grid;
   justify-items: center;
-  gap: 0.2em;
-  font-size: 0.85rem;
+  gap: 0.1em;
+  max-width: 6.5em;
+  font-size: 0.75rem;
   font-weight: 700;
+  text-align: center;
 }
 
 .dv-hub__today {
   display: grid;
   justify-items: center;
-  gap: 1em;
+  gap: 0.7em;
   text-align: center;
 }
 
 .dv-hub__greeting {
-  font-size: min(2.2rem, 9vw);
+  font-size: min(1.8rem, 8vw);
 }
 
 .dv-hub__adventure {
@@ -554,6 +573,47 @@
   text-decoration: underline;
   text-decoration-thickness: 0.12em;
   text-underline-offset: 0.18em;
+}
+
+.dv-quests {
+  display: grid;
+  gap: 0.4em;
+  width: 100%;
+}
+
+.dv-quests__title {
+  font-size: 1rem;
+}
+
+.dv-quests__list {
+  display: grid;
+  gap: 0.4em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-quest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4em;
+  padding: 0.15em 0.2em 0.15em 0.6em;
+  border: 0.08em solid var(--dv-line);
+  border-radius: 0.8em;
+  font-size: 0.9rem;
+  text-align: start;
+  background: var(--dv-paper);
+}
+
+.dv-quest[data-claimed='true'] {
+  border-color: var(--dv-success);
+  color: var(--dv-success-deep);
+}
+
+.dv-quest__state {
+  font-weight: 700;
 }
 
 .dv-gift__art svg {
@@ -628,7 +688,7 @@
 }
 
 .dv-round--boss .dv-round__dragon svg {
-  width: min(9rem, 22vh, 26vw);
+  width: min(12rem, 28vh, 30vw);
 }
 
 .dv-round__boss svg {
@@ -653,11 +713,17 @@
   background: var(--dv-card);
 }
 
-.dv-problem-card__line {
+/* Read-aloud and hint sit under the problem, so the problem has the card's whole width. */
+.dv-problem-card__tools {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 0.6em;
+}
+
+.dv-problem-card__tools:not(:has(button)) {
+  display: none;
 }
 
 .dv-round__story {
@@ -955,24 +1021,35 @@
 
 .dv-nest {
   display: grid;
-  grid-template-columns: repeat(var(--columns, 1), 1.5em);
-  gap: 0.35em;
-  padding: 0.9em 1.1em;
+  grid-template-columns: repeat(var(--columns, 1), 1.25em);
+  gap: 0.3em;
+  padding: 0.9em 1.2em;
   border: 0.14em solid var(--dv-line-strong);
-  border-radius: 50% / 34%;
+  border-radius: 1.6em;
   background: var(--dv-paper-deep);
 }
 
 .dv-nest__egg {
-  width: 1.5em;
-  height: 1.9em;
+  width: 1.25em;
+  height: 1.6em;
   border-radius: 50% 50% 46% 46% / 60% 60% 40% 40%;
   background: var(--dv-card);
-  box-shadow: inset -0.15em -0.2em 0 var(--dv-line);
+  box-shadow:
+    inset -0.15em -0.2em 0 var(--dv-line),
+    0 0 0 0.06em var(--dv-line-strong);
 }
 
 .dv-nest__size {
   font-weight: 700;
+}
+
+.dv-nest__goal {
+  max-width: none;
+  padding: 0.3em 0.9em;
+  border-radius: 1em;
+  font-size: 1.15rem;
+  font-weight: 700;
+  background: var(--dv-sun);
 }
 
 .dv-nest__found {
@@ -993,6 +1070,143 @@
   background: var(--dv-success-soft);
 }
 
+.dv-nest__split {
+  grid-column: 1 / -1;
+  height: 0;
+  border-top: 0.16em dashed var(--dv-primary-deep);
+}
+
+.dv-nest__egg--missing {
+  background: transparent;
+  box-shadow: inset 0 0 0 0.12em var(--dv-miss-deep);
+}
+
+/* Number Trail: stones along a path; fixed ones are flat, movable ones are buttons. */
+.dv-trail {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-trail__stone {
+  display: grid;
+  place-items: center;
+  min-width: max(var(--dv-target), 2.6em);
+  min-height: max(var(--dv-target), 2.6em);
+  padding: 0.2em 0.5em;
+  border: 0.12em solid var(--dv-primary-deep);
+  border-radius: 50%;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow: 0 0.18em 0 var(--dv-line-strong);
+  cursor: pointer;
+}
+
+.dv-trail__stone--fixed {
+  border-color: var(--dv-line-strong);
+  color: var(--dv-ink-soft);
+  background: var(--dv-paper-deep);
+  box-shadow: none;
+  cursor: default;
+}
+
+.dv-trail__stone[data-selected='true'] {
+  border-color: var(--dv-sun-deep);
+  background: var(--dv-sun);
+  outline: 0.14em dashed var(--dv-ink);
+  outline-offset: 0.12em;
+}
+
+/* Fact Family Nest: three numbers in the nest, four equations to fill. */
+.dv-family__nest {
+  display: flex;
+  justify-content: center;
+  gap: 0.8em;
+  padding: 0.8em 1.4em;
+  border: 0.14em solid var(--dv-line-strong);
+  border-radius: 50% / 40%;
+  background: var(--dv-paper-deep);
+}
+
+.dv-family__number {
+  min-width: max(var(--dv-target), 2.8em);
+  min-height: max(var(--dv-target), 2.8em);
+  border: 0.12em solid var(--dv-primary-deep);
+  border-radius: 50%;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  cursor: pointer;
+}
+
+.dv-family__number[data-picked='true'] {
+  background: var(--dv-sun);
+  outline: 0.14em dashed var(--dv-ink);
+  outline-offset: 0.12em;
+}
+
+.dv-family__equations {
+  display: grid;
+  gap: 0.6em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-family__equation {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.8em;
+  border: 0.1em solid transparent;
+  border-radius: 1em;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.dv-family__equation[data-state='correct'] {
+  border-color: var(--dv-success);
+  background: var(--dv-success-soft);
+}
+
+.dv-family__equation[data-state='miss'] {
+  border-color: var(--dv-miss);
+  background: var(--dv-miss-soft);
+}
+
+.dv-family__slot {
+  min-width: max(var(--dv-target), 2.4em);
+  min-height: var(--dv-target);
+  border: 0.1em solid var(--dv-line-strong);
+  border-radius: 0.6em;
+  font: inherit;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  cursor: pointer;
+}
+
+.dv-family__slot[data-empty='true'] {
+  border-style: dashed;
+  background: var(--dv-paper);
+}
+
+.dv-family__sign {
+  color: var(--dv-primary-deep);
+}
+
+.dv-family__badge {
+  width: 1.4em;
+  height: 1.4em;
+}
 /* ---- Results --------------------------------------------------------------------------- */
 
 .dv-results__card {
@@ -1040,8 +1254,23 @@
   width: min(6.5rem, 16vh);
 }
 
+/* Many celebrations at once (after the placement check): smaller pictures, smaller words. */
+.dv-results__celebrations[data-many='true'] .dv-celebrate {
+  font-size: 0.85rem;
+}
+
+.dv-results__celebrations[data-many='true'] .dv-celebrate svg {
+  width: min(4rem, 10vh);
+}
+
+/* A hatching is the hero of the card: its own row, big. */
+.dv-celebrate--hatch {
+  flex-basis: 100%;
+}
+
 .dv-celebrate--hatch svg {
-  width: min(11rem, 26vh);
+  width: min(16rem, 32vh);
+  margin-block: -12% -4%;
 }
 
 /* ---- Valley map, region road and level card ------------------------------------------ */

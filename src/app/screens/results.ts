@@ -21,6 +21,7 @@ import { backdrop } from './scene';
 
 const CELEBRATED = [
   'level.completed',
+  'arena.finished',
   'dragon.hatched',
   'dragon.grew',
   'dragon.crowned',
@@ -45,6 +46,10 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
   const level = levelId ? data.levels.find((candidate) => candidate.id === levelId) : undefined;
   const levelDone = run?.result ?? null;
   const timeUp = round.endReason === 'time-limit';
+  const arena = events.find(
+    (event): event is Extract<Celebrated, { type: 'arena.finished' }> =>
+      event.type === 'arena.finished',
+  );
   const next = resultsNext(view);
 
   const saveStatus = createSaveStatus(app, active);
@@ -56,9 +61,13 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
 
   const headline = timeUp
     ? t('results.timeUp')
-    : levelDone
-      ? t('results.levelDone')
-      : t('results.activityDone');
+    : round.endReason === 'time-up'
+      ? t('results.timeIsUp')
+      : round.activity === 'placement'
+        ? t('results.placement')
+        : levelDone
+          ? t('results.levelDone')
+          : t('results.activityDone');
   const heading = h('h1', {
     className: 'dv-results__title',
     testId: 'results-title',
@@ -74,7 +83,21 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
     : null;
   if (stars) parts.push(stars.element);
 
-  if (round.type === 'problems' && round.progress.answered > 0) {
+  if (arena) {
+    parts.push(
+      h('p', {
+        className: 'dv-results__summary',
+        testId: 'results-arena',
+        text: t('results.arena', { score: arena.data.score }),
+      }),
+      h('p', {
+        className: 'dv-results__level',
+        text: arena.data.record
+          ? t('results.arenaRecord')
+          : t('results.arenaBest', { best: arena.data.best }),
+      }),
+    );
+  } else if (round.type === 'problems' && round.progress.answered > 0) {
     parts.push(
       h('p', {
         className: 'dv-results__summary',
@@ -185,7 +208,16 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
     }
   }
   if (celebrations.length > 0) {
-    parts.push(h('div', { className: 'dv-results__celebrations' }, ...celebrations));
+    parts.push(
+      h(
+        'div',
+        {
+          className: 'dv-results__celebrations',
+          dataset: { many: String(celebrations.length > 3) },
+        },
+        ...celebrations,
+      ),
+    );
   }
 
   // ---- what next ------------------------------------------------------------------------------

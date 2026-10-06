@@ -95,7 +95,10 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
             h(
               'li',
               { className: 'dv-hub__other', dataset: { dragon: dragon.id } },
-              viewDragonArt(dragon, { className: 'dv-dragon-art dv-dragon-art--small' }),
+              viewDragonArt(dragon, {
+                className: 'dv-dragon-art dv-dragon-art--small',
+                animated: false,
+              }),
               h('span', {
                 text: t(`stage.${dragon.stage}` as MessageKey, { name: text(dragon.nameKey) }),
               }),
@@ -109,6 +112,8 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
 
   const adventureSlot = h('div', { className: 'dv-hub__adventure' });
   const goalSlot = h('div', { className: 'dv-hub__goal' });
+  const questSlot = h('div', { className: 'dv-hub__quests' });
+  const weekSlot = h('div', { className: 'dv-hub__week' });
 
   const adventureLabel = (adventure: Adventure, current: GameView): string => {
     switch (adventure.kind) {
@@ -219,6 +224,8 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
     const daily = current.daily;
     if (!daily) {
       goalSlot.replaceChildren();
+      questSlot.replaceChildren();
+      weekSlot.replaceChildren();
       return;
     }
     const today = weekdayIndex(daily.day);
@@ -253,11 +260,60 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
         ),
       ),
     );
+    const quests =
+      daily.quests.length === 0
+        ? []
+        : [
+            h(
+              'section',
+              { className: 'dv-quests', testId: 'quests' },
+              h('h2', { className: 'dv-quests__title', text: t('hub.quests') }),
+              h(
+                'ul',
+                { className: 'dv-quests__list' },
+                ...daily.quests.map((quest) =>
+                  h(
+                    'li',
+                    {
+                      className: 'dv-quest',
+                      testId: `quest-${quest.template}`,
+                      dataset: { done: String(quest.done), claimed: String(quest.claimed) },
+                    },
+                    h('span', { className: 'dv-quest__title', text: text(quest.titleKey) }),
+                    quest.claimed
+                      ? h('span', { className: 'dv-quest__state', text: t('quest.claimed') })
+                      : quest.done
+                        ? candyButton({
+                            label: t('quest.claim', { count: quest.coins }),
+                            variant: 'sun',
+                            size: 'small',
+                            testId: `quest-claim-${quest.template}`,
+                            onPress: async () => {
+                              await active.commands.capture()({
+                                type: 'claimQuest',
+                                quest: quest.id,
+                              });
+                            },
+                            onError: app.kit.onError,
+                          })
+                        : h('span', {
+                            className: 'dv-quest__state',
+                            text: t('quest.progress', {
+                              value: Math.min(quest.progress, quest.target),
+                              max: quest.target,
+                            }),
+                          }),
+                  ),
+                ),
+              ),
+            ),
+          ];
     goalSlot.replaceChildren(
       meter.element,
       ...(daily.sleepy ? [h('p', { className: 'dv-note', text: t('hub.sleepy') })] : []),
-      week,
     );
+    weekSlot.replaceChildren(week);
+    questSlot.replaceChildren(...quests);
   };
 
   const paint = (): void => {
@@ -276,10 +332,30 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       label: t('hub.map'),
       icon: 'map',
       variant: 'paper',
+      size: 'small',
       testId: 'hub-map',
       onPress: () => app.router.push(app.screens.map(keeperId)),
       onError: app.kit.onError,
     }),
+    ...(view.hub.arena.available
+      ? [
+          candyButton({
+            label: t('hub.arena'),
+            icon: 'sparkle',
+            variant: 'paper',
+            size: 'small',
+            testId: 'hub-arena',
+            onPress: async () => {
+              await active.commands.capture()({
+                type: 'startActivity',
+                activity: { kind: 'arena' },
+              });
+              await app.continueGame(keeperId);
+            },
+            onError: app.kit.onError,
+          }),
+        ]
+      : []),
   );
 
   const element = h(
@@ -298,13 +374,14 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
     h(
       'div',
       { className: 'dv-hub__layout' },
-      nest,
+      h('div', { className: 'dv-hub__side' }, nest, weekSlot),
       h(
         'section',
         { className: 'dv-card dv-hub__today' },
         heading,
         adventureSlot,
         goalSlot,
+        questSlot,
         places,
       ),
     ),

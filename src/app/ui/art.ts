@@ -75,7 +75,13 @@ export function outfitOf(outfit: Readonly<Record<string, string | null>>): Outfi
 /** A dragon from the game view, in its stage and outfit. */
 export function viewDragonArt(
   dragon: DragonView,
-  options: { expression?: DragonExpression; framing?: 'stage' | 'fit'; className?: string } = {},
+  options: {
+    expression?: DragonExpression;
+    framing?: 'stage' | 'fit';
+    className?: string;
+    /** Small or background dragons stay still, so a page never animates more than it needs. */
+    animated?: boolean;
+  } = {},
 ): SVGSVGElement {
   return dragonArt(
     {
@@ -84,6 +90,7 @@ export function viewDragonArt(
       expression: options.expression ?? dragon.expression,
       outfit: outfitOf(dragon.outfit),
       framing: options.framing ?? 'fit',
+      animated: options.animated ?? true,
     },
     options.className,
   );

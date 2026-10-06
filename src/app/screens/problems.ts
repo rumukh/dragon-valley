@@ -50,6 +50,9 @@ import { backdrop } from './scene';
 import { speakerButton } from './speech';
 
 const FRUITS = ['apple', 'pear', 'plum', 'cherries', 'berries'] as const;
+/** The Lightning Arena is a one-minute race (docs/design.md §5.11); the shell keeps the time. */
+export const ARENA_SECONDS = 60;
+const ARENA_MISS_MS = 1500;
 const CORRECT_PAUSE_MS = 1100;
 
 function problemRound(view: GameView): ProblemRoundView | null {
@@ -84,8 +87,27 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     className: 'dv-round__title',
     text: t(`activity.${activity}` as MessageKey),
   });
+  const arena = activity === 'arena';
   let progress: MeterView;
-  if (boss && first.progress.meter) {
+  if (arena) {
+    progress = createMeter({
+      label: t('arena.time'),
+      max: ARENA_SECONDS,
+      value: ARENA_SECONDS,
+      valueText: (value) => t('arena.seconds', { count: value }),
+      testId: 'arena-time',
+    });
+  } else if (first.placement) {
+    progress = createMeter({
+      label: t('activity.placement'),
+      max: first.placement.steps,
+      value: first.placement.step,
+      valueText: (value, max) =>
+        t('placement.step', { current: Math.min(value + 1, max), total: max }),
+      testId: 'placement-progress',
+      compact: true,
+    });
+  } else if (boss && first.progress.meter) {
     progress = createMeter({
       label: t(`boss.meter.${boss.mood}` as MessageKey),
       max: first.progress.meter.target,
@@ -143,6 +165,11 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   let disposed = false;
   let pose: BossPose = bossPose(first.progress.meter, false);
   const timer = createResponseTimer();
+  // The Arena's one-minute race, paused like everything else.
+  const race = createResponseTimer();
+  let raceTimer: ReturnType<typeof setInterval> | undefined;
+  let timeUp = false;
+  let raceEnded = false;
 
   const releaseInput = (): void => {
     tiles?.dispose();
@@ -396,6 +423,15 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       next,
     );
     if (asked.step !== 'operation') showModel(asked.problem);
+    if (arena) {
+      next.hidden = true;
+      setTimeout(() => {
+        if (disposed) return;
+        busy = false;
+        void advance().catch(app.kit.onError);
+      }, ARENA_MISS_MS);
+      return;
+    }
     if (active.preferences.current().autoRead && asked.step !== 'operation') {
       app.speak(`${t('round.miss')} ${speakSolved(asked.problem, result.expected)}`);
     }
@@ -403,7 +439,10 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   };
 
   const updateProgress = (round: ProblemRoundView): void => {
-    if (boss && round.progress.meter) progress.update(round.progress.meter.value);
+    if (arena) {
+      // The race clock updates itself.
+    } else if (round.placement) progress.update(round.placement.step);
+    else if (boss && round.progress.meter) progress.update(round.progress.meter.value);
     else progress.update(round.progress.answered);
     streak.textContent =
       round.progress.streak >= 3 ? t('round.streak', { count: round.progress.streak }) : '';
@@ -470,8 +509,45 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     if (pausedByDialog || document.visibilityState === 'hidden') timer.pause();
   };
 
+  /** The race is over: end the round on time (once), then show the results. */
+  const endRace = async (): Promise<void> => {
+    if (raceEnded) return;
+    raceEnded = true;
+    clearInterval(raceTimer);
+    releaseInput();
+    const round = problemRound(host.getView());
+    if (round?.status === 'active') {
+      await active.commands.capture()({ type: 'endRound', reason: 'time-up' });
+    }
+    await app.continueGame(keeperId);
+  };
+
+  const tickRace = (): void => {
+    const left = Math.max(0, ARENA_SECONDS - Math.floor(race.elapsed() / 1000));
+    progress.update(left);
+    if (left > 0 || timeUp) return;
+    timeUp = true;
+    if (!busy) void endRace().catch(app.kit.onError);
+  };
+
+  /**
+   * Where focus goes for an answer: the first choice tile, or the keypad itself (not one of its
+   * keys, so Enter on the keyboard submits instead of pressing the focused key).
+   */
+  const answerFocus = (): HTMLElement | null => {
+    if (keypad) {
+      keypad.element.tabIndex = -1;
+      return keypad.element;
+    }
+    return tiles?.element.querySelector<HTMLElement>('button:not(:disabled)') ?? null;
+  };
+
   /** Show the next problem, or leave for the results when the round is over. */
   const advance = async (): Promise<void> => {
+    if (timeUp) {
+      await endRace();
+      return;
+    }
     const view = host.getView();
     const round = problemRound(view);
     if (view.screen !== 'round' || !round || round.status !== 'active' || !round.problem) {
@@ -480,7 +556,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     }
     showProblem(round.problem);
     if (active.preferences.current().autoRead) app.speak(spokenProblem(round.problem));
-    (tiles ?? keypad)?.element.querySelector<HTMLElement>('button:not(:disabled)')?.focus();
+    answerFocus()?.focus();
   };
 
   // ---- pause ----------------------------------------------------------------------------------
@@ -488,6 +564,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     if (pausedByDialog) return;
     pausedByDialog = true;
     timer.pause();
+    race.pause();
     host.pause('user');
     app.audio.pause();
     app.stopSpeaking();
@@ -523,15 +600,23 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     pausedByDialog = false;
     app.audio.resume();
     await active.commands.resume('user');
-    if (document.visibilityState !== 'hidden') timer.resume();
+    if (document.visibilityState !== 'hidden') {
+      timer.resume();
+      race.resume();
+    }
     if (choice === 'quit') {
       await active.commands.capture()({ type: 'endRound', reason: 'quit' });
       await app.continueGame(keeperId);
     }
   };
   const onVisibility = (): void => {
-    if (document.visibilityState === 'hidden') timer.pause();
-    else if (!pausedByDialog) timer.resume();
+    if (document.visibilityState === 'hidden') {
+      timer.pause();
+      race.pause();
+    } else if (!pausedByDialog) {
+      timer.resume();
+      race.resume();
+    }
   };
   document.addEventListener('visibilitychange', onVisibility);
   const unsubscribeVoices = app.speech.subscribe(() => {
@@ -544,6 +629,10 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   paintBoss();
   updateProgress(first);
   if (first.problem) showProblem(first.problem);
+  if (arena) {
+    race.start();
+    raceTimer = setInterval(tickRace, 250);
+  }
 
   const pauseButton = candyButton({
     label: t('round.pause'),
@@ -580,9 +669,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
           'div',
           { className: 'dv-card dv-problem-card' },
           story,
-          h('div', { className: 'dv-problem-card__line' }, problemSlot, speakerSlot),
+          problemSlot,
           note,
-          hintSlot,
+          h('div', { className: 'dv-problem-card__tools' }, speakerSlot, hintSlot),
         ),
         feedback,
         modelSlot,
@@ -597,7 +686,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     field: 'valley',
     region: region?.id ?? null,
     music: boss ? 'boss' : 'round',
-    focusTarget: () => answerSlot.querySelector<HTMLElement>('button:not(:disabled)') ?? heading,
+    focusTarget: () => answerFocus() ?? heading,
     onEscape() {
       void pause().catch(app.kit.onError);
       return true;
@@ -607,6 +696,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     },
     dispose() {
       disposed = true;
+      clearInterval(raceTimer);
       releaseInput();
       document.removeEventListener('visibilitychange', onVisibility);
       unsubscribeVoices();
