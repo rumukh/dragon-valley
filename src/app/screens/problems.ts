@@ -291,12 +291,15 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
         icon: 'hint',
         variant: 'paper',
         size: 'small',
+        keepsFocus: true,
         testId: 'round-hint',
         onPress: async () => {
           await taken(active.commands.captureSend()({ type: 'hint' }));
           hintSlot.replaceChildren();
           showModel(problem.problem);
           app.kit.announcer.announce(t('round.hintShown'));
+          // The button is gone: the answer keeps the keyboard.
+          answerFocus()?.focus();
         },
         onError: app.kit.onError,
       }),

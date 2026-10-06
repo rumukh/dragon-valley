@@ -84,8 +84,9 @@ svg {
   box-shadow: 0 0 0 0.1em var(--dv-card);
 }
 
-/* Headings and screens receive focus programmatically (screen changes); no ring for those. */
-[tabindex='-1']:focus {
+/* Headings and screens receive focus programmatically (screen changes); no ring for those.
+   Controls always show their ring, whatever their tabindex. */
+:where(h1, h2, h3, p, div, section, main, article, header)[tabindex='-1']:focus {
   outline: none;
   box-shadow: none;
 }

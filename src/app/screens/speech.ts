@@ -19,6 +19,7 @@ export function speakerButton(
       icon: 'speaker',
       iconOnly: true,
       variant: 'paper',
+      keepsFocus: true,
       testId,
       onPress: () => {
         app.speak(text());
