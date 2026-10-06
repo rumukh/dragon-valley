@@ -17,6 +17,7 @@ export const LIMITS = Object.freeze({
   seamStepRatio: 1.5,
   seamFluxRatio: 4,
   maxFirstSoundMs: 12,
+  contextRates: [22050, 44100, 48000],
 });
 
 /** Problems (strings) for one rendered entry. An empty list means the sound passes. */
@@ -56,11 +57,21 @@ export function soundProblems(entry, source) {
   if (loop) {
     if (seconds < LIMITS.musicMinSeconds || seconds > LIMITS.musicMaxSeconds)
       problems.push(`${id}: loop length ${seconds.toFixed(2)} s`);
+    // Browsers decode to the context rate; a loop must stay a whole number of frames there, or
+    // the decoded buffer is truncated and the loop period drifts by a fraction of a sample.
+    for (const rate of LIMITS.contextRates) {
+      if ((x.length * rate) % decoded.sampleRate !== 0)
+        problems.push(`${id}: ${x.length} samples is not a whole number of frames at ${rate} Hz`);
+    }
     const seam = seamMetrics(x, decoded.sampleRate);
     if (seam.seamStepRatio > LIMITS.seamStepRatio)
       problems.push(`${id}: seam step ratio ${seam.seamStepRatio}`);
-    if (seam.seamFluxRatio > LIMITS.seamFluxRatio)
-      problems.push(`${id}: seam spectral flux ratio ${seam.seamFluxRatio}`);
+    // The seam may carry an ordinary downbeat onset, but it must not be an outlier: no more abrupt
+    // than the strongest spectral change elsewhere in the loop.
+    if (seam.seamFluxRatio > Math.max(LIMITS.seamFluxRatio, 1.05 * seam.fluxMaxElsewhereRatio))
+      problems.push(
+        `${id}: seam spectral flux ratio ${seam.seamFluxRatio} (max elsewhere ${seam.fluxMaxElsewhereRatio})`,
+      );
     const found = clicks(x, decoded.sampleRate, true);
     if (found.length) problems.push(`${id}: clicks at ${found.join(', ')} s`);
   } else {

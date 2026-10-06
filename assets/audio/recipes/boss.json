@@ -1,0 +1,120 @@
+{
+  "id": "boss",
+  "title": "Boss challenge",
+  "description": "Playful, bouncy tension that is never scary: 128 BPM in A minor. A: a tiptoeing pizzicato bass walks down chromatically (A G# G F#) under a cheeky staccato bassoon tune with a tick-tock woodblock clock and finger snaps. B: the relative major, a marimba tune climbing in sequence with bassoon answers, then an E7 run back to the start.",
+  "category": "music",
+  "kind": "music",
+  "bus": "music",
+  "seed": 3301,
+  "sampleRate": 22050,
+  "oversample": 2,
+  "tempo": 128,
+  "meter": [4, 4],
+  "key": "A minor",
+  "form": ["A", "B"],
+  "sectionBars": { "A": 8, "B": 8 },
+  "loudness": { "measure": "integrated", "target": -23 },
+  "seam": { "search": [-0.46, 0] },
+  "chords": {
+    "A": "Am | E/G# | Am/G | D/F# | F | E7 | Am | E7",
+    "B": "C | G/B | Am | E/G# | F | G | Am | E7"
+  },
+  "instruments": {
+    "bassoon": { "extends": "bassoon" },
+    "marimba": { "extends": "marimba" },
+    "pizz": { "extends": "pizz" },
+    "chops": { "extends": "pizz", "minGate": 0.25 },
+    "kick": { "extends": "kickSoft" },
+    "snap": { "extends": "snap" },
+    "block": { "extends": "woodblock" }
+  },
+  "tracks": [
+    {
+      "name": "bassoon",
+      "instrument": "bassoon",
+      "db": -2,
+      "sends": { "room": -14 },
+      "humanize": { "time": 0.005, "velocity": 0.05 },
+      "phrases": {
+        "A": "mf A3:e' C4:e' E4:e' r:e D#4:e' E4:e' r:q | D4:e' B3:e' G#3:e' r:e B3:q' E3:q' | A3:e' C4:e' E4:e' r:e F4:e' E4:e' r:q | F#4:e' E4:e' D4:e' C4:e' A3:h | A3:e' C4:e' F4:e' r:e E4:e' F4:e' r:q | G#4:e' F4:e' E4:e' D4:e' B3:q' G#3:q' | A3:q' C4:q' E4:q' A4:q' | G#4:q' E4:q' B3:q' r:q",
+        "B": "r:w | r:w | r:w | r:w | r:h r:q F3:e' A3:e' | r:h r:q G3:e' B3:e' | r:h r:q A3:e' C4:e' | r:w"
+      }
+    },
+    {
+      "name": "marimba",
+      "instrument": "marimba",
+      "db": 2,
+      "sends": { "room": -12 },
+      "humanize": { "time": 0.005, "velocity": 0.05 },
+      "phrases": {
+        "B": "mf C5:e E5:e G5:e C6:e B5:q G5:q | D5:e G5:e B5:e D6:e C6:q B5:q | C5:e E5:e A5:e C6:e B5:q A5:q | B4:e E5:e G#5:e B5:e A5:q G#5:q | A5:e' A5:e' C6:e' A5:e' F5:q' r:q | B5:e' B5:e' D6:e' B5:e' G5:q' r:q | C6:e' C6:e' E6:e' C6:e' A5:q' r:q | B5:e' G#5:e' E5:e' D5:e' B4:q' G#4:q'"
+      }
+    },
+    {
+      "name": "pizz-bass",
+      "instrument": "pizz",
+      "db": -3,
+      "sends": { "room": -18 },
+      "humanize": { "time": 0.004, "velocity": 0.05 },
+      "phrases": {
+        "A": "A2:q' E3:q' A2:q' E3:q' | G#2:q' E3:q' G#2:q' E3:q' | G2:q' E3:q' G2:q' E3:q' | F#2:q' D3:q' F#2:q' D3:q' | F2:q' C3:q' F2:q' C3:q' | E2:q' B2:q' E2:q' G#2:q' | A2:q' E3:q' A2:q' C3:q' | E2:q' G#2:q' B2:q' D3:q'",
+        "B": "C3:q' G2:q' C3:q' G2:q' | B2:q' G2:q' B2:q' D3:q' | A2:q' E2:q' A2:q' C3:q' | G#2:q' E2:q' G#2:q' B2:q' | F2:q' C3:q' F2:q' A2:q' | G2:q' D3:q' G2:q' B2:q' | A2:q' E3:q' A2:q' C3:q' | E2:q' G#2:q' B2:q' D3:q'"
+      }
+    },
+    {
+      "name": "chops",
+      "instrument": "chops",
+      "db": -9,
+      "sends": { "room": -14 },
+      "humanize": { "time": 0.004, "velocity": 0.05 },
+      "pattern": {
+        "type": "comp",
+        "voicing": { "low": "A3", "high": "C5", "size": 3 },
+        "steps": [
+          { "beat": 2, "len": 0.25, "velocity": 0.7 },
+          { "beat": 4, "len": 0.25, "velocity": 0.62 }
+        ]
+      }
+    },
+    {
+      "name": "kick",
+      "instrument": "kick",
+      "db": -10,
+      "steps": { "grid": "q", "pattern": "7-6-" }
+    },
+    {
+      "name": "snap",
+      "instrument": "snap",
+      "db": -4,
+      "sends": { "room": -12 },
+      "humanize": { "time": 0.004, "velocity": 0.08 },
+      "steps": { "grid": "q", "pattern": "-7-6" }
+    },
+    {
+      "name": "tick",
+      "instrument": "block",
+      "db": -15,
+      "humanize": { "time": 0.002, "velocity": 0.06 },
+      "steps": { "grid": "e", "pitch": "A5", "pattern": { "A": "6-4-5-4-", "B": "4-3-4-3-" } }
+    },
+    {
+      "name": "tock",
+      "instrument": "block",
+      "db": -15,
+      "humanize": { "time": 0.002, "velocity": 0.06 },
+      "steps": { "grid": "e", "pitch": "E5", "pattern": { "A": "-4-3-4-3", "B": "-3-2-3-2" } }
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 1.0,
+      "size": 0.7,
+      "damping": 6500,
+      "predelay": 0.012,
+      "lowcut": 250,
+      "highcut": 7000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 40, "q": 0.7 }] }
+}

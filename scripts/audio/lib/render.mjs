@@ -10,7 +10,7 @@
  * reverb, echo and the limiter run a priming pass, so the file is exactly one period of a periodic
  * signal and loops sample-accurately.
  */
-import { dbToGain, mtof, pow, roundTo, gainToDb } from './dmath.mjs';
+import { dbToGain, gainToDb, mtof, pow, powerToDb, roundTo } from './dmath.mjs';
 import { applyFades } from './env.mjs';
 import { applyEq, dcBlock } from './filters.mjs';
 import { echo, reverb } from './fx.mjs';
@@ -156,7 +156,19 @@ function trackEvents(track, recipe, layout, chart) {
     const voicings = voicingOpts ? voiceProgression(chart, voicingOpts) : null;
     const voicingAt = (beat) => voicings[chart.indexOf(chordAt(chart, beat))];
     let previousBass = null;
-    for (const section of layout.sections) {
+    if (p.type === 'sustain') {
+      chart.forEach((c, index) => {
+        if (!inSection(c.section)) return;
+        events.push({
+          beat: c.beat,
+          beats: c.beats,
+          midi: voicings[index],
+          velocity: p.velocity ?? 0.7,
+          gate: p.gate ?? 1,
+        });
+      });
+    }
+    for (const section of p.type === 'sustain' ? [] : layout.sections) {
       if (!inSection(section.name)) continue;
       for (let bar = 0; bar < section.bars; bar++) {
         const barBeat = section.beat + bar * layout.barBeats;
@@ -339,6 +351,7 @@ export function renderRecipe(rawRecipe, patches) {
   const sendsOs = Object.fromEntries(busNames.map((b) => [b, new Float64Array(lengthOs)]));
   const offset = isMusic ? 0 : (recipe.offset ?? 0.002);
   let voiceCount = 0;
+  const trackLevels = [];
 
   for (const track of recipe.tracks) {
     const trackBuf = new Float64Array(lengthOs);
@@ -382,10 +395,13 @@ export function renderRecipe(rawRecipe, patches) {
     }
     applyEq(trackBuf, track.eq, fs, circular);
     const gain = dbToGain(track.db ?? 0);
+    let trackEnergy = 0;
     for (let i = 0; i < lengthOs; i++) {
       const v = trackBuf[i] * gain;
       dryOs[i] += v;
+      trackEnergy += v * v;
     }
+    trackLevels.push({ name: track.name, dryRmsDb: roundTo(powerToDb(trackEnergy / lengthOs), 1) });
     for (const [bus, sendDb] of Object.entries(track.sends || {})) {
       if (!sendsOs[bus]) throw new Error(`Track ${track.name} sends to unknown bus ${bus}`);
       const g = gain * dbToGain(sendDb);
@@ -489,6 +505,7 @@ export function renderRecipe(rawRecipe, patches) {
     stats: {
       lengthSamples: lengthOut,
       voices: voiceCount,
+      tracks: trackLevels,
       loudness: roundTo(loud, 2),
       truePeakDbtp: roundTo(tp, 2),
       rotationSamples: rotation,

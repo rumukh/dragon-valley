@@ -1,0 +1,157 @@
+{
+  "id": "valley",
+  "title": "Valley (hub and map)",
+  "description": "An original gentle folk dance in the spirit of the Czech sousedska: a lilting 3/4 at 120 BPM in F major. A: clarinet tune over tuba 'oom' and accordion 'pah-pah'. B: flute in flowing eighths over sustained accordion and cimbalom arpeggios (subdominant colour). A2: flute and clarinet in parallel thirds with a rocking cimbalom.",
+  "category": "music",
+  "kind": "music",
+  "bus": "music",
+  "seed": 3101,
+  "sampleRate": 22050,
+  "oversample": 2,
+  "tempo": 120,
+  "meter": [3, 4],
+  "key": "F major",
+  "form": ["A", "B", "A2"],
+  "sectionBars": { "A": 8, "B": 8, "A2": 8 },
+  "loudness": { "measure": "integrated", "target": -23 },
+  "seam": { "search": [-0.5, 0] },
+  "chords": {
+    "A": "F | C7 | Gm | C | F | Bb | C7 | F",
+    "B": "Bb | Bb | F | Dm | Gm | C7 | F | C7",
+    "A2": "F | C7 | Gm | C | F | Bb | C7 | F"
+  },
+  "instruments": {
+    "clarinet": { "extends": "clarinet" },
+    "flute": { "extends": "flute" },
+    "accordion": { "extends": "accordion" },
+    "tuba": { "extends": "tuba" },
+    "cimbalom": { "extends": "cimbalom", "minGate": 0.5 },
+    "shaker": { "extends": "shaker" },
+    "ting": { "extends": "triangleTing", "pitch": "A6" }
+  },
+  "tracks": [
+    {
+      "name": "clarinet",
+      "instrument": "clarinet",
+      "db": -2,
+      "sends": { "hall": -11 },
+      "humanize": { "time": 0.006, "velocity": 0.05 },
+      "phrases": {
+        "A": "mf C5:q F5:e G5:e A5:q | Bb5:q. A5:e G5:q | D5:q G5:e A5:e Bb5:q | A5:q G5:h | C5:q F5:e G5:e A5:q | D6:q. C6:e Bb5:q | A5:e Bb5:e G5:q E5:q | F5:h.",
+        "A2": "p A4:q C5:e E5:e F5:q | G5:q. F5:e E5:q | Bb4:q D5:e F5:e G5:q | F5:q E5:h | A4:q C5:e E5:e F5:q | Bb5:q. A5:e F5:q | F5:e G5:e E5:q C5:q | A4:h F4:q'"
+      }
+    },
+    {
+      "name": "flute",
+      "instrument": "flute",
+      "db": -3,
+      "sends": { "hall": -9 },
+      "humanize": { "time": 0.006, "velocity": 0.05 },
+      "phrases": {
+        "B": "mf D5:e F5:e Bb5:e A5:e G5:e F5:e | G5:q. F5:e D5:q | C5:e F5:e A5:e G5:e F5:e E5:e | F5:q. E5:e D5:q | Bb4:e D5:e G5:e F5:e E5:e D5:e | E5:q. F5:e G5:q | A5:e G5:e F5:e E5:e D5:e C5:e | G5:q. F5:e E5:q",
+        "A2": "mf C5:q F5:e G5:e A5:q | Bb5:q. A5:e G5:q | D5:q G5:e A5:e Bb5:q | A5:q G5:h | C5:q F5:e G5:e A5:q | D6:q. C6:e Bb5:q | A5:e Bb5:e G5:q E5:q | F5:h A4:q'"
+      }
+    },
+    {
+      "name": "oompah",
+      "instrument": "accordion",
+      "db": -5,
+      "sections": ["A", "A2"],
+      "sends": { "hall": -14 },
+      "humanize": { "time": 0.004, "velocity": 0.04 },
+      "pattern": {
+        "type": "comp",
+        "voicing": { "low": "A3", "high": "E5", "size": 3 },
+        "steps": [
+          { "beat": 2, "len": 0.55, "velocity": 0.72 },
+          { "beat": 3, "len": 0.55, "velocity": 0.62 }
+        ]
+      }
+    },
+    {
+      "name": "bellows",
+      "instrument": "accordion",
+      "db": -12,
+      "sections": ["B"],
+      "sends": { "hall": -10 },
+      "pattern": {
+        "type": "sustain",
+        "voicing": { "low": "A3", "high": "E5", "size": 3 },
+        "velocity": 0.6,
+        "gate": 0.97
+      }
+    },
+    {
+      "name": "tuba",
+      "instrument": "tuba",
+      "db": -7,
+      "gate": 0.7,
+      "sends": { "hall": -18 },
+      "humanize": { "time": 0.004, "velocity": 0.04 },
+      "phrases": {
+        "A": "F2:q r:h | E2:q r:h | G2:q r:h | C2:q r:q E2:q | F2:q r:h | D2:q r:h | C2:q r:q E2:q | F2:q r:q C2:q",
+        "B": "Bb2:h. | F2:h. | A2:h. | D2:h. | G2:h. | C2:h. | F2:h. | C2:h E2:q",
+        "A2": "F2:q r:h | E2:q r:h | G2:q r:h | C2:q r:q E2:q | F2:q r:h | D2:q r:h | C2:q r:q E2:q | F2:q r:q C2:q"
+      }
+    },
+    {
+      "name": "cimbalom-b",
+      "instrument": "cimbalom",
+      "db": -4,
+      "sections": ["B"],
+      "sends": { "hall": -9 },
+      "humanize": { "time": 0.004, "velocity": 0.05 },
+      "pattern": {
+        "type": "arp",
+        "step": 1,
+        "order": [0, 1, 2],
+        "voicing": { "low": "F4", "high": "F5", "size": 3 },
+        "velocity": [0.7, 0.55, 0.6],
+        "gate": 0.9
+      }
+    },
+    {
+      "name": "cimbalom-a2",
+      "instrument": "cimbalom",
+      "db": -9,
+      "sections": ["A2"],
+      "sends": { "hall": -9 },
+      "humanize": { "time": 0.004, "velocity": 0.05 },
+      "pattern": {
+        "type": "arp",
+        "step": 0.5,
+        "order": [0, 1, 2, 3, 2, 1],
+        "voicing": { "low": "F4", "high": "F5", "size": 3 },
+        "velocity": [0.7, 0.5, 0.55, 0.62, 0.5, 0.45],
+        "gate": 0.9
+      }
+    },
+    {
+      "name": "shaker",
+      "instrument": "shaker",
+      "db": -3,
+      "sections": ["A", "A2"],
+      "humanize": { "time": 0.003, "velocity": 0.06 },
+      "steps": { "grid": "q", "pattern": "-65" }
+    },
+    {
+      "name": "ting",
+      "instrument": "ting",
+      "db": -22,
+      "sends": { "hall": -8 },
+      "steps": { "grid": "q", "pattern": { "A": "4-----", "A2": "5-----" } }
+    }
+  ],
+  "buses": {
+    "hall": {
+      "type": "reverb",
+      "decay": 1.7,
+      "size": 0.95,
+      "damping": 6000,
+      "predelay": 0.02,
+      "lowcut": 250,
+      "highcut": 7000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 40, "q": 0.7 }] }
+}

@@ -1,0 +1,13 @@
+Dragon Valley audio (assets/audio)
+
+Every sound effect and music loop in this folder is an original work, synthesized by this
+repository's own scripts (scripts/audio) from the JSON recipes in assets/audio/recipes. No samples,
+recordings, sample libraries or third-party audio are used, and the music quotes no existing
+melody, including traditional folk tunes.
+
+The audio is part of Dragon Valley and is licensed under the same MIT License as the rest of the
+repository (Copyright (c) 2026 Ruslan Mukhamedov); see licenses.txt or the repository LICENSE.
+
+Provenance (generator, recipe digests and the SHA-256 of every file) is recorded in the
+repository at assets/audio/provenance.json. Running `npm run audio:build` regenerates identical
+bytes on any platform.

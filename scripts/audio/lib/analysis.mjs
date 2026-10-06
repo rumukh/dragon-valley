@@ -274,11 +274,13 @@ export function seamMetrics(x, fs) {
   });
   const fluxSorted = [...flux].sort((a, b) => a - b);
   const median = fluxSorted[Math.floor(flux.length / 2)] || 1e-12;
-  // frames whose window covers the seam: those starting within the last 512 samples
+  // Frames whose window covers the seam: those starting within the last 512 samples, or at 0.
   let seamFlux = 0;
+  let otherMax = 0;
   for (let f = 0; f < frames.length; f++) {
     const start = f * 128;
     if (start > n - 512 || start === 0) seamFlux = Math.max(seamFlux, flux[f]);
+    else otherMax = Math.max(otherMax, flux[f]);
   }
   return {
     seamStep: roundTo(seamStep, 6),
@@ -290,6 +292,7 @@ export function seamMetrics(x, fs) {
     rmsFirst50msDb: roundTo(rmsAround(0, w), 2),
     seamFluxRatio: roundTo(seamFlux / median, 3),
     fluxP99Ratio: roundTo(fluxSorted[Math.floor(0.99 * (flux.length - 1))] / median, 3),
+    fluxMaxElsewhereRatio: roundTo(otherMax / median, 3),
   };
 }
 
