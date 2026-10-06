@@ -6,8 +6,10 @@ installation and the grown-ups' area, on the packed Aegis SDK's **public exports
 `src/app/art/**` belong to S4. The game rules run behind `RuntimeAdapter<S, A, V, C>`; the
 shell never decides an outcome.
 
-Status: phase 1 (PR A). Screens run a small **preview adapter** (§14) until phase 2 binds them
-to the real adapter (`src/rules/adapter.ts`).
+Status: phase 2 (PR B): the Region 1 vertical slice on the real adapter (`src/rules/adapter.ts`)
+and the Region 1 rules: story, hub, map, every Region 1 activity, results, collections and the
+grown-ups' game settings. Phase 3 adds the remaining activities, the Dragon Diary, the progress
+dashboard and printables (§16).
 
 ## 1. Layout
 
@@ -16,10 +18,11 @@ to the real adapter (`src/rules/adapter.ts`).
 | `main.ts`, `index.html` | Boot (§2) and the static splash; the CSP is filled in by `scripts/build.mjs`   |
 | `shell/app.ts`          | The persistent chrome, shared services, the active keeper's session, errors    |
 | `router/`               | Screen stack and router (§3)                                                   |
-| `screens/`              | Title, keepers, keeper editor, hub, round, grown-ups' area, recovery, error    |
+| `screens/`              | Title, keepers, editor, play (story, hub, rounds, results), map, collections   |
 | `persistence/`          | Family, preferences, game sessions, save status, recovery, backups (§4)        |
 | `controller/`           | The command controller (§5)                                                    |
-| `content/`              | Loading and validating the content pack                                        |
+| `content/`              | Loading and validating the content pack and its strings                        |
+| `game/`                 | Game definition, view readings, timers, the map layout, rule refusal codes     |
 | `design/`, `styles/`    | Tokens from S4's palette, the reading font, CSS (§7)                           |
 | `ui/`                   | DOM kit: buttons, keypad, choice tiles, dialogs, toasts, meters, confetti, …   |
 | `math/notation.ts`      | Problems as styled tokens in Czech or international notation (§9)              |
@@ -27,7 +30,6 @@ to the real adapter (`src/rules/adapter.ts`).
 | `audio/`                | Game audio over `createNarration`, S5's manifest, event-to-sound mapping (§10) |
 | `parent/`               | The grown-ups' gate (§6) and offline installation (§12)                        |
 | `i18n/messages.ts`      | Typed access to `content/catalogs/en.ui.json` (§13)                            |
-| `preview/adapter.ts`    | Temporary preview rules (§14)                                                  |
 | `sw.ts`                 | The offline worker (`createOfflineWorker`), built by `scripts/build.mjs`       |
 
 ## 2. Boot and readiness
@@ -35,20 +37,23 @@ to the real adapter (`src/rules/adapter.ts`).
 `main.ts` applies the design tokens and default presentation and reads the deployment base and
 offline revision from `<meta>` tags. It starts loading the reading font (waiting at most 2.5 s)
 and the content pack (`content/dragon-valley.content.json`, validated against the contract's
-`contentRegistration`), reads S5's audio manifest (a missing or broken manifest means a silent
+`contentRegistration`) with its strings (`content/catalogs/en.content.json`, which must hold
+every key the pack uses), reads S5's audio manifest (a missing or broken manifest means a silent
 game, never a failed boot), then opens the family record while the rest finishes. The first
 screen is the title, the recovery screen (an unreadable family record) or the error screen (an
 invalid content pack).
 
 The hidden `boot-status` element is the readiness signal for tests and tools:
 `data-state="ready"` only after the first screen is mounted and painted, `data-screen` names the
-current screen (`title`, `keepers`, `editor`, `hub`, `round`, `parent`, `recovery`, `error`) and
+current screen (`title`, `keepers`, `editor`, `play`, `map`, `region`, `level`, `market`, `den`,
+`album`, `window`, `parent`, `recovery`, `error`) and
 `data-content-revision` the validated pack's revision. Nothing is put on `window`; nothing is
 written to the console. Uncaught errors and rejections are routed to the error boundary.
 
 ## 3. Router and screens
 
-An explicit in-memory stack (`router/stack.ts`): `push`, `replace`, `reset`, `back`, `refresh`.
+An explicit in-memory stack (`router/stack.ts`): `push`, `replace`, `reset`, `back`, `refresh`
+and `backTo(key)` (return to a screen further down the stack, rebuilt).
 Browser history is never used for gameplay; every screen with somewhere to go back to has a
 visible Back button. Back **rebuilds** the previous screen from its entry rather than reviving
 stale DOM. A navigation overtaken by a newer one is discarded before it mounts (double taps
@@ -156,9 +161,12 @@ gets kind, specific help after a miss.
   not shipped). It is renamed because subsetting is a modification and "Andika" is a Reserved
   Font Name. `node scripts/fonts/subset-andika.mjs --source <Andika-7.000 folder> --check`
   rebuilds it byte for byte (dev dependency `subset-font`). No remote fonts.
-- **Icons and pictures**: S4's `renderIcon`, `renderAvatar` and `renderDragon` with unique ID
-  prefixes. A few interface glyphs S4 has not drawn yet (pause, play, plus, pencil, download,
-  upload, trash, warning, retry, backspace, shield) are local stopgaps in `ui/icons.ts`.
+- **Icons and pictures**: S4's `renderIcon` (including the interface glyphs), `renderAvatar`,
+  `renderDragon`, `renderHatch`, `renderBoss`, `renderSticker`, `renderCosmeticIcon` and
+  `renderMagicWindow`, each with a unique ID prefix. A few glyphs S4's set does not have (minus,
+  sparkle, book, map, gift, bag, window) are drawn in `ui/icons.ts`. Small and background
+  dragons are drawn still and animated art carries no CSS filters, so a page never animates more
+  than it needs (software-rendered browsers otherwise burn CPU).
 
 ## 8. Input
 
@@ -194,15 +202,18 @@ One `createNarration` instance (`audio/game-audio.ts`) with an `AudioContext` at
   their lengths with at most 0.7 s between them; `level.completed` plays one star sound per star),
   `first`, `cycle`, `random`. The cue context comes from the event payloads
   (`answer.correct.streak`, `coins.earned.amount`, `level.completed.stars`).
-- **Shell cues**: `ui.tap` (gate hold), `ui.keypad` (keys and typed digits), `ui.navigate`
-  (push and Back, gate unlocked), `ui.blocked` (refused actions). `fx.*` cues arrive with the
-  phase 2 animations.
+- **Shell cues**: `ui.tap` (gate hold, eggs, cards, stones), `ui.keypad` (keys and typed digits),
+  `ui.navigate` (push and Back, gate unlocked), `ui.blocked` (refused actions),
+  `fx.dragon-eating` (a fruit reaches the dragon's mouth), `fx.boss-laugh` (a right answer
+  tickles the boss) and `fx.dragon-happy` (a matched pair, a finished board).
 - **Overlap control** when a sound starts: the manifest's per-sound minimum interval and
   concurrency (group advice such as `sparkle-family` is not a sound and is skipped), a default
   30 ms per sound, and at most six effects starting within 250 ms.
-- **Music states** (`Screen.music`): title, keepers and editor `title`; hub `hub`; round
-  `round`, then `results`; the grown-ups' area, recovery and error are silent. Changes
-  crossfade over the manifest's 1.2 s; the same track continues across screens that share it.
+- **Music states** (`Screen.music`): title, keepers and editor `title`; hub and story `hub`; map,
+  region and level card `map`; Market and Den `market`; Album and Window `album`; rounds and
+  minigames `round`; boss rounds `boss`; results `results`; the grown-ups' area, recovery and
+  error are silent. Changes crossfade over the manifest's 1.2 s; the same track continues across
+  screens that share it.
 - Nothing plays while paused or hidden; `clear()` on restore and keeper switch drops pending
   sequence sounds and playing sounds. Every audio failure is contained: the game works silently.
 
@@ -243,32 +254,85 @@ A unit test checks sentence length, placeholders and that every key is used. A t
 `cs.ui.json` with the same keys. Content strings (levels, dragons, stories) are in
 `en.content.json`, validated by `scripts/validate-content.mjs`.
 
-## 14. The preview adapter (temporary)
+## 14. The game screens
 
-`preview/adapter.ts` is a tiny, deterministic rules stand-in (a four-problem warm-up round, an
-egg that warms, coins and stars) so the shell's persistence, controller, round screen and tests
-run end to end before the real screens are bound. Its saves use their own namespace
-(`dragon-valley-preview`), so they can never be mistaken for real game saves. Phase 2 removes it.
+**The play screen** (`screens/play.ts`) is one router entry per keeper (`play:<id>`) that shows
+whatever the view requires: a story beat, the active round (a problem round or a minigame
+board), the results of a finished round, or else the hub. Entering it starts the day's session
+when the local date changed (`startSession`; time reaches the rules only as this date) and, at
+the hub, activates newer content. After an action that changes what the game shows, a screen
+calls `app.continueGame(id)`, which returns to the play entry and rebuilds it; maps, level cards
+and collections open on top of it. A restore rebuilds it from the restored view. Live commit
+events are kept briefly in the keeper's **event inbox** for the screens that celebrate them
+(the closing line of a beat, hatching, stickers, a finished board, the Arena's score); a restore
+empties it, so nothing is ever replayed.
+
+- **Story** (`story.ts`): the beat's scene (S4 backgrounds; scene ids are background ids), old
+  Glimmer or the boss of a boss level, one line at a time with read-aloud, Next and Skip. The
+  first-egg beat offers its choices as three eggs. A beat's last line ends it in the rules, so it
+  arrives as `story.advanced` and is shown from the content graph before moving on.
+- **Hub** (`hub.ts`): the featured dragon (the first egg's) with the facts it still needs for its
+  next stage, the other dragons, the week's played days (a habit view, never a streak), today's
+  goal and quests (with their claim buttons), the gift chest and one **Daily Adventure** button
+  that does what `hub.next` suggests (placement, snack, the next level or the level in
+  progress, the gift, or free play on the map). Places: the valley map, Market, Dragon Den,
+  Sticker Album, Magic Window and, once open, the Lightning Arena. When the grown-ups' time limit
+  is used up, it offers a goodbye instead.
+- **Map, region road and level card** (`map.ts`): S4's `valley-map` with the content's regions
+  as the SDK's `createHotspotList` buttons placed over the picture (a tap anywhere inside a
+  region works through `logicalPoint` and `hitHotspot`; places the content does not have yet
+  sleep under a lock). A region zooms the same picture to its stretch of road with one button
+  per level (locked, open, the glowing next one, or its stars) and the boss. The level card lists
+  the activities and starts, continues or replays the level.
+- **Problem rounds** (`problems.ts`): Feeding Time, the Boss Challenge, snack time, the placement
+  check and the Lightning Arena on `ProblemRoundView`. Choice tiles or the keypad as the view
+  resolves each problem (remainders, signs, operations and terms included); a right answer
+  throws a fruit along an arc into the dragon's mouth (S4's anchors; an egg glows instead) or a
+  sparkle onto the boss, whose pose follows its mood meter; a miss shows the right fact and its
+  picture until the child goes on; re-asks show the picture first and the hint shows it on
+  request. Response time excludes paused and hidden time. Placement answers with
+  `placementAnswer` and shows its ladder steps; the Arena runs the shell's one-minute race and
+  ends with `endRound{ reason: 'time-up' }`.
+- **Minigames** (`minigames.ts`): Memory Match, Number Trail, Egg Grid (with its strategy split
+  and an always-visible goal) and Fact Family Nest on the rules' typed boards
+  (`MinigameRoundView.current`, faces through the contract's `formatFace`), every move tagged
+  with the board revision. A finished board cheers on `minigame.completed`.
+- **Results** (`results.ts`): stars, the score, coins, and the round's celebrations: hatching (S4's
+  hatch sequence), growing, new eggs, stickers, regions, the Arena's best. Then the level's next
+  activity, or back to the valley.
+- **Collections** (`collections.ts`): Glimmer's Market (`buy`), the Dragon Den (`equip`, eggs only
+  in the nest), the Sticker Album and the Magic Window (S4's window with a legend).
+- **The grown-ups' settings** add the time limit for one sitting (a preference; the shell counts
+  play time per keeper and page and ends a round gently with `endRound{ reason: 'time-limit' }`)
+  and the settings the rules own, sent as actions: the daily goal, the Arena, opening regions
+  early and running the placement check again.
+
+Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.ts`).
 
 ## 15. Testing
 
 - **Unit** (`test/unit/app/`, Vitest): router stack, keypad state machine (incl. remainder
   mode), gate questions, family and preference schemas, records and recovery, game sessions
-  (checkpoints, retry, restore, content activation), backups, save status, the catalog, tokens,
-  fonts, notation and the verbalizer, voices, the audio manifest, sound mapping and game audio.
+  (checkpoints, retry, restore, content activation), backups, save status, the catalog (with every
+  vocabulary the screens build keys from), tokens, fonts, notation and the verbalizer, voices, the
+  audio manifest, sound mapping and game audio; and for the game screens: view readings checked
+  against the real rules, response time and the play clock, problem pictures, answer labels,
+  card faces, the map layout and the content strings.
 - **DOM** (`test/unit/app/dom/`, happy-dom): keypad, choice tiles and the router.
-- **Browser** (`test/e2e/profiles.spec.ts`, Playwright): title → new keeper → hub; reload keeps
-  the keeper; a keyboard-played round saves every answer and survives a reload; the gate (early
-  release, a wrong answer); the notation switch, a rename and pausing a round with Escape. CI runs Chromium, WebKit and Firefox. Locally the default project
-  is the installed Edge; `$env:DV_E2E_ALL_ENGINES = '1'; npm run test:e2e` runs all three.
+- **Browser** (`test/e2e/profiles.spec.ts`, Playwright): a new keeper's prologue, first egg and
+  hub, kept after a reload; the placement check by keyboard with a kind miss, results and saved
+  coins after a reload; the grown-ups' gate; notation, a rule setting, a rename and the pause
+  dialog. CI runs Chromium, WebKit and Firefox. Locally the default project is the installed
+  Edge; `$env:DV_E2E_ALL_ENGINES = '1'; npm run test:e2e` runs all three (set `DV_E2E_PORT` to a
+  free port when another checkout already serves 4321).
 
-## 16. Phase 2 and later
+## 16. Phase 3 and later
 
-Bind the screens to the real adapter (story and first-egg choice, placement, valley map with
-`createHotspotList`, region paths, level intro, Feeding Time, results, hatching, Dragon Den,
-Market, Sticker Album, Magic Window, Dragon Diary, grown-ups' progress and settings including
-daily goal, time limit, Arena and unlocking ahead), `error.<code>` messages, `fx.*` cues,
-then the remaining activities and printables.
+The remaining activities (Riddle Scrolls once the `word` generator lands, Compare Stones, Sharing
+Feast, Golem Orders), the Dragon Diary, the grown-ups' progress dashboard (window, tables,
+hardest facts, trend), printables (flashcards and certificates through `@aegis/narrative`
+`layoutPrint` / `renderPrintHtml`), `fx.*` cues for the remaining moments, and a persisted
+per-day time limit (today it counts per page load).
 
 ## 17. SDK notes
 
