@@ -123,7 +123,17 @@ copy). Identifiers come from `src/rules/contract/ids.ts` and `persistence.ts`.
 `capture()` binds a dispatcher to the committed revision **and** a view generation when a screen
 renders; any newer view (a commit or a restore, even with the same numeric revision) makes older
 dispatchers refuse with `StaleCommandError`, and the runtime refuses a mismatched
-`expectedRevision` before any rule runs. `bindVisibilityPause` pauses the host, audio and speech
+`expectedRevision` before any rule runs. `capture()`'s dispatcher resolves once the action is
+durably saved. For actions the child waits on (an answer, a board move, the next story line,
+starting a level) screens use `captureSend()`: it resolves when the action is saved, or once it is
+committed if the save takes longer than `SAVE_PATIENCE_MS` (250 ms), since the runtime shows the
+committed view before it starts the save; the save status tracks the rest, so feedback never
+waits on a slow device. A save that fails within that time rejects with `accepted: true`: a round
+holds that answer (no praise for what is not stored; the save status says "Not saved" with Retry,
+and another answer says "Saving stopped. Tap Retry at the top."), and when Retry stores it the
+round gives its feedback and goes on. Actions that only move on (`taken()`) treat it as done.
+Commands sent while another one is still saving wait for it instead of being refused as busy.
+`bindVisibilityPause` pauses the host, audio and speech
 when the page is hidden; `resume(reason)` continues accepted work. Refused actions play
 `ui.blocked`; a paused game or a refused action also shows a gentle toast ("The game is paused.",
 "That did not work. Please try again."), except while a save is blocked or the game is busy, where
@@ -155,11 +165,16 @@ gets kind, specific help after a miss.
   pressed while its hit area stays at rest, so an edge never jitters or loses a click. Screens
   settle in from above in 200 ms, starting partly visible (a slow first frame never shows an
   empty screen), so a transition never flashes a scrollbar. Everything reflows at 200 %
-  text and on a phone in portrait. On a landscape tablet (1180 × 820, 1024 × 768) the game
+  text and on a phone in portrait, and words and numbers stay whole: a box is never narrower than
+  its longest word (`overflow-wrap: break-word`), choice tiles wrap onto more rows instead of
+  splitting a label, meters, steppers and the week wrap their parts, and single-column grids use
+  `minmax(0, 1fr)` so nothing pushes the page sideways. The text size is also mirrored as
+  `data-text-scale` on `<html>`, so WebKit restyles the root at once. On a landscape tablet
+  (1180 × 820, 1024 × 768) the game
   screens fit without page scrolling: the hub sets the dragon, its week and the places beside
-  today's card; the results card scrolls its celebrations inside itself with the button onward
-  always in view; a round's title and progress share a line and the picture behind a problem
-  stands under the dragon.
+  today's card; the results card scrolls its celebrations inside itself (a named region in the
+  Tab order) with the button onward always in view; a round's title and progress share a line
+  and the picture behind a problem stands under the dragon.
 - **Feedback never relies on colour alone**: correct is green + check + happy egg; a miss is
   warm orange + `?` + a curious egg + "Almost! Let's look…", with the visual model shown first.
   Term questions mark the asked-about number with a marker **and** an underline.
@@ -186,7 +201,10 @@ gets kind, specific help after a miss.
 - **Choice tiles** (`ui/tiles.ts`): digits type a choice's label (type-ahead), arrows move,
   Space or Enter choose; a missed choice is blocked, not hidden. Escape pauses a round.
 - Keyboard handling is a stack of handlers (`ui/keyboard.ts`) that ignores text fields and
-  leaves Enter/Space on a focused button to the browser, so one press is one action.
+  leaves Enter/Space on a focused button to the browser, so one press is one action. Tools beside
+  an answer (Read aloud, Show me: `keepsFocus`) do not take focus from a pointer, so Enter still
+  sends the typed answer. The router gives `tabindex="-1"` only to headings and containers it
+  focuses; controls keep their place in the Tab order and always show their focus ring.
 
 ## 9. Notation
 
@@ -258,7 +276,9 @@ All English text lives in `content/catalogs/en.ui.json` (S3), imported at build 
 is a compile-time type, and read through the SDK's `createMessages`, which refuses missing keys
 and missing placeholder values. Child-facing sentences keep to the narrative toolkit's child
 profile (at most ten words); keys under `parent.`, `recovery.` and `startup.` are for grown-ups.
-A unit test checks sentence length, placeholders and that every key is used. A translation adds
+A unit test checks sentence length, placeholders and that every key is used. Messages about a
+count have a singular and a plural key (`coins.earned.one` / `.other`, …), chosen by
+`plural(t, count, one, other)`: "You got 1 coin!", "Find 1 way." A translation adds
 `cs.ui.json` with the same keys. Content strings (levels, dragons, stories) are in
 `en.content.json`, validated by `scripts/validate-content.mjs`.
 
@@ -295,7 +315,10 @@ toast where they were earned.
   as the SDK's `createHotspotList` buttons placed over the picture (a tap anywhere inside a
   region works through `logicalPoint` and `hitHotspot`; places the content does not have yet
   sleep under a lock). A region zooms the same picture to its stretch of road with one button
-  per level (locked, open, the glowing next one, or its stars) and the boss. The level card lists
+  per level (locked, open, the glowing next one, or its stars) and the boss. Buttons are placed
+  from percentages (`--x`, `--y`) so they never leave the frame: a place's name is anchored in
+  proportion to where it stands, and pins and markers stay half their size from the edges;
+  markers follow the road's size, not the text size. The level card lists
   the activities and starts, continues or replays the level.
 - **Problem rounds** (`problems.ts`): Feeding Time, the Boss Challenge, snack time, the placement
   check and the Lightning Arena on `ProblemRoundView`. Choice tiles or the keypad as the view
