@@ -90,6 +90,10 @@ export function beatsPerBar(meter) {
 /**
  * Parse melody notation into events {beat, beats, midi: number[], velocity, gate}.
  * If barBeats is given, every bar (between '|') must contain exactly that many beats.
+ *
+ * @param {string} text
+ * @param {{ barBeats?: number, gate?: number, velocity?: number }} [options]
+ * @returns {{ events: { beat: number, beats: number, midi: number[], velocity: number, gate: number }[], beats: number }}
  */
 export function parseMelody(text, { barBeats, gate = 0.92, velocity = 0.8 } = {}) {
   const events = [];

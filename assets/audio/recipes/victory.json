@@ -41,7 +41,7 @@
       "phrases": {
         "A": "f C5:q E5:e G5:e C6:q G5:q | A5:q. G5:e F5:q A5:q | G5:q. F5:e D5:q B4:q | C5:h r:q G4:q",
         "B": "mf E5:e E5:e A5:e A5:e C6:q A5:q | F5:e F5:e A5:e A5:e C6:q A5:q | F#5:q A5:q D6:q C6:q | B5:q. A5:e G5:q F5:q",
-        "A2": "f C5:q E5:e G5:e C6:q G5:q | A5:q. G5:e F5:q A5:q | G5:e A5:e B5:e D6:e F6:q D6:q | C6:h. G4:q"
+        "A2": "f C5:q E5:e G5:e C6:q G5:q | A5:q. G5:e F5:q A5:q | G5:e A5:e B5:e D6:e F6:q D6:q | C6:h. G4:q'"
       }
     },
     {
@@ -84,7 +84,7 @@
       "phrases": {
         "A": "C3:q r:q G2:q r:q | F2:q r:q C3:q r:q | G2:q r:q D3:q r:q | C3:q r:q G2:q r:q",
         "B": "A2:q r:q E2:q r:q | F2:q r:q C3:q r:q | D3:q r:q A2:q r:q | G2:q r:q B2:q r:q",
-        "A2": "C3:q r:q G2:q r:q | F2:q r:q C3:q r:q | G2:q r:q D3:q r:q | C3:q r:q G2:q G2:q"
+        "A2": "C3:q r:q G2:q r:q | F2:q r:q C3:q r:q | G2:q r:q D3:q r:q | C3:q r:q G2:q G2:q'"
       }
     },
     {

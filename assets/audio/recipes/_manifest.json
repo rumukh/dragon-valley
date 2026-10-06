@@ -132,18 +132,18 @@
       "sounds": ["blocked"],
       "note": "A locked level, an unaffordable item or an invalid move."
     },
-    "fx.fruitEaten": {
+    "fx.dragon-eating": {
       "kind": "presentation",
       "sounds": ["chomp"],
       "note": "Feeding Time: when the fruit reaches the dragon after a correct answer, about 0.3 s after the chime."
     },
-    "fx.dragonHappy": { "kind": "presentation", "sounds": ["dragon-chirp"] },
-    "fx.dragonSleepy": {
+    "fx.dragon-happy": { "kind": "presentation", "sounds": ["dragon-chirp"] },
+    "fx.dragon-sleepy": {
       "kind": "presentation",
       "sounds": ["dragon-yawn"],
       "note": "After the daily goal, when the dragons get sleepy."
     },
-    "fx.bossLaugh": {
+    "fx.boss-laugh": {
       "kind": "presentation",
       "sounds": ["boss-laugh"],
       "note": "Boss Challenge: when a correct answer fills the boss's laughing or happy meter."

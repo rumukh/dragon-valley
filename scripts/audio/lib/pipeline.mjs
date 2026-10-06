@@ -60,7 +60,8 @@ export function loadRecipes() {
     const recipe = readJson(join(RECIPE_DIR, name));
     if (`${recipe.id}.json` !== name)
       throw new Error(`Recipe ${name} must have id ${name.slice(0, -5)}`);
-    if (!/^[a-z0-9][a-z0-9-]{0,63}$/.test(recipe.id)) throw new Error(`Bad sound id ${recipe.id}`);
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(recipe.id) || recipe.id.length > 64)
+      throw new Error(`Sound id ${recipe.id} must be lower-case kebab words (content ID rules)`);
     return { file: `assets/audio/recipes/${name}`, recipe };
   });
 }

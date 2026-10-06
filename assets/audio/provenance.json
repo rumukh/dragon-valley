@@ -306,10 +306,10 @@
     {
       "id": "victory",
       "file": "assets/audio/music/victory.wav",
-      "sha256": "d51797fc26810413b618e35976f0938e510db5eca1d253baf784e2c3a5f98b37",
+      "sha256": "36b011a7c33337d7abab21564ba6b56efcda67c2b1fff652feee7f32b9c2ff88",
       "bytes": 882044,
       "recipe": "assets/audio/recipes/victory.json",
-      "recipeSha256": "a237a3e3c007d946e5d790ce8f53b8a27dbb3f32fe896f8e4146e936b02a130f",
+      "recipeSha256": "db2bf7a77041710cc113975c7aae8e8f0bdd75c443e19d3d9b4c46a8d4c034be",
       "seed": 3401
     }
   ],
