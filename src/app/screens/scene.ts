@@ -3,7 +3,7 @@
  * plain images, so they never run script or reach the network), the backdrop for a story scene,
  * and who appears in a story beat.
  */
-import type { ContentData, StoryBeat } from '../../rules/contract';
+import type { ContentData, DragonExpression, StoryBeat } from '../../rules/contract';
 import type { BossState } from '../art/characters/bosses';
 import { h } from '../ui/dom';
 
@@ -65,6 +65,26 @@ export function beatFigure(
       return { kind: 'boss', id: boss, pose: trigger.kind === 'level-start' ? 'start' : 'won' };
   }
   return { kind: 'glimmer' };
+}
+
+/**
+ * Old Glimmer's face for a story line. The story data carries no mood per line yet, so the
+ * shell keeps one for the version-1 lines (a sneeze is a surprise, cold eggs are a sad, sleepy
+ * moment); any other line is calm, and a beat's last line is happy.
+ */
+const LINE_EXPRESSIONS: Readonly<Record<string, DragonExpression>> = {
+  'story.prologue.1': 'curious',
+  'story.prologue.2': 'curious',
+  'story.prologue.3': 'sleepy',
+  'story.prologue.4': 'happy',
+  'story.first-egg.choose': 'curious',
+  'story.first-egg.chosen': 'proud',
+  'story.meadow-welcome.1': 'happy',
+  'story.meadow-welcome.2': 'proud',
+};
+
+export function lineExpression(textKey: string, last: boolean): DragonExpression {
+  return LINE_EXPRESSIONS[textKey] ?? (last ? 'happy' : 'idle');
 }
 
 /** The text key of a beat's node (the last line of a beat is shown from its event). */

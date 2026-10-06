@@ -4,13 +4,13 @@
  * three eggs. Skippable beats can be skipped whole. The last line of a beat ends the beat in the
  * rules, so it arrives as an event; the screen shows it before moving on.
  */
-import type { GameEvent } from '../../rules/contract';
+import type { DragonExpression, GameEvent } from '../../rules/contract';
 import { candyButton } from '../ui/button';
 import { bossArt, dragonArt } from '../ui/art';
 import { h } from '../ui/dom';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
-import { backdrop, beatFigure, nodeText, sceneBackground } from './scene';
+import { backdrop, beatFigure, lineExpression, nodeText, sceneBackground } from './scene';
 import { speakerButton } from './speech';
 
 type StoryAdvanced = Extract<GameEvent, { type: 'story.advanced' }>;
@@ -33,11 +33,15 @@ export function storyScreen(app: App, active: ActiveKeeper): Screen {
     className: 'dv-story__figure',
     attributes: { 'aria-hidden': 'true' },
   });
+  const glimmer = (expression: DragonExpression): SVGSVGElement =>
+    dragonArt({ dragon: 'glimmer', stage: 'adult', expression, framing: 'fit' });
   portrait.append(
     figure.kind === 'boss'
       ? bossArt(figure.id, figure.pose)
-      : dragonArt({ dragon: 'glimmer', stage: 'adult', expression: 'happy', framing: 'fit' }),
+      : glimmer(lineExpression(story.text, story.finished)),
   );
+  portrait.dataset['expression'] =
+    figure.kind === 'boss' ? figure.pose : lineExpression(story.text, story.finished);
 
   let spoken = '';
   const say = (key: string): void => {
@@ -83,6 +87,11 @@ export function storyScreen(app: App, active: ActiveKeeper): Screen {
       portrait.replaceChildren(
         dragonArt({ dragon: egg.rig, stage: 'egg', warmth: 0.6, framing: 'fit' }),
       );
+      delete portrait.dataset['expression'];
+    } else if (figure.kind === 'glimmer') {
+      const expression = lineExpression(key, true);
+      portrait.replaceChildren(glimmer(expression));
+      portrait.dataset['expression'] = expression;
     }
     say(key);
     autoRead();
