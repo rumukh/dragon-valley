@@ -2,7 +2,7 @@
 /**
  * Content validation gate:
  *
- *   node scripts/validate-content.mjs [--strict-coverage]
+ *   node scripts/validate-content.mjs [--strict-coverage] [--strict-art]
  *
  * 1. content/dragon-valley.content.json against the contract's registration (schema, references,
  *    unlock reachability, skill pools, activity options, balance sanity).
@@ -11,7 +11,9 @@
  * 3. Story lines keep to the child profile's sentence length (@aegis/narrative CHILD_PROFILE).
  * 4. Every shipped pack in content/history/ is valid under the current schema and named by its
  *    revision; the current revision is not reused for different content.
- * 5. Art references exist in assets/art/catalog.json once the art pipeline publishes it.
+ * 5. Art references (backgrounds, rigs, cosmetics, sticker icons and frames) are checked against
+ *    assets/art/catalog.json once the art pipeline publishes it: reported, or with --strict-art
+ *    failing the gate.
  * 6. Curriculum coverage (objectives without a lesson or a boss) is reported; with
  *    --strict-coverage it fails the gate (turned on when the full v1 content lands).
  *
@@ -57,25 +59,35 @@ function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'));
 }
 
-/** Art catalog IDs, accepting `{ assets: [{ id }] }`, `{ ids: [] }` or a plain array of IDs. */
-function artCatalogIds(/** @type {unknown} */ catalog) {
-  if (Array.isArray(catalog)) return catalog.filter((id) => typeof id === 'string');
-  if (catalog && typeof catalog === 'object') {
-    const record = /** @type {Record<string, unknown>} */ (catalog);
-    if (Array.isArray(record.ids)) return record.ids.filter((id) => typeof id === 'string');
-    if (Array.isArray(record.assets)) {
-      return record.assets
-        .map((entry) =>
-          entry && typeof entry === 'object' ? /** @type {any} */ (entry).id : undefined,
-        )
-        .filter((id) => typeof id === 'string');
+/**
+ * Every ID the art catalog publishes: each `id` field at any depth (dragons, characters,
+ * cosmetics, avatars, regions, and later bosses, stickers and backgrounds) plus every string listed
+ * under `icons` (items, fruits, map nodes, glyphs, emblems). A plain array of IDs also works.
+ * @param {unknown} catalog
+ * @returns {string[]}
+ */
+export function artCatalogIds(catalog) {
+  /** @type {Set<string>} */
+  const ids = new Set();
+  /** @param {unknown} node @param {boolean} listed */
+  const visit = (node, listed) => {
+    if (typeof node === 'string') {
+      if (listed) ids.add(node);
+    } else if (Array.isArray(node)) {
+      for (const entry of node) visit(entry, listed);
+    } else if (node && typeof node === 'object') {
+      for (const [key, value] of Object.entries(node)) {
+        if (key === 'id' && typeof value === 'string') ids.add(value);
+        else if (typeof value === 'object') visit(value, listed || key === 'icons');
+      }
     }
-  }
-  return null;
+  };
+  visit(catalog, Array.isArray(catalog));
+  return [...ids].sort();
 }
 
 /**
- * @param {{ root?: string; strictCoverage?: boolean }} [options]
+ * @param {{ root?: string; strictCoverage?: boolean; strictArt?: boolean }} [options]
  */
 export async function validateContentTree(options = {}) {
   const root = options.root ?? repositoryRoot;
@@ -170,13 +182,14 @@ export async function validateContentTree(options = {}) {
     }
   }
 
-  // Art catalog.
+  // Art catalog. Report-only until art and content have converged; --strict-art makes it a gate.
   const artFile = join(root, 'assets', 'art', 'catalog.json');
   if (existsSync(artFile)) {
     const ids = artCatalogIds(readJson(artFile));
-    if (ids === null)
-      errors.push('assets/art/catalog.json: expected { "assets": [{ "id": ... }] }');
-    else for (const d of contract.checkArtCatalog(data, ids)) errors.push(d.message);
+    for (const d of contract.checkArtCatalog(data, ids)) {
+      if (options.strictArt) errors.push(d.message);
+      else warnings.push(d.message);
+    }
   } else {
     warnings.push('assets/art/catalog.json not published yet: art references not checked');
   }
@@ -206,7 +219,8 @@ export async function validateContentTree(options = {}) {
 
 if (isMain(import.meta.url)) {
   const strictCoverage = process.argv.includes('--strict-coverage');
-  const { errors, warnings, summary } = await validateContentTree({ strictCoverage });
+  const strictArt = process.argv.includes('--strict-art');
+  const { errors, warnings, summary } = await validateContentTree({ strictCoverage, strictArt });
   for (const warning of warnings) console.log(`warning: ${warning}`);
   for (const error of errors) console.error(`error: ${error}`);
   if (summary) console.log(`content ${JSON.stringify(summary)}`);

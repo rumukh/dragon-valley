@@ -42,10 +42,10 @@ type Adapter = RuntimeAdapter<ProfileState, GameAction, GameView, ContentData>;
  * changes the run but never this number. Re-pin only for a deliberate rules or content change,
  * with the reason in the commit message (docs/testing.md, "When a golden moves").
  */
-const GOLDEN_HASH = '86f276f9ed5b4c3f';
+const GOLDEN_HASH = '90d4beb2a0561ec0';
 
 /** Golden digest of every commit hash in order: catches timing changes the final hash misses. */
-const GOLDEN_TRAJECTORY = '0755946640d0a77a';
+const GOLDEN_TRAJECTORY = 'edca3c7b58fe88e0';
 
 const DAY = '2026-10-06';
 const SEED = 'golden-first-session';

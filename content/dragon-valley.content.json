@@ -149,7 +149,7 @@
           "after": []
         },
         "boss": "bridge-troll",
-        "background": "background.sunny-meadow"
+        "background": "sunny-meadow"
       }
     ],
     "levels": [
@@ -299,7 +299,7 @@
         "rewards": {
           "coins": [5, 10, 15],
           "eggs": [],
-          "cosmetics": ["scarf-daisy"]
+          "cosmetics": ["scarf-striped"]
         },
         "boss": null,
         "storyBeat": null,
@@ -394,7 +394,7 @@
         "rewards": {
           "coins": [10, 20, 30],
           "eggs": [],
-          "cosmetics": ["hat-crown-paper"]
+          "cosmetics": ["hat-party"]
         },
         "boss": "bridge-troll",
         "storyBeat": "beat.bridge-troll",
@@ -561,7 +561,7 @@
         "table": 0,
         "nameKey": "dragon.puff",
         "region": "sunny-meadow",
-        "rig": "rig.puff",
+        "rig": "puff",
         "skills": ["mul-0"],
         "divisionSkills": [],
         "boss": "bridge-troll"
@@ -572,7 +572,7 @@
         "table": 1,
         "nameKey": "dragon.mirror",
         "region": "sunny-meadow",
-        "rig": "rig.mirror",
+        "rig": "mirror",
         "skills": ["mul-1"],
         "divisionSkills": ["div-1"],
         "boss": "bridge-troll"
@@ -583,7 +583,7 @@
         "table": 2,
         "nameKey": "dragon.bubbles",
         "region": "sunny-meadow",
-        "rig": "rig.bubbles",
+        "rig": "bubbles",
         "skills": ["mul-2"],
         "divisionSkills": ["div-2"],
         "boss": "bridge-troll"
@@ -594,7 +594,7 @@
         "table": 5,
         "nameKey": "dragon.sunny",
         "region": "sunny-meadow",
-        "rig": "rig.sunny",
+        "rig": "sunny",
         "skills": ["mul-5"],
         "divisionSkills": ["div-5"],
         "boss": "bridge-troll"
@@ -605,7 +605,7 @@
         "table": 10,
         "nameKey": "dragon.goldie",
         "region": "sunny-meadow",
-        "rig": "rig.goldie",
+        "rig": "goldie",
         "skills": ["mul-10"],
         "divisionSkills": ["div-10"],
         "boss": "bridge-troll"
@@ -623,50 +623,50 @@
     ],
     "cosmetics": [
       {
-        "id": "hat-sunflower",
+        "id": "hat-flower-crown",
         "slot": "head",
-        "assetId": "cosmetic.hat-sunflower",
-        "nameKey": "cosmetic.hat-sunflower",
+        "assetId": "hat-flower-crown",
+        "nameKey": "cosmetic.hat-flower-crown",
         "price": 20,
         "unlock": null
       },
       {
-        "id": "scarf-daisy",
+        "id": "scarf-striped",
         "slot": "neck",
-        "assetId": "cosmetic.scarf-daisy",
-        "nameKey": "cosmetic.scarf-daisy",
+        "assetId": "scarf-striped",
+        "nameKey": "cosmetic.scarf-striped",
         "price": 15,
         "unlock": null
       },
       {
         "id": "glasses-round",
         "slot": "eyes",
-        "assetId": "cosmetic.glasses-round",
+        "assetId": "glasses-round",
         "nameKey": "cosmetic.glasses-round",
         "price": 25,
         "unlock": null
       },
       {
-        "id": "wings-sparkle",
+        "id": "paint-stars",
         "slot": "wings",
-        "assetId": "cosmetic.wings-sparkle",
-        "nameKey": "cosmetic.wings-sparkle",
+        "assetId": "paint-stars",
+        "nameKey": "cosmetic.paint-stars",
         "price": 40,
         "unlock": "sunny-meadow.3"
       },
       {
-        "id": "nest-clover",
+        "id": "nest-flowers",
         "slot": "nest",
-        "assetId": "cosmetic.nest-clover",
-        "nameKey": "cosmetic.nest-clover",
+        "assetId": "nest-flowers",
+        "nameKey": "cosmetic.nest-flowers",
         "price": 30,
         "unlock": "sunny-meadow.2"
       },
       {
-        "id": "hat-crown-paper",
+        "id": "hat-party",
         "slot": "head",
-        "assetId": "cosmetic.hat-crown-paper",
-        "nameKey": "cosmetic.hat-crown-paper",
+        "assetId": "hat-party",
+        "nameKey": "cosmetic.hat-party",
         "price": 60,
         "unlock": "sunny-meadow.boss"
       }
@@ -681,9 +681,9 @@
           "dragon": null,
           "stage": "hatchling"
         },
-        "icon": "sticker-icon.egg-crack",
+        "icon": "egg",
         "color": "#f7b955",
-        "frame": "sticker-frame.round"
+        "frame": "frame-round"
       },
       {
         "id": "show-what-you-know",
@@ -692,9 +692,9 @@
         "criteria": {
           "kind": "placement-done"
         },
-        "icon": "sticker-icon.star",
+        "icon": "star-filled",
         "color": "#5bb8f5",
-        "frame": "sticker-frame.round"
+        "frame": "frame-round"
       },
       {
         "id": "meadow-first-steps",
@@ -705,9 +705,9 @@
           "level": "sunny-meadow.1",
           "stars": 1
         },
-        "icon": "sticker-icon.flower",
+        "icon": "emblem-sunny-meadow",
         "color": "#8bd36b",
-        "frame": "sticker-frame.round"
+        "frame": "frame-round"
       },
       {
         "id": "meadow-three-stars",
@@ -718,9 +718,9 @@
           "level": "sunny-meadow.5",
           "stars": 3
         },
-        "icon": "sticker-icon.three-stars",
+        "icon": "node-stars-3",
         "color": "#ffd23f",
-        "frame": "sticker-frame.star"
+        "frame": "frame-star"
       },
       {
         "id": "streak-ten",
@@ -730,9 +730,9 @@
           "kind": "streak",
           "count": 10
         },
-        "icon": "sticker-icon.lightning",
+        "icon": "badge-correct",
         "color": "#ff8c42",
-        "frame": "sticker-frame.round"
+        "frame": "frame-round"
       },
       {
         "id": "first-outfit",
@@ -742,9 +742,9 @@
           "kind": "cosmetics-owned",
           "count": 1
         },
-        "icon": "sticker-icon.hat",
+        "icon": "hat-party",
         "color": "#c77dff",
-        "frame": "sticker-frame.round"
+        "frame": "frame-round"
       },
       {
         "id": "troll-giggles",
@@ -754,9 +754,9 @@
           "kind": "boss-defeated",
           "boss": "bridge-troll"
         },
-        "icon": "sticker-icon.troll",
+        "icon": "chest-open",
         "color": "#6ccff6",
-        "frame": "sticker-frame.shield"
+        "frame": "frame-shield"
       }
     ],
     "quests": [

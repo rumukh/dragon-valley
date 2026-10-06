@@ -179,11 +179,11 @@ describe('cross-file references', () => {
   it('lists every art ID the pack refers to, and flags the ones missing from a catalog', () => {
     const data = fresh().data;
     const ids = collectArtIds(data).map((ref) => ref.id);
-    expect(ids).toContain('background.sunny-meadow');
-    expect(ids).toContain('rig.bubbles');
+    expect(ids).toContain('sunny-meadow');
+    expect(ids).toContain('bubbles');
     expect(checkArtCatalog(data, ids)).toEqual([]);
-    const withoutRig = ids.filter((id) => id !== 'rig.bubbles');
-    expect(checkArtCatalog(data, withoutRig).map((d) => d.recordId)).toEqual(['rig.bubbles']);
+    const withoutRig = ids.filter((id) => id !== 'bubbles');
+    expect(checkArtCatalog(data, withoutRig).map((d) => d.recordId)).toEqual(['bubbles']);
   });
 });
 
