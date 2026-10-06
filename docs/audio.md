@@ -83,11 +83,30 @@ const audio = createNarration({
     try {
       return new AudioContext({ sampleRate: 22050, latencyHint: 'interactive' });
     } catch {
+      // Fallback: a browser that rejects the option still gets working, seamless audio (below).
       return new AudioContext();
     }
   },
 });
 ```
+
+**Context rate: recommendation and fallback**
+
+- **Recommended.** Construct the context with `{ sampleRate: 22050 }`, the pack's own rate.
+  `decodeAudioData` then does no resampling and loop seams are exact. The browser resamples the
+  context's output stream continuously, so audio quality is unchanged. Decoded PCM is also
+  smaller.
+- **Fallback.** Construct with the option inside `try`/`catch`, and fall back to the default
+  constructor `new AudioContext()` if a browser rejects it.
+  - Chrome 74+, Edge 79+, Firefox 61+ and Safari 14.1+ (iOS 14.5+) accept the option.
+  - Older WebKit may throw `NotSupportedError`, or may silently ignore the option.
+  - Firefox's known issue with custom rates affects only MediaStream sources, which the game does
+    not use. Read-aloud uses Web Speech, not Web Audio.
+- **Either path is safe.** On the default path the browser resamples each file to 44.1 or 48 kHz
+  at decode time. The worst measured seam error is -54.9 dBFS (see the table under "Loop seams"),
+  which is inaudible.
+- `audio` exposes no context getter. To log which path is active, keep a reference to the context
+  your factory returns and read its `sampleRate`.
 
 - `manifest.json` lists every sound with an `id` and a site-relative `src`. Register them as one
   pack:
@@ -189,19 +208,23 @@ zeros. A looping buffer can therefore pick up a tiny error at its seam. To minim
 - Each loop's start point was chosen at its quietest instant within the last beat.
 - The final pickup notes are detached.
 
-Measured in Chromium by decoding each loop once and tiled twice, then comparing the edges:
+Measured in Chromium 151 by decoding each loop once and tiled twice at each context rate, then
+comparing the samples around the seam:
 
-| Loop     | Seam error at 44.1 kHz | Seam error at 48 kHz |
-| -------- | ---------------------- | -------------------- |
-| valley   | -60.2 dBFS             | -59.5 dBFS           |
-| practice | -57.7 dBFS             | -57.0 dBFS           |
-| boss     | -55.6 dBFS             | -54.9 dBFS           |
-| victory  | -59.2 dBFS             | -58.6 dBFS           |
+| Loop     | Recommended path: 22.05 kHz context | Fallback path: 44.1 kHz | Fallback path: 48 kHz |
+| -------- | ----------------------------------- | ----------------------- | --------------------- |
+| valley   | 0 (exact)                           | -60.2 dBFS              | -59.5 dBFS            |
+| practice | 0 (exact)                           | -57.7 dBFS              | -57.0 dBFS            |
+| boss     | 0 (exact)                           | -55.6 dBFS              | -54.9 dBFS            |
+| victory  | 0 (exact)                           | -59.2 dBFS              | -58.6 dBFS            |
 
-At these levels the error is inaudible. With the recommended **22.05 kHz context** there is no
-decode resampling, so the error is exactly zero. The browser resamples the context's output stream
-continuously instead. The test suite simulates the decode resampler and fails if a seam error
-exceeds -45 dBFS.
+- **Recommended path.** The decoded buffer keeps the file's frame count and maps 1:1 onto the
+  file's samples, so the loop wraps with no error at all. The only difference is Chrome's int16 to
+  float scale, which divides positive samples by 32767 and negative ones by 32768.
+- **Fallback path.** The error lasts about a millisecond at the downbeat, 55 dB or more below full
+  scale, which is inaudible. Every loop is a whole number of frames at 44.1 and 48 kHz, so the
+  decoded loop period never drifts.
+- The test suite simulates the decode resampler and fails if a seam error exceeds -45 dBFS.
 
 ## Working on the sounds
 
