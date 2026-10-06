@@ -1,8 +1,8 @@
 {
   "format": "aegis-sdk-build/1",
-  "revision": "5949a7fa1a34bf66a054220585a0d05699c61d70",
+  "revision": "0abd61b5a679020bfb66bf4db24888df9e339d4d",
   "workingTree": "clean",
-  "sourceDigest": "2c83c1814069db10a5cd009793fcc36898b06492b1302232005db9294302708d",
+  "sourceDigest": "a726c53afdf74c5f8752981cc8928ea9922358be313552b2923f1ad8affd614d",
   "sourceFiles": [
     {
       "path": "LICENSE",
@@ -382,7 +382,7 @@
     },
     {
       "path": "packages/runtime/src/host.ts",
-      "sha256": "2be6b071bfa1b1dc133e9bd451431b19994d6c73d00bf0d263455c8c5c97d081"
+      "sha256": "5031c1aa24973a7077f05754b5c728e689a1e3bcf8334d7a5bba776311968a18"
     },
     {
       "path": "packages/runtime/src/index.ts",
@@ -403,6 +403,10 @@
     {
       "path": "packages/runtime/src/types.ts",
       "sha256": "956375428e1ac4f9d417df3351dcd7ce65b4cdce70b9cbf687face0d2cbd5368"
+    },
+    {
+      "path": "packages/runtime/test/content.test.ts",
+      "sha256": "9e381105d980037dff49d5e4acd8545128e64d4cd0c7edd088a4eee2175fca16"
     },
     {
       "path": "packages/runtime/test/data.test.ts",
@@ -446,35 +450,35 @@
     "npm": "11.16.0",
     "typescript": "5.9.3"
   },
-  "version": "0.0.0-local.r5949a7fa1a34.d2c83c1814069db10",
+  "version": "0.0.0-local.r0abd61b5a679.da726c53afdf74c5f",
   "packages": [
     {
       "name": "@aegis/core",
-      "version": "0.0.0-local.r5949a7fa1a34.d2c83c1814069db10",
-      "file": "aegis-core-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz",
-      "sha256": "e27f8c31a9c29a24165bfa6c89fafdfc720b19d5c82d730e48f1c98ff01c1faf",
-      "integrity": "sha512-SoICTASI4u/1cFw7uFJKprtxthPDEKCDZ8T3OHMQaCWphG5tt/ByQrkGNWCcqGgXE9VfPE9wLW70FTGPA7tYAA=="
+      "version": "0.0.0-local.r0abd61b5a679.da726c53afdf74c5f",
+      "file": "aegis-core-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz",
+      "sha256": "16612c186b2371e93ceeb1565953e7b7d9326126d321c8d12b7c5cf2ae69c7ae",
+      "integrity": "sha512-sJUXJL0XxJiQY8U1VcHdTS1vEK0VyveWmN7QXviH9YxplYXF5r7et2yOFKO5gDKBUFS1nH8/gYlLhZAEeQ2Adw=="
     },
     {
       "name": "@aegis/runtime",
-      "version": "0.0.0-local.r5949a7fa1a34.d2c83c1814069db10",
-      "file": "aegis-runtime-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz",
-      "sha256": "6994cd7fb6181383f594f280f0d02645e1e834ca6962ed89727d342ccb3155e9",
-      "integrity": "sha512-LG8xbE9IFpSmE9I65YjWUmpIFXnXtZRSgUmIwCRsgyR3NFgHLPhgz1645aVmMk8pZ+y2sNkebLpIL3488o28eQ=="
+      "version": "0.0.0-local.r0abd61b5a679.da726c53afdf74c5f",
+      "file": "aegis-runtime-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz",
+      "sha256": "72aac3d1218da81b086c81f57e516d2d61bd6874f6b79c69039effc7ec140384",
+      "integrity": "sha512-0s0Rjv/DdldW0K5LB9Wr0Trdsn6+Mh+rv0K5cDDyyuxpnIz6JI3AQQ/1kWznjyLJyWaCNMEEGlj1fNrAbxPRbQ=="
     },
     {
       "name": "@aegis/narrative",
-      "version": "0.0.0-local.r5949a7fa1a34.d2c83c1814069db10",
-      "file": "aegis-narrative-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz",
-      "sha256": "82042bb0719fd7191621d15d3d681c6c36e542d97f6be3655c4777122be56efd",
-      "integrity": "sha512-DpuNBuHURAv981XvYnuyYFWcDGLoSq7NOQrjh4JqbX/WqJ6Pgx63HnjAG8uD0G7bc2DqICW1QVjSZKOK1iWC2Q=="
+      "version": "0.0.0-local.r0abd61b5a679.da726c53afdf74c5f",
+      "file": "aegis-narrative-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz",
+      "sha256": "c9e3165983190533bac07ceee14366b5a2f5daf9d4a3b20fd6588c4fa1630b29",
+      "integrity": "sha512-uW8W1qYhKcAtHaqx8Te40jEa1DuVFxqVM0VHvGh0aiGsjEVba5SXZvZBmukqEDGSjpmULvNCHqhzpUTiTEf/7g=="
     },
     {
       "name": "@aegis/browser",
-      "version": "0.0.0-local.r5949a7fa1a34.d2c83c1814069db10",
-      "file": "aegis-browser-0.0.0-local.r5949a7fa1a34.d2c83c1814069db10.tgz",
-      "sha256": "755263410d8b794fb06299052be3bf8f4673ae7cafcf36857693f8729fcd6a42",
-      "integrity": "sha512-8t6aDZ02P4CptqSA9+xepsYDXcgk6hsWBh5J9nqhvqvAsX1ViH2INPiKqFXs2TSTG80aavm2mMhav27MX3RlfA=="
+      "version": "0.0.0-local.r0abd61b5a679.da726c53afdf74c5f",
+      "file": "aegis-browser-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz",
+      "sha256": "5194c4775178dd4cc587177b91d9026e87e40abda9499077e60e980e20116885",
+      "integrity": "sha512-rPJkU8XOhffN6j56/3870pWIFflOPLTCDbbB6pfWmQnFLe5dIYBQ3TJmoCWpTomu/cKE3W6b8kpjfynlcH/bTw=="
     }
   ]
 }
