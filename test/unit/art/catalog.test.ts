@@ -84,7 +84,13 @@ describe('art catalog', () => {
 
   it('lists every boss, background, sticker frame and Magic Window level', () => {
     const cat = committed as unknown as {
-      bosses: Array<{ id: string; region: string; states: string[]; outcome: string }>;
+      bosses: Array<{
+        id: string;
+        region: string;
+        states: string[];
+        outcome: string;
+        mood: string;
+      }>;
       backgrounds: Array<{
         id: string;
         file: string;
@@ -100,6 +106,7 @@ describe('art catalog', () => {
     for (const b of cat.bosses) {
       expect(b.states).toEqual(['start', 'warming', 'won']);
       expect(['laugh', 'sleep', 'agree']).toContain(b.outcome);
+      expect(['sleepy', 'laughing', 'happy']).toContain(b.mood);
       for (const state of b.states)
         checkChildSafe(renderBoss(b.id, state as 'start', { idPrefix: 'cb' }));
     }

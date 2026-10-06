@@ -9,7 +9,7 @@ import { COSMETIC_SLOTS, DRAGON_EXPRESSIONS, DRAGON_RECIPES, DRAGON_STAGES } fro
 import { FRUIT_IDS, GLYPH_ICON_IDS, ITEM_ICON_IDS } from './icons';
 import { REGION_EMBLEM_IDS } from './icons/emblems';
 import { PALETTE } from './palette';
-import { BOSS_IDS, BOSS_OUTCOME, BOSS_STATES } from './characters/bosses';
+import { BOSS_IDS, BOSS_MOOD, BOSS_OUTCOME, BOSS_STATES } from './characters/bosses';
 import { STICKER_COLORS, STICKER_FRAMES } from './stickers';
 import { MASTERY_LEVELS, magicWindowLayout } from './window';
 import { BACKGROUND_IDS, HALL_WINDOW, SCENE_LAYOUT } from './backgrounds';
@@ -98,6 +98,7 @@ export function buildCatalog(): Record<string, unknown> {
       region: CANONICAL_REGION_IDS[i],
       states: [...BOSS_STATES],
       outcome: BOSS_OUTCOME[id],
+      mood: BOSS_MOOD[id],
     })),
     cosmetics: COSMETICS.map((c) => ({ id: c.id, slot: c.slot, name: c.name })),
     avatars: KEEPER_AVATARS.map((id) => ({ id })),

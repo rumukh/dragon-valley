@@ -196,19 +196,21 @@ gender-neutral keepers as round badges (120 × 120 grid).
 `renderBoss(id, state, { size, idPrefix, title, animated })` draws the nine friendly folklore
 bosses on the 512 × 512 character canvas (feet at y = 470, like the dragons) in three states:
 `start` (the challenge pose), `warming` (about half way along the boss meter) and `won`. Nobody
-gets hurt; `BOSS_OUTCOME` says how each one ends:
+gets hurt. `BOSS_OUTCOME` says how each one is won, and `BOSS_MOOD` gives the same ending in the
+content contract's `BossMood` vocabulary. The `won` pose shows that mood, so a content pack's
+`bosses[].mood` must match it (tested):
 
-| Boss             | Region           | Start → warming → won                                                          | Outcome |
-| ---------------- | ---------------- | ------------------------------------------------------------------------------ | ------- |
-| `bridge-troll`   | sunny-meadow     | arms crossed on his bridge → scratching his head → belly laugh with tears      | laugh   |
-| `forest-witch`   | whispering-woods | a kind Ježibaba squinting on her broom → waving → sharing a gingerbread heart  | agree   |
-| `krakonos`       | fire-mountain    | stern under a rain cloud → the sun peeks out → laughing in the sunshine        | laugh   |
-| `gnome-king`     | crystal-caves    | arms crossed by his lantern → lantern raised → dancing with a crystal          | agree   |
-| `water-goblin`   | sharing-lake     | hugging lidded teacups → peeking at a plum → giving the lost fruit back        | agree   |
-| `lake-nymphs`    | leftover-lagoon  | giggling behind their hands → waving → dancing hand in hand                    | laugh   |
-| `friendly-giant` | giants-peaks     | puzzled (?) → yawning → fast asleep (zZ)                                       | sleep   |
-| `golem`          | riddle-ruins     | confused, lamps dark → lamps 1 and 2 lit → all three lit, cheering (in order!) | agree   |
-| `seven-headed`   | dragon-castle    | all seven heads sneezy → four cured → all cured and happy                      | agree   |
+| Boss             | Region           | Start → warming → won                                                          | Outcome | Mood       |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------ | ------- | ---------- |
+| `bridge-troll`   | sunny-meadow     | arms crossed on his bridge → scratching his head → belly laugh with tears      | laugh   | `laughing` |
+| `forest-witch`   | whispering-woods | a kind Ježibaba squinting on her broom → waving → sharing a gingerbread heart  | agree   | `happy`    |
+| `krakonos`       | fire-mountain    | stern under a rain cloud → the sun peeks out → laughing in the sunshine        | laugh   | `laughing` |
+| `gnome-king`     | crystal-caves    | arms crossed by his lantern → lantern raised → dancing with a crystal          | agree   | `happy`    |
+| `water-goblin`   | sharing-lake     | hugging lidded teacups → peeking at a plum → giving the lost fruit back        | agree   | `happy`    |
+| `lake-nymphs`    | leftover-lagoon  | giggling behind their hands → waving → dancing hand in hand                    | laugh   | `laughing` |
+| `friendly-giant` | giants-peaks     | puzzled (?) → yawning → fast asleep (zZ)                                       | sleep   | `sleepy`   |
+| `golem`          | riddle-ruins     | confused, lamps dark → lamps 1 and 2 lit → all three lit, cheering (in order!) | agree   | `happy`    |
+| `seven-headed`   | dragon-castle    | all seven heads sneezy → four cured → all cured and happy                      | agree   | `happy`    |
 
 The root carries `data-boss`, `data-state` and `data-expression` (`happy` when won), so the
 shared animation classes (`dv-zzz`, twinkles, sneezes, the lantern glow) work for bosses too.
@@ -302,8 +304,9 @@ Content references art **only by these ids**:
   "avatars": [{ "id": "keeper-1" }],
   "icons": { "items": [...], "fruits": [...], "mapNodes": [...], "glyphs": [...], "emblems": [...] },
   "bosses": [{ "id": "golem", "region": "riddle-ruins", "states": ["start", "warming", "won"],
-               "outcome": "agree" }],
-  "stickers": { "frames": [...], "colors": [...], "content": "any icon id or any dragon id" },
+               "outcome": "agree", "mood": "happy" }],
+  "stickers": { "frames": [...], "colors": [...],
+                "content": "icon: any icon id (icons.*) or cosmetic id; or dragon: any dragon id" },
   "magicWindow": { "levels": ["dim", "bronze", "silver", "gold"], "flags": ["needs-polish"], ... },
   "backgrounds": [{ "id": "sunny-meadow", "file": "assets/backgrounds/sunny-meadow.svg", "kind": "region",
                     "region": "sunny-meadow", "layout": { "dragon": ..., "boss": ..., "ui": ... } }],
@@ -314,6 +317,16 @@ Content references art **only by these ids**:
 
 Names in the catalog are English defaults for tooling; player-facing strings belong in the
 content catalogs. Boss and dragon ids are separate namespaces (`seven-headed` is both).
+
+**Content cross-check.** `npm run validate:content -- --strict-art` checks that every art id in
+the content pack exists in this catalog. `test/unit/art/content-art.test.ts` goes further and
+renders each reference in the role the pack gives it:
+
+- a region's `background` must be a region scene;
+- a dragon's `rig` must have the same `kind` and `table`, so its mnemonic teaches that table;
+- a boss's `mood` must equal `BOSS_MOOD`;
+- a cosmetic's `assetId` must be drawn for its `slot` and fit every content dragon;
+- every sticker must compose.
 
 ## 11. Recipes (`assets/art/dragons/<id>.json`)
 

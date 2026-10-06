@@ -200,7 +200,8 @@
         "warming",
         "won"
       ],
-      "outcome": "laugh"
+      "outcome": "laugh",
+      "mood": "laughing"
     },
     {
       "id": "forest-witch",
@@ -210,7 +211,8 @@
         "warming",
         "won"
       ],
-      "outcome": "agree"
+      "outcome": "agree",
+      "mood": "happy"
     },
     {
       "id": "krakonos",
@@ -220,7 +222,8 @@
         "warming",
         "won"
       ],
-      "outcome": "laugh"
+      "outcome": "laugh",
+      "mood": "laughing"
     },
     {
       "id": "gnome-king",
@@ -230,7 +233,8 @@
         "warming",
         "won"
       ],
-      "outcome": "agree"
+      "outcome": "agree",
+      "mood": "happy"
     },
     {
       "id": "water-goblin",
@@ -240,7 +244,8 @@
         "warming",
         "won"
       ],
-      "outcome": "agree"
+      "outcome": "agree",
+      "mood": "happy"
     },
     {
       "id": "lake-nymphs",
@@ -250,7 +255,8 @@
         "warming",
         "won"
       ],
-      "outcome": "laugh"
+      "outcome": "laugh",
+      "mood": "laughing"
     },
     {
       "id": "friendly-giant",
@@ -260,7 +266,8 @@
         "warming",
         "won"
       ],
-      "outcome": "sleep"
+      "outcome": "sleep",
+      "mood": "sleepy"
     },
     {
       "id": "golem",
@@ -270,7 +277,8 @@
         "warming",
         "won"
       ],
-      "outcome": "agree"
+      "outcome": "agree",
+      "mood": "happy"
     },
     {
       "id": "seven-headed",
@@ -280,7 +288,8 @@
         "warming",
         "won"
       ],
-      "outcome": "agree"
+      "outcome": "agree",
+      "mood": "happy"
     }
   ],
   "cosmetics": [
