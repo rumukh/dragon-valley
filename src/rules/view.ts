@@ -2,7 +2,7 @@
  * The view projection: everything the shell renders, computed from state and content on every
  * commit. Pure and deterministic; no text, only catalog keys and structured problems.
  */
-import { projectMinigame, createMinigameRegistry } from '@aegis/narrative';
+import { projectMinigame } from '@aegis/narrative';
 import type { MinigameDefinition, MinigameState } from '@aegis/narrative';
 import {
   DRAGON_STAGES,
@@ -33,13 +33,13 @@ import type {
   WindowView,
 } from './contract';
 import { atLeast, isDue, masteryLevel } from './learning/items';
-import { dueItems, hungryDragons, itemsOf, shareAt } from './progression/dragons';
-import { isComplete, levelStatus, nextLevel, percentOf, regionOpen } from './progression/levels';
+import { MINIGAMES, boardView } from './minigames/boards';
+import { arenaProblem } from './progression/arena';
+import { dragonFacts, dueItems, hungryDragons, itemsOf, shareAt } from './progression/dragons';
+import { levelStatus, nextLevel, percentOf, regionOpen } from './progression/levels';
 import { availableCosmetics } from './economy/rewards';
 import { storyView } from './story/beats';
 import type { Data, Read, ReadState } from './types';
-
-const minigames = createMinigameRegistry();
 
 function screenOf(state: ReadState): Screen {
   if (state.story.pending !== null) return 'story';
@@ -48,12 +48,20 @@ function screenOf(state: ReadState): Screen {
   return 'hub';
 }
 
+/**
+ * The Daily Adventure's next step (docs/design.md §4.2): a pending story beat, the placement
+ * check while it is pending, snack time for hungry dragons at the start of the day, the next
+ * glowing level, the gift once the goal is reached, else free play.
+ */
 function nextStep(state: ReadState, data: Data, hungry: readonly string[]): NextStep {
   if (state.story.pending !== null) return { kind: 'story', beat: state.story.pending };
-  const level = nextLevel(state, data);
-  if (hungry.length > 0 && state.daily !== null && state.daily.answers === 0 && level === null) {
+  if (state.onboarding.placement === 'pending' && data.placement.steps.length > 0) {
+    return { kind: 'placement' };
+  }
+  if (hungry.length > 0 && state.daily !== null && state.daily.answers === 0) {
     return { kind: 'snack', dragon: null };
   }
+  const level = nextLevel(state, data);
   if (level !== null) return { kind: 'level', level };
   if (state.daily?.gift === 'ready') return { kind: 'gift' };
   return { kind: 'free-play' };
@@ -104,7 +112,7 @@ function hubView(
     next: nextStep(state, data, hungry),
     hungry,
     arena: {
-      available: state.settings.arena && isComplete(state, data.balance.arena.unlockAfter),
+      available: arenaProblem(state, data, index) === null,
       best: state.arena.best,
     },
   };
@@ -159,7 +167,7 @@ function roundView(
     const projected = projectMinigame(
       round.definition as MinigameDefinition,
       round.state as MinigameState,
-      minigames,
+      MINIGAMES,
     );
     return {
       id: round.id,
@@ -176,6 +184,7 @@ function roundView(
         revision: projected.revision,
         view: projected.view,
       },
+      current: boardView(round.definition, round.state, projected.view),
       coins: round.coins,
     };
   }
@@ -212,6 +221,14 @@ function roundView(
     feedback: round.feedback,
     coins: round.coins,
     dragon: dragon === null ? null : { id: dragon, expression },
+    placement:
+      round.placement === null
+        ? null
+        : {
+            step: Math.min(round.placement.step, data.placement.steps.length),
+            steps: data.placement.steps.length,
+            placed: [...round.placement.placed],
+          },
   };
 }
 
@@ -226,7 +243,7 @@ function dragonViews(
     .map((dragon) => {
       const owned = state.dragons[dragon.id]!;
       const items = itemsOf(dragon.skills, index);
-      const due = dueItems(state, items);
+      const due = dueItems(state, dragonFacts(dragon, index));
       const stageIndex = DRAGON_STAGES.indexOf(owned.stage);
       const rule = data.balance.growth[stageIndex];
       const hungry = owned.stage !== 'egg' && due >= data.balance.hungry.minDue;
@@ -266,27 +283,31 @@ function cell(state: ReadState, data: Data, item: string, row: number, column: n
   };
 }
 
+/** The window's panes are fixed: computed once, not on every commit. */
+const MUL_PANES = allMulFactIds().map((item) => {
+  const parsed = parseItemId(item);
+  return {
+    item,
+    row: parsed?.kind === 'mul' ? parsed.a : 0,
+    column: parsed?.kind === 'mul' ? parsed.b : 0,
+  };
+});
+const DIV_PANES = allDivFactIds().map((item) => {
+  const parsed = parseItemId(item);
+  return {
+    item,
+    row: parsed?.kind === 'div' ? parsed.divisor : 0,
+    column: parsed?.kind === 'div' ? parsed.quotient : 0,
+  };
+});
+/** Every multiplication fact of each times table 0..10, in either factor. */
+const TABLE_FACTS = Array.from({ length: TABLE_MAX + 1 }, (_, table) =>
+  MUL_PANES.filter((pane) => pane.row === table || pane.column === table).map((pane) => pane.item),
+);
+
 function windowView(state: ReadState, data: Data): WindowView {
-  const cells = allMulFactIds().map((item) => {
-    const parsed = parseItemId(item)!;
-    return cell(
-      state,
-      data,
-      item,
-      parsed.kind === 'mul' ? parsed.a : 0,
-      parsed.kind === 'mul' ? parsed.b : 0,
-    );
-  });
-  const division = allDivFactIds().map((item) => {
-    const parsed = parseItemId(item)!;
-    return cell(
-      state,
-      data,
-      item,
-      parsed.kind === 'div' ? parsed.divisor : 0,
-      parsed.kind === 'div' ? parsed.quotient : 0,
-    );
-  });
+  const cells = MUL_PANES.map((pane) => cell(state, data, pane.item, pane.row, pane.column));
+  const division = DIV_PANES.map((pane) => cell(state, data, pane.item, pane.row, pane.column));
   const counts = Object.fromEntries(MASTERY_LEVELS.map((level) => [level, 0])) as Record<
     MasteryLevel,
     number
@@ -386,11 +407,7 @@ function parentView(
   data: Data,
   index: ReadonlyMap<string, readonly string[]>,
 ): ParentView {
-  const tables = Array.from({ length: TABLE_MAX + 1 }, (_, table) => {
-    const items = allMulFactIds().filter((id) => {
-      const parsed = parseItemId(id);
-      return parsed?.kind === 'mul' && (parsed.a === table || parsed.b === table);
-    });
+  const tables = TABLE_FACTS.map((items, table) => {
     const { accuracy, fastShare } = accuracyOf(state, items);
     const mastered = items.filter((item) =>
       atLeast(state.items[item], 'silver', data.balance),

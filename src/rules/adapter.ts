@@ -1,24 +1,24 @@
 /**
  * The Dragon Valley runtime adapter: state, actions, content, commands, jobs and view, registered
- * with `@aegis/runtime`. This is the walking skeleton the contract ships with. It implements
- * sessions, story beats (including the first-egg choice), level runs with problem rounds for the
- * small-table generators, grading, Leitner moves, re-ask jobs, coins, eggs, dragon growth,
- * stickers, the market, outfits, the daily goal and gift, rule settings and the full view.
+ * with `@aegis/runtime`. It implements sessions and days (daily goal, quests, gift), story beats
+ * (including the first-egg choice), level runs of problem rounds and minigame boards, the
+ * placement check, snack time, the Lightning Arena, grading, Leitner moves, the mix, re-ask
+ * jobs, coins, eggs, dragon growth, stickers, the market, outfits, rule settings, state
+ * validation and the full view.
  *
- * Rejected with `not-implemented` until S2b builds them: placement, arena, snack time, minigame
- * moves and quest claims. Level runs skip activities the skeleton cannot play (minigames and
- * generators other than mul.fact/div.fact/mul.missing).
+ * Level runs skip activities whose generators are not implemented yet.
  */
 import { createRuntimeHost, failure, requireValue, schema, success } from '@aegis/runtime';
 import type {
   CheckpointWriter,
   ContentPack,
+  JsonValue,
   Outcome,
   RuntimeAdapter,
   RuntimeHost,
 } from '@aegis/runtime';
-import { restoreCosmetics, restoreNarrative } from '@aegis/narrative';
-import type { NarrativeGraph } from '@aegis/narrative';
+import { restoreCosmetics, restoreMinigame, restoreNarrative } from '@aegis/narrative';
+import type { MinigameDefinition, NarrativeGraph } from '@aegis/narrative';
 import {
   ACTION_TURNS,
   ADAPTER_ID,
@@ -39,6 +39,7 @@ import {
   skillItemIndex,
 } from './contract';
 import type { ContentData, GameAction, GameView, ProfileState } from './contract';
+import { checkDailyGoal, claimProblem, claimQuest, startDay } from './economy/daily';
 import {
   availableCosmetics,
   awardStickers,
@@ -46,18 +47,15 @@ import {
   grantItem,
   openGift,
 } from './economy/rewards';
+import { MINIGAMES } from './minigames/boards';
+import { arenaProblem, startArena } from './progression/arena';
 import { applyGrowth } from './progression/dragons';
 import { isPlayable } from './progression/levels';
-import {
-  activeProblemRound,
-  canPlay,
-  checkDailyGoal,
-  closeRound,
-  completeRound,
-  gradeAnswer,
-  serveNext,
-  startRunActivity,
-} from './progression/rounds';
+import { applyMinigameMove, moveProblem } from './progression/minigame-rounds';
+import { placementProblem, startPlacement } from './progression/placement';
+import { activeProblemRound, gradeAnswer, roundDone, serveNext } from './progression/problems';
+import { canPlay, closeRound, completeRound, startRunActivity } from './progression/rounds';
+import { snackProblem, startSnack } from './progression/snack';
 import { chooseInBeat, findBeat, storyChoiceProblem, triggerBeats } from './story/beats';
 import { projectView } from './view';
 import type { Ctx, Read, ReadState } from './types';
@@ -71,6 +69,13 @@ type Reject = {
   };
 };
 const reject = (code: string, message: string): Reject => failure(code, message);
+
+function problemOnScreen(state: ReadState): boolean {
+  const round = state.round;
+  return (
+    round !== null && round.type === 'problems' && round.status === 'active' && !!round.current
+  );
+}
 
 function legality(action: GameAction, read: Read): Reject | null {
   const state: ReadState = read.state;
@@ -94,30 +99,51 @@ function legality(action: GameAction, read: Read): Reject | null {
         ? null
         : reject('locked-level', 'This level is still locked.');
     case 'startActivity': {
-      if (action.activity.kind !== 'level')
-        return reject('not-implemented', 'Coming with the rules work.');
+      if (pendingBlocking) return reject('story-pending', 'Finish the story first.');
       if (activeRound) return reject('round-active', 'Finish or leave the current round first.');
+      const request = action.activity;
+      const index = skillItemIndex(data);
+      if (request.kind === 'placement') {
+        const problem = placementProblem(data, index);
+        return problem === null ? null : reject('locked-activity', problem);
+      }
+      if (request.kind === 'snack') {
+        const problem = snackProblem(state, data, index, request.dragon);
+        return problem === null ? null : reject(problem.code, problem.message);
+      }
+      if (request.kind === 'arena') {
+        const problem = arenaProblem(state, data, index);
+        return problem === null ? null : reject('arena-locked', problem);
+      }
       const run = state.run;
       const level = run === null ? undefined : data.levels.find((l) => l.id === run.level);
       if (!run || !level) return reject('no-level', 'Start a level first.');
-      if (action.activity.index > run.next || action.activity.index >= level.activities.length) {
+      if (request.index > run.next || request.index >= level.activities.length) {
         return reject('locked-activity', 'Play the activities in order.');
       }
-      return canPlay(data, level, action.activity.index, skillItemIndex(data))
+      return canPlay(data, level, request.index, index)
         ? null
         : reject('not-implemented', 'This activity is coming with the rules work.');
     }
-    case 'answer': {
-      if (round === null || round.type !== 'problems' || !activeRound || round.current === null) {
-        return reject('no-problem', 'There is no problem to answer.');
-      }
-      return round.activity === 'placement' ? reject('wrong-action', 'Use placementAnswer.') : null;
-    }
+    case 'answer':
+      if (!problemOnScreen(state)) return reject('no-problem', 'There is no problem to answer.');
+      return round?.type === 'problems' && round.activity === 'placement'
+        ? reject('wrong-action', 'Use placementAnswer.')
+        : null;
+    case 'placementAnswer':
+      if (!problemOnScreen(state)) return reject('no-problem', 'There is no problem to answer.');
+      return round?.type === 'problems' && round.activity === 'placement'
+        ? null
+        : reject('wrong-action', 'Use answer.');
     case 'hint':
-      if (round === null || round.type !== 'problems' || !activeRound || round.current === null) {
-        return reject('no-problem', 'There is no problem to hint.');
-      }
-      return round.current.hinted ? reject('already-hinted', 'The hint is already shown.') : null;
+      if (!problemOnScreen(state)) return reject('no-problem', 'There is no problem to hint.');
+      return round?.type === 'problems' && round.current?.hinted
+        ? reject('already-hinted', 'The hint is already shown.')
+        : null;
+    case 'minigameMove': {
+      const problem = moveProblem(state, action.revision, action.move);
+      return problem === null ? null : reject(problem.code, problem.message);
+    }
     case 'endRound':
       if (round === null) return reject('no-round', 'There is no round.');
       if (action.reason === 'done')
@@ -143,6 +169,10 @@ function legality(action: GameAction, read: Read): Reject | null {
       if (!item || !state.cosmetics.owned.includes(item.id))
         return reject('not-owned', 'Not owned.');
       return item.slot === action.slot ? null : reject('wrong-slot', 'It does not fit there.');
+    }
+    case 'claimQuest': {
+      const problem = claimProblem(state, data, action.quest);
+      return problem === null ? null : reject(problem.code, problem.message);
     }
     case 'openGift':
       return state.daily?.gift === 'ready'
@@ -174,10 +204,6 @@ function legality(action: GameAction, read: Read): Reject | null {
       }
       return null;
     }
-    case 'placementAnswer':
-    case 'minigameMove':
-    case 'claimQuest':
-      return reject('not-implemented', 'Coming with the rules work.');
   }
 }
 
@@ -195,21 +221,23 @@ function startSession(ctx: Ctx, iso: string): void {
   state.sessions += 1;
   if (newDay) {
     state.daysPracticed += 1;
-    state.daily = {
-      day,
-      answers: 0,
-      correct: 0,
-      fast: 0,
-      goal: state.settings.dailyGoal,
-      quests: [],
-      gift: 'locked',
-    };
-    state.history = [...state.history, { day, answers: 0, correct: 0, fast: 0 }].slice(
-      -ctx.content.data.balance.daily.historyDays,
-    );
+    startDay(ctx, day);
   }
   ctx.emit(EVENTS.sessionStarted, { day: isoDay(day), newDay });
   if (state.sessions === 1) triggerBeats(ctx, (trigger) => trigger.kind === 'first-session');
+  awardStickers(ctx);
+}
+
+/** After an answer: serve the next problem or finish the round; then growth and stickers. */
+function afterAnswer(ctx: Ctx): void {
+  const index = indexOf(ctx);
+  const round = activeProblemRound(ctx);
+  if (round && round.current === null) {
+    if (roundDone(ctx.content.data, round)) completeRound(ctx, index, 'finished');
+    else serveNext(ctx, index);
+  }
+  applyGrowth(ctx, index);
+  awardStickers(ctx);
 }
 
 function command(
@@ -262,6 +290,9 @@ function validateState(read: Read): Outcome<void> {
       }
     }
   }
+  for (const quest of state.daily?.quests ?? []) {
+    if (!known(data.quests, quest.template)) problems.push(`quest ${quest.id}`);
+  }
   try {
     restoreCosmetics(cosmeticCatalog(data), state.cosmetics);
   } catch {
@@ -280,8 +311,21 @@ function validateState(read: Read): Outcome<void> {
     }
   }
   if (state.run && !known(data.levels, state.run.level)) problems.push(`run ${state.run.level}`);
-  if (state.round && state.round.skills.some((skill) => !known(data.skills, skill)))
+  const round = state.round;
+  if (round && round.skills.some((skill) => !known(data.skills, skill)))
     problems.push('round skills');
+  if (round?.type === 'minigame') {
+    try {
+      restoreMinigame(round.definition as MinigameDefinition, round.state, MINIGAMES);
+    } catch {
+      problems.push('round board');
+    }
+  }
+  if (round?.type === 'problems' && round.placement !== null) {
+    if (round.placement.step > data.placement.steps.length) problems.push('placement step');
+    for (const level of round.placement.placed)
+      if (!known(data.levels, level)) problems.push(`placed ${level}`);
+  }
   for (const job of read.jobs) {
     const payload = job.payload as { round?: unknown };
     if (job.rule !== 'reask' || state.round?.id !== payload.round) problems.push(`job ${job.id}`);
@@ -319,6 +363,10 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
           if (action.type !== 'startLevel') return;
           const index = indexOf(ctx);
           if (ctx.state.round) closeRound(ctx);
+          // Playing a level instead of the placement check skips it (parents can re-run it).
+          if (ctx.state.onboarding.placement === 'pending') {
+            ctx.state.onboarding.placement = 'skipped';
+          }
           ctx.state.run = { level: action.level, next: 0, results: [] };
           triggerBeats(
             ctx,
@@ -329,18 +377,37 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
       }),
       command('startActivity', {
         start(ctx, action) {
-          if (action.type !== 'startActivity' || action.activity.kind !== 'level') return;
-          if (ctx.state.round) ctx.state.round = null;
-          startRunActivity(ctx, indexOf(ctx), action.activity.index);
+          if (action.type !== 'startActivity') return;
+          const index = indexOf(ctx);
+          const request = action.activity;
+          if (request.kind === 'level') {
+            // Keep the run, even a finished one: a replayed activity belongs to it.
+            ctx.state.round = null;
+            startRunActivity(ctx, index, request.index);
+            return;
+          }
+          if (ctx.state.round) closeRound(ctx);
+          if (request.kind === 'placement') startPlacement(ctx, index);
+          else if (request.kind === 'snack') startSnack(ctx, index, request.dragon);
+          else startArena(ctx, index);
         },
       }),
       command('answer', {
         start: (ctx, action) =>
           action.type === 'answer' && gradeAnswer(ctx, action.value, action.elapsedMs),
-        finish(ctx) {
+        finish: afterAnswer,
+      }),
+      command('placementAnswer', {
+        start: (ctx, action) =>
+          action.type === 'placementAnswer' && gradeAnswer(ctx, action.value, action.elapsedMs),
+        finish: afterAnswer,
+      }),
+      command('minigameMove', {
+        start(ctx, action) {
+          if (action.type !== 'minigameMove') return;
           const index = indexOf(ctx);
-          const round = activeProblemRound(ctx);
-          if (round && round.current === null) serveNext(ctx, index);
+          const finished = applyMinigameMove(ctx, index, action.revision, action.move as JsonValue);
+          if (finished) completeRound(ctx, index, 'finished');
           applyGrowth(ctx, index);
           awardStickers(ctx);
         },
@@ -357,7 +424,7 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
         start(ctx, action) {
           if (action.type !== 'endRound') return;
           if (action.reason === 'done') closeRound(ctx);
-          else completeRound(ctx, indexOf(ctx), action.reason === 'quit' ? 'quit' : action.reason);
+          else completeRound(ctx, indexOf(ctx), action.reason);
           if (action.reason === 'quit') closeRound(ctx);
         },
       }),
@@ -380,6 +447,13 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
             slot: action.slot,
             item: action.item,
           });
+        },
+      }),
+      command('claimQuest', {
+        start(ctx, action) {
+          if (action.type !== 'claimQuest') return;
+          claimQuest(ctx, action.quest);
+          awardStickers(ctx);
         },
       }),
       command('openGift', {
@@ -407,9 +481,6 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
           else ctx.state.settings.unlockAhead = [...setting.value];
         },
       }),
-      command('placementAnswer', {}),
-      command('minigameMove', {}),
-      command('claimQuest', {}),
     ],
     jobs: JOB_RULES.map((id) => ({
       id,

@@ -89,7 +89,15 @@ export function dueItems(state: ReadState, items: readonly string[]): number {
   return items.filter((item) => isDue(state.items[item], day)).length;
 }
 
-/** Owned, hatched dragons with enough due items. */
+/** Every fact a dragon eats: its mastery set and its division facts. */
+export function dragonFacts(
+  dragon: DeepReadonly<Dragon>,
+  index: ReadonlyMap<string, readonly string[]>,
+): string[] {
+  return itemsOf([...dragon.skills, ...dragon.divisionSkills], index);
+}
+
+/** Owned, hatched dragons with enough due facts (multiplication or division). */
 export function hungryDragons(
   state: ReadState,
   data: Data,
@@ -101,7 +109,7 @@ export function hungryDragons(
       return (
         owned !== undefined &&
         owned.stage !== 'egg' &&
-        dueItems(state, itemsOf(dragon.skills, index)) >= data.balance.hungry.minDue
+        dueItems(state, dragonFacts(dragon, index)) >= data.balance.hungry.minDue
       );
     })
     .map((dragon) => dragon.id);

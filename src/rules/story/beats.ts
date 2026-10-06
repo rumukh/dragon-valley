@@ -61,6 +61,8 @@ function finishBeat(ctx: Ctx, id: string): void {
   const story = ctx.state.story;
   if (!story.done.includes(id)) story.done.push(id);
   if (story.pending === id) story.pending = null;
+  // A finished beat never runs again: keep its ID in `done`, drop its narrative state.
+  delete story.beats[id];
   triggerBeats(ctx, (trigger) => trigger.kind === 'after-beat' && trigger.beat === id);
   startNext(ctx);
 }
