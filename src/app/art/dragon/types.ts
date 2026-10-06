@@ -47,7 +47,7 @@ export type TailTip =
   | 'gear'
   | 'tuft';
 export type SpikeStyle = 'round' | 'flame' | 'crystal' | 'leaf' | 'stone' | 'none';
-export type CrestStyle = 'none' | 'sun' | 'flower' | 'crown10' | 'shell' | 'cloud-tuft';
+export type CrestStyle = 'none' | 'sun' | 'flower' | 'crown10' | 'shell' | 'cloud-tuft' | 'flames';
 export type MarkingStyle =
   | 'belly-plates'
   | 'rainbow-belly'
@@ -75,7 +75,8 @@ export type FeatureStyle =
   | 'spectacles'
   | 'bushy-brows'
   | 'shawl'
-  | 'sparkle-cheeks';
+  | 'sparkle-cheeks'
+  | 'rock-body';
 export type EggPattern =
   | 'clouds'
   | 'shine'
@@ -118,7 +119,8 @@ export interface DragonRecipe {
   horns: { style: HornStyle; count: number; length: number };
   ears: { style: EarStyle; size: number };
   wings: { style: WingStyle; count: 2 | 4; size: number };
-  tail: { count: 1 | 2; tip: TailTip; length: number };
+  /** curl: how high the tail tip rises (0.62 default; 1 = up to the shoulders). */
+  tail: { count: 1 | 2; tip: TailTip; length: number; curl?: number };
   spikes: { style: SpikeStyle; where: 'tail' | 'head' | 'none'; count: number };
   crest: { style: CrestStyle; count: number };
   markings: MarkingStyle[];

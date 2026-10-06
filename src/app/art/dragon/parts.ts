@@ -3,7 +3,7 @@ import { smoothClosedD, M, Q, C, L } from '../svg/path';
 import { h } from '../svg/xml';
 import { linearGradient, softGradient, type Ctx } from './ctx';
 import { limb } from './shapes';
-import { CX, GROUND } from './skeleton';
+import { CX, GROUND, hasBellyEmblem } from './skeleton';
 
 export function bodyPathD(ctx: Ctx): string {
   const { top, bottom, w, h: bh } = ctx.sk.body;
@@ -219,22 +219,26 @@ export function feet(ctx: Ctx): string {
   return h('g', { class: 'dv-feet' }, ...out);
 }
 
-export type ArmPose = 'rest' | 'cheer' | 'chin' | 'hold' | 'relax' | 'hips';
+export type ArmPose = 'rest' | 'sides' | 'cheer' | 'chin' | 'hold' | 'relax' | 'hips';
 
 export function armPoseFor(ctx: Ctx): { left: ArmPose; right: ArmPose; front: boolean } {
+  // Paws stay off the belly when the dragon's mnemonic is drawn there.
+  const rest: ArmPose = hasBellyEmblem(ctx.recipe) ? 'sides' : 'rest';
   switch (ctx.expression) {
     case 'happy':
       return { left: 'cheer', right: 'cheer', front: false };
     case 'curious':
-      return { left: 'chin', right: 'rest', front: true };
+      return { left: 'chin', right: rest, front: true };
     case 'eating':
       return { left: 'hold', right: 'hold', front: true };
     case 'sleepy':
-      return { left: 'relax', right: 'relax', front: false };
+      return rest === 'sides'
+        ? { left: 'sides', right: 'sides', front: false }
+        : { left: 'relax', right: 'relax', front: false };
     case 'proud':
       return { left: 'hips', right: 'hips', front: false };
     default:
-      return { left: 'rest', right: 'rest', front: false };
+      return { left: rest, right: rest, front: false };
   }
 }
 
@@ -283,6 +287,13 @@ export function arms(ctx: Ctx): string {
           sh,
           { x: CX + side * w * 0.56, y: top + bh * 0.46 },
           { x: CX + side * w * 0.43, y: top + bh * 0.62 },
+        ];
+        break;
+      case 'sides':
+        pts = [
+          sh,
+          { x: CX + side * w * 0.5, y: top + bh * 0.47 },
+          { x: CX + side * w * 0.47, y: top + bh * 0.66 },
         ];
         break;
       default:

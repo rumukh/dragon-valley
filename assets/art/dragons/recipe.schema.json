@@ -269,6 +269,11 @@
           "type": "number",
           "minimum": 0.5,
           "maximum": 1.5
+        },
+        "curl": {
+          "type": "number",
+          "minimum": 0.3,
+          "maximum": 1.3
         }
       }
     },
@@ -323,7 +328,8 @@
             "flower",
             "crown10",
             "shell",
-            "cloud-tuft"
+            "cloud-tuft",
+            "flames"
           ]
         },
         "count": {
@@ -371,7 +377,8 @@
           "spectacles",
           "bushy-brows",
           "shawl",
-          "sparkle-cheeks"
+          "sparkle-cheeks",
+          "rock-body"
         ]
       }
     },

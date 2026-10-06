@@ -9,6 +9,10 @@ import { COSMETIC_SLOTS, DRAGON_EXPRESSIONS, DRAGON_RECIPES, DRAGON_STAGES } fro
 import { FRUIT_IDS, GLYPH_ICON_IDS, ITEM_ICON_IDS } from './icons';
 import { REGION_EMBLEM_IDS } from './icons/emblems';
 import { PALETTE } from './palette';
+import { BOSS_IDS, BOSS_OUTCOME, BOSS_STATES } from './characters/bosses';
+import { STICKER_COLORS, STICKER_FRAMES } from './stickers';
+import { MASTERY_LEVELS, magicWindowLayout } from './window';
+import { BACKGROUND_IDS, HALL_WINDOW, SCENE_LAYOUT } from './backgrounds';
 
 /** Where each dragon hatches (docs/plan.md section 2.3). */
 const HOME_REGION: Record<string, string> = {
@@ -76,12 +80,25 @@ export function buildCatalog(): Record<string, unknown> {
   return {
     schemaVersion: CATALOG_SCHEMA_VERSION,
     generatedBy: 'scripts/art/build-art.mjs from src/app/art/catalog.ts',
-    grids: { dragonCanvas: 512, icon: 64, avatar: 120 },
+    grids: {
+      dragonCanvas: 512,
+      bossCanvas: 512,
+      icon: 64,
+      avatar: 120,
+      sticker: 120,
+      background: [1600, 1000],
+    },
     dragonStages: [...DRAGON_STAGES],
     dragonExpressions: [...DRAGON_EXPRESSIONS],
     cosmeticSlots: [...COSMETIC_SLOTS],
     dragons,
     characters,
+    bosses: BOSS_IDS.map((id, i) => ({
+      id,
+      region: CANONICAL_REGION_IDS[i],
+      states: [...BOSS_STATES],
+      outcome: BOSS_OUTCOME[id],
+    })),
     cosmetics: COSMETICS.map((c) => ({ id: c.id, slot: c.slot, name: c.name })),
     avatars: KEEPER_AVATARS.map((id) => ({ id })),
     icons: {
@@ -93,6 +110,36 @@ export function buildCatalog(): Record<string, unknown> {
       glyphs: [...GLYPH_ICON_IDS],
       emblems: [...REGION_EMBLEM_IDS],
     },
+    stickers: {
+      frames: STICKER_FRAMES.map((id) => ({ id })),
+      colors: [...STICKER_COLORS],
+      content: 'icon: any icon id (icons.*) or cosmetic id; or dragon: any dragon id',
+    },
+    magicWindow: {
+      levels: [...MASTERY_LEVELS],
+      flags: ['needs-polish'],
+      multiplication: {
+        rows: 11,
+        cols: 11,
+        rowMeaning: 'first factor 0-10',
+        colMeaning: 'second factor 0-10',
+      },
+      division: { rows: 10, cols: 11, rowMeaning: 'divisor 1-10', colMeaning: 'quotient 0-10' },
+      hallViewBox: magicWindowLayout().viewBox,
+    },
+    backgrounds: BACKGROUND_IDS.map((id) => ({
+      id,
+      file: `assets/backgrounds/${id}.svg`,
+      width: 1600,
+      height: 1000,
+      kind: id === 'valley-map' ? 'map' : id === 'castle-hall' ? 'hall' : 'region',
+      ...((CANONICAL_REGION_IDS as readonly string[]).includes(id)
+        ? { region: id, layout: SCENE_LAYOUT }
+        : {}),
+      ...(id === 'valley-map' ? { hotspots: 'assets/backgrounds/map-hotspots.json' } : {}),
+      ...(id === 'castle-hall' ? { window: HALL_WINDOW } : {}),
+      prompt: `assets/backgrounds/prompts/${id}.prompt.txt`,
+    })),
     regions,
   };
 }

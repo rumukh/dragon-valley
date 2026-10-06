@@ -1,6 +1,7 @@
-import { f } from '../svg/num';
+import { f, lerp } from '../svg/num';
+import { M, L, ellipsePoint, polyD } from '../svg/path';
+import { rng } from '../svg/prng';
 import { h, svgDoc } from '../svg/xml';
-import { lerp } from '../svg/num';
 import {
   renderEyewear,
   renderHat,
@@ -32,6 +33,7 @@ import {
   cloudTuft,
   crownTen,
   ears,
+  flameCrest,
   flowerCrest,
   horns,
   royalCrown,
@@ -43,12 +45,14 @@ import {
   arms,
   armPoseFor,
   body,
+  bodyFill,
   bodyPathD,
   bodySheen,
   brows,
   cheeks,
   eyes,
   feet,
+  headFill,
   headPathD,
   headShape,
   headSheen,
@@ -137,8 +141,12 @@ function dragonLayers(ctx: Ctx): {
     else if (r.crest.style === 'flower') crestTop = flowerCrest(ctx);
     else if (r.crest.style === 'shell') crestTop = shellCrest(ctx);
     else if (r.crest.style === 'cloud-tuft') crestTop = cloudTuft(ctx);
+    else if (r.crest.style === 'flames') crestTop = flameCrest(ctx);
   }
-  const crown = crowned && !hat && r.crest.style !== 'crown10' ? royalCrown(ctx) : '';
+  const crown =
+    crowned && !hat && r.crest.style !== 'crown10'
+      ? royalCrown(ctx, r.crest.style === 'flames' ? lerp(40, 52, sk.t) : 0)
+      : '';
   const headD = headPathD(ctx);
   const headInner =
     crestBack +
@@ -169,7 +177,11 @@ function dragonLayers(ctx: Ctx): {
     tails(ctx) +
     (hasFeature(ctx, 'wind-key') ? windKey(ctx) : '') +
     neck(ctx) +
-    (hasFeature(ctx, 'cloud-body') ? cloudBody(ctx, bodyD) : body(ctx, bodyD)) +
+    (hasFeature(ctx, 'cloud-body')
+      ? cloudBody(ctx, bodyD)
+      : hasFeature(ctx, 'rock-body')
+        ? rockBody(ctx)
+        : body(ctx, bodyD)) +
     bodySheen(ctx) +
     bodyMarks(ctx) +
     bellyLayer(ctx) +
@@ -212,19 +224,116 @@ function dragonLayers(ctx: Ctx): {
   };
 }
 
+/** Puff: head with puffy cloud bumps along the top and sides (union outline). */
+function cloudHead(ctx: Ctx, d: string): string {
+  const hd = ctx.sk.head;
+  const fill = headFill(ctx);
+  const circles = [-172, -146, -118, -90, -62, -34, -8].map((a, i) => {
+    const p = ellipsePoint(hd.cx, hd.cy, hd.rx * 0.84, hd.ry * 0.8, a);
+    return { x: p.x, y: p.y, r: hd.rx * (i === 3 ? 0.27 : 0.24) };
+  });
+  return h(
+    'g',
+    { class: 'dv-head-shape' },
+    h(
+      'g',
+      { fill: ctx.paint.line },
+      ...circles.map((c) => h('circle', { cx: c.x, cy: c.y, r: c.r + ctx.W / 2 })),
+      h('path', {
+        d,
+        stroke: ctx.paint.line,
+        'stroke-width': ctx.W * 2,
+        'stroke-linejoin': 'round',
+      }),
+    ),
+    h(
+      'g',
+      { fill },
+      ...circles.map((c) => h('circle', { cx: c.x, cy: c.y, r: c.r })),
+      h('path', { d }),
+    ),
+  );
+}
+
+/** Boulder: a chunky, chiselled stone body (straight facets, a few cracks). */
+function rockBody(ctx: Ctx): string {
+  const { top, w, h: bh } = ctx.sk.body;
+  const right: Array<[number, number]> = [
+    [0.14, -0.005],
+    [0.3, 0.05],
+    [0.43, 0.2],
+    [0.5, 0.4],
+    [0.53, 0.6],
+    [0.5, 0.8],
+    [0.42, 0.94],
+    [0.24, 1.02],
+  ];
+  const r = rng(`rock-${ctx.recipe.id}`);
+  const jitter = (): number => (r() - 0.5) * 0.03;
+  const pts = [
+    { x: CX, y: top - 0.01 * bh },
+    ...right.map(([x, y]) => ({ x: CX + (x + jitter()) * w, y: top + (y + jitter()) * bh })),
+    { x: CX, y: top + 1.03 * bh },
+    ...right
+      .slice()
+      .reverse()
+      .map(([x, y]) => ({ x: CX - (x + jitter()) * w, y: top + (y + jitter()) * bh })),
+  ];
+  const d = polyD(pts);
+  const cracks =
+    M(CX + w * 0.42, top + bh * 0.3) +
+    L(CX + w * 0.34, top + bh * 0.36) +
+    L(CX + w * 0.38, top + bh * 0.44) +
+    M(CX - w * 0.46, top + bh * 0.66) +
+    L(CX - w * 0.38, top + bh * 0.7) +
+    L(CX - w * 0.4, top + bh * 0.78) +
+    M(CX + w * 0.2, top + bh * 0.06) +
+    L(CX + w * 0.27, top + bh * 0.12);
+  return (
+    h('path', {
+      class: 'dv-body',
+      d,
+      fill: bodyFill(ctx),
+      stroke: ctx.paint.line,
+      'stroke-width': ctx.W * 1.1,
+      'stroke-linejoin': 'round',
+    }) +
+    h('path', {
+      d: cracks,
+      fill: 'none',
+      stroke: ctx.paint.line,
+      'stroke-width': ctx.W * 0.55,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      opacity: 0.55,
+    }) +
+    h('path', {
+      d: polyD([
+        { x: CX - w * 0.38, y: top + bh * 0.16 },
+        { x: CX - w * 0.26, y: top + bh * 0.08 },
+        { x: CX - w * 0.2, y: top + bh * 0.2 },
+      ]),
+      fill: '#ffffff',
+      opacity: 0.22,
+    })
+  );
+}
+
 /** Puff: body silhouette made of cloud puffs (union outline: outline layer, then fill layer). */
 function cloudBody(ctx: Ctx, d: string): string {
   const { top, w, h: bh } = ctx.sk.body;
   const pts: Array<[number, number, number]> = [
-    [-0.4, 0.3, 0.15],
-    [-0.47, 0.52, 0.16],
-    [-0.46, 0.76, 0.16],
-    [-0.28, 0.93, 0.15],
-    [0, 0.98, 0.15],
-    [0.28, 0.93, 0.15],
-    [0.46, 0.76, 0.16],
-    [0.47, 0.52, 0.16],
-    [0.4, 0.3, 0.15],
+    [-0.36, 0.16, 0.15],
+    [-0.46, 0.36, 0.17],
+    [-0.5, 0.58, 0.18],
+    [-0.46, 0.8, 0.17],
+    [-0.28, 0.95, 0.16],
+    [0, 1.0, 0.16],
+    [0.28, 0.95, 0.16],
+    [0.46, 0.8, 0.17],
+    [0.5, 0.58, 0.18],
+    [0.46, 0.36, 0.17],
+    [0.36, 0.16, 0.15],
   ];
   const circles = pts.map(([x, y, r]) => ({ x: CX + x * w, y: top + y * bh, r: r * w }));
   const grad = `url(#${ctx.ids.id('body-grad')})`;
@@ -250,11 +359,6 @@ function cloudBody(ctx: Ctx, d: string): string {
       h('path', { d }),
     ),
   );
-}
-
-/** Puff: head with a soft cloudy rim. */
-function cloudHead(ctx: Ctx, d: string): string {
-  return headShape(ctx, d);
 }
 
 /** Bounding box of the drawing in design space (for `fit` framing). */
@@ -287,11 +391,15 @@ function designBounds(ctx: Ctx, stage: DragonStage): [number, number, number, nu
   if (r.tail.count === 2) minX = Math.min(minX, 2 * CX - tail.x - tail.r * 0.75);
   if (r.crest.style === 'sun')
     minY = Math.min(minY, hd.cy - hd.ry * 1.62 - lerp(46, 72, sk.t) - 10);
-  if (r.crest.style !== 'none' && r.crest.style !== 'sun')
+  if (r.crest.style === 'flames') minY = Math.min(minY, hd.cy - hd.ry - lerp(58, 72, sk.t));
+  if (r.crest.style !== 'none' && r.crest.style !== 'sun' && r.crest.style !== 'flames')
     minY = Math.min(minY, hd.cy - hd.ry - 50);
   const hasHat = Boolean(ctx.outfit.head);
   if (hasHat) minY = Math.min(minY, hd.cy - hd.ry - hd.rx * 1.2);
-  if (sk.stage === 'crowned') minY = Math.min(minY, hd.cy - hd.ry * 1.45 - 10);
+  if (sk.stage === 'crowned') {
+    const lift = r.crest.style === 'flames' ? lerp(40, 52, sk.t) : 0;
+    minY = Math.min(minY, hd.cy - hd.ry * 1.45 - 10 - lift);
+  }
   if (hasFeature(ctx, 'smoke-ring'))
     minX = Math.min(minX, hd.cx - hd.rx - lerp(30, 40, sk.t) * 1.9);
   if (hasFeature(ctx, 'bubbles')) {

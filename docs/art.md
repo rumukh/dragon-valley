@@ -5,6 +5,13 @@ renderer is a **pure, deterministic function that returns an SVG string**: no DO
 `Math.random`, no platform trigonometry. The same options always give byte-identical markup on every
 OS (pinned by golden digests in `test/unit/art/dragon.test.ts`).
 
+**Imports for the shell.** Prefer the sub-modules you need (`src/app/art/dragon`, `…/icons`,
+`…/characters/avatars`, `…/characters/bosses`, `…/window`, `…/stickers`, `…/cosmetics`,
+`…/palette`) so the bundle stays small; the umbrella `src/app/art` re-exports everything.
+`src/app/art/backgrounds` and `src/app/art/catalog` are build-time generators: at runtime load the
+static files in `assets/backgrounds/` and `assets/art/catalog.json` instead (only
+`mapNodePositions` and `MAP_HOTSPOTS` are handy at runtime).
+
 ## 1. Art direction
 
 - **Bright storybook, "toy vinyl" finish.** Rounded shapes, soft radial shading (light top-left,
@@ -21,10 +28,10 @@ OS (pinned by golden digests in `test/unit/art/dragon.test.ts`).
   | ×0    | Puff      | Cloud-puff body, blows a smoke ring shaped like **0** ("poof!")                    |
   | ×1    | Mirror    | Silver mirror belly and a **reflection** under its feet: stays the same            |
   | ×2    | Bubbles   | **Two tails**, bubbles in pairs, spots in pairs: doubles                           |
-  | ×3    | Clover    | **3 horns**, 3 leaf spikes, a three-leaf clover on the belly and the tail          |
+  | ×3    | Clover    | **3 sapling horns**, 3 leaf spikes, a three-leaf clover on the belly and the tail  |
   | ×4    | Petal     | **4 petal wings** (two pairs: double the double), four-petal flower crest          |
   | ×5    | Sunny     | **5-ray sun crest**, a clock face belly and a **clock-hand tail** (5-minute steps) |
-  | ×6    | Ember     | **5 flames** on the tail **+ 1** flame on the tip                                  |
+  | ×6    | Ember     | **5 golden flames** on its head **+ 1 blue flame** on the tail tip                 |
   | ×7    | Rainbow   | **7 rainbow stripes** on the belly                                                 |
   | ×8    | Crystal   | **8-point snowflake** on the belly (double, double, double)                        |
   | ×9    | Starry    | A ten-frame of stars with **9 stars and 1 empty place** (10 − 1)                   |
@@ -33,8 +40,14 @@ OS (pinned by golden digests in `test/unit/art/dragon.test.ts`).
   | 100s  | Boulder   | Stone dragon with a hundred-square, a ten-rod and a one-cube carved on its belly   |
   | ( )   | Clockwork | Three gears that **turn one after another**, in order                              |
 
-  Eggs hint at their hatchling (Puff's egg has clouds and a 0, Ember's has 5 + 1 flames, Starry's
-  has 9 stars and one empty star, and so on).
+  Eggs hint at their hatchling (Puff's egg has clouds and a 0, Ember's has 5 orange flames and 1 blue
+  one, Starry's has 9 stars and one empty star, and so on).
+
+  Mnemonics are sized to be **countable at gameplay size (120-200 px)**: belly emblems are large and
+  the paws rest at the sides so nothing covers them (
+  pm run art:gallery writes a 160 px
+  mnemonics.png sheet to check this). Silhouettes vary too: Puff is a puffy cloud, Boulder a
+  chiselled stone dragon with rock horns, Petal has notched blossom wings under a leafy flower.
 
 - **Region accents** give each place one signature color (palette `regions`); dragons are drawn in
   their own colors so they stay recognisable everywhere.
@@ -158,6 +171,9 @@ reduced motion never show a half-blink or a hidden part.
 **nest** (8 decorations). They sit on rig anchors, so every cosmetic fits every dragon at every
 stage (eggs show only the nest). Ownership, prices and unlocks are content (S2), not art.
 
+`renderCosmeticIcon(id, { size, idPrefix, title })` draws any cosmetic on its own, centred in a
+square view box, for Glimmer's Market tiles and stickers.
+
 ## 5. Icons and avatars
 
 `renderIcon(id, { size, idPrefix, title, accent })` renders any id in `ICON_IDS` on a 64 × 64 grid:
@@ -175,7 +191,101 @@ stage (eggs show only the nest). Ownership, prices and unlocks are content (S2),
 `renderAvatar('keeper-1' … 'keeper-8', { size, idPrefix, title, frame })` renders eight diverse,
 gender-neutral keepers as round badges (120 × 120 grid).
 
-## 6. The catalog (`assets/art/catalog.json`)
+## 6. Bosses (`src/app/art/characters/bosses.ts`)
+
+`renderBoss(id, state, { size, idPrefix, title, animated })` draws the nine friendly folklore
+bosses on the 512 × 512 character canvas (feet at y = 470, like the dragons) in three states:
+`start` (the challenge pose), `warming` (about half way along the boss meter) and `won`. Nobody
+gets hurt; `BOSS_OUTCOME` says how each one ends:
+
+| Boss             | Region           | Start → warming → won                                                          | Outcome |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------ | ------- |
+| `bridge-troll`   | sunny-meadow     | arms crossed on his bridge → scratching his head → belly laugh with tears      | laugh   |
+| `forest-witch`   | whispering-woods | a kind Ježibaba squinting on her broom → waving → sharing a gingerbread heart  | agree   |
+| `krakonos`       | fire-mountain    | stern under a rain cloud → the sun peeks out → laughing in the sunshine        | laugh   |
+| `gnome-king`     | crystal-caves    | arms crossed by his lantern → lantern raised → dancing with a crystal          | agree   |
+| `water-goblin`   | sharing-lake     | hugging lidded teacups → peeking at a plum → giving the lost fruit back        | agree   |
+| `lake-nymphs`    | leftover-lagoon  | giggling behind their hands → waving → dancing hand in hand                    | laugh   |
+| `friendly-giant` | giants-peaks     | puzzled (?) → yawning → fast asleep (zZ)                                       | sleep   |
+| `golem`          | riddle-ruins     | confused, lamps dark → lamps 1 and 2 lit → all three lit, cheering (in order!) | agree   |
+| `seven-headed`   | dragon-castle    | all seven heads sneezy → four cured → all cured and happy                      | agree   |
+
+The root carries `data-boss`, `data-state` and `data-expression` (`happy` when won), so the
+shared animation classes (`dv-zzz`, twinkles, sneezes, the lantern glow) work for bosses too.
+
+## 7. Magic Window (`src/app/art/window`)
+
+```ts
+renderMagicWindow({
+  multiplication, // 11 rows (first factor 0-10) x 11 panes (second factor 0-10)
+  division, // 10 rows (divisor 1-10) x 11 panes (quotient 0-10)
+  idPrefix,
+  size,
+  title,
+  animated,
+});
+// a pane is 'dim' | 'bronze' | 'silver' | 'gold' or { level, needsPolish: true }; missing panes are dim
+renderMasteryGrid({ op: 'mul' | 'div', cells, idPrefix, size }); // plain grid for the parent area
+magicWindowLayout(); // pane rectangles in the 600 x 872 window viewBox, for hit targets
+```
+
+The hall window is an arched stained-glass window: multiplication panes in the body, the 110
+division facts as a sunburst fan in the arch (rings = divisors 1-10 from the centre out, sectors
+= quotients 0-10 left to right) and a central star that glows brighter as more panes light up.
+Glass colors come from `palette.mastery`; gold panes twinkle and panes that need polishing get
+dusty smudges (never a broken look). Every pane carries `data-op` plus `data-a`/`data-b`
+(multiplication) or `data-divisor`/`data-quotient`/`data-dividend` (division); the root carries
+`data-lit` and `data-total`. In the castle hall, place the window at `HALL_WINDOW`
+(`{ x: 532, y: 84, width: 536, height: 779 }` in the hall's 1600 × 1000 space).
+
+## 8. Stickers (`src/app/art/stickers`)
+
+`renderSticker({ frame, color, icon | dragon, stage?, idPrefix, size, title })` composes a
+die-cut sticker (120 × 120) so content can add stickers without new art:
+
+- `frame`: `frame-round`, `frame-scallop`, `frame-shield`, `frame-star`, `frame-hexagon`,
+  `frame-heart`, `frame-ribbon`, `frame-cloud` (published in the catalog as `stickers.frames[].id`).
+- `color`: any region id, `primary`, `sun`, `coral`, `sky`, `meadow`, `gold`, `silver`,
+  `bronze`, or a `#rrggbb` color.
+- `icon`: any `renderIcon` id (UI glyphs take a darker tint of the frame color) or any cosmetic id
+  (shown as the item, e.g. `hat-party`); or
+- `dragon`: any dragon id, shown as a happy portrait (`stage` defaults to `youngling`).
+
+## 9. Backgrounds and the valley map (`assets/backgrounds`)
+
+Eleven layered SVG scenes at 1600 × 1000 (16:10), generated by `npm run art:build` from
+`src/app/art/backgrounds` (each ≤ 150 KB, tested): `valley-map`, one scene per region id and
+`castle-hall`. They are child-safe static images (`<img>` or CSS backgrounds); painted versions
+can replace them later from `assets/backgrounds/prompts/<id>.prompt.txt`, and
+`assets/backgrounds/provenance.json` records the source of each (SVG original, painted pending).
+
+**Region scene layout** (`SCENE_LAYOUT`, also in the catalog): the player's dragon stands at
+`(430, 850)`, the boss at `(1170, 850)`, and the calm centre-top area `{ x: 400, y: 70, width:
+800, height: 470 }` is kept free for the problem card.
+
+**Map hotspots** (`assets/backgrounds/map-hotspots.json`, also `MAP_HOTSPOTS`):
+
+```jsonc
+{
+  "schemaVersion": 1,
+  "background": "valley-map",
+  "logical": { "width": 1600, "height": 1000 },
+  "hotspots": [{ "id": "sunny-meadow", "x": 40, "y": 730, "width": 420, "height": 260,
+                 "labelKey": "region.sunny-meadow.name" }],          // @aegis/browser/ui Hotspot
+  "path": [[96, 942], ...],                                          // the whole road, in order
+  "regions": { "sunny-meadow": { "center": {...}, "nodes": [6 x {x, y}], "boss": {x, y},
+                                 "path": [[x, y], ...] } }
+}
+```
+
+Hotspots pass `validateHotspots` and every level node and boss node hits its own region with
+`hitHotspot` (tested against the real SDK). The map's `<svg>` uses the default `xMidYMid meet`,
+matching `logicalPoint`. Node counts follow the plan (6, 6, 6, 6, 6, 5, 6, 6 and 3 levels plus one
+boss each); if content changes a count, `mapNodePositions(regionId, count)` spaces any number of
+nodes evenly along the region's own stretch of road. `labelKey`s are suggestions for the content
+string catalog.
+
+## 10. The catalog (`assets/art/catalog.json`)
 
 Generated from `src/app/art/catalog.ts` by `npm run art:build`; a test fails if it is stale.
 Content references art **only by these ids**:
@@ -191,16 +301,21 @@ Content references art **only by these ids**:
   "cosmetics": [{ "id": "hat-wizard", "slot": "head", "name": "Wizard Hat" }],
   "avatars": [{ "id": "keeper-1" }],
   "icons": { "items": [...], "fruits": [...], "mapNodes": [...], "glyphs": [...], "emblems": [...] },
+  "bosses": [{ "id": "golem", "region": "riddle-ruins", "states": ["start", "warming", "won"],
+               "outcome": "agree" }],
+  "stickers": { "frames": [...], "colors": [...], "content": "any icon id or any dragon id" },
+  "magicWindow": { "levels": ["dim", "bronze", "silver", "gold"], "flags": ["needs-polish"], ... },
+  "backgrounds": [{ "id": "sunny-meadow", "file": "assets/backgrounds/sunny-meadow.svg", "kind": "region",
+                    "region": "sunny-meadow", "layout": { "dragon": ..., "boss": ..., "ui": ... } }],
   "regions": [{ "id": "sunny-meadow", "accent": "#ffc53d", "deep": "...", "soft": "...",
                 "onAccent": "ink", "emblem": "emblem-sunny-meadow" }]
 }
 ```
 
 Names in the catalog are English defaults for tooling; player-facing strings belong in the
-content catalogs. The second art PR adds `bosses`, `stickers`, `magicWindow` and `backgrounds`
-sections in the same style.
+content catalogs. Boss and dragon ids are separate namespaces (`seven-headed` is both).
 
-## 7. Recipes (`assets/art/dragons/<id>.json`)
+## 11. Recipes (`assets/art/dragons/<id>.json`)
 
 A recipe is data: colors (`body`, `belly`, `wing`, `horn`, `accent`, `iris`, `cheek`, optional
 `shade`, `accent2`), `build` proportions, `horns`, `ears`, `wings` (style and 2 or 4 wings),
@@ -209,14 +324,15 @@ A recipe is data: colors (`body`, `belly`, `wing`, `horn`, `accent`, `iris`, `ch
 in `src/app/art/dragon/recipes.ts`, add its signature color to the palette, run
 `npm run art:build` and `npm run art:gallery`, and review the sheets.
 
-## 8. Pipeline
+## 12. Pipeline
 
-| Command               | What it does                                                                                                        |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `npm run art:build`   | Regenerates `catalog.json`, `animations.css` (and the background SVGs)                                              |
-| `npm run art:check`   | Fails if a generated artifact is stale                                                                              |
-| `npm run art:gallery` | Writes `out/art-gallery/index.html` and PNG contact sheets via headless Edge (`DV_EDGE` overrides the browser path) |
-| `npm run art:goldens` | Re-pins the golden digests after an intentional, reviewed art change                                                |
+| Command                                      | What it does                                                                                                                      |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run art:build`                          | Regenerates `catalog.json`, `animations.css` (and the background SVGs)                                                            |
+| `npm run art:check`                          | Fails if a generated artifact is stale                                                                                            |
+| `npm run art:gallery`                        | Writes `out/art-gallery/index.html` and PNG contact sheets via headless Edge (`DV_EDGE` overrides the browser path)               |
+| `npm run art:goldens`                        | Re-pins the golden digests after an intentional, reviewed art change                                                              |
+| `node scripts/art/zoom.mjs <name> <spec>...` | True-pixel review sheet: `ember:adult:happy`, `boss:golem:won`, `icon:coin`, `sticker:3`, `window:2`, `bg:sunny-meadow`, `hall:2` |
 
 **Child safety** (tested for every render): no `<script>`, no `foreignObject`, no event
 handlers, no external `href`/`url()`, no fonts or `@import`, no images; only local `#id`

@@ -86,7 +86,13 @@ function headSlots(sk: Skeleton): HeadSlot[] {
 
 /** One head drawn at the canonical position, then placed. */
 function sevenHead(base: Ctx, slot: HeadSlot, sneezy: boolean, refSk: Skeleton): string {
-  const ctx = { ...base, expression: BASE_EXPRESSION[slot.personality], sk: refSk } as Ctx;
+  // Once cured and happy (the won boss state), every head smiles except the sleepy one.
+  const cheer = base.expression === 'happy' && !sneezy && slot.personality !== 'sleepy';
+  const ctx = {
+    ...base,
+    expression: cheer ? 'happy' : BASE_EXPRESSION[slot.personality],
+    sk: refSk,
+  } as Ctx;
   const hd = refSk.head;
   const e = refSk.eye;
   let extra = '';

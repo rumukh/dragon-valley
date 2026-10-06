@@ -166,6 +166,27 @@ sheets.push({
 });
 
 sheets.push({
+  name: 'mnemonics',
+  title: 'Mnemonics at gameplay size (160 px, fit): hatchling, youngling, adult',
+  width: 1640,
+  height: 1180,
+  body: () => {
+    const cells = [];
+    for (const id of DRAGONS.filter((d) => d !== 'glimmer')) {
+      for (const stage of /** @type {const} */ (['hatchling', 'youngling', 'adult'])) {
+        cells.push(
+          cell(
+            art.renderDragon({ dragon: id, stage, idPrefix: uid(id), size: 160, framing: 'fit' }),
+            `${id} ${stage}`,
+          ),
+        );
+      }
+    }
+    return grid(9, cells, 160);
+  },
+});
+
+sheets.push({
   name: 'roster-small',
   title: 'Readability at 64 px (hatchling, adult) and 128 px',
   width: 1500,
@@ -425,7 +446,7 @@ if (existsSync(join(bgDir, 'valley-map.svg'))) {
     width: 1700,
     height: 2400,
     body: () => {
-      const ids = ['valley-map', ...art.CANONICAL_REGION_IDS_FOR_ART, 'castle-hall'];
+      const ids = art.BACKGROUND_IDS;
       const hot = existsSync(hotspotsPath) ? JSON.parse(readFileSync(hotspotsPath, 'utf8')) : null;
       return ids
         .map((/** @type {string} */ id) => {
@@ -434,6 +455,11 @@ if (existsSync(join(bgDir, 'valley-map.svg'))) {
             '<svg width="800" height="500" ',
           );
           let overlay = '';
+          if (id === 'castle-hall') {
+            const w = art.HALL_WINDOW;
+            const sample = art.magicWindowSamples()[2].options;
+            overlay = `<div style="position:absolute;left:${6 + w.x / 2}px;top:${6 + w.y / 2}px;width:${w.width / 2}px;height:${w.height / 2}px">${art.renderMagicWindow({ ...sample, idPrefix: 'hallwin', size: w.width / 2 }).replace(/ height="[\d.]+"/, ` height="${w.height / 2}"`)}</div>`;
+          }
           if (id === 'valley-map' && hot) {
             overlay = `<svg viewBox="0 0 ${hot.logical.width} ${hot.logical.height}" width="800" height="500" style="position:absolute;left:6px;top:6px">${hot.hotspots
               .map(

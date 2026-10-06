@@ -1,0 +1,10 @@
+Dragon Valley background: sharing-lake
+
+Scene: A calm millpond on a summer day: a weeping willow on the left shore, a wooden water mill with a turning wheel and a brown roof on the right shore, a small wooden dock with three porcelain teacups turned upside down, lily pads with white and pink flowers, reeds with brown cattails, a far shore with a line of pines and soft hills, gentle ripples, clouds in a pale blue sky, a grassy bank with flowers in the foreground.
+
+Style: storybook painterly illustration for a children's math adventure game (ages 8-9), soft gouache and watercolor textures with gentle edges, bright but harmonious colors, warm cream light and deep plum shadows (never black).
+Palette anchors: buttercup #ffc53d, fern #3aa65b, ember #f26a2e, amethyst #8b5cf6, lake #2d8ce6, lagoon #13b2a6, heather #e35d9b, moss #93a83a, royal #d93a57, paper #fff8ec, ink #2a2140.
+Format: 16:10 landscape, 3200 x 2000 px (it is shown at 1600 x 1000 logical units).
+Composition: keep the upper-middle third calm (sky or soft distant scenery) for UI panels; the ground line sits around the lower quarter; leave clear standing room left and right of centre where the game places the player's dragon (x about 27%) and the friendly boss (x about 73%).
+Strictly: no text, letters, numbers, signs, logos or watermarks; no people, dragons or creatures (the game draws them); nothing scary or dangerous; cosy, safe and inviting.
+Match the composition of the committed SVG version of this background (same layout, landmarks and light direction) so hotspots and characters still line up.
