@@ -19,8 +19,8 @@ import { Player, loadPack, trajectoryDigest } from './support';
 import type { Adapter, Style } from './support';
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '56c67c17af17d5df';
-const GOLDEN_TRAJECTORY = '713eb203d3d68a77';
+const GOLDEN_HASH = '86ad015bc22d58a3';
+const GOLDEN_TRAJECTORY = '9f565791bd262bf6';
 
 const SEED = 'golden-struggling-child';
 const STRUGGLING: Style = {

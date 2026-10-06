@@ -105,6 +105,10 @@ export function oracle(problem: Problem, step: 'operation' | 'answer'): AnswerVa
 export function wrongAnswer(view: ProblemRoundView): AnswerValue {
   const problem = view.problem!;
   const right = oracle(problem.problem, problem.step);
+  // The operation step always offers the four operations, whatever the input mode.
+  if (right.kind === 'operation') {
+    return { kind: 'operation', operation: right.operation === 'add' ? 'sub' : 'add' };
+  }
   const other = problem.choices?.find((choice) => JSON.stringify(choice) !== JSON.stringify(right));
   if (other) return other;
   if (right.kind === 'number') return { kind: 'number', value: right.value + 1 };

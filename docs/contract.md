@@ -554,12 +554,15 @@ Match, Number Trail, Egg Grid, Fact Family Nest), the adaptive mix (due reviews,
 learning items, the learning share following today's success, the focus egg, no repeats), re-ask
 jobs, the boss meter with its kindness cap and spaced review, the placement check, snack time,
 the Lightning Arena, grading, Leitner moves, coins and streak bonuses, stars, eggs, growth,
-stickers, the market, outfits, settings, state validation and the complete view.
+stickers, the market, outfits, settings, state validation and the complete view. Every generator
+of §6 is implemented with its distractors ([learning.md](learning.md)), so problem rounds play
+word problems (with the Riddle Scrolls operation step), remainders, beyond-the-tables problems,
+order of operations, comparisons and terms as soon as content lists such skills.
 
 Not implemented yet (the rest of the rules work): the Sharing Feast and Golem Orders boards,
-Compare Stones and Riddle Scrolls flows beyond what the generic problem round already does,
-partial credit for commuted facts, unlock-ahead review, the finale. Level runs skip an activity
-whose generator S2a has not shipped yet (Riddle Scrolls' `word` today).
+Compare Stones and Riddle Scrolls flows beyond what the generic problem round already does
+(`auto` input still resolves by Leitner box alone, while comparisons and terms need choice input:
+`keypadPossible`), partial credit for commuted facts, unlock-ahead review, the finale.
 
 The command traces in `test/traces/` (`first-session`, `region-one`, `struggling-child`) pin the
 rules with named checks, literal golden hashes and trajectories, and mutation checks. When the

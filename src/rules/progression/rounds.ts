@@ -4,7 +4,7 @@
  * A level run plays the level's activities in order; each activity is one round (problem round
  * or minigame round). A round ends when it is finished (`finished`, or `time-up` in the Arena),
  * quit, or stopped by the parent's time limit; only a finished round completes its activity.
- * Activities this build cannot play (a generator not implemented yet) are skipped, and the level
+ * Activities this build cannot play (a minigame board not implemented yet) are skipped, and the level
  * completes when the run first reaches its end: stars, star coins, first-time eggs and cosmetics,
  * the boss, region unlocks, story beats, quests, growth and stickers.
  */

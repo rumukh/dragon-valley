@@ -26,7 +26,7 @@ import type { Adapter } from './support';
  * the old and new values in the commit message (docs/testing.md, "When a golden moves").
  */
 const GOLDEN_HASH = 'a2e4e72c0c31752e';
-const GOLDEN_TRAJECTORY = '632dc083d75d06b1';
+const GOLDEN_TRAJECTORY = '5f5b18f35b5da667';
 
 const SEED = 'golden-first-session';
 const PLACEMENT_MISS = 6;

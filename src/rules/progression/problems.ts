@@ -199,7 +199,7 @@ export function serveNext(ctx: Ctx, index: Index): void {
   const skillIds =
     round.placement !== null ? [data.placement.steps[round.placement.step]!.skill] : round.skills;
   const skill = skillFor(data, skillIds, item, index)!;
-  const problem = problemFor(skill, item, problems);
+  const problem = problemFor(skill, item, { problems, words: ctx.random('words'), data });
   const box = ctx.state.items[item]?.box ?? 0;
   const input =
     round.input === 'auto'
