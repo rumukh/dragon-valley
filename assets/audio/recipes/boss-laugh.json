@@ -1,0 +1,79 @@
+{
+  "id": "boss-laugh",
+  "title": "Boss laughs (friendly)",
+  "description": "A jolly bassoon \"bwa-ha-ha-hoo\" down a G major arpeggio (D4-B3-G3-D3): playful, never scary.",
+  "category": "character",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 2601,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 0.9,
+  "loudness": { "measure": "momentary", "target": -16 },
+  "instruments": {
+    "laugh": {
+      "extends": "bassoon",
+      "formant": { "vowels": [[0, "ah"], [0.08, "a"]], "size": 0.9, "q": 4, "mix": 0.75, "db": 6 }
+    }
+  },
+  "tracks": [
+    {
+      "name": "laugh",
+      "sends": { "room": -14 },
+      "voices": [
+        {
+          "instrument": "laugh",
+          "at": 0,
+          "gate": 0.1,
+          "pitch": "D4",
+          "velocity": 0.95,
+          "pitchEnv": [[0, 1.2], [0.07, 0, 2]]
+        },
+        {
+          "instrument": "laugh",
+          "at": 0.13,
+          "gate": 0.1,
+          "pitch": "B3",
+          "velocity": 0.8,
+          "pitchEnv": [[0, 1.2], [0.07, 0, 2]]
+        },
+        {
+          "instrument": "laugh",
+          "at": 0.26,
+          "gate": 0.1,
+          "pitch": "G3",
+          "velocity": 0.85,
+          "pitchEnv": [[0, 1.2], [0.07, 0, 2]]
+        },
+        {
+          "instrument": "laugh",
+          "at": 0.39,
+          "gate": 0.28,
+          "pitch": "D3",
+          "velocity": 0.9,
+          "pitchEnv": [[0, 1.2], [0.07, 0, 2]],
+          "vibrato": { "rate": 6, "depth": 0.4, "delay": 0.08, "fade": 0.08 },
+          "formant": {
+            "vowels": [[0, "ah"], [0.1, "oh"], [0.25, "u"]],
+            "size": 0.9,
+            "q": 4,
+            "mix": 0.75,
+            "db": 6
+          }
+        }
+      ]
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 0.8,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

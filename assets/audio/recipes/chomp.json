@@ -1,0 +1,96 @@
+{
+  "id": "chomp",
+  "title": "Dragon munches fruit",
+  "description": "Three juicy crunches (\"nom nom nom\") and a cartoon gulp.",
+  "category": "character",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 1301,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 0.65,
+  "loudness": { "measure": "momentary", "target": -16 },
+  "instruments": {
+    "crunch": {
+      "sources": [
+        {
+          "type": "noise",
+          "color": "white",
+          "filters": [
+            { "type": "bandpass", "freq": 1700, "q": 0.8, "keytrack": 1 },
+            { "type": "highpass", "freq": 500 }
+          ]
+        }
+      ],
+      "amp": { "points": [[0, 0], [0.002, 1], [0.05, 0, 4]] }
+    },
+    "jaw": {
+      "pitch": "D3",
+      "sources": [{ "type": "osc", "wave": "sine" }],
+      "pitchEnv": [[0, 7], [0.03, 0, 3]],
+      "amp": { "a": 0.002, "d": 0.07, "s": 0 },
+      "db": -4
+    },
+    "squish": {
+      "sources": [
+        {
+          "type": "noise",
+          "color": "pink",
+          "filters": [
+            {
+              "type": "bandpass",
+              "freq": 1200,
+              "q": 3,
+              "keytrack": 1,
+              "env": [[0, 1.2], [0.06, -0.6, 2]]
+            }
+          ]
+        }
+      ],
+      "amp": { "points": [[0, 0], [0.004, 1], [0.07, 0, 3]] },
+      "db": -6
+    },
+    "gulp": {
+      "sources": [{ "type": "osc", "wave": "sine" }, { "type": "osc", "wave": "triangle", "db": -10 }],
+      "formant": { "vowels": [[0, "u"]], "size": 1.2, "q": 5, "mix": 0.5 },
+      "pitchEnv": [[0, 0], [0.11, -9, 2]],
+      "amp": { "a": 0.008, "d": 0.1, "s": 0.6, "r": 0.05 },
+      "db": -5
+    }
+  },
+  "tracks": [
+    {
+      "name": "bites",
+      "sends": { "room": -20 },
+      "voices": [
+        { "instrument": "crunch", "at": 0, "pitch": "C4", "velocity": 0.95 },
+        { "instrument": "jaw", "at": 0, "velocity": 0.95 },
+        { "instrument": "squish", "at": 0.012, "pitch": "C4", "velocity": 0.855 },
+        { "instrument": "crunch", "at": 0.13, "pitch": "D4", "velocity": 0.8 },
+        { "instrument": "jaw", "at": 0.13, "velocity": 0.8 },
+        {
+          "instrument": "squish",
+          "at": 0.14200000000000002,
+          "pitch": "D4",
+          "velocity": 0.7200000000000001
+        },
+        { "instrument": "crunch", "at": 0.26, "pitch": "B3", "velocity": 0.88 },
+        { "instrument": "jaw", "at": 0.26, "velocity": 0.88 },
+        { "instrument": "squish", "at": 0.272, "pitch": "B3", "velocity": 0.792 },
+        { "instrument": "gulp", "at": 0.42, "gate": 0.1, "pitch": "A4", "velocity": 0.8 }
+      ]
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 0.6,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

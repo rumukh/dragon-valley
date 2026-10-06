@@ -1,0 +1,63 @@
+{
+  "id": "chime-5",
+  "title": "Correct answer, streak 5",
+  "description": "Top of the streak ladder: celesta A5 to D6, a G6 crown note and a short sparkle.",
+  "category": "feedback",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 1105,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 1.2,
+  "loudness": { "measure": "momentary", "target": -15 },
+  "instruments": {
+    "bell": { "extends": "celesta" },
+    "body": {
+      "sources": [{ "type": "osc", "wave": "sine" }],
+      "amp": { "a": 0.006, "d": 0.55, "s": 0, "r": 0.05, "dCurve": 4 },
+      "db": -12
+    },
+    "sparkle": { "extends": "sparkle" }
+  },
+  "tracks": [
+    {
+      "name": "chime",
+      "sends": { "room": -13 },
+      "voices": [
+        { "instrument": "bell", "at": 0, "pitch": "A5", "velocity": 0.6 },
+        { "instrument": "bell", "at": 0.065, "pitch": "D6", "velocity": 0.95 },
+        { "instrument": "body", "at": 0.065, "pitch": "D6", "transpose": -12, "velocity": 0.8 },
+        { "instrument": "bell", "at": 0.13, "pitch": "G6", "velocity": 0.8 }
+      ]
+    },
+    {
+      "name": "sparkle",
+      "db": -9,
+      "sends": { "room": -8 },
+      "scatter": {
+        "instrument": "sparkle",
+        "count": 5,
+        "start": 0.16,
+        "end": 0.55,
+        "distribution": "even",
+        "jitter": 0.6,
+        "pitches": ["E7", "G7", "A7"],
+        "order": "cycle",
+        "db": [-6, 0],
+        "detune": 5
+      }
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 1.1,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

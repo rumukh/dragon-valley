@@ -1,0 +1,98 @@
+{
+  "id": "boss-won",
+  "title": "Boss won over (jingle)",
+  "description": "A playful A major jingle (A-C#-E-A, then B-G# resolving to A) on brass and marimba with pizzicato bass, a woodblock wink and a triangle ting.",
+  "category": "feedback",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 2701,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 3,
+  "fanfare": true,
+  "loudness": { "measure": "momentary", "target": -15 },
+  "instruments": {
+    "brass": { "extends": "brass" },
+    "marimba": { "extends": "marimba" },
+    "pizz": { "extends": "pizz" },
+    "kick": { "extends": "kickSoft" },
+    "block": { "extends": "woodblock" },
+    "ting": { "extends": "triangleTing" },
+    "sparkle": { "extends": "sparkle" }
+  },
+  "tracks": [
+    {
+      "name": "melody",
+      "sends": { "room": -11 },
+      "notes": {
+        "instrument": "brass",
+        "tempo": 150,
+        "melody": "A4:e C#5:e E5:e A5:q. B5:e' G#5:e' A5:h."
+      }
+    },
+    {
+      "name": "melody-marimba",
+      "db": -5,
+      "sends": { "room": -11 },
+      "notes": {
+        "instrument": "marimba",
+        "tempo": 150,
+        "melody": "A4:e C#5:e E5:e A5:q. B5:e G#5:e A5:h."
+      }
+    },
+    {
+      "name": "chords",
+      "db": -9,
+      "sends": { "room": -10 },
+      "notes": {
+        "instrument": "brass",
+        "tempo": 150,
+        "melody": "[C#4,E4,A4]:h. [B3,D4,E4,G#4]:q' [C#4,E4,A4]:h."
+      }
+    },
+    {
+      "name": "bass",
+      "db": -2,
+      "notes": { "instrument": "pizz", "tempo": 150, "melody": "A2:q E2:q A2:q E2:q A2:h." }
+    },
+    {
+      "name": "perc",
+      "db": -6,
+      "voices": [
+        { "instrument": "kick", "at": 0, "velocity": 0.8 },
+        { "instrument": "block", "at": 1, "pitch": "E5", "velocity": 0.7 },
+        { "instrument": "block", "at": 1.2000000000000002, "pitch": "A5", "velocity": 0.75 },
+        { "instrument": "kick", "at": 1.6, "velocity": 0.9 },
+        { "instrument": "ting", "at": 1.6, "velocity": 0.55 }
+      ]
+    },
+    {
+      "name": "sparkle",
+      "db": -11,
+      "sends": { "room": -6 },
+      "scatter": {
+        "instrument": "sparkle",
+        "count": 5,
+        "start": 1.6500000000000001,
+        "end": 2.3,
+        "distribution": "even",
+        "jitter": 0.6,
+        "pitches": ["A6", "C#7", "E7"],
+        "order": "cycle",
+        "db": [-8, 0]
+      }
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 1.3,
+      "size": 0.75,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

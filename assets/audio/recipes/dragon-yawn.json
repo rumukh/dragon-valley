@@ -1,0 +1,61 @@
+{
+  "id": "dragon-yawn",
+  "title": "Sleepy dragon yawn",
+  "description": "A small, cute \"aaah-mmm\" yawn that rises a little and sighs down.",
+  "category": "soft",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 2202,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 1.5,
+  "loudness": { "measure": "momentary", "target": -18 },
+  "instruments": {
+    "voice": {
+      "extends": "voiceCute",
+      "sources": [
+        { "type": "osc", "wave": "triangle" },
+        { "type": "osc", "wave": "saw", "db": -10 },
+        { "type": "osc", "wave": "sine", "db": -2 },
+        { "type": "noise", "color": "pink", "db": -9 }
+      ],
+      "formant": {
+        "vowels": [[0, "a"], [0.5, "ah"], [0.9, "o"], [1.2, "m"]],
+        "size": 1.35,
+        "q": 6,
+        "mix": 0.9,
+        "db": 4
+      },
+      "vibrato": { "rate": 4.5, "depth": 0.15, "delay": 0.2, "fade": 0.3 },
+      "amp": { "a": 0.12, "aCurve": -1, "d": 0.3, "s": 0.75, "r": 0.35 }
+    }
+  },
+  "tracks": [
+    {
+      "name": "yawn",
+      "sends": { "room": -16 },
+      "voices": [
+        {
+          "instrument": "voice",
+          "at": 0,
+          "gate": 1,
+          "pitch": "C5",
+          "velocity": 0.85,
+          "pitchEnv": [[0, 0], [0.25, 1.5, -1], [1.1, -7, 2]]
+        }
+      ]
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 0.8,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

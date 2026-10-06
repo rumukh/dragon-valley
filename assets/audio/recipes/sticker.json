@@ -1,0 +1,61 @@
+{
+  "id": "sticker",
+  "title": "Sticker earned",
+  "description": "A bubbly \"bloop\" as the sticker pops on, then a celesta G5-C6 \"ta-da\" and a few sparkles.",
+  "category": "feedback",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 1901,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 1,
+  "loudness": { "measure": "momentary", "target": -15 },
+  "instruments": {
+    "bloop": {
+      "sources": [{ "type": "osc", "wave": "sine" }],
+      "pitchEnv": [[0, -7], [0.035, 7, 2]],
+      "amp": { "a": 0.002, "d": 0.07, "s": 0, "dCurve": 3 }
+    },
+    "bell": { "extends": "celesta" },
+    "sparkle": { "extends": "sparkle" }
+  },
+  "tracks": [
+    {
+      "name": "sticker",
+      "sends": { "room": -12 },
+      "voices": [
+        { "instrument": "bloop", "at": 0, "pitch": "G4", "velocity": 0.9 },
+        { "instrument": "bell", "at": 0.09, "pitch": "G5", "velocity": 0.85 },
+        { "instrument": "bell", "at": 0.19, "pitch": "C6", "velocity": 0.95 }
+      ]
+    },
+    {
+      "name": "sparkle",
+      "db": -10,
+      "sends": { "room": -6 },
+      "scatter": {
+        "instrument": "sparkle",
+        "count": 4,
+        "start": 0.24,
+        "end": 0.6,
+        "distribution": "even",
+        "jitter": 0.5,
+        "pitches": ["C7", "E7", "G7"],
+        "order": "cycle",
+        "db": [-6, 0]
+      }
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 1,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

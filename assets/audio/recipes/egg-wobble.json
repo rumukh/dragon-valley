@@ -1,0 +1,66 @@
+{
+  "id": "egg-wobble",
+  "title": "Egg wobbles",
+  "description": "Three hollow shell knocks (tok-tik-tok) over a soft wobbly tone as the egg rocks.",
+  "category": "character",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 1501,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 0.75,
+  "loudness": { "measure": "momentary", "target": -16 },
+  "instruments": {
+    "knock": {
+      "extends": "woodblock",
+      "sources": [
+        {
+          "type": "additive",
+          "partials": [
+            { "ratio": 1, "db": 0, "t60": 0.2 },
+            { "ratio": 2.71, "db": -8, "t60": 0.07 },
+            { "ratio": 4.9, "db": -18, "t60": 0.03 }
+          ]
+        },
+        {
+          "type": "noise",
+          "color": "white",
+          "db": -16,
+          "filters": [{ "type": "bandpass", "freq": 2500, "q": 1 }],
+          "env": { "points": [[0, 1], [0.003, 0, 2]] }
+        }
+      ]
+    },
+    "wobble": {
+      "sources": [{ "type": "osc", "wave": "triangle" }],
+      "filters": [{ "type": "lowpass", "freq": 900, "q": 0.6 }],
+      "vibrato": { "rate": 6.5, "depth": 0.6 },
+      "amp": { "a": 0.02, "d": 0.1, "s": 0.6, "r": 0.15 },
+      "db": -10
+    }
+  },
+  "tracks": [
+    {
+      "name": "egg",
+      "sends": { "room": -18 },
+      "voices": [
+        { "instrument": "knock", "at": 0, "pitch": "F4", "velocity": 0.85 },
+        { "instrument": "knock", "at": 0.16, "pitch": "A4", "velocity": 0.7 },
+        { "instrument": "knock", "at": 0.31, "pitch": "F4", "velocity": 0.78 },
+        { "instrument": "wobble", "at": 0, "gate": 0.42, "pitch": "C4", "velocity": 0.8 }
+      ]
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 0.7,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}

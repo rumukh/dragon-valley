@@ -1,0 +1,119 @@
+{
+  "id": "practice",
+  "title": "Practice (rounds)",
+  "description": "Calm, sparse and unobtrusive so it never competes with thinking: 72 BPM in C major (the answer chimes always fit). Soft electric piano chords and a warm pad, a quiet bass and a few kalimba notes with a gentle echo. A: Cmaj7 Am7 Dm7 G7sus4; A2 borrows a wistful F minor 6; B: Em7 Am7 Dm7 G7sus4 leads home.",
+  "category": "musicCalm",
+  "kind": "music",
+  "bus": "music",
+  "seed": 3201,
+  "sampleRate": 22050,
+  "oversample": 2,
+  "tempo": 72,
+  "meter": [4, 4],
+  "key": "C major",
+  "form": ["A", "A2", "B"],
+  "sectionBars": { "A": 4, "A2": 4, "B": 4 },
+  "loudness": { "measure": "integrated", "target": -26 },
+  "seam": { "search": [-0.8, 0] },
+  "chords": {
+    "A": "Cmaj7 | Am7 | Dm7 | G7sus4",
+    "A2": "Cmaj7 | Am7 | Fmaj7 | Fm6",
+    "B": "Em7 | Am7 | Dm7 | G7sus4"
+  },
+  "instruments": {
+    "kalimba": { "extends": "kalimba" },
+    "epiano": { "extends": "epiano" },
+    "pad": {
+      "extends": "pad",
+      "sources": [{ "type": "osc", "wave": "saw", "detune": [-7, 6], "phase": "random" }],
+      "filters": [{ "type": "lowpass", "freq": 1000, "q": 0.6, "keytrack": 0.3 }]
+    },
+    "bass": {
+      "extends": "subBass",
+      "sources": [
+        { "type": "osc", "wave": "sine" },
+        { "type": "osc", "wave": "sine", "octave": 1, "db": -7 },
+        { "type": "osc", "wave": "sine", "semis": 19, "db": -17 }
+      ]
+    }
+  },
+  "tracks": [
+    {
+      "name": "kalimba",
+      "instrument": "kalimba",
+      "db": -2,
+      "sends": { "hall": -8, "echo": -9 },
+      "humanize": { "time": 0.008, "velocity": 0.06 },
+      "phrases": {
+        "A": "p r:q E5:q G5:q B5:q | C6:h. r:q | r:q F5:q A5:q C6:q | D6:h C6:h",
+        "A2": "p r:q G5:q E5:q D5:q | E5:h. r:q | r:q A5:q C6:q E6:q | D6:h Ab5:h",
+        "B": "p G5:h. r:q | r:q C6:q B5:q A5:q | F5:h E5:q D5:q | D5:h. r:q"
+      }
+    },
+    {
+      "name": "epiano",
+      "instrument": "epiano",
+      "db": -8,
+      "sends": { "hall": -9 },
+      "humanize": { "time": 0.006, "velocity": 0.04 },
+      "sections": ["A", "A2"],
+      "pattern": {
+        "type": "comp",
+        "voicing": { "low": "C4", "high": "A5", "size": 4 },
+        "steps": [{ "beat": 1, "len": 4, "velocity": 0.5, "gate": 0.95 }]
+      }
+    },
+    {
+      "name": "epiano-b",
+      "instrument": "epiano",
+      "db": -9,
+      "sends": { "hall": -9 },
+      "humanize": { "time": 0.006, "velocity": 0.04 },
+      "sections": ["B"],
+      "pattern": {
+        "type": "comp",
+        "voicing": { "low": "C4", "high": "A5", "size": 4 },
+        "steps": [
+          { "beat": 1, "len": 2, "velocity": 0.5, "gate": 0.95 },
+          { "beat": 3, "len": 2, "velocity": 0.4, "gate": 0.95 }
+        ]
+      }
+    },
+    {
+      "name": "pad",
+      "instrument": "pad",
+      "db": -17,
+      "sends": { "hall": -10 },
+      "pattern": {
+        "type": "sustain",
+        "voicing": { "low": "E3", "high": "D5", "size": 4 },
+        "velocity": 0.55,
+        "gate": 0.9
+      }
+    },
+    {
+      "name": "bass",
+      "instrument": "bass",
+      "db": -16,
+      "humanize": { "time": 0.004, "velocity": 0.03 },
+      "phrases": {
+        "A": "C2:w | A2:w | D2:w | G2:w",
+        "A2": "C2:w | A2:w | F2:w | F2:w",
+        "B": "E2:w | A2:w | D2:w | G2:w"
+      }
+    }
+  ],
+  "buses": {
+    "hall": {
+      "type": "reverb",
+      "decay": 2.6,
+      "size": 1.0,
+      "damping": 5000,
+      "predelay": 0.03,
+      "lowcut": 200,
+      "highcut": 6500
+    },
+    "echo": { "type": "echo", "beats": 0.75, "feedback": 0.3, "damping": 3000, "db": 0 }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 40, "q": 0.7 }] }
+}

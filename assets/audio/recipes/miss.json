@@ -1,0 +1,49 @@
+{
+  "id": "miss",
+  "title": "Not quite (soft and curious)",
+  "description": "Two soft round tones, E4 then G4 with a gentle questioning rise: a curious \"hmm?\", never a buzzer.",
+  "category": "soft",
+  "kind": "sfx",
+  "bus": "effects",
+  "seed": 1201,
+  "sampleRate": 22050,
+  "oversample": 4,
+  "duration": 0.55,
+  "loudness": { "measure": "momentary", "target": -18 },
+  "instruments": {
+    "boop": {
+      "sources": [{ "type": "osc", "wave": "sine" }, { "type": "osc", "wave": "triangle", "db": -14 }],
+      "filters": [{ "type": "lowpass", "freq": 1400, "q": 0.6 }],
+      "amp": { "a": 0.006, "d": 0.08, "s": 0.7, "r": 0.08 }
+    }
+  },
+  "tracks": [
+    {
+      "name": "boop",
+      "sends": { "room": -16 },
+      "voices": [
+        { "instrument": "boop", "at": 0, "gate": 0.09, "pitch": "E4", "velocity": 0.75 },
+        {
+          "instrument": "boop",
+          "at": 0.14,
+          "gate": 0.16,
+          "pitch": "G4",
+          "velocity": 0.85,
+          "pitchEnv": [[0, -1], [0.12, 0.6, 2]]
+        }
+      ]
+    }
+  ],
+  "buses": {
+    "room": {
+      "type": "reverb",
+      "decay": 0.8,
+      "size": 0.6,
+      "damping": 7000,
+      "predelay": 0.008,
+      "lowcut": 300,
+      "highcut": 8000
+    }
+  },
+  "master": { "eq": [{ "type": "highpass", "freq": 120, "q": 0.7 }] }
+}
