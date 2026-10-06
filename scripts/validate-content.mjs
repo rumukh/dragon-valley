@@ -11,7 +11,9 @@
  * 3. Story lines and word-problem sentences keep to the child profile's sentence length
  *    (@aegis/narrative CHILD_PROFILE), word problems counted with their longest names and things.
  * 4. Every shipped pack in content/history/ is valid under the current schema and named by its
- *    revision; the current revision is not reused for different content.
+ *    revision; the current revision is not reused for different content; every catalog key an
+ *    archived pack uses is still in the catalog (a save restored with that pack shows its strings
+ *    until it reaches the hub and moves to the current pack).
  * 5. Art references (backgrounds, rigs, cosmetics, sticker icons and frames) are checked against
  *    assets/art/catalog.json once the art pipeline publishes it: reported, or with --strict-art
  *    failing the gate.
@@ -221,6 +223,14 @@ export async function validateContentTree(options = {}) {
       errors.push(
         `revision ${pack.revision} was shipped with different content: bump the revision`,
       );
+    }
+    if (archived.ok) {
+      for (const { key, where } of contract.collectCatalogKeys(archived.value.data)) {
+        if (english[key] === undefined)
+          errors.push(
+            `history/${name}: catalogs/en.content.json lost "${key}" (${where}), which a save restored with this pack still shows`,
+          );
+      }
     }
   }
 

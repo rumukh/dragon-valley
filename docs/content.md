@@ -12,22 +12,42 @@ sentence length, history packs, art IDs and curriculum coverage.
 
 ## 1. Files and revisions
 
-| File                                 | What                                                 | Owner   |
-| ------------------------------------ | ---------------------------------------------------- | ------- |
-| `content/dragon-valley.content.json` | the pack: `{ id, revision, schemaVersion, data }`    | S2b     |
-| `content/catalogs/en.content.json`   | every string the pack refers to                      | S2b     |
-| `wordTemplates` and `word.*` keys    | word problems and their words                        | S2a     |
-| `content/history/<revision>.json`    | every shipped revision, byte for byte (never edited) | release |
+| File                                 | What                                                  | Owner          |
+| ------------------------------------ | ----------------------------------------------------- | -------------- |
+| `content/dragon-valley.content.json` | the pack: `{ id, revision, schemaVersion, data }`     | S2b            |
+| `content/catalogs/en.content.json`   | every string the pack refers to                       | S2b            |
+| `wordTemplates` and `word.*` keys    | word problems and their words                         | S2a            |
+| `content/history/<revision>.json`    | every revision deployed, byte for byte (never edited) | `content:bump` |
 
-Before the first release the pack stays `1.0.0`. After it, every change bumps `revision` (patch for
-balance or text, minor for new levels or regions) and the shipped pack is archived in
-`content/history/`. IDs are append-only: never rename or delete a level, skill, dragon,
-cosmetic or sticker that has shipped; saves refer to them.
+**Every content change merged to `main` gets a new revision** (MAJOR.MINOR.PATCH: patch for
+balance or text, minor for new levels or regions). `main` deploys to the live site, and a save pins
+the exact pack it was played with (ID, revision and content hash): the runtime restores it only
+with that pack. The shell loads `content/history/<revision>.json` for a save that pins an older
+revision, restores it with that pack and moves it to the current pack at the hub. The Region 1
+slice went live as `1.0.0` (main `373a5d2`); v1 is `1.1.0`.
+
+To change content:
+
+1. Run `npm run content:bump -- <revision>`, before or after editing. It reads the deployed pack
+   from `origin/main` (`--from <git-ref>` for another ref; fetch first), archives it byte for byte
+   as `content/history/<its revision>.json` and sets the pack's `revision`, nothing else. It
+   refuses a revision that is not newer and a branch whose pack is behind the deployed one.
+2. Pin the new revision and its content hash in `REVISIONS` in
+   `test/unit/contract/content.test.ts` (the failing test prints the hash). That test fails
+   whenever the pack changes under a pinned revision, so a forgotten bump cannot reach `main`.
+3. Re-pin the golden traces (the content hash is part of every snapshot) with the reason and the
+   old and new values in the commit message ([testing.md](testing.md)), then `npm run verify`.
+
+Archived packs never change (their hashes are pinned too) and stay valid under the current schema.
+Every catalog key an archived pack uses stays in the catalog (the validator checks): a restored old
+save shows those strings until it reaches the hub. IDs are append-only: never rename or delete a
+level, skill, dragon, cosmetic or sticker that has shipped; saves refer to them.
 
 Catalog keys name the record they belong to: `level.<id>`, `boss.<id>`, `dragon.<id>`,
 `skill.<id>`, `cosmetic.<id>`, `sticker.<id>`, `quest.<id>`, `objective.<…>`, story lines
 `story.<beat>.<n>` (S2a's word problems `word.*`), and region names `region.<id>.name`, the keys the
-art's valley map also labels its regions with (`assets/backgrounds/map-hotspots.json`).
+art's valley map also labels its regions with (`assets/backgrounds/map-hotspots.json`; the archived
+`1.0.0` pack still names Sunny Meadow `region.sunny-meadow`, so that key stays too).
 
 ## 2. Levels
 
