@@ -1,0 +1,65 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "glimmer",
+  "name": "Glimmer",
+  "kind": "guide",
+  "mnemonic": "Old Glimmer, the wise and kind castle dragon who guides the Keeper.",
+  "colors": {
+    "body": "#6fb8c8",
+    "shade": "#3f7f94",
+    "belly": "#e9f1e4",
+    "wing": "#a9c9e8",
+    "horn": "#f3ead8",
+    "accent": "#8d7bd6",
+    "iris": "#4a3a8a",
+    "cheek": "#ffb3b8"
+  },
+  "build": {
+    "chub": 0.6,
+    "head": 1,
+    "snout": 1.12,
+    "body": 1
+  },
+  "horns": {
+    "style": "curved",
+    "count": 2,
+    "length": 1.1
+  },
+  "ears": {
+    "style": "frill",
+    "size": 0.9
+  },
+  "wings": {
+    "style": "feather",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "tuft",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "belly-plates"
+  ],
+  "features": [
+    "beard",
+    "spectacles",
+    "bushy-brows",
+    "shawl"
+  ],
+  "egg": {
+    "base": "#cfe6ec",
+    "accent": "#6fb8c8",
+    "pattern": "spots"
+  }
+}

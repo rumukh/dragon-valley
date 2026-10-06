@@ -1,0 +1,63 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "crystal",
+  "name": "Crystal",
+  "kind": "table",
+  "table": 8,
+  "mnemonic": "An ice dragon with an 8-point snowflake. Times 8 is double, double, double: 2, 4, 8.",
+  "colors": {
+    "body": "#a2e8ff",
+    "shade": "#4aa6df",
+    "belly": "#effcff",
+    "wing": "#d8f5ff",
+    "horn": "#f4fdff",
+    "accent": "#5aa9e8",
+    "iris": "#2856b8",
+    "cheek": "#ffb8dc"
+  },
+  "build": {
+    "chub": 0.45,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "crystal",
+    "count": 2,
+    "length": 1
+  },
+  "ears": {
+    "style": "frill",
+    "size": 0.9
+  },
+  "wings": {
+    "style": "crystal",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "crystal",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "snowflake-belly"
+  ],
+  "features": [
+    "shine"
+  ],
+  "egg": {
+    "base": "#c9f0ff",
+    "accent": "#5aa9e8",
+    "pattern": "snowflake"
+  }
+}

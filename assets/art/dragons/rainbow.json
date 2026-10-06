@@ -1,0 +1,61 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "rainbow",
+  "name": "Rainbow",
+  "kind": "table",
+  "table": 7,
+  "mnemonic": "A rainbow dragon with 7 stripes, one for each color of the rainbow.",
+  "colors": {
+    "body": "#fbf6ff",
+    "shade": "#c7b6e6",
+    "belly": "#ffffff",
+    "wing": "#f1eaff",
+    "horn": "#ffe7a3",
+    "accent": "#a66cf0",
+    "iris": "#7b4fd6",
+    "cheek": "#ffaacd"
+  },
+  "build": {
+    "chub": 0.5,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "curved",
+    "count": 2,
+    "length": 0.9
+  },
+  "ears": {
+    "style": "frill",
+    "size": 1
+  },
+  "wings": {
+    "style": "bat",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "heart",
+    "length": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "rainbow-belly"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#fbf7ff",
+    "accent": "#a66cf0",
+    "pattern": "rainbow"
+  }
+}

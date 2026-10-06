@@ -1,0 +1,64 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "bubbles",
+  "name": "Bubbles",
+  "kind": "table",
+  "table": 2,
+  "mnemonic": "A water dragon with two tails. Times 2 means double: everything about Bubbles comes in twos.",
+  "colors": {
+    "body": "#45aef5",
+    "shade": "#2172c4",
+    "belly": "#cdf3ff",
+    "wing": "#7ddfe8",
+    "horn": "#eafcff",
+    "accent": "#2fb4c8",
+    "iris": "#174f9e",
+    "cheek": "#ff9fc4"
+  },
+  "build": {
+    "chub": 0.6,
+    "head": 1,
+    "snout": 1,
+    "body": 1
+  },
+  "horns": {
+    "style": "nub",
+    "count": 2,
+    "length": 0.9
+  },
+  "ears": {
+    "style": "fin",
+    "size": 1.1
+  },
+  "wings": {
+    "style": "fin",
+    "count": 2,
+    "size": 1
+  },
+  "tail": {
+    "count": 2,
+    "tip": "fin",
+    "length": 0.85
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "belly-plates",
+    "bubble-spots"
+  ],
+  "features": [
+    "bubbles"
+  ],
+  "egg": {
+    "base": "#9fdcff",
+    "accent": "#3a9cf0",
+    "pattern": "waves"
+  }
+}

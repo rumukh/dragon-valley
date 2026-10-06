@@ -1,0 +1,60 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "seven-headed",
+  "name": "Seven-Headed Dragon",
+  "kind": "finale",
+  "mnemonic": "The Seven-Headed Dragon from Czech folk tales. Each of its 7 heads has its own personality.",
+  "colors": {
+    "body": "#8a63e8",
+    "shade": "#5a3cb8",
+    "belly": "#ffe9a8",
+    "wing": "#b49cf5",
+    "horn": "#fff3d6",
+    "accent": "#ffcf33",
+    "iris": "#4a2a8a",
+    "cheek": "#ff9fc8"
+  },
+  "build": {
+    "chub": 0.7,
+    "head": 1,
+    "snout": 1,
+    "body": 1.1
+  },
+  "horns": {
+    "style": "curved",
+    "count": 2,
+    "length": 0.6
+  },
+  "ears": {
+    "style": "frill",
+    "size": 0.7
+  },
+  "wings": {
+    "style": "bat",
+    "count": 2,
+    "size": 1.1
+  },
+  "tail": {
+    "count": 1,
+    "tip": "spade",
+    "length": 1.1
+  },
+  "spikes": {
+    "style": "round",
+    "where": "tail",
+    "count": 4
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "belly-plates"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#c9b6f7",
+    "accent": "#8a63e8",
+    "pattern": "spots"
+  }
+}

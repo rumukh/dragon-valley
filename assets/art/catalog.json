@@ -1,0 +1,563 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "scripts/art/build-art.mjs from src/app/art/catalog.ts",
+  "grids": {
+    "dragonCanvas": 512,
+    "icon": 64,
+    "avatar": 120
+  },
+  "dragonStages": [
+    "egg",
+    "hatchling",
+    "youngling",
+    "adult",
+    "crowned"
+  ],
+  "dragonExpressions": [
+    "idle",
+    "happy",
+    "curious",
+    "eating",
+    "sleepy",
+    "proud"
+  ],
+  "cosmeticSlots": [
+    "head",
+    "neck",
+    "eyes",
+    "wings",
+    "nest"
+  ],
+  "dragons": [
+    {
+      "id": "puff",
+      "name": "Puff",
+      "kind": "table",
+      "table": 0,
+      "homeRegion": "sunny-meadow",
+      "signature": "#b9b0ea",
+      "mnemonic": "A cloud-wisp dragon. Anything times 0 goes poof! Puff blows smoke rings shaped like a 0.",
+      "recipe": "assets/art/dragons/puff.json"
+    },
+    {
+      "id": "mirror",
+      "name": "Mirror",
+      "kind": "table",
+      "table": 1,
+      "homeRegion": "sunny-meadow",
+      "signature": "#a9b6cc",
+      "mnemonic": "A silver dragon with a shiny mirror belly and a reflection. Times 1 stays the same, just like a reflection.",
+      "recipe": "assets/art/dragons/mirror.json"
+    },
+    {
+      "id": "bubbles",
+      "name": "Bubbles",
+      "kind": "table",
+      "table": 2,
+      "homeRegion": "sunny-meadow",
+      "signature": "#3a9cf0",
+      "mnemonic": "A water dragon with two tails. Times 2 means double: everything about Bubbles comes in twos.",
+      "recipe": "assets/art/dragons/bubbles.json"
+    },
+    {
+      "id": "clover",
+      "name": "Clover",
+      "kind": "table",
+      "table": 3,
+      "homeRegion": "whispering-woods",
+      "signature": "#4fbf66",
+      "mnemonic": "A three-leaf forest dragon with 3 horns, 3 leaf spikes and a clover tail. Count in threes!",
+      "recipe": "assets/art/dragons/clover.json"
+    },
+    {
+      "id": "petal",
+      "name": "Petal",
+      "kind": "table",
+      "table": 4,
+      "homeRegion": "whispering-woods",
+      "signature": "#ff86b9",
+      "mnemonic": "A flower dragon with 4 wings: two pairs. Times 4 is double the double.",
+      "recipe": "assets/art/dragons/petal.json"
+    },
+    {
+      "id": "sunny",
+      "name": "Sunny",
+      "kind": "table",
+      "table": 5,
+      "homeRegion": "sunny-meadow",
+      "signature": "#ffd23a",
+      "mnemonic": "A sunshine dragon with a five-ray sun crest and a clock-hand tail. A clock counts in fives: 5, 10, 15 minutes.",
+      "recipe": "assets/art/dragons/sunny.json"
+    },
+    {
+      "id": "ember",
+      "name": "Ember",
+      "kind": "table",
+      "table": 6,
+      "homeRegion": "fire-mountain",
+      "signature": "#ff5f3d",
+      "mnemonic": "A fire dragon with 6 flames: 5 on its tail and 1 more on the tip. 6 groups = 5 groups + 1 group.",
+      "recipe": "assets/art/dragons/ember.json"
+    },
+    {
+      "id": "rainbow",
+      "name": "Rainbow",
+      "kind": "table",
+      "table": 7,
+      "homeRegion": "fire-mountain",
+      "signature": "#a66cf0",
+      "mnemonic": "A rainbow dragon with 7 stripes, one for each color of the rainbow.",
+      "recipe": "assets/art/dragons/rainbow.json"
+    },
+    {
+      "id": "crystal",
+      "name": "Crystal",
+      "kind": "table",
+      "table": 8,
+      "homeRegion": "crystal-caves",
+      "signature": "#6fd3f5",
+      "mnemonic": "An ice dragon with an 8-point snowflake. Times 8 is double, double, double: 2, 4, 8.",
+      "recipe": "assets/art/dragons/crystal.json"
+    },
+    {
+      "id": "starry",
+      "name": "Starry",
+      "kind": "table",
+      "table": 9,
+      "homeRegion": "crystal-caves",
+      "signature": "#3d3b94",
+      "mnemonic": "A night dragon with 9 stars in 10 places: one place is empty. Times 9 is 10 groups minus 1 group.",
+      "recipe": "assets/art/dragons/starry.json"
+    },
+    {
+      "id": "goldie",
+      "name": "Goldie",
+      "kind": "table",
+      "table": 10,
+      "homeRegion": "sunny-meadow",
+      "signature": "#f2b42c",
+      "mnemonic": "A golden dragon with a 10-point crown and a 0 medal. Times 10: add a zero!",
+      "recipe": "assets/art/dragons/goldie.json"
+    },
+    {
+      "id": "pearl",
+      "name": "Pearl",
+      "kind": "special",
+      "homeRegion": "leftover-lagoon",
+      "signature": "#f2c9dd",
+      "mnemonic": "A shell dragon who shares pearls fairly. Pearls that cannot be shared are the leftovers: the remainder.",
+      "recipe": "assets/art/dragons/pearl.json"
+    },
+    {
+      "id": "boulder",
+      "name": "Boulder",
+      "kind": "special",
+      "homeRegion": "giants-peaks",
+      "signature": "#9a8f86",
+      "mnemonic": "A big stone dragon for big numbers. Carved on its belly: a hundred, a ten and a one.",
+      "recipe": "assets/art/dragons/boulder.json"
+    },
+    {
+      "id": "clockwork",
+      "name": "Clockwork",
+      "kind": "special",
+      "homeRegion": "riddle-ruins",
+      "signature": "#c9773a",
+      "mnemonic": "A clockwork dragon whose gears turn in order, one after another, just like the order of operations.",
+      "recipe": "assets/art/dragons/clockwork.json"
+    },
+    {
+      "id": "seven-headed",
+      "name": "Seven-Headed Dragon",
+      "kind": "finale",
+      "homeRegion": "dragon-castle",
+      "signature": "#8a63e8",
+      "mnemonic": "The Seven-Headed Dragon from Czech folk tales. Each of its 7 heads has its own personality.",
+      "recipe": "assets/art/dragons/seven-headed.json"
+    }
+  ],
+  "characters": [
+    {
+      "id": "glimmer",
+      "name": "Glimmer",
+      "kind": "guide",
+      "render": "renderDragon",
+      "recipe": "assets/art/dragons/glimmer.json"
+    }
+  ],
+  "cosmetics": [
+    {
+      "id": "hat-party",
+      "slot": "head",
+      "name": "Party Hat"
+    },
+    {
+      "id": "hat-wizard",
+      "slot": "head",
+      "name": "Wizard Hat"
+    },
+    {
+      "id": "hat-top",
+      "slot": "head",
+      "name": "Top Hat"
+    },
+    {
+      "id": "hat-beanie",
+      "slot": "head",
+      "name": "Cozy Beanie"
+    },
+    {
+      "id": "hat-flower-crown",
+      "slot": "head",
+      "name": "Flower Crown"
+    },
+    {
+      "id": "hat-pirate",
+      "slot": "head",
+      "name": "Captain Hat"
+    },
+    {
+      "id": "hat-chef",
+      "slot": "head",
+      "name": "Chef Hat"
+    },
+    {
+      "id": "hat-cap",
+      "slot": "head",
+      "name": "Sports Cap"
+    },
+    {
+      "id": "hat-propeller",
+      "slot": "head",
+      "name": "Propeller Hat"
+    },
+    {
+      "id": "hat-straw",
+      "slot": "head",
+      "name": "Straw Sun Hat"
+    },
+    {
+      "id": "scarf-striped",
+      "slot": "neck",
+      "name": "Striped Scarf"
+    },
+    {
+      "id": "scarf-cozy",
+      "slot": "neck",
+      "name": "Knitted Scarf"
+    },
+    {
+      "id": "bow-tie",
+      "slot": "neck",
+      "name": "Bow Tie"
+    },
+    {
+      "id": "ribbon-bow",
+      "slot": "neck",
+      "name": "Ribbon Bow"
+    },
+    {
+      "id": "pearl-necklace",
+      "slot": "neck",
+      "name": "Pearl Necklace"
+    },
+    {
+      "id": "gold-medal",
+      "slot": "neck",
+      "name": "Gold Medal"
+    },
+    {
+      "id": "bandana",
+      "slot": "neck",
+      "name": "Bandana"
+    },
+    {
+      "id": "bell-collar",
+      "slot": "neck",
+      "name": "Bell Collar"
+    },
+    {
+      "id": "glasses-round",
+      "slot": "eyes",
+      "name": "Round Glasses"
+    },
+    {
+      "id": "glasses-star",
+      "slot": "eyes",
+      "name": "Star Glasses"
+    },
+    {
+      "id": "glasses-heart",
+      "slot": "eyes",
+      "name": "Heart Glasses"
+    },
+    {
+      "id": "sunglasses",
+      "slot": "eyes",
+      "name": "Sunglasses"
+    },
+    {
+      "id": "monocle",
+      "slot": "eyes",
+      "name": "Monocle"
+    },
+    {
+      "id": "goggles",
+      "slot": "eyes",
+      "name": "Flying Goggles"
+    },
+    {
+      "id": "mask-hero",
+      "slot": "eyes",
+      "name": "Hero Mask"
+    },
+    {
+      "id": "glasses-square",
+      "slot": "eyes",
+      "name": "Square Glasses"
+    },
+    {
+      "id": "paint-stripes",
+      "slot": "wings",
+      "name": "Striped Wings"
+    },
+    {
+      "id": "paint-dots",
+      "slot": "wings",
+      "name": "Polka-Dot Wings"
+    },
+    {
+      "id": "paint-stars",
+      "slot": "wings",
+      "name": "Starry Wings"
+    },
+    {
+      "id": "paint-hearts",
+      "slot": "wings",
+      "name": "Heart Wings"
+    },
+    {
+      "id": "paint-flames",
+      "slot": "wings",
+      "name": "Flame Wings"
+    },
+    {
+      "id": "paint-galaxy",
+      "slot": "wings",
+      "name": "Galaxy Wings"
+    },
+    {
+      "id": "paint-rainbow",
+      "slot": "wings",
+      "name": "Rainbow Wings"
+    },
+    {
+      "id": "paint-checker",
+      "slot": "wings",
+      "name": "Checkered Wings"
+    },
+    {
+      "id": "nest-pillow",
+      "slot": "nest",
+      "name": "Plump Pillow"
+    },
+    {
+      "id": "nest-lantern",
+      "slot": "nest",
+      "name": "Glowing Lantern"
+    },
+    {
+      "id": "nest-flowers",
+      "slot": "nest",
+      "name": "Flower Bed"
+    },
+    {
+      "id": "nest-number-blocks",
+      "slot": "nest",
+      "name": "Number Blocks"
+    },
+    {
+      "id": "nest-quilt",
+      "slot": "nest",
+      "name": "Patchwork Quilt"
+    },
+    {
+      "id": "nest-mushrooms",
+      "slot": "nest",
+      "name": "Mushroom Patch"
+    },
+    {
+      "id": "nest-treasure",
+      "slot": "nest",
+      "name": "Treasure Pile"
+    },
+    {
+      "id": "nest-books",
+      "slot": "nest",
+      "name": "Book Stack"
+    }
+  ],
+  "avatars": [
+    {
+      "id": "keeper-1"
+    },
+    {
+      "id": "keeper-2"
+    },
+    {
+      "id": "keeper-3"
+    },
+    {
+      "id": "keeper-4"
+    },
+    {
+      "id": "keeper-5"
+    },
+    {
+      "id": "keeper-6"
+    },
+    {
+      "id": "keeper-7"
+    },
+    {
+      "id": "keeper-8"
+    }
+  ],
+  "icons": {
+    "items": [
+      "coin",
+      "star-filled",
+      "star-empty",
+      "chest-closed",
+      "chest-open",
+      "egg",
+      "badge-correct",
+      "badge-almost"
+    ],
+    "fruits": [
+      "apple",
+      "plum",
+      "pear",
+      "cherries",
+      "berries"
+    ],
+    "mapNodes": [
+      "node-locked",
+      "node-open",
+      "node-current",
+      "node-stars-1",
+      "node-stars-2",
+      "node-stars-3"
+    ],
+    "glyphs": [
+      "lock",
+      "check",
+      "question",
+      "speaker",
+      "settings",
+      "parent",
+      "home",
+      "back",
+      "next",
+      "close",
+      "print",
+      "hint",
+      "music",
+      "sound-off"
+    ],
+    "emblems": [
+      "emblem-sunny-meadow",
+      "emblem-whispering-woods",
+      "emblem-fire-mountain",
+      "emblem-crystal-caves",
+      "emblem-sharing-lake",
+      "emblem-leftover-lagoon",
+      "emblem-giants-peaks",
+      "emblem-riddle-ruins",
+      "emblem-dragon-castle"
+    ]
+  },
+  "regions": [
+    {
+      "id": "sunny-meadow",
+      "accentName": "Buttercup",
+      "accent": "#ffc53d",
+      "deep": "#8a5a00",
+      "soft": "#fff3d1",
+      "onAccent": "ink",
+      "emblem": "emblem-sunny-meadow"
+    },
+    {
+      "id": "whispering-woods",
+      "accentName": "Fern",
+      "accent": "#3aa65b",
+      "deep": "#1f7a3f",
+      "soft": "#dff3e5",
+      "onAccent": "ink",
+      "emblem": "emblem-whispering-woods"
+    },
+    {
+      "id": "fire-mountain",
+      "accentName": "Ember",
+      "accent": "#f26a2e",
+      "deep": "#b23f12",
+      "soft": "#fde3d6",
+      "onAccent": "ink",
+      "emblem": "emblem-fire-mountain"
+    },
+    {
+      "id": "crystal-caves",
+      "accentName": "Amethyst",
+      "accent": "#8b5cf6",
+      "deep": "#6236d6",
+      "soft": "#ece4ff",
+      "onAccent": "white",
+      "emblem": "emblem-crystal-caves"
+    },
+    {
+      "id": "sharing-lake",
+      "accentName": "Lake",
+      "accent": "#2d8ce6",
+      "deep": "#1b5fae",
+      "soft": "#dbebfc",
+      "onAccent": "ink",
+      "emblem": "emblem-sharing-lake"
+    },
+    {
+      "id": "leftover-lagoon",
+      "accentName": "Lagoon",
+      "accent": "#13b2a6",
+      "deep": "#08706a",
+      "soft": "#d4f3f0",
+      "onAccent": "ink",
+      "emblem": "emblem-leftover-lagoon"
+    },
+    {
+      "id": "giants-peaks",
+      "accentName": "Heather",
+      "accent": "#e35d9b",
+      "deep": "#a8326c",
+      "soft": "#fbe1ee",
+      "onAccent": "ink",
+      "emblem": "emblem-giants-peaks"
+    },
+    {
+      "id": "riddle-ruins",
+      "accentName": "Moss",
+      "accent": "#93a83a",
+      "deep": "#5f6e14",
+      "soft": "#eef2d6",
+      "onAccent": "ink",
+      "emblem": "emblem-riddle-ruins"
+    },
+    {
+      "id": "dragon-castle",
+      "accentName": "Royal",
+      "accent": "#d93a57",
+      "deep": "#a8203e",
+      "soft": "#fbdde3",
+      "onAccent": "white",
+      "emblem": "emblem-dragon-castle"
+    }
+  ]
+}

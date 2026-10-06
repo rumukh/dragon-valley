@@ -1,0 +1,64 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "puff",
+  "name": "Puff",
+  "kind": "table",
+  "table": 0,
+  "mnemonic": "A cloud-wisp dragon. Anything times 0 goes poof! Puff blows smoke rings shaped like a 0.",
+  "colors": {
+    "body": "#e6e1ff",
+    "shade": "#a99fe6",
+    "belly": "#ffffff",
+    "wing": "#f4f2ff",
+    "horn": "#ffffff",
+    "accent": "#9d8df1",
+    "iris": "#6c5ad6",
+    "cheek": "#ffa8cc"
+  },
+  "build": {
+    "chub": 0.7,
+    "head": 1,
+    "snout": 0.9,
+    "body": 1
+  },
+  "horns": {
+    "style": "none",
+    "count": 0,
+    "length": 1
+  },
+  "ears": {
+    "style": "cloud",
+    "size": 0.9
+  },
+  "wings": {
+    "style": "cloud",
+    "count": 2,
+    "size": 0.95
+  },
+  "tail": {
+    "count": 1,
+    "tip": "cloud",
+    "length": 0.9
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "cloud-tuft",
+    "count": 0
+  },
+  "markings": [
+    "belly-plates"
+  ],
+  "features": [
+    "smoke-ring",
+    "cloud-body"
+  ],
+  "egg": {
+    "base": "#ece8ff",
+    "accent": "#a99fe6",
+    "pattern": "clouds"
+  }
+}
