@@ -19,7 +19,12 @@ import { createSaveStatus, keeperBadge, topBar } from './common';
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
-const PLACE_ICONS = { market: 'bag', den: 'home', album: 'book', window: 'window' } as const;
+const PLACES = {
+  market: { label: 'hub.market', icon: 'bag' },
+  den: { label: 'hub.den', icon: 'home' },
+  album: { label: 'hub.album', icon: 'book' },
+  window: { label: 'hub.window', icon: 'window' },
+} as const;
 
 /** Facts a dragon has toward its next stage, and how many it needs. */
 export function growthFacts(dragon: DragonView): { have: number; need: number } | null {
@@ -356,8 +361,8 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
     }),
     ...(['market', 'den', 'album', 'window'] as const).map((place) =>
       candyButton({
-        label: t(`hub.${place}`),
-        icon: PLACE_ICONS[place],
+        label: t(PLACES[place].label),
+        icon: PLACES[place].icon,
         variant: 'paper',
         size: 'small',
         testId: `hub-${place}`,

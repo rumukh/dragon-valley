@@ -20,13 +20,22 @@ export function animate(
   return element.animate(keyframes, options);
 }
 
-/** Resolve when an animation ends or is cancelled; immediately when there is none. */
+/**
+ * Resolve when an animation ends or is cancelled; immediately when there is none. It also
+ * resolves shortly after the animation should have ended, because a browser may hold back
+ * animations of a page in the background, and the game must never wait on decoration.
+ */
 export function finished(animation: Animation | null): Promise<void> {
   if (!animation) return Promise.resolve();
-  return animation.finished.then(
-    () => undefined,
-    () => undefined,
-  );
+  const timing = animation.effect?.getComputedTiming();
+  const end = typeof timing?.endTime === 'number' ? timing.endTime : 0;
+  return Promise.race([
+    animation.finished.then(
+      () => undefined,
+      () => undefined,
+    ),
+    wait(end + 250),
+  ]);
 }
 
 export function wait(milliseconds: number): Promise<void> {
