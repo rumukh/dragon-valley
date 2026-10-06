@@ -20,6 +20,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "validate:content": "node scripts/validate-content.mjs",
+    "content:bump": "node scripts/content-bump.mjs",
     "audio:build": "node scripts/audio/build.mjs",
     "audio:verify": "node scripts/audio/verify.mjs",
     "audio:report": "node scripts/audio/report.mjs",
