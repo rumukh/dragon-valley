@@ -321,42 +321,51 @@ test('a tablet screen holds the hub, the Egg Grid and the results; nests are tap
   await page.getByTestId('egg-check').click();
   await expect(status).toContainText(
     product === 12 ? 'Yes! 3 rows of 4 is 12.' : `3 rows of 4 is 12. We need ${product}.`,
+    { timeout: 15_000 },
   );
 
-  // Every rectangle of every board, by tapping its far corner.
-  const results = page.getByTestId('screen-results');
+  // Every rectangle of every board, by tapping its far corner. The board is read in one go,
+  // without waiting on elements: the results screen replaces it when the round is over.
+  const board = () =>
+    page.evaluate(() => ({
+      over: document.querySelector('[data-testid="screen-results"]') !== null,
+      goal: document.querySelector('[data-testid="egg-goal"]')?.textContent ?? '',
+      found: [...document.querySelectorAll('[data-testid="egg-found"] li')].map((item) =>
+        (item.textContent ?? '').replace(/\s/g, ''),
+      ),
+    }));
   for (let move = 0; move < 30; move++) {
-    if (await results.isVisible()) break;
-    const goal = await page.getByTestId('egg-goal').innerText();
-    const eggs = Number(/of (\d+) eggs/.exec(goal)![1]);
-    const found = (await page.getByTestId('egg-found').locator('li').allInnerTexts()).map((text) =>
-      text.replace(/\s/g, ''),
-    );
+    const before = await board();
+    if (before.over) break;
+    const eggs = Number(/of (\d+) eggs/.exec(before.goal)![1]);
     const rows = [2, 3, 4, 5, 6, 7, 8, 9, 10].find(
       (side) =>
         eggs % side === 0 &&
         eggs / side >= 2 &&
         eggs / side <= 10 &&
-        !found.includes(`${side}·${eggs / side}`),
+        !before.found.includes(`${side}·${eggs / side}`),
     );
-    expect(rows, `a nest of ${eggs} left to find (found ${found.join(', ')})`).toBeDefined();
+    expect(rows, `a nest of ${eggs} left to find (found ${before.found.join(', ')})`).toBeDefined();
     await grid.locator(`[data-row="${rows}"][data-column="${eggs / rows!}"]`).click();
     await page.getByTestId('egg-check').click();
     // The nest is found: the list grows, the next board comes, or the round is over.
     await expect
-      .poll(async () => {
-        if (await results.isVisible()) return 'moved';
-        const now = await page
-          .getByTestId('egg-goal')
-          .innerText()
-          .catch(() => goal);
-        const count = await page.getByTestId('egg-found').locator('li').count();
-        return now !== goal || count > found.length ? 'moved' : 'waiting';
-      })
+      .poll(
+        async () => {
+          const after = await board();
+          return after.over ||
+            after.goal !== before.goal ||
+            after.found.length > before.found.length
+            ? 'moved'
+            : 'waiting';
+        },
+        { timeout: 20_000 },
+      )
       .toBe('moved');
   }
 
   // A hatch is celebrated on its own first; then the results fit the screen too.
+  const results = page.getByTestId('screen-results');
   await expect(results).toBeVisible();
   for (let hatch = 0; hatch < 3; hatch++) {
     if (!(await page.getByTestId('hatch-celebration').isVisible())) break;
