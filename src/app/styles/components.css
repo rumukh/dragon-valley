@@ -655,6 +655,96 @@
   background: var(--dv-primary);
 }
 
+/* Tabs over a long collection: arrows at the ends, the tabs between them wrap. Picture tabs
+   keep a fixed size, so big text never turns nine of them into a tall column; on a narrow
+   screen the arrows go under the tabs. */
+.dv-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  width: min(100%, 60em);
+  margin-inline: auto;
+}
+
+.dv-tabs--arrows {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+@media (max-width: 599px) {
+  .dv-tabs--arrows {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dv-tabs--arrows .dv-tabs__list {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+
+  .dv-tabs--arrows .dv-tabs__arrow {
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .dv-tabs--arrows .dv-tabs__arrow:last-child {
+    justify-self: end;
+  }
+}
+
+.dv-tabs__list {
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 0;
+}
+
+.dv-tabs__arrow {
+  flex: 0 0 auto;
+}
+
+.dv-tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+}
+
+.dv-tabs__list--icons .dv-tabs__tab {
+  width: calc(var(--dv-target) + 8px);
+  height: calc(var(--dv-target) + 8px);
+  padding: 0;
+  border-radius: 50%;
+}
+
+.dv-tabs__list--icons .dv-tabs__tab[aria-pressed='true'] {
+  background: var(--dv-sun);
+  outline: 3px solid var(--dv-primary-deep);
+  outline-offset: 2px;
+}
+
+.dv-tabs__tab .dv-tabs__emblem {
+  width: calc(var(--dv-target) - 8px);
+  height: calc(var(--dv-target) - 8px);
+}
+
+/* A finished page or shelf: a small check on the tab. */
+.dv-tabs__done {
+  width: 1em;
+  height: 1em;
+}
+
+.dv-tabs__list--icons .dv-tabs__done {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  color: var(--dv-card);
+  background: var(--dv-success-deep);
+}
+
 .dv-switch {
   display: flex;
   align-items: center;

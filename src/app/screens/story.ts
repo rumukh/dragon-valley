@@ -19,7 +19,7 @@ type StoryAdvanced = Extract<GameEvent, { type: 'story.advanced' }>;
 export function storyScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
   const text = app.text;
-  const data = app.game.content.data;
+  const data = active.game.content().data;
   const view = active.game.host.getView();
   const story = view.story!;
   const beat = data.story.beats.find((candidate) => candidate.id === story.beat);

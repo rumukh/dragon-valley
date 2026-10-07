@@ -10,7 +10,11 @@
  */
 import { IndexedDbSaveStorage } from '@aegis/browser/indexeddb';
 import type { SaveStorage } from '@aegis/browser/save';
-import { applyPresentationPreferences, bindVisibilityPause } from '@aegis/browser/ui';
+import {
+  applyPresentationPreferences,
+  bindVisibilityPause,
+  CHILD_SAFE_PRESET,
+} from '@aegis/browser/ui';
 import { createGameAudio } from '../audio/game-audio';
 import type { GameAudio } from '../audio/game-audio';
 import { eventCueContext as cueContext } from '../audio/sound-map';
@@ -227,9 +231,12 @@ export function createApp(options: AppOptions): App {
     const chosen = preferences ?? DEFAULT_PREFERENCES;
     const root = document.documentElement;
     applyPresentationPreferences(root, chosen.presentation);
-    // The SDK sets only the --aegis-text-scale property; WebKit can keep the root's old font
-    // size for a while after that. An attribute change makes every engine restyle it at once.
+    // The SDK sets only the --aegis-text-scale property, and an engine can keep the root's old
+    // font size for a while after that (DV-QA-13: WebKit, and once Chromium). The root's own
+    // font size, set here directly, is restyled at once, so the next screen's very first frame
+    // is already at the keeper's size; the attribute names the scale for styles and tests.
     root.dataset['textScale'] = String(chosen.presentation.textScale);
+    root.style.fontSize = `${CHILD_SAFE_PRESET.readingPixels * chosen.presentation.textScale}px`;
     audio.setVolumes(chosen.presentation.volumes);
   };
 

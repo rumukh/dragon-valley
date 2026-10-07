@@ -13,7 +13,18 @@ export type DvGame = GameDefinition<ProfileState, GameAction, GameView, ContentD
 export type DvSession = GameSession<ProfileState, GameAction, GameView, ContentData>;
 export type DvPack = ContentPack<ContentData>;
 
-/** The game for the newest pack; `history` lists older shipped packs saves may still pin. */
-export function dragonValleyGame(content: DvPack, history: readonly DvPack[] = []): DvGame {
-  return { gameId: GAME_ID, adapter: dragonValleyAdapter, content, history };
+/** The game for the newest pack: `history` holds older shipped packs at hand, and `loadHistory`
+ * fetches one a save pins (`content/history.ts`). */
+export function dragonValleyGame(
+  content: DvPack,
+  history: readonly DvPack[] = [],
+  loadHistory?: (revision: string) => Promise<DvPack>,
+): DvGame {
+  return {
+    gameId: GAME_ID,
+    adapter: dragonValleyAdapter,
+    content,
+    history,
+    ...(loadHistory ? { loadHistory } : {}),
+  };
 }
