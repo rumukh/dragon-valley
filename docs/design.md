@@ -431,7 +431,11 @@ of known facts against your own best. The shell keeps the time and ends the roun
   eats wait in the basket. These are comparisons, terms and word problems until the Seven-Headed
   Dragon hatches, and the facts of eggs not hatched yet. Snack time for every dragon serves them
   with the dragons' due facts, and the Daily Adventure offers snack time when only the basket has
-  something due, so every fact the child knows is reviewed.
+  something due, so every fact the child knows is reviewed. A snack of the basket alone (no
+  dragon is hungry) is as long as the basket, within the usual maximum: one problem per fact, a
+  fact and its twin once (a right answer to 6 · 8 reviews 8 · 6), so a single due fact is a
+  one-problem snack. Any round that runs out of things to ask finishes normally, with its results
+  and coins.
 - **Placement** ("Show the dragons what you know!") walks a ladder of skills
   (`placement.steps`), 2-4 problems per step, 12-24 problems in total. It stops early and gently
   after `stopAfterMisses` misses in a row. Passing a step (`passAccuracy`) marks its levels as placed:

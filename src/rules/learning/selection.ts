@@ -368,7 +368,8 @@ export function pickKnown(
 
 /**
  * The next item of a mixed round from `pool` (the round's items), skipping `blocked` recent
- * items while others are available and preferring items not `served` in this round yet.
+ * items while others are available and preferring items not `served` in this round yet. `null`
+ * when the pool is empty (like every draw here: the round then has nothing left to serve).
  */
 export function pickMixed(options: {
   state: ReadState;
@@ -378,11 +379,12 @@ export function pickMixed(options: {
   served?: readonly string[];
   focus: readonly string[] | null;
   random: RandomStream;
-}): string {
+}): string | null {
   const { state, data, random } = options;
   const served = options.served ?? [];
   const day = state.day ?? 0;
   const candidates = withoutRecent(options.pool, options.blocked);
+  if (candidates.length === 0) return null;
   const tiers: Record<ItemTier, string[]> = { due: [], known: [], learning: [] };
   const protect = lowSuccess(state, data);
   for (const item of candidates) tiers[mixTier(state, item, day, protect)].push(item);
@@ -404,7 +406,8 @@ export function pickMixed(options: {
  * `likelyFirst` while the child's success is protected, the likeliest successes), then rule facts
  * never answered right (other rounds serve at most one of them, so snack time is where Puff and
  * Mirror meet the rest of their facts), then the weakest known items (lowest box) not served in
- * this snack yet, then anything in the pool.
+ * this snack yet, then anything in the pool. `null` when the pool is empty: a snack of the
+ * basket alone empties it as it goes.
  */
 export function pickSnack(options: {
   state: ReadState;
@@ -413,11 +416,12 @@ export function pickSnack(options: {
   served?: readonly string[];
   random: RandomStream;
   likelyFirst?: boolean;
-}): string {
+}): string | null {
   const { state, random } = options;
   const served = options.served ?? [];
   const day = state.day ?? 0;
   const candidates = withoutRecent(options.pool, options.blocked);
+  if (candidates.length === 0) return null;
   const due = candidates.filter((item) => isDue(state.items[item], day));
   const picked = pickReview(state, due, random, options.likelyFirst ?? false);
   if (picked !== null) return picked;
@@ -440,7 +444,7 @@ export function pickSnack(options: {
 /**
  * Placement: an item of the step's skill not asked yet in this round, new items first; with
  * `focus` (every other problem of a step), the chosen egg's facts first, so a child who knows
- * them warms the egg already in the check.
+ * them warms the egg already in the check. `null` when the pool is empty.
  */
 export function pickPlacement(options: {
   state: ReadState;
@@ -448,25 +452,30 @@ export function pickPlacement(options: {
   blocked: readonly string[];
   random: RandomStream;
   focus?: readonly string[] | null;
-}): string {
+}): string | null {
   const { state, random, focus } = options;
   const candidates = withoutRecent(options.pool, options.blocked);
+  if (candidates.length === 0) return null;
   const fresh = candidates.filter((item) => state.items[item] === undefined);
   const from = fresh.length > 0 ? fresh : candidates;
   const focused = focus ? from.filter((item) => focus.includes(item)) : [];
   return random.pick(focused.length > 0 ? focused : from);
 }
 
-/** The Arena: facts answered right before, not served in this race yet, else anything. */
+/**
+ * The Arena: facts answered right before, not served in this race yet, else anything. `null` when
+ * the pool is empty.
+ */
 export function pickArena(options: {
   state: ReadState;
   pool: readonly string[];
   blocked: readonly string[];
   served: readonly string[];
   random: RandomStream;
-}): string {
+}): string | null {
   const { state, served, random } = options;
   const candidates = withoutRecent(options.pool, options.blocked);
+  if (candidates.length === 0) return null;
   return random.pick(
     prefer(
       candidates,

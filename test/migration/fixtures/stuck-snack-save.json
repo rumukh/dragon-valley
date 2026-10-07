@@ -1,0 +1,3750 @@
+{
+  "format": "aegis-runtime/1",
+  "adapter": "dragon-valley",
+  "stateVersion": 1,
+  "content": {
+    "id": "dragon-valley",
+    "revision": "1.1.0",
+    "schemaVersion": 1,
+    "hash": "be73b39155127a02"
+  },
+  "seed": "simulation:perfect",
+  "revision": 5148,
+  "turn": 3146,
+  "world": {
+    "version": 1,
+    "tick": 0,
+    "entities": [],
+    "resources": {
+      "aegis.runtime.state": {
+        "day": 20798,
+        "firstDay": 20731,
+        "sessions": 68,
+        "daysPracticed": 68,
+        "onboarding": {
+          "firstEgg": "bubbles",
+          "placement": "done"
+        },
+        "items": {
+          "mul:2x9": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:5x9": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:2x6": {
+            "box": 5,
+            "due": 20813,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:2x4": {
+            "box": 5,
+            "due": 20807,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:0x9": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:8x1": {
+            "box": 5,
+            "due": 20809,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "mul:1x6": {
+            "box": 5,
+            "due": 20812,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:10:2": {
+            "box": 5,
+            "due": 20807,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "div:20:5": {
+            "box": 5,
+            "due": 20806,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "div:10:5": {
+            "box": 5,
+            "due": 20812,
+            "seen": 16,
+            "correct": 16,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:12:2": {
+            "box": 5,
+            "due": 20804,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20788
+          },
+          "div:6:2": {
+            "box": 5,
+            "due": 20805,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "div:16:2": {
+            "box": 5,
+            "due": 20804,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20788
+          },
+          "mul:4x8": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:0x4": {
+            "box": 5,
+            "due": 20810,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:4x0": {
+            "box": 5,
+            "due": 20810,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:7x4": {
+            "box": 5,
+            "due": 20806,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "div:0:3": {
+            "box": 5,
+            "due": 20808,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:12:4": {
+            "box": 5,
+            "due": 20812,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:9:3": {
+            "box": 5,
+            "due": 20811,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:2x3": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:3x2": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:2x8": {
+            "box": 5,
+            "due": 20808,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "mul:8x2": {
+            "box": 5,
+            "due": 20808,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "mul:2x10": {
+            "box": 5,
+            "due": 20807,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:4x5": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:5x4": {
+            "box": 5,
+            "due": 20812,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:10x2": {
+            "box": 5,
+            "due": 20807,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:5x2": {
+            "box": 5,
+            "due": 20813,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:5x7": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:5x6": {
+            "box": 5,
+            "due": 20805,
+            "seen": 7,
+            "correct": 7,
+            "recent": ["ok", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "mul:5x8": {
+            "box": 5,
+            "due": 20811,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:10x5": {
+            "box": 5,
+            "due": 20809,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "mul:10x3": {
+            "box": 5,
+            "due": 20812,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:8x10": {
+            "box": 5,
+            "due": 20800,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20784
+          },
+          "mul:10x1": {
+            "box": 5,
+            "due": 20813,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "word:more-than": {
+            "box": 5,
+            "due": 20811,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "word:sharing": {
+            "box": 5,
+            "due": 20808,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "word:equal-groups": {
+            "box": 5,
+            "due": 20807,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:10x0": {
+            "box": 5,
+            "due": 20813,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:3x0": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:7x0": {
+            "box": 5,
+            "due": 20807,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:0x6": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:0x1": {
+            "box": 5,
+            "due": 20813,
+            "seen": 7,
+            "correct": 7,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:1x1": {
+            "box": 5,
+            "due": 20813,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:7x1": {
+            "box": 5,
+            "due": 20812,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:4x1": {
+            "box": 5,
+            "due": 20813,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:2x1": {
+            "box": 5,
+            "due": 20810,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:6x2": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:7x2": {
+            "box": 5,
+            "due": 20813,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:2:2": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:3x4": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:4x3": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:3x7": {
+            "box": 5,
+            "due": 20806,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "mul:7x3": {
+            "box": 5,
+            "due": 20806,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "mul:3x10": {
+            "box": 5,
+            "due": 20812,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:6x3": {
+            "box": 5,
+            "due": 20813,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:8x3": {
+            "box": 5,
+            "due": 20809,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "mul:5x3": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:3x8": {
+            "box": 5,
+            "due": 20809,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "mul:3x6": {
+            "box": 5,
+            "due": 20813,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "compare:fact-number": {
+            "box": 5,
+            "due": 20812,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "word:times-as-many": {
+            "box": 5,
+            "due": 20812,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "word:grouping": {
+            "box": 5,
+            "due": 20803,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20787
+          },
+          "div:28:4": {
+            "box": 5,
+            "due": 20811,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:20:4": {
+            "box": 5,
+            "due": 20811,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:4x7": {
+            "box": 5,
+            "due": 20806,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "div:16:4": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:32:4": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:4x2": {
+            "box": 5,
+            "due": 20807,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "div:4:4": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:15:3": {
+            "box": 5,
+            "due": 20808,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:8:4": {
+            "box": 5,
+            "due": 20806,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "mul:4x6": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:6x4": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:6x6": {
+            "box": 5,
+            "due": 20810,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:6x8": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:8x6": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:6x9": {
+            "box": 5,
+            "due": 20806,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "mul:9x6": {
+            "box": 5,
+            "due": 20806,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "mul:6x5": {
+            "box": 5,
+            "due": 20805,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "mul:6x7": {
+            "box": 5,
+            "due": 20806,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "mul:7x6": {
+            "box": 5,
+            "due": 20806,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "mul:7x8": {
+            "box": 5,
+            "due": 20811,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:8x7": {
+            "box": 5,
+            "due": 20811,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:10x7": {
+            "box": 5,
+            "due": 20811,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:7x5": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:7x7": {
+            "box": 5,
+            "due": 20811,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:9x7": {
+            "box": 5,
+            "due": 20813,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:42:6": {
+            "box": 5,
+            "due": 20806,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "div:42:7": {
+            "box": 5,
+            "due": 20809,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:48:6": {
+            "box": 5,
+            "due": 20812,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:28:7": {
+            "box": 5,
+            "due": 20811,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:30:6": {
+            "box": 5,
+            "due": 20809,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:35:7": {
+            "box": 5,
+            "due": 20810,
+            "seen": 17,
+            "correct": 17,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:36:6": {
+            "box": 5,
+            "due": 20809,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:70:7": {
+            "box": 5,
+            "due": 20813,
+            "seen": 20,
+            "correct": 20,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:63:7": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:49:7": {
+            "box": 5,
+            "due": 20810,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:1x4": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:3x5": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:3x9": {
+            "box": 5,
+            "due": 20811,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:4x9": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:7x9": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:6x10": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "word:times-fewer": {
+            "box": 5,
+            "due": 20812,
+            "seen": 16,
+            "correct": 16,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:1x7": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:24:6": {
+            "box": 5,
+            "due": 20809,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "mul:7x10": {
+            "box": 5,
+            "due": 20811,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:7:7": {
+            "box": 5,
+            "due": 20810,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:12:6": {
+            "box": 5,
+            "due": 20804,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20788
+          },
+          "div:60:6": {
+            "box": 5,
+            "due": 20800,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20784
+          },
+          "mul:0x7": {
+            "box": 5,
+            "due": 20807,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:8x4": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:8x9": {
+            "box": 5,
+            "due": 20810,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:9x8": {
+            "box": 5,
+            "due": 20810,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:10x8": {
+            "box": 5,
+            "due": 20800,
+            "seen": 7,
+            "correct": 7,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20784
+          },
+          "mul:8x8": {
+            "box": 5,
+            "due": 20805,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "mul:8x5": {
+            "box": 5,
+            "due": 20811,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:9x3": {
+            "box": 5,
+            "due": 20811,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:9x5": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:9x10": {
+            "box": 5,
+            "due": 20808,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "mul:10x9": {
+            "box": 5,
+            "due": 20808,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "mul:9x4": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:9x2": {
+            "box": 5,
+            "due": 20812,
+            "seen": 17,
+            "correct": 17,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:9x0": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:9x9": {
+            "box": 5,
+            "due": 20806,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "div:45:9": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:18:9": {
+            "box": 5,
+            "due": 20808,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:80:8": {
+            "box": 5,
+            "due": 20808,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:27:9": {
+            "box": 5,
+            "due": 20809,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:48:8": {
+            "box": 5,
+            "due": 20813,
+            "seen": 16,
+            "correct": 16,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:16:8": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:36:9": {
+            "box": 5,
+            "due": 20803,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20787
+          },
+          "div:9:9": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:54:9": {
+            "box": 5,
+            "due": 20804,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20788
+          },
+          "div:32:8": {
+            "box": 5,
+            "due": 20802,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20786
+          },
+          "div:72:8": {
+            "box": 5,
+            "due": 20811,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:0:9": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:1x10": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:5x10": {
+            "box": 5,
+            "due": 20809,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "mul:10x4": {
+            "box": 5,
+            "due": 20813,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:2x5": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "compare:fact-fact": {
+            "box": 5,
+            "due": 20802,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20786
+          },
+          "div:72:9": {
+            "box": 5,
+            "due": 20809,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:24:8": {
+            "box": 5,
+            "due": 20805,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "div:63:9": {
+            "box": 5,
+            "due": 20813,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:40:8": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:64:8": {
+            "box": 5,
+            "due": 20808,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:8:8": {
+            "box": 5,
+            "due": 20813,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:56:8": {
+            "box": 5,
+            "due": 20810,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:21:3": {
+            "box": 5,
+            "due": 20800,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20784
+          },
+          "div:40:10": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:40:5": {
+            "box": 5,
+            "due": 20811,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:6:1": {
+            "box": 5,
+            "due": 20805,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "div:8:2": {
+            "box": 5,
+            "due": 20809,
+            "seen": 16,
+            "correct": 16,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:20:10": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:18:2": {
+            "box": 5,
+            "due": 20811,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:24:4": {
+            "box": 5,
+            "due": 20807,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "div:36:4": {
+            "box": 5,
+            "due": 20801,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20785
+          },
+          "div:0:8": {
+            "box": 5,
+            "due": 20809,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:0:2": {
+            "box": 5,
+            "due": 20813,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:90:9": {
+            "box": 5,
+            "due": 20804,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20788
+          },
+          "div:6:3": {
+            "box": 5,
+            "due": 20810,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:14:2": {
+            "box": 5,
+            "due": 20809,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:14:7": {
+            "box": 5,
+            "due": 20805,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "mul:4x10": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:5x1": {
+            "box": 5,
+            "due": 20812,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:5:1": {
+            "box": 5,
+            "due": 20810,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "word:fewer-than": {
+            "box": 5,
+            "due": 20802,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20786
+          },
+          "div:5:5": {
+            "box": 5,
+            "due": 20808,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:0:6": {
+            "box": 5,
+            "due": 20802,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20786
+          },
+          "div:3:3": {
+            "box": 5,
+            "due": 20809,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:7:1": {
+            "box": 5,
+            "due": 20800,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20784
+          },
+          "div:0:4": {
+            "box": 5,
+            "due": 20804,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20788
+          },
+          "div:27:3": {
+            "box": 5,
+            "due": 20813,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:30:3": {
+            "box": 5,
+            "due": 20802,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20786
+          },
+          "div:12:3": {
+            "box": 5,
+            "due": 20803,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20787
+          },
+          "div:20:2": {
+            "box": 5,
+            "due": 20808,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:9:1": {
+            "box": 5,
+            "due": 20810,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:35:5": {
+            "box": 5,
+            "due": 20804,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20788
+          },
+          "rem:d5": {
+            "box": 5,
+            "due": 20809,
+            "seen": 16,
+            "correct": 16,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "rem:d3": {
+            "box": 5,
+            "due": 20809,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "rem:d4": {
+            "box": 5,
+            "due": 20807,
+            "seen": 19,
+            "correct": 19,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "rem:d2": {
+            "box": 5,
+            "due": 20812,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "rem:d6": {
+            "box": 5,
+            "due": 20811,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "rem:d9": {
+            "box": 5,
+            "due": 20808,
+            "seen": 18,
+            "correct": 18,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "rem:d7": {
+            "box": 5,
+            "due": 20811,
+            "seen": 20,
+            "correct": 20,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "rem:d8": {
+            "box": 5,
+            "due": 20805,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "rem:d10": {
+            "box": 5,
+            "due": 20805,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "word:leftover": {
+            "box": 5,
+            "due": 20812,
+            "seen": 21,
+            "correct": 21,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:25:5": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:15:5": {
+            "box": 5,
+            "due": 20809,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:2:1": {
+            "box": 5,
+            "due": 20810,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:30:5": {
+            "box": 5,
+            "due": 20806,
+            "seen": 16,
+            "correct": 16,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20790
+          },
+          "pow10:x100": {
+            "box": 5,
+            "due": 20813,
+            "seen": 17,
+            "correct": 17,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "pow10:x10": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "tens:d4": {
+            "box": 5,
+            "due": 20803,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20787
+          },
+          "tens:d6": {
+            "box": 5,
+            "due": 20813,
+            "seen": 16,
+            "correct": 16,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "tens:d8": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "tens:d2": {
+            "box": 5,
+            "due": 20811,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "tens:d5": {
+            "box": 5,
+            "due": 20801,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20785
+          },
+          "tens:d7": {
+            "box": 5,
+            "due": 20810,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "tens:d3": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "tens:d9": {
+            "box": 5,
+            "due": 20807,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul2d1d:nocarry": {
+            "box": 5,
+            "due": 20811,
+            "seen": 17,
+            "correct": 17,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul2d1d:carry": {
+            "box": 5,
+            "due": 20808,
+            "seen": 21,
+            "correct": 21,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div2d1d:regroup": {
+            "box": 5,
+            "due": 20809,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div2d1d:noregroup": {
+            "box": 5,
+            "due": 20811,
+            "seen": 19,
+            "correct": 19,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "word:two-step": {
+            "box": 5,
+            "due": 20810,
+            "seen": 17,
+            "correct": 17,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "order:no-brackets": {
+            "box": 5,
+            "due": 20813,
+            "seen": 23,
+            "correct": 23,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "order:brackets": {
+            "box": 5,
+            "due": 20799,
+            "seen": 22,
+            "correct": 22,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20783
+          },
+          "compare:expression": {
+            "box": 5,
+            "due": 20812,
+            "seen": 25,
+            "correct": 25,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "terms:product": {
+            "box": 5,
+            "due": 20798,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20782
+          },
+          "terms:quotient": {
+            "box": 5,
+            "due": 20809,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "terms:divisor": {
+            "box": 5,
+            "due": 20799,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20783
+          },
+          "terms:remainder": {
+            "box": 5,
+            "due": 20808,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "terms:dividend": {
+            "box": 5,
+            "due": 20810,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "terms:factor": {
+            "box": 5,
+            "due": 20811,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:0:1": {
+            "box": 5,
+            "due": 20810,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:8:1": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:0:10": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:4:2": {
+            "box": 5,
+            "due": 20808,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:18:6": {
+            "box": 5,
+            "due": 20805,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "div:21:7": {
+            "box": 5,
+            "due": 20812,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:1x3": {
+            "box": 5,
+            "due": 20810,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:70:10": {
+            "box": 5,
+            "due": 20809,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "div:18:3": {
+            "box": 5,
+            "due": 20811,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:24:3": {
+            "box": 5,
+            "due": 20811,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:1:1": {
+            "box": 5,
+            "due": 20807,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:1x0": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:0x8": {
+            "box": 5,
+            "due": 20810,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:3x3": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:10:1": {
+            "box": 5,
+            "due": 20807,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:0x0": {
+            "box": 5,
+            "due": 20809,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "mul:3x1": {
+            "box": 5,
+            "due": 20810,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "div:45:5": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:81:9": {
+            "box": 5,
+            "due": 20807,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "mul:0x3": {
+            "box": 5,
+            "due": 20813,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:50:10": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:1x5": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:2x2": {
+            "box": 5,
+            "due": 20811,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:0x2": {
+            "box": 5,
+            "due": 20811,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:40:4": {
+            "box": 5,
+            "due": 20808,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20792
+          },
+          "div:90:10": {
+            "box": 5,
+            "due": 20812,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:6x1": {
+            "box": 5,
+            "due": 20812,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:1x9": {
+            "box": 5,
+            "due": 20812,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:3:1": {
+            "box": 5,
+            "due": 20807,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20791
+          },
+          "div:0:5": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:0:7": {
+            "box": 5,
+            "due": 20810,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:6x0": {
+            "box": 5,
+            "due": 20812,
+            "seen": 16,
+            "correct": 16,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:5x0": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:2x0": {
+            "box": 5,
+            "due": 20811,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:1x8": {
+            "box": 5,
+            "due": 20809,
+            "seen": 9,
+            "correct": 9,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20793
+          },
+          "mul:2x7": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:1x2": {
+            "box": 5,
+            "due": 20810,
+            "seen": 15,
+            "correct": 15,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:5x5": {
+            "box": 5,
+            "due": 20810,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:4x4": {
+            "box": 5,
+            "due": 20811,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "mul:9x1": {
+            "box": 5,
+            "due": 20812,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "mul:8x0": {
+            "box": 5,
+            "due": 20810,
+            "seen": 13,
+            "correct": 13,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          },
+          "mul:10x6": {
+            "box": 5,
+            "due": 20813,
+            "seen": 10,
+            "correct": 10,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:0x5": {
+            "box": 5,
+            "due": 20813,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "mul:0x10": {
+            "box": 5,
+            "due": 20813,
+            "seen": 8,
+            "correct": 8,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20797
+          },
+          "div:4:1": {
+            "box": 5,
+            "due": 20811,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:10:10": {
+            "box": 5,
+            "due": 20812,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:100:10": {
+            "box": 5,
+            "due": 20811,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:30:10": {
+            "box": 5,
+            "due": 20812,
+            "seen": 14,
+            "correct": 14,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20796
+          },
+          "div:50:5": {
+            "box": 5,
+            "due": 20811,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20795
+          },
+          "div:60:10": {
+            "box": 5,
+            "due": 20805,
+            "seen": 12,
+            "correct": 12,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20789
+          },
+          "div:80:10": {
+            "box": 5,
+            "due": 20810,
+            "seen": 11,
+            "correct": 11,
+            "recent": ["fast", "fast", "fast"],
+            "lastDay": 20794
+          }
+        },
+        "levels": {
+          "sunny-meadow.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": true,
+            "paidStars": 3
+          },
+          "sunny-meadow.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": true,
+            "paidStars": 3
+          },
+          "sunny-meadow.4": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": true,
+            "paidStars": 3
+          },
+          "sunny-meadow.5": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": true,
+            "paidStars": 3
+          },
+          "whispering-woods.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": true,
+            "paidStars": 3
+          },
+          "whispering-woods.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": true,
+            "paidStars": 3
+          },
+          "whispering-woods.4": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": true,
+            "paidStars": 3
+          },
+          "sunny-meadow.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sunny-meadow.6": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sunny-meadow.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "whispering-woods.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "whispering-woods.5": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "whispering-woods.6": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "whispering-woods.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "fire-mountain.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "fire-mountain.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "fire-mountain.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "fire-mountain.4": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "fire-mountain.5": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "fire-mountain.6": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "fire-mountain.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "crystal-caves.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "crystal-caves.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "crystal-caves.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "crystal-caves.4": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "crystal-caves.5": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "crystal-caves.6": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "crystal-caves.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sharing-lake.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sharing-lake.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sharing-lake.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sharing-lake.4": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sharing-lake.5": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sharing-lake.6": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "sharing-lake.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "leftover-lagoon.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "leftover-lagoon.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "leftover-lagoon.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "leftover-lagoon.4": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "leftover-lagoon.5": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "leftover-lagoon.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "giants-peaks.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "giants-peaks.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "giants-peaks.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "giants-peaks.4": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "giants-peaks.5": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "giants-peaks.6": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "giants-peaks.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "riddle-ruins.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "riddle-ruins.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "riddle-ruins.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "riddle-ruins.4": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "riddle-ruins.5": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "riddle-ruins.6": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "riddle-ruins.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "dragon-castle.1": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "dragon-castle.2": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "dragon-castle.3": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          },
+          "dragon-castle.boss": {
+            "stars": 3,
+            "bestAccuracy": 100,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 3
+          }
+        },
+        "bosses": {
+          "bridge-troll": {
+            "defeatedDay": 20731
+          },
+          "forest-witch": {
+            "defeatedDay": 20733
+          },
+          "krakonos": {
+            "defeatedDay": 20735
+          },
+          "gnome-king": {
+            "defeatedDay": 20737
+          },
+          "water-goblin": {
+            "defeatedDay": 20739
+          },
+          "lake-nymphs": {
+            "defeatedDay": 20741
+          },
+          "friendly-giant": {
+            "defeatedDay": 20743
+          },
+          "golem": {
+            "defeatedDay": 20744
+          },
+          "seven-headed": {
+            "defeatedDay": 20746
+          }
+        },
+        "dragons": {
+          "bubbles": {
+            "stage": "crowned",
+            "obtainedDay": 20731,
+            "stageDay": 20771,
+            "outfit": {
+              "head": "hat-beanie",
+              "neck": "scarf-cozy",
+              "eyes": "goggles",
+              "wings": null,
+              "nest": null
+            }
+          },
+          "sunny": {
+            "stage": "crowned",
+            "obtainedDay": 20731,
+            "stageDay": 20770,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": "sunglasses",
+              "wings": null,
+              "nest": null
+            }
+          },
+          "goldie": {
+            "stage": "adult",
+            "obtainedDay": 20731,
+            "stageDay": 20754,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": "glasses-heart",
+              "wings": null,
+              "nest": null
+            }
+          },
+          "mirror": {
+            "stage": "crowned",
+            "obtainedDay": 20731,
+            "stageDay": 20766,
+            "outfit": {
+              "head": "hat-straw",
+              "neck": "bandana",
+              "eyes": "monocle",
+              "wings": "paint-galaxy",
+              "nest": null
+            }
+          },
+          "puff": {
+            "stage": "crowned",
+            "obtainedDay": 20731,
+            "stageDay": 20766,
+            "outfit": {
+              "head": "hat-flower-crown",
+              "neck": "bow-tie",
+              "eyes": "glasses-round",
+              "wings": "paint-flames",
+              "nest": "nest-flowers"
+            }
+          },
+          "clover": {
+            "stage": "crowned",
+            "obtainedDay": 20732,
+            "stageDay": 20763,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "petal": {
+            "stage": "crowned",
+            "obtainedDay": 20732,
+            "stageDay": 20771,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "ember": {
+            "stage": "youngling",
+            "obtainedDay": 20733,
+            "stageDay": 20737,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "rainbow": {
+            "stage": "adult",
+            "obtainedDay": 20733,
+            "stageDay": 20749,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "crystal": {
+            "stage": "crowned",
+            "obtainedDay": 20735,
+            "stageDay": 20769,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "starry": {
+            "stage": "crowned",
+            "obtainedDay": 20735,
+            "stageDay": 20766,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "pearl": {
+            "stage": "crowned",
+            "obtainedDay": 20739,
+            "stageDay": 20767,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "boulder": {
+            "stage": "crowned",
+            "obtainedDay": 20741,
+            "stageDay": 20759,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "clockwork": {
+            "stage": "crowned",
+            "obtainedDay": 20743,
+            "stageDay": 20744,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "seven-headed": {
+            "stage": "adult",
+            "obtainedDay": 20746,
+            "stageDay": 20750,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          }
+        },
+        "coins": 8913,
+        "coinsEarned": 9393,
+        "cosmetics": {
+          "schema": 1,
+          "owned": [
+            "scarf-striped",
+            "glasses-square",
+            "ribbon-bow",
+            "hat-party",
+            "bow-tie",
+            "glasses-star",
+            "hat-flower-crown",
+            "hat-wizard",
+            "paint-dots",
+            "hat-straw",
+            "nest-lantern",
+            "nest-pillow",
+            "glasses-round",
+            "hat-cap",
+            "paint-stripes",
+            "hat-beanie",
+            "nest-treasure",
+            "nest-flowers",
+            "hat-propeller",
+            "bandana",
+            "nest-quilt",
+            "nest-mushrooms",
+            "scarf-cozy",
+            "hat-pirate",
+            "paint-stars",
+            "monocle",
+            "paint-hearts",
+            "paint-flames",
+            "pearl-necklace",
+            "bell-collar",
+            "goggles",
+            "nest-number-blocks",
+            "paint-galaxy",
+            "hat-top",
+            "paint-checker",
+            "sunglasses",
+            "nest-books",
+            "mask-hero",
+            "hat-chef",
+            "glasses-heart",
+            "paint-rainbow",
+            "gold-medal"
+          ],
+          "claims": [
+            {
+              "id": "level:sunny-meadow.4:scarf-striped",
+              "item": "scarf-striped"
+            },
+            {
+              "id": "level:whispering-woods.4:glasses-square",
+              "item": "glasses-square"
+            },
+            {
+              "id": "gift:20731",
+              "item": "ribbon-bow"
+            },
+            {
+              "id": "level:sunny-meadow.boss:hat-party",
+              "item": "hat-party"
+            },
+            {
+              "id": "buy:bow-tie",
+              "item": "bow-tie"
+            },
+            {
+              "id": "gift:20732",
+              "item": "glasses-star"
+            },
+            {
+              "id": "buy:hat-flower-crown",
+              "item": "hat-flower-crown"
+            },
+            {
+              "id": "level:whispering-woods.boss:hat-wizard",
+              "item": "hat-wizard"
+            },
+            {
+              "id": "gift:20733",
+              "item": "paint-dots"
+            },
+            {
+              "id": "buy:hat-straw",
+              "item": "hat-straw"
+            },
+            {
+              "id": "level:fire-mountain.4:nest-lantern",
+              "item": "nest-lantern"
+            },
+            {
+              "id": "gift:20734",
+              "item": "nest-pillow"
+            },
+            {
+              "id": "buy:glasses-round",
+              "item": "glasses-round"
+            },
+            {
+              "id": "level:fire-mountain.boss:hat-cap",
+              "item": "hat-cap"
+            },
+            {
+              "id": "gift:20735",
+              "item": "paint-stripes"
+            },
+            {
+              "id": "buy:hat-beanie",
+              "item": "hat-beanie"
+            },
+            {
+              "id": "level:crystal-caves.4:nest-treasure",
+              "item": "nest-treasure"
+            },
+            {
+              "id": "buy:nest-flowers",
+              "item": "nest-flowers"
+            },
+            {
+              "id": "level:crystal-caves.boss:hat-propeller",
+              "item": "hat-propeller"
+            },
+            {
+              "id": "buy:bandana",
+              "item": "bandana"
+            },
+            {
+              "id": "level:sharing-lake.4:nest-quilt",
+              "item": "nest-quilt"
+            },
+            {
+              "id": "gift:20738",
+              "item": "nest-mushrooms"
+            },
+            {
+              "id": "buy:scarf-cozy",
+              "item": "scarf-cozy"
+            },
+            {
+              "id": "level:sharing-lake.boss:hat-pirate",
+              "item": "hat-pirate"
+            },
+            {
+              "id": "gift:20739",
+              "item": "paint-stars"
+            },
+            {
+              "id": "buy:monocle",
+              "item": "monocle"
+            },
+            {
+              "id": "level:leftover-lagoon.4:paint-hearts",
+              "item": "paint-hearts"
+            },
+            {
+              "id": "buy:paint-flames",
+              "item": "paint-flames"
+            },
+            {
+              "id": "level:leftover-lagoon.boss:pearl-necklace",
+              "item": "pearl-necklace"
+            },
+            {
+              "id": "gift:20741",
+              "item": "bell-collar"
+            },
+            {
+              "id": "buy:goggles",
+              "item": "goggles"
+            },
+            {
+              "id": "level:giants-peaks.4:nest-number-blocks",
+              "item": "nest-number-blocks"
+            },
+            {
+              "id": "buy:paint-galaxy",
+              "item": "paint-galaxy"
+            },
+            {
+              "id": "level:giants-peaks.boss:hat-top",
+              "item": "hat-top"
+            },
+            {
+              "id": "gift:20743",
+              "item": "paint-checker"
+            },
+            {
+              "id": "buy:sunglasses",
+              "item": "sunglasses"
+            },
+            {
+              "id": "level:riddle-ruins.4:nest-books",
+              "item": "nest-books"
+            },
+            {
+              "id": "gift:20744",
+              "item": "mask-hero"
+            },
+            {
+              "id": "level:riddle-ruins.boss:hat-chef",
+              "item": "hat-chef"
+            },
+            {
+              "id": "buy:glasses-heart",
+              "item": "glasses-heart"
+            },
+            {
+              "id": "gift:20745",
+              "item": "paint-rainbow"
+            },
+            {
+              "id": "level:dragon-castle.boss:gold-medal",
+              "item": "gold-medal"
+            }
+          ],
+          "equipped": []
+        },
+        "stickers": {
+          "streak-ten": {
+            "day": 20731
+          },
+          "hot-streak": {
+            "day": 20731
+          },
+          "show-what-you-know": {
+            "day": 20731
+          },
+          "first-hatch": {
+            "day": 20731
+          },
+          "meadow-first-steps": {
+            "day": 20731
+          },
+          "troll-giggles": {
+            "day": 20731
+          },
+          "first-outfit": {
+            "day": 20731
+          },
+          "clover-hatched": {
+            "day": 20732
+          },
+          "petal-hatched": {
+            "day": 20732
+          },
+          "whispering-woods-explorer": {
+            "day": 20732
+          },
+          "three-days": {
+            "day": 20733
+          },
+          "witch-gingerbread": {
+            "day": 20733
+          },
+          "coin-collector": {
+            "day": 20733
+          },
+          "ember-hatched": {
+            "day": 20733
+          },
+          "rainbow-hatched": {
+            "day": 20733
+          },
+          "fire-mountain-explorer": {
+            "day": 20733
+          },
+          "quest-helper": {
+            "day": 20734
+          },
+          "week-warrior": {
+            "day": 20735
+          },
+          "first-youngling": {
+            "day": 20735
+          },
+          "krakonos-laughs": {
+            "day": 20735
+          },
+          "crystal-hatched": {
+            "day": 20735
+          },
+          "starry-hatched": {
+            "day": 20735
+          },
+          "crystal-caves-explorer": {
+            "day": 20735
+          },
+          "every-table": {
+            "day": 20735
+          },
+          "fair-sharer": {
+            "day": 20736
+          },
+          "gnome-dance": {
+            "day": 20737
+          },
+          "sharing-lake-explorer": {
+            "day": 20737
+          },
+          "half-window": {
+            "day": 20739
+          },
+          "goblin-teacups": {
+            "day": 20739
+          },
+          "pearl-hatched": {
+            "day": 20739
+          },
+          "leftover-lagoon-explorer": {
+            "day": 20739
+          },
+          "ten-days": {
+            "day": 20740
+          },
+          "leftover-expert": {
+            "day": 20740
+          },
+          "nymph-dance": {
+            "day": 20741
+          },
+          "first-adult": {
+            "day": 20741
+          },
+          "giants-peaks-explorer": {
+            "day": 20741
+          },
+          "boulder-hatched": {
+            "day": 20741
+          },
+          "big-numbers": {
+            "day": 20742
+          },
+          "giant-nap": {
+            "day": 20743
+          },
+          "clockwork-hatched": {
+            "day": 20743
+          },
+          "riddle-ruins-explorer": {
+            "day": 20743
+          },
+          "bracket-boss": {
+            "day": 20743
+          },
+          "word-wizard": {
+            "day": 20744
+          },
+          "golem-orders": {
+            "day": 20744
+          },
+          "first-crown": {
+            "day": 20744
+          },
+          "dragon-castle-explorer": {
+            "day": 20745
+          },
+          "seven-heads-cured": {
+            "day": 20746
+          },
+          "twenty-days": {
+            "day": 20750
+          },
+          "double-double": {
+            "day": 20752
+          },
+          "meadow-three-stars": {
+            "day": 20752
+          },
+          "finger-trick": {
+            "day": 20754
+          },
+          "arena-runner": {
+            "day": 20754
+          }
+        },
+        "daily": {
+          "day": 20798,
+          "answers": 0,
+          "correct": 0,
+          "fast": 0,
+          "levels": 0,
+          "minigames": 0,
+          "goal": 30,
+          "quests": [
+            {
+              "id": "correct-40@20798",
+              "template": "correct-40",
+              "progress": 0,
+              "claimed": false
+            },
+            {
+              "id": "streak-8@20798",
+              "template": "streak-8",
+              "progress": 0,
+              "claimed": false
+            },
+            {
+              "id": "snack-5@20798",
+              "template": "snack-5",
+              "progress": 0,
+              "claimed": false
+            }
+          ],
+          "gift": "locked"
+        },
+        "history": [
+          {
+            "day": 20739,
+            "answers": 52,
+            "correct": 52,
+            "fast": 52
+          },
+          {
+            "day": 20740,
+            "answers": 52,
+            "correct": 52,
+            "fast": 52
+          },
+          {
+            "day": 20741,
+            "answers": 48,
+            "correct": 48,
+            "fast": 48
+          },
+          {
+            "day": 20742,
+            "answers": 46,
+            "correct": 46,
+            "fast": 46
+          },
+          {
+            "day": 20743,
+            "answers": 54,
+            "correct": 54,
+            "fast": 54
+          },
+          {
+            "day": 20744,
+            "answers": 60,
+            "correct": 60,
+            "fast": 60
+          },
+          {
+            "day": 20745,
+            "answers": 47,
+            "correct": 47,
+            "fast": 47
+          },
+          {
+            "day": 20746,
+            "answers": 49,
+            "correct": 49,
+            "fast": 49
+          },
+          {
+            "day": 20747,
+            "answers": 50,
+            "correct": 50,
+            "fast": 50
+          },
+          {
+            "day": 20748,
+            "answers": 46,
+            "correct": 46,
+            "fast": 46
+          },
+          {
+            "day": 20749,
+            "answers": 46,
+            "correct": 46,
+            "fast": 46
+          },
+          {
+            "day": 20750,
+            "answers": 46,
+            "correct": 46,
+            "fast": 46
+          },
+          {
+            "day": 20751,
+            "answers": 51,
+            "correct": 51,
+            "fast": 51
+          },
+          {
+            "day": 20752,
+            "answers": 48,
+            "correct": 48,
+            "fast": 48
+          },
+          {
+            "day": 20753,
+            "answers": 43,
+            "correct": 43,
+            "fast": 43
+          },
+          {
+            "day": 20754,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20755,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20756,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20757,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20758,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20759,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20760,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20761,
+            "answers": 42,
+            "correct": 42,
+            "fast": 42
+          },
+          {
+            "day": 20762,
+            "answers": 42,
+            "correct": 42,
+            "fast": 42
+          },
+          {
+            "day": 20763,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20764,
+            "answers": 41,
+            "correct": 41,
+            "fast": 41
+          },
+          {
+            "day": 20765,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20766,
+            "answers": 43,
+            "correct": 43,
+            "fast": 43
+          },
+          {
+            "day": 20767,
+            "answers": 43,
+            "correct": 43,
+            "fast": 43
+          },
+          {
+            "day": 20768,
+            "answers": 42,
+            "correct": 42,
+            "fast": 42
+          },
+          {
+            "day": 20769,
+            "answers": 43,
+            "correct": 43,
+            "fast": 43
+          },
+          {
+            "day": 20770,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20771,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20772,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20773,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20774,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20775,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20776,
+            "answers": 42,
+            "correct": 42,
+            "fast": 42
+          },
+          {
+            "day": 20777,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20778,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20779,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20780,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20781,
+            "answers": 43,
+            "correct": 43,
+            "fast": 43
+          },
+          {
+            "day": 20782,
+            "answers": 42,
+            "correct": 42,
+            "fast": 42
+          },
+          {
+            "day": 20783,
+            "answers": 42,
+            "correct": 42,
+            "fast": 42
+          },
+          {
+            "day": 20784,
+            "answers": 43,
+            "correct": 43,
+            "fast": 43
+          },
+          {
+            "day": 20785,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20786,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20787,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20788,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20789,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20790,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20791,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20792,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20793,
+            "answers": 44,
+            "correct": 44,
+            "fast": 44
+          },
+          {
+            "day": 20794,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20795,
+            "answers": 43,
+            "correct": 43,
+            "fast": 43
+          },
+          {
+            "day": 20796,
+            "answers": 42,
+            "correct": 42,
+            "fast": 42
+          },
+          {
+            "day": 20797,
+            "answers": 45,
+            "correct": 45,
+            "fast": 45
+          },
+          {
+            "day": 20798,
+            "answers": 0,
+            "correct": 0,
+            "fast": 0
+          }
+        ],
+        "arena": {
+          "best": 44,
+          "plays": 45
+        },
+        "questsClaimed": 140,
+        "bestStreak": 44,
+        "story": {
+          "beats": {},
+          "pending": null,
+          "queue": [],
+          "done": [
+            "beat.prologue",
+            "beat.first-egg",
+            "beat.meadow-welcome",
+            "beat.bridge-troll",
+            "beat.troll-laughs",
+            "beat.whispering-woods-welcome",
+            "beat.forest-witch",
+            "beat.witch-agrees",
+            "beat.fire-mountain-welcome",
+            "beat.krakonos",
+            "beat.krakonos-laughs",
+            "beat.crystal-caves-welcome",
+            "beat.gnome-king",
+            "beat.gnome-king-dances",
+            "beat.sharing-lake-welcome",
+            "beat.water-goblin",
+            "beat.goblin-agrees",
+            "beat.leftover-lagoon-welcome",
+            "beat.lake-nymphs",
+            "beat.nymphs-laugh",
+            "beat.giants-peaks-welcome",
+            "beat.friendly-giant",
+            "beat.giant-sleeps",
+            "beat.riddle-ruins-welcome",
+            "beat.golem",
+            "beat.golem-agrees",
+            "beat.dragon-castle-welcome",
+            "beat.seven-headed",
+            "beat.finale",
+            "beat.meadow-new-eggs"
+          ]
+        },
+        "run": null,
+        "round": {
+          "id": "r243",
+          "type": "problems",
+          "activity": "snack",
+          "source": {
+            "kind": "snack",
+            "dragon": null
+          },
+          "skills": [],
+          "input": "auto",
+          "target": 6,
+          "meter": null,
+          "asked": 1,
+          "answered": 0,
+          "correct": 0,
+          "fast": 0,
+          "streak": 0,
+          "bestStreak": 0,
+          "reasks": 0,
+          "queue": [],
+          "recent": ["terms:product"],
+          "current": {
+            "index": 1,
+            "item": "terms:product",
+            "problem": {
+              "kind": "term",
+              "sentence": {
+                "op": "mul",
+                "left": 4,
+                "right": 9,
+                "result": 36,
+                "remainder": null
+              },
+              "highlight": "result"
+            },
+            "input": "choice",
+            "choices": [
+              {
+                "kind": "term",
+                "term": "quotient"
+              },
+              {
+                "kind": "term",
+                "term": "factor"
+              },
+              {
+                "kind": "term",
+                "term": "dividend"
+              },
+              {
+                "kind": "term",
+                "term": "product"
+              }
+            ],
+            "step": "answer",
+            "reask": false,
+            "hinted": false
+          },
+          "feedback": null,
+          "coins": 0,
+          "placement": null,
+          "status": "active",
+          "endReason": null
+        },
+        "roundCounter": 243,
+        "settings": {
+          "dailyGoal": 30,
+          "arena": true,
+          "unlockAhead": []
+        },
+        "finale": {
+          "day": 20746
+        }
+      }
+    },
+    "prng": {
+      "s": [2146765645, 2804744911, 3880137356, 1326266814]
+    },
+    "allocator": {
+      "slots": [],
+      "free": []
+    }
+  },
+  "streams": {
+    "distractors": {
+      "s": [1932124104, 3805041994, 237380226, 3496867492]
+    },
+    "problems": {
+      "s": [2386638892, 1154792045, 1510438604, 3070591052]
+    },
+    "rewards": {
+      "s": [994229165, 4018655166, 4016376286, 2508643146]
+    },
+    "words": {
+      "s": [3602941520, 1708474253, 1973061033, 1801142204]
+    }
+  },
+  "pending": null,
+  "jobs": [],
+  "claims": [
+    "story:beat.crystal-caves-welcome:egg.crystal",
+    "story:beat.fire-mountain-welcome:egg.ember",
+    "story:beat.first-egg:first-egg.bubbles",
+    "story:beat.giants-peaks-welcome:egg.boulder",
+    "story:beat.leftover-lagoon-welcome:egg.pearl",
+    "story:beat.meadow-new-eggs:egg.mirror",
+    "story:beat.meadow-new-eggs:egg.puff",
+    "story:beat.riddle-ruins-welcome:egg.clockwork",
+    "story:beat.whispering-woods-welcome:egg.clover"
+  ],
+  "consumedJobs": [],
+  "phase": {
+    "id": "round",
+    "instance": 485,
+    "enteredTurn": 3146,
+    "allowance": 1000000
+  },
+  "nextAction": 5149,
+  "nextJob": 1,
+  "nextPhase": 486
+}

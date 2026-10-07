@@ -510,9 +510,13 @@ items, snacks) and re-asks resolved to choice input outside the Arena and the pl
 
 Snack time for every dragon (`startActivity { snack, dragon: null }`) also serves the valley's
 basket: due facts no hatched dragon eats (docs/design.md §5.12). The round's `dragon` is then the
-first owned dragon, as for any fact no owned dragon eats. Wherever reviews are served, a known fact
+first owned dragon, as for any fact no owned dragon eats. A snack of the basket alone (no dragon
+is hungry) has one problem per basket fact, counting a fact and its commuted twin once (a right
+answer reviews both), within the usual maximum. Wherever reviews are served, a known fact
 (box 2+) four or more days past its review day (`STARVING_DAYS`) comes first: the review guarantee
-(§6.3).
+(§6.3). A problem round whose draw finds nothing left to serve finishes as if its target were
+reached (`round.completed`, `status: 'complete'`, `endReason: 'finished'`), at the next answer or
+at its start, so no round can wait for an answer it cannot ask.
 
 Word problems with an operation (Riddle Scrolls, and stories in boss and mixed rounds) are asked
 in two steps: the operation, then the number. A right operation moves the problem to its answer

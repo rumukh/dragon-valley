@@ -237,14 +237,22 @@ function startSession(ctx: Ctx, iso: string): void {
   awardStickers(ctx);
 }
 
+/**
+ * The safety net: a problem round with no problem on screen has nothing left to serve (its draw
+ * came back empty), so it finishes like any finished round, with its results, coins and growth.
+ * No round can be left waiting for an answer it cannot ask.
+ */
+function settleRound(ctx: Ctx, index: Index): void {
+  const round = activeProblemRound(ctx);
+  if (round && round.current === null) completeRound(ctx, index, 'finished');
+}
+
 /** After an answer: serve the next problem or finish the round; then growth and stickers. */
 function afterAnswer(ctx: Ctx): void {
   const index = indexOf(ctx);
   const round = activeProblemRound(ctx);
-  if (round && round.current === null) {
-    if (roundDone(ctx.content.data, round)) completeRound(ctx, index, 'finished');
-    else serveNext(ctx, index);
-  }
+  if (round && round.current === null && !roundDone(ctx.content.data, round)) serveNext(ctx, index);
+  settleRound(ctx, index);
   applyGrowth(ctx, index);
   awardStickers(ctx);
 }
@@ -381,14 +389,15 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
             const level = ctx.content.data.levels.find((l) => l.id === action.level)!;
             ctx.state.run = { level: action.level, next: level.activities.length, results: [] };
             startRunActivity(ctx, index, action.activity);
-            return;
+          } else {
+            ctx.state.run = { level: action.level, next: 0, results: [] };
+            triggerBeats(
+              ctx,
+              (trigger) => trigger.kind === 'level-start' && trigger.level === action.level,
+            );
+            startRunActivity(ctx, index, 0);
           }
-          ctx.state.run = { level: action.level, next: 0, results: [] };
-          triggerBeats(
-            ctx,
-            (trigger) => trigger.kind === 'level-start' && trigger.level === action.level,
-          );
-          startRunActivity(ctx, index, 0);
+          settleRound(ctx, index);
         },
       }),
       command('startActivity', {
@@ -400,12 +409,13 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
             // Keep the run, even a finished one: a replayed activity belongs to it.
             ctx.state.round = null;
             startRunActivity(ctx, index, request.index);
-            return;
+          } else {
+            if (ctx.state.round) closeRound(ctx);
+            if (request.kind === 'placement') startPlacement(ctx, index);
+            else if (request.kind === 'snack') startSnack(ctx, index, request.dragon);
+            else startArena(ctx, index);
           }
-          if (ctx.state.round) closeRound(ctx);
-          if (request.kind === 'placement') startPlacement(ctx, index);
-          else if (request.kind === 'snack') startSnack(ctx, index, request.dragon);
-          else startArena(ctx, index);
+          settleRound(ctx, index);
         },
       }),
       command('answer', {
