@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vitest';
 import { createPrng, hashString } from '@aegis/core';
 import {
   BLANK,
+  NOTATIONS,
   expectedAnswer,
   formatExpr,
   formatProblem,
@@ -21,15 +22,35 @@ import {
   skillItems,
   wordFamilyLookup,
 } from '../../../src/rules/contract';
-import type { Expr, Problem, Skill, WordProblem, WordTemplate } from '../../../src/rules/contract';
+import type {
+  Expr,
+  Operator,
+  Problem,
+  Skill,
+  WordProblem,
+  WordTemplate,
+} from '../../../src/rules/contract';
 import {
   IMPLEMENTED_GENERATORS,
   canGenerate,
   choicesFor,
   problemFor,
 } from '../../../src/rules/learning/generate';
+import { readsAsWritten } from '../../../src/rules/learning/generators/order';
 import { templateCombinations } from '../../../src/rules/learning/generators/word';
-import { data, groups, operations, range, readWritten, sources, value, violations } from './oracle';
+import {
+  data,
+  groups,
+  operations,
+  parseWritten,
+  range,
+  readWritten,
+  readsAsItsTree,
+  shapeOf,
+  sources,
+  value,
+  violations,
+} from './oracle';
 
 const familyOf = wordFamilyLookup(data);
 const itemsOf = (skill: Skill) => skillItems(skill, familyOf);
@@ -377,6 +398,79 @@ describe('order of operations', () => {
       survey(onlyHigh, 50, 'order-high').broken,
       '· and : only: brackets still possible',
     ).toEqual([]);
+  });
+
+  it('reads a tree as written only when steps of the same strength go from the left', () => {
+    const cases: [string, Expr, boolean][] = [
+      [
+        '60 + 6 + 45 : 5 built from the left',
+        op('add', op('add', num(60), num(6)), op('div', num(45), num(5))),
+        true,
+      ],
+      [
+        '60 + (6 + 45 : 5) without its brackets',
+        op('add', num(60), op('add', num(6), op('div', num(45), num(5)))),
+        false,
+      ],
+      ['60 + (6 − 9) without its brackets', op('add', num(60), op('sub', num(6), num(9))), false],
+      ['2 · (3 · 4) without its brackets', op('mul', num(2), op('mul', num(3), num(4))), false],
+      ['8 − (3 − 1) with its brackets', op('sub', num(8), group(op('sub', num(3), num(1)))), true],
+      ['(2 + 3) · 4 with its brackets', op('mul', group(op('add', num(2), num(3))), num(4)), true],
+      ['(2 + 3) · 4 without its brackets', op('mul', op('add', num(2), num(3)), num(4)), false],
+      [
+        '(2 + 3 + 4) · 5 built from the right inside its brackets',
+        op('mul', group(op('add', num(2), op('add', num(3), num(4)))), num(5)),
+        false,
+      ],
+      ['2 + 3 · 4', op('add', num(2), op('mul', num(3), num(4))), true],
+      ['2 · 3 + 4', op('add', op('mul', num(2), num(3)), num(4)), true],
+    ];
+    for (const [name, expr, expected] of cases) {
+      expect(readsAsWritten(expr), name).toBe(expected);
+      expect(readsAsItsTree(expr), `the oracle agrees: ${name}`).toBe(expected);
+    }
+  });
+
+  it('builds every tree the way its text is read, in both notations, chains from the left', () => {
+    const strong = (o: Operator) => o === 'mul' || o === 'div';
+    /** `60 + 6 − 9`: an unbracketed operation of the same strength as the left operand. */
+    const chained = (expr: Expr): boolean => {
+      if (expr.kind === 'group') return chained(expr.inner);
+      if (expr.kind !== 'op') return false;
+      const left = expr.left;
+      return (
+        (left.kind === 'op' && strong(left.op) === strong(expr.op)) ||
+        chained(left) ||
+        chained(expr.right)
+      );
+    };
+    const cases = [
+      order(['add', 'sub'], 'forbidden'),
+      order(['mul', 'div'], 'allowed'),
+      order(['add', 'sub', 'mul', 'div'], 'forbidden', [3, 3]),
+      order(['add', 'sub', 'mul', 'div'], 'required', [3, 3]),
+      order(['add', 'sub', 'mul', 'div'], 'allowed'),
+      order(['add', 'mul'], 'allowed', [2, 3], [0, 20], 100),
+    ];
+    const misread: string[] = [];
+    let chains = 0;
+    let total = 0;
+    for (const [index, s] of cases.entries()) {
+      for (const { problem } of survey(s, 150, `order-reading-${index}`).problems) {
+        if (problem.kind !== 'equation') continue;
+        total += 1;
+        for (const notation of NOTATIONS) {
+          const text = formatExpr(problem.left, notation);
+          if (shapeOf(parseWritten(text)) !== shapeOf(problem.left)) misread.push(text);
+        }
+        if (chained(problem.left)) chains += 1;
+      }
+    }
+    expect(misread, 'trees that are not the reading of their own text').toEqual([]);
+    expect(
+      chains,
+      `chains like 60 + 6 + 9 are still asked (${chains} of ${total})`,
+    ).toBeGreaterThan(total / 3);
   });
 });
 
@@ -751,7 +845,7 @@ const GOLDEN_DIGESTS: Record<string, string> = {
   'mul.tens': '514df63e9cec896e',
   'mul.2d1d': 'f264932240426237',
   'div.2d1d': '4e74529cb7ab5b93',
-  'order.ops': '8861fac9e55de2c5',
+  'order.ops': '5476b30016ea6583',
   compare: 'e401e296cf834ea4',
   terms: '6a437531585bea35',
   word: 'bbea82bfc710f266',
@@ -919,6 +1013,24 @@ describe('mutation checks: the rules name broken problems', () => {
       'order:no-brackets',
       eq(op('sub', num(2), op('mul', num(3), num(4)))),
       'every step is a whole number within the result maximum',
+    ],
+    [
+      'a chain built from the right (60 + 6 + 45 : 5 done as 60 + (6 + 9))',
+      order,
+      'order:no-brackets',
+      eq(op('add', num(60), op('add', num(6), op('div', num(45), num(5))))),
+      'the written expression reads as its tree',
+    ],
+    [
+      'a side built from the right',
+      skill({ generator: 'compare', params: { sides: 'expression', tables: [7], equalShare: 20 } }),
+      'compare:expression',
+      {
+        kind: 'compare',
+        left: op('add', num(2), op('add', num(7), op('mul', num(7), num(3)))),
+        right: num(30),
+      },
+      'both sides read as their trees',
     ],
     [
       'a far number',

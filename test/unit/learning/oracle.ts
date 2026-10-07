@@ -9,7 +9,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createPrng } from '@aegis/core';
 import { parseContentJson, requireValue } from '@aegis/runtime';
-import { contentRegistration, formatExpr, problemSchema } from '../../../src/rules/contract';
+import {
+  NOTATIONS,
+  contentRegistration,
+  formatExpr,
+  problemSchema,
+} from '../../../src/rules/contract';
 import type {
   AnswerValue,
   ContentData,
@@ -100,49 +105,85 @@ export function groups(expr: Expr): Expr[] {
   return [];
 }
 
+const WRITTEN_OPERATORS: Readonly<Record<string, Operator>> = {
+  '+': 'add',
+  '\u2212': 'sub',
+  '\u00b7': 'mul',
+  '\u00d7': 'mul',
+  ':': 'div',
+  '\u00f7': 'div',
+};
+
+const strengthOf = (token: string | undefined): 0 | 1 | 2 => {
+  const operator = token === undefined ? undefined : WRITTEN_OPERATORS[token];
+  if (operator === undefined) return 0;
+  return operator === 'mul' || operator === 'div' ? 2 : 1;
+};
+
 /**
- * Reads rendered Czech-notation text (`2 + 3 · 4`, `(12 − 4) : 2`) the way a child is taught:
- * brackets first, then · and :, then + and −, each from left to right. `null` when a step leaves
- * the whole numbers.
+ * The tree a child reads from rendered text in either notation (`2 + 3 · 4`, `(12 − 4) : 2`,
+ * `60 + 6 + 9`, `2 × 3 ÷ 6`), the way it is taught: brackets first (kept as `group` nodes), then
+ * · and : (× and ÷), then + and −, each from left to right.
  */
-export function readWritten(text: string): number | null {
-  const tokens = text.match(/\d+|[+\u2212\u00b7:()]/g) ?? [];
+export function parseWritten(text: string): Expr {
+  const tokens = text.match(/\d+|[+\u2212\u00b7\u00d7:\u00f7()]/g) ?? [];
   let at = 0;
-  const factor = (): number | null => {
+  const atom = (): Expr => {
     const token = tokens[at++];
     if (token === '(') {
       const inner = sum();
       at++; // ')'
-      return inner;
+      return { kind: 'group', inner };
     }
-    return token === undefined ? null : Number(token);
+    return token === undefined ? { kind: 'blank' } : { kind: 'num', value: Number(token) };
   };
-  const product = (): number | null => {
-    let left = factor();
-    while (tokens[at] === '\u00b7' || tokens[at] === ':') {
-      const op = tokens[at++] === ':' ? 'div' : 'mul';
-      const right = factor();
-      left = left === null || right === null ? null : step(op, left, right);
+  const product = (): Expr => {
+    let left = atom();
+    while (strengthOf(tokens[at]) === 2) {
+      const operator = WRITTEN_OPERATORS[tokens[at++]!]!;
+      left = { kind: 'op', op: operator, left, right: atom() };
     }
     return left;
   };
-  const sum = (): number | null => {
+  const sum = (): Expr => {
     let left = product();
-    while (tokens[at] === '+' || tokens[at] === '\u2212') {
-      const op = tokens[at++] === '+' ? 'add' : 'sub';
-      const right = product();
-      left = left === null || right === null ? null : step(op, left, right);
+    while (strengthOf(tokens[at]) === 1) {
+      const operator = WRITTEN_OPERATORS[tokens[at++]!]!;
+      left = { kind: 'op', op: operator, left, right: product() };
     }
     return left;
   };
   return sum();
 }
 
-/** The expression's written text read back equals its tree's value (brackets are right). */
-export function readsAsItsTree(expr: Expr): boolean {
-  return readWritten(formatExpr(expr)) === value(expr);
+/** The value of rendered text read the school way, or `null` when a step leaves the whole numbers. */
+export function readWritten(text: string): number | null {
+  return value(parseWritten(text));
 }
 
+/** A tree as plain data (operations, brackets and numbers), to compare two trees. */
+export function shapeOf(expr: Expr): string {
+  const shape = (e: Expr): unknown =>
+    e.kind === 'op'
+      ? [e.op, shape(e.left), shape(e.right)]
+      : e.kind === 'group'
+        ? ['()', shape(e.inner)]
+        : e.kind === 'num'
+          ? e.value
+          : '?';
+  return JSON.stringify(shape(expr));
+}
+
+/**
+ * The tree is exactly the school reading of its rendered text, in every notation: the same
+ * operations in the same places and the same brackets, not just the same value. `60 + (6 + 9)`
+ * is worth as much as `60 + 6 + 9`, but that text is read, and done step by step, as
+ * `(60 + 6) + 9`.
+ */
+export function readsAsItsTree(expr: Expr): boolean {
+  const tree = shapeOf(expr);
+  return NOTATIONS.every((notation) => shapeOf(parseWritten(formatExpr(expr, notation))) === tree);
+}
 // ---------------------------------------------------------------------------------------------
 // Templates
 
