@@ -446,7 +446,7 @@ export function parentScreen(
       const rulesSection = async (keeper: Keeper): Promise<HTMLElement> => {
         const heading = h('h3', { text: t('parent.rules.heading', { name: keeper.name }) });
         const active = await app.openKeeper(keeper.id);
-        const view = active.game.host.getView();
+        const view = active.game.view();
         if (view.day === null) {
           return h(
             'div',

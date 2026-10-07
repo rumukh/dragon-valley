@@ -21,7 +21,7 @@ import { storyScreen } from './story';
 
 /** Start (or resume) today's session unless the game is already on today's date. */
 export async function startToday(active: ActiveKeeper, today = localDay()): Promise<void> {
-  if (active.game.host.getView().day === today) return;
+  if (active.game.view().day === today) return;
   await active.commands.capture()({ type: 'startSession', day: today });
 }
 
@@ -32,7 +32,7 @@ export function playScreen(app: App, keeperId: string): ScreenEntry {
       const active = await app.openKeeper(keeperId);
       await active.game.activateLatestContent();
       await startToday(active);
-      const view = active.game.host.getView();
+      const view = active.game.view();
       switch (view.screen) {
         case 'story':
           if (view.story) return storyScreen(app, active);

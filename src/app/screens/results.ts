@@ -40,10 +40,9 @@ type Celebrated = Extract<GameEvent, { type: (typeof CELEBRATED)[number] }>;
 export function resultsScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
   const text = app.text;
-  const host = active.game.host;
   const keeperId = active.keeper.id;
   const data = active.game.content().data;
-  const view = host.getView();
+  const view = active.game.view();
   const round = view.round!;
   const run = view.run;
   const events = active.events.take(CELEBRATED) as Celebrated[];

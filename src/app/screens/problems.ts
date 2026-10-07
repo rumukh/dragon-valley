@@ -68,7 +68,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   const host = active.game.host;
   const keeperId = active.keeper.id;
   const data = active.game.content().data;
-  const first = problemRound(host.getView())!;
+  const first = problemRound(active.game.view())!;
   const activity = first.activity;
   const placement = activity === 'placement';
   const levelId = first.source.kind === 'level' ? first.source.level : null;
@@ -85,7 +85,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
 
   // ---- chrome -------------------------------------------------------------------------------
   const saveStatus = createSaveStatus(app, active);
-  const coins = createCoinCounter(app.kit, host.getView().coins);
+  const coins = createCoinCounter(app.kit, active.game.view().coins);
   const heading = h('h1', {
     className: 'dv-round__title',
     text: t(`activity.${activity}` as MessageKey),
@@ -314,7 +314,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     busy = true;
     setInputDisabled(true);
     const asked = shown;
-    const before = host.getView();
+    const before = active.game.view();
     try {
       // Feedback comes as soon as the answer is saved, or once it is taken if saving is slow.
       await send(
@@ -349,7 +349,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   ): Promise<void> => {
     busy = true;
     setInputDisabled(true);
-    const after = host.getView();
+    const after = active.game.view();
     const round = problemRound(after);
     const result = round?.feedback;
     if (!round || !result || result.index !== asked.index) {
@@ -579,7 +579,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     raceEnded = true;
     clearInterval(raceTimer);
     releaseInput();
-    const round = problemRound(host.getView());
+    const round = problemRound(active.game.view());
     if (round?.status === 'active') {
       await active.commands.capture()({ type: 'endRound', reason: 'time-up' });
     }
@@ -609,7 +609,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   const endForRest = async (): Promise<void> => {
     clearInterval(restTimer);
     releaseInput();
-    if (problemRound(host.getView())?.status === 'active') {
+    if (problemRound(active.game.view())?.status === 'active') {
       await active.commands.capture()({ type: 'endRound', reason: 'time-limit' });
     }
     await app.continueGame(keeperId);
@@ -632,7 +632,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       await endForRest();
       return;
     }
-    const view = host.getView();
+    const view = active.game.view();
     const round = problemRound(view);
     if (view.screen !== 'round' || !round || round.status !== 'active' || !round.problem) {
       await app.continueGame(keeperId);
@@ -709,7 +709,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   });
 
   // ---- first paint ----------------------------------------------------------------------------
-  paintDragon(host.getView());
+  paintDragon(active.game.view());
   paintBoss();
   updateProgress(first);
   if (first.problem) showProblem(first.problem);

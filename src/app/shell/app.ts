@@ -262,7 +262,11 @@ export function createApp(options: AppOptions): App {
         id: keeper.id,
         seed: profileSeed(keeper.id),
       });
-      const commands = createCommandController(game.host, (error) => app.reportError(error));
+      const commands = createCommandController(
+        game.host,
+        (error) => app.reportError(error),
+        (listener) => game.subscribe((change) => listener(change.reason)),
+      );
       // One clock per keeper and page, so closing and reopening a keeper keeps counting.
       const clock = clocks.get(keeper.id) ?? createPlayClock();
       clocks.set(keeper.id, clock);
@@ -292,23 +296,24 @@ export function createApp(options: AppOptions): App {
           return taken;
         },
       };
-      const unsubscribeCommits = game.host.subscribeCommits((commit) => {
+      // Everything the shell does with a commit hangs off the session's one host listener.
+      const unsubscribeChanges = game.subscribe((change) => {
+        if (change.reason === 'restore') {
+          audio.clear();
+          stopSpeech();
+          inbox.length = 0;
+          // The play screen shows what the restored game needs, never what it showed before.
+          if (router.currentKey() === playKey(keeper.id)) void router.refresh();
+          return;
+        }
         // A new round starts a new results story: what came before it (the first egg chosen in
         // the story, an earlier round's sticker) is not celebrated again at this round's end.
-        if (commit.events.some((event) => event.type === 'round.started')) inbox.length = 0;
-        for (const event of commit.events) {
+        if (change.events.some((event) => event.type === 'round.started')) inbox.length = 0;
+        for (const event of change.events) {
           if (!CELEBRATION_SOUNDS.has(event.type)) audio.cue(event.type, cueContext(event.data));
           inbox.push(event as unknown as GameEvent);
           if (inbox.length > MAX_INBOX) inbox.shift();
         }
-      });
-      const unsubscribeRestore = game.host.subscribe((_view, reason) => {
-        if (reason !== 'restore') return;
-        audio.clear();
-        stopSpeech();
-        inbox.length = 0;
-        // The play screen shows what the restored game needs, never what it showed before.
-        if (router.currentKey() === playKey(keeper.id)) void router.refresh();
       });
       const unsubscribePreferences = preferences.subscribe((value) => applyPresentation(value));
       applyPresentation(preferences.current());
@@ -326,8 +331,7 @@ export function createApp(options: AppOptions): App {
         async release() {
           clock.pause();
           unsubscribePreferences();
-          unsubscribeRestore();
-          unsubscribeCommits();
+          unsubscribeChanges();
           unbindVisibility();
           commands.dispose();
           audio.clear();

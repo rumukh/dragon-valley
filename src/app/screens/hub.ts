@@ -31,9 +31,8 @@ const PLACES = {
 export function hubScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
   const text = app.text;
-  const host = active.game.host;
   const keeperId = active.keeper.id;
-  const view = host.getView();
+  const view = active.game.view();
   const saveStatus = createSaveStatus(app, active);
   const coins = createCoinCounter(app.kit, view.coins);
 
@@ -352,13 +351,13 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
   };
 
   const paint = (): void => {
-    const current = host.getView();
+    const current = active.game.view();
     coins.set(current.coins);
     paintNest(current);
     paintAdventure(current);
   };
   paint();
-  const unsubscribe = host.subscribe(() => paint());
+  const unsubscribe = active.game.subscribe(() => paint());
 
   const places = h(
     'nav',

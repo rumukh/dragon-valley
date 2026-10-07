@@ -41,7 +41,7 @@ function collection(
   coins: ReturnType<typeof createCoinCounter>;
 } {
   const saveStatus = createSaveStatus(app, active);
-  const coins = createCoinCounter(app.kit, active.game.host.getView().coins);
+  const coins = createCoinCounter(app.kit, active.game.view().coins);
   const heading = h('h1', { className: 'dv-collection__title', text: options.title });
   const element = h(
     'main',
@@ -99,11 +99,10 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
       const t = app.kit.t;
       const text = app.text;
       const active = await app.openKeeper(keeperId);
-      const host = active.game.host;
       const shelf = h('ul', { className: 'dv-shelf', testId: 'market-items' });
       const note = h('p', { className: 'dv-note', testId: 'market-note' });
       const available = (): MarketItem[] =>
-        host.getView().market.items.filter((entry) => entry.available);
+        active.game.view().market.items.filter((entry) => entry.available);
       let shown = marketStartShelf(available(), marketShelves.get(keeperId));
       const slots = COSMETIC_SLOTS.filter((slot) =>
         available().some((entry) => entry.slot === slot),
@@ -162,7 +161,7 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
                 ? t('market.buy', { price: entry.price })
                 : plural(
                     t,
-                    entry.price - host.getView().coins,
+                    entry.price - active.game.view().coins,
                     'market.need.one',
                     'market.need.other',
                   ),
@@ -196,7 +195,7 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
         );
       };
       const paint = (): void => {
-        const view = host.getView();
+        const view = active.game.view();
         frame.coins.set(view.coins);
         const items = available();
         note.textContent = items.length === 0 ? t('market.empty') : t('market.intro');
@@ -221,8 +220,7 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
       const t = app.kit.t;
       const text = app.text;
       const active = await app.openKeeper(keeperId);
-      const host = active.game.host;
-      let chosen: string | null = host.getView().dragons[0]?.id ?? null;
+      let chosen: string | null = active.game.view().dragons[0]?.id ?? null;
       const picker = h('div', {
         className: 'dv-den__dragons',
         attributes: { role: 'group', 'aria-label': t('den.pick') },
@@ -247,7 +245,7 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
         view.market.items.filter((entry) => entry.owned && entry.slot === slot);
 
       const paint = (): void => {
-        const view = host.getView();
+        const view = active.game.view();
         frame.coins.set(view.coins);
         const dragon: DragonView | undefined =
           view.dragons.find((candidate) => candidate.id === chosen) ?? view.dragons[0];
@@ -371,7 +369,7 @@ export function albumScreen(app: App, keeperId: string): ScreenEntry {
       const t = app.kit.t;
       const text = app.text;
       const active = await app.openKeeper(keeperId);
-      const view = active.game.host.getView();
+      const view = active.game.view();
       const regionTitle = (id: string): string => {
         const region = view.hub.regions.find((candidate) => candidate.id === id);
         return region ? text(region.titleKey) : id;
@@ -505,7 +503,7 @@ export function windowScreen(app: App, keeperId: string): ScreenEntry {
     async build() {
       const t = app.kit.t;
       const active = await app.openKeeper(keeperId);
-      const view = active.game.host.getView();
+      const view = active.game.view();
       const { counts } = view.window;
       const lit = counts.bronze + counts.silver + counts.gold;
       const art = svgElement(

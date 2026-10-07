@@ -74,9 +74,17 @@ export interface CommandController<A> {
   dispose(): void;
 }
 
+/** Calls `listener` for every new view (a commit or a restore); returns its unsubscribe. */
+export type ViewWatch = (listener: (reason: 'commit' | 'restore') => void) => () => void;
+
+/**
+ * `watch` is how the controller hears of new views. By default it listens to the host itself;
+ * the shell passes its game session's fan-out instead, so the host keeps a single listener.
+ */
 export function createCommandController<S, A, V, C>(
   host: RuntimeHost<S, A, V, C>,
   onError: (error: unknown) => void,
+  watch: ViewWatch = (listener) => host.subscribe((_view, reason) => listener(reason)),
 ): CommandController<A> {
   let generation = 0;
   let disposed = false;
@@ -115,7 +123,7 @@ export function createCommandController<S, A, V, C>(
     return continuation;
   };
 
-  const unsubscribeView = host.subscribe((_view, reason) => {
+  const unsubscribeView = watch((reason) => {
     generation++;
     if (reason === 'restore') failed = false;
   });

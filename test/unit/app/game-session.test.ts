@@ -99,6 +99,65 @@ describe('game session', () => {
     await session.close();
   });
 
+  it('passes every commit on from one host listener, and reads the view without copying', async () => {
+    const session = await openGameSession(new MemorySaveStorage(), COUNT_GAME, PROFILE_A);
+    const subscribe = vi.spyOn(session.host, 'subscribe');
+    const subscribeCommits = vi.spyOn(session.host, 'subscribeCommits');
+    const getView = vi.spyOn(session.host, 'getView');
+    const commands = createCommandController(session.host, noErrors, (listener) =>
+      session.subscribe((change) => listener(change.reason)),
+    );
+    const changes: { count: number; reason: string; events: string[] }[] = [];
+    const unsubscribe = session.subscribe((change) =>
+      changes.push({
+        count: change.view.count,
+        reason: change.reason,
+        events: change.events.map((event) => event.type),
+      }),
+    );
+    const before = session.view();
+    expect(before).toEqual({ count: 0, ticks: 0, content: 'v1' });
+    const stale = commands.capture();
+    await commands.capture()({ type: 'tick', turns: 1 });
+    expect(changes).toEqual([{ count: 1, reason: 'commit', events: ['counted'] }]);
+    const after = session.view();
+    expect(after).toEqual({ count: 1, ticks: 1, content: 'v1' });
+    expect(session.view(), 'the same view until the next commit').toBe(after);
+    expect(before, 'an earlier view is never changed').toEqual({
+      count: 0,
+      ticks: 0,
+      content: 'v1',
+    });
+    await expect(
+      stale({ type: 'note' }),
+      'the fan-out keeps the stale-view guard',
+    ).rejects.toBeInstanceOf(StaleCommandError);
+    expect(subscribe, 'no view listener on the host').not.toHaveBeenCalled();
+    expect(subscribeCommits, 'no commit listener besides the session own').not.toHaveBeenCalled();
+    expect(getView, 'no copy of the view per read').not.toHaveBeenCalled();
+    unsubscribe();
+    await commands.capture()({ type: 'note' });
+    expect(changes, 'an unsubscribed listener hears nothing more').toHaveLength(1);
+    commands.dispose();
+    await session.close();
+  });
+
+  it('runs every listener even when one fails, and the game goes on', async () => {
+    const session = await openGameSession(new MemorySaveStorage(), COUNT_GAME, PROFILE_A);
+    const commands = createCommandController(session.host, () => undefined);
+    const heard: number[] = [];
+    session.subscribe(() => {
+      throw new Error('a broken screen');
+    });
+    session.subscribe((change) => heard.push(change.view.count));
+    const receipt = await commands.capture()({ type: 'tick', turns: 1 });
+    expect(receipt.accepted).toBe(true);
+    expect(heard).toEqual([1]);
+    expect(session.view().count).toBe(1);
+    commands.dispose();
+    await session.close();
+  });
+
   it('shows a sent action once it is saved, or once taken when the save is slow', async () => {
     const storage = new SlowStorage();
     const session = await openGameSession(storage, COUNT_GAME, PROFILE_A);
@@ -242,8 +301,11 @@ describe('restore and recovery', () => {
     await savedGame(storage);
     const upgraded = await openGameSession(storage, COUNT_GAME_V2, PROFILE_A);
     expect(upgraded.host.getView()).toEqual({ count: 1, ticks: 1, content: 'v1' });
+    expect(upgraded.content().revision).toBe('v1');
     expect(await upgraded.activateLatestContent()).toBe(true);
     expect(upgraded.host.getView().content).toBe('v2');
+    expect(upgraded.view().content, 'the activation commit reaches the session view').toBe('v2');
+    expect(upgraded.content().revision).toBe('v2');
     expect(upgraded.indicator()).toEqual({ kind: 'saved' });
     expect(await upgraded.activateLatestContent()).toBe(false);
     await createCommandController(upgraded.host, noErrors).capture()({ type: 'tick', turns: 1 });
@@ -263,9 +325,13 @@ describe('restore and recovery', () => {
     expect(exported).toBeDefined();
 
     const target = await openGameSession(storage, COUNT_GAME, PROFILE_B);
+    const changes: string[] = [];
+    target.subscribe((change) => changes.push(`${change.reason}:${change.view.count}`));
     await expect(target.importEnvelope(exported!)).rejects.toThrow();
     await target.importEnvelope(rebind(JSON.parse(exported!), PROFILE_B.id));
     expect(target.host.getView().count).toBe(1);
+    expect(target.view(), 'the restored view is the latest').toEqual(target.host.getView());
+    expect(changes, 'a restore is passed on too').toEqual(['restore:1']);
     expect(target.indicator()).toEqual({ kind: 'saved' });
     await target.close();
     const reopened = await openGameSession(storage, COUNT_GAME, PROFILE_B);

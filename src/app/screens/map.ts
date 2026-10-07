@@ -85,7 +85,7 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
       const t = app.kit.t;
       const active = await app.openKeeper(keeperId);
       const map = await loadValleyMap(app.env.baseUrl);
-      const view = active.game.host.getView();
+      const view = active.game.view();
       const saveStatus = createSaveStatus(app, active);
       const coins = createCoinCounter(app.kit, view.coins);
       const camera: Camera = { x: 0, y: 0, ...map.logical };
@@ -179,7 +179,7 @@ export function regionScreen(app: App, keeperId: string, regionId: string): Scre
       const text = app.text;
       const active = await app.openKeeper(keeperId);
       const map = await loadValleyMap(app.env.baseUrl);
-      const view = active.game.host.getView();
+      const view = active.game.view();
       const region = findRegion(view, regionId);
       const layout = map.regions[regionId];
       const spot = map.hotspots.find((candidate) => candidate.id === regionId);
@@ -299,7 +299,7 @@ export function levelScreen(app: App, keeperId: string, levelId: string): Screen
       const t = app.kit.t;
       const text = app.text;
       const active = await app.openKeeper(keeperId);
-      const view = active.game.host.getView();
+      const view = active.game.view();
       const found = findLevel(view, levelId);
       const content = active.game.content().data.levels.find((level) => level.id === levelId);
       if (!found || !content) throw new Error(`Unknown level ${levelId}.`);

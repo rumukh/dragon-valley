@@ -20,7 +20,7 @@ export function storyScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
   const text = app.text;
   const data = active.game.content().data;
-  const view = active.game.host.getView();
+  const view = active.game.view();
   const story = view.story!;
   const beat = data.story.beats.find((candidate) => candidate.id === story.beat);
   const figure = beatFigure(data, beat);
