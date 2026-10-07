@@ -35,9 +35,11 @@ import { projectView } from '../../../src/rules/view';
 import type { Ctx, Read } from '../../../src/rules/types';
 import { loadPack } from '../../traces/support';
 
-const plain = loadPack().data;
+/** The pack without the effort path, as content 1.2.0 and earlier shipped it. */
+const plain: ContentData = JSON.parse(JSON.stringify(loadPack().data));
+delete plain.balance.mastery.effort;
 const EFFORT = { bronzeDays: 2, silverDays: 4, gapDays: 2 };
-/** The shipped pack with the effort path: bronze after 2 counted days, silver after 4, 2 apart. */
+/** The pack with the effort path: bronze after 2 counted days, silver after 4, 2 apart. */
 const data: ContentData = JSON.parse(JSON.stringify(plain));
 data.balance.mastery.effort = { ...EFFORT };
 const index = itemIndex(plain);
