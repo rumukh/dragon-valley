@@ -24,6 +24,7 @@ import type {
   DivRemProblem,
   EquationProblem,
   Expr,
+  ExprPath,
   Notation,
   Problem,
   ProblemStep,
@@ -159,6 +160,72 @@ export function problemTokens(
       return out;
     }
   }
+}
+
+/**
+ * A number, sign or bracket of an expression with the path of the node it belongs to (Golem
+ * Orders): a sign's path is its operation's, so tapping the sign picks that operation, and every
+ * token of an operation's part of the line lies at or below its path.
+ */
+export interface PathToken {
+  readonly kind: 'number' | 'sign' | 'bracket';
+  readonly text: string;
+  readonly path: ExprPath;
+}
+
+export function pathTokens(expr: Expr, notation: Notation = DEFAULT_NOTATION): PathToken[] {
+  const out: PathToken[] = [];
+  const brackets = (child: Expr, path: ExprPath): void => {
+    out.push({ kind: 'bracket', text: '(', path });
+    visit(child, path);
+    out.push({ kind: 'bracket', text: ')', path });
+  };
+  const visit = (node: Expr, path: ExprPath): void => {
+    switch (node.kind) {
+      case 'num':
+        out.push({ kind: 'number', text: String(node.value), path });
+        return;
+      case 'blank':
+        out.push({ kind: 'number', text: '?', path });
+        return;
+      case 'group':
+        out.push({ kind: 'bracket', text: '(', path });
+        visit(node.inner, [...path, 'inner']);
+        out.push({ kind: 'bracket', text: ')', path });
+        return;
+      case 'op': {
+        const side = (child: Expr, which: 'left' | 'right'): void => {
+          if (needsGroup(node.op, child, which)) brackets(child, [...path, which]);
+          else visit(child, [...path, which]);
+        };
+        side(node.left, 'left');
+        out.push({ kind: 'sign', text: OPERATOR_SYMBOLS[notation][node.op], path });
+        side(node.right, 'right');
+      }
+    }
+  };
+  visit(expr, []);
+  return out;
+}
+
+export function samePath(a: ExprPath, b: ExprPath): boolean {
+  return a.length === b.length && a.every((step, index) => step === b[index]);
+}
+
+/** True when `path` is `prefix` itself or lies below it. */
+export function isWithin(path: ExprPath, prefix: ExprPath): boolean {
+  return prefix.length <= path.length && prefix.every((step, index) => path[index] === step);
+}
+
+/** The node at `path`, or null when the path leads nowhere. */
+export function exprAt(expr: Expr, path: ExprPath): Expr | null {
+  let node: Expr = expr;
+  for (const step of path) {
+    if (step === 'inner' && node.kind === 'group') node = node.inner;
+    else if (step !== 'inner' && node.kind === 'op') node = node[step];
+    else return null;
+  }
+  return node;
 }
 
 /** The problem with its blanks filled by `answer`: `7 · 8 = 56`, `23 : 5 = 4 r 3`. */

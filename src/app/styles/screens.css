@@ -1358,6 +1358,230 @@
   width: 1.4em;
   height: 1.4em;
 }
+
+/* Sharing Feast and Golem Orders: the board's picture beside its question and keypad on a
+   landscape tablet, above them on a phone. */
+.dv-split-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: start;
+  gap: clamp(10px, 2vh, 20px) clamp(14px, 2.6vw, 32px);
+}
+
+.dv-split-board__field,
+.dv-split-board__panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: clamp(8px, 1.6vh, 16px);
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-split-board {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: center;
+  }
+}
+
+/* Sharing Feast: a bowl of fruit over a row of baskets. Ten fruit can be a bag marked "10". */
+.dv-feast__bowl {
+  display: grid;
+  justify-items: center;
+  gap: 0.3em;
+  width: min(100%, 22em);
+  padding: 0.6em 1em 0.9em;
+  border: 0.14em solid var(--dv-line-strong);
+  border-radius: 1em 1em 50% 50% / 1em 1em 45% 45%;
+  background: var(--dv-paper-deep);
+}
+
+.dv-feast__bowl-label {
+  font-weight: 700;
+}
+
+.dv-feast__pile {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-end;
+  justify-content: center;
+  gap: 0.2em;
+  max-width: 100%;
+  min-height: 1.2em;
+}
+
+.dv-feast__fruit {
+  width: 0.95em;
+  height: 0.95em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, var(--dv-card) 0 14%, var(--dv-coral) 16%);
+  box-shadow: 0 0 0 0.06em var(--dv-line-strong);
+}
+
+.dv-feast__ten {
+  display: grid;
+  place-items: center;
+  min-width: 2.2em;
+  height: 1.5em;
+  padding: 0 0.25em;
+  border: 0.1em solid var(--dv-sun-deep);
+  border-radius: 0.5em 0.5em 0.9em 0.9em;
+  font-size: 0.8em;
+  font-weight: 700;
+  color: var(--dv-ink);
+  background: var(--dv-sun);
+}
+
+.dv-feast__baskets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6em;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-feast__slot {
+  display: grid;
+  flex: 0 1 5em;
+  justify-items: center;
+  gap: 0.3em;
+  min-width: 0;
+}
+
+.dv-feast__basket {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: end;
+  justify-items: center;
+  gap: 0.2em;
+  width: 100%;
+  min-height: max(var(--dv-target), 4.2em);
+  padding: 0.4em 0.4em 0.3em;
+  border: 0.14em solid var(--dv-primary-deep);
+  border-radius: 0.6em 0.6em 1.6em 1.6em;
+  font: inherit;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow: 0 0.2em 0 var(--dv-line-strong);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.dv-feast__basket:disabled {
+  cursor: default;
+}
+
+.dv-feast__count {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-feast__tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3em;
+}
+
+.dv-feast__question {
+  max-width: 100%;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Golem Orders: numbers and gears; the picked operation's part of the line is marked. */
+.dv-golem__figure {
+  width: min(8em, 28vw);
+}
+
+.dv-golem__art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dv-golem__orders {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25em;
+  max-width: 100%;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-golem__number,
+.dv-golem__bracket {
+  padding: 0 0.08em;
+  border-radius: 0.3em;
+}
+
+.dv-golem__number[data-picked='true'],
+.dv-golem__bracket[data-picked='true'] {
+  background: var(--dv-sun);
+}
+
+/* A gear: a round sign with dashed teeth; the picked one is solid, outlined and pressed. */
+.dv-gear {
+  display: grid;
+  place-items: center;
+  width: max(var(--dv-target), 1.6em);
+  height: max(var(--dv-target), 1.6em);
+  padding: 0;
+  border: 0.12em dashed var(--dv-primary-deep);
+  border-radius: 50%;
+  font: inherit;
+  color: var(--dv-primary-deep);
+  background: var(--dv-primary-soft);
+  box-shadow: 0 0.12em 0 var(--dv-line-strong);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.dv-gear[data-picked='true'] {
+  border-style: solid;
+  color: var(--dv-ink);
+  background: var(--dv-sun);
+  outline: 0.1em dashed var(--dv-ink);
+  outline-offset: 0.1em;
+}
+
+.dv-golem__trail,
+.dv-golem__solved {
+  max-width: 100%;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.dv-golem__solved {
+  padding: 0.2em 0.8em;
+  border-radius: 1em;
+  color: var(--dv-success-deep);
+  background: var(--dv-success-soft);
+}
+
+.dv-golem__ask {
+  max-width: 100%;
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.dv-golem__ask[data-picked='false'] {
+  font-size: 1.15rem;
+}
 /* ---- Results --------------------------------------------------------------------------- */
 
 /* The results screen is exactly one screen tall: the card shrinks to fit, its list of
@@ -1742,6 +1966,10 @@
   list-style: none;
 }
 
+.dv-shelf__title {
+  font-size: 1.2rem;
+}
+
 .dv-shelf__item {
   display: grid;
   justify-items: center;
@@ -1758,8 +1986,9 @@
   border-color: var(--dv-success);
 }
 
+/* Pictures keep a picture's size when the text grows, so 200 % text does not double them. */
 .dv-shelf__art {
-  width: 5em;
+  width: clamp(72px, 5em, 120px);
 }
 
 .dv-shelf__name {
@@ -1888,7 +2117,7 @@
 
 .dv-album__stickers {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(8em, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(6em, 100%), 1fr));
   gap: 0.8em;
   margin: 0;
   padding: 0;
@@ -1905,7 +2134,7 @@
 }
 
 .dv-album__sticker svg {
-  width: 5em;
+  width: clamp(72px, 5em, 120px);
 }
 
 .dv-album__sticker[data-earned='false'] {
@@ -1915,8 +2144,8 @@
 .dv-album__empty {
   display: grid;
   place-items: center;
-  width: 5em;
-  height: 5em;
+  width: clamp(72px, 5em, 120px);
+  height: clamp(72px, 5em, 120px);
   border: 0.14em dashed var(--dv-line-strong);
   border-radius: 50%;
 }

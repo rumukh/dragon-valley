@@ -4,8 +4,10 @@
  * round, or else the hub. After an action that changes this, screens ask the shell to continue
  * the game, which rebuilds this entry; Back from anything opened on top of it returns here.
  *
- * Entering it starts the day's session when the local date has changed (time reaches the rules
- * only as this date), and the hub is the safe boundary where newer content may be activated.
+ * Building it is the safe boundary where newer content is activated: a save from before an
+ * update moves to the newest pack here, before today's session starts, unless a round or a story
+ * is still in progress (the rules refuse then, and the next visit tries again). Entering it starts
+ * the day's session when the local date has changed (time reaches the rules only as this date).
  */
 import type { ScreenEntry } from '../router/router';
 import { playKey } from '../shell/app';
@@ -28,6 +30,7 @@ export function playScreen(app: App, keeperId: string): ScreenEntry {
     key: playKey(keeperId),
     async build() {
       const active = await app.openKeeper(keeperId);
+      await active.game.activateLatestContent();
       await startToday(active);
       const view = active.game.host.getView();
       switch (view.screen) {

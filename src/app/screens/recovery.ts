@@ -138,6 +138,9 @@ export function recoveryScreen(app: App, problem: RecoveryRequired): ScreenEntry
           h('span', { className: 'dv-recovery__icon' }, icon('shield')),
           h('h1', { text: t('recovery.heading') }),
           h('p', { text: message }),
+          problem.code === 'content-unavailable'
+            ? h('p', { testId: 'recovery-content', text: t('recovery.content') })
+            : null,
           h('p', {
             text: problem.actions.available ? t('recovery.unchanged') : t('recovery.unavailable'),
           }),

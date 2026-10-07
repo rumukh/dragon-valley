@@ -327,6 +327,16 @@ describe('boss poses', () => {
   });
 });
 
+describe('the Daily Adventure', () => {
+  it('replays one game of a finished level when the day had none', () => {
+    const view = {
+      hub: { next: { kind: 'minigame', level: 'sunny-meadow.2', activity: 1 } },
+      run: null,
+    } as unknown as GameView;
+    expect(adventureFor(view)).toEqual({ kind: 'minigame', level: 'sunny-meadow.2', activity: 1 });
+  });
+});
+
 describe('weekdays', () => {
   it('count Monday as 0 in every time zone', () => {
     expect(weekdayIndex('2026-10-05')).toBe(0);

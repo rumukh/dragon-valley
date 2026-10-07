@@ -1,6 +1,7 @@
 /**
  * Minigame rounds on the rules' typed boards (`MinigameRoundView.current`, docs/contract.md
- * §11.1): Memory Match, Number Trail, Egg Grid and Fact Family Nest. Every move goes through the
+ * §11.1): Memory Match, Number Trail, Egg Grid and Fact Family Nest here, Sharing Feast and
+ * Golem Orders in `boards/`. Every move goes through the
  * command controller with the board revision it was made against; the screen redraws from the
  * view after each commit, cheers when a board is done (`minigame.completed`; the next board
  * replaces it in the same commit), and moves on to the results once the round is over. Boards
@@ -8,13 +9,7 @@
  * to be fixed. A board this build cannot draw shows a kind message and a way back.
  */
 import { formatExpr, formatFace, num, op, OPERATOR_SYMBOLS } from '../../rules/contract';
-import type {
-  BoardView,
-  EggGridSplit,
-  GameView,
-  MinigameMove,
-  MinigameRoundView,
-} from '../../rules/contract';
+import type { BoardView, EggGridSplit, GameView, MinigameRoundView } from '../../rules/contract';
 import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { numberToWords } from '../speech/numbers';
@@ -27,30 +22,14 @@ import { createCoinCounter, createMeter } from '../ui/meters';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
 import { CommandRejectedError } from '../controller/commands';
+import type { BoardContext, BoardOf, BoardPainter } from './boards/board';
+import { sharingFeast } from './boards/feast';
+import { golemOrders } from './boards/golem';
 import { createSaveStatus, topBar } from './common';
 import { backdrop } from './scene';
 
 export function minigameRound(view: GameView): MinigameRoundView | null {
   return view.round?.type === 'minigame' ? view.round : null;
-}
-
-type BoardOf<K extends BoardView['kind']> = Extract<BoardView, { kind: K }>;
-
-interface BoardContext {
-  readonly app: App;
-  readonly active: ActiveKeeper;
-  /** The current board of this kind, or null once the round has moved past it. */
-  board<K extends BoardView['kind']>(kind: K): BoardOf<K> | null;
-  /** Send one move against the current board revision; false when the round is over. */
-  move(move: MinigameMove): Promise<boolean>;
-  status(text: string): void;
-  notation(): 'czech' | 'international';
-}
-
-interface BoardPainter {
-  readonly element: HTMLElement;
-  paint(): void;
-  focus(): HTMLElement | null;
 }
 
 // ---- Memory Match ---------------------------------------------------------------------------
@@ -572,12 +551,14 @@ const PAINTERS: {
   'number-trail': numberTrail,
   'egg-grid': eggGrid,
   'fact-family': factFamily,
+  'sharing-feast': sharingFeast,
+  'golem-orders': golemOrders,
 };
 
 export function minigameScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
   const host = active.game.host;
-  const data = app.game.content.data;
+  const data = active.game.content().data;
   const first = minigameRound(host.getView())!;
   const kind = first.current?.kind;
   const levelId = first.source.kind === 'level' ? first.source.level : null;
@@ -615,6 +596,7 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
       const current = minigameRound(host.getView())?.current;
       return current?.kind === wanted ? (current as BoardOf<K>) : null;
     },
+    index: () => minigameRound(host.getView())?.board ?? 0,
     async move(move) {
       if (busy) return false;
       const round = minigameRound(host.getView());
@@ -751,6 +733,7 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
       disposed = true;
       unsubscribeSaved();
       clearInterval(restTimer);
+      painter?.dispose?.();
       saveStatus.dispose();
     },
   };

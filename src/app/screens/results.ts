@@ -42,7 +42,7 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
   const text = app.text;
   const host = active.game.host;
   const keeperId = active.keeper.id;
-  const data = app.game.content.data;
+  const data = active.game.content().data;
   const view = host.getView();
   const round = view.round!;
   const run = view.run;
