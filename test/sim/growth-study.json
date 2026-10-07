@@ -1,0 +1,845 @@
+[
+  {
+    "id": "shipped",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ]
+  },
+  {
+    "id": "a-adult80",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 80,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ]
+  },
+  {
+    "id": "a-adult80-young50",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 50,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 80,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ]
+  },
+  {
+    "id": "b-easy-adult75",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "dragons": {
+      "puff": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 60,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "mirror": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 60,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "bubbles": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 60,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "sunny": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 60,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "goldie": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 60,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ]
+    }
+  },
+  {
+    "id": "b-easy-young40-adult75",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "dragons": {
+      "puff": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 40,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "mirror": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 40,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "bubbles": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 40,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "sunny": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 40,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "goldie": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 40,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 75,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ]
+    }
+  },
+  {
+    "id": "c-effort-3-6",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "effort": {
+      "bronze": 3,
+      "silver": 6,
+      "gap": 2
+    }
+  },
+  {
+    "id": "c-effort-3-5",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "effort": {
+      "bronze": 3,
+      "silver": 5,
+      "gap": 2
+    }
+  },
+  {
+    "id": "c-effort-2-4",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "effort": {
+      "bronze": 2,
+      "silver": 4,
+      "gap": 2
+    }
+  },
+  {
+    "id": "c-effort-2-4-gap1",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "effort": {
+      "bronze": 2,
+      "silver": 4,
+      "gap": 1
+    }
+  },
+  {
+    "id": "d-division-lag",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false,
+        "divisionShare": 30
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true,
+        "divisionShare": 60
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ]
+  },
+  {
+    "id": "d-division-lag-effort",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false,
+        "divisionShare": 30
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true,
+        "divisionShare": 60
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "effort": {
+      "bronze": 3,
+      "silver": 6,
+      "gap": 2
+    }
+  },
+  {
+    "id": "d-youngling-mul",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 90,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ]
+  },
+  {
+    "id": "d-effort-3-6-adult80",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 80,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "effort": {
+      "bronze": 3,
+      "silver": 6,
+      "gap": 2
+    }
+  },
+  {
+    "id": "d-effort-3-5-adult80",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 80,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "effort": {
+      "bronze": 3,
+      "silver": 5,
+      "gap": 2
+    }
+  },
+  {
+    "id": "d-effort-2-4-adult80",
+    "gates": [
+      {
+        "stage": "hatchling",
+        "share": 30,
+        "mastery": "seen",
+        "division": false,
+        "boss": false
+      },
+      {
+        "stage": "youngling",
+        "share": 60,
+        "mastery": "bronze",
+        "division": true,
+        "boss": false
+      },
+      {
+        "stage": "adult",
+        "share": 80,
+        "mastery": "silver",
+        "division": true,
+        "boss": true
+      },
+      {
+        "stage": "crowned",
+        "share": 100,
+        "mastery": "gold",
+        "division": true,
+        "boss": true
+      }
+    ],
+    "effort": {
+      "bronze": 2,
+      "silver": 4,
+      "gap": 2
+    }
+  }
+]

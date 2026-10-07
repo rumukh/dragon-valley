@@ -73,6 +73,7 @@ function report(learner: LearnerName, patch: Partial<SimulationReport> = {}): Si
     eggDays: { bubbles: 0, sunny: 0 },
     bossDays: { troll: 3 },
     levelDays: { 'a.1': 0, 'a.boss': 3 },
+    metDays: {},
     finaleDay: 3,
     coins: 800,
     cosmetics: 5,

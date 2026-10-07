@@ -16,12 +16,29 @@ import {
   loadCatalog,
   marketAtEnd,
   mistake,
+  noteMet,
   overdueKnown,
   simulate,
   storyWords,
   tallyEvents,
 } from './driver';
 import type { AnswerRecord, SimulationReport } from './driver';
+import type { GrowthGate, GrowthVariant } from './growth';
+import { loadPack } from '../traces/support';
+
+/** The shipped growth rules, and a youngling gate so lenient that day one already passes it. */
+const SHIPPED_GATES = loadPack().data.balance.growth as GrowthGate[];
+const VARIANTS: GrowthVariant[] = [
+  { id: 'shipped', gates: SHIPPED_GATES },
+  {
+    id: 'lenient',
+    gates: SHIPPED_GATES.map((gate) =>
+      gate.stage === 'youngling'
+        ? { stage: 'youngling', share: 10, mastery: 'seen', division: false, boss: false }
+        : gate,
+    ),
+  },
+];
 
 const runs = new Map<string, Promise<SimulationReport>>();
 const answers = new Map<string, AnswerRecord[]>();
@@ -34,6 +51,7 @@ const firstSession = (learner: 'perfect' | 'struggling') => {
       seed: 'harness',
       answersPerDay: 24,
       onAnswer: (record) => records.push(record),
+      growthVariants: VARIANTS,
     });
     runs.set(learner, report);
   }
@@ -113,6 +131,47 @@ describe('the learner simulation', () => {
       "each graded answer carries the rules' bucket",
     ).toEqual([]);
     expect(graded.filter((r) => r.bucket === 'fast').length, 'quick answers').toBe(day.fast);
+  });
+
+  it('records the day each fact was first met, a board credit included', async () => {
+    const report = await firstSession('perfect');
+    const answered = new Set(answers.get('perfect')!.map((r) => r.item));
+    const met = Object.keys(report.metDays);
+    expect(
+      met.filter((item) => report.metDays[item] !== 0),
+      'everything met in the first session is met on day 0',
+    ).toEqual([]);
+    expect(
+      [...answered].filter((item) => report.metDays[item] === undefined),
+      'every fact answered was met',
+    ).toEqual([]);
+    expect(
+      met.filter((item) => !answered.has(item)).length,
+      'some facts were met on a board only (the Egg Grid credits facts it never asks)',
+    ).toBeGreaterThan(0);
+  });
+
+  it('follows other growth rules in the same run, the shipped ones exactly as the game', async () => {
+    const report = await firstSession('perfect');
+    const shipped = report.growthVariants!['shipped']!;
+    expect(Object.keys(report.stages).length, 'dragons hatched on day one').toBeGreaterThan(0);
+    expect(shipped, 'the shipped rules as a variant: the game’s own stage days').toEqual(
+      report.stages,
+    );
+    const lenient = report.growthVariants!['lenient']!;
+    expect(
+      Object.values(lenient).filter((stages) => stages.youngling === 0).length,
+      'a lenient youngling gate already grows dragons on day one',
+    ).toBeGreaterThan(0);
+  });
+});
+
+describe('the day a fact is first met', () => {
+  it('keeps the first day and adds new facts on the day they are met', () => {
+    const metDays: Record<string, number> = { 'mul:2x3': 0 };
+    noteMet(metDays, ['mul:2x3', 'mul:2x4'], 3);
+    noteMet(metDays, ['mul:2x3', 'mul:2x4', 'div:8:2'], 5);
+    expect(metDays).toEqual({ 'mul:2x3': 0, 'mul:2x4': 3, 'div:8:2': 5 });
   });
 });
 
