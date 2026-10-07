@@ -195,7 +195,10 @@ gets kind, specific help after a miss.
   `minmax(0, 1fr)` so nothing pushes the page sideways. The keeper's text size is set on `<html>`
   directly (its font size, plus `data-text-scale`) together with the SDK's `--aegis-text-scale`,
   because an engine can keep the root's old size after a custom property changes (DV-QA-13:
-  WebKit, once Chromium); the next screen's first frame is already at the keeper's size. On a
+  WebKit, once Chromium). Even so an engine may draw a newly mounted screen at the old size for a
+  few frames (WebKit about 150 ms, Chromium about 80), so after a change of text size the stage
+  stays transparent (`data-restyling`, never hidden, so focus and screen readers are not
+  disturbed) until the new screen is styled at the keeper's size, at most 400 ms. On a
   landscape screen (1024 × 768, 1180 × 820, 1280 × 800, 1366 × 657 and 1536 × 730) every
   child's screen fits at 100 % text without page scrolling, every control in view (bigger text
   may scroll). The frame's padding and gaps follow the window's height as well as its width, and

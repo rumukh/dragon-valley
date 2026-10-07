@@ -235,13 +235,46 @@ export function createApp(options: AppOptions): App {
       bootStatus.dataset['screen'] = (router.currentKey() ?? '').split(':')[0] ?? '';
       audio.setMusic(screen.music ?? null);
       if (moved) audio.cue('ui.navigate');
+      if (rescaled !== null) revealAtScale(screen.element, rescaled);
+      rescaled = null;
     },
     fallback: (error) => app.screens.error(error),
   });
 
+  /** A text size the next screen must be drawn at before anyone sees it (DV-QA-13). */
+  let rescaled: number | null = null;
+  let revealing = 0;
+  /**
+   * After a change of text size the next screen stays transparent until it is styled at the new
+   * size: an engine can draw a newly mounted screen against the root's old size for a few frames
+   * (WebKit, sometimes Chromium), so a 200 % reader would see small text flash. The stage is
+   * transparent, not hidden, so focus and screen readers are not disturbed; at most 400 ms.
+   */
+  const revealAtScale = (element: HTMLElement, scale: number): void => {
+    const own = ++revealing;
+    const expected = CHILD_SAFE_PRESET.readingPixels * scale;
+    const started = performance.now();
+    const ready = (): boolean =>
+      Math.abs(parseFloat(getComputedStyle(element).fontSize) - expected) < 0.5;
+    if (ready()) return;
+    stage.dataset['restyling'] = 'true';
+    const check = (): void => {
+      if (own !== revealing) return;
+      if (!element.isConnected || ready() || performance.now() - started > 400) {
+        delete stage.dataset['restyling'];
+        return;
+      }
+      requestAnimationFrame(check);
+    };
+    requestAnimationFrame(check);
+  };
+
   const applyPresentation = (preferences: ChildPreferences | null): void => {
     const chosen = preferences ?? DEFAULT_PREFERENCES;
     const root = document.documentElement;
+    if (root.dataset['textScale'] !== String(chosen.presentation.textScale)) {
+      rescaled = chosen.presentation.textScale;
+    }
     applyPresentationPreferences(root, chosen.presentation);
     // The SDK sets only the --aegis-text-scale property, and an engine can keep the root's old
     // font size for a while after that (DV-QA-13: WebKit, and once Chromium). The root's own
