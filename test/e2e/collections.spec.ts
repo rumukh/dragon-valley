@@ -53,14 +53,25 @@ test('market purchases and Dragon Den outfits are saved and removable', async ({
   await closeCollection(page, 'Ada');
 
   await openCollection(page, 'den');
+  // The first dragon ever dressed earns "Dressed Up" (criterion: one dragon dressed).
   await equipCosmetic(page, {
     dragon: 'bubbles',
     slot: 'head',
     item: 'hat-flower-crown',
     name: 'Flower Crown',
     previewClass: '.dv-hat-flower-crown',
+    sticker: 'Dressed Up',
   });
   await removeCosmetic(page, { slot: 'head', previewClass: '.dv-hat-flower-crown' });
+  await closeCollection(page, 'Ada');
+  await openCollection(page, 'album');
+  await expect(
+    page
+      .getByTestId('album-sunny-meadow')
+      .locator('.dv-album__sticker')
+      .filter({ hasText: 'Dressed Up' }),
+    'the album keeps "Dressed Up", even with the hat taken off',
+  ).toHaveAttribute('data-earned', 'true');
 });
 
 test('Sticker Album shows earned and unearned stickers and turns pages with Next and the arrow keys', async ({
