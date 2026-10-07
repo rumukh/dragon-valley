@@ -315,7 +315,16 @@ both notations: "Fifty-six divided by seven equals what?", "four remainder three
 "open bracket … close bracket", comparisons as "Which sign goes between … and …?", term
 questions as the sentence then "What do we call forty-two?" (naming "the second four" when a
 number appears twice). Word problems read their catalog story first (phase 2), then the
-arithmetic. Numbers are British English (`speech/numbers.ts`, up to 999 999).
+arithmetic. Numbers are British English (`speech/numbers.ts`, up to 999 999). A Memory Match
+example card names the number its term is about: "thirty divided by six equals five, six
+marked".
+
+Words the voices say wrongly have **aliases** (`speech/aliases.ts`), applied to the text just
+before it is spoken, so the screen keeps the original. They are flat `speech.alias.*` keys in the
+UI catalog: `speech.alias.Krakonoš` = "Krakonosh" always; `speech.alias.Kč.one` = "crown" and
+`.other` = "crowns" follow the number before the word ("1 Kč" is said "1 crown", "25 Kč" "25
+crowns"). Only whole words match, so a possessive keeps its ending. A unit test checks that every
+alias is for a word some catalog string uses ("Kč" waits for S2a's money stories).
 
 ## 12. Offline installation
 

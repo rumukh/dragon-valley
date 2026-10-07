@@ -25,7 +25,7 @@ import {
   StaleCommandError,
 } from '../controller/commands';
 import type { CommandController } from '../controller/commands';
-import { createTranslator, hasMessage } from '../i18n/messages';
+import { createTranslator, EN_UI, hasMessage } from '../i18n/messages';
 import { createOfflineInstaller } from '../parent/offline';
 import type { OfflineInstaller } from '../parent/offline';
 import { profileSeed, SAVE_DATABASE } from '../../rules/contract';
@@ -45,6 +45,7 @@ import { FamilyStore, PreferencesStore } from '../persistence/stores';
 import { createRouter } from '../router/router';
 import type { Router, ScreenEntry } from '../router/router';
 import type { PrintRequest } from '../screens/print';
+import { speechAliases } from '../speech/aliases';
 import { createReadAloud } from '../speech/read-aloud';
 import type { ReadAloud } from '../speech/read-aloud';
 import { createAnnouncer } from '../ui/announcer';
@@ -184,7 +185,7 @@ export function createApp(options: AppOptions): App {
   root.replaceChildren(stage, toasts.element, fx, dialogs, announcer.element, bootStatus);
 
   const audio = createGameAudio({ baseUrl: env.baseUrl, map: options.audioMap });
-  const speech = createReadAloud();
+  const speech = createReadAloud(undefined, speechAliases(EN_UI));
   const storage = options.storage ?? new IndexedDbSaveStorage(SAVE_DATABASE);
   const family = new FamilyStore(storage);
   const offline = createOfflineInstaller({ baseUrl: env.baseUrl, revision: env.revision });

@@ -4,8 +4,11 @@
  * Every utterance names its voice explicitly: leaving it unset would let the browser pick its
  * default, which can be a network voice. With no local English voice, `available()` is false,
  * the speaker button is hidden and the grown-ups' area explains why. Speech is cancelled on
- * every screen change, on pause and when the page is hidden.
+ * every screen change, on pause and when the page is hidden. Words the voices say wrongly are
+ * replaced by their aliases just before speaking (`aliases.ts`); the screen keeps them.
  */
+import { applyAliases } from './aliases';
+import type { SpeechAlias } from './aliases';
 import { chooseVoice, localEnglishVoices } from './voices';
 import type { VoiceInfo, VoiceLike } from './voices';
 
@@ -41,7 +44,10 @@ function platform(): SpeechPlatform {
   };
 }
 
-export function createReadAloud(environment: SpeechPlatform = platform()): ReadAloud {
+export function createReadAloud(
+  environment: SpeechPlatform = platform(),
+  aliases: readonly SpeechAlias[] = [],
+): ReadAloud {
   const { synth, Utterance } = environment;
   const listeners = new Set<() => void>();
   let voices: VoiceInfo[] = [];
@@ -74,7 +80,7 @@ export function createReadAloud(environment: SpeechPlatform = platform()): ReadA
       const voice = chosen && native.find((candidate) => candidate.voiceURI === chosen.uri);
       if (!chosen || !voice) return false;
       synth.cancel();
-      const utterance = new Utterance(text);
+      const utterance = new Utterance(applyAliases(text, aliases));
       utterance.voice = voice as SpeechSynthesisVoice;
       utterance.lang = voice.lang;
       utterance.volume = options.volume ?? 1;
