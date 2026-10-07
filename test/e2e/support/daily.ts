@@ -59,6 +59,27 @@ export async function finishRoundWithMistakes(page: Page, wrongAnswers: number):
   await expect(results(page), 'the round ends').toBeVisible();
 }
 
+/**
+ * The router keeps a screen in view while the next one is built (up to 320 ms for its pictures,
+ * docs/app.md §2), so a screen read right after a press can still be the one pressed on: wait for
+ * it to give way first.
+ */
+async function leaves(page: Page, testId: string, what: string): Promise<void> {
+  await expect(page.getByTestId(testId), what).toHaveCount(0, { timeout: 30_000 });
+}
+
+/** Results → Continue, and wait until the results have given way to what comes next. */
+async function continueFromResults(page: Page): Promise<void> {
+  await page.getByTestId('results-continue').click({ timeout: 10_000 });
+  await leaves(page, 'screen-results', 'the results give way to what comes next');
+}
+
+/** Press the Daily Adventure (not the gift) and wait until the hub has given way to its step. */
+export async function startAdventure(page: Page): Promise<void> {
+  await page.getByTestId('hub-adventure').click();
+  await leaves(page, 'screen-hub', 'the Daily Adventure leaves the hub');
+}
+
 export async function finishVisibleActivity(page: Page, keeper: string): Promise<void> {
   for (let step = 0; step < 10; step++) {
     await expect
@@ -79,13 +100,13 @@ export async function finishVisibleActivity(page: Page, keeper: string): Promise
     if (await page.getByTestId('screen-minigame').isVisible()) {
       await finishCurrentMinigame(page);
       await throughHatches(page);
-      await page.getByTestId('results-continue').click();
+      await continueFromResults(page);
       continue;
     }
     if (await page.getByTestId('screen-round').isVisible()) {
       await playRound(page, 'keyboard');
       await throughHatches(page);
-      await page.getByTestId('results-continue').click();
+      await continueFromResults(page);
       continue;
     }
     if (await results(page).isVisible()) {
@@ -110,7 +131,7 @@ export async function openDailyGift(page: Page, keeper: string): Promise<void> {
       await expectHub(page, keeper);
       return;
     }
-    await adventure.click();
+    await startAdventure(page);
     await finishVisibleActivity(page, keeper);
     await expectHub(page, keeper);
   }

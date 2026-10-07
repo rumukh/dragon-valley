@@ -5,7 +5,6 @@
  */
 import { expect, test } from './support/fixtures';
 import { keeperWithRegions, playRound, results, startLevel } from './support/app';
-import { unlessKnown } from './support/known-issues';
 import {
   continueToNextActivity,
   playEggGridByTouch,
@@ -82,7 +81,7 @@ test('Memory Match remainder cards: pair a division with its quotient and remain
 
 test('Memory Match term cards: pair term names with rendered example sentences', async ({
   page,
-}, testInfo) => {
+}) => {
   await keeperWithRegions(page, 'Ada', ['riddle-ruins']);
   await startLevel(page, 'riddle-ruins', 'riddle-ruins.4');
   await playRound(page, 'keyboard');
@@ -92,17 +91,16 @@ test('Memory Match term cards: pair term names with rendered example sentences',
   let examples = 0;
   await playMemoryMatch(page, 'keyboard', 'term', async (card, face) => {
     if (!face.includes('=') || examples++ > 0) return;
-    await unlessKnown(testInfo, 'DV-QA-17', async () => {
-      await expect(
-        card.locator('mark, [data-highlight], [class*="asked"], [class*="highlight"]'),
-        `the example "${face}" marks the number its term names`,
-      ).toHaveCount(1, { timeout: 2_000 });
-      await expect(card, 'and its name says which number that is').toHaveAttribute(
-        'aria-label',
-        /highlight|marked|which/i,
-        { timeout: 2_000 },
-      );
-    });
+    // DV-QA-17 (fixed by #46): the example marks the number its term names, and says which.
+    await expect(
+      card.locator('mark, [data-highlight], [class*="asked"], [class*="highlight"]'),
+      `the example "${face}" marks the number its term names`,
+    ).toHaveCount(1, { timeout: 2_000 });
+    await expect(card, 'and its name says which number that is').toHaveAttribute(
+      'aria-label',
+      /highlight|marked|which/i,
+      { timeout: 2_000 },
+    );
   });
   expect(examples, 'an example card was turned over').toBeGreaterThan(0);
   await expect(results(page), 'the term Memory Match ends on its results').toBeVisible();

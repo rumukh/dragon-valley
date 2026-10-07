@@ -648,24 +648,70 @@ export async function playRound(page: Page, via: Via, limit = 80): Promise<Playe
   return played;
 }
 
+/**
+ * What the hub says, for a failure that finds it instead of the screen it expected: its Daily
+ * Adventure and today's goal.
+ */
+async function hubSays(page: Page): Promise<string> {
+  const text = async (testId: string): Promise<string> =>
+    (
+      (await page
+        .getByTestId(testId)
+        .textContent({ timeout: 1_000 })
+        .catch(() => null)) ?? ''
+    )
+      .replace(/\s+/g, ' ')
+      .trim();
+  return `the hub is showing (Daily Adventure "${await text('hub-adventure')}", ${await text('daily-goal')})`;
+}
+
 /** Through any hatch celebration ("Hooray!" for each new dragon) to the results card. */
 export async function throughHatches(page: Page): Promise<void> {
   const hooray = page.getByTestId('hatch-continue');
   const card = page.getByTestId('round-results');
+  const hub = page.getByTestId('screen-hub');
   for (let dragon = 0; dragon < 10; dragon++) {
+    let showing: 'hatch' | 'card' | 'hub' | null = null;
     await expect
-      .poll(async () => (await hooray.isVisible()) || (await card.isVisible()), {
-        message: 'a hatching dragon or the results card',
-      })
-      .toBe(true);
-    if (!(await hooray.isVisible())) return;
+      .poll(
+        async () => {
+          showing = (await hooray.isVisible())
+            ? 'hatch'
+            : (await card.isVisible())
+              ? 'card'
+              : (await hub.isVisible())
+                ? 'hub'
+                : null;
+          return showing;
+        },
+        { message: 'a hatching dragon or the results card' },
+      )
+      .not.toBeNull();
+    // Waiting for results and finding the hub: fail at once, saying what the hub says.
+    if (showing === 'hub') throw new Error(`Expected the results, but ${await hubSays(page)}.`);
+    if (showing !== 'hatch') return;
     await hooray.click();
   }
 }
 
 /** From the results, back to the valley (the hub). */
 export async function leaveResults(page: Page, name: string): Promise<void> {
-  await page.getByTestId('results-continue').click();
+  const next = page.getByTestId('results-continue');
+  const hub = page.getByTestId('screen-hub');
+  await expect
+    .poll(async () => (await next.isVisible()) || (await hub.isVisible()), {
+      message: 'the results, or the hub',
+      timeout: 30_000,
+    })
+    .toBe(true);
+  // Waiting for results and finding the hub: fail at once, saying what the hub says.
+  if (!(await next.isVisible()))
+    throw new Error(`Expected the results, but ${await hubSays(page)}.`);
+  await next.click({ timeout: 10_000 }).catch(async (error: unknown) => {
+    throw new Error(
+      `The results' Continue could not be pressed (${(await hub.isVisible()) ? await hubSays(page) : 'no hub either'}): ${String(error)}`,
+    );
+  });
   await expectHub(page, name);
 }
 

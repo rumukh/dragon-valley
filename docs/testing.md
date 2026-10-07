@@ -156,6 +156,23 @@ $env:DV_E2E_PART = 'regions,valley'; npm run test:e2e   # parts, as a CI job run
 $env:DV_E2E_PORT = '4401'; npm run test:e2e       # a second run beside another one
 ```
 
+**WebKit on Windows is not CI's WebKit.** Playwright's Windows build behaves differently from the
+Linux one CI runs, in two ways that show in this suite:
+
+- It draws a page at rest only a few times a second. Taps wait for stable frames, so touch tests
+  run slower (the Sunny Meadow journey by touch takes 6.5 to 12 min there, by how busy the machine
+  is, against 3.5 min on CI), long specs such as the day's (`daily.spec.ts`, three to four times
+  slower than on CI) can run out of their time budgets, and the blank-screen watch's runs are
+  coarse.
+- Once a Tab pass has left the page, the document loses focus. `toBeFocused` then reports the
+  focused element as "inactive", although it is the active element. `keyboard.spec.ts` › "the
+  keepers screen and the grown-ups area are in reading order" fails there for that reason only;
+  CI's WebKit passes it.
+
+Judge WebKit by CI, or by WebKit on Linux or macOS. At main `5d98ee3`, this is the only local WebKit
+failure in `input.spec.ts` and `keyboard.spec.ts`. Two `input.spec.ts` tests that failed there the
+same way before #19 pass now.
+
 ### Guards on every test
 
 Every spec imports `test` and `expect` from `test/e2e/support/fixtures.ts`. Its automatic `guard`

@@ -26,13 +26,14 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
 
 ## 2. Defects and decisions
 
-- [ ] No open blocker or major defect ([defects.md](defects.md)). Open today, all S3: one major,
-      DV-QA-17 (Memory Match's term cards), and two minor in WebKit, DV-QA-13 and 15; fix the major
-      one, fix or accept the minor ones for v1.
-- [ ] _(person)_ The copy decisions are made ([copy-review.md](copy-review.md), "Needs a human
-      decision") and the agreed changes merged (S2b, S3).
-- [ ] The accessibility advice is fixed or accepted ([accessibility.md](accessibility.md):
-      `boot-status` hidden from screen readers, toasts, the startup-failure screen's heading).
+- [x] No open blocker or major defect ([defects.md](defects.md)): the last major one, DV-QA-17,
+      was fixed by #46. Open today: two minor, both S3 and both in WebKit (DV-QA-13, also sometimes
+      in Chromium, and DV-QA-15); fix them or accept them for v1.
+- [x] _(person)_ The copy decisions are made ([copy-review.md](copy-review.md), "Needs a human
+      decision") and the agreed changes merged (S2b: #38, #40, #43; S3: #41, #46).
+- [x] The accessibility advice is fixed or accepted ([accessibility.md](accessibility.md):
+      `boot-status` hidden from screen readers, toasts, the startup-failure screen's heading): fixed
+      by #46; no axe finding of any level since.
 
 ## 3. Human checkpoints (plan §4.6)
 

@@ -13,7 +13,7 @@ import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import { expect, test } from './support/fixtures';
 import type { FindingKind, Guard } from './support/guard';
-import { boot, newFamily, startPlacement } from './support/app';
+import { boot, leaveResults, newFamily, startPlacement, throughHatches } from './support/app';
 import { audit, focusPixels, focusStop, SEEN_PIXELS } from './support/a11y';
 import { blankReport, markBlankWatch, resetBlankWatch, watchBlankScreens } from './support/blank';
 import { layoutProblems } from './support/layout';
@@ -191,6 +191,26 @@ test.describe('the blank-screen watch sees a screen with nothing to see', () => 
       const run = (await blankReport(page)).runs.find((candidate) => candidate.label === how);
       expect(run?.why, `a ${how} plant is seen for what it is`).toBe(how);
       expect(run!.durationMs, `the ${how} run lasts about its second`).toBeGreaterThan(300);
+    }
+  });
+});
+
+test.describe('waiting for results, the helpers fail at once when they find the hub', () => {
+  test('throughHatches and leaveResults say what the hub says, within seconds', async ({
+    page,
+  }) => {
+    await newFamily(page, { name: 'Ada' });
+    for (const [name, wait] of [
+      ['throughHatches', () => throughHatches(page)],
+      ['leaveResults', () => leaveResults(page, 'Ada')],
+    ] as const) {
+      const started = Date.now();
+      await expect(wait(), `${name} on the hub`).rejects.toThrow(
+        /^Expected the results, but the hub is showing \(Daily Adventure "Show the dragons what you know!"/,
+      );
+      expect(Date.now() - started, `${name} fails at once, not at the test's timeout`).toBeLessThan(
+        5_000,
+      );
     }
   });
 });
