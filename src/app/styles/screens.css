@@ -2591,6 +2591,67 @@
   height: 1.3em;
 }
 
+/* On a landscape window the shelf's name, its tabs and the note share one row, and more, smaller
+   things stand on a shelf, so a full shelf fits without scrolling. A thing the keeper owns or can
+   buy shows its price on its button ("Buy for 20"), so the price line goes on a short window. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-market {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      'title tabs note'
+      'shelf shelf shelf';
+    align-items: center;
+    gap: 0.6em 1em;
+  }
+
+  .dv-market > .dv-note {
+    grid-area: note;
+    margin: 0;
+  }
+
+  .dv-market > .dv-tabs {
+    grid-area: tabs;
+    width: auto;
+    margin: 0;
+  }
+
+  .dv-market > .dv-shelf__title {
+    grid-area: title;
+    margin: 0;
+  }
+
+  .dv-market > .dv-shelf {
+    grid-area: shelf;
+  }
+
+  .dv-shelf {
+    grid-template-columns: repeat(auto-fill, minmax(min(7em, 100%), 1fr));
+    gap: 0.6em;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 860px) {
+  .dv-shelf__item {
+    gap: 0.15em;
+    padding: 0.45em;
+  }
+
+  .dv-shelf__art {
+    width: clamp(48px, 2.6em, 64px);
+  }
+
+  .dv-shelf__name {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+
+  .dv-shelf__item[data-owned='true'] .dv-shelf__price,
+  .dv-shelf__item[data-affordable='true'] .dv-shelf__price {
+    display: none;
+  }
+}
+
 .dv-den {
   display: grid;
   gap: 1em;
@@ -2636,7 +2697,7 @@
 
 @media (min-width: 900px) and (orientation: landscape) {
   .dv-den__stage {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.35fr);
   }
 }
 
@@ -2651,6 +2712,17 @@
 
 .dv-den__name {
   font-weight: 700;
+}
+
+.dv-den__wardrobe {
+  display: grid;
+  align-content: start;
+  gap: 0.6em;
+  min-width: 0;
+}
+
+.dv-den__wardrobe > .dv-tabs {
+  width: 100%;
 }
 
 .dv-den__slots {
@@ -2681,6 +2753,25 @@
 .dv-den__empty {
   font-size: 0.85rem;
   color: var(--dv-ink-soft);
+}
+
+/* On a short landscape window the dragons stand in one smaller row above the stage. */
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 860px) {
+  .dv-den {
+    gap: 0.6em;
+  }
+
+  .dv-den__dragon {
+    padding: 0.2em 0.35em;
+  }
+
+  .dv-den__dragon .dv-dragon-art--small {
+    width: min(3.6em, 7vh);
+  }
+
+  .dv-den__preview svg {
+    width: min(15rem, 30vh, 70vw);
+  }
 }
 
 .dv-album__page {
