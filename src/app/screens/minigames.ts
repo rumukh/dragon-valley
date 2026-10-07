@@ -294,7 +294,7 @@ function eggGrid(context: BoardContext): BoardPainter {
       { className: 'dv-stepper', attributes: { role: 'group', 'aria-label': label } },
       h('span', { className: 'dv-stepper__label', text: label }),
       candyButton({
-        label: t('egg.less', { what: label }),
+        label: t(which === 'rows' ? 'egg.rows.less' : 'egg.columns.less'),
         icon: 'minus',
         iconOnly: true,
         variant: 'paper',
@@ -305,7 +305,7 @@ function eggGrid(context: BoardContext): BoardPainter {
       }),
       values[which],
       candyButton({
-        label: t('egg.more', { what: label }),
+        label: t(which === 'rows' ? 'egg.rows.more' : 'egg.columns.more'),
         icon: 'plus',
         iconOnly: true,
         variant: 'paper',

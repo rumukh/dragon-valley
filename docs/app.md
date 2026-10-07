@@ -167,7 +167,9 @@ as `error.<code>` keys in `en.ui.json` and never shows diagnostic text to a chil
 Press and hold for two seconds (the button fills up; letting go early empties it), then answer a
 two-digit × two-digit multiplication on the keypad. Factors are never multiples of ten, never
 repeated digits, never equal, and never the previous question. A wrong answer asks a new
-question: no lockout, no penalty. The question is made by the shell, not the rules.
+question: no lockout, no penalty. The question is made by the shell, not the rules. It is always
+written with ×, whatever a keeper's notation (the coordinator's decision): the gate is for
+grown-ups, and no keeper is chosen yet.
 
 ## 7. Design system
 

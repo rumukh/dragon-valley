@@ -172,7 +172,7 @@ test.describe('the save status', () => {
     // The first window's next answer would overwrite the other window's progress.
     await giveAnswer(page, await readAnswer(page), 'keyboard');
     await expect(saveStatus(page)).toHaveAttribute('data-state', 'conflict');
-    await expect(saveStatus(page)).toContainText('Open in another window');
+    await expect(saveStatus(page)).toContainText('Opened in another window');
     await expect(page.getByTestId('save-retry')).toHaveCount(0);
     await page.getByTestId('save-reopen').click();
     await expectSaved(page);

@@ -106,7 +106,9 @@ test('names are checked kindly: too long, odd signs, and a name already taken', 
   await expect(problem).toHaveText('That name is too long.');
   await name.fill('Ema!');
   await save.click();
-  await expect(problem).toHaveText('Please use letters, numbers and spaces.');
+  await expect(problem).toHaveText(
+    'Please use letters, numbers, spaces, apostrophes, full stops or hyphens.',
+  );
   await name.fill('EMA');
   await save.click();
   await expect(problem, 'names are unique, ignoring case').toHaveText(

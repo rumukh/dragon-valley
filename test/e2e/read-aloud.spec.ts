@@ -148,9 +148,9 @@ test.describe('without a local English voice', () => {
     await openGrownUps(page, 'settings');
     await expect(page.getByTestId('setting-voice')).toHaveCount(0);
     await expect(page.getByTestId('voice-none')).toContainText(
-      'This device has no built-in English voice, so the read-aloud button is hidden.',
+      'No offline English voice is installed, so read-aloud is hidden.',
     );
-    await expect(page.getByTestId('voice-none')).toContainText('no text ever leaves it');
+    await expect(page.getByTestId('voice-none')).toContainText('No text leaves the device.');
   });
 
   test('a local English voice that arrives late makes the speaker appear', async ({ page }) => {

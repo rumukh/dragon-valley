@@ -101,7 +101,7 @@ describe('Golem Orders', () => {
     expect(golemMessage({ last: 'not-first', picked: null })).toBe('golem.notFirst');
     expect(golemMessage({ last: 'wrong-value', picked: [] })).toBe('golem.wrong');
     const t = createTranslator();
-    expect(t('golem.notFirst', { mul: '·', div: ':', minus: '−' })).toBe(
+    expect(t('golem.notFirst', { mul: '·', div: ':', plus: '+', minus: '−' })).toBe(
       'Not yet! First brackets, then · and :, then + and −.',
     );
     expect(placeholders(t('golem.solved', { chain: 'x' }))).toEqual([]);

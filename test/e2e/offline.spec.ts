@@ -162,7 +162,7 @@ test('a browser that cannot install says so, and the game still works online', a
   await openGrownUps(page, 'offline');
   await expect(status(page)).toHaveAttribute('data-state', 'unavailable');
   await expect(status(page)).toHaveText(
-    'This browser cannot install Dragon Valley for offline play. A recent browser on a secure (https) page can.',
+    'This browser cannot install Dragon Valley for offline play. A recent browser on a secure web page can.',
   );
   await expect(page.getByTestId('offline-install')).toHaveCount(0);
 });
