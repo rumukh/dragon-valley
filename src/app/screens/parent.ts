@@ -10,6 +10,7 @@ import { assertChildSafeView } from '@aegis/browser/ui';
 import type { SettingChange } from '../../rules/contract';
 import type { MessageKey } from '../i18n/messages';
 import { NOTATIONS } from '../math/notation';
+import { shortRevision } from '../parent/about';
 import type { OfflineState } from '../parent/offline';
 import { BACKUP_MAX_BYTES } from '../persistence/backup';
 import { findKeeper, MAX_KEEPERS } from '../persistence/family';
@@ -828,7 +829,10 @@ export function parentScreen(
           'parent.tab.about',
           h('p', {
             testId: 'about-version',
-            text: t('parent.about.version', { revision: app.env.revision }),
+            text: t('parent.about.version', { revision: shortRevision(app.env.revision) }),
+            // The whole revision for support, as in index.html and resource-graph.json.
+            attributes: { title: app.env.revision },
+            dataset: { revision: app.env.revision },
           }),
           h('p', { text: t('parent.about.privacy') }),
           h('p', { text: t('parent.about.font') }),

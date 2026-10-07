@@ -203,6 +203,9 @@ export async function grownUpWalk(page: Page, visit: Visit): Promise<void> {
   await expect(page.getByTestId('offline-status')).toHaveAttribute('data-state', /.+/);
   await visit({ name: '28-parent-offline', description: "Grown-ups' area: offline play" });
   await openTab(page, 'about');
+  // A short build id that fits a phone's line; the whole offline revision stays on it for support.
+  await expect(page.getByTestId('about-version')).toHaveText(/^Version [0-9a-f]{8}$/);
+  await expect(page.getByTestId('about-version')).toHaveAttribute('title', /^[0-9a-f]{24}$/);
   await visit({ name: '29-parent-about', description: "Grown-ups' area: about and privacy" });
   await openTab(page, 'progress');
   await expect(page.getByTestId('progress-summary')).toBeVisible();
