@@ -443,7 +443,9 @@ growth; growth draws no random numbers. So each candidate is followed during the
 (`node scripts/simulate.mjs --growth test/sim/growth-study.json`, `test/sim/growth.ts`): after
 every step that can credit a fact or win over a boss, each variant's stage for each dragon, never
 going down, as in the game. The shipped rules as a variant reproduced the game's own stage days
-in all 17 runs (348 of 348). Content 1.2.0 with PR F (#40), reading on:
+in all 17 runs (348 of 348). Content 1.3.0 ships the effort path itself, and the variants read the
+rules' mastery levels, so on 1.3.0 every variant counts it too: reproduce the study on main
+5d98ee3. Content 1.2.0 with PR F (#40), reading on:
 
 - the struggling child over 365 days on seeds `simulation`, s2, s3 and s4 (the effort + 80 %
   variants on the first three);

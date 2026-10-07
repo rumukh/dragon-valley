@@ -10,6 +10,11 @@
  * level; its division facts too, at their own share if given; its boss), gates of their own
  * for some dragons, and an optional effort path: a fact also counts as bronze or silver once it
  * was answered right on enough different days, `gap` days or more apart.
+ *
+ * A variant reads the rules' mastery levels (`atLeast`), so the content's own effort path
+ * (`balance.mastery.effort`, from content 1.3.0) counts in every variant, and a variant's effort
+ * path only adds to it. The growth study (balance-report.md §8) ran on content 1.2.0, which has
+ * none: reproduce it there (main 5d98ee3).
  */
 import type { DeepReadonly } from '@aegis/runtime';
 import { DRAGON_STAGES } from '../../src/rules/contract';
