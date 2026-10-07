@@ -445,10 +445,20 @@ async function playSunnyMeadow(page: Page, input: Input, testInfo: TestInfo): Pr
 
 test.use({ reducedMotion: 'reduce' });
 
+/**
+ * A whole region is a long test: on CI about 1.5 min in Chromium and Firefox and up to 3.5 min in
+ * WebKit; WebKit on Windows, which barely animates a page at rest, took up to 12 min by touch on a
+ * busy machine (docs/testing.md §5). The budgets keep twice that and more.
+ */
+function journeyBudget(browserName: string): number {
+  return browserName === 'webkit' ? 1_500_000 : 600_000;
+}
+
 test('Sunny Meadow from a new keeper to the Bridge Troll, by keyboard alone', async ({
   page,
+  browserName,
 }, testInfo) => {
-  test.setTimeout(900_000);
+  test.setTimeout(journeyBudget(browserName));
   await playSunnyMeadow(page, 'keyboard', testInfo);
 });
 
@@ -457,8 +467,9 @@ test.describe('on a touch screen', () => {
 
   test('Sunny Meadow from a new keeper to the Bridge Troll, by touch alone', async ({
     page,
+    browserName,
   }, testInfo) => {
-    test.setTimeout(900_000);
+    test.setTimeout(journeyBudget(browserName));
     await playSunnyMeadow(page, 'touch', testInfo);
   });
 });
