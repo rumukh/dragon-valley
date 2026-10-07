@@ -89,8 +89,9 @@ describe('problem pictures', () => {
   });
 
   it('offer no picture where neither counting nor a strategy picture would help', () => {
+    // 0 · 4 is a rule fact with its own picture; 0 · 100 has nothing to count, move or share.
     expect(
-      modelFor({ kind: 'equation', left: op('mul', num(0), num(4)), right: BLANK }),
+      modelFor({ kind: 'equation', left: op('mul', num(0), num(100)), right: BLANK }),
     ).toBeNull();
     // Two two-digit factors are beyond the 3rd grade; round tens like 30 · 4 have their picture.
     expect(

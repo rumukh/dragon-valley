@@ -18,7 +18,7 @@ describe('the small tables keep their pictures to count', () => {
   it('draws products up to 10 · 10 as arrays and table divisions as groups', () => {
     expect(modelFor(mul(10, 10))).toEqual({ kind: 'array', rows: 10, columns: 10 });
     expect(modelFor(mul(7, 10))).toEqual({ kind: 'array', rows: 7, columns: 10 });
-    expect(modelFor(mul(10, 1))).toEqual({ kind: 'array', rows: 10, columns: 1 });
+    expect(modelFor(mul(10, 2))).toEqual({ kind: 'array', rows: 10, columns: 2 });
     expect(modelFor(div(72, 8))).toEqual({ kind: 'groups', total: 72, size: 8 });
     expect(modelFor(div(56, 7))).toEqual({ kind: 'groups', total: 56, size: 7 });
   });
@@ -61,9 +61,9 @@ describe('place-shift: · 10, · 100, : 10 and : 100', () => {
     expect(modelFor(div(70, 10))).toMatchObject({ kind: 'place-shift', from: 70, to: 7 });
   });
 
-  it('has nothing to move for zero', () => {
+  it('has nothing to move for zero (0 : 10 is a rule fact instead)', () => {
     expect(modelFor(mul(0, 100))).toBeNull();
-    expect(modelFor(div(0, 10))).toBeNull();
+    expect(modelFor(div(0, 10))).toMatchObject({ kind: 'rule', rule: 'zero-shared' });
   });
 });
 

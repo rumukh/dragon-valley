@@ -4,7 +4,9 @@
  *
  * In the small tables it is something to count: an array of dots for a product (rows ×
  * columns), or equal groups for a division, with leftovers set apart for a remainder (at most
- * 100 dots). Beyond them (Giant's Peaks) it is the written strategy, drawn:
+ * 100 dots). The rule facts get their rule as a picture of plates (`rule`): a number times 0 or
+ * 1 (either order), a number divided by 1 or by itself, and 0 divided by a number. Beyond the
+ * small tables (Giant's Peaks) it is the written strategy, drawn:
  *
  * - `place-shift`: `34 · 10`, `7 · 100` (either order) and every `: 10` and `: 100`. The digits
  *   move one or two places in a place-value chart, and zeros fill the empty places.
@@ -32,6 +34,23 @@ export interface OrderStep {
   readonly path: ExprPath;
   readonly value: number;
 }
+
+/**
+ * The rule facts, by their picture: `times-zero` is n · 0 (n empty plates), `zero-times` 0 · n
+ * (no plates at all), `times-one` n · 1 (n plates of one), `one-times` 1 · n (one plate of n),
+ * `divide-one` n : 1 (n plates of one), `zero-shared` 0 : n (n empty plates) and `divide-self`
+ * n : n (one plate of n).
+ */
+export const RULES = [
+  'times-zero',
+  'zero-times',
+  'times-one',
+  'one-times',
+  'divide-one',
+  'zero-shared',
+  'divide-self',
+] as const;
+export type Rule = (typeof RULES)[number];
 
 export type ProblemModel =
   | { readonly kind: 'array'; readonly rows: number; readonly columns: number }
@@ -77,6 +96,16 @@ export type ProblemModel =
       readonly kind: 'order-steps';
       readonly steps: readonly OrderStep[];
       readonly result: number;
+    }
+  | {
+      readonly kind: 'rule';
+      readonly rule: Rule;
+      /** The fact as written, `left op right = result`, and the number the child finds. */
+      readonly op: 'mul' | 'div';
+      readonly left: number;
+      readonly right: number;
+      readonly result: number;
+      readonly unknown: 'left' | 'right' | 'result';
     };
 
 export type ModelKind = ProblemModel['kind'];
@@ -96,10 +125,44 @@ function countable(total: number, size: number): boolean {
 }
 
 const oneDigit = (n: number): boolean => n >= 2 && n <= 9;
+/** Rule facts are drawn as plates up to this number (the small tables). */
+export const MAX_RULE_NUMBER = 10;
+
+/** The rule a product `a · b` shows, if it is a rule fact: 0 before 1, so `0 · 1` is about 0. */
+function productRule(a: number, b: number): Rule | null {
+  if (Math.max(a, b) > MAX_RULE_NUMBER) return null;
+  if (a === 0) return 'zero-times';
+  if (b === 0) return 'times-zero';
+  if (b === 1) return 'times-one';
+  if (a === 1) return 'one-times';
+  return null;
+}
+
+/** The rule a quotient `a : b` shows, if it is a rule fact. */
+function quotientRule(a: number, b: number): Rule | null {
+  if (b === 0 || Math.max(a, b) > MAX_RULE_NUMBER) return null;
+  if (a === 0) return 'zero-shared';
+  if (b === 1) return 'divide-one';
+  if (a === b) return 'divide-self';
+  return null;
+}
+
+function ruleModel(
+  rule: Rule,
+  op: 'mul' | 'div',
+  left: number,
+  right: number,
+  unknown: 'left' | 'right' | 'result',
+): ProblemModel {
+  const result = op === 'mul' ? left * right : left / right;
+  return { kind: 'rule', rule, op, left, right, result, unknown };
+}
 const isPower = (n: number): n is 10 | 100 => (POWERS as readonly number[]).includes(n);
 
 /** A product of two numbers, `a · b = ?`. */
 function productModel(a: number, b: number): ProblemModel | null {
+  const rule = productRule(a, b);
+  if (rule) return ruleModel(rule, 'mul', a, b, 'result');
   if (a >= 1 && b >= 1 && a <= 10 && b <= 10) return { kind: 'array', rows: a, columns: b };
   // When both factors are powers of ten (`10 · 100`), the second moves the digits of the first.
   const power = isPower(b) ? b : isPower(a) ? a : null;
@@ -130,6 +193,8 @@ function productModel(a: number, b: number): ProblemModel | null {
 
 /** A quotient of two numbers, `a : b = ?`. */
 function quotientModel(a: number, b: number): ProblemModel | null {
+  const rule = quotientRule(a, b);
+  if (rule) return ruleModel(rule, 'div', a, b, 'result');
   if (isPower(b) && a >= 1 && a <= MAX_PLACE_VALUE && a % b === 0) {
     return {
       kind: 'place-shift',
@@ -185,8 +250,17 @@ export function modelFor(problem: Problem): ProblemModel | null {
       }
       const product = value(right);
       if (left.op === 'mul' && product !== null) {
-        // A missing factor: the product shared into groups of the known factor.
+        // A missing factor: the product shared into groups of the known factor. A rule fact
+        // (`? · 5 = 0`, `7 · ? = 7`) shows its rule.
         const known = left.left.kind === 'blank' ? b : left.right.kind === 'blank' ? a : null;
+        if (known !== null && known !== 0 && product % known === 0) {
+          const found = product / known;
+          const [x, y] = left.left.kind === 'blank' ? [found, known] : [known, found];
+          const rule = productRule(x, y);
+          if (rule) {
+            return ruleModel(rule, 'mul', x, y, left.left.kind === 'blank' ? 'left' : 'right');
+          }
+        }
         return known !== null && countable(product, known)
           ? { kind: 'groups', total: product, size: known }
           : null;

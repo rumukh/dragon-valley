@@ -1,16 +1,18 @@
 // @ts-check
 /**
- * Review sheets and a size check for the strategy pictures (src/app/ui/models.ts), drawn by the
- * shell's own renderer and stylesheets in a browser (the installed Edge through Playwright, or
- * Playwright's Chromium).
+ * Review sheets and a size check for the pictures behind a problem (src/app/ui/models.ts): the
+ * strategy pictures, the arrays and equal groups of the small tables, and the rule facts. They are
+ * drawn by the shell's own renderer and stylesheets in a browser (the installed Edge through
+ * Playwright, or Playwright's Chromium).
  *
  * - `out/models-gallery/models.png`: every kind on its sample problems in a 306 px slot (the
  *   model slot of a 1280 × 800 round), after a miss, before answering and in the international
  *   notation; `zoom-<kind>.png` at true pixels.
  * - The size check: every sample (both notations, with and without the answer) in the model slot
- *   of the layout budget (`BUDGET`) at each child viewport, in a normal round and in a boss round.
- *   At 100 % text a figure must fit the slot's height; at 100 % and 200 % text nothing may reach
- *   out of the round's left column. Results go to `out/models-gallery/budget.json`, with
+ *   of the layout budget (`BUDGET`) at each child viewport, in a lesson, an ordinary boss round and
+ *   the Seven-Headed Dragon's. At 100 % text a figure must fit the slot's height; at 100 % and
+ *   200 % text nothing may reach out of the round's left column, and no dot is drawn smaller than
+ *   `MIN_DOT`. Results go to `out/models-gallery/budget.json`, with
  *   `budget-<case>.png` sheets; the script fails when anything is over.
  *
  *   node scripts/art/models-gallery.mjs
@@ -23,20 +25,31 @@ import { pathToFileURL } from 'node:url';
 import { ROOT } from './lib.mjs';
 
 const OUT = join(ROOT, 'out', 'models-gallery');
-const KINDS = ['place-shift', 'tens-groups', 'split-mul', 'split-div', 'order-steps'];
+const KINDS = [
+  'array',
+  'groups',
+  'rule',
+  'place-shift',
+  'tens-groups',
+  'split-mul',
+  'split-div',
+  'order-steps',
+];
+/** The smallest dot a picture to count may have, in px (models.css floors the dot here). */
+const MIN_DOT = 6;
 
 /**
  * The model slot at 100 % text in S3's round layout (PR D, measured in the real round with a
  * hatched dragon): the slot's width, which is the round's left column, and the height free for a
- * picture. A boss round's height is the Seven-Headed Dragon's, the tightest boss (its heads line
- * takes room), capped at 260 px at 1366 x 657 as S3 asked.
+ * picture. The Seven-Headed Dragon's round is the tightest (its heads line takes room); its height
+ * is capped at 260 px at 1366 x 657, as S3 asked.
  */
 const BUDGET = [
-  { viewport: [1024, 768], normal: [246, 419], boss: [293, 355] },
-  { viewport: [1180, 820], normal: [284, 453], boss: [339, 392] },
-  { viewport: [1280, 800], normal: [311, 440], boss: [370, 378] },
-  { viewport: [1366, 657], normal: [335, 347], boss: [400, 260] },
-  { viewport: [1536, 730], normal: [379, 394], boss: [451, 328] },
+  { viewport: [1024, 768], normal: [246, 419], boss: [293, 465], finale: [293, 355] },
+  { viewport: [1180, 820], normal: [284, 453], boss: [339, 502], finale: [339, 392] },
+  { viewport: [1280, 800], normal: [311, 440], boss: [370, 488], finale: [370, 378] },
+  { viewport: [1366, 657], normal: [335, 347], boss: [400, 386], finale: [400, 260] },
+  { viewport: [1536, 730], normal: [379, 394], boss: [451, 438], finale: [451, 328] },
 ];
 
 const ENTRY = `
@@ -55,7 +68,21 @@ const t = createTranslator();
 const eq = (left) => ({ kind: 'equation', left, right: BLANK });
 const mul = (a, b) => eq(op('mul', num(a), num(b)));
 const div = (a, b) => eq(op('div', num(a), num(b)));
+const missing = (known, product) => ({ kind: 'equation', left: op('mul', BLANK, num(known)), right: num(product) });
+const leftover = (dividend, divisor) => ({ kind: 'divrem', dividend, divisor });
 const SAMPLES = {
+  array: [mul(10, 10), mul(7, 8), mul(10, 2), mul(2, 10), mul(3, 4)],
+  groups: [missing(10, 100), leftover(99, 10), div(81, 9), leftover(47, 6), missing(8, 96)],
+  rule: [
+    mul(0, 4),
+    mul(10, 0),
+    mul(7, 1),
+    mul(1, 10),
+    div(10, 1),
+    div(0, 5),
+    div(9, 9),
+    missing(5, 0),
+  ],
   'place-shift': [mul(34, 10), mul(7, 100), div(340, 10), mul(10, 100), div(700, 100)],
   'tens-groups': [mul(30, 3), mul(4, 20), mul(50, 4), mul(20, 9), mul(90, 9)],
   'split-mul': [mul(38, 8), mul(11, 6), mul(8, 47), mul(91, 2), mul(99, 9)],
@@ -164,6 +191,7 @@ window.dvMeasure = () =>
       width: box ? Math.round(box.width) : 0,
       height: box ? Math.round(box.height) : 0,
       spill: Math.round(spill * 10) / 10,
+      dot: Math.min(...[...cell.querySelectorAll('.dv-model__dot')].map((d) => Math.round(d.getBoundingClientRect().width * 10) / 10), Infinity),
     };
   });
 `;
@@ -196,7 +224,7 @@ async function launch() {
   }
 }
 
-/** @typedef {{ id: string, kind: string | null, expected: string, width: number, height: number, spill: number }} Measure */
+/** @typedef {{ id: string, kind: string | null, expected: string, width: number, height: number, spill: number, dot: number }} Measure */
 
 async function main() {
   mkdirSync(OUT, { recursive: true });
@@ -231,6 +259,7 @@ async function main() {
     ...BUDGET.flatMap((b) => [
       { name: `normal-${b.viewport.join('x')}`, viewport: b.viewport, slot: b.normal, boss: false },
       { name: `boss-${b.viewport.join('x')}`, viewport: b.viewport, slot: b.boss, boss: true },
+      { name: `finale-${b.viewport.join('x')}`, viewport: b.viewport, slot: b.finale, boss: true },
     ]),
   ];
   /** @type {Array<Measure & { case: string, text: number, budget: number, over: string[] }>} */
@@ -252,11 +281,12 @@ async function main() {
         const over = [];
         if (m.kind !== m.expected) over.push(`drew ${m.kind} for ${m.expected}`);
         if (m.spill > 0.5) over.push(`reaches ${m.spill} px out of the column`);
+        if (m.dot < MIN_DOT - 0.05) over.push(`a dot of ${m.dot} px`);
         if (text === 1 && m.height > item.slot[1])
           over.push(`${m.height} px tall in ${item.slot[1]}`);
         results.push({ ...m, case: item.name, text, budget: item.slot[1], over });
       }
-      if (text === 1 && (item.boss || item.name === 'normal-1366x657')) {
+      if (text === 1 && (item.name.startsWith('finale') || item.name === 'normal-1366x657')) {
         await tab.screenshot({ path: join(OUT, `budget-${item.name}.png`), fullPage: true });
       }
     }
@@ -270,9 +300,14 @@ async function main() {
     const best = tallest.get(key);
     if (!best || r.height > best.height) tallest.set(key, r);
   }
-  console.log('tallest figure per case (100 % text): height / budget, width');
-  for (const [key, r] of tallest)
-    console.log(`  ${key.padEnd(20)} ${r.height} / ${r.budget}  ${r.width} px  (${r.id})`);
+  console.log('tallest figure per case (100 % text): height / budget, width; smallest dot');
+  for (const [key, r] of tallest) {
+    const dots = results.filter((x) => x.case === key && x.text === 1 && Number.isFinite(x.dot));
+    const smallest = Math.min(...dots.map((x) => x.dot));
+    console.log(
+      `  ${key.padEnd(20)} ${r.height} / ${r.budget}  ${r.width} px  (${r.id})  dot >= ${smallest} px`,
+    );
+  }
   const failures = results.filter((r) => r.over.length > 0);
   console.log(`checked ${results.length} figures; ${failures.length} over budget`);
   for (const f of failures.slice(0, 30)) {
