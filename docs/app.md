@@ -228,7 +228,11 @@ gets kind, specific help after a miss.
   steps are written one per line in rem; a long step wraps after a + or − and never sideways.
   `node scripts/art/models-gallery.mjs` draws every kind for review. It also checks each one in
   the slot's budget at the five child viewports, in normal and boss rounds at 100 % and 200 %
-  text, and fails when a figure is too tall or reaches out of the column.
+  text, and fails when a figure is too tall or reaches out of the column. The slot is exactly
+  the cast column's width (`min-width: 0` and inline-size containment, so a picture may size
+  itself in `cqw`); an array's dots shrink with the slot's width as well as the window's height.
+  On a landscape window a hatched dragon steps back to 26vh while a picture shows in a lesson
+  round.
 
 - **Font**: "DV Reading", a Latin subset of **Andika 7.000** (SIL Open Font License 1.1), WOFF2,
   Regular and Bold, about 38 KB each, in `assets/fonts/dv-reading/` with `OFL.txt` (shipped)

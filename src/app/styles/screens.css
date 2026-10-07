@@ -859,11 +859,15 @@
   min-width: 0;
 }
 
-/* The picture behind a problem gets its own line under the dragon (and the boss). */
+/* The picture behind a problem gets its own line under the dragon (and the boss), exactly as wide
+   as the cast's column: a picture sizes itself to it (`cqw`), never past it, at any text size. */
 .dv-round__cast > .dv-round__model {
   display: grid;
   justify-items: center;
   flex-basis: 100%;
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
 }
 
 .dv-round__dragon svg {
@@ -884,6 +888,17 @@
 
 .dv-round--boss .dv-round__dragon[data-stage='egg'] svg {
   width: min(7.5rem, 20vh, 30vw);
+}
+
+/* On a landscape window a hatched dragon steps back a little while a picture shows, so the
+   picture has the room of a few more lines. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-round:not(.dv-round--boss)
+    .dv-round__cast:has(> .dv-round__model:not(:empty))
+    .dv-round__dragon:not([data-stage='egg'])
+    svg {
+    width: min(15rem, 26vh, 40vw);
+  }
 }
 
 /* On a landscape window the dragon and the boss stand side by side, the picture behind a problem
@@ -1259,6 +1274,7 @@
   display: grid;
   justify-items: center;
   gap: 0.4em;
+  max-width: 100%;
   margin: 0;
   padding: 0.6em 0.9em;
   border-radius: 1em;
@@ -1270,12 +1286,18 @@
   color: var(--dv-ink-soft);
 }
 
-/* Dots shrink for tall pictures, so a whole array fits beside the problem. */
+/* Dots shrink for tall pictures, so a whole array fits beside the problem, and for wide ones, so
+   it fits its slot's width (`cqw`, less the picture's padding) at any text size. The gaps are
+   0.4 of a dot, so a row of n dots is (1.4n - 0.4) dots long. */
 .dv-model__array {
-  --dot: min(0.7em, calc(26vh / var(--rows, 1) - 0.28em));
+  --dot: min(
+    0.7em,
+    calc(26vh / (var(--rows, 1) * 1.4 - 0.4)),
+    calc((100cqw - 1.8em) / (var(--columns, 1) * 1.4 - 0.4))
+  );
   display: grid;
   grid-template-columns: repeat(var(--columns, 1), var(--dot));
-  gap: 0.28em;
+  gap: calc(var(--dot) * 0.4);
 }
 
 .dv-model__array .dv-model__dot {
