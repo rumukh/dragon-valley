@@ -17,6 +17,7 @@ import { boot, leaveResults, newFamily, startPlacement, throughHatches } from '.
 import { audit, focusPixels, focusStop, SEEN_PIXELS } from './support/a11y';
 import { blankReport, markBlankWatch, resetBlankWatch, watchBlankScreens } from './support/blank';
 import { layoutProblems } from './support/layout';
+import { photograph, shotCap } from './support/screens';
 import { PARTS } from './support/parts';
 import { evaluate, notationOf, solve, storyOperation, toToken, written } from './support/problem';
 import type { Token } from './support/problem';
@@ -192,6 +193,37 @@ test.describe('the blank-screen watch sees a screen with nothing to see', () => 
       expect(run?.why, `a ${how} plant is seen for what it is`).toBe(how);
       expect(run!.durationMs, `the ${how} run lasts about its second`).toBeGreaterThan(300);
     }
+  });
+});
+
+test.describe('a page too tall to photograph whole is cut and reported, not a crash', () => {
+  test('a 40 000 px page is photographed to the cap and its height recorded', async ({
+    page,
+  }, testInfo) => {
+    await boot(page);
+    await page.evaluate(() => {
+      const tall = document.createElement('div');
+      tall.style.cssText = 'height:40000px;background:linear-gradient(#fff,#ccc)';
+      document.querySelector('main')?.append(tall);
+    });
+    const path = testInfo.outputPath('tall.png');
+    const height = await photograph(page, testInfo, path, 'a planted tall page');
+    expect(height, 'the page is as tall as planted').toBeGreaterThan(40_000);
+    const ratio = await page.evaluate(() => devicePixelRatio);
+    const cap = shotCap(ratio);
+    expect(cap, "a cut screenshot stays under WebKit's 32 767 device px").toBeLessThanOrEqual(
+      Math.floor(32_767 / ratio),
+    );
+    // A PNG's height is the big-endian number at bytes 20-23 of its header (device pixels).
+    expect(readFileSync(path).readUInt32BE(20), 'the screenshot is cut').toBe(
+      Math.round(cap * ratio),
+    );
+    expect(
+      testInfo.annotations.find((note) => note.type === 'tall page')?.description,
+      'the true height is recorded as a finding',
+    ).toMatch(
+      new RegExp(`^a planted tall page is \\d+ px tall; its screenshot keeps the top ${cap} px$`),
+    );
   });
 });
 

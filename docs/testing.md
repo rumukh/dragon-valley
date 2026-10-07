@@ -306,6 +306,12 @@ Each CI job uploads `qa-screens-<job>` (screenshots and contact sheets, 30 days:
 `playwright-report-<job>` (the HTML report with every axe result and guard report attached,
 `qa-summary.md`, `results.json`), plus `playwright-traces-<job>` when something failed.
 
+A full-page screenshot stops at 16 000 CSS px, and at 32 000 device px (WebKit cannot take one past
+32 767, which its 2× desktop profile reaches at 16 384 CSS px). A taller page is photographed from
+the top and listed in the job summary under "Pages too tall to photograph whole", with its true
+height: a finding for whoever owns the screen, not a crash of the walk (`support/screens.ts`,
+proved by `harness.spec.ts`).
+
 ### Adding a test
 
 Import from `./support/fixtures`, drive through `support/app.ts`, compute answers with

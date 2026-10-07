@@ -83,7 +83,7 @@ export async function checkStop(
       const folder = options.set ? join(screensRoot(testInfo), options.set) : screensRoot(testInfo);
       const path = join(folder, viewport.id, `${stop.name}.png`);
       mkdirSync(dirname(path), { recursive: true });
-      await page.screenshot({ path, fullPage: true, animations: 'disabled', caret: 'hide' });
+      await photograph(page, testInfo, path, where);
     }
     if (options.layout) {
       const problems = knownLayout(testInfo, where, await layoutProblems(page));
@@ -91,6 +91,48 @@ export async function checkStop(
     }
     if (options.axe && viewport.axe) await expectAccessible(page, testInfo, where);
   }
+}
+
+/**
+ * The tallest page photographed whole, in CSS px. An engine cannot take a screenshot past some
+ * height (WebKit stops at 32 767 device px, which its 2× desktop profile reaches at 16 384 CSS px),
+ * and no person reviews one that long: a taller page is photographed from the top, and its true
+ * height is recorded as a finding (a `tall page` annotation, listed in the job summary) instead of
+ * failing the walk.
+ */
+export const MAX_SHOT_HEIGHT = 16_000;
+/** The tallest screenshot in device pixels, under WebKit's limit. */
+const MAX_SHOT_PIXELS = 32_000;
+
+/** The height in CSS px a screenshot is cut at, for a device pixel ratio. */
+export function shotCap(devicePixelRatio: number): number {
+  return Math.min(MAX_SHOT_HEIGHT, Math.floor(MAX_SHOT_PIXELS / devicePixelRatio));
+}
+
+/** A full-page screenshot, cut at `shotCap`; returns the page's true height in CSS px. */
+export async function photograph(
+  page: Page,
+  testInfo: TestInfo,
+  path: string,
+  where: string,
+): Promise<number> {
+  const { width, height, ratio } = await page.evaluate(() => ({
+    width: document.documentElement.scrollWidth,
+    height: document.documentElement.scrollHeight,
+    ratio: devicePixelRatio,
+  }));
+  const cap = shotCap(ratio);
+  const shot = { path, fullPage: true, animations: 'disabled', caret: 'hide' } as const;
+  if (height <= cap) {
+    await page.screenshot(shot);
+    return height;
+  }
+  testInfo.annotations.push({
+    type: 'tall page',
+    description: `${where} is ${height} px tall; its screenshot keeps the top ${cap} px`,
+  });
+  await page.screenshot({ ...shot, clip: { x: 0, y: 0, width, height: cap } });
+  return height;
 }
 
 /** A contact sheet (plain HTML, relative image paths, nothing external) for one walk. */

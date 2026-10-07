@@ -104,6 +104,7 @@ class QaSummary implements Reporter {
     const evidence: string[] = [];
     const measured: string[] = [];
     const blanks: string[] = [];
+    const tall: string[] = [];
     const met = new Set<string>();
     for (const { test, run } of this.results) {
       const project = projectOf(test);
@@ -132,6 +133,8 @@ class QaSummary implements Reporter {
           measured.push(`- ${description} _(${project})_`);
         } else if (note.type === 'blank screens') {
           blanks.push(`- ${test.title}: ${description} _(${project})_`);
+        } else if (note.type === 'tall page') {
+          tall.push(`- ${description} _(${project})_`);
         } else if (note.type === 'axe advisory') {
           const rule = / ([a-z0-9-]+ \((?:minor|moderate|serious|critical|unknown)\)) at /.exec(
             description,
@@ -189,6 +192,10 @@ class QaSummary implements Reporter {
     if (measured.length > 0) {
       // Sizes and first-screen timings against their budgets (perf.spec.ts).
       lines.push('', '### Performance', '', ...measured.sort());
+    }
+    if (tall.length > 0) {
+      // A page too tall to photograph whole (support/screens.ts, MAX_SHOT_HEIGHT): a finding.
+      lines.push('', '### Pages too tall to photograph whole', '', ...tall.sort());
     }
     if (blanks.length > 0) {
       // Frames with nothing to see between screens (playtest.spec.ts, support/blank.ts).
