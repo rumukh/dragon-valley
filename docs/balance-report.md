@@ -87,7 +87,9 @@ its dragons grow up.
 Every check passes in every 84-day run. By day 84 the struggling child has 6-11 table younglings
 (none on 1.2.0), and 5-8 adults within a year (three seeds). The average child's 11th adult comes
 on day 39-70 over five seeds (median 56; 72 on 1.2.0). Over a year, weekly progress runs out for
-the slow child (21 of 53 weeks): a lit pane no longer goes dark after a miss to be lit again.
+the slow child (21 of 53 weeks): a lit pane no longer goes dark after a miss to be lit again. The
+coordinator made weekly progress a 12-week target and set the slow child's market limit to 9
+sessions (§9).
 
 ## 2. The children
 
@@ -148,7 +150,7 @@ The checks are named; each label states what it measured.
 | tables mastered    | average: every times-table dragon adult within 12 weeks                              | brief; a school trimester |
 | growing up         | struggling: the first table youngling by day 118; in a year, at least 3 table adults | coordinator (1.3.0)       |
 | rewarded           | every child earns coins every session                                                | testing.md §4             |
-| weekly progress    | average, struggling, slow: a level, hatch, growth, sticker or lit pane every week    | testing.md §4             |
+| weekly progress    | average, struggling, slow: a level, hatch, growth, sticker or lit pane, weeks 1-12   | testing.md §4             |
 | gift               | the gift opens every session that reaches the daily goal                             | design §7.4               |
 | hatch pace         | every egg hatches within 5 sessions of arriving                                      | design §4.1, §6.5         |
 | no dead end        | perfect, average, slow: every level completed, every boss won over                   | testing.md §4             |
@@ -156,7 +158,7 @@ The checks are named; each label states what it measured.
 | no starving        | no known fact (Leitner box 2+) waits more than 7 days past its review day            | testing.md §4             |
 | coins              | average: median 50-80 coins per session (a typical session; others as measured)      | design §7.1               |
 | market lasts       | average, 365 days: something on sale it cannot afford yet after 110 sessions         | coordinator (1.2.0)       |
-| market pace        | median wait for something new: average ≤ 6 (never > 10), slow ≤ 8, struggling ≤ 12   | coordinator (1.2.0)       |
+| market pace        | median wait for something new: average ≤ 6 (never > 10), slow ≤ 9, struggling ≤ 12   | coordinator (1.2.0/1.3.0) |
 | starter week       | every child buys its first cosmetic in its first week                                | coordinator (1.2.0)       |
 | fluency            | the slow child earns silver but never gold                                           | design §6.5               |
 | perfect pace       | the perfect child reaches the finale within 4 weeks                                  | design §3                 |
@@ -184,7 +186,8 @@ reported as measured; their market waits are their binding targets.
 **The market's targets** (decisions O5 and O5c): a new item about every five sessions, about
 weekly, matters more to an 8-year-old than a market that lasts the whole year, and it is kinder to
 slower children. The valley's own rewards (stickers, hatching, growth, the window, the finale)
-carry the rest of the year.
+carry the rest of the year. The slow child's limit is 9 sessions from content 1.3.0, 8 before:
+PR F's first tastes trade a little success for coverage (§9).
 
 ## 4. Results
 
@@ -625,7 +628,7 @@ earlier `big-numbers`; on s2, s3 and s5 Clockwork, a special dragon, is adult by
 `first-adult` and `bracket-boss`).
 
 **The average child** (day 84). Its 11th adult comes 2-34 days earlier: **median day 56** (72 on
-1.2.0 with PR F), above the coordinator's 55, with one seed at day 39.
+1.2.0 with PR F), above the coordinator's 55, with one seed at day 39. The coordinator accepted it.
 
 | Seed       | Success median | 11th table adult (day) | Window silver / gold |
 | ---------- | -------------- | ---------------------- | -------------------- |
@@ -659,7 +662,7 @@ Crystal (301) and Starry (343): `growing-up` passes (the first youngling on day 
 against at least 3). Its success holds at 63 % (median) over the year. The study's year runs on
 s2 and s3, which 1.3.0 reproduces exactly, give 8 adults from day 168 and 5 from day 218.
 
-**Two findings in the year runs** (outside the gate, for the coordinator):
+**Two findings in the year runs, and the coordinator's decisions:**
 
 1. **Weekly progress runs out late in the year.** Weeks with progress (a level, a hatch, growth,
    a sticker or a lit pane): struggling 51 of 53 (weeks 37 and 48 have none), average 52 of 53
@@ -673,10 +676,23 @@ s2 and s3, which 1.3.0 reproduces exactly, give 8 adults from day 168 and 5 from
    progress on 12 days. Options: (a) read weekly progress as a 12-week target, like the success
    band, and report the year runs as measured; (b) something new to earn late in the year, such
    as stickers for long practice or a full window (S2b's content); (c) count the market and the
-   gift as progress.
+   gift as progress. **Decision: (a).** `progress-weekly` judges the first 12 weeks and reports the
+   whole run as measured (slow: 12 of 12, the whole run 21 of 53). The late-year drop is mostly the
+   model's: the slow child is never quick by construction, so after about day 94 it has nothing
+   left to grow, where a real child speeds up with practice. Long-term goals still matter to a
+   child who plays all year, so (b) goes to the v1.1 backlog: milestone stickers for days
+   practised (10, 25, 50, 100, 150, 200), right answers (500, 1,000, 2,500, 5,000) and weeks with
+   practice.
 2. **The slow child's market pace** is a median wait of 9 sessions for something new (target
    ≤ 8; the longest 13). With 1.2.0's growth on the same play it is the same, so it comes from
-   PR F's play, not 1.3.0; 1.2.0 before PR F had 8 (§4.4).
+   PR F's play, not 1.3.0; 1.2.0 before PR F had 8 (§4.4). Over the year the slow child's session
+   median is 87 % (89 % before PR F) and it earns 13,959 coins (14,773), so it owns every cosmetic
+   on day 247 instead of 228. **Decision: accepted.** The slow child's limit is now 9 sessions:
+   PR F's first tastes trade a little success for coverage.
+
+With these decisions every check passes in the year runs too, except the average child's success
+band, a 12-week target that a year run misses, as in 1.2.0 (§4.4): a child who has mastered the
+tables answers right more often (here 171 of 261 sessions in the band, median 88 %).
 
 **Limits.** As §8: the model does not feel the motivation of a growing dragon, and its struggling
 child forgets fast. One seed for the year runs and for the slow and perfect children.

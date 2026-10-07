@@ -195,6 +195,15 @@ export const TARGETS = {
    * school year (`yearDays` or more) at least `adults` times-table dragons grow to adult.
    */
   growingUp: { youngDay: 118, yearDays: 365, adults: 3 },
+  /**
+   * The average, struggling and slow children see progress (a level, a hatch, growth, a sticker
+   * or a lit pane) in every week with play of their first `progressWeeks` weeks: a 12-week target,
+   * like the success band. A longer run reports the whole run's count as measured (the
+   * coordinator's decision for content 1.3.0, balance-report.md §9): a pane lit by the effort path
+   * stays lit, so late in a school year a child who never answers quickly has little left to
+   * light, where before a pane went dark after a miss and was lit again.
+   */
+  progressWeeks: 12,
   /** The perfect child reaches the finale within 4 weeks of daily play. */
   perfectFinaleDays: 28,
   /** An egg hatches within this many sessions of the child receiving it. */
@@ -220,7 +229,10 @@ export const TARGETS = {
    * - `lastsSessions`: the average child still has something on sale it cannot afford yet after
    *   this many sessions (a shorter run must end with something to save for);
    * - `pace`: the median wait for something new from the market (or the gift) for each child,
-   *   and for the average child the longest wait while cosmetics remain;
+   *   and for the average child the longest wait while cosmetics remain. The slow child's is 9
+   *   sessions, 8 until content 1.3.0: PR F's first tastes serve the taught facts a child never
+   *   answered, trading a little success for coverage, so its coins and its new cosmetics come a
+   *   little later (the coordinator's decision, balance-report.md §9);
    * - `firstWeekDays`: every child buys its first cosmetic in its first week.
    * The simulated child buys the cheapest item it can afford at the end of each session.
    */
@@ -228,7 +240,7 @@ export const TARGETS = {
     lastsSessions: 110,
     pace: {
       average: { median: 6, longest: 10 },
-      slow: { median: 8 },
+      slow: { median: 9 },
       struggling: { median: 12 },
     } as Partial<Record<LearnerName, { median: number; longest?: number }>>,
     firstWeekDays: 7,
@@ -378,21 +390,28 @@ export const CHECKS: readonly Check[] = [
     id: 'progress-weekly',
     learners: ['average', 'struggling', 'slow'],
     evaluate: (r) => {
-      const weeks: boolean[] = [];
+      const weeks: { start: number; moved: boolean }[] = [];
       for (let start = 0; start < r.days.length; start += 7) {
         const week = r.days.slice(start, start + 7).filter((d) => d.played);
         if (week.length === 0) continue;
-        weeks.push(
-          week.some(
+        weeks.push({
+          start,
+          moved: week.some(
             (d) =>
               d.levels.length + d.hatched.length + d.grew.length + d.stickers.length + d.panes > 0,
           ),
-        );
+        });
       }
-      const moved = weeks.filter(Boolean).length;
+      const { progressWeeks } = TARGETS;
+      const judged = weeks.filter((w) => w.start < progressWeeks * 7);
+      const moved = judged.filter((w) => w.moved).length;
+      const later =
+        weeks.length > judged.length
+          ? ` of the first ${progressWeeks} (the whole run, as measured: ${weeks.filter((w) => w.moved).length} of ${weeks.length})`
+          : '';
       return {
-        ok: moved === weeks.length,
-        name: `saw progress (a level, a hatch, growth, a sticker or a lit pane) in ${moved} of ${weeks.length} weeks`,
+        ok: moved === judged.length,
+        name: `saw progress (a level, a hatch, growth, a sticker or a lit pane) in ${moved} of ${judged.length} weeks${later}`,
       };
     },
   },

@@ -188,6 +188,34 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     expect(check(r, 'progress-weekly').ok).toBe(false);
   });
 
+  it('weekly progress over the first 12 weeks; a longer run reports the rest as measured', () => {
+    /** 14 weeks of play, with no progress at all in the weeks `empty` picks. */
+    const run = (empty: (week: number) => boolean) =>
+      report('slow', {
+        days: Array.from({ length: 98 }, (_, i) =>
+          day(i, empty(Math.floor(i / 7)) ? { panes: 0 } : {}),
+        ),
+      });
+    const late = check(
+      run((week) => week >= 12),
+      'progress-weekly',
+    );
+    expect(late.ok, 'weeks 13 and 14 without progress').toBe(true);
+    expect(late.name).toContain(
+      'in 12 of 12 weeks of the first 12 (the whole run, as measured: 12 of 14)',
+    );
+    const early = check(
+      run((week) => week === 11),
+      'progress-weekly',
+    );
+    expect(early.ok, 'the 12th week without progress').toBe(false);
+    expect(early.name).toContain(
+      'in 11 of 12 weeks of the first 12 (the whole run, as measured: 13 of 14)',
+    );
+    const twelve = report('slow', { days: Array.from({ length: 84 }, (_, i) => day(i)) });
+    expect(check(twelve, 'progress-weekly').name, 'a 12-week run').toMatch(/in 12 of 12 weeks$/);
+  });
+
   it('a goal reached without the gift', () => {
     const r = report('average');
     r.days[3] = day(3, { giftOpened: false });
@@ -309,20 +337,20 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     expect(check(long, 'market-pace').ok, 'a quick median does not hide a drought').toBe(false);
   });
 
-  it('the slow child waits at most 8 sessions, the struggling child 12 (median)', () => {
+  it('the slow child waits at most 9 sessions, the struggling child 12 (median)', () => {
     expect(
       check(
-        buying('slow', 40, (i) => i % 8 === 0),
+        buying('slow', 40, (i) => i % 9 === 0),
         'market-pace',
       ).ok,
-      'slow: 8',
+      'slow: 9',
     ).toBe(true);
     const slow = check(
-      buying('slow', 30, (i) => i % 9 === 0),
+      buying('slow', 40, (i) => i % 10 === 0),
       'market-pace',
     );
-    expect(slow.ok, 'slow: 9').toBe(false);
-    expect(slow.name).toContain('every 9 sessions (median of 4 waits, at most 8; the longest 9)');
+    expect(slow.ok, 'slow: 10').toBe(false);
+    expect(slow.name).toContain('every 10 sessions (median of 4 waits, at most 9; the longest 10)');
     const twelve = buying('struggling', 40, (i) => i % 12 === 0);
     expect(check(twelve, 'market-pace').ok, 'struggling: 12').toBe(true);
     const thirteen = check(
