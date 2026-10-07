@@ -103,6 +103,7 @@ class QaSummary implements Reporter {
     const advice = new Map<string, number>();
     const evidence: string[] = [];
     const measured: string[] = [];
+    const blanks: string[] = [];
     const met = new Set<string>();
     for (const { test, run } of this.results) {
       const project = projectOf(test);
@@ -129,6 +130,8 @@ class QaSummary implements Reporter {
           evidence.push(`- ${note.type} _(${project})_: \`${description.replace(/`/g, "'")}\``);
         } else if (note.type === 'performance') {
           measured.push(`- ${description} _(${project})_`);
+        } else if (note.type === 'blank screens') {
+          blanks.push(`- ${test.title}: ${description} _(${project})_`);
         } else if (note.type === 'axe advisory') {
           const rule = / ([a-z0-9-]+ \((?:minor|moderate|serious|critical|unknown)\)) at /.exec(
             description,
@@ -186,6 +189,10 @@ class QaSummary implements Reporter {
     if (measured.length > 0) {
       // Sizes and first-screen timings against their budgets (perf.spec.ts).
       lines.push('', '### Performance', '', ...measured.sort());
+    }
+    if (blanks.length > 0) {
+      // Frames with nothing to see between screens (playtest.spec.ts, support/blank.ts).
+      lines.push('', '### Blank screens between screens', '', ...blanks.sort());
     }
     lines.push('', '### Accessibility advice (moderate and minor axe findings, by rule)', '');
     if (advice.size === 0) lines.push('None.');

@@ -30,17 +30,18 @@ The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest
 | Zero outbound requests and zero console errors   | The guard on every test (`support/fixtures.ts`, `support/guard.ts`), proved by `harness.spec.ts`                                 | Covered                 |
 | 200 % text and reduced motion                    | `reflow.spec.ts`, `motion.spec.ts`                                                                                               | Covered (DV-QA-13 open) |
 | Screenshots at tablet, desktop and phone sizes   | `screens.spec.ts`, indexed in [screens.md](screens.md)                                                                           | Covered                 |
+| A tablet screen without page scrolling           | `playtest.spec.ts` (the hub, the Egg Grid, a round, each hatch and the results at 1180 × 820 and 1024 × 768), `profiles.spec.ts` | Covered                 |
 
 ## Plan §2.8: the first session
 
-| Step                                          | Evidence                                                                                                                                            | Status            |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| Title, a new keeper, the story, the first egg | `first-run.spec.ts` (skippable story, the egg cannot be skipped)                                                                                    | Covered           |
-| Placement check                               | `profiles.spec.ts`, `persistence.spec.ts`, `input.spec.ts`, `settings.spec.ts`                                                                      | Covered           |
-| First Feeding Time and the first hatch        | The screen walks; `profiles.spec.ts` (the hatch celebrated before the results); `test/sim/` (the first session hatches the first egg for every bot) | Covered           |
-| First sticker and coins                       | `live.spec.ts` (coins announced), `persistence.spec.ts` (coins kept), `collections.spec.ts` (the placement check's sticker in the album)            | Covered           |
-| Buy a hat                                     | `collections.spec.ts`: a hat too dear first, then bought for its price and worn in the Dragon Den, still worn after a reload                        | Covered           |
-| The map shows the next level                  | The map and road are visited and checked (`screens.spec.ts`, `reflow.spec.ts`)                                                                      | Covered, visually |
+| Step                                          | Evidence                                                                                                                                                                                                                                                       | Status            |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| Title, a new keeper, the story, the first egg | `first-run.spec.ts` (skippable story, the egg cannot be skipped)                                                                                                                                                                                               | Covered           |
+| Placement check                               | `profiles.spec.ts`, `persistence.spec.ts`, `input.spec.ts`, `settings.spec.ts`                                                                                                                                                                                 | Covered           |
+| First Feeding Time and the first hatch        | The screen walks; `profiles.spec.ts` (the hatch celebrated before the results); `playtest.spec.ts` (the hatched dragon at least 200 px each way, with no word on it, at two tablet sizes); `test/sim/` (the first session hatches the first egg for every bot) | Covered           |
+| First sticker and coins                       | `live.spec.ts` (coins announced), `persistence.spec.ts` (coins kept), `collections.spec.ts` (the placement check's sticker in the album)                                                                                                                       | Covered           |
+| Buy a hat                                     | `collections.spec.ts`: a hat too dear first, then bought for its price and worn in the Dragon Den, still worn after a reload                                                                                                                                   | Covered           |
+| The map shows the next level                  | The map and road are visited and checked (`screens.spec.ts`, `reflow.spec.ts`)                                                                                                                                                                                 | Covered, visually |
 
 ## Plan §2.9: session flow and wellbeing
 
@@ -58,6 +59,7 @@ The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------- |
 | Painted backgrounds, the dragon rig, cosmetics on anchors | `test/unit/art/`; every screen photographed for review                                    | Covered; approval is a human checkpoint |
 | Animation, with reduced motion respected                  | `motion.spec.ts`                                                                          | Covered                                 |
+| A change of screen never leaves the screen blank          | `playtest.spec.ts` (`support/blank.ts`, proved by `harness.spec.ts`): never over 300 ms   | Covered                                 |
 | Feedback never by colour alone                            | `live.spec.ts` and the round specs read the words; the screens show the symbol            | Covered for words; symbols by review    |
 | Audio from deterministic recipes, on the SDK's buses      | `test/unit/audio/` (determinism, the 8 MB pack), `test/unit/app/` (sound map, game audio) | Covered; audition is a human checkpoint |
 | Read-aloud with local voices only                         | `read-aloud.spec.ts`, `test/unit/app/verbalizer.test.ts`, `test/unit/app/voices.test.ts`  | Covered                                 |
