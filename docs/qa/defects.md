@@ -15,41 +15,38 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 
 ## Open
 
-| ID       | Severity | Owner | Summary                                                                               |
-| -------- | -------- | ----- | ------------------------------------------------------------------------------------- |
-| DV-QA-13 | minor    | S3    | WebKit, sometimes Chromium: a keeper's hub at 200 % text appears at normal size first |
-| DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys                |
+| ID       | Severity | Owner | Summary                                                                            |
+| -------- | -------- | ----- | ---------------------------------------------------------------------------------- |
+| DV-QA-13 | minor    | S3    | WebKit, intermittent: a keeper's hub at 200 % text comes into sight at normal size |
+| DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys             |
 
-### DV-QA-13 (minor, S3; WebKit, sometimes Chromium): a keeper's hub at 200 % text first appears at normal size
+### DV-QA-13 (minor, S3; WebKit, intermittent): a keeper's hub at 200 % text first comes into sight at normal size
 
-- **Repro** (Playwright's WebKit 26.6, on Windows, and on the Ubuntu runner before #19): give a
-  keeper Text size **200%** in the grown-ups' area, then open that keeper from "Who is playing?".
-- **Expected**: the hub appears at 200 %, as in Chromium and Firefox (6 of 6 openings each).
-- **Actual** (at `0827c3a`, after #19): in 6 of 6 openings the hub's text is drawn at its normal
-  size first. The greeting is 43.2 px, not 86.4 px, for 140-435 ms, then everything jumps to
-  200 %. `<html>` already carries the scale (`--aegis-text-scale: 2`, `data-text-scale="2"`), yet
-  its computed size is still 24 px in 2 of 6. #19 mirrors the scale in `data-text-scale` so that
-  WebKit restyles the root, but no rule reads that attribute, so it restyles nothing; the root's
-  size is right more often since, the text below it is not. Two further tries, through a test
-  shim and not in the game: setting the root's `font-size` inline whenever the scale changes
-  changed nothing; forcing a style and layout flush right after it made the root right in 6 of 6,
-  but the hub's text still lagged 145-185 ms. WebKit keeps the newly mounted screen's text styled
-  against the old root size until its next rendering update.
-- **Also in Chromium, sometimes**: on CI the root was still 24 px as the hub
-  appeared in 2 of the last 4 Chromium runs of the test (runs 37562539633, main after #26, and
-  37564290512, #28), while Chromium is right at once on every other run and locally. So the cause
-  is not WebKit's alone: the hub is shown before the keeper's text size has taken effect, and a
-  slower engine or a busy machine lets a frame through. The registry marks it as always open in
-  WebKit and intermittent in Chromium (a run without it is noted, not taken for a fix); Firefox
-  has always been right at once and stays strict.
-- **Ideas** (untested): keep the new screen hidden until the next animation frame after a text
-  size change (e.g. `visibility: hidden` on the stage until `requestAnimationFrame`), so no child
-  sees it at the wrong size; or apply the keeper's presentation earlier, before "Who is playing?"
-  starts the change of screen. Minor: the setting is never lost, but a 200 % reader sees small
-  text flash for up to half a second whenever their keeper opens.
-- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…" compares the root and the
-  greeting as the hub appears with the same hub at 100 %; where it shows, it records how long until
-  200 % (`DV-QA-13 evidence` in the job summary).
+- **Repro** (Playwright's WebKit 26.6): give a keeper Text size **200%** in the grown-ups' area,
+  then open that keeper from "Who is playing?".
+- **Expected**: the hub comes into sight at 200 %. After #49 Chromium does (6 of 6 openings:
+  the stage stays transparent for 7 frames, until the hub is restyled), and Firefox always has.
+- **Actual** (at `44ab948`, after #49): in WebKit, 6 of 8 openings still show the hub at 100 %
+  first. Frame by frame: the hub is mounted and the stage gets `data-restyling="true"` in the same
+  task, yet at the first animation frame the stage's computed opacity is still 1 and the greeting
+  computes at 43.2 px, not 86.4 px. At the next frame the stage is transparent and the greeting
+  86.4 px; the stage turns opaque again once the hub's own size is 48 px. WebKit applies the
+  attribute rule (`.dv-stage[data-restyling='true'] { opacity: 0 }`) a frame late: exactly the
+  frame drawn at the old size. In 2 of 8 the stage was transparent from the first frame. The page
+  cannot tell what was painted; this is the same computed-style evidence the defect was found by.
+- **Before #49** (at `0827c3a`): 6 of 6 WebKit openings drew the greeting at 43.2 px for
+  140-435 ms, and Chromium on CI sometimes did too (2 of 4 runs).
+- **Likely fix**: make the stage transparent, and flush its style, before the new screen is
+  inserted: set `data-restyling` when `applyPresentation` sees the scale change (or just before
+  `replaceProjection`), then read `getComputedStyle(stage).opacity` so WebKit applies the rule
+  before the screen's first frame. Minor: the setting is never lost, but a 200 % reader can see
+  small text for a frame or so whenever their keeper opens.
+- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…" watches every animation
+  frame from the tap on the keeper and keeps the sizes at the first frame the greeting is in sight
+  (it and its ancestors at least half opaque), against the same hub at 100 %; the job summary
+  records them (`DV-QA-13 evidence`, with the frames it was kept out of sight). Chromium and
+  Firefox check it strictly; in WebKit it is marked intermittent (a run without it is noted, not
+  taken for a fix).
 
 ### DV-QA-15 (minor, S3; WebKit): the keeper pictures lose their focus ring under the arrow keys
 
@@ -73,7 +70,7 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 ## Fixed
 
 Each was verified fixed by the suite in Chromium (Edge), Firefox and WebKit, and its assertion now
-runs as a regression check. (DV-QA-13 stays open for WebKit and, sometimes, Chromium.) The full
+runs as a regression check. (DV-QA-13 is fixed in Chromium by #49 and stays open for WebKit.) The full
 write-ups (repro, cause, suggested fix) are in this file's history:
 `git log -p -- docs/qa/defects.md`.
 

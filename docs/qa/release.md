@@ -27,8 +27,8 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
 ## 2. Defects and decisions
 
 - [x] No open blocker or major defect ([defects.md](defects.md)): the last major one, DV-QA-17,
-      was fixed by #46. Open today: two minor, both S3 and both in WebKit (DV-QA-13, also sometimes
-      in Chromium, and DV-QA-15); fix them or accept them for v1.
+      was fixed by #46. Open today: two minor, both S3 and both in WebKit only (DV-QA-13 and
+      DV-QA-15); fix them or accept them for v1.
 - [x] _(person)_ The copy decisions are made ([copy-review.md](copy-review.md), "Needs a human
       decision") and the agreed changes merged (S2b: #38, #40, #43; S3: #41, #46).
 - [x] The accessibility advice is fixed or accepted ([accessibility.md](accessibility.md):
