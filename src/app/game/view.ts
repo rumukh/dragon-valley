@@ -104,6 +104,14 @@ export function bossPose(
   return 'start';
 }
 
+/**
+ * The day the game is on once today's session has started (`today` is the local date): the rules
+ * never go back a day, so a save from a device whose clock ran ahead keeps its own day.
+ */
+export function gameDay(view: Pick<GameView, 'day'>, today: string): string {
+  return view.day !== null && view.day > today ? view.day : today;
+}
+
 export type Adventure =
   | { readonly kind: 'level'; readonly level: string; readonly resume: number | null }
   | { readonly kind: 'minigame'; readonly level: string; readonly activity: number }

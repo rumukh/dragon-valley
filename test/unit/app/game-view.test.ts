@@ -24,6 +24,7 @@ import {
   bossPose,
   featuredDragon,
   findLevel,
+  gameDay,
   growthOf,
   resultsNext,
   stepChoices,
@@ -324,6 +325,16 @@ describe('boss poses', () => {
     expect(bossPose({ value: 8, target: 15 }, false)).toBe('warming');
     expect(bossPose({ value: 15, target: 15 }, false)).toBe('won');
     expect(bossPose({ value: 3, target: 15 }, true)).toBe('won');
+  });
+});
+
+describe('the game day', () => {
+  it('is today, unless the save is already on a later day', () => {
+    expect(gameDay({ day: null }, '2026-10-07')).toBe('2026-10-07');
+    expect(gameDay({ day: '2026-10-06' }, '2026-10-07')).toBe('2026-10-07');
+    expect(gameDay({ day: '2026-10-20' }, '2026-10-07'), 'a clock that ran ahead').toBe(
+      '2026-10-20',
+    );
   });
 });
 

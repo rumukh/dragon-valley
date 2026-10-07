@@ -9,6 +9,7 @@
  * is still in progress (the rules refuse then, and the next visit tries again). Entering it starts
  * the day's session when the local date has changed (time reaches the rules only as this date).
  */
+import { gameDay } from '../game/view';
 import type { ScreenEntry } from '../router/router';
 import { playKey } from '../shell/app';
 import type { ActiveKeeper, App } from '../shell/app';
@@ -33,7 +34,7 @@ export function playScreen(app: App, keeperId: string): ScreenEntry {
       await active.game.activateLatestContent();
       // The Dragon Diary tells what today brought: note how the day begins.
       const today = localDay();
-      await active.day.begin(today, active.game.view());
+      await active.day.begin(gameDay(active.game.view(), today), active.game.view());
       await startToday(active, today);
       const view = active.game.view();
       switch (view.screen) {
