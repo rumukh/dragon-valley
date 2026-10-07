@@ -54,10 +54,10 @@ export const DEFECTS = {
   'DV-QA-13': {
     owner: 'S3',
     severity: 'minor',
-    engines: ['webkit', 'chromium'],
-    intermittent: ['chromium'],
+    engines: ['webkit'],
+    intermittent: true,
     title:
-      "A keeper's hub at 200 % text can first appear at normal size. In WebKit always: the greeting is drawn at 43 px, not 86 px, for 140-435 ms (6 of 6 openings), and the root still reports 24 px in 2 of 6; #19's data-text-scale (no rule reads it) did not change this. In Chromium sometimes: on CI the root was still 24 px as the hub appeared in 2 of 4 runs. Firefox has been right at once.",
+      "In WebKit a keeper's hub at 200 % text can still come into sight at normal size (6 of 8 openings after #49): the stage gets data-restyling at once, but WebKit applies its opacity: 0 a frame late, the very frame the greeting is drawn at 43.2 px, not 86.4 px. #49 fixed Chromium (6 of 6 openings kept out of sight until 200 %); Firefox was always right. Making the stage transparent, and flushing its style, before the new screen is inserted would close the gap.",
   },
   'DV-QA-15': {
     owner: 'S3',
