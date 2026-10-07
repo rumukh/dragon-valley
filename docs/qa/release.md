@@ -23,6 +23,9 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
       archived). Every later content change runs `npm run content:bump`, which archives `1.3.0` in
       `content/history/` so v1 saves upgrade ([contract.md](../contract.md),
       [content.md](../content.md) §1).
+- [ ] The README's four screenshots (`docs/images/`) show the release build. They date from #30;
+      `hub.jpg` still shows "Bubbles's egg" (DV-QA-19). S6 retakes them from the release commit's
+      tablet screen walks (`qa-screens-*` artifacts, 1180 × 820) as JPEGs of about 100 KB each.
 
 ## 2. Defects and decisions
 
