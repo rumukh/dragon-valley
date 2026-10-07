@@ -109,8 +109,8 @@ describe('quest progress and claims', () => {
     expect(done.done && !done.claimed).toBe(true);
     const coins = player.view().coins;
     await player.act({ type: 'startSession', day: '2026-10-07' });
-    expect(player.data('quest.claimed')).toContainEqual({ quest: done.id, coins: 10 });
-    expect(player.view().coins).toBeGreaterThanOrEqual(coins + 10);
+    expect(player.data('quest.claimed')).toContainEqual({ quest: done.id, coins: 3 });
+    expect(player.view().coins).toBeGreaterThanOrEqual(coins + 3);
     expect(player.view().daily!.quests.every((q) => q.id.endsWith('@20733'))).toBe(true);
     await player.dispose();
   });

@@ -29,8 +29,8 @@ vi.setConfig({ testTimeout: 300_000 });
  * pinned as literals. Re-pin only for a deliberate rules or content change, with the reason and
  * the old and new values in the commit message (docs/testing.md, "When a golden moves").
  */
-const GOLDEN_HASH = 'f13e54fba61c2d97';
-const GOLDEN_TRAJECTORY = '8542af182bfcdce4';
+const GOLDEN_HASH = '143f372c937992c5';
+const GOLDEN_TRAJECTORY = 'fd9b0693628d90a4';
 
 const SEED = 'golden-first-session';
 const PLACEMENT_MISS = 6;
@@ -141,8 +141,8 @@ function checks(o: Observation): Record<string, boolean> {
     'seven of eight right earned two stars on the first try':
       JSON.stringify(p.data('level.completed')) ===
       '[{"level":"sunny-meadow.1","stars":2,"firstTime":true}]',
-    'the star coins were 5 and 10':
-      JSON.stringify(stars) === '[{"amount":5,"reason":"stars"},{"amount":10,"reason":"stars"}]',
+    'the star coins were 2 and 4':
+      JSON.stringify(stars) === '[{"amount":2,"reason":"stars"},{"amount":4,"reason":"stars"}]',
     'the placement check paid its 10 coins once':
       p.data('coins.earned').filter((e) => (e as { reason: string }).reason === 'placement')
         .length === 1,

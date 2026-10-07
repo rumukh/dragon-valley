@@ -61,7 +61,7 @@ describe('the Bridge Troll', () => {
     expect(player.data('level.completed')).toEqual([
       { level: 'sunny-meadow.boss', stars: 1, firstTime: true },
     ]);
-    expect(player.data('coins.earned')).toContainEqual({ amount: 30, reason: 'boss' });
+    expect(player.data('coins.earned')).toContainEqual({ amount: 15, reason: 'boss' });
     expect(player.view().story?.beat, 'the outro beat follows').toBe('beat.troll-laughs');
     expect(player.state().coins).toBeGreaterThan(0);
     await player.dispose();

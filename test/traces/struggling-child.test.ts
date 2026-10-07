@@ -2,7 +2,9 @@
  * Golden trace: a struggling child plays Sunny Meadow over two days.
  *
  * The child misses the first three placement problems, then about two answers in five, answers
- * slowly (9 s), and makes a mistake on every minigame board before solving it. Day 1: the
+ * slowly (9 s), and makes a mistake on every minigame board before solving it. Its answers to
+ * facts are slow; a story's answer has its reading time on top (docs/design.md §6.2), so the
+ * same 9 s is not slow there. Day 1: the
  * placement check, Sunny Meadow 1 and 2. Day 2: snack time, then Sunny Meadow 3-6 and the Bridge
  * Troll. The design's kindness rules (docs/design.md §1, §5, §6.5) must hold throughout: no
  * failing, no lost coins, dragons that never shrink, gentle stops and capped re-asks, and a boss
@@ -23,8 +25,8 @@ import type { Adapter, Style } from './support';
 vi.setConfig({ testTimeout: 300_000 });
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '9a6f13468ecb7e5e';
-const GOLDEN_TRAJECTORY = '5968cb23b412c53c';
+const GOLDEN_HASH = 'b87aa54a890f4b30';
+const GOLDEN_TRAJECTORY = '96fd9271010275e2';
 
 const SEED = 'golden-struggling-child';
 const STRUGGLING: Style = {
@@ -116,6 +118,8 @@ function checks(o: Observation): Record<string, boolean> {
   const earned = p
     .data('coins.earned')
     .reduce((sum: number, e) => sum + (e as { amount: number }).amount, 0);
+  const right = p.data('answer.correct') as { item: string; bucket: string }[];
+  const stories = right.filter((e) => e.item.startsWith('word:'));
   const completed = p.data('level.completed') as { level: string; stars: number }[];
   const stickerDays = new Set(Object.values(state.stickers).map((s) => s.day));
   return {
@@ -128,9 +132,11 @@ function checks(o: Observation): Record<string, boolean> {
       (count) => count <= 2,
     ),
     'misses were re-asked at all': p.count('reask.scheduled') > 0,
-    'every right answer of the slow child was recorded as slow': p
-      .data('answer.correct')
-      .every((e) => (e as { bucket: string }).bucket === 'slow'),
+    'every right answer of the slow child to a fact was recorded as slow': right
+      .filter((e) => !e.item.startsWith('word:'))
+      .every((e) => e.bucket === 'slow'),
+    'its right answers to stories had time to read (design §6.2), so none was slow':
+      stories.length > 0 && stories.every((e) => e.bucket !== 'slow'),
     'a slow right answer never moved a box up':
       slowPromotions.length === 0 && p.data('answer.correct').length > 0,
     'no answer ever cost a coin (the wallet is all that was earned)':
@@ -207,7 +213,17 @@ describe('mutation checks: the named checks fail when a capability breaks', () =
     };
     const observation = await playStruggling(quick);
     const failed = failedChecks(observation);
-    expect(failed).toContain('every right answer of the slow child was recorded as slow');
+    expect(failed).toContain('every right answer of the slow child to a fact was recorded as slow');
+    await observation.player.dispose();
+  });
+
+  it('without the reading time its story answers are slow again', async () => {
+    const pack: ContentPack<ContentData> = JSON.parse(JSON.stringify(loadPack()));
+    delete pack.data.balance.response.word;
+    const observation = await playStruggling(dragonValleyAdapter, SEED, pack);
+    expect(failedChecks(observation)).toContain(
+      'its right answers to stories had time to read (design §6.2), so none was slow',
+    );
     await observation.player.dispose();
   });
 
