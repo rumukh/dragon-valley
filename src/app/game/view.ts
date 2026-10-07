@@ -112,6 +112,18 @@ export function gameDay(view: Pick<GameView, 'day'>, today: string): string {
   return view.day !== null && view.day > today ? view.day : today;
 }
 
+/**
+ * Heads won over so far, for a boss won over head by head: the meter is shared evenly between
+ * the heads (docs/contract.md, `RegionView.boss.heads`).
+ */
+export function curedHeads(
+  meter: { readonly value: number; readonly target: number } | null,
+  heads: number,
+): number {
+  if (meter === null || meter.target <= 0 || heads < 1) return 0;
+  return Math.min(heads, Math.floor((meter.value * heads) / meter.target));
+}
+
 export type Adventure =
   | { readonly kind: 'level'; readonly level: string; readonly resume: number | null }
   | { readonly kind: 'minigame'; readonly level: string; readonly activity: number }

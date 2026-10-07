@@ -22,6 +22,7 @@ import {
   adventureFor,
   answerKindOf,
   bossPose,
+  curedHeads,
   featuredDragon,
   findLevel,
   gameDay,
@@ -325,6 +326,19 @@ describe('boss poses', () => {
     expect(bossPose({ value: 8, target: 15 }, false)).toBe('warming');
     expect(bossPose({ value: 15, target: 15 }, false)).toBe('won');
     expect(bossPose({ value: 3, target: 15 }, true)).toBe('won');
+  });
+
+  it('cure the Seven-Headed Dragon head by head: three right answers a head', () => {
+    const boss = pack.data.bosses.find((candidate) => candidate.heads === 7)!;
+    const meter = (value: number) => ({ value, target: boss.meter });
+    expect(boss.meter).toBe(21);
+    expect(curedHeads(null, 7)).toBe(0);
+    expect(curedHeads(meter(2), 7)).toBe(0);
+    expect(curedHeads(meter(3), 7)).toBe(1);
+    expect(curedHeads(meter(20), 7)).toBe(6);
+    expect(curedHeads(meter(21), 7)).toBe(7);
+    expect(curedHeads(meter(25), 7), 'never more heads than it has').toBe(7);
+    expect(curedHeads({ value: 4, target: 0 }, 7), 'no meter, no heads').toBe(0);
   });
 });
 

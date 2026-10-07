@@ -10,6 +10,7 @@ import { checkStop, writeContactSheet } from './support/screens';
 import { installSpeech, TYPICAL_VOICES } from './support/speech';
 import {
   familyAfterPlacement,
+  finaleWalk,
   grownUpWalk,
   placesWalk,
   roundWalk,
@@ -64,6 +65,17 @@ test("the keepers and the grown-ups' area", async ({ page }, testInfo) => {
     await checkStop(page, testInfo, stop, everything);
   });
   writeContactSheet(testInfo, 'keepers-and-grown-ups', stops);
+});
+
+test('the finale: the Seven-Headed Dragon head by head, the Magic Window whole', async ({
+  page,
+}, testInfo) => {
+  const stops: Stop[] = [];
+  await finaleWalk(page, async (stop) => {
+    stops.push(stop);
+    await checkStop(page, testInfo, stop, everything);
+  });
+  writeContactSheet(testInfo, 'the-finale', stops);
 });
 
 test('when things go wrong: failed saves, recovery, errors', async ({ page }, testInfo) => {

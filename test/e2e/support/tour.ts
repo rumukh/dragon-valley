@@ -25,6 +25,8 @@ import {
   holdGate,
   leaveHub,
   leaveResults,
+  loadBackup,
+  openGrownUps,
   openTab,
   passGate,
   reload,
@@ -33,8 +35,10 @@ import {
   startLevel,
   startPlacement,
   typeGateAnswer,
+  unlockAhead,
   waitReady,
 } from './app';
+import { FINALE_BEAT, finaleBackup } from './finale';
 import { readAnswer } from './problem';
 import {
   corruptRecord,
@@ -231,6 +235,42 @@ export async function grownUpWalk(page: Page, visit: Visit): Promise<void> {
     await leaveHub(page);
   }
   await visit({ name: '32-keepers-full', description: 'Four keepers: the valley is full' });
+}
+
+/**
+ * The Seven-Headed Dragon and the finale. A grown-up opens Dragon Castle ahead and the child cures
+ * the boss's first head; then a save the rules played to the finale beat is loaded
+ * (support/finale.ts) for its first two lines: every head cured, then the Magic Window whole.
+ */
+export async function finaleWalk(page: Page, visit: Visit): Promise<void> {
+  await boot(page);
+  await createFirstKeeper(page, { name: 'Ada', avatar: 'keeper-4' });
+  await leaveHub(page);
+  await openGrownUps(page, 'settings');
+  await unlockAhead(page, 'dragon-castle');
+  await closeGrownUps(page);
+  await page.getByTestId('keeper-profile-1').click();
+  await expectHub(page, 'Ada');
+  await startLevel(page, 'dragon-castle', 'dragon-castle.boss');
+  for (let answer = 0; answer < 3; answer++) await answerCorrectly(page, 'keyboard');
+  await expect(page.getByTestId('boss-heads')).toHaveText('1 of 7 heads cured');
+  await visit({ name: '37-boss-heads', description: 'The Seven-Headed Dragon: one head cured' });
+  await backToHub(page, 'Ada', async () => {
+    await page.keyboard.press('Escape');
+    await page.getByTestId('pause-quit').click();
+  });
+  await leaveHub(page);
+
+  await loadBackup(page, await finaleBackup(), 'Ada');
+  await page.getByTestId('keeper-profile-1').click();
+  await expect(page.getByTestId('screen-story')).toHaveAttribute('data-beat', FINALE_BEAT);
+  await visit({ name: '38-finale', description: 'The finale: all seven heads smile' });
+  await page.getByTestId('story-next').click();
+  await expect(page.getByTestId('hall-window')).toBeVisible();
+  await visit({
+    name: '39-finale-window',
+    description: 'The finale: the Magic Window whole again',
+  });
 }
 
 /**

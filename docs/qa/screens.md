@@ -16,8 +16,8 @@ differ by operating system, so no test compares them.
 - **CI**: each run of the `CI` workflow uploads one artifact per engine from the job that runs
   the walks: `qa-screens-chromium-walks+rest`, `qa-screens-firefox-walks+rest` and
   `qa-screens-webkit-walks` (kept 30 days). Open `first-run-and-placement.html`,
-  `the-valley.html`, `keepers-and-grown-ups.html`, `when-things-go-wrong.html` or `text-200.html`
-  in the artifact for a contact sheet: one row per stop, one column per size.
+  `the-valley.html`, `keepers-and-grown-ups.html`, `the-finale.html`, `when-things-go-wrong.html`
+  or `text-200.html` in the artifact for a contact sheet: one row per stop, one column per size.
 - **Locally**: `npm run test:e2e -- screens.spec.ts reflow.spec.ts` writes the same files to
   `out/qa-screens/<project>/` (`chromium-msedge` with the default local browser).
 
@@ -90,6 +90,18 @@ goodbye and reads the day's Dragon Diary (`placesWalk`).
 | `30-confirm-remove`  | Confirming the removal of a keeper                    |
 | `31-editor-change`   | Changing a keeper, with Remove                        |
 | `32-keepers-full`    | Four keepers: the valley is full                      |
+
+## The finale (`the-finale`)
+
+A grown-up opens Dragon Castle ahead and the child cures the Seven-Headed Dragon's first head;
+then a save the rules played to the finale beat (`test/e2e/support/finale.ts`) shows its first two
+lines (`finaleWalk`).
+
+| Stop               | What it shows                            |
+| ------------------ | ---------------------------------------- |
+| `37-boss-heads`    | The Seven-Headed Dragon: one head cured  |
+| `38-finale`        | The finale: all seven heads smile        |
+| `39-finale-window` | The finale: the Magic Window whole again |
 
 ## When things go wrong (`when-things-go-wrong`)
 

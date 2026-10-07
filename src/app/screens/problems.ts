@@ -5,11 +5,13 @@
  * One problem at a time in the child's notation, answered with choice tiles or the keypad (with
  * remainder mode), as the view resolves. A right answer throws a fruit into the dragon's mouth
  * (an egg glows warmer instead); on a boss level a sparkle tickles the boss and its mood meter
- * fills. A miss is never punished: orange "?", "Almost! Let's look…", the right fact and its
- * picture, and the child goes on when ready. A re-asked fact shows its picture first; a hint
- * shows it on request. Response time excludes pauses. Every answer goes through the command
- * controller (stale-view guard, strict save); Escape or Pause pauses the game.
+ * fills, and the Seven-Headed Dragon is won over head by head. A miss is never punished: orange
+ * "?", "Almost! Let's look…", the right fact and its picture, and the child goes on when ready. A
+ * re-asked fact shows its picture first; a hint shows it on request. Response time excludes
+ * pauses. Every answer goes through the command controller (stale-view guard, strict save);
+ * Escape or Pause pauses the game.
  */
+import { FINALE_DRAGON_ID } from '../../rules/contract';
 import type {
   AnswerValue,
   Feedback,
@@ -21,15 +23,16 @@ import type {
 import { getDragonAnchors } from '../art/dragon';
 import { CommandRejectedError, taken } from '../controller/commands';
 import { createResponseTimer } from '../game/timer';
-import { answerKindOf, bossPose, featuredDragon, stepChoices } from '../game/view';
+import { answerKindOf, bossPose, curedHeads, featuredDragon, stepChoices } from '../game/view';
 import type { BossPose } from '../game/view';
 import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { modelFor } from '../math/model';
 import { formatSolved } from '../math/notation';
 import { speakProblem, speakSolved } from '../speech/verbalizer';
-import { artIcon, bossArt, outfitOf, viewDragonArt } from '../ui/art';
+import { artIcon, bossArt, outfitOf, sevenHeadedArt, viewDragonArt } from '../ui/art';
 import { candyButton } from '../ui/button';
+import { confetti } from '../ui/confetti';
 import { openModal } from '../ui/dialog';
 import { h } from '../ui/dom';
 import { centerOf, flyAlongArc, svgPointToPage } from '../ui/fly';
@@ -40,7 +43,7 @@ import type { KeypadView } from '../ui/keypad';
 import { createCoinCounter, createMeter } from '../ui/meters';
 import type { MeterView } from '../ui/meters';
 import { arrayModel, groupsModel } from '../ui/models';
-import { prefersReducedMotion, wait } from '../ui/motion';
+import { animate, EASE_OUT, prefersReducedMotion, wait } from '../ui/motion';
 import { createTiles } from '../ui/tiles';
 import type { TilesView } from '../ui/tiles';
 import type { Screen } from '../router/router';
@@ -80,6 +83,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     activity === 'boss' && level?.boss
       ? data.bosses.find((candidate) => candidate.id === level.boss)
       : undefined;
+  const heads = boss?.heads ?? 1;
+  // The Seven-Headed Dragon is drawn head by head; other bosses show their pose.
+  const byHead = boss?.id === FINALE_DRAGON_ID && heads > 1;
   const notation = (): ReturnType<typeof active.preferences.current>['notation'] =>
     active.preferences.current().notation;
 
@@ -143,6 +149,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     testId: 'round-boss',
     attributes: { role: 'img' },
   });
+  const headsLine = byHead ? h('p', { className: 'dv-heads', testId: 'boss-heads' }) : null;
   const story = h('p', { className: 'dv-round__story', testId: 'round-story' });
   const problemSlot = h('div', { className: 'dv-round__problem' });
   const speakerSlot = h('div', { className: 'dv-round__speaker' });
@@ -167,6 +174,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   let pausedByDialog = false;
   let disposed = false;
   let pose: BossPose = bossPose(first.progress.meter, false);
+  let cured = byHead ? curedHeads(first.progress.meter, heads) : 0;
   const timer = createResponseTimer();
   // The Arena's one-minute race, paused like everything else.
   const race = createResponseTimer();
@@ -217,12 +225,47 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
 
   const paintBoss = (): void => {
     if (!boss) return;
-    bossSlot.replaceChildren(bossArt(boss.id, pose));
+    const name = text(boss.nameKey);
     bossSlot.dataset['pose'] = pose;
+    if (!byHead) {
+      bossSlot.replaceChildren(bossArt(boss.id, pose));
+      bossSlot.setAttribute('aria-label', t(`boss.pose.${pose}` as MessageKey, { name }));
+      return;
+    }
+    bossSlot.replaceChildren(sevenHeadedArt(cured, { className: 'dv-boss-art' }));
+    bossSlot.dataset['cured'] = String(cured);
     bossSlot.setAttribute(
       'aria-label',
-      t(`boss.pose.${pose}` as MessageKey, { name: text(boss.nameKey) }),
+      cured >= heads
+        ? t('boss.pose.won', { name })
+        : t('boss.headsLabel', { name, count: cured, total: heads }),
     );
+    headsLine?.replaceChildren(
+      h(
+        'span',
+        { className: 'dv-heads__pips', attributes: { 'aria-hidden': 'true' } },
+        ...Array.from({ length: heads }, (_, index) =>
+          h('span', { className: 'dv-heads__pip', dataset: { cured: String(index < cured) } }),
+        ),
+      ),
+      h('span', { text: t('boss.heads', { count: cured, total: heads }) }),
+    );
+  };
+
+  /** Heads just cured give a little hop and a shower of confetti. */
+  const celebrateHeads = (from: number, to: number): void => {
+    const art = bossSlot.querySelector('svg');
+    for (let head = from + 1; head <= to; head++) {
+      const group = art?.querySelector(`.dv-seven-head[data-head="${head}"]`);
+      if (group) {
+        animate(
+          group,
+          [{ transform: 'scale(1)' }, { transform: 'scale(1.2)' }, { transform: 'scale(1)' }],
+          { duration: 700, easing: EASE_OUT },
+        );
+      }
+    }
+    if (art) void confetti(app.kit.fx, { pieces: 18, origin: centerOf(art) });
   };
 
   /** Where a thrown fruit lands: the dragon's mouth, or the middle of an egg. */
@@ -396,10 +439,23 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     const fact = t('round.correct', {
       fact: formatSolved(asked.problem, result.given, notation()),
     });
-    setFeedback('correct', h('span', { text: fact }));
+    const round = problemRound(after)!;
+    const nowCured = byHead ? curedHeads(round.progress.meter, heads) : cured;
+    setFeedback(
+      'correct',
+      h('span', { text: fact }),
+      ...(nowCured > cured
+        ? [
+            h('span', {
+              className: 'dv-feedback__extra',
+              testId: 'feedback-head',
+              text: t('boss.headCured'),
+            }),
+          ]
+        : []),
+    );
     hintSlot.replaceChildren();
     if (chosenTile) tiles?.setState(chosenTile, 'correct');
-    const round = problemRound(after)!;
     updateProgress(round);
     const gained = after.coins - before.coins;
     const from = centerOf(source);
@@ -428,10 +484,13 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     if (disposed) return;
     if (boss) {
       const next = bossPose(round.progress.meter, round.status === 'complete');
-      app.kit.cue('fx.boss-laugh');
-      if (next !== pose) {
+      const before = cured;
+      app.kit.cue(nowCured > before ? 'fx.dragon-happy' : 'fx.boss-laugh');
+      if (next !== pose || nowCured !== before) {
         pose = next;
+        cured = nowCured;
         paintBoss();
+        if (cured > before) celebrateHeads(before, cured);
       }
     } else if (currentDragon(after)?.stage !== 'egg') {
       app.kit.cue('fx.dragon-eating');
@@ -747,7 +806,22 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       { className: 'dv-round__play' },
       // The picture behind a problem stands with the dragon, so the problem, its feedback and
       // the answers keep their places on one screen.
-      h('div', { className: 'dv-round__cast' }, dragonSlot, ...(boss ? [bossSlot] : []), modelSlot),
+      h(
+        'div',
+        { className: 'dv-round__cast' },
+        dragonSlot,
+        ...(boss
+          ? [
+              h(
+                'div',
+                { className: 'dv-round__boss-figure' },
+                bossSlot,
+                ...(headsLine ? [headsLine] : []),
+              ),
+            ]
+          : []),
+        modelSlot,
+      ),
       h(
         'div',
         { className: 'dv-round__board' },

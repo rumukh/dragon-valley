@@ -1,11 +1,17 @@
 /**
  * Scene pieces shared by the story, rounds and the map: S4's static SVG backgrounds (shown as
- * plain images, so they never run script or reach the network), the backdrop for a story scene,
- * and who appears in a story beat.
+ * plain images, so they never run script or reach the network), the backdrop for a story scene
+ * (the castle hall can hold the Magic Window in its niche), and who appears in a story beat.
  */
 import type { ContentData, DragonExpression, StoryBeat } from '../../rules/contract';
+import { HALL_WINDOW } from '../art/backgrounds/scenes-b';
 import type { BossState } from '../art/characters/bosses';
 import { h } from '../ui/dom';
+
+const SVG = 'http://www.w3.org/2000/svg';
+/** S4's backgrounds are drawn on a 1600 × 1000 canvas. */
+const SCENE_WIDTH = 1600;
+const SCENE_HEIGHT = 1000;
 
 /** S4's background scenes (assets/backgrounds/<id>.svg, 1600 × 1000). */
 export const BACKGROUND_IDS = [
@@ -52,12 +58,50 @@ export function backdrop(id: string, className = 'dv-backdrop'): HTMLElement {
   );
 }
 
-/** Who speaks in a beat: a boss for a boss level's story, otherwise old Glimmer. */
-export function beatFigure(
-  data: ContentData,
-  beat: StoryBeat | undefined,
-): { readonly kind: 'glimmer' } | { readonly kind: 'boss'; id: string; pose: BossState } {
+/**
+ * The castle hall with a picture in its window niche (the Magic Window whole again). Hall and
+ * window are one SVG in the hall's own units, so the window stays in the niche at every size; the
+ * picture covers the screen like the plain backdrop (bottom centre).
+ */
+export function hallBackdrop(window: SVGSVGElement): HTMLElement {
+  const picture = document.createElementNS(SVG, 'svg');
+  picture.setAttribute('viewBox', `0 0 ${SCENE_WIDTH} ${SCENE_HEIGHT}`);
+  picture.setAttribute('preserveAspectRatio', 'xMidYMax slice');
+  picture.setAttribute('class', 'dv-backdrop__image');
+  picture.setAttribute('focusable', 'false');
+  const image = document.createElementNS(SVG, 'image');
+  image.setAttribute('href', backgroundUrl('castle-hall'));
+  image.setAttribute('width', String(SCENE_WIDTH));
+  image.setAttribute('height', String(SCENE_HEIGHT));
+  window.setAttribute('x', String(HALL_WINDOW.x));
+  window.setAttribute('y', String(HALL_WINDOW.y));
+  window.setAttribute('width', String(HALL_WINDOW.width));
+  window.setAttribute('height', String(HALL_WINDOW.height));
+  picture.append(image, window);
+  return h(
+    'div',
+    {
+      className: 'dv-backdrop',
+      attributes: { 'aria-hidden': 'true' },
+      dataset: { background: 'castle-hall' },
+    },
+    picture,
+  );
+}
+
+export type BeatFigure =
+  | { readonly kind: 'glimmer' }
+  | { readonly kind: 'boss'; readonly id: string; readonly pose: BossState }
+  /** The finale: the Seven-Headed Dragon with every head cured. */
+  | { readonly kind: 'finale' };
+
+/**
+ * Who appears in a beat: the cured Seven-Headed Dragon in the finale, a boss for a boss level's
+ * story, otherwise old Glimmer.
+ */
+export function beatFigure(data: ContentData, beat: StoryBeat | undefined): BeatFigure {
   const trigger = beat?.trigger;
+  if (trigger?.kind === 'finale') return { kind: 'finale' };
   if (trigger?.kind === 'boss-defeated') return { kind: 'boss', id: trigger.boss, pose: 'won' };
   if (trigger?.kind === 'level-start' || trigger?.kind === 'level-complete') {
     const boss = data.levels.find((level) => level.id === trigger.level)?.boss;

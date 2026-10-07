@@ -11,10 +11,15 @@ import { renderBoss } from '../art/characters/bosses';
 import type { BossState } from '../art/characters/bosses';
 import { renderDragon, renderHatch } from '../art/dragon';
 import type { DragonRenderOptions, Outfit } from '../art/dragon';
+import { getRecipe } from '../art/dragon/recipes';
+import { renderSevenHeaded } from '../art/dragon/seven';
 import { renderIcon } from '../art/icons';
 import { renderCosmeticIcon } from '../art/cosmetics/icon';
 import { renderSticker } from '../art/stickers';
 import type { StickerSpec } from '../art/stickers';
+import { renderMagicWindow } from '../art/window';
+import type { PaneState } from '../art/window';
+import { FINALE_DRAGON_ID, TABLE_MAX, TABLE_MIN } from '../../rules/contract';
 import type { DragonExpression, DragonView, KeeperAvatar } from '../../rules/contract';
 
 let serial = 0;
@@ -111,6 +116,54 @@ export function bossArt(
 ): SVGSVGElement {
   const node = svgElement(renderBoss(id, pose, { idPrefix: nextPrefix('boss'), animated }));
   node.classList.add(...className.split(' '));
+  return node;
+}
+
+/** Heads of the Seven-Headed Dragon. */
+export const SEVEN_HEADS = 7;
+
+/**
+ * The Seven-Headed Dragon with its first `cured` heads (from the left) cured; with all seven
+ * cured, every head smiles.
+ */
+export function sevenHeadedArt(
+  cured: number,
+  options: { readonly className?: string; readonly animated?: boolean } = {},
+): SVGSVGElement {
+  const heads = Math.max(0, Math.min(SEVEN_HEADS, Math.floor(cured)));
+  const node = svgElement(
+    renderSevenHeaded(
+      {
+        dragon: FINALE_DRAGON_ID,
+        stage: 'adult',
+        expression: heads === SEVEN_HEADS ? 'happy' : 'idle',
+        framing: 'fit',
+        idPrefix: nextPrefix('seven'),
+        animated: options.animated ?? true,
+      },
+      getRecipe(FINALE_DRAGON_ID),
+      heads,
+    ),
+  );
+  node.classList.add(...(options.className ?? 'dv-dragon-art').split(' '));
+  node.dataset['cured'] = String(heads);
+  return node;
+}
+
+/** The Magic Window whole again, every pane gold: the finale's picture, not a keeper's progress. */
+export function wholeWindowArt(className = 'dv-window-art'): SVGSVGElement {
+  const columns = TABLE_MAX - TABLE_MIN + 1;
+  const rows = (count: number): PaneState[][] =>
+    Array.from({ length: count }, () => Array.from({ length: columns }, (): PaneState => 'gold'));
+  const node = svgElement(
+    renderMagicWindow({
+      multiplication: rows(columns),
+      division: rows(columns - 1),
+      idPrefix: nextPrefix('window'),
+    }),
+  );
+  node.classList.add(...className.split(' '));
+  node.setAttribute('aria-hidden', 'true');
   return node;
 }
 

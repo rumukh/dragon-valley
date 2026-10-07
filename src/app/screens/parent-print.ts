@@ -6,14 +6,12 @@
  */
 import { OPERATOR_SYMBOLS, TABLE_MAX, TABLE_MIN } from '../../rules/contract';
 import type { Notation } from '../../rules/contract';
-import { renderSevenHeaded } from '../art/dragon/seven';
-import { getRecipe } from '../art/dragon/recipes';
 import type { Keeper } from '../persistence/family';
 import { earnedCertificates, hardestFacts, longDay, tableFacts } from '../print/content';
 import type { Certificate } from '../print/content';
 import { certificateJob, flashcardJob } from '../print/documents';
 import type { CertificateText } from '../print/documents';
-import { bossArt, dragonArt, svgElement } from '../ui/art';
+import { bossArt, dragonArt, SEVEN_HEADS, sevenHeadedArt } from '../ui/art';
 import { candyButton } from '../ui/button';
 import { h } from '../ui/dom';
 import type { App } from '../shell/app';
@@ -38,26 +36,6 @@ export interface PrintTabOptions {
 }
 
 const TABLES = Array.from({ length: TABLE_MAX - TABLE_MIN + 1 }, (_, index) => TABLE_MIN + index);
-
-/** The finale's dragon with all seven heads smiling. */
-function sevenHeadedArt(): SVGSVGElement {
-  const node = svgElement(
-    renderSevenHeaded(
-      {
-        dragon: 'seven-headed',
-        stage: 'adult',
-        expression: 'happy',
-        framing: 'fit',
-        idPrefix: 'dv-print-seven',
-        animated: false,
-      },
-      getRecipe('seven-headed'),
-      7,
-    ),
-  );
-  node.classList.add('dv-dragon-art');
-  return node;
-}
 
 export function printContent(
   app: App,
@@ -229,7 +207,7 @@ export function printContent(
       case 'region':
         return bossArt(certificate.boss, 'won', 'dv-boss-art', false);
       case 'finale':
-        return sevenHeadedArt();
+        return sevenHeadedArt(SEVEN_HEADS, { animated: false });
     }
   };
 
