@@ -55,7 +55,7 @@ test('a new family goes from the title through the prologue to their first egg a
   // The prologue, one line at a time; Skip goes to the egg choice, which cannot be skipped.
   await expectScreen(page, 'play');
   const line = page.getByTestId('story-line');
-  await expect(line).toHaveText('Long ago, the Seven-Headed Dragon caught a cold.');
+  await expect(line).toHaveText('Long ago, a dragon with seven heads caught a cold.');
   await page.getByTestId('story-next').click();
   await expect(line).toHaveText('A-choo! The Magic Window broke into shiny pieces.');
   await page.getByTestId('story-skip').click();

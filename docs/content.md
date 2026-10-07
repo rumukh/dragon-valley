@@ -20,11 +20,15 @@ sentence length, history packs, art IDs and curriculum coverage.
 | `content/history/<revision>.json`    | every revision deployed, byte for byte (never edited) | `content:bump` |
 
 **Every content change merged to `main` gets a new revision** (MAJOR.MINOR.PATCH: patch for
-balance or text, minor for new levels or regions). `main` deploys to the live site, and a save pins
+balance or text, minor for new levels or regions). A change to the catalogs alone needs none, since
+saves pin the pack and not its strings, unless it changes a story's word count (`words`, in the
+pack; the validator names the template). `main` deploys to the live site, and a save pins
 the exact pack it was played with (ID, revision and content hash): the runtime restores it only
 with that pack. The shell loads `content/history/<revision>.json` for a save that pins an older
 revision, restores it with that pack and moves it to the current pack at the hub. The Region 1
-slice went live as `1.0.0` (main `373a5d2`); v1 is `1.1.0`.
+slice went live as `1.0.0` (main `373a5d2`), v1 as `1.1.0` (main `78c4943`), and the balance from
+the learner simulations as `1.2.0` (main `57855d3`); [content/history](../content/history/README.md)
+lists what is archived.
 
 To change content:
 

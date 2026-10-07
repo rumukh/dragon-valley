@@ -697,7 +697,7 @@ pipeline, so new stickers need no new art.
 | Sharing Lake     | Fair Sharer (30 division facts at bronze), First Youngling, Lake Explorer, The Goblin's Teacups, Quest Helper (10 quests)                                   |
 | Leftover Lagoon  | Pearl Hatched, Leftover Expert (remainders at silver), Lagoon Explorer, The Nymph Dance, Ten Days                                                           |
 | Giant's Peaks    | Boulder Hatched, Big Numbers (carrying at bronze), Peak Explorer, The Giant's Nap, Arena Runner (Arena best 20), First Adult Dragon                         |
-| Riddle Ruins     | Clockwork Hatched, Bracket Boss (brackets at silver), Ruins Explorer, The Golem's Orders, Word Wizard (all six terms), Twenty Days                          |
+| Riddle Ruins     | Clockwork Hatched, Bracket Expert (brackets at silver), Ruins Explorer, The Golem's Orders, Word Wizard (all six terms), Twenty Days                        |
 | Dragon Castle    | Half the Window (61 panes silver), Golden Window (121 panes gold), First Crown, Castle Explorer, Seven Heads Cured, Every Table (all table dragons hatched) |
 
 Sticker icons are art icons or cosmetics (a hatch sticker is an egg in the dragon's signature
