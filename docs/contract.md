@@ -512,11 +512,20 @@ Snack time for every dragon (`startActivity { snack, dragon: null }`) also serve
 basket: due facts no hatched dragon eats (docs/design.md §5.12). The round's `dragon` is then the
 first owned dragon, as for any fact no owned dragon eats. A snack of the basket alone (no dragon
 is hungry) has one problem per basket fact, counting a fact and its commuted twin once (a right
-answer reviews both), within the usual maximum. Wherever reviews are served, a known fact
-(box 2+) four or more days past its review day (`STARVING_DAYS`) comes first: the review guarantee
-(§6.3). A problem round whose draw finds nothing left to serve finishes as if its target were
-reached (`round.completed`, `status: 'complete'`, `endReason: 'finished'`), at the next answer or
-at its start, so no round can wait for an answer it cannot ask.
+answer reviews both), and per first taste (below), within the usual maximum. Wherever reviews are
+served, a known fact (box 2+) four or more days past its review day (`STARVING_DAYS`) comes first:
+the review guarantee (§6.3). A problem round whose draw finds nothing left to serve finishes as if
+its target were reached (`round.completed`, `status: 'complete'`, `endReason: 'finished'`), at the
+next answer or at its start, so no round can wait for an answer it cannot ask.
+
+Snack time also serves **first tastes** (`firstTastes`): at its 2nd, 4th and 6th problem, a fact of
+an owned dragon that a finished level taught and the child never answered nor met on a board: eggs'
+facts first, then the hatched dragons', the oldest first; for one dragon's snack only its own, and
+never the finale's egg. Starving facts come before the 4th and 6th problem's tastes, and before the
+2nd's too while success is protected. A taste is an ordinary problem of the round: nothing in the
+view marks it. A snack has a problem per due fact and per first taste (three at most), within its
+size limits, and serves no fact the child has neither answered nor been taught (`taughtItems`: the
+items of a finished level's skills).
 
 Word problems with an operation (Riddle Scrolls, and stories in boss and mixed rounds) are asked
 in two steps: the operation, then the number. A right operation moves the problem to its answer

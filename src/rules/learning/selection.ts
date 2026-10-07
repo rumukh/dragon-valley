@@ -412,12 +412,15 @@ export function pickMixed(options: {
 }
 
 /**
- * Snack time: due items first (`pickReview`: starving facts, then the most overdue or, with
- * `likelyFirst` while the child's success is protected, the likeliest successes), then rule facts
- * never answered right (other rounds serve at most one of them, so snack time is where Puff and
- * Mirror meet the rest of their facts), then the weakest known items (lowest box) not served in
- * this snack yet, then anything in the pool. `null` when the pool is empty: a snack of the
- * basket alone empties it as it goes.
+ * Snack time: starving facts first (the review guarantee), then at every other problem a first
+ * taste (`tastes`: facts the child was taught but never answered, in order), up to
+ * `tastesPerSnack` in a snack; the first of them (the 2nd problem) comes even before starving
+ * facts, unless the child's success is protected (`likelyFirst`). Then due items (the most overdue, or with `likelyFirst`, while
+ * the child's success is protected, the likeliest successes), then rule facts never answered right
+ * (other rounds serve at most one of them, so snack time is where Puff and Mirror meet the rest
+ * of their facts), then the weakest known items (lowest box) not served in this snack yet, then
+ * anything in the pool. `null` when the pool is empty: a snack of the basket alone empties it as
+ * it goes.
  */
 export function pickSnack(options: {
   state: ReadState;
@@ -426,6 +429,8 @@ export function pickSnack(options: {
   served?: readonly string[];
   random: RandomStream;
   likelyFirst?: boolean;
+  tastes?: readonly string[];
+  tastesPerSnack?: number;
 }): string | null {
   const { state, random } = options;
   const served = options.served ?? [];
@@ -433,6 +438,16 @@ export function pickSnack(options: {
   const candidates = withoutRecent(options.pool, options.blocked);
   if (candidates.length === 0) return null;
   const due = candidates.filter((item) => isDue(state.items[item], day));
+  const starved = due.filter((item) => starving(state.items[item], day));
+  const slot = served.length % 2 === 1 && served.length < 2 * (options.tastesPerSnack ?? 0);
+  const taste = slot
+    ? (options.tastes ?? []).find((item) => candidates.includes(item) && !served.includes(item))
+    : undefined;
+  // A snack's first taste comes even before starving facts, unless the child's success is
+  // protected: a long review backlog must not hold every new fact back for weeks.
+  const firstTaste = served.length === 1 && !(options.likelyFirst ?? false);
+  if (taste !== undefined && (firstTaste || starved.length === 0)) return taste;
+  if (starved.length > 0) return pickDue(state, starved, random)!;
   const picked = pickReview(state, due, random, options.likelyFirst ?? false);
   if (picked !== null) return picked;
   const rules = candidates.filter(

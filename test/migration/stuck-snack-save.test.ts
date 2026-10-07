@@ -10,8 +10,9 @@
  * stuck the same way. `fixtures/stuck-snack-save.json` is the snapshot of the simulation's last
  * commit before the failing answer, made with main 4a89348's rules: the save the shell keeps.
  *
- * The current rules restore it exactly as saved; its next answer finishes the snack normally,
- * and the next snack of the basket alone is one problem long.
+ * The current rules restore it exactly as saved; its next answer goes on to the first tastes (the
+ * facts the child was taught but never met, docs/design.md §5.12), after which the snack finishes
+ * normally, and the next snack of the basket alone is as long as its basket and first tastes.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -21,7 +22,7 @@ import type { ContentPack, RuntimeSnapshot } from '@aegis/runtime';
 import { contentRegistration, isoDay } from '../../src/rules/contract';
 import type { ContentData, GameView } from '../../src/rules/contract';
 import { itemIndex } from '../../src/rules/learning/index-cache';
-import { basketItems, hungryDragons } from '../../src/rules/progression/dragons';
+import { basketItems, firstTastes, hungryDragons } from '../../src/rules/progression/dragons';
 import { PERFECT, Player, root } from '../traces/support';
 
 // Whole rounds are replayed here with the full content pack: give them room on a busy machine.
@@ -98,6 +99,10 @@ describe('a save stuck in a snack of the basket alone', () => {
     expect(basketItems(state, pack.data, index), 'one fact in the basket').toEqual([
       'terms:product',
     ]);
+    expect(
+      firstTastes(state, pack.data, index, null),
+      "four facts the child never met: Goldie's, Ember's, Rainbow's",
+    ).toEqual(['mul:10x10', 'div:54:6', 'div:6:6', 'div:56:7']);
     expect(state.round).toMatchObject({
       activity: 'snack',
       source: { kind: 'snack', dragon: null },
@@ -111,20 +116,33 @@ describe('a save stuck in a snack of the basket alone', () => {
     await player.dispose();
   });
 
-  it('finishes the snack with its next answer, pays for it and goes on to the next day', async () => {
+  it('goes on to the facts the child never met, finishes, pays and goes on to the next day', async () => {
     const player = await restored();
     const coins = player.state().coins;
     expect(await player.answer(), 'the answer is accepted').toBe(true);
     expect(player.failures).toEqual([]);
+    const tastes: string[] = [];
+    for (let guard = 0; guard < 10; guard++) {
+      const round = problemRound(player.view());
+      if (round.status !== 'active' || !round.problem) break;
+      tastes.push(round.problem.item);
+      expect(await player.answer()).toBe(true);
+    }
+    expect(tastes.sort(), 'the basket is empty: the first tastes, then nothing left').toEqual([
+      'div:54:6',
+      'div:56:7',
+      'div:6:6',
+      'mul:10x10',
+    ]);
     const round = problemRound(player.view());
     expect(
       { status: round.status, endReason: round.endReason, ...round.progress },
-      'the basket is empty: the snack is over after 1 of its 6 problems',
-    ).toMatchObject({ status: 'complete', endReason: 'finished', answered: 1, correct: 1 });
+      'the snack is over after 5 of its 6 problems',
+    ).toMatchObject({ status: 'complete', endReason: 'finished', answered: 5, correct: 5 });
     expect(player.data('round.completed')).toEqual([
-      { round: 'r243', answered: 1, correct: 1, fast: 1 },
+      { round: 'r243', answered: 5, correct: 5, fast: 5 },
     ]);
-    expect(player.state().coins, 'the right answer was paid').toBeGreaterThan(coins);
+    expect(player.state().coins, 'the right answers were paid').toBeGreaterThan(coins);
     expect(await player.act({ type: 'endRound', reason: 'done' }), 'and closed').toBe(true);
     expect(player.view().round).toBeNull();
     expect(player.view().hub.next.kind, 'nothing left to feed today').not.toBe('snack');
@@ -136,8 +154,7 @@ describe('a save stuck in a snack of the basket alone', () => {
     expect(player.failures).toEqual([]);
     await player.dispose();
   });
-
-  it('could always be quit, and the next snack of the basket alone is one problem long', async () => {
+  it('could always be quit, and the next snack of the basket alone is as long as its food', async () => {
     const player = await restored();
     expect(await player.act({ type: 'endRound', reason: 'quit' }), 'pause → Quit').toBe(true);
     expect(player.state().round, 'quit and closed').toBeNull();
@@ -146,7 +163,10 @@ describe('a save stuck in a snack of the basket alone', () => {
       dragon: null,
     });
     await player.act({ type: 'startActivity', activity: { kind: 'snack', dragon: null } });
-    expect(problemRound(player.view()).progress.target, 'one fact, one problem').toBe(1);
+    expect(
+      problemRound(player.view()).progress.target,
+      'one fact and three first tastes, a problem each',
+    ).toBe(4);
     await player.playRound();
     expect(problemRound(player.view()).status).toBe('complete');
     expect(await player.act({ type: 'endRound', reason: 'done' })).toBe(true);

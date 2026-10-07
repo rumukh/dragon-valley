@@ -433,18 +433,33 @@ of known facts against your own best. The shell keeps the time and ends the roun
 
 ### 5.12 Snack Time (`snack`) and Placement (`placement`)
 
-- **Snack time** serves a hungry dragon's due items (or all hungry dragons'), 6-10 problems, auto
-  input; while recent success is below 70 % only 4-6, so a session is not dominated by reviews the
-  child cannot do yet (§6.3). Feeding hungry dragons _is_ the spaced review.
+- **Snack time** serves a hungry dragon's due items (or all hungry dragons'), a problem per due fact
+  or first taste (below), 6-10 problems, auto input; while recent success is below 70 % only 4-6,
+  so a session is not dominated by reviews the child cannot do yet (§6.3). Feeding hungry dragons
+  _is_ the spaced review.
 - **The valley's basket** (added after the learner simulations): due facts that no hatched dragon
   eats wait in the basket. These are comparisons, terms and word problems until the Seven-Headed
   Dragon hatches, and the facts of eggs not hatched yet. Snack time for every dragon serves them
   with the dragons' due facts, and the Daily Adventure offers snack time when only the basket has
   something due, so every fact the child knows is reviewed. A snack of the basket alone (no
-  dragon is hungry) is as long as the basket, within the usual maximum: one problem per fact, a
-  fact and its twin once (a right answer to 6 · 8 reviews 8 · 6), so a single due fact is a
-  one-problem snack. Any round that runs out of things to ask finishes normally, with its results
-  and coins.
+  dragon is hungry) is as long as the basket and its first tastes (below), within the usual
+  maximum: one problem per fact, a fact and its twin once (a right answer to 6 · 8 reviews 8 · 6),
+  so a single due fact is a one-problem snack. Any round that runs out of things to ask finishes
+  normally, with its results and coins.
+- **First tastes** (added after the learner simulations): a level's round draws new facts at
+  random, so a taught fact can be missed, and a child who earns three stars never replays a level:
+  the perfect child never met 6 : 6 or 54 : 6, and Ember could not grow up. Snack time therefore
+  serves _first tastes_, facts of the child's dragons that a finished level taught but the child
+  has never answered (nor met on a board): every other problem of a snack (the 2nd, 4th and 6th),
+  up to three. Starving facts (§6.3) come before them, except the snack's first taste: it is served
+  even on a busy day, unless the child's success is protected, so that a long review backlog cannot
+  hold every new fact back for weeks (the slow learner lost two thirds of its tastes to starving
+  facts). Eggs' facts come first, as they warm the egg (so every egg hatches within a few
+  sessions); then the hatched dragons', the oldest dragon first, multiplication before division.
+  A snack makes room for its tastes (it is longer by up to three problems, within its size), so
+  they do not crowd out the due facts. Snack time serves no fact the child has neither met nor been
+  taught (a dragon's division facts wait for the division levels), a dragon's own snack tastes only
+  its own facts, and the Seven-Headed Dragon's egg is left out (the finale hatches it).
 - **Placement** ("Show the dragons what you know!") walks a ladder of skills
   (`placement.steps`), 2-4 problems per step, 12-24 problems in total. It stops early and gently
   after `stopAfterMisses` misses in a row. Passing a step (`passAccuracy`) marks its levels as placed:

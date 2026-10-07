@@ -83,36 +83,56 @@ describe('snack time', () => {
     await player.dispose();
   });
 
-  it('serves the due facts first, 6 to 10 problems, then the dragon is fed', async () => {
+  it('serves the due facts first, first tastes in between, then the dragon is fed', async () => {
     const player = await hatched();
     await player.act({ type: 'startSession', day: '2026-10-07' });
     const day = player.state().day!;
+    const items = player.state().items;
     const due = new Set(
-      Object.entries(player.state().items)
+      Object.entries(items)
         .filter(([, item]) => item.correct > 0 && item.due <= day && item.lastDay < day)
         .map(([id]) => id),
     );
+    // Sunny Meadow 1 taught every ×2 fact (and no division yet): those never answered are tastes.
+    const twos = new Set(Array.from({ length: 11 }, (_, n) => [`mul:2x${n}`, `mul:${n}x2`]).flat());
+    const untasted = [...twos].filter((id) => items[id] === undefined);
+    expect(untasted.length, 'some ×2 facts were never answered').toBeGreaterThanOrEqual(3);
     await player.act({ type: 'startActivity', activity: { kind: 'snack', dragon: 'bubbles' } });
     const round = player.view().round;
     if (round?.type !== 'problems') throw new Error('a snack is a problem round');
-    const bubblesDue = new Set([...due].filter((id) => /x2$|^mul:2x/.test(id)));
+    const bubblesDue = new Set([...due].filter((id) => twos.has(id)));
     expect(bubblesDue.size).toBeGreaterThan(0);
-    expect(round.progress.target).toBe(Math.min(10, Math.max(6, bubblesDue.size)));
+    expect(round.progress.target, 'a problem per due fact and first taste (3 at most)').toBe(
+      Math.min(10, Math.max(6, bubblesDue.size + Math.min(3, untasted.length))),
+    );
     expect(round.source).toEqual({ kind: 'snack', dragon: 'bubbles' });
     const served: string[] = [];
     // Whether each problem's fact was due when it was served (a right answer to 8 · 2 also
-    // reviews 2 · 8, so a twin may stop being due before its turn).
+    // reviews 2 · 8, so a twin may stop being due before its turn), and whether it was a first
+    // taste (never answered).
     const wasDue: boolean[] = [];
+    const tasted: boolean[] = [];
     while (player.view().round?.status === 'active') {
       const now = player.view().round;
       if (now?.type !== 'problems' || !now.problem) break;
       served.push(now.problem.item);
       wasDue.push(isDue(player.state().items[now.problem.item], day));
+      tasted.push(player.state().items[now.problem.item] === undefined);
       await player.answer();
     }
-    expect(wasDue[0], 'a due fact first').toBe(true);
     expect(
-      wasDue.slice(wasDue.indexOf(false)).every((d) => !d) || !wasDue.includes(false),
+      [1, 3, 5].every((n) => tasted[n]) && [0, 2, 4].every((n) => !tasted[n]),
+      `first tastes at the 2nd, 4th and 6th problems, due facts in between: ${served.join(' ')}`,
+    ).toBe(true);
+    expect(
+      served.filter((item) => item.startsWith('div:')),
+      'no division before the division levels',
+    ).toEqual([]);
+    // Apart from facts met for the first time, the due facts come first.
+    const rest = wasDue.filter((_, n) => !tasted[n]);
+    expect(rest[0], 'a due fact first').toBe(true);
+    expect(
+      rest.slice(rest.indexOf(false)).every((d) => !d) || !rest.includes(false),
       `due facts come first: ${served.join(' ')}`,
     ).toBe(true);
     expect(player.view().dragons.find((d) => d.id === 'bubbles')!.hungry).toBe(false);
