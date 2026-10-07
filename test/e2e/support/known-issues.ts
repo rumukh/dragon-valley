@@ -66,6 +66,12 @@ export const DEFECTS = {
     title:
       "In WebKit (Safari) the keeper pictures lose their focus ring once an arrow key moves the choice: WebKit does not match :focus-visible on a radio focused by an arrow key (a plain page does the same), and the ring is drawn only for :focus-visible. The moving 'chosen' ring still marks the picture.",
   },
+  'DV-QA-19': {
+    owner: 'S3',
+    severity: 'minor',
+    title:
+      "The hub names the first egg “Bubbles's egg” (the hatching art's label: “Bubbles's egg wobbles and cracks.”): en.ui.json's stage.egg and hatch.hatching add 's to every name. The copy brief writes “Bubbles' egg”: a name ending in s takes only the apostrophe.",
+  },
 } as const satisfies Record<string, Defect>;
 
 export type DefectId = keyof typeof DEFECTS;

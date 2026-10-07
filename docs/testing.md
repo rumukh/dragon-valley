@@ -153,12 +153,21 @@ WebKit, about twice as slow per test on a hosted runner, runs eight jobs of one 
 three workers (`regions+controls` and `activities+playtest` share one each; its tests mostly wait
 on the engine, so the third worker shortens a job on the four-processor runner). The split follows
 measured run
-times, so each job takes about seven minutes, installation included; `harness.spec.ts` checks that
-the matrix runs every part once per engine. Setup is under a minute: `setup-node`
-restores npm's cache, and Playwright's browsers are downloaded, not cached, because the download
-is 4–9 s of the install step and the rest is the system packages (apt: about 15 s for Chromium
-and Firefox, 45 s for WebKit), which a browser cache would not skip. A slow Ubuntu mirror once
-stretched WebKit's packages from one minute to ten; the 20-minute job limit leaves room for that.
+times, so each job's tests take three to seven minutes; `harness.spec.ts` checks that
+the matrix runs every part once per engine. Setup is usually under a minute: `setup-node` restores
+npm's cache, and Playwright's engines are downloaded (4–9 s). The rest of the install is the system
+packages they need (fonts, codecs, GTK; about 15 s for Chromium and Firefox, 45 s for WebKit) from
+Ubuntu's mirror, which is at times far slower. On 7 October 2026 it served Firefox's 49 MB at
+63 kB/s, so the install took 13 minutes and the job 19, against a 20-minute limit; one Chromium job
+of the same run waited 10 minutes. So the `.deb` files are cached per engine, runner image and
+Playwright version (`actions/cache`, key `debs-<engine>-<image>-playwright-<version>`). apt
+installs from the cache without downloading, and a new key starts from the newest cache of the same
+engine. After the install, `apt-get autoclean` drops the versions the mirror no longer has, and one
+job per engine (its walks) saves the set: 31 MB for Chromium, 48 MB for Firefox, 121 MB for WebKit.
+With the cache, each engine's install takes 17–26 s (apt: "Need to get 0 B"), also on a newer runner
+image restored from the older image's cache, and the longest job 7.4 minutes. The job limit is 30
+minutes, room for a slow mirror on a cache miss; the test step has its own 15-minute limit, the
+guard against a hang.
 
 ```
 npm run test:e2e                                   # everything, system Edge
@@ -307,6 +316,12 @@ Each CI job uploads `qa-screens-<job>` (screenshots and contact sheets, 30 days:
 `chromium-walks+rest`, `firefox-walks+rest` and `webkit-walks`, the jobs that run the walks) and
 `playwright-report-<job>` (the HTML report with every axe result and guard report attached,
 `qa-summary.md`, `results.json`), plus `playwright-traces-<job>` when something failed.
+
+A full-page screenshot stops at 16 000 CSS px, and at 32 000 device px (WebKit cannot take one past
+32 767, which its 2× desktop profile reaches at 16 384 CSS px). A taller page is photographed from
+the top and listed in the job summary under "Pages too tall to photograph whole", with its true
+height: a finding for whoever owns the screen, not a crash of the walk (`support/screens.ts`,
+proved by `harness.spec.ts`).
 
 ### Adding a test
 

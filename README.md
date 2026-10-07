@@ -11,7 +11,7 @@ landscape. A grown-up can install it for offline play from the grown-ups' area.
 
 | ![Old Glimmer asks which of three eggs feels warm: the bubbly blue, the sunny yellow or the shiny golden egg](docs/images/first-egg.jpg) |     ![Feeding Time: 10 · 2 = ? with four answers to pick, a read-aloud button and "Show me"](docs/images/round.jpg)     |
 | :--------------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: |
-|  ![The hub: Bubbles's egg and how many facts until it hatches, today's goal and quests, the days played this week](docs/images/hub.jpg)  | ![The valley map: Sunny Meadow open, the other places waiting along the road to the castle](docs/images/valley-map.jpg) |
+|  ![The hub: Bubbles' egg and how many facts until it hatches, today's goal and quests, the days played this week](docs/images/hub.jpg)   | ![The valley map: Sunny Meadow open, the other places waiting along the road to the castle](docs/images/valley-map.jpg) |
 
 ## For grown-ups
 

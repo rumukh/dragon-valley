@@ -5,8 +5,8 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
 
 ## 1. The build
 
-- [ ] `main` is green on the release commit: CI (verify on Ubuntu and Windows, the nine e2e jobs
-      on Chromium, Firefox and WebKit) and the Pages deployment from that commit.
+- [ ] `main` is green on the release commit: CI (verify on Ubuntu and Windows, and the 16 e2e jobs:
+      4 on Chromium, 4 on Firefox, 8 on WebKit) and the Pages deployment from that commit.
 - [ ] Each e2e job summary lists only the known defects below, and its "Performance" section shows
       every budget met ([performance.md](performance.md)).
 - [ ] The live site is that commit. The build is reproducible, so building the commit again and
@@ -19,18 +19,22 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
     Select-String -Pattern 'dv-offline-revision' | ForEach-Object { $_.Matches.Value }
   ```
 
-- [ ] The content pack's revision is final for v1 (today `1.2.0`; `1.0.0` and `1.1.0` are
-      archived). Every later content change runs `npm run content:bump`, which archives `1.2.0` in
+- [ ] The content pack's revision is final for v1 (today `1.3.0`; `1.0.0`, `1.1.0` and `1.2.0` are
+      archived). Every later content change runs `npm run content:bump`, which archives `1.3.0` in
       `content/history/` so v1 saves upgrade ([contract.md](../contract.md),
       [content.md](../content.md) §1).
+- [ ] The README's four screenshots (`docs/images/`) show the release build. They date from #30;
+      `hub.jpg` still shows "Bubbles's egg" (DV-QA-19). S6 retakes them from the release commit's
+      tablet screen walks (`qa-screens-*` artifacts, 1180 × 820) as JPEGs of about 100 KB each.
 
 ## 2. Defects and decisions
 
 - [x] No open blocker or major defect ([defects.md](defects.md)): the last major one, DV-QA-17,
-      was fixed by #46. Open today: two minor, both S3 and both in WebKit only (DV-QA-13 and
-      DV-QA-15); fix them or accept them for v1.
+      was fixed by #46. Open today: three minor ones, all S3. Two are WebKit only (DV-QA-13 and
+      DV-QA-15); DV-QA-19 ("Bubbles's egg" on the hub) shows on every engine. Fix them or accept them for v1.
 - [x] _(person)_ The copy decisions are made ([copy-review.md](copy-review.md), "Needs a human
-      decision") and the agreed changes merged (S2b: #38, #40, #43; S3: #41, #46).
+      decision") and the agreed changes merged (S2b: #38, #40, #43; S3: #41, #46). Possessives
+      were reviewed after #52; the one finding is DV-QA-19.
 - [x] The accessibility advice is fixed or accepted ([accessibility.md](accessibility.md):
       `boot-status` hidden from screen readers, toasts, the startup-failure screen's heading): fixed
       by #46; no axe finding of any level since.

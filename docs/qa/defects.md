@@ -19,6 +19,7 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 | -------- | -------- | ----- | ---------------------------------------------------------------------------------- |
 | DV-QA-13 | minor    | S3    | WebKit, intermittent: a keeper's hub at 200 % text comes into sight at normal size |
 | DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys             |
+| DV-QA-19 | minor    | S3    | The hub says "Bubbles's egg"; the copy brief writes "Bubbles' egg"                 |
 
 ### DV-QA-13 (minor, S3; WebKit, intermittent): a keeper's hub at 200 % text first comes into sight at normal size
 
@@ -66,6 +67,31 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 - **Evidence**: `test/e2e/keyboard.spec.ts` › "the keeper editor by keyboard alone › the pictures
   are one named radio group…" (the ring by pixels after the arrows; strict in Chromium and
   Firefox).
+
+### DV-QA-19 (minor, S3): the hub says "Bubbles's egg"
+
+- **Repro** (any engine, main at `22cdedc`): make a new keeper and choose Bubbles, the first of
+  the three eggs.
+- **Expected**: the nest's caption and its picture's name say "Bubbles' egg". This is the copy
+  brief's own example (the coordinator's PR C request): a name ending in "s" takes only the
+  apostrophe.
+- **Actual**: "Bubbles's egg", both under the egg and as the picture's accessible name. The same
+  rule gives the hatching art's label "Bubbles's egg wobbles and cracks." (`hatch.hatching`, while
+  the egg cracks) and the screen-reader list of other dragons on the hub's "My dragons" button
+  (`stage.egg` again, while Bubbles is still an egg and another dragon is featured). The cause is
+  `content/catalogs/en.ui.json`, `stage.egg` ("{name}'s egg") and `hatch.hatching` ("{name}'s egg
+  wobbles and cracks."), which add "'s" to every name. Bubbles is the only dragon whose name ends
+  in "s". No word-problem name does, so S2b's `word.grouping.holiday` ("{name}'s holiday") reads well.
+- **Likely fix**: form possessives in one place, for example a `possessive(name)` helper (add "'"
+  after a final "s", otherwise "'s"). Pass its result as an `{owner}` parameter (`"{owner} egg"`)
+  to `stage.egg` and `hatch.hatching`. The grown-ups' texts that name a keeper
+  (`parent.keepers.removeBody`, `parent.data.*`, `parent.progress.unreadable`,
+  `parent.print.hardestTitle`, `recovery.game`, `recovery.preferences`) would then read
+  "Jonas' dragons" for a keeper called Jonas, the same as the children's screens. Minor: the
+  meaning is clear, but it is the first dragon most children meet, and the form contradicts the brief.
+- **Evidence**: `test/e2e/first-run.spec.ts` › "the nest says whose egg it is…" (the picture's
+  accessible name and the hub's text). "Sunny's egg" and "Goldie's egg" are checked strictly in the
+  same file. Details: [copy-review.md](copy-review.md), "Possessives".
 
 ## Fixed
 
