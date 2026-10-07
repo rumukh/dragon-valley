@@ -42,17 +42,20 @@ function state(patch: Partial<ProfileState> = {}): ProfileState {
   return { ...initialProfileState({ dailyGoal: 30, arena: true }), day: DAY, ...patch };
 }
 
-function daily(answers: number, correct: number): ProfileState['daily'] {
+function daily(answers: number, correct: number): Pick<ProfileState, 'daily' | 'history'> {
   return {
-    day: DAY,
-    answers,
-    correct,
-    fast: 0,
-    levels: 0,
-    minigames: 0,
-    goal: 30,
-    quests: [],
-    gift: 'locked',
+    daily: {
+      day: DAY,
+      answers,
+      correct,
+      fast: 0,
+      levels: 0,
+      minigames: 0,
+      goal: 30,
+      quests: [],
+      gift: 'locked',
+    },
+    history: [{ day: DAY, answers, correct, fast: 0 }],
   };
 }
 
@@ -79,22 +82,23 @@ describe('item tiers', () => {
 describe('the learning share', () => {
   const { knownShare, minLearningShare, maxLearningShare } = data.balance.mix;
 
-  it('starts at 100 - knownShare before five answers today', () => {
+  it('starts at 100 - knownShare before five answers', () => {
     expect(learningShare(state(), data)).toBe(100 - knownShare);
-    expect(learningShare(state({ daily: daily(4, 0) }), data)).toBe(100 - knownShare);
+    expect(learningShare(state(daily(4, 0)), data)).toBe(100 - knownShare);
   });
 
   it('grows when the child succeeds more than the target and shrinks when less, within bounds', () => {
-    const full = learningShare(state({ daily: daily(40, 40) }), data);
-    const poor = learningShare(state({ daily: daily(40, 20) }), data);
+    const full = learningShare(state(daily(40, 40)), data);
+    const poor = learningShare(state(daily(40, 20)), data);
     expect(full).toBe(Math.min(maxLearningShare, 30 + (100 - 82)));
     expect(poor).toBe(minLearningShare);
-    expect(learningShare(state({ daily: daily(40, 33) }), data), '82 % is on target').toBe(30);
+    // 14 of 17 is 82 % (the last 20 answers of a 40-answer day would count 16 of 20).
+    expect(learningShare(state(daily(17, 14)), data), '82 % is on target').toBe(30);
   });
 
   it('applies only part of the shift until a full window of answers', () => {
-    // 10 of 20 window answers, all right: shift (100 - 82) * 10 / 20 = 9.
-    expect(learningShare(state({ daily: daily(10, 10) }), data)).toBe(39);
+    // A new child's 10 of 20 window answers, all right: shift (100 - 82) * 10 / 20 = 9.
+    expect(learningShare(state(daily(10, 10)), data)).toBe(39);
   });
 });
 
@@ -170,16 +174,17 @@ describe('rule facts', () => {
 });
 
 describe('mixed draws', () => {
-  it('serve the most overdue review when the draw is not a learning one', () => {
+  it('serve the most overdue review when the draw is not a learning one (on target)', () => {
     const s = state({
-      daily: daily(40, 20),
+      ...daily(40, 34),
       items: {
         'mul:2x3': item(3, DAY - 3),
         'mul:2x4': item(3, DAY - 1),
         'mul:2x5': item(4, DAY + 3),
       },
     });
-    // The share is at its minimum (poor day): most draws are reviews, oldest due first.
+    // 85 % is inside the success band: review draws keep the spaced order, oldest due first
+    // (below the band they serve the likeliest successes: test/unit/rounds/mix-control.test.ts).
     const picks = new Set<string>();
     const random = createPrng('mixed');
     for (let i = 0; i < 30; i++) {

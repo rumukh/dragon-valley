@@ -330,7 +330,7 @@ compose). Sound IDs are not in content: the shell maps events to sounds from S5'
   restoring against its own revision.
 - **State compatibility.** New state fields are optional (`objectWithOptional`) with a default
   that old saves get by omission, so every save keeps restoring under newer rules without bumping
-  `STATE_VERSION` (the day counters `daily.levels` and `daily.minigames` are the first such fields).
+  `STATE_VERSION` (the day counters `daily.levels` and `daily.minigames` were the first such fields; `round.current.teach` followed).
 
 ## 8. Per-profile state (`state.ts`)
 
@@ -459,7 +459,10 @@ one-shots). It contains:
   dragons; arena availability.
 - `run`: the level's activities and done flags, and the level result once finished.
 - `round`: for problem rounds the progress (answered, target, correct, streak, boss meter), the
-  current `problem` (structured problem, resolved input, choices, step, re-ask and hint flags:
+  current `problem` (structured problem, resolved input, choices, step, re-ask and hint flags, and
+  `teach: true` when the item's last two answers were misses (not in the Arena or the placement
+  check), so the shell shows the picture model before asking, as for a re-ask; the field is absent
+  otherwise:
   at a story's `operation` step the choices are the four operations, + − · : in that order; at the
   `answer` step answer options in seeded order for choice input, else `null`), the last `feedback` (with the expected answer for "Let's look"), coins, the dragon
   being fed with its expression, and for the placement check its ladder (`placement`: step,
@@ -488,6 +491,12 @@ glowing `level` until a level was finished today; then, once a day that had no m
 `minigame { level, activity }` (a minigame of the furthest finished level, replayed with
 `startLevel { level, activity }`); the `gift` once the goal is reached; the next `level`;
 `free-play`.
+
+While recent success (the last `mix.window` answers, across days) is below `LOW_SUCCESS`, the rules
+protect the child's success: likely successes first in the mix and in snacks, a due item missed
+last time treated as a learning item, snacks of 4-6 problems instead of 6-10, and reviews (due
+items, snacks) and re-asks resolved to choice input outside the Arena and the placement check
+(docs/design.md §6.3).
 
 Word problems with an operation (Riddle Scrolls, and stories in boss and mixed rounds) are asked
 in two steps: the operation, then the number. A right operation moves the problem to its answer
@@ -608,9 +617,9 @@ Daily Adventure steps), story beats with the first-egg choice and every region's
 and finale beats, level runs of problem rounds and all six minigame boards (Memory Match in its
 value, family and term modes, Number Trail, Egg Grid, Fact Family Nest, Sharing Feast, Golem
 Orders), replaying one activity of a finished level, the adaptive mix (due reviews, known and
-learning items, the learning share following today's success, the focus egg, no repeats; every
-skill of an activity is served when several produce the same item), partial credit for commuted
-facts, re-ask jobs, the boss meter with its kindness cap, spaced review and many heads, the
+learning items, the learning share following recent success, the focus egg, no repeats, and below
+the success band likely successes first, smaller snacks and choice input for reviews and re-asks; every skill of an activity is served when several produce the same
+item), partial credit for commuted facts, re-ask jobs and teaching a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
 finale, the placement check, snack time, the Lightning Arena, grading (with the Riddle Scrolls
 operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth, stickers, the
 market, outfits, settings (with unlock-ahead), state validation and the complete view. Every

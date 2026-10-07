@@ -30,7 +30,7 @@ vi.setConfig({ testTimeout: 300_000 });
  * the old and new values in the commit message (docs/testing.md, "When a golden moves").
  */
 const GOLDEN_HASH = 'f13e54fba61c2d97';
-const GOLDEN_TRAJECTORY = 'a2ed761a367e70d8';
+const GOLDEN_TRAJECTORY = '8542af182bfcdce4';
 
 const SEED = 'golden-first-session';
 const PLACEMENT_MISS = 6;
