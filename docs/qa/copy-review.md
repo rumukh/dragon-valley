@@ -2,52 +2,54 @@
 
 Scope: every string in `content/catalogs/en.content.json` (content, owner S2b) and
 `content/catalogs/en.ui.json` (interface, owner S3), and English literals in `src/app`, at commit
-`f850d39`. Each key was read where it is used (the content pack, the app's `t()` calls), so
-child-facing and grown-up-facing text are judged by their own rules. Every quoted "Current" text
-below was checked against the catalogs by script (47 quotes, all exact).
+`8d3236a` (main after #29). Each key was read where it is used (the content pack, the app's `t()` calls), so
+child-facing and grown-up-facing text are judged by their own rules. Strings added by PR #29
+(Dragon Diary/goodbye, Progress, Print, certificates, finale heads, and related app literals) were
+reviewed too. Every quoted "Current" text below was checked against the catalogs by script.
 
 - **Child-facing text**: short active sentences, common words, concrete instructions ("Tap…",
   "Pick…"), kind correction after a miss, and nothing a speech engine would read badly (the game
   reads problems and stories aloud).
 - **Grown-up-facing text**: plain and precise, above all about what happens to saved data.
-- **Severity**: _major_, a child could misunderstand the task or a math statement disagrees with
-  the chosen notation; _minor_, harder than needed or an inconsistent term; _polish_, style.
+- **Severity**: _major_, a child could misunderstand the task, or a math statement is wrong or
+  disagrees with the chosen notation; _minor_, harder than needed or an inconsistent term; _polish_, style.
 - **Owner**: S2b for `en.content.json`, S3 for `en.ui.json` and `src/app`.
 
 ## Summary
 
-No major findings: nothing a child would misread as a different task, and every problem the game
-renders follows the keeper's notation (`src/app/math/notation.ts`). The copy is short, warm and
-consistent on the whole; what remains is clarity in a few places, two terms that collide, and
-decisions only a person can make.
+One major finding: the new grown-ups' Progress label `parent.item.tens` says division for a
+multiplication skill. No child-facing task is misleading, and every problem the game renders
+follows the keeper's notation (`src/app/math/notation.ts`). The copy is short, warm and consistent
+on the whole; what remains is clarity in a few places, two terms that collide, and decisions only a
+person can make.
 
 | Severity | S2b content | S3 app/UI | Total |
 | -------- | ----------: | --------: | ----: |
-| Major    |           0 |         0 |     0 |
-| Minor    |          18 |        13 |    31 |
-| Polish   |           8 |         5 |    13 |
+| Major    |           0 |         1 |     1 |
+| Minor    |          18 |        18 |    36 |
+| Polish   |           8 |         6 |    14 |
 
 Most important changes:
 
-1. Decide the "times fewer" wording (plan §6) and, either way, name the larger owner instead of
+1. Fix `parent.item.tens`: it labels multiplication-by-tens practice as division in the grown-ups'
+   Progress tab (S3).
+2. Decide the "times fewer" wording (plan §6) and, either way, name the larger owner instead of
    "That is…" in the four `word.times-fewer.*` stories (S2b).
-2. Make the remainder prompts say which number goes where: `round.typeRemainder` and
+3. Make the remainder prompts say which number goes where: `round.typeRemainder` and
    `keypad.quotientField` (S3); `word.leftover.boats` ("How many children wait?") and
    `word.leftover.album` (S2b).
-3. Rename "First Grown-Up Dragon" (`sticker.first-adult`): "grown-up" means the adults' area
+4. Rename "First Grown-Up Dragon" (`sticker.first-adult`): "grown-up" means the adults' area
    everywhere else (S2b).
-4. Use simpler words in the first story lines: `story.prologue.2` ("shattered", "panes") and
+5. Use simpler words in the first story lines: `story.prologue.2` ("shattered", "panes") and
    `story.forest-witch.3` ("surely") (S2b).
-5. Make the gate's question follow the notation, or decide it is always international
+6. Make the gate's question follow the notation, or decide it is always international
    (`gate.question`, S3).
-6. Shorten the grown-ups' data texts and say plainly what they change: `parent.settings.noVoice`,
+7. Shorten the grown-ups' data texts and say plainly what they change: `parent.settings.noVoice`,
    `parent.data.importConfirmBody`, `parent.data.resetBody` and `parent.offline.intro` (S3).
-7. `editor.problem.chars` names fewer characters than the name check accepts (it also allows
+8. `editor.problem.chars` names fewer characters than the name check accepts (it also allows
    apostrophes, full stops and hyphens) (S3).
-8. Read-aloud: decide how `Krakonoš` is spoken, and label the notation examples in Settings so a
+9. Read-aloud: decide how `Krakonoš` is spoken, and label the notation examples in Settings so a
    screen reader does not read "3 · 4" sign by sign (S2b, S3).
-9. Before the grown-ups' progress screens show objectives, make the `objective.*` examples follow
-   the notation; today they are Czech only and shown nowhere (S2b).
 10. Use one set of words for units of play: a problem in a round (activity), activities in a level,
     and "game" only for the whole game.
 
@@ -110,6 +112,18 @@ that omit their objects are the main copy risks above.
 | `quest.snack-5` / `quest.snack-10` | "Feed 5 snacks to hungry dragons" / "Feed 10 snacks to hungry dragons" | Clear, but "snacks" are not named elsewhere in reward copy except "Snack time".                          | Add or standardize a snack term in the terminology list, e.g. "Feed 5 dragon snacks". | Minor    | S2b   |
 | `cosmetic.paint-dots`              | "Polka-Dot Wings"                                                      | Hyphenation is correct as an adjective, but source literals use the same name; keep one source of truth. | Keep catalog value; remove or mark duplicated source literal as non-UI metadata.      | Minor    | S2b   |
 
+### Diary, progress and print
+
+| Key                           | Current                                                                                                                                                                   | Issue                                                                                                                                                                 | Suggested                                                                                                                                                                             | Severity | Owner |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----- |
+| `parent.item.tens`            | "Dividing tens by {n}"                                                                                                                                                    | Verified in `src/rules/contract/skills.ts` and `src/rules/learning/generators/beyond.ts`: `tens:dN` is the `mul.tens` bucket, so this label says the wrong operation. | "Tens times {n}" or "Multiplying tens by {n}".                                                                                                                                        | Major    | S3    |
+| `parent.family.times-fewer`   | "times fewer (N-krát méně)"                                                                                                                                               | The Progress tab now exposes the exact risky phrase that the child templates avoided; plan §6 still needs editorial sign-off.                                         | "inverse times-as-many problems (N-krát méně)" for now, or the human-approved wording from the decision below.                                                                        | Minor    | S3    |
+| `parent.progress.divCaption`  | "Division: the column number is the result of dividing by the row number"                                                                                                 | Verified in `divisionPanes()`: rows are divisors and columns are quotients, but the caption does not say what is being divided, so it reads incomplete.               | "Division: rows are divisors; columns are quotients."                                                                                                                                 | Minor    | S3    |
+| `parent.progress.windowIntro` | "Every fact is a pane of glass. It turns bronze, then silver, then gold as the fact becomes sure and quick. A sparkle marks a known fact that is due for practice again." | "The fact becomes sure and quick" is awkward; grown-ups need to know it means the child answers that fact correctly and quickly.                                      | "Every fact is a pane of glass. It turns bronze, then silver, then gold as your child answers it correctly and quickly. A sparkle marks a known fact that is due for practice again." | Minor    | S3    |
+| `parent.progress.tablesNote`  | "Each table counts its multiplication facts in both orders. Right answers and quick answers are shares of all answers to them; quick answers show fluency."               | "Shares of all answers to them" is hard to parse.                                                                                                                     | "Each table counts its multiplication facts in both orders. Right and quick answers are percentages of answers for that table; quick answers show fluency."                           | Minor    | S3    |
+| `parent.progress.notYet`      | "{name} has not answered any problems yet. Progress shows up here after the first game."                                                                                  | "Game" adds another unit of play in a grown-up status message; this screen otherwise measures problems, days, tables and skills.                                      | "{name} has not answered any problems yet. Progress shows up here after the first activity."                                                                                          | Minor    | S3    |
+| `parent.progress.unreadable`  | "{name}'s saved game could not be opened here. Open it from the keepers screen to see what is wrong."                                                                     | Accurate, but "what is wrong" sounds blunter than the rest of the recovery copy.                                                                                      | "{name}'s saved game could not be opened here. Open it from the keepers screen to see what happened."                                                                                 | Polish   | S3    |
+
 ### Grown-ups' area
 
 | Key                             | Current                                                                                                                                                                                                                                                        | Issue                                                                             | Suggested                                                                                                                                                                                                                | Severity | Owner |
@@ -135,20 +149,23 @@ that omit their objects are the main copy risks above.
 
 ## Terminology
 
-| Term               | Use                                         | Variants found (keys)                                                                                                                                                                                         | Recommendation                                                                                                                                     |
-| ------------------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Child/player       | The child's profile and role in the valley. | "keeper" (`keepers.*`, `editor.avatarLabel`), "Dragon Keeper" (`story.prologue.4`), "child/children" (`parent.keepers.*`, word templates), "player" not visible.                                              | Use "keeper" for child-facing profile cards and "child" for grown-up data/settings. Keep "Dragon Keeper" as the story title.                       |
-| Adult area         | The protected settings/data area.           | "Grown-ups" (`keepers.grownups`, `parent.heading`, `gate.heading`), "grown-up" (`recovery.heading`, `error.invalid-day`), "parent" only in key names/docs.                                                    | Keep visible "grown-up(s)". Avoid "Grown-Up Dragon" for dragon stages.                                                                             |
-| Currency           | Spendable reward.                           | "coin/coins" (`results.coins.*`, `market.need.*`, `gift.coins.*`), "crowns" in word problems (`word.equal-groups.tickets`, `word.times-as-many.savings`, `word.two-step.*`).                                  | Keep game economy as coins. Decide if Czech "crowns" word problems are intentional cultural context.                                               |
-| Stars/progress     | Level quality and Magic Window mastery.     | "stars" (`results.stars`, `road.stars`), "Gold/Silver/Bronze/Still dark" (`window.*`).                                                                                                                        | Good. Keep "stars" for levels and metal colors for facts/window.                                                                                   |
-| Dragon growth      | Dragon life stages.                         | "egg" (`results.egg`, `gift.egg`), "hatched" (`results.grew.hatchling`), "grew bigger" (`results.grew.youngling`), "all grown up" (`results.grew.adult`), "crown/crowned" (`results.grew.crowned`, stickers). | Use "adult dragon" rather than "grown-up dragon" in stickers; consider surfacing "youngling" only if taught.                                       |
-| Magic Window       | Mastery mosaic.                             | "Magic Window" (`story.*`, `window.heading`, `window.art`), "Window" in stickers (`sticker.half-window`, `sticker.golden-window`).                                                                            | Good. Use full "Magic Window" in first mention on any screen.                                                                                      |
-| Sticker collection | Achievement collection.                     | "Sticker Album" (`album.heading`), "Stickers" (`hub.album`), "Album pages" (`album.pages`).                                                                                                                   | Good. Use "Sticker Album" for screen heading and "Stickers" for short hub button.                                                                  |
-| Shop/market        | Cosmetic buying screen.                     | "Glimmer's Market" (`market.heading`), "Market" (`hub.market`), "Buy things" (`den.nothing`); "shop" not visible.                                                                                             | Good. Prefer "Market" over "shop" everywhere.                                                                                                      |
-| Snacks/daily       | Spaced review and daily rewards.            | "Snack time" (`hub.adventure.snack`), "Feed snacks" (`quest.snack-*`), "Today's goal" (`hub.goal`), "Today's quests" (`hub.quests`), "gift" (`hub.adventure.gift`, `gift.*`).                                 | Add one child-facing explanation of snacks; keep "gift" if the design no longer uses "gift chest" visibly.                                         |
-| Activity units     | Units of play.                              | "Problem" (`round.progress`), "game" (`error.*`, `match.*`), "level" (`results.levelDone`, `level.*`), "activity" (`results.activityDone`), "mini-game" (`quest.minigame-*`), "Arena" (`hub.arena`).          | Pick a hierarchy: problem inside round/activity, activity inside level, optional Arena. Avoid "game" for rounds unless referring to the whole app. |
-| Activity names     | Named minigames and modes.                  | Feeding Time, Memory Match, Egg Grid, Sharing Feast, Golem Orders, Riddle Scrolls, Number Trail, Fact Family, Lightning Arena appear in docs/content; UI often says generic "game".                           | When space allows, show the activity name consistently; otherwise use "activity" not "game".                                                       |
-| Region/level/boss  | World navigation.                           | "place" (`results.region`, `hub.places`), "region" in content/docs, "level" (`road.levels`, `level.*`), "boss" in stickers/design, "Win over {name}!" (`level.boss`).                                         | "Place" is child-friendly; keep "region" for grown-ups/docs. Use "boss challenge" only if introduced.                                              |
+| Term               | Use                                         | Variants found (keys)                                                                                                                                                                                                                                    | Recommendation                                                                                                                                     |
+| ------------------ | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Child/player       | The child's profile and role in the valley. | "keeper" (`keepers.*`, `editor.avatarLabel`), "Dragon Keeper" (`story.prologue.4`), "child/children" (`parent.keepers.*`, word templates), "player" not visible.                                                                                         | Use "keeper" for child-facing profile cards and "child" for grown-up data/settings. Keep "Dragon Keeper" as the story title.                       |
+| Adult area         | The protected settings/data area.           | "Grown-ups" (`keepers.grownups`, `parent.heading`, `gate.heading`), "grown-up" (`recovery.heading`, `error.invalid-day`), "parent" only in key names/docs.                                                                                               | Keep visible "grown-up(s)". Avoid "Grown-Up Dragon" for dragon stages.                                                                             |
+| Currency           | Spendable reward.                           | "coin/coins" (`results.coins.*`, `market.need.*`, `gift.coins.*`), "crowns" in word problems (`word.equal-groups.tickets`, `word.times-as-many.savings`, `word.two-step.*`).                                                                             | Keep game economy as coins. Decide if Czech "crowns" word problems are intentional cultural context.                                               |
+| Stars/progress     | Level quality and Magic Window mastery.     | "stars" (`results.stars`, `road.stars`), "Gold/Silver/Bronze/Still dark" (`window.*`).                                                                                                                                                                   | Good. Keep "stars" for levels and metal colors for facts/window.                                                                                   |
+| Dragon growth      | Dragon life stages.                         | "egg" (`results.egg`, `gift.egg`), "hatched" (`results.grew.hatchling`), "grew bigger" (`results.grew.youngling`), "all grown up" (`results.grew.adult`), "crown/crowned" (`results.grew.crowned`, stickers).                                            | Use "adult dragon" rather than "grown-up dragon" in stickers; consider surfacing "youngling" only if taught.                                       |
+| Magic Window       | Mastery mosaic.                             | "Magic Window" (`story.*`, `window.heading`, `window.art`), "Window" in stickers (`sticker.half-window`, `sticker.golden-window`).                                                                                                                       | Good. Use full "Magic Window" in first mention on any screen.                                                                                      |
+| Sticker collection | Achievement collection.                     | "Sticker Album" (`album.heading`), "Stickers" (`hub.album`), "Album pages" (`album.pages`).                                                                                                                                                              | Good. Use "Sticker Album" for screen heading and "Stickers" for short hub button.                                                                  |
+| Shop/market        | Cosmetic buying screen.                     | "Glimmer's Market" (`market.heading`), "Market" (`hub.market`), "Buy things" (`den.nothing`); "shop" not visible.                                                                                                                                        | Good. Prefer "Market" over "shop" everywhere.                                                                                                      |
+| Snacks/daily       | Spaced review and daily rewards.            | "Snack time" (`hub.adventure.snack`), "Feed snacks" (`quest.snack-*`), "Today's goal" (`hub.goal`), "Today's quests" (`hub.quests`), "gift" (`hub.adventure.gift`, `gift.*`).                                                                            | Add one child-facing explanation of snacks; keep "gift" if the design no longer uses "gift chest" visibly.                                         |
+| Activity units     | Units of play.                              | "Problem" (`round.progress`, `parent.progress.notYet`), "game" (`error.*`, `match.*`, `parent.progress.notYet`), "level" (`results.levelDone`, `level.*`), "activity" (`results.activityDone`), "mini-game" (`quest.minigame-*`), "Arena" (`hub.arena`). | Pick a hierarchy: problem inside round/activity, activity inside level, optional Arena. Avoid "game" for rounds unless referring to the whole app. |
+| Activity names     | Named minigames and modes.                  | Feeding Time, Memory Match, Egg Grid, Sharing Feast, Golem Orders, Riddle Scrolls, Number Trail, Fact Family, Lightning Arena appear in docs/content; UI often says generic "game".                                                                      | When space allows, show the activity name consistently; otherwise use "activity" not "game".                                                       |
+| Region/level/boss  | World navigation.                           | "place" (`results.region`, `hub.places`), "region" in content/docs, "level" (`road.levels`, `level.*`), "boss" in stickers/design, "Win over {name}!" (`level.boss`).                                                                                    | "Place" is child-friendly; keep "region" for grown-ups/docs. Use "boss challenge" only if introduced.                                              |
+| Progress           | Grown-up summary of learning.               | "Progress" (`parent.tab.progress`, `parent.progress.for`), "Magic Window panes" (`parent.progress.panes`), "facts mastered", "right answers", "quick answers", "hardest facts", "skills" (`parent.progress.*`).                                          | Good overall. Replace "hardest facts" with "facts to practise" if grown-ups or children may read it as a fixed-ability label.                      |
+| Printables         | Grown-up printing and saved HTML.           | "Print" (`parent.tab.print`, `print.print`), "Save as a file" (`print.file`), "Flashcards" (`parent.print.cardsHeading`), "Certificates" (`parent.print.certificatesHeading`), "sheet/page" (`print.*`).                                                 | Good. Keep "Print" for the tab/action, "flashcards" for practice cards, and "certificates" for achievements.                                       |
+| Dragon Diary       | Goodbye/session summary.                    | "Goodbye" (`goodbye.heading`), "Dragon Diary" (`diary.heading`), "Today you learned" (`diary.learned`), "See you soon" (`goodbye.done`).                                                                                                                 | Good. Keep "Diary" only for the session summary so it does not collide with Progress.                                                              |
 
 ## Notation
 
@@ -165,6 +182,8 @@ that omit their objects are the main copy risks above.
 | `parent.settings.notation.czech`         | "Czech school: 3 · 4, 12 : 3, 4 r 3"                                 | Correct because it labels the Czech option, but do not reuse as a generic example.                                                                                                                                                   | Keep, ideally rendered with an aria-label for read-aloud.                                          |
 | `parent.settings.notation.international` | "International: 3 × 4, 12 ÷ 3, 4 R 3"                                | Correct because it labels the international option.                                                                                                                                                                                  | Keep, ideally rendered with an aria-label for read-aloud.                                          |
 | `golem.notFirst`                         | "Not yet! First brackets, then {mul} and {div}, then + and {minus}." | Multiplication, division, and minus are placeholders; plus is hard-coded but invariant.                                                                                                                                              | Optionally pass `{plus}` for speech consistency.                                                   |
+| `parent.print.tableTitle`                | "Flashcards: the {table} times table ({mul} and {div})"              | Correct: `src/app/screens/parent-print.ts` passes `OPERATOR_SYMBOLS[notation].mul` and `.div`, so the title follows the keeper's notation.                                                                                           | No change required.                                                                                |
+| `src/app/math/facts.ts`                  | Builds `question` and `sentence` from `OPERATOR_SYMBOLS[notation]`.  | Correct for Progress hardest facts, Dragon Diary facts, and printable flashcards.                                                                                                                                                    | No change required.                                                                                |
 | `src/app/math/notation.ts` renderer      | Uses `OPERATOR_SYMBOLS[notation]` and `REMAINDER_SYMBOLS[notation]`. | Correct for multiplication, division, and remainder in both notations.                                                                                                                                                               | No copy change.                                                                                    |
 
 ### Term names
@@ -184,8 +203,10 @@ does Ember have?"
 
 ## Copy outside the catalogs
 
-No user-visible English was found outside the catalogs. Two sets of English literals in `src/app`
-look like copy but are not shown on screen:
+No new user-visible English string literals were found outside the catalogs in the PR #29 `src/app`
+diff. The printable certificate date is generated with `Intl.DateTimeFormat('en-GB')`, which fits
+the English-only scope. Two older sets of English literals in `src/app` look like copy but are not
+shown on screen:
 
 - `src/app/art/cosmetics/index.ts`: the 42 cosmetic names ("Party Hat", "Polka-Dot Wings", …) feed
   the art catalog's metadata (`src/app/art/catalog.ts`); the market and den show the `cosmetic.*`
@@ -199,7 +220,7 @@ renderer's symbols.
 ## Needs a human decision
 
 - Approve the inverse "times as many" wording for the curriculum's "times fewer" objective, or give
-  S2b a preferred child-friendly wording.
+  S2b/S3 a preferred wording for both the child stories and the grown-ups' Progress label.
 - Decide whether Czech cultural names with diacritics (`Krakonoš`) need read-aloud aliases.
 - Decide whether word-problem money should use Czech "crowns" or the game's "coins".
 - Decide whether the grown-up gate should follow the active keeper's notation or always use
