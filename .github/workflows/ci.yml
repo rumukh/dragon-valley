@@ -74,29 +74,19 @@ jobs:
       matrix:
         include:
           - { engine: chromium, label: walks+rest, part: 'walks,rest', workers: 2 }
+          - { engine: chromium, label: rounds+controls, part: 'rounds,controls', workers: 2 }
           - {
               engine: chromium,
-              label: rounds+regions+controls,
-              part: 'rounds,regions,controls',
-              workers: 2,
-            }
-          - {
-              engine: chromium,
-              label: valley+activities+days,
-              part: 'valley,activities,days',
+              label: regions+valley+activities+days,
+              part: 'regions,valley,activities,days',
               workers: 2,
             }
           - { engine: firefox, label: walks+rest, part: 'walks,rest', workers: 2 }
+          - { engine: firefox, label: rounds+controls, part: 'rounds,controls', workers: 2 }
           - {
               engine: firefox,
-              label: rounds+regions+controls,
-              part: 'rounds,regions,controls',
-              workers: 2,
-            }
-          - {
-              engine: firefox,
-              label: valley+activities+days,
-              part: 'valley,activities,days',
+              label: regions+valley+activities+days,
+              part: 'regions,valley,activities,days',
               workers: 2,
             }
           - { engine: webkit, label: walks, part: walks, workers: 3 }

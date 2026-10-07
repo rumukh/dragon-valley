@@ -116,7 +116,7 @@ of the suite each (`DV_E2E_PART`, comma-separated; `support/parts.ts`): `walks` 
 `valley` (`boards`, `bosses`, `upgrade`, `finale`, `map`), `activities` (`activities`), `days`
 (`daily`, `collections`), `controls` (`grown-ups`, `visibility`) and `rest` (every other spec,
 including any new one). Chromium and Firefox run three jobs each with two workers, `walks+rest`,
-`rounds+regions+controls` and `valley+activities+days`; WebKit, about twice as slow per test on a
+`rounds+controls` and `regions+valley+activities+days`; WebKit, about twice as slow per test on a
 hosted runner, runs one job per part with three workers (its tests mostly wait on the engine, so
 the third worker shortens a job on the four-processor runner). The split follows measured run
 times, so each job takes about seven minutes, installation included; `harness.spec.ts` checks that
