@@ -1966,6 +1966,10 @@
   list-style: none;
 }
 
+.dv-shelf__title {
+  font-size: 1.2rem;
+}
+
 .dv-shelf__item {
   display: grid;
   justify-items: center;
@@ -1982,8 +1986,9 @@
   border-color: var(--dv-success);
 }
 
+/* Pictures keep a picture's size when the text grows, so 200 % text does not double them. */
 .dv-shelf__art {
-  width: 5em;
+  width: clamp(72px, 5em, 120px);
 }
 
 .dv-shelf__name {
@@ -2112,7 +2117,7 @@
 
 .dv-album__stickers {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(8em, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(6em, 100%), 1fr));
   gap: 0.8em;
   margin: 0;
   padding: 0;
@@ -2129,7 +2134,7 @@
 }
 
 .dv-album__sticker svg {
-  width: 5em;
+  width: clamp(72px, 5em, 120px);
 }
 
 .dv-album__sticker[data-earned='false'] {
@@ -2139,8 +2144,8 @@
 .dv-album__empty {
   display: grid;
   place-items: center;
-  width: 5em;
-  height: 5em;
+  width: clamp(72px, 5em, 120px);
+  height: clamp(72px, 5em, 120px);
   border: 0.14em dashed var(--dv-line-strong);
   border-radius: 50%;
 }
