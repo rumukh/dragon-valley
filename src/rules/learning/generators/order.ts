@@ -2,11 +2,13 @@
  * Order of operations (`order.ops`): `2 + 3 · 4 = ?`, `20 − 12 : 4 = ?`, `(2 + 3) · 4 = ?`,
  * `24 : (8 − 2) = ?`. Items: `order:no-brackets` and `order:brackets`.
  *
- * A problem has 2 or 3 operations (`operations`) over the skill's `operators`. A no-brackets
- * problem is written exactly as precedence reads it and, when the operators allow, mixes · or :
- * with + or −, so precedence matters. A brackets problem needs at least one pair of brackets
- * (never one pair inside another) and, whenever the numbers allow, gives a different value
- * without them.
+ * A problem has 2 or 3 operations (`operations`) over the skill's `operators`. Every tree is
+ * exactly how its written text is read at school (`readsAsWritten`): brackets first, then · and :,
+ * then + and −, each from left to right, so a chain of the same strength is built from the left
+ * (`(60 + 6) + 9`) and Golem Orders' steps follow the reading. A no-brackets problem mixes · or :
+ * with + or − when the operators allow, so precedence matters. A brackets problem needs at least
+ * one pair of brackets (never one pair inside another) and, whenever the numbers allow, gives a
+ * different value without them.
  *
  * Numbers come from a small dynamic program: for the chosen expression shape it computes every
  * value each part can take, then draws the answer and splits it top-down, so the draw never fails
@@ -91,6 +93,8 @@ function skeletons(params: DeepReadonly<OrderOpsParams>, n: number, brackets: bo
   for (const shape of shapes(n)) {
     for (const sequence of sequences(operators, n)) {
       const tree = withGroups(label(shape, sequence));
+      // `60 + (6 + 9)` without its brackets is written `60 + 6 + 9`, which is read `(60 + 6) + 9`.
+      if (!readsAsWritten(tree)) continue;
       const { pairs, nested } = bracketsOf(tree);
       if (brackets ? pairs === 0 || nested || !simpleGroups(tree) : pairs > 0) continue;
       if (!brackets && levels.size > 1 && new Set(sequence.map(precedence)).size < 2) continue;
@@ -99,6 +103,23 @@ function skeletons(params: DeepReadonly<OrderOpsParams>, n: number, brackets: bo
   }
   const additive = out.filter((tree) => groupsAdditive(tree));
   return additive.length > 0 ? additive : out;
+}
+
+/**
+ * True when the tree is exactly how its written text is read at school: brackets first, then
+ * · and :, then + and −, each from left to right. An operand of an operation binds at least as
+ * tightly as the operation (else it is bracketed), and a right operand binds strictly more
+ * tightly: a right operand of the same strength is read with the operation before it, so
+ * `60 + (6 + 9)` written without brackets would be done as `(60 + 6) + 9`.
+ */
+export function readsAsWritten(expr: Expr): boolean {
+  if (expr.kind === 'group') return readsAsWritten(expr.inner);
+  if (expr.kind !== 'op') return true;
+  const strength = precedence(expr.op);
+  const { left, right } = expr;
+  if (left.kind === 'op' && precedence(left.op) < strength) return false;
+  if (right.kind === 'op' && precedence(right.op) <= strength) return false;
+  return readsAsWritten(left) && readsAsWritten(right);
 }
 
 /** Every bracket pair holds one operation of two numbers. */

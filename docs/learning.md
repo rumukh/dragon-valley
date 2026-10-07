@@ -70,9 +70,14 @@ equally often whatever its number of quotients.
   has two digits up to `dividendMax`. With `remainder: 'forbidden'` (the core) the problem is
   `48 : 3 = ?`. A bonus skill that allows remainders asks `75 : 4 = ? r ?`.
 - **`order.ops`** (`2 + 3 · 4`, `(2 + 3) · 4`, `24 : (8 − 2)`, `20 − 12 : 4`):
-  - The number of operations and the expression's shape are drawn first. A no-brackets problem is
-    written exactly as precedence reads it, and when the operators allow it, it mixes `·` or `:`
-    with `+` or `−`, so precedence matters.
+  - The number of operations and the expression's shape are drawn first. Every tree is exactly how
+    its written text is read at school: brackets first, then `·` and `:`, then `+` and `−`, each
+    from left to right. So a chain of the same strength is built from the left: `60 + 6 + 45 : 5`
+    is the tree `(60 + 6) + (45 : 5)`, never `60 + (6 + 45 : 5)`, which prints the same text
+    (the contract brackets a right operand of the same strength only under `−` and `:`) but would
+    make Golem Orders ask for `6 + 9` before `60 + 6`.
+  - A no-brackets problem mixes `·` or `:` with `+` or `−` when the operators allow it, so
+    precedence matters.
   - A brackets problem has at least one bracket pair. Each pair holds one operation of two numbers,
     is never inside another, and holds `+` or `−` when the operators allow it. Brackets are
     explicit `group` nodes.
@@ -294,13 +299,16 @@ content).
 
 `test/unit/learning/` holds the generator, distractor and word-content tests:
 
-- **`generators.test.ts`** has five kinds of test:
+- **`generators.test.ts`** has six kinds of test:
   - Exhaustive surveys of the small-table facts.
   - Coverage checks that the draws reach every remainder pair, every ×10/×100 factor, every
     tens × digit pair, every 2-digit × 1-digit pair and every 2-digit : 1-digit division of the core
     parameters.
   - Property surveys over 60 random parameter sets per generator inside the curriculum bounds,
     every content skill and every word template.
+  - Reading checks for order of operations: every tree equals the school reading of its own text
+    in Czech and international notation (chains built from the left), with direct cases of the
+    reading rule (the tree `60 + (6 + 45 : 5)` prints as `60 + 6 + 45 : 5`, which is not read so).
   - Determinism, and literal golden digests of 30 problems with their choices per generator.
   - Mutation checks: each rule of the oracle, fed a broken problem, names the rule it breaks.
 - **`distractors.test.ts`**:
@@ -314,9 +322,10 @@ content).
   - The validator's word count.
 
 `oracle.ts` holds the independent oracles: plain arithmetic, a separate reader of the rendered
-text (`2 + 3 · 4` is read back with precedence), and `violations()`, which restates each
-generator's rules from the curriculum and names every rule a problem breaks. The tests never use
-`expectedAnswer` as the oracle for the answer's value.
+text in both notations (`2 + 3 · 4` is read back with precedence, `60 + 6 + 9` from the left, into
+a tree that must equal the generated one, not just its value), and `violations()`, which restates
+each generator's rules from the curriculum and names every rule a problem breaks. The tests never
+use `expectedAnswer` as the oracle for the answer's value.
 
 To add a template, add it to `wordTemplates` with its `word.*` text and run `npm run verify`. The
 word tests check every template in the pack, and the generator golden for `word` moves (re-pin it
