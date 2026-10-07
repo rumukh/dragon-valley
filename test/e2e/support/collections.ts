@@ -28,6 +28,37 @@ export function marketItem(page: Page, name: string) {
   return page.getByTestId('market-items').locator('li').filter({ hasText: name });
 }
 
+/**
+ * Record the toasts that appear from now on (they leave after about three seconds, which a slow
+ * engine can miss); the returned function reads their texts so far.
+ */
+export async function recordToasts(page: Page): Promise<() => Promise<string[]>> {
+  await page.evaluate(() => {
+    const scope = window as unknown as {
+      __dvQaToasts?: string[];
+      __dvQaToastWatch?: MutationObserver;
+    };
+    scope.__dvQaToastWatch?.disconnect();
+    const seen: string[] = [];
+    scope.__dvQaToasts = seen;
+    const host = document.querySelector('[data-testid="toasts"]');
+    if (!host) return;
+    const watch = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (node instanceof HTMLElement && node.dataset['testid'] === 'toast') {
+            seen.push((node.textContent ?? '').trim());
+          }
+        }
+      }
+    });
+    watch.observe(host, { childList: true });
+    scope.__dvQaToastWatch = watch;
+  });
+  return () =>
+    page.evaluate(() => (window as unknown as { __dvQaToasts?: string[] }).__dvQaToasts ?? []);
+}
+
 export async function buyMarketItem(
   page: Page,
   options: { id: string; name: string; slot: string; price: number },
@@ -66,15 +97,31 @@ export async function expectTooDear(
 
 export async function equipCosmetic(
   page: Page,
-  options: { dragon: string; slot: string; item: string; name: string; previewClass: string },
+  options: {
+    dragon: string;
+    slot: string;
+    item: string;
+    name: string;
+    previewClass: string;
+    /** A sticker this dressing earns, told by a toast ("New sticker: Dressed Up"). */
+    sticker?: string;
+  },
 ): Promise<void> {
   await page.getByTestId(`den-dragon-${options.dragon}`).click();
+  const toasts = options.sticker ? await recordToasts(page) : null;
   await page.getByTestId(`den-${options.slot}-${options.item}`).click();
   await expect(page.getByTestId(`den-${options.slot}-${options.item}`)).toHaveAttribute(
     'aria-pressed',
     'true',
   );
   await expect(page.getByTestId('den-preview').locator(options.previewClass)).toHaveCount(1);
+  if (options.sticker) {
+    await expect
+      .poll(toasts!, {
+        message: `dressing earns "${options.sticker}", and a toast says so`,
+      })
+      .toContainEqual(expect.stringContaining(`New sticker: ${options.sticker}`));
+  }
   // A move shows once taken; the reload must come after it is saved.
   await expectSaved(page);
   await page.reload();

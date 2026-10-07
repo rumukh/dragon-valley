@@ -26,10 +26,9 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
 
 ## 2. Defects and decisions
 
-- [ ] No open blocker or major defect ([defects.md](defects.md)). Open today, all S3: two major,
-      DV-QA-17 (Memory Match's term cards) and DV-QA-18 (a missed × 0 fact sent to look at a picture
-      it does not have), and two minor in WebKit, DV-QA-13 and 15; fix the major ones, fix or accept
-      the minor ones for v1.
+- [ ] No open blocker or major defect ([defects.md](defects.md)). Open today, all S3: one major,
+      DV-QA-17 (Memory Match's term cards), and two minor in WebKit, DV-QA-13 and 15; fix the major
+      one, fix or accept the minor ones for v1.
 - [ ] _(person)_ The copy decisions are made ([copy-review.md](copy-review.md), "Needs a human
       decision") and the agreed changes merged (S2b, S3).
 - [ ] The accessibility advice is fixed or accepted ([accessibility.md](accessibility.md):

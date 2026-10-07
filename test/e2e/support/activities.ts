@@ -527,6 +527,68 @@ async function tapEggNest(page: Page, rows: number, columns: number): Promise<vo
   );
 }
 
+/** Build a nest with a stepper's − and + buttons, pressed from the keyboard (Enter). */
+async function stepEggNest(page: Page, rows: number, columns: number): Promise<void> {
+  for (const [which, target] of [
+    ['rows', rows],
+    ['columns', columns],
+  ] as const) {
+    const value = page.getByTestId(`egg-${which}-value`);
+    const current = Number(await value.innerText());
+    if (current === target) continue;
+    // The steppers stay in place while the nest is redrawn, so the focus stays on the button.
+    await page.getByTestId(`egg-${which}-${current < target ? 'more' : 'less'}`).focus();
+    for (let step = 0; step < Math.abs(target - current); step++) {
+      await page.keyboard.press('Enter');
+    }
+    await expect(value, `the ${which} stepper reads ${target}`).toHaveText(String(target));
+  }
+  await expect(page.getByTestId('egg-sentence')).toHaveText(
+    rows === 1 ? `${rows} row of ${columns}` : `${rows} rows of ${columns}`,
+  );
+}
+
+/**
+ * The Egg Grid from the keyboard alone: the field of spots is a picture for pointing at
+ * (`aria-hidden`), so each nest is built with the steppers and sent with Check. Only right nests:
+ * the kind line for a wrong one is the touch test's.
+ */
+export async function playEggGridByKeyboard(page: Page): Promise<void> {
+  await expect(page.getByTestId('egg-grid'), 'Egg Grid opens').toBeVisible();
+  let nests = 0;
+  for (let move = 0; move < 80 && !(await results(page).isVisible()); move++) {
+    const before = await readEggBoard(page);
+    if (before.over) break;
+    const rows = Array.from({ length: before.maxSide }, (_, index) => index + 1).find((side) => {
+      const columns = before.product / side;
+      return (
+        Number.isInteger(columns) &&
+        columns <= before.maxSide &&
+        !before.found.includes(rectangleText(side, columns))
+      );
+    });
+    expect(
+      rows,
+      `an Egg Grid nest remains for ${before.product} (found ${before.found.join(', ')})`,
+    ).toBeDefined();
+    await stepEggNest(page, rows!, before.product / rows!);
+    await press(page.getByTestId('egg-check'), 'keyboard');
+    await waitForActivityMove(
+      page,
+      async () => {
+        const after = await readEggBoard(page);
+        return (
+          after.over || after.product !== before.product || after.found.length > before.found.length
+        );
+      },
+      'the Egg Grid takes the nest built with the steppers',
+    );
+    nests += 1;
+  }
+  expect(nests, 'the steppers built at least one nest').toBeGreaterThan(0);
+  await expect(results(page), 'Egg Grid ends on its results').toBeVisible();
+}
+
 export async function playEggGridByTouch(page: Page): Promise<void> {
   await expect(page.getByTestId('egg-grid'), 'Egg Grid opens').toBeVisible();
   let provedKindFeedback = false;

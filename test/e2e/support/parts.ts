@@ -27,6 +27,9 @@ export const NAMED_PARTS = {
   controls: ['grown-ups', 'visibility'],
   // The coordinator's playtest findings on the Region 1 slice, as regression checks.
   playtest: ['playtest'],
+  // Whole journeys: Sunny Meadow from a new keeper to the Bridge Troll by keyboard and by touch,
+  // and the placement check's paths.
+  journey: ['journey', 'placement'],
 } as const satisfies Record<string, readonly string[]>;
 
 type NamedPart = keyof typeof NAMED_PARTS;

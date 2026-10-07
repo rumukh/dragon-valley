@@ -45,7 +45,10 @@ export type Avatar = (typeof AVATARS)[number];
 
 export type ParentTab =
   'keepers' | 'progress' | 'print' | 'settings' | 'data' | 'offline' | 'about';
-export type Via = 'keyboard' | 'pointer';
+/** How a child acts: keys on a keyboard, a mouse, or a finger on a touch screen. */
+export type Via = 'keyboard' | 'pointer' | 'touch';
+/** The gate's lock is held with a mouse or the Space key (Playwright cannot hold a touch). */
+export type GateVia = Exclude<Via, 'touch'>;
 
 export interface KeeperSpec {
   readonly name: string;
@@ -217,7 +220,7 @@ export async function newFamily(page: Page, ...keepers: KeeperSpec[]): Promise<v
 // ---- The grown-ups' gate and area ---------------------------------------------------------
 
 /** Hold the lock until the question appears (two seconds; docs/app.md §6). */
-export async function holdGate(page: Page, via: Via = 'pointer'): Promise<void> {
+export async function holdGate(page: Page, via: GateVia = 'pointer'): Promise<void> {
   const hold = page.getByTestId('gate-hold');
   await expect(hold).toBeVisible();
   if (via === 'pointer') {
@@ -247,7 +250,7 @@ export async function typeGateAnswer(page: Page, value: number): Promise<void> {
   await page.keyboard.press('Enter');
 }
 
-export async function passGate(page: Page, via: Via = 'pointer'): Promise<void> {
+export async function passGate(page: Page, via: GateVia = 'pointer'): Promise<void> {
   await holdGate(page, via);
   await typeGateAnswer(page, await gateProduct(page));
   await expect(page.getByTestId('parent-gate')).toHaveCount(0);
@@ -419,12 +422,14 @@ export function choiceId(answer: AnswerValue): string {
   }
 }
 
-/** Enter `answer` the way a child would: typed on the keyboard, or tapped on screen. */
+/** Enter `answer` the way a child would: typed on the keyboard, clicked, or tapped on screen. */
 export async function giveAnswer(page: Page, answer: AnswerValue, via: Via): Promise<void> {
   const mode = await answerMode(page);
+  const hit = (control: Locator): Promise<void> =>
+    via === 'touch' ? control.tap() : control.click();
   if (mode === 'choice') {
     const tile = page.getByTestId(`choice-${choiceId(answer)}`);
-    if (via === 'pointer') await tile.click();
+    if (via !== 'keyboard') await hit(tile);
     else if (answer.kind === 'number') {
       // Number tiles pick by their digits.
       await page.keyboard.type(String(answer.value));
@@ -448,16 +453,16 @@ export async function giveAnswer(page: Page, answer: AnswerValue, via: Via): Pro
     await page.keyboard.press('Enter');
     return;
   }
-  const tap = async (digits: string): Promise<void> => {
-    for (const digit of digits) await page.getByTestId(`keypad-${digit}`).click();
+  const enter = async (digits: string): Promise<void> => {
+    for (const digit of digits) await hit(page.getByTestId(`keypad-${digit}`));
   };
-  if (answer.kind === 'number') await tap(String(answer.value));
+  if (answer.kind === 'number') await enter(String(answer.value));
   else {
-    await tap(String(answer.quotient));
-    await page.getByTestId('keypad-field-1').click();
-    await tap(String(answer.remainder));
+    await enter(String(answer.quotient));
+    await hit(page.getByTestId('keypad-field-1'));
+    await enter(String(answer.remainder));
   }
-  await page.getByTestId('keypad-ok').click();
+  await hit(page.getByTestId('keypad-ok'));
 }
 
 /** A plausible wrong answer for the problem on screen (another tile, or one more). */

@@ -6,10 +6,9 @@ and WebKit, against WCAG 2.2 levels A and AA and the plan's own promises (plan �
 **In short:**
 
 - No serious or critical axe violation on any screen, in any engine, at any size.
-- Two major defects are open for S3: Memory Match's term cards neither show nor name the number
-  their example is about (DV-QA-17), and a missed × 0 fact is told to "look at the picture" when
-  it has none (DV-QA-18). Two minor ones stay open too, both for S3 and both in WebKit (one also
-  sometimes in Chromium).
+- One major defect is open for S3: Memory Match's term cards neither show nor name the number
+  their example is about (DV-QA-17). Two minor ones stay open too, both for S3 and both in WebKit
+  (one also sometimes in Chromium).
 - Three moderate axe findings are easy fixes.
 - Some things only a person can check, above all screen readers on a real iPad and Windows forced
   colours (below).
@@ -71,12 +70,11 @@ All owned by S3; full write-ups with repro and suggested fixes in [defects.md](d
 | DV-QA-13 | WebKit, sometimes Chromium | A keeper's hub at 200 % text appears at normal size first                |
 | DV-QA-15 | WebKit                     | The keeper pictures lose their focus ring under the arrow keys           |
 | DV-QA-17 | all                        | Major: the term cards' example neither shows nor names its marked number |
-| DV-QA-18 | all                        | Major: a missed × 0 fact is told to look at a picture it does not have   |
 
-Fourteen defects found by the suite have been fixed and stay pinned as regression checks: among them
+Fifteen defects found by the suite have been fixed and stay pinned as regression checks: among them
 the 40 px Retry button, words broken at 200 % text, sideways scrolling at 200 % on a phone, map
 hotspots cut off, focus targets that lost their ring, celebrations that a keyboard could not reach
-(axe, serious), Enter re-reading the problem after Read aloud, the last sideways scroll in WebKit and a lost announcement ([defects.md](defects.md),
+(axe, serious), Enter re-reading the problem after Read aloud, the last sideways scroll in WebKit, a lost announcement and a × 0 fact sent to look at a picture it did not have ([defects.md](defects.md),
 "Fixed").
 
 ## Advice: moderate axe findings

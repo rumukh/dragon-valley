@@ -3,14 +3,14 @@
  * later with its picture first ("Let's try this one again. Look first!"). A fact missed twice in
  * a row is taught the next time it comes: its picture first, drawn unsolved, with "Look at the
  * picture first. Then answer!". Either way the picture is there before the answer, so no Show me
- * is offered, and the right answer is praised. A fact with no picture (× 0) must not send the
- * child to look at one (DV-QA-18).
+ * is offered, and the right answer is praised. A × 0 fact's picture states its rule (#45, which
+ * fixed DV-QA-18: before it, a × 0 fact was sent to look at a picture it did not have).
  *
  * The first test misses a fact in the browser; the others open a game the rules played to the
  * moment (support/saves.ts, `missedFactBackup`), stopped mid-round as a reload would find it.
  */
 import { expect, test } from './support/fixtures';
-import type { Page, TestInfo } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import {
   answerCorrectly,
   answerWrongly,
@@ -24,7 +24,6 @@ import {
   round,
   startLevel,
 } from './support/app';
-import { unlessKnown } from './support/known-issues';
 import { readAnswer, readProblem, written } from './support/problem';
 import type { Token } from './support/problem';
 import { missedFactBackup } from './support/saves';
@@ -83,7 +82,7 @@ test('a missed fact comes back a few problems later, its picture first', async (
   await keeperWithRegions(page, 'Ada', ['fire-mountain']);
   await startLevel(page, 'fire-mountain', 'fire-mountain.3');
   await expect(round(page), 'Feeding Time is a problem round').toBeVisible();
-  // Miss the first fact that has a picture (a × 0 fact has none: DV-QA-18).
+  // Miss the first fact that is not × 0 (a × 0 fact has its own test below).
   let missed: Token[] | null = null;
   for (let turn = 0; turn < 6 && missed === null; turn++) {
     await awaitOpenProblem(page);
@@ -135,25 +134,40 @@ test('a fact missed twice in a row is taught: its picture first, unsolved, then 
   await answerCorrectly(page, 'keyboard');
 });
 
+/**
+ * The rule a × 0 fact's picture states (#45 draws the rule facts as plates): `n · 0 = ?` is n
+ * empty plates, "Any number times 0 is 0."; `0 · n = ?` is an empty tray, "No groups means
+ * nothing at all.". Another form (a missing factor) may show either.
+ */
+function zeroRule(tokens: readonly Token[]): RegExp {
+  const [left, op, right, equals] = tokens;
+  const value = (token: Token | undefined): number | null =>
+    token?.kind === 'number' ? token.value : null;
+  if (op?.kind === 'op' && op.op === 'mul' && equals?.kind === 'equals') {
+    if (value(left) === 0) return /No groups means nothing at all\./;
+    if (value(right) === 0) return /Any number times 0 is 0\./;
+  }
+  return /Any number times 0 is 0\.|No groups means nothing at all\./;
+}
+
 for (const stop of ['reask', 'teach'] as const) {
-  test(`a × 0 fact ${stop === 'reask' ? 'asked again' : 'taught'} does not send the child to look at a picture it does not have`, async ({
+  test(`a × 0 fact ${stop === 'reask' ? 'asked again' : 'taught'} shows its rule as a picture first`, async ({
     page,
-  }, testInfo: TestInfo) => {
+  }, testInfo) => {
     test.slow();
     const fact = await openMissedFact(page, await missedFactBackup('times zero', stop));
-    const note = page.getByTestId('round-note');
-    await expect(note, `${fact} comes back with a note`).not.toHaveText('');
-    const said = await note.innerText();
-    const shown = (await picture(page).count()) > 0;
+    await expect(page.getByTestId('round-note'), `${fact} comes back with its note`).toHaveText(
+      NOTES[stop],
+    );
+    // DV-QA-18 (fixed by #45): the note sends the child to look, so there must be a picture.
+    await expectPictureFirst(page, stop === 'reask' ? 'asked again' : 'taught');
+    const words = await pictureWords(page);
+    expect(words, `the picture says the rule of ${fact}`).toMatch(
+      zeroRule((await readProblem(page)).tokens),
+    );
     testInfo.annotations.push({
-      type: 'DV-QA-18 evidence',
-      description: `${fact} ${stop === 'reask' ? 'asked again' : 'taught'}: "${said.replace(/\s+/g, ' ')}"; a picture: ${shown ? 'shown' : 'none'}`,
-    });
-    await unlessKnown(testInfo, 'DV-QA-18', async () => {
-      expect(
-        shown || !/\blook\b/i.test(said),
-        `"${said}" sends the child to look, so a picture must be shown`,
-      ).toBe(true);
+      type: 'rule picture',
+      description: `${fact} ${stop === 'reask' ? 'asked again' : 'taught'}: "${words.replace(/\s+/g, ' ').trim()}"`,
     });
     await answerCorrectly(page, 'keyboard');
   });
