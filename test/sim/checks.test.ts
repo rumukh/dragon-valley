@@ -188,6 +188,34 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     expect(check(r, 'progress-weekly').ok).toBe(false);
   });
 
+  it('weekly progress over the first 12 weeks; a longer run reports the rest as measured', () => {
+    /** 14 weeks of play, with no progress at all in the weeks `empty` picks. */
+    const run = (empty: (week: number) => boolean) =>
+      report('slow', {
+        days: Array.from({ length: 98 }, (_, i) =>
+          day(i, empty(Math.floor(i / 7)) ? { panes: 0 } : {}),
+        ),
+      });
+    const late = check(
+      run((week) => week >= 12),
+      'progress-weekly',
+    );
+    expect(late.ok, 'weeks 13 and 14 without progress').toBe(true);
+    expect(late.name).toContain(
+      'in 12 of 12 weeks of the first 12 (the whole run, as measured: 12 of 14)',
+    );
+    const early = check(
+      run((week) => week === 11),
+      'progress-weekly',
+    );
+    expect(early.ok, 'the 12th week without progress').toBe(false);
+    expect(early.name).toContain(
+      'in 11 of 12 weeks of the first 12 (the whole run, as measured: 13 of 14)',
+    );
+    const twelve = report('slow', { days: Array.from({ length: 84 }, (_, i) => day(i)) });
+    expect(check(twelve, 'progress-weekly').name, 'a 12-week run').toMatch(/in 12 of 12 weeks$/);
+  });
+
   it('a goal reached without the gift', () => {
     const r = report('average');
     r.days[3] = day(3, { giftOpened: false });
@@ -309,20 +337,20 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     expect(check(long, 'market-pace').ok, 'a quick median does not hide a drought').toBe(false);
   });
 
-  it('the slow child waits at most 8 sessions, the struggling child 12 (median)', () => {
+  it('the slow child waits at most 9 sessions, the struggling child 12 (median)', () => {
     expect(
       check(
-        buying('slow', 40, (i) => i % 8 === 0),
+        buying('slow', 40, (i) => i % 9 === 0),
         'market-pace',
       ).ok,
-      'slow: 8',
+      'slow: 9',
     ).toBe(true);
     const slow = check(
-      buying('slow', 30, (i) => i % 9 === 0),
+      buying('slow', 40, (i) => i % 10 === 0),
       'market-pace',
     );
-    expect(slow.ok, 'slow: 9').toBe(false);
-    expect(slow.name).toContain('every 9 sessions (median of 4 waits, at most 8; the longest 9)');
+    expect(slow.ok, 'slow: 10').toBe(false);
+    expect(slow.name).toContain('every 10 sessions (median of 4 waits, at most 9; the longest 10)');
     const twelve = buying('struggling', 40, (i) => i % 12 === 0);
     expect(check(twelve, 'market-pace').ok, 'struggling: 12').toBe(true);
     const thirteen = check(
@@ -457,6 +485,50 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     );
     expect(ids).not.toContain('bosses');
     expect(runChecks([report('average')]).map((c) => c.id)).toContain('no-dead-end');
+  });
+
+  it('a struggling child whose dragons do not grow up', () => {
+    const tables = ['bubbles', 'sunny', 'goldie', 'petal'];
+    const grown = (days: number, stages: SimulationReport['stages']) =>
+      check(
+        report('struggling', {
+          daysSimulated: days,
+          days: Array.from({ length: days }, (_, i) => day(i)),
+          content: { ...report('struggling').content, tableDragons: tables },
+          stages,
+        }),
+        'growing-up',
+      );
+    const twelveWeeks = grown(84, { bubbles: { hatchling: 0, youngling: 60 } });
+    expect(twelveWeeks.ok, twelveWeeks.name).toBe(true);
+    expect(twelveWeeks.name).toBe(
+      'struggling: saw its dragons grow: the first times-table youngling on day 60 (by day 83, the end of the first term or of the run); 0 times-table adults within 84 days',
+    );
+    expect(grown(84, { bubbles: { hatchling: 0 } }).ok, 'no youngling in 12 weeks').toBe(false);
+    expect(
+      grown(84, { bubbles: { hatchling: 0, adult: 70 } }).ok,
+      'a dragon that passed youngling in one step',
+    ).toBe(true);
+    const year = (youngling: number, adults: number) =>
+      grown(
+        365,
+        Object.fromEntries(
+          tables.map((dragon, i): [string, Record<string, number>] => [
+            dragon,
+            i < adults
+              ? { hatchling: 0, youngling: youngling + i, adult: 200 + i }
+              : { hatchling: 0, youngling: youngling + i },
+          ]),
+        ),
+      );
+    const several = year(118, 3);
+    expect(several.ok, several.name).toBe(true);
+    expect(several.name).toBe(
+      'struggling: saw its dragons grow: the first times-table youngling on day 118 (by day 118, the end of the first term); 3 times-table adults within the year (at least 3)',
+    );
+    expect(year(119, 3).ok, 'the first youngling after the first term').toBe(false);
+    expect(year(100, 2).ok, 'only two adults in a year').toBe(false);
+    expect(runChecks([report('average')]).map((c) => c.id)).not.toContain('growing-up');
   });
   it('a slow child with gold panes or a crowned dragon', () => {
     const gold = report('slow', { window: { dim: 0, bronze: 0, silver: 100, gold: 21 } });

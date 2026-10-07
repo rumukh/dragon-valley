@@ -125,10 +125,11 @@ describe('a variant', () => {
   });
 
   it('may give some dragons gates of their own', () => {
+    const ninety: GrowthVariant = { id: 'ninety', gates: gates(90) };
     const easy: GrowthVariant = { id: 'easy', gates: gates(90), dragons: { bubbles: gates(80) } };
     const s = bubblesState(3, 80, 80, ['bridge-troll']);
     expect(variantStage(easy, bubbles, s, data, index), 'Bubbles at 80 %').toBe('adult');
-    expect(variantStage(SHIPPED, bubbles, s, data, index), 'shipped: 90 %').toBe('youngling');
+    expect(variantStage(ninety, bubbles, s, data, index), 'everyone at 90 %').toBe('youngling');
     const sunny = dragon('sunny');
     const sunnyItems: Record<string, ItemState> = {};
     for (const item of [

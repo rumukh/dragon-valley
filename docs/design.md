@@ -634,7 +634,7 @@ table dragon, the 21 facts of its table in both orders).
 | egg       | received (first egg choice, level rewards)                             |
 | hatchling | 30 % of the set answered correctly at least once                       |
 | youngling | 60 % at bronze or better, and 60 % of its division facts at bronze     |
-| adult     | 90 % at silver or better (division too) and its region's boss defeated |
+| adult     | 80 % at silver or better (division too) and its region's boss defeated |
 | crowned   | 100 % gold (division too)                                              |
 
 **Rule facts and growth** (after the learner simulations): from bronze up, a dragon counts the rule

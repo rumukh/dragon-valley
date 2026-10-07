@@ -483,8 +483,9 @@ ull for a right operation step, which is not graded). */
 }
 
 /**
- * A fact is known at bronze or better: Leitner box 2 and up. The no-starving guarantee covers
- * known facts; facts in box 0-1 are still being learned (docs/testing.md §4).
+ * A fact is known from Leitner box 2 up. The no-starving guarantee covers known facts; facts in
+ * box 0-1 are still being learned (docs/testing.md §4). This is the box, not the mastery level:
+ * with the effort path (`balance.mastery.effort`, content 1.3.0) a fact in box 1 can show bronze.
  */
 export const KNOWN_BOX = 2;
 

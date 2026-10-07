@@ -14,7 +14,9 @@ import type { Style } from '../../traces/support';
 // Six sessions are replayed twice with the full content pack: room on a busy machine.
 vi.setConfig({ testTimeout: 300_000 });
 
-const plain = loadPack();
+/** The pack without the effort path, as content 1.2.0 and earlier shipped it. */
+const plain = JSON.parse(JSON.stringify(loadPack())) as ContentPack<ContentData>;
+delete plain.data.balance.mastery.effort;
 const effort = JSON.parse(JSON.stringify(plain)) as ContentPack<ContentData>;
 effort.data.balance.mastery.effort = { bronzeDays: 2, silverDays: 4, gapDays: 2 };
 

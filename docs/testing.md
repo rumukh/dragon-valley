@@ -88,9 +88,16 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
   median is at least 60 %, with the band as its stretch goal (it progresses more slowly but keeps
   succeeding: never wrong more often than right);
 - the average bot grows every times-table dragon to adult within 12 weeks;
-- every bot earns coins every session and, except the perfect one, sees progress every week;
-- no known fact (Leitner box 2+) waits more than a week past its review day; facts
-  in box 0-1 are still being learned and are served as learning items;
+- the struggling bot sees its dragons grow (content 1.3.0's effort path): its first times-table
+  youngling by the end of the first term (day 118 of a run from 5 October, or the run's end), and
+  in a run of 365 days or more at least 3 times-table adults;
+- every bot earns coins every session and, except the perfect one, sees progress every week of its
+  first 12 weeks (a 12-week target, like the success band); a longer run reports its whole count
+  as measured (the coordinator's decision for content 1.3.0: a pane lit by the effort path stays
+  lit, so late in a school year a bot that never answers quickly has little left to light);
+- no known fact (Leitner box 2+) waits more than a week past its review day; facts in box 0-1 are
+  still being learned and are served as learning items. The check counts the box, not the mastery
+  level: with the effort path (content 1.3.0) a fact in box 1 can show bronze;
 - no dead ends: the perfect, average and slow bots complete every level and win over every boss in
   12 weeks; the struggling bot keeps a steady path instead (its success matters more than its
   speed, and the rules' protection slows it by design): while levels remain, every week with play
@@ -102,9 +109,12 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
   reported as measured, and their market waits below are their binding targets;
 - Glimmer's Market keeps something new coming (the 1.2.0 economy): the average bot still has
   something on sale it cannot afford yet after 110 sessions (a 365-day run) and gets something new
-  with a median wait of at most 6 sessions and never more than 10; the slow bot waits at most 8
+  with a median wait of at most 6 sessions and never more than 10; the slow bot waits at most 9
   sessions (median), the struggling bot at most 12; every bot buys its first cosmetic in its first
-  week;
+  week. The slow bot's limit was 8 until content 1.3.0: PR F's first tastes serve the taught facts
+  a child never answered, trading a little success for coverage (over a school year its session
+  median went from 89 to 87 % and its coins from 14,773 to 13,959), so its new cosmetics come a
+  little later (a median of 9 sessions; the coordinator's decision);
 - the first session hatches the first egg for every bot; the slow bot earns silver but never gold.
 
 A simulated day costs about a hundred commits, so the long runs live outside the gate:

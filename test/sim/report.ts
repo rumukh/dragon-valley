@@ -176,16 +176,34 @@ export const TARGETS = {
    */
   coins: { low: 50, high: 80 },
   /**
-   * Days a known fact (bronze and up: box 2+, driver.ts `KNOWN_BOX`) may wait past its review
-   * day (testing.md §4: interval plus a grace). Facts in box 0-1 are still being learned.
+   * Days a known fact (Leitner box 2+, driver.ts `KNOWN_BOX`) may wait past its review day
+   * (testing.md §4: interval plus a grace). Facts in box 0-1 are still being learned.
    */
   graceDays: 7,
   /**
-   * The average child grows every times-table dragon to adult (90 % of its multiplication and
-   * division facts at silver, its boss won over) within 12 weeks of play, five days a week: the
-   * new tables 6-9 belong to the first half of 3rd grade, and 12 weeks is a school trimester.
+   * The average child grows every times-table dragon to adult (its multiplication and division
+   * facts at the adult gate's share of silver, its boss won over) within 12 weeks of play, five
+   * days a week: the new tables 6-9 belong to the first half of 3rd grade, and 12 weeks is a
+   * school trimester.
    */
   tablesAdultDays: 84,
+  /**
+   * The struggling child sees its dragons grow (the coordinator's decision for content 1.3.0,
+   * after the growth study in balance-report.md §8: the effort path and adult at 80 %): its first
+   * times-table dragon reaches youngling within the first school term (by 31 January, day
+   * `youngDay` of a run from 5 October; within the run when it is shorter), and in a run of a
+   * school year (`yearDays` or more) at least `adults` times-table dragons grow to adult.
+   */
+  growingUp: { youngDay: 118, yearDays: 365, adults: 3 },
+  /**
+   * The average, struggling and slow children see progress (a level, a hatch, growth, a sticker
+   * or a lit pane) in every week with play of their first `progressWeeks` weeks: a 12-week target,
+   * like the success band. A longer run reports the whole run's count as measured (the
+   * coordinator's decision for content 1.3.0, balance-report.md §9): a pane lit by the effort path
+   * stays lit, so late in a school year a child who never answers quickly has little left to
+   * light, where before a pane went dark after a miss and was lit again.
+   */
+  progressWeeks: 12,
   /** The perfect child reaches the finale within 4 weeks of daily play. */
   perfectFinaleDays: 28,
   /** An egg hatches within this many sessions of the child receiving it. */
@@ -211,7 +229,10 @@ export const TARGETS = {
    * - `lastsSessions`: the average child still has something on sale it cannot afford yet after
    *   this many sessions (a shorter run must end with something to save for);
    * - `pace`: the median wait for something new from the market (or the gift) for each child,
-   *   and for the average child the longest wait while cosmetics remain;
+   *   and for the average child the longest wait while cosmetics remain. The slow child's is 9
+   *   sessions, 8 until content 1.3.0: PR F's first tastes serve the taught facts a child never
+   *   answered, trading a little success for coverage, so its coins and its new cosmetics come a
+   *   little later (the coordinator's decision, balance-report.md §9);
    * - `firstWeekDays`: every child buys its first cosmetic in its first week.
    * The simulated child buys the cheapest item it can afford at the end of each session.
    */
@@ -219,7 +240,7 @@ export const TARGETS = {
     lastsSessions: 110,
     pace: {
       average: { median: 6, longest: 10 },
-      slow: { median: 8 },
+      slow: { median: 9 },
       struggling: { median: 12 },
     } as Partial<Record<LearnerName, { median: number; longest?: number }>>,
     firstWeekDays: 7,
@@ -238,6 +259,24 @@ interface Check {
 /** Sessions played from day `from` to day `to` (inclusive). */
 function sessionsBetween(report: SimulationReport, from: number, to: number): number {
   return report.days.filter((d) => d.played && d.index >= from && d.index <= to).length;
+}
+
+const GROWN_STAGES = ['hatchling', 'youngling', 'adult', 'crowned'] as const;
+
+/**
+ * The first day a dragon was at `stage` or later. A dragon can pass two stages in one step, and
+ * the report then holds only the last of them.
+ */
+export function stageReached(
+  report: SimulationReport,
+  dragon: string,
+  stage: (typeof GROWN_STAGES)[number],
+): number | null {
+  const stages = report.stages[dragon] ?? {};
+  const days = GROWN_STAGES.slice(GROWN_STAGES.indexOf(stage))
+    .map((s) => stages[s])
+    .filter((at): at is number => at !== undefined);
+  return days.length > 0 ? Math.min(...days) : null;
 }
 
 /**
@@ -351,21 +390,28 @@ export const CHECKS: readonly Check[] = [
     id: 'progress-weekly',
     learners: ['average', 'struggling', 'slow'],
     evaluate: (r) => {
-      const weeks: boolean[] = [];
+      const weeks: { start: number; moved: boolean }[] = [];
       for (let start = 0; start < r.days.length; start += 7) {
         const week = r.days.slice(start, start + 7).filter((d) => d.played);
         if (week.length === 0) continue;
-        weeks.push(
-          week.some(
+        weeks.push({
+          start,
+          moved: week.some(
             (d) =>
               d.levels.length + d.hatched.length + d.grew.length + d.stickers.length + d.panes > 0,
           ),
-        );
+        });
       }
-      const moved = weeks.filter(Boolean).length;
+      const { progressWeeks } = TARGETS;
+      const judged = weeks.filter((w) => w.start < progressWeeks * 7);
+      const moved = judged.filter((w) => w.moved).length;
+      const later =
+        weeks.length > judged.length
+          ? ` of the first ${progressWeeks} (the whole run, as measured: ${weeks.filter((w) => w.moved).length} of ${weeks.length})`
+          : '';
       return {
-        ok: moved === weeks.length,
-        name: `saw progress (a level, a hatch, growth, a sticker or a lit pane) in ${moved} of ${weeks.length} weeks`,
+        ok: moved === judged.length,
+        name: `saw progress (a level, a hatch, growth, a sticker or a lit pane) in ${moved} of ${judged.length} weeks${later}`,
       };
     },
   },
@@ -476,7 +522,7 @@ export const CHECKS: readonly Check[] = [
       );
       return {
         ok: worst.days <= TARGETS.graceDays,
-        name: `no known fact (bronze and up) waited more than ${TARGETS.graceDays} days past its review day (the longest: ${worst.days} days${worst.item ? `, ${worst.item} on day ${worst.day}` : ''})`,
+        name: `no known fact (box 2+) waited more than ${TARGETS.graceDays} days past its review day (the longest: ${worst.days} days${worst.item ? `, ${worst.item} on day ${worst.day}` : ''})`,
       };
     },
   },
@@ -489,7 +535,27 @@ export const CHECKS: readonly Check[] = [
       const last = reached.length === days.length ? Math.max(...reached) : null;
       return {
         ok: last !== null && last <= TARGETS.tablesAdultDays,
-        name: `grew every times-table dragon to adult (90 % silver) within ${TARGETS.tablesAdultDays} days (${reached.length} of ${days.length} adult${last !== null ? `, the last on day ${last}` : ''})`,
+        name: `grew every times-table dragon to adult within ${TARGETS.tablesAdultDays} days (${reached.length} of ${days.length} adult${last !== null ? `, the last on day ${last}` : ''})`,
+      };
+    },
+  },
+  {
+    id: 'growing-up',
+    learners: ['struggling'],
+    evaluate: (r) => {
+      const { youngDay, yearDays, adults } = TARGETS.growingUp;
+      const young = r.content.tableDragons
+        .map((dragon) => stageReached(r, dragon, 'youngling'))
+        .filter((at): at is number => at !== null);
+      const first = young.length > 0 ? Math.min(...young) : null;
+      const deadline = Math.min(youngDay, r.daysSimulated - 1);
+      const grown = r.content.tableDragons.filter(
+        (dragon) => stageReached(r, dragon, 'adult') !== null,
+      ).length;
+      const year = r.daysSimulated >= yearDays;
+      return {
+        ok: first !== null && first <= deadline && (!year || grown >= adults),
+        name: `saw its dragons grow: the first times-table youngling on day ${first ?? '-'} (by day ${deadline}, the end of the first term${deadline < youngDay ? ' or of the run' : ''}); ${grown} times-table adult${grown === 1 ? '' : 's'} ${year ? `within the year (at least ${adults})` : `within ${r.daysSimulated} days`}`,
       };
     },
   },

@@ -230,7 +230,7 @@ describe('the market a day report records', () => {
 });
 
 describe('the known facts the no-starving check watches', () => {
-  it('counts facts at bronze and up (box 2+) past their review day, most overdue first', () => {
+  it('counts facts in box 2+ past their review day, most overdue first', () => {
     expect(KNOWN_BOX, 'bronze is box 2').toBe(2);
     const items = {
       'mul:7x8': { box: 1, due: 80 },
