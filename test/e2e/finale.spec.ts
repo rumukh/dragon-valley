@@ -14,19 +14,15 @@ import { expect, test } from './support/fixtures';
 import {
   answerCorrectly,
   boot,
-  closeGrownUps,
   createFirstKeeper,
   expectHub,
   expectScreen,
   keeperCard,
+  keeperWithRegions,
   leaveHub,
   loadBackup,
-  newFamily,
-  openGrownUps,
-  playAs,
   round,
   startLevel,
-  unlockAhead,
 } from './support/app';
 import { FINALE_BEAT, finaleBackup } from './support/finale';
 
@@ -50,12 +46,7 @@ async function praiseAfter(page: Page, act: () => Promise<unknown>): Promise<str
 }
 
 test('the Seven-Headed Dragon is won over head by head', async ({ page }) => {
-  await newFamily(page, { name: 'Ada' });
-  await leaveHub(page);
-  await openGrownUps(page, 'settings');
-  await unlockAhead(page, 'dragon-castle');
-  await closeGrownUps(page);
-  await playAs(page, 1, 'Ada');
+  await keeperWithRegions(page, 'Ada', ['dragon-castle']);
   await startLevel(page, 'dragon-castle', 'dragon-castle.boss');
   await expect(round(page)).toBeVisible();
 

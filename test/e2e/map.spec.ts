@@ -15,8 +15,8 @@ import {
   leaveHub,
   newFamily,
   openGrownUps,
+  openRegionsEarly,
   playAs,
-  unlockAhead,
 } from './support/app';
 
 interface Box {
@@ -55,7 +55,7 @@ async function openValley(page: Page, regions: readonly string[], large: boolean
   await leaveHub(page);
   await openGrownUps(page, 'settings');
   if (large) await chooseSetting(page, 'setting-text-200');
-  for (const region of regions.slice(1)) await unlockAhead(page, region);
+  await openRegionsEarly(page, regions.slice(1));
   await closeGrownUps(page);
   await playAs(page, 1, 'Ada');
   await page.getByTestId('hub-map').click();

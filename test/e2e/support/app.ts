@@ -340,17 +340,6 @@ export async function setVolume(page: Page, testId: string, percent: number): Pr
   await expect(page.getByTestId(testId)).toHaveValue(String(percent));
 }
 
-/**
- * A game rule: open a region ahead of the child's progress (its levels and boss open too). Game
- * rules are saved in the keeper's game, with "Game setting saved."
- */
-export async function unlockAhead(page: Page, region: string): Promise<void> {
-  const testId = `setting-unlock-${region}`;
-  await changeOnPanel(page, () => page.getByTestId(testId).click());
-  await expect(page.getByTestId('toast').last()).toHaveText('Game setting saved.');
-  await expect(page.getByTestId(testId)).toBeChecked();
-}
-
 /** Load a backup file into keeper 1 through the grown-ups' area; ends on "Who is playing?". */
 export async function loadBackup(page: Page, text: string, name: string): Promise<void> {
   await openGrownUps(page, 'data');

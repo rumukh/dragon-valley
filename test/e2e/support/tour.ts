@@ -27,6 +27,7 @@ import {
   leaveResults,
   loadBackup,
   openGrownUps,
+  openRegionsEarly,
   openTab,
   passGate,
   reload,
@@ -35,7 +36,6 @@ import {
   startLevel,
   startPlacement,
   typeGateAnswer,
-  unlockAhead,
   waitReady,
 } from './app';
 import { FINALE_BEAT, finaleBackup } from './finale';
@@ -246,7 +246,7 @@ export async function riddlesWalk(page: Page, visit: Visit): Promise<void> {
   await createFirstKeeper(page, { name: 'Ada', avatar: 'keeper-6' });
   await leaveHub(page);
   await openGrownUps(page, 'settings');
-  await unlockAhead(page, 'riddle-ruins');
+  await openRegionsEarly(page, ['riddle-ruins']);
   await closeGrownUps(page);
   await page.getByTestId('keeper-profile-1').click();
   await expectHub(page, 'Ada');
@@ -281,7 +281,7 @@ export async function finaleWalk(page: Page, visit: Visit): Promise<void> {
   await createFirstKeeper(page, { name: 'Ada', avatar: 'keeper-4' });
   await leaveHub(page);
   await openGrownUps(page, 'settings');
-  await unlockAhead(page, 'dragon-castle');
+  await openRegionsEarly(page, ['dragon-castle']);
   await closeGrownUps(page);
   await page.getByTestId('keeper-profile-1').click();
   await expectHub(page, 'Ada');
