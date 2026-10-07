@@ -194,11 +194,16 @@ gets kind, specific help after a miss.
   directly (its font size, plus `data-text-scale`) together with the SDK's `--aegis-text-scale`,
   because an engine can keep the root's old size after a custom property changes (DV-QA-13:
   WebKit, once Chromium); the next screen's first frame is already at the keeper's size. On a
-  landscape tablet (1180 × 820, 1024 × 768) the game
-  screens fit without page scrolling: the hub sets the dragon, its week and the places beside
-  today's card; the results card scrolls its celebrations inside itself (a named region in the
-  Tab order) with the button onward always in view; a round's title and progress share a line
-  and the picture behind a problem stands under the dragon.
+  landscape screen (1024 × 768, 1180 × 820, 1280 × 800, 1366 × 657 and 1536 × 730) every
+  child's screen fits at 100 % text without page scrolling, every control in view (bigger text
+  may scroll). The frame's padding and gaps follow the window's height as well as its width, and
+  a short window (up to 860 px high) draws words, problems and pictures a little smaller, never a
+  button. The hub sets the dragon and its week beside today's card with the places along the
+  bottom (down the right from 1000 px wide); the results card scrolls its celebrations inside
+  itself (a named region in the Tab order) with the button onward always in view; a round's
+  title and progress share a line and the picture behind a problem stands under the dragon (in
+  a boss round under the dragon and the boss, side by side, who step back while it shows);
+  boards keep a wide keypad beside them; the map's names stand beside it on a wide window.
 - **Feedback never relies on colour alone**: correct is green + check + happy egg; a miss is
   warm orange + `?` + a curious egg + "Almost! Let's look…", with the visual model shown first.
   Term questions mark the asked-about number with a marker **and** an underline.
@@ -244,7 +249,9 @@ gets kind, specific help after a miss.
   keyboard doing the same (digits, Backspace, Enter). **Remainder mode** has two fields, the
   quotient and the remainder, written `4 r 3` (Czech) or `4 R 3` (international); typing `r`,
   Space or the arrow keys, or a tap on a field, moves between them. Keys do not take focus when
-  clicked, so Enter always submits.
+  clicked, so Enter always submits. Beside a board the keypad is four keys wide and three rows
+  tall (`layout: 'wide'`: `1 2 3 ⌫ / 4 5 6 0 / 7 8 9 OK`), and a board may set its answer
+  fields (`display`) into its own sentence.
 - **Choice tiles** (`ui/tiles.ts`): digits type a choice's label (type-ahead), arrows move,
   Space or Enter choose; a missed choice is blocked, not hidden. Escape pauses a round.
 - Keyboard handling is a stack of handlers (`ui/keyboard.ts`) that ignores text fields and
@@ -356,7 +363,8 @@ toast where they were earned.
   one SVG in the hall's units, `hallBackdrop`, so the window stays in the niche at every size),
   and its last line ends in confetti.
 - **Hub** (`hub.ts`): the featured dragon (the first egg's) with the facts it still needs for its
-  next stage (the rules' exact `next.have` of `next.need`), the other dragons, the week's played
+  next stage (the rules' exact `next.have` of `next.need`), "My dragons" (one button with up to
+  five of the other dragons, small, and "+N" for the rest, that opens the Den), the week's played
   days (a habit view, never a streak), today's
   goal and quests (with their claim buttons), the gift chest and one **Daily Adventure** button
   that does what `hub.next` suggests (placement, snack, the next level or the level in
@@ -375,14 +383,23 @@ toast where they were earned.
   region works through `logicalPoint` and `hitHotspot`; places the content does not have yet
   sleep under a lock). While the names fit, the buttons stand on the picture, each exactly one
   target high; when the map is narrower than 36 text sizes (a phone, or 200 % text) or any two
-  names would touch, the same buttons line up under the picture across the whole width and the
-  picture keeps each place's emblem as a pin (a `ResizeObserver` decides; one set of buttons
-  either way). A region zooms the same picture to its stretch of road with one button per
-  level (locked, open, the glowing next one, or its stars) and the boss. Buttons are placed
+  names would touch, the same buttons leave the picture, which keeps each place's emblem as a
+  pin: on a landscape window at least 1.55 times as wide as tall (with room for 40 text sizes)
+  they stand beside it in columns of five, otherwise they line up under it across the whole
+  width, and on a landscape window the map then leaves room for three rows of them. One set of
+  buttons either way: a `ResizeObserver` asks for a new layout a frame later, and the names
+  are measured on a hidden stand-in of the picture, so the real buttons and the focus stay
+  put (a browser may restyle the real picture only on the next frame). A picture is as wide as
+  the window's height allows at its own shape (`--ratio`). A region zooms the same picture to
+  its stretch of road with one button per level (locked, open, the glowing next one, or its
+  stars) and the boss; beside it (under it in portrait) the levels are listed by name with
+  their stars, a tap opening the level like its marker (the list is hidden from screen readers
+  and out of the Tab order, since the markers carry the same names). Buttons are placed
   from percentages (`--x`, `--y`) so they never leave the frame: a place's name is anchored in
   proportion to where it stands, and pins and markers stay half their size from the edges;
   pins and markers follow the picture's size, not the text size. The level card lists the
-  activities and starts, continues or replays the level.
+  activities and starts, continues or replays the level; on a landscape window a boss stands
+  beside its card's words.
 - **Problem rounds** (`problems.ts`): Feeding Time, the Boss Challenge, snack time, the placement
   check and the Lightning Arena on `ProblemRoundView`. Choice tiles or the keypad as the view
   resolves each problem (remainders, signs, operations and terms included); a right answer
@@ -402,7 +419,8 @@ toast where they were earned.
   stone with an expression shows its value and the place the right sign. **The Seven-Headed
   Dragon** is won over head by head: three right answers cure a head (`curedHeads`: the meter
   shared evenly), cured heads smile from the left, pips and words say how many, and a cured head
-  hops with confetti and "A head is cured!".
+  hops with confetti and "A head is cured!". The answer given right after Show me is taken: the
+  hint is a step of its own, so the round asks for a fresh command token after it.
 - **Minigames** (`minigames.ts`): Memory Match, Number Trail, Egg Grid and Fact Family Nest on
   the rules' typed boards (`MinigameRoundView.current`, faces through the contract's
   `formatFace`), every move tagged with the board revision. A finished board cheers on
@@ -410,16 +428,20 @@ toast where they were earned.
   controls: one tap builds the nest up to that spot (the steppers do the same from the
   keyboard), the nest is told in words ("5 rows of 7") and only Check tells its total ("Yes! 5
   rows of 7 is 35.", or after a wrong nest "5 rows of 8 is 40. We need 35."); the strategy
-  pictures (five-plus, double, ten-minus) are drawn on the field.
-  - **Sharing Feast** (`boards/feast.ts`): a bowl over a row of baskets. A tap gives a basket one
+  pictures (five-plus, double, ten-minus) are drawn on the field. On a landscape window
+  Memory Match lays its cards in two rows (`matchColumnsWide`) and the Fact Family nest writes
+  its four sentences in two columns.
+  - **Sharing Feast** (`boards/feast.ts`): a bowl, with "One for each basket" beside it, over
+    a row of baskets (each a fixed width, as many to a row as fit). A tap gives a basket one
     fruit, its minus takes one back, "One for each basket" deals a round, and from 20 fruit on a
     bag of ten goes in at once (drawn as a bag marked 10). The question is the division the
-    baskets show, `12 : 3 = ?` or `13 : 3 = ? r ?`, on the keypad; the rules' checks come back
+    baskets show, `12 : 3 = ?` or `13 : 3 = ? r ?`, with the answer boxes in the division
+    itself and the wide keypad under it; the rules' checks come back
     as kind lines (not fair yet, the bowl can still go round, count again). An answer bigger
     than the whole feast is answered on the board, since the rules refuse that move.
   - **Golem Orders** (`boards/golem.ts`): the expression as numbers and gears; a gear is the
     sign of its operation (`pathTokens` give every sign its operation's path), picking one marks
-    its part of the line and the keypad asks its result. The steps are written the school way
+    its part of the line and the (wide) keypad asks its result. The steps are written the school way
     (`8 + 2 · 3 = 8 + 6`, each step on one line), and the finished board's chain stays on show
     while the next one starts.
   - Boards with a keypad beside their own buttons use the keypad's `claimFocus`: typing moves
@@ -436,8 +458,13 @@ toast where they were earned.
   and Right between them): the Album one region page (emblem tabs with a check on a full page,
   arrows that turn around the ends; it opens at the page looked at last, else the furthest open
   region's), the Market one shelf per slot (each tab shows one of its things; it opens at the
-  shelf looked at last, else the first with something to buy now). Sticker and item pictures
-  keep a picture's size at 200 % text.
+  shelf looked at last, else the first with something to buy now), the Den one slot at a time
+  under named tabs (it opens at the slot dressed last, else the first with something owned; an
+  egg shows only its nest). On a landscape window the Market writes a shelf's name, its tabs and
+  the note in one row over more, smaller things, and on a short window a thing the keeper owns
+  or can buy shows its price only on its button; the Den's dragons stand in one smaller row and
+  the wardrobe takes the wider column. Sticker and item pictures keep a picture's size at 200 %
+  text.
 - **The grown-ups' Progress tab** (`parent-progress.ts`, shaped by `parent/progress.ts` from the
   view): a summary (days, answers, panes that shine, dragons), the Magic Window as two plain
   grids with their axes (S4's `renderMasteryGrid`, multiplication 11 × 11 and division 10 × 11)
@@ -477,7 +504,8 @@ Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.t
   copies, a failing listener isolated, restores delivered), the Progress tab's shaping and what
   there is to print, laid out by the narrative toolkit (`progress-print.test.ts`), the Dragon
   Diary and its day record (`diary.test.ts`), the game day and the heads of the finale boss.
-- **DOM** (`test/unit/app/dom/`, happy-dom): keypad, choice tiles, the router and Compare Stones.
+- **DOM** (`test/unit/app/dom/`, happy-dom): keypad (with its wide layout), choice tiles, the
+  router, the announcer and Compare Stones.
 - **Browser** (`test/e2e/profiles.spec.ts`, Playwright): a new keeper's prologue, first egg and
   hub, kept after a reload; the placement check by keyboard with a kind miss, results and saved
   coins after a reload; the grown-ups' gate; notation, a rule setting, a rename and the pause
@@ -491,6 +519,7 @@ Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.t
   Seven-Headed Dragon's first head cured after Dragon Castle is opened ahead, and the finale
   beat from a save the rules win in Node (`support/finale.ts`). `map.spec.ts`: with every
   region open, no two names on the map overlap, on the picture at 100 % and under it at 200 %.
+  `hint.spec.ts`: the answer given right after Show me is taken, by keyboard and by tapping.
   The screen tour (`support/tour.ts`, docs/qa/screens.md) also walks goodbye, the Progress and
   Print tabs, the print preview, Riddle Ruins and the finale. CI runs
   Chromium, WebKit and Firefox. Locally the default project is the installed
