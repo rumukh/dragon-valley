@@ -8,7 +8,8 @@ as `<revision>.json`, byte for byte as deployed. An archived pack is never edite
 | ------------ | -------- | -------------------------------------------- | -------------- |
 | `1.0.0.json` | 1.0.0    | the Region 1 slice                           | `373a5d2`      |
 | `1.1.0.json` | 1.1.0    | v1: the nine regions                         | `78c4943`      |
-| (live)       | 1.2.0    | the balance from the learner simulations     | `57855d3`      |
+| `1.2.0.json` | 1.2.0    | the balance from the learner simulations     | `57855d3`      |
+| (live)       | 1.3.0    | the dragons grow up (the effort path)        | `22cdedc`      |
 
 The live pack is `content/dragon-valley.content.json`; it is archived here when the next revision
 replaces it.
