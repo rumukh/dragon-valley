@@ -181,7 +181,9 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
   (`openRegionsEarly`), so any activity, boss or the finale is one map trip away.
 - **One run per port.** Each `DV_E2E_PORT` builds into its own `out/e2e-site-<port>` and writes
   to its own output folder (`out/e2e-results-<port>`; `test-results/` on the default port), so
-  two local runs never clear each other's files.
+  two local runs never clear each other's files. Every run starts its own web server and never
+  reuses one already listening: a busy port (another run, another checkout serving its own build)
+  stops the run at once with Playwright's "already used" message.
 - **Faults from outside.** `support/storage.ts` damages stored records the way a failing disk
   would (the intact copy kept as "previous") and installs IndexedDB faults before the game starts
   (writes that fail like a full disk, storage that will not open like some private windows).
