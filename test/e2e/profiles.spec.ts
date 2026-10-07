@@ -117,7 +117,7 @@ test('a new keeper hears the prologue, chooses an egg and keeps it after a reloa
   await page.getByTestId('keeper-save').click();
 
   // The prologue, line by line; the egg choice cannot be skipped.
-  await expect(page.getByTestId('story-line')).toContainText('Seven-Headed Dragon');
+  await expect(page.getByTestId('story-line')).toContainText('a dragon with seven heads');
   await page.getByTestId('story-next').click();
   await expect(page.getByTestId('story-line')).toContainText('Magic Window');
   await page.getByTestId('story-skip').click();
