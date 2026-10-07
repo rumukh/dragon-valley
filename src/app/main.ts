@@ -60,6 +60,7 @@ function showStartupFailure(root: HTMLElement): void {
       h(
         'div',
         { className: 'dv-card dv-recovery__card' },
+        h('h1', { text: t('startup.heading') }),
         h('p', { text: t('startup.failed') }),
         retry,
       ),

@@ -85,6 +85,7 @@
   "error.body": "Something went wrong. Your saved progress is safe.",
   "error.restart": "Back to the start",
   "error.code": "Code for grown-ups: {code}",
+  "startup.heading": "Something went wrong",
   "startup.failed": "Dragon Valley could not start. Saved progress was not changed.",
   "startup.retry": "Try again",
   "parent.heading": "Grown-ups",

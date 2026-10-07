@@ -173,11 +173,13 @@ export function createApp(options: AppOptions): App {
   const stage = h('div', { className: 'dv-stage', testId: 'stage' });
   const fx = h('div', { className: 'dv-fx-layer', attributes: { 'aria-hidden': 'true' } });
   const dialogs = h('div', { className: 'dv-dialogs' });
+  // A signal for tools (its attributes), not for people: kept out of the accessibility tree.
   const bootStatus = h('p', {
     className: 'dv-visually-hidden',
     testId: 'boot-status',
     text: t('app.ready'),
     dataset: { state: 'loading' },
+    attributes: { 'aria-hidden': 'true' },
   });
   // The static splash stays on stage until the first screen replaces it.
   const splash = root.querySelector('.dv-splash');

@@ -1,6 +1,8 @@
 /**
  * Toasts: short messages at the top of the screen that also reach screen readers. They never
- * steal focus and disappear on their own; a warning stays until the next one replaces it.
+ * steal focus and disappear on their own; a warning stays until the next one replaces it. The
+ * announcer says each one, so the picture of it is hidden from assistive technology (otherwise
+ * it would be read twice, and outside any landmark).
  */
 import { h } from './dom';
 import { icon } from './icons';
@@ -22,7 +24,11 @@ const ICON_BY_TONE: Record<ToastTone, IconName> = {
 };
 
 export function createToaster(announcer: Announcer, maxVisible = 3): Toaster {
-  const element = h('div', { className: 'dv-toasts', testId: 'toasts' });
+  const element = h('div', {
+    className: 'dv-toasts',
+    testId: 'toasts',
+    attributes: { 'aria-hidden': 'true' },
+  });
   const remove = (toast: HTMLElement): void => {
     toast.dataset['leaving'] = 'true';
     setTimeout(() => toast.remove(), 220);
