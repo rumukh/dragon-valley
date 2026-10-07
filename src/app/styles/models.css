@@ -5,10 +5,10 @@
  * tell them apart, not color alone. Nothing moves.
  *
  * Size (S3's budget for the model slot under the dragon): the figure fills the slot's width,
- * which is 244 to 445 px. The drawing scales with that width up to a fifth of the screen's
- * height (a seventh in a boss round), and its steps are written under it, one per line, in rem so they follow the
- * keeper's text size. Nothing may stick out sideways, even at 200 % text: a step wraps after a
- * + or −, and as a last resort inside.
+ * which is 244 to 451 px. The drawing scales with that width up to a fifth of the screen's
+ * height (a sixth in a boss round), and its steps are written under it, one per line, in rem so
+ * they follow the keeper's text size. Nothing may stick out sideways, even at 200 % text: a step
+ * wraps after a + or −, and as a last resort inside.
  */
 
 .dv-model--strategy {
@@ -250,21 +250,11 @@
   font-size: 17px;
 }
 
-/* A boss round shares the column with the boss as well: a shorter drawing, smaller steps. */
-.dv-round--boss .dv-model--strategy {
-  gap: 0.25em;
-  padding: 0.4em 0.6em;
-}
-
+/*
+ * A boss round puts the dragon and the boss side by side above the picture (S3's PR D): the
+ * slot is wider, so the drawing is capped a little lower to keep the Seven-Headed Dragon's round
+ * within the screen at 1366 x 657.
+ */
 .dv-round--boss .dv-model__art {
-  max-height: 14vh;
-}
-
-.dv-round--boss .dv-model__line,
-.dv-round--boss .dv-model__steps {
-  font-size: 0.8rem;
-}
-
-.dv-round--boss .dv-model__rule-text {
-  font-size: 0.75rem;
+  max-height: 17vh;
 }

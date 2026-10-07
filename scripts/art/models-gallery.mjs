@@ -8,11 +8,10 @@
  *   model slot of a 1280 × 800 round), after a miss, before answering and in the international
  *   notation; `zoom-<kind>.png` at true pixels.
  * - The size check: every sample (both notations, with and without the answer) in the model slot
- *   of S3's layout budget at each child viewport, in a normal round and in a boss round, plus the
- *   boss round's worst case of 240 × 220 px. At 100 % text a figure must fit the slot's height;
- *   at 100 % and 200 % text nothing may reach out of the round's left column. Results go to
- *   `out/models-gallery/budget.json`, with `budget-<case>.png` sheets; the script fails when
- *   anything is over.
+ *   of the layout budget (`BUDGET`) at each child viewport, in a normal round and in a boss round.
+ *   At 100 % text a figure must fit the slot's height; at 100 % and 200 % text nothing may reach
+ *   out of the round's left column. Results go to `out/models-gallery/budget.json`, with
+ *   `budget-<case>.png` sheets; the script fails when anything is over.
  *
  *   node scripts/art/models-gallery.mjs
  */
@@ -27,19 +26,18 @@ const OUT = join(ROOT, 'out', 'models-gallery');
 const KINDS = ['place-shift', 'tens-groups', 'split-mul', 'split-div', 'order-steps'];
 
 /**
- * The model slot at 100 % text: its width and the height free for a model. Normal rounds were
- * measured in the real round with a hatched dragon, the worst and by Giant's Peaks the usual case
- * (main 53a2e08); boss rounds are S3's budget for once the dragon and the boss stand side by side.
+ * The model slot at 100 % text in S3's round layout (PR D, measured in the real round with a
+ * hatched dragon): the slot's width, which is the round's left column, and the height free for a
+ * picture. A boss round's height is the Seven-Headed Dragon's, the tightest boss (its heads line
+ * takes room), capped at 260 px at 1366 x 657 as S3 asked.
  */
 const BUDGET = [
-  { viewport: [1024, 768], normal: [244, 367], boss: [291, 260] },
-  { viewport: [1180, 820], normal: [282, 373], boss: [336, 280] },
-  { viewport: [1280, 800], normal: [306, 353], boss: [365, 270] },
-  { viewport: [1366, 657], normal: [329, 259], boss: [392, 220] },
-  { viewport: [1536, 730], normal: [374, 307], boss: [445, 240] },
+  { viewport: [1024, 768], normal: [246, 419], boss: [293, 355] },
+  { viewport: [1180, 820], normal: [284, 453], boss: [339, 392] },
+  { viewport: [1280, 800], normal: [311, 440], boss: [370, 378] },
+  { viewport: [1366, 657], normal: [335, 347], boss: [400, 260] },
+  { viewport: [1536, 730], normal: [379, 394], boss: [451, 328] },
 ];
-/** The worst case S3 asked to design for, at the shortest screen. */
-const WORST = { viewport: [1366, 657], boss: [240, 220] };
 
 const ENTRY = `
 import { applyTokens } from '../../src/app/design/tokens';
@@ -234,7 +232,6 @@ async function main() {
       { name: `normal-${b.viewport.join('x')}`, viewport: b.viewport, slot: b.normal, boss: false },
       { name: `boss-${b.viewport.join('x')}`, viewport: b.viewport, slot: b.boss, boss: true },
     ]),
-    { name: 'boss-worst-240x220', viewport: WORST.viewport, slot: WORST.boss, boss: true },
   ];
   /** @type {Array<Measure & { case: string, text: number, budget: number, over: string[] }>} */
   const results = [];
