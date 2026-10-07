@@ -289,6 +289,23 @@ export async function focusPixels(page: Page, leave: () => Promise<void>): Promi
       const { left, top } = node.getBoundingClientRect();
       return { left, top };
     });
+  /**
+   * The control's place once the page has stopped moving: a focus that scrolls the page to its
+   * next stop may do so a frame after the key press (WebKit does), so the place is read again
+   * after two animation frames until it holds.
+   */
+  const settledPlace = async (): Promise<{ left: number; top: number }> => {
+    let last = await place();
+    for (let check = 0; check < 20; check++) {
+      await page.evaluate(
+        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+      );
+      const next = await place();
+      if (next.left === last.left && next.top === last.top) return next;
+      last = next;
+    }
+    return last;
+  };
   const shot = (clip: { x: number; y: number; width: number; height: number }): Promise<Buffer> =>
     page.screenshot({ clip, animations: 'disabled', caret: 'hide', scale: 'css' });
   try {
@@ -302,13 +319,14 @@ export async function focusPixels(page: Page, leave: () => Promise<void>): Promi
     const start = await place();
     const focused = await shot(before);
     await leave();
-    const now = await place();
+    const now = await settledPlace();
     if (now.left !== start.left || now.top !== start.top) {
       // The key scrolled the page to its next stop: scroll back by exactly as much.
       await page.evaluate(([left, top]) => window.scrollBy({ left, top, behavior: 'instant' }), [
         now.left - start.left,
         now.top - start.top,
       ] as const);
+      await settledPlace();
     }
     const after = await clipOf();
     if (JSON.stringify(after) !== JSON.stringify(before)) {
