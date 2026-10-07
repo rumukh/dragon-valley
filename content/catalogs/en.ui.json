@@ -369,6 +369,7 @@
   "round.hint": "Show me",
   "round.hintShown": "Here is a picture to help.",
   "round.reask": "Let's try this one again. Look first!",
+  "round.teach": "Look at the picture first. Then answer!",
   "round.streak": "{count} in a row!",
   "round.operationRight": "Yes! We need {operation}.",
   "round.operationIs": "We need {operation}.",

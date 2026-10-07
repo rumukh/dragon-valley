@@ -388,7 +388,8 @@ toast where they were earned.
   resolves each problem (remainders, signs, operations and terms included); a right answer
   throws a fruit along an arc into the dragon's mouth (S4's anchors; an egg glows instead) or a
   sparkle onto the boss, whose pose follows its mood meter; a miss shows the right fact and its
-  picture until the child goes on; re-asks show the picture first and the hint shows it on
+  picture until the child goes on; re-asks show the picture first, and so does a fact missed
+  twice in a row (`teach`: "Look at the picture first. Then answer!"); the hint shows it on
   request. Response time excludes paused and hidden time. Placement answers with
   `placementAnswer` and shows its ladder steps; the Arena runs the shell's one-minute race and
   ends with `endRound{ reason: 'time-up' }`. A Riddle Scrolls story first asks for its sign: the
