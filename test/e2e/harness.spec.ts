@@ -218,12 +218,13 @@ test.describe('a page too tall to photograph whole is cut and reported, not a cr
     expect(readFileSync(path).readUInt32BE(20), 'the screenshot is cut').toBe(
       Math.round(cap * ratio),
     );
-    expect(
-      testInfo.annotations.find((note) => note.type === 'tall page')?.description,
-      'the true height is recorded as a finding',
-    ).toMatch(
+    const finding = testInfo.annotations.findIndex((note) => note.type === 'tall page');
+    expect(finding, 'the true height is recorded as a finding').toBeGreaterThanOrEqual(0);
+    expect(testInfo.annotations[finding]!.description).toMatch(
       new RegExp(`^a planted tall page is \\d+ px tall; its screenshot keeps the top ${cap} px$`),
     );
+    // A planted page is not a finding about the game: keep it out of the job summary.
+    testInfo.annotations.splice(finding, 1);
   });
 });
 
