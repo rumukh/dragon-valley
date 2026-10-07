@@ -200,8 +200,10 @@ gets kind, specific help after a miss.
   stays transparent (`data-restyling`, never hidden, so focus and screen readers are not
   disturbed) until the new screen is styled at the keeper's size, at most 400 ms. WebKit applied
   that rule a frame late, the very frame drawn at the old size, so the stage also goes
-  transparent inline, its style read back, just before the new screen is inserted, and is shown
-  again only at an animation frame where the new size holds (DV-QA-13). On a
+  transparent inline, its style read back, just before the new screen is inserted. A screen already
+  styled at its size when it is mounted is shown at once; any other waits, transparent, for an
+  animation frame where the new size holds (DV-QA-13). Opening a keeper at the size the page already
+  has changes nothing. On a
   landscape screen (1024 × 768, 1180 × 820, 1280 × 800, 1366 × 657 and 1536 × 730) every
   child's screen fits at 100 % text without page scrolling, every control in view (bigger text
   may scroll). The frame's padding and gaps follow the window's height as well as its width, and
