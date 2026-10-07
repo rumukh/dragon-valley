@@ -26,6 +26,9 @@ import {
 } from './support/app';
 import { FINALE_BEAT, finaleBackup } from './support/finale';
 
+// As in bosses.spec: the heads and the window are checked, not the motion (motion.spec has that).
+test.use({ reducedMotion: 'reduce' });
+
 /** The text of the praise that follows `act` (it shows only briefly). */
 async function praiseAfter(page: Page, act: () => Promise<unknown>): Promise<string> {
   await page.evaluate(() => {
@@ -69,6 +72,7 @@ test('the Seven-Headed Dragon is won over head by head', async ({ page }) => {
 });
 
 test('the finale: every head cured and the Magic Window whole again', async ({ page }) => {
+  test.slow(); // The rules win the whole boss round in Node before the browser loads the save.
   const backup = await finaleBackup();
   await boot(page);
   await createFirstKeeper(page, { name: 'Ema' });

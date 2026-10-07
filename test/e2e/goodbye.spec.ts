@@ -18,6 +18,7 @@ import {
 } from './support/app';
 
 test('a day with stickers ends with goodbye and the Dragon Diary', async ({ page }) => {
+  test.slow(); // A whole placement check and a reload.
   await newFamily(page, { name: 'Ada' });
   await page.getByTestId('hub-back').click();
   await expectScreen(page, 'keepers');
