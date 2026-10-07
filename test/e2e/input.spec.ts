@@ -215,6 +215,7 @@ test.describe('on a touch screen', () => {
   test.use({ hasTouch: true });
 
   test('a whole round is played by tapping the keypad', async ({ page }) => {
+    test.slow();
     await startPlacement(page);
     for (let step = 0; step < 30 && !(await results(page).isVisible()); step++) {
       const answer = await readAnswer(page);

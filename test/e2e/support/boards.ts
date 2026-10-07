@@ -108,24 +108,39 @@ async function clearFeastAnswer(page: Page, via: BoardVia): Promise<void> {
   }
 }
 
-async function waitForBoardAdvance(page: Page, before: number, boardTestId: string): Promise<void> {
-  await expect(
-    results(page)
-      .or(page.locator(`[data-testid="${boardTestId}"]`))
-      .or(page.getByTestId('screen-round')),
-    'the level keeps moving after a board is completed',
-  ).toBeVisible({ timeout: 20_000 });
-  if (await page.getByTestId(boardTestId).isVisible()) {
-    await expect
-      .poll(
-        async () =>
-          Number(
-            (await page.getByTestId('minigame-progress').getAttribute('aria-valuenow')) ?? '0',
-          ),
-        { message: 'the minigame progress advances after the completed board' },
-      )
-      .toBeGreaterThan(before);
-  }
+/** Whether the activity is over: its results show, or the level's next round. */
+async function activityEnded(page: Page): Promise<boolean> {
+  return (await results(page).isVisible()) || (await page.getByTestId('screen-round').isVisible());
+}
+
+/** An attribute of an element that may be gone a moment later (null then). */
+function attributeOf(element: Locator, name: string): Promise<string | null> {
+  return element.getAttribute(name, { timeout: 1_000 }).catch(() => null);
+}
+
+/**
+ * A completed board is followed by the next board (the progress counts it) or, after the last
+ * one, by the end of the activity: wait for either, and say which.
+ */
+async function waitForBoardAdvance(page: Page, before: number): Promise<'next board' | 'ended'> {
+  let outcome = 'waiting' as 'next board' | 'ended' | 'waiting';
+  await expect
+    .poll(
+      async () => {
+        if (await activityEnded(page)) outcome = 'ended';
+        else {
+          const now = await attributeOf(page.getByTestId('minigame-progress'), 'aria-valuenow');
+          outcome = now !== null && Number(now) > before ? 'next board' : 'waiting';
+        }
+        return outcome;
+      },
+      {
+        message: 'a completed board leads to the next board or ends the activity',
+        timeout: 20_000,
+      },
+    )
+    .not.toBe('waiting');
+  return outcome === 'next board' ? 'next board' : 'ended';
 }
 
 export async function playSharingFeast(page: Page, via: BoardVia): Promise<void> {
@@ -181,8 +196,7 @@ export async function playSharingFeast(page: Page, via: BoardVia): Promise<void>
     ).toHaveText(`In the bowl: ${problem.remainder}`);
 
     await submitFeastAnswer(page, problem, via);
-    await waitForBoardAdvance(page, progress, 'feast');
-    if (await page.getByTestId('feast').isVisible()) {
+    if ((await waitForBoardAdvance(page, progress)) === 'next board') {
       await expect(
         minigameStatus(page),
         'a completed Sharing Feast board cheers before the next board is played',
@@ -386,10 +400,19 @@ export async function playGolemOrders(page: Page, via: BoardVia): Promise<void> 
       ).toHaveText(`${next.expression} = ?`);
       await submitGolemValue(page, next.value, via);
 
-      await expect(
-        results(page).or(page.getByTestId('golem')).or(page.getByTestId('screen-round')),
-        'the Golem board keeps moving after a correct order step',
-      ).toBeVisible({ timeout: 20_000 });
+      // A move is taken once it is saved; the gears read before then would be the old ones. The
+      // board shows the step taken (no gear picked), the next board, or the end of the activity.
+      await expect
+        .poll(
+          async () =>
+            (await activityEnded(page)) ||
+            (await attributeOf(page.getByTestId('golem-ask'), 'data-picked')) === 'false',
+          {
+            message: 'the Golem board takes a correct result before the next gear is picked',
+            timeout: 20_000,
+          },
+        )
+        .toBe(true);
 
       if (await page.getByTestId('golem').isVisible()) {
         const newProgress = Number(

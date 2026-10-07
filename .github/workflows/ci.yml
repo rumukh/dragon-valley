@@ -61,18 +61,19 @@ jobs:
     name: e2e (${{ matrix.engine }}, ${{ matrix.label }})
     runs-on: ubuntu-latest
     # Each engine runs in parallel jobs, one or more parts of the suite each
-    # (test/e2e/support/parts.ts), so the slowest job stays under ten minutes: Chromium and
-    # Firefox in two (the core suite; the valley: regions, boards, bosses, the finale, upgrades),
-    # WebKit, about twice as slow on a hosted runner, in five.
-    timeout-minutes: 30
+    # (test/e2e/support/parts.ts), balanced by measured run times so every job takes about seven
+    # minutes: Chromium and Firefox in two, WebKit, about twice as slow on a hosted runner, in
+    # five. Every part runs once per engine (test/e2e/harness.spec.ts checks this matrix).
+    # The limit is a guard against a hang: room for a slow package mirror, not a budget.
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { engine: chromium, label: core, part: 'walks,rounds,rest' }
-          - { engine: chromium, label: valley, part: 'regions,valley' }
-          - { engine: firefox, label: core, part: 'walks,rounds,rest' }
-          - { engine: firefox, label: valley, part: 'regions,valley' }
+          - { engine: chromium, label: walks+rest, part: 'walks,rest' }
+          - { engine: chromium, label: rounds+regions+valley, part: 'rounds,regions,valley' }
+          - { engine: firefox, label: walks+rest, part: 'walks,rest' }
+          - { engine: firefox, label: rounds+regions+valley, part: 'rounds,regions,valley' }
           - { engine: webkit, label: walks, part: walks }
           - { engine: webkit, label: rounds, part: rounds }
           - { engine: webkit, label: rest, part: rest }
@@ -97,7 +98,9 @@ jobs:
         run: npm ci
 
       # Hosted runners download Playwright's own engines; the development machine uses the system
-      # Edge/Chrome channel instead (see playwright.config.ts).
+      # Edge/Chrome channel instead (see playwright.config.ts). Not cached: the browser download
+      # is 4-9 s of this step and the rest is the system packages (apt, 15-45 s), which a cache of
+      # ~/.cache/ms-playwright would not skip (measured, docs/testing.md §5).
       - name: Install ${{ matrix.engine }}
         run: npx playwright install --with-deps ${{ matrix.engine }}
 
@@ -108,7 +111,7 @@ jobs:
         run: npx playwright test --project=${{ matrix.engine }}
 
       # Screens for human review at tablet, desktop and phone sizes (docs/qa/screens.md); only the
-      # walks take them: qa-screens-chromium-core, -firefox-core and -webkit-walks.
+      # walks take them: qa-screens-chromium-walks+rest, -firefox-walks+rest and -webkit-walks.
       - name: Upload the screens for review
         if: always()
         uses: actions/upload-artifact@v4

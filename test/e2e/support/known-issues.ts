@@ -38,8 +38,11 @@ export interface Defect {
   readonly title: string;
   /** Only these engines show it; on the others its assertions stay strict. */
   readonly engines?: readonly Engine[];
-  /** It shows only under some timings, so a passing check is not taken for a fix. */
-  readonly intermittent?: boolean;
+  /**
+   * It shows only under some timings (everywhere, or on these engines), so a passing check there
+   * is not taken for a fix.
+   */
+  readonly intermittent?: boolean | readonly Engine[];
 }
 
 /**
@@ -58,9 +61,10 @@ export const DEFECTS = {
   'DV-QA-13': {
     owner: 'S3',
     severity: 'minor',
-    engines: ['webkit'],
+    engines: ['webkit', 'chromium'],
+    intermittent: ['chromium'],
     title:
-      "In WebKit a keeper's hub at 200 % text first appears at normal size: the greeting is drawn at 43 px, not 86 px, for 140-435 ms (6 of 6 openings), and the root still reports 24 px in 2 of 6. #19's data-text-scale (no rule reads it) did not change this; Chromium and Firefox are right at once.",
+      "A keeper's hub at 200 % text can first appear at normal size. In WebKit always: the greeting is drawn at 43 px, not 86 px, for 140-435 ms (6 of 6 openings), and the root still reports 24 px in 2 of 6; #19's data-text-scale (no rule reads it) did not change this. In Chromium sometimes: on CI the root was still 24 px as the hub appeared in 2 of 4 runs. Firefox has been right at once.",
   },
   'DV-QA-15': {
     owner: 'S3',
@@ -106,6 +110,14 @@ export function engineOf(testInfo: TestInfo): string {
 export function defectApplies(testInfo: TestInfo, id: DefectId): boolean {
   const engines: readonly string[] | undefined = (DEFECTS[id] as Defect).engines;
   return engines === undefined || engines.includes(engineOf(testInfo));
+}
+
+/** Whether a defect shows only under some timings on this test's engine. */
+function intermittentHere(testInfo: TestInfo, defect: Defect): boolean {
+  const { intermittent } = defect;
+  return typeof intermittent === 'object'
+    ? (intermittent as readonly string[]).includes(engineOf(testInfo))
+    : intermittent === true;
 }
 
 /** Split layout problems into unknown ones (failures) and known defects (annotated). */
@@ -154,7 +166,7 @@ export async function unlessKnown(
   try {
     await assertion();
     testInfo.annotations.push(
-      defect.intermittent
+      intermittentHere(testInfo, defect)
         ? {
             type: 'defect not seen this time',
             description: `${id} did not show in this run (it shows only under some timings): ${defect.title}`,

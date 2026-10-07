@@ -114,10 +114,14 @@ builds are installed. CI runs each engine in parallel jobs with `DV_E2E_AUDIT=1`
 of the suite each (`DV_E2E_PART`, comma-separated; `support/parts.ts`): `walks` (`screens`,
 `reflow`), `rounds` (`input`, `persistence`, `recovery`, `settings`), `regions` (`regions`),
 `valley` (`boards`, `bosses`, `upgrade`) and `rest` (every other spec, including any new one).
-Chromium and Firefox run two jobs each, `core` (`walks,rounds,rest`) and `valley`
-(`regions,valley`); WebKit, about twice as slow on a hosted runner, runs one job per part. Each
-job has two workers and stays under ten minutes, installation included (a slow Ubuntu mirror once
-stretched WebKit's system packages, `install --with-deps`, from one minute to ten).
+Chromium and Firefox run two jobs each, `walks+rest` and `rounds+regions+valley`; WebKit, about
+twice as slow on a hosted runner, runs one job per part. The split follows measured run times, so
+each job, with two workers, takes about seven minutes, installation included; `harness.spec.ts`
+checks that the matrix runs every part once per engine. Setup is under a minute: `setup-node`
+restores npm's cache, and Playwright's browsers are downloaded, not cached, because the download
+is 4–9 s of the install step and the rest is the system packages (apt: about 15 s for Chromium
+and Firefox, 45 s for WebKit), which a browser cache would not skip. A slow Ubuntu mirror once
+stretched WebKit's packages from one minute to ten; the 20-minute job limit leaves room for that.
 
 ```
 npm run test:e2e                                   # everything, system Edge
@@ -177,7 +181,9 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
   (`openRegionsEarly`), so any activity, boss or the finale is one map trip away.
 - **One run per port.** Each `DV_E2E_PORT` builds into its own `out/e2e-site-<port>` and writes
   to its own output folder (`out/e2e-results-<port>`; `test-results/` on the default port), so
-  two local runs never clear each other's files.
+  two local runs never clear each other's files. Every run starts its own web server and never
+  reuses one already listening: a busy port (another run, another checkout serving its own build)
+  stops the run at once with Playwright's "already used" message.
 - **Faults from outside.** `support/storage.ts` damages stored records the way a failing disk
   would (the intact copy kept as "previous") and installs IndexedDB faults before the game starts
   (writes that fail like a full disk, storage that will not open like some private windows).
@@ -185,6 +191,11 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
 - **Named waits only.** Feedback is observed in the page (`feedbackAfter`), so a half-second
   "Yes!" is never missed; there are no fixed sleeps except where a duration is the subject (the
   gate's two-second hold).
+- **Time budgets.** A test has 120 s, an `expect` 10 s. Whole rounds and other long flows declare
+  more: `test.slow()` triples the budget, and the walks, regions, boards, bosses and offline specs
+  set theirs (`test.setTimeout`). A budget is at least twice the test's slowest time on CI, and the
+  job summary lists every test that used more than half of its budget, so a budget is raised
+  before a slower runner turns it into a failure.
 - **Layout checks** (`support/layout.ts`): no sideways scrolling (naming the element that sticks
   out), no control outside the viewport or cut off by a clipping parent, every control at least
   48 × 48 px (a radio or switch measured by its label), no word broken in the middle.
@@ -205,22 +216,23 @@ behaviour the game should have and wraps that one assertion in `unlessKnown(...)
 reproduces the test records it and carries on; when the fix lands the assertion passes and the
 summary lists the marker as "fixed?" so it can be removed. A defect seen on one engine only lists
 it (`engines`), and stays a failure everywhere else. One that shows only under some timings is
-marked `intermittent`: a passing run is noted ("not seen this time"), not taken for a fix. Nothing
-unlisted is tolerated.
+marked `intermittent` (everywhere, or on the engines it names): a passing run there is noted ("not
+seen this time"), not taken for a fix. Nothing unlisted is tolerated.
 
 `support/qa-reporter.ts` writes `qa-summary.md` into the run's output folder (`test-results/` on
 the default port) and the GitHub job summary: totals, known defects still reproducing (with the
 evidence a test recorded for them), markers that no longer reproduce, registered defects that no
 test met (in a full run: a layout or axe allowance whose problem is gone says nothing by itself),
-and axe advice by rule. With `DV_E2E_AUDIT=1` it also fails the run if a spec file (of the job's
-part) did not run in a project or a test was skipped without a reason.
+tests that used more than half their time budget, and axe advice by rule. With `DV_E2E_AUDIT=1`
+it also fails the run if a spec file (of the job's part) did not run in a project or a test was
+skipped without a reason.
 
 ### Artifacts
 
-Each CI job uploads `qa-screens-<job>` (screenshots and contact sheets, 30 days: `chromium`,
-`firefox` and `webkit-walks`, the part that takes them) and `playwright-report-<job>` (the HTML
-report with every axe result and guard report attached, `qa-summary.md`, `results.json`), plus
-`playwright-traces-<job>` when something failed.
+Each CI job uploads `qa-screens-<job>` (screenshots and contact sheets, 30 days:
+`chromium-walks+rest`, `firefox-walks+rest` and `webkit-walks`, the jobs that run the walks) and
+`playwright-report-<job>` (the HTML report with every axe result and guard report attached,
+`qa-summary.md`, `results.json`), plus `playwright-traces-<job>` when something failed.
 
 ### Adding a test
 

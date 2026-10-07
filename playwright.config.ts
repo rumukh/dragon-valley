@@ -61,7 +61,10 @@ export default defineConfig({
   webServer: {
     command: `node scripts/serve.mjs --build --out ${siteFolder(port).replace(/\\/g, '/')} --base ${base} --port ${port}`,
     url: `http://127.0.0.1:${port}${base}`,
-    reuseExistingServer: !ci,
+    // Never reuse a server already on the port: it may belong to another run or another checkout,
+    // serving their build and vanishing when that run ends. A busy port stops the run at once;
+    // choose another with DV_E2E_PORT.
+    reuseExistingServer: false,
     timeout: 120_000,
     stdout: 'pipe',
     stderr: 'pipe',
