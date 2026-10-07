@@ -134,8 +134,17 @@ history: `git log -p -- docs/qa/defects.md`.
   time from an answer to its feedback on a throttled device.
 - axe reports only moderate findings: `region` (toasts, the announcer and the
   boot status sit outside landmarks) and `page-has-heading-one` on the startup failure screen.
-- Remainder mode (`4 r 3` / `4 R 3`) cannot be reached in play until Region 6 content lands; the
-  keypad logic is unit-tested and the e2e parity check covers number mode.
+- Remainder mode (`4 r 3` / `4 R 3`) is played both ways since v1: typed in the leftover Sharing
+  Feast (`boards.spec.ts`), tapped in Leftover Lagoon 2's Feeding Time (`regions.spec.ts`).
+- A mixed round serves a keeper who is still learning their focus egg's facts first
+  (`selection.ts`, `pickLearning`). With regions opened early, a new keeper's Dragon Castle 3
+  (seven skills: tables, division, remainders, two-digit × one-digit, the order of operations,
+  comparisons, stories) asked only × and : facts in 14 problems, eight of them the 2-table of their
+  first egg. Fine for a child who arrives there by play; worth a look for children whose grown-ups
+  open regions early (S2b).
+- The finale ends like any boss level: "Level complete! The Seven-Headed Dragon, 21 of 21 right",
+  a new egg (the Seven-Headed Dragon) and the sticker "Seven Heads Cured"; the finale's own
+  celebration is phase 3 (docs/app.md §16).
 - The keeper pictures are a sound radio group for keyboards and screen readers: the group is named
   "Pick your keeper", each radio by its description ("A short bob and a star pin"), the checked
   state is exposed, Tab enters at the chosen picture, arrows and Space choose, and the choice is

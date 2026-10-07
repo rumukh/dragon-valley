@@ -13,9 +13,9 @@ differ by operating system, so no test compares them.
 
 ## Where to find them
 
-- **CI**: each run of the `CI` workflow uploads one artifact per engine, `qa-screens-chromium`,
-  `qa-screens-webkit-walks` (WebKit runs in parts; the `walks` part takes the pictures) and
-  `qa-screens-firefox` (kept 30 days). Open `first-run-and-placement.html`,
+- **CI**: each run of the `CI` workflow uploads one artifact per engine from the job that runs
+  the walks: `qa-screens-chromium-core`, `qa-screens-firefox-core` and `qa-screens-webkit-walks`
+  (kept 30 days). Open `first-run-and-placement.html`,
   `the-valley.html`, `keepers-and-grown-ups.html`, `when-things-go-wrong.html` or `text-200.html`
   in the artifact for a contact sheet: one row per stop, one column per size.
 - **Locally**: `npm run test:e2e -- screens.spec.ts reflow.spec.ts` writes the same files to

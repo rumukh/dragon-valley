@@ -23,7 +23,7 @@ a golden is a pinned literal, never self-referential; every test is mutation-che
 
 CI then audits the record again outside npm (`node scripts/verify.mjs --audit`), so a lost exit code
 cannot turn a failed gate green. The e2e jobs run the QA suite (§5) on Chromium, WebKit and Firefox:
-one job per engine, WebKit split into three parts.
+each engine in parallel jobs (Chromium and Firefox in two, WebKit in five).
 
 ## 2. Rules for every test
 
@@ -110,19 +110,21 @@ decisions are in [balance-report.md](balance-report.md).
 `test/e2e/` runs the built site at the Pages base `/dragon-valley/` in a real browser. Locally it
 drives the system Microsoft Edge (`DV_BROWSER_CHANNEL=chrome` for Chrome) and never downloads
 browsers; `$env:DV_E2E_ALL_ENGINES = '1'` runs Chromium, WebKit and Firefox where Playwright's own
-builds are installed. CI runs one job per engine with `DV_E2E_AUDIT=1`; WebKit, about twice as slow
-as the others on a hosted runner, runs in three parallel jobs, one per part of the suite
-(`DV_E2E_PART`, `support/parts.ts`): `walks` (`screens`, `reflow`), `rounds` (`input`,
-`persistence`, `recovery`, `settings`) and `rest` (every other spec, including any new one). With
-two workers per job, a run takes 7½ to 8 minutes: Chromium 7m02s-7m31s, Firefox 6m48s-8m00s and
-the WebKit parts 5m28s-6m44s on the hosted runner, installation included (a slow Ubuntu mirror once
+builds are installed. CI runs each engine in parallel jobs with `DV_E2E_AUDIT=1`, one or more parts
+of the suite each (`DV_E2E_PART`, comma-separated; `support/parts.ts`): `walks` (`screens`,
+`reflow`), `rounds` (`input`, `persistence`, `recovery`, `settings`), `regions` (`regions`),
+`valley` (`boards`, `bosses`, `upgrade`) and `rest` (every other spec, including any new one).
+Chromium and Firefox run two jobs each, `core` (`walks,rounds,rest`) and `valley`
+(`regions,valley`); WebKit, about twice as slow on a hosted runner, runs one job per part. Each
+job has two workers and stays under ten minutes, installation included (a slow Ubuntu mirror once
 stretched WebKit's system packages, `install --with-deps`, from one minute to ten).
 
 ```
 npm run test:e2e                                   # everything, system Edge
 npm run test:e2e -- input.spec.ts --headed         # one spec, watching
 $env:DV_E2E_ALL_ENGINES = '1'; npm run test:e2e -- --project=webkit
-$env:DV_E2E_PART = 'walks'; npm run test:e2e       # one part, as a CI job runs it
+$env:DV_E2E_PART = 'regions,valley'; npm run test:e2e   # parts, as a CI job runs them
+$env:DV_E2E_PORT = '4401'; npm run test:e2e       # a second run beside another one
 ```
 
 ### Guards on every test
@@ -159,13 +161,23 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
 | `live.spec.ts`        | Live regions announce a miss and its fact, typed digits, praise, coins, results and toasts politely, a failed save assertively, and each region exists before it speaks                                                                                                                                                                                                                                                                                                |
 | `screens.spec.ts`     | Every screen and state at three sizes: screenshots for review ([qa/screens.md](qa/screens.md)), axe (no serious or critical WCAG 2.2 A/AA violation) and the layout checks                                                                                                                                                                                                                                                                                             |
 | `harness.spec.ts`     | The checks themselves see planted faults (including a focus ring removed by a rule or covered by art, which only the pixel check sees); the answer oracle solves hand-written problems in both notations                                                                                                                                                                                                                                                               |
+| `regions.spec.ts`     | Each region of the valley (opened early by the grown-ups): a whole activity of its own kind, answered by the oracle to its results: stories (sign, then number), remainders, ×10 and ×100, two-digit × one-digit, comparisons with brackets, terms                                                                                                                                                                                                                     |
+| `boards.spec.ts`      | Sharing Feast and Golem Orders by touch and by keyboard, played from what they show (deal the fruit, answer the division; pick the gear the order of operations does next, brackets first), a kind line for a wrong step; a feast of two-digit totals, then its two-digit divisions                                                                                                                                                                                    |
+| `bosses.spec.ts`      | A boss's mood meter fills by one per right answer and holds on a miss until the boss is won over; the Seven-Headed Dragon is won over head by head, each head asking its own skill in order (tables, division, remainders, two-digit × one-digit, order of operations, comparisons, stories)                                                                                                                                                                           |
+| `upgrade.spec.ts`     | (S3) A save from before a content update opens on its archived pack and moves to the newest at the hub; while that pack is out of reach the save waits on the recovery screen                                                                                                                                                                                                                                                                                          |
 
 ### How the tests drive the game
 
 - **Through the screen only.** Helpers in `support/app.ts` act as a child or grown-up would
   (test IDs are handles, never private state). Answers come from `support/problem.ts`, an
   independent oracle that parses the rendered problem (either notation, brackets, an answer box
-  anywhere, remainders) and works it out with its own arithmetic.
+  anywhere, remainders, a comparison's sign, a marked term) and works it out with its own
+  arithmetic; a story's sign step is matched against the pack's word-problem templates, whose
+  words the story shows. The grown-ups' "Open regions early" opens every level of a region
+  (`openRegionsEarly`), so any activity, boss or the finale is one map trip away.
+- **One run per port.** Each `DV_E2E_PORT` builds into its own `out/e2e-site-<port>` and writes
+  to its own output folder (`out/e2e-results-<port>`; `test-results/` on the default port), so
+  two local runs never clear each other's files.
 - **Faults from outside.** `support/storage.ts` damages stored records the way a failing disk
   would (the intact copy kept as "previous") and installs IndexedDB faults before the game starts
   (writes that fail like a full disk, storage that will not open like some private windows).
@@ -196,11 +208,12 @@ it (`engines`), and stays a failure everywhere else. One that shows only under s
 marked `intermittent`: a passing run is noted ("not seen this time"), not taken for a fix. Nothing
 unlisted is tolerated.
 
-`support/qa-reporter.ts` writes `test-results/qa-summary.md` and the GitHub job summary: totals,
-known defects still reproducing (with the evidence a test recorded for them), markers that no
-longer reproduce, registered defects that no test met (in a full run: a layout or axe allowance
-whose problem is gone says nothing by itself), and axe advice by rule. With `DV_E2E_AUDIT=1` it also fails the run if a spec
-file (of the job's part) did not run in a project or a test was skipped without a reason.
+`support/qa-reporter.ts` writes `qa-summary.md` into the run's output folder (`test-results/` on
+the default port) and the GitHub job summary: totals, known defects still reproducing (with the
+evidence a test recorded for them), markers that no longer reproduce, registered defects that no
+test met (in a full run: a layout or axe allowance whose problem is gone says nothing by itself),
+and axe advice by rule. With `DV_E2E_AUDIT=1` it also fails the run if a spec file (of the job's
+part) did not run in a project or a test was skipped without a reason.
 
 ### Artifacts
 
