@@ -80,6 +80,12 @@ export const DEFECTS = {
     title:
       "Two announcements within 40 ms: only the second is heard (the announcer drops a pending message). Seen on CI WebKit as a round ended: the last answer's coin line ('You got 11 coins!'), announced only after its coins finish flying, came as the results appeared and replaced their headline.",
   },
+  'DV-QA-17': {
+    owner: 'S3',
+    severity: 'major',
+    title:
+      "Memory Match's term cards do not show which number of the example is meant. The rules pair a term with an example whose number of that term is highlighted ('which is 42 in 6 · 7 = 42?'), but the card shows the example as plain text ('30 : 6 = 5') and reads it without the highlight, so a child can only guess whether it pairs with the dividend, the divisor or the quotient (Riddle Ruins 4).",
+  },
 } as const satisfies Record<string, Defect>;
 
 export type DefectId = keyof typeof DEFECTS;
