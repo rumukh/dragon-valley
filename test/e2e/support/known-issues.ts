@@ -48,31 +48,10 @@ export interface Defect {
 /**
  * Open defects. Fixed ones leave this list once their fix is verified on every engine (their
  * write-ups and the PR that fixed them are in docs/qa/defects.md); the assertions that pinned
- * them stay in the specs as plain regression checks.
+ * them stay in the specs as plain regression checks. None is open: DV-QA-13, DV-QA-15 and
+ * DV-QA-19 were the last, fixed by #57.
  */
-export const DEFECTS = {
-  'DV-QA-13': {
-    owner: 'S3',
-    severity: 'minor',
-    engines: ['webkit'],
-    intermittent: true,
-    title:
-      "In WebKit a keeper's hub at 200 % text can still come into sight at normal size (6 of 8 openings after #49): the stage gets data-restyling at once, but WebKit applies its opacity: 0 a frame late, the very frame the greeting is drawn at 43.2 px, not 86.4 px. #49 fixed Chromium (6 of 6 openings kept out of sight until 200 %); Firefox was always right. Making the stage transparent, and flushing its style, before the new screen is inserted would close the gap.",
-  },
-  'DV-QA-15': {
-    owner: 'S3',
-    severity: 'minor',
-    engines: ['webkit'],
-    title:
-      "In WebKit (Safari) the keeper pictures lose their focus ring once an arrow key moves the choice: WebKit does not match :focus-visible on a radio focused by an arrow key (a plain page does the same), and the ring is drawn only for :focus-visible. The moving 'chosen' ring still marks the picture.",
-  },
-  'DV-QA-19': {
-    owner: 'S3',
-    severity: 'minor',
-    title:
-      "The hub names the first egg “Bubbles's egg” (the hatching art's label: “Bubbles's egg wobbles and cracks.”): en.ui.json's stage.egg and hatch.hatching add 's to every name. The copy brief writes “Bubbles' egg”: a name ending in s takes only the apostrophe.",
-  },
-} as const satisfies Record<string, Defect>;
+export const DEFECTS = {} as const satisfies Record<string, Defect>;
 
 export type DefectId = keyof typeof DEFECTS;
 

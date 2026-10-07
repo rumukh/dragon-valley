@@ -7,6 +7,7 @@ import type { KeeperAvatar } from '../../rules/contract/ids';
 import { openParentGate } from '../parent/gate-dialog';
 import { findKeeper, MAX_NAME_LENGTH } from '../persistence/family';
 import type { FamilyProblem } from '../persistence/family';
+import { possessive } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { candyButton, linkButton } from '../ui/button';
 import { avatarArt } from '../ui/art';
@@ -119,6 +120,20 @@ export function editorScreen(app: App, keeperId: string | null): ScreenEntry {
         onPress: submit,
         onError: app.kit.onError,
       });
+      const picker = h(
+        'fieldset',
+        { className: 'dv-avatar-picker' },
+        h('legend', { className: 'dv-field__label', text: t('editor.avatarLabel') }),
+        h('div', { className: 'dv-avatar-grid' }, ...radios),
+      );
+      // WebKit does not match :focus-visible on a radio an arrow key moved to (DV-QA-15), so the
+      // picker notes keyboard use itself and the focused picture shows its ring for that too.
+      picker.addEventListener('keydown', () => {
+        picker.dataset['keys'] = 'true';
+      });
+      picker.addEventListener('pointerdown', () => {
+        delete picker.dataset['keys'];
+      });
       const form = h(
         'form',
         { className: 'dv-card dv-editor__card', attributes: { novalidate: '' } },
@@ -137,12 +152,7 @@ export function editorScreen(app: App, keeperId: string | null): ScreenEntry {
             attributes: { id: 'dv-keeper-name-hint' },
           }),
         ),
-        h(
-          'fieldset',
-          { className: 'dv-avatar-picker' },
-          h('legend', { className: 'dv-field__label', text: t('editor.avatarLabel') }),
-          h('div', { className: 'dv-avatar-grid' }, ...radios),
-        ),
+        picker,
         problem,
         h('div', { className: 'dv-row dv-row--end' }, save),
       );
@@ -161,7 +171,7 @@ export function editorScreen(app: App, keeperId: string | null): ScreenEntry {
             if (!(await openParentGate(app.kit))) return;
             const sure = await confirmDialog(app.kit, {
               heading: t('parent.keepers.removeTitle', { name: existing.name }),
-              body: t('parent.keepers.removeBody', { name: existing.name }),
+              body: t('parent.keepers.removeBody', { owner: possessive(existing.name) }),
               confirmLabel: t('parent.keepers.removeConfirm', { name: existing.name }),
               cancelLabel: t('common.cancel'),
               tone: 'warning',

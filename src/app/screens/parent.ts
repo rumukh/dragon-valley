@@ -8,6 +8,7 @@
  */
 import { assertChildSafeView } from '@aegis/browser/ui';
 import type { SettingChange } from '../../rules/contract';
+import { possessive } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { NOTATIONS } from '../math/notation';
 import { shortRevision } from '../parent/about';
@@ -208,7 +209,7 @@ export function parentScreen(
       const removeKeeper = async (keeper: Keeper): Promise<void> => {
         const sure = await confirmDialog(app.kit, {
           heading: t('parent.keepers.removeTitle', { name: keeper.name }),
-          body: t('parent.keepers.removeBody', { name: keeper.name }),
+          body: t('parent.keepers.removeBody', { owner: possessive(keeper.name) }),
           confirmLabel: t('parent.keepers.removeConfirm', { name: keeper.name }),
           cancelLabel: t('common.cancel'),
           tone: 'warning',
@@ -252,7 +253,7 @@ export function parentScreen(
             h('p', {
               className: 'dv-note',
               testId: 'parent-unreadable',
-              text: t('parent.progress.unreadable', { name: keeper.name }),
+              text: t('parent.progress.unreadable', { owner: possessive(keeper.name) }),
             }),
           );
         }
@@ -655,9 +656,10 @@ export function parentScreen(
                       tone: 'success',
                     });
                   } catch {
-                    app.kit.toasts.show(t('parent.data.exportFailed', { name: keeper.name }), {
-                      tone: 'warning',
-                    });
+                    app.kit.toasts.show(
+                      t('parent.data.exportFailed', { owner: possessive(keeper.name) }),
+                      { tone: 'warning' },
+                    );
                   }
                 },
                 onError: app.kit.onError,
@@ -681,7 +683,7 @@ export function parentScreen(
                     const backup = parseKeeperBackup(text);
                     const sure = await confirmDialog(app.kit, {
                       heading: t('parent.data.importConfirmTitle', { name: keeper.name }),
-                      body: t('parent.data.importConfirmBody', { name: keeper.name }),
+                      body: t('parent.data.importConfirmBody', { owner: possessive(keeper.name) }),
                       confirmLabel: t('parent.data.importConfirm'),
                       cancelLabel: t('common.cancel'),
                       tone: 'warning',
@@ -704,16 +706,17 @@ export function parentScreen(
                 onPress: async () => {
                   const sure = await confirmDialog(app.kit, {
                     heading: t('parent.data.resetTitle', { name: keeper.name }),
-                    body: t('parent.data.resetBody', { name: keeper.name }),
+                    body: t('parent.data.resetBody', { owner: possessive(keeper.name) }),
                     confirmLabel: t('parent.data.resetConfirm'),
                     cancelLabel: t('common.cancel'),
                     tone: 'warning',
                   });
                   if (!sure) return;
                   await eraseProgress(app, keeper.id);
-                  app.kit.toasts.show(t('parent.data.resetDone', { name: keeper.name }), {
-                    tone: 'success',
-                  });
+                  app.kit.toasts.show(
+                    t('parent.data.resetDone', { owner: possessive(keeper.name) }),
+                    { tone: 'success' },
+                  );
                 },
                 onError: app.kit.onError,
               }),

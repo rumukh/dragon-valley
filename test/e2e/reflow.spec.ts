@@ -21,7 +21,6 @@ import {
   openGrownUps,
   playAs,
 } from './support/app';
-import { unlessKnown } from './support/known-issues';
 import { checkStop, writeContactSheet, ZOOMED } from './support/screens';
 import { installSpeech, TYPICAL_VOICES } from './support/speech';
 import { grownUpWalk, placesWalk, roundWalk, welcomeWalk } from './support/tour';
@@ -111,13 +110,13 @@ test("a keeper's text at 200 %: the hub and a whole round reflow at every size",
   const opened = (await inSight())!;
   const doubled = (sizes: { root: number; greeting: number }): boolean =>
     sizes.root === normal.root * 2 && Math.abs(sizes.greeting - normal.greeting * 2) < 0.5;
-  await unlessKnown(testInfo, 'DV-QA-13', async () => {
-    expect(opened.root, "the hub comes into sight at the keeper's 200 %: a 48 px root").toBe(48);
-    expect(opened.greeting, 'and the greeting twice its size at 100 %').toBeCloseTo(
-      normal.greeting * 2,
-      0,
-    );
-  });
+  // DV-QA-13, fixed: WebKit drew the hub's first frame at 100 % (the stage now goes transparent,
+  // its style flushed, before the hub is inserted).
+  expect(opened.root, "the hub comes into sight at the keeper's 200 %: a 48 px root").toBe(48);
+  expect(opened.greeting, 'and the greeting twice its size at 100 %').toBeCloseTo(
+    normal.greeting * 2,
+    0,
+  );
   testInfo.annotations.push({
     type: 'DV-QA-13 evidence',
     description: `as the hub came into sight: root ${opened.root} px, greeting ${opened.greeting} px (at 100 %: ${normal.root} and ${normal.greeting}), after ${opened.hiddenFrames} frames kept out of sight`,

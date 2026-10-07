@@ -17,7 +17,12 @@ import {
   TERMS,
 } from '../../../src/rules/contract';
 import { RULE_ERROR_CODES } from '../../../src/app/game/errors';
-import { createTranslator, EN_UI as en, placeholders } from '../../../src/app/i18n/messages';
+import {
+  createTranslator,
+  EN_UI as en,
+  placeholders,
+  possessive,
+} from '../../../src/app/i18n/messages';
 import type { MessageKey } from '../../../src/app/i18n/messages';
 
 /** Keys for grown-ups; longer, plain explanations are fine there. */
@@ -129,6 +134,23 @@ describe('English catalog', () => {
     expect(t('round.progress', { current: 2, total: 4 })).toBe('Problem 2 of 4');
     expect(placeholders(en['round.progress'])).toEqual(['current', 'total']);
     expect(() => t('hub.greeting')).toThrow();
+  });
+
+  it("forms a possessive as the copy brief does: Bubbles' egg, Sunny's egg (DV-QA-19)", () => {
+    const t = createTranslator();
+    expect(possessive('Bubbles')).toBe("Bubbles'");
+    expect(possessive('Jonas')).toBe("Jonas'");
+    expect(possessive('Sunny')).toBe("Sunny's");
+    expect(t('stage.egg', { owner: possessive('Bubbles') })).toBe("Bubbles' egg");
+    expect(t('parent.data.resetDone', { owner: possessive('Jonas') })).toBe(
+      "Jonas' progress was erased.",
+    );
+    const owners = keys.filter((key) => placeholders(en[key]).includes('owner'));
+    expect(owners.length, 'possessives come only from {owner}').toBeGreaterThan(0);
+    expect(
+      keys.filter((key) => en[key].includes("}'s")),
+      "no {name}'s left",
+    ).toEqual([]);
   });
 
   it('uses every message somewhere in the shell', () => {

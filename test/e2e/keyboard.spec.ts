@@ -30,7 +30,6 @@ import {
 } from './support/app';
 import { focusPixels, focusStop, ids, SEEN_PIXELS, tabPass } from './support/a11y';
 import type { FocusStop } from './support/a11y';
-import { unlessKnown } from './support/known-issues';
 import { installSpeech, TYPICAL_VOICES } from './support/speech';
 
 test.beforeEach(async ({ context }) => {
@@ -235,7 +234,7 @@ test.describe('the keeper editor by keyboard alone', () => {
 
   test('the pictures are one named radio group: arrows choose, the choice is announced and kept, and focus shows', async ({
     page,
-  }, testInfo) => {
+  }) => {
     await boot(page);
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
@@ -294,12 +293,11 @@ test.describe('the keeper editor by keyboard alone', () => {
     await expect(picture(2), 'a screen reader hears the choice: it reads as checked').toBeChecked();
     await expect(group.getByRole('radio', { checked: true })).toHaveCount(1);
     const afterArrows = await focusPixels(page, () => page.keyboard.press('Tab'));
-    await unlessKnown(testInfo, 'DV-QA-15', async () => {
-      expect(
-        afterArrows,
-        'the picture an arrow key moved to shows its focus ring',
-      ).toBeGreaterThanOrEqual(SEEN_PIXELS);
-    });
+    // DV-QA-15, fixed: WebKit matches no :focus-visible after an arrow key; the picker marks it.
+    expect(
+      afterArrows,
+      'the picture an arrow key moved to shows its focus ring',
+    ).toBeGreaterThanOrEqual(SEEN_PIXELS);
     await expect(page.getByTestId('keeper-save')).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     await expect(picture(2), 'Shift+Tab comes back to the chosen picture').toBeFocused();

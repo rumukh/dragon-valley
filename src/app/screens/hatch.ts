@@ -7,6 +7,7 @@
  */
 import type { DragonView } from '../../rules/contract';
 import { CANVAS, HATCH_DURATION_MS } from '../art/dragon';
+import { possessive } from '../i18n/messages';
 import { hatchArt } from '../ui/art';
 import { candyButton } from '../ui/button';
 import { confetti } from '../ui/confetti';
@@ -89,7 +90,7 @@ export function hatchCelebration(app: App, dragons: readonly DragonView[]): Hatc
     element.dataset['revealed'] = 'false';
     element.dataset['dragon'] = dragon.id;
     caption.textContent = t('hatch.watch');
-    art.setAttribute('aria-label', t('hatch.hatching', { name: dragonName }));
+    art.setAttribute('aria-label', t('hatch.hatching', { owner: possessive(dragonName) }));
     // Inserting the art starts its sequence; a new egg replays it.
     const egg = hatchArt(dragon.rig, 'dv-hatch-stage__dragon');
     egg.setAttribute('viewBox', HATCH_VIEW_BOX);

@@ -10,6 +10,7 @@
  */
 import { readBackup, rebind } from '../persistence/backup';
 import { BACKUP_MAX_BYTES } from '../persistence/backup';
+import { possessive } from '../i18n/messages';
 import { findKeeper } from '../persistence/family';
 import { errorCode, RecoveryRequired } from '../persistence/recovery';
 import { candyButton, linkButton } from '../ui/button';
@@ -127,8 +128,8 @@ export function recoveryScreen(app: App, problem: RecoveryRequired): ScreenEntry
         problem.kind === 'family'
           ? t('recovery.family')
           : problem.kind === 'game'
-            ? t('recovery.game', { name })
-            : t('recovery.preferences', { name });
+            ? t('recovery.game', { owner: possessive(name) })
+            : t('recovery.preferences', { owner: possessive(name) });
       const element = h(
         'main',
         { className: 'dv-recovery', testId: 'screen-recovery', dataset: { kind: problem.kind } },

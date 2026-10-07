@@ -6,6 +6,7 @@
  */
 import { OPERATOR_SYMBOLS, TABLE_MAX, TABLE_MIN } from '../../rules/contract';
 import type { Notation } from '../../rules/contract';
+import { possessive } from '../i18n/messages';
 import type { Keeper } from '../persistence/family';
 import { earnedCertificates, hardestFacts, longDay, tableFacts } from '../print/content';
 import type { Certificate } from '../print/content';
@@ -84,11 +85,11 @@ export function printContent(
           onPress: () =>
             open(() => ({
               job: flashcardJob(
-                t('parent.print.hardestTitle', { name: keeper.name }),
+                t('parent.print.hardestTitle', { owner: possessive(keeper.name) }),
                 hardest,
                 `${slug}-hardest-facts`,
               ),
-              title: t('parent.print.hardestTitle', { name: keeper.name }),
+              title: t('parent.print.hardestTitle', { owner: possessive(keeper.name) }),
               guidance: cardsGuidance,
             })),
           onError: app.kit.onError,

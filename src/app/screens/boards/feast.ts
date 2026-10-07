@@ -16,6 +16,7 @@
  */
 import { BLANK, num, op, REMAINDER_SYMBOLS } from '../../../rules/contract';
 import type { Problem, SharingFeastBoard } from '../../../rules/contract';
+import { plural } from '../../i18n/messages';
 import type { MessageKey } from '../../i18n/messages';
 import { speakProblem } from '../../speech/verbalizer';
 import { candyButton } from '../../ui/button';
@@ -272,7 +273,9 @@ export function sharingFeast(context: BoardContext): BoardPainter {
     keypad?.setDisabled(true);
     context.status(
       fair.left > 0
-        ? t('feast.sharedLeft', { each: fair.each, left: fair.left })
+        ? plural(t, fair.left, 'feast.sharedLeft.one', 'feast.sharedLeft.other', {
+            each: fair.each,
+          })
         : t('feast.shared', { each: fair.each }),
     );
     const beats = dealBeats(counts, fair.each);

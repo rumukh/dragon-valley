@@ -287,7 +287,8 @@
   background: var(--dv-primary);
 }
 
-.dv-avatar-choice:has(input:focus-visible) {
+.dv-avatar-choice:has(input:focus-visible),
+.dv-avatar-picker[data-keys='true'] .dv-avatar-choice:has(input:focus) {
   outline: 0.16em solid var(--dv-ink);
   outline-offset: 0.12em;
 }
@@ -2116,20 +2117,36 @@
 
 /* ---- Goodbye and the Dragon Diary ------------------------------------------------------ */
 
+/* Goodbye is one screen tall, like results: after a big day the diary scrolls inside its card,
+   so "See you soon!" always stays in view. */
+.dv-goodbye.dv-screen {
+  height: 100vh;
+  height: 100dvh;
+}
+
 /* The dragon waves beside the diary on a tablet, above it on a phone. */
 .dv-goodbye__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   justify-items: center;
   align-items: center;
   gap: 1rem;
+  flex: 0 1 auto;
   width: min(100%, 52em);
+  min-height: 0;
   margin-inline: auto;
 }
 
+.dv-goodbye__layout:has(> .dv-goodbye__dragon) {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
 @media (min-width: 900px) and (orientation: landscape) {
-  .dv-goodbye__layout {
+  .dv-goodbye__layout,
+  .dv-goodbye__layout:has(> .dv-goodbye__dragon) {
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    grid-template-rows: minmax(0, 1fr);
   }
 }
 
@@ -2152,8 +2169,13 @@
 .dv-diary {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  align-content: start;
   gap: 0.6em;
   width: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .dv-diary__header {
@@ -2199,9 +2221,11 @@
   background: var(--dv-success-soft);
 }
 
+/* Two to a row when the card is wide, so a big day's hatches and stickers stay short. */
 .dv-diary__list {
   display: grid;
-  gap: 0.4em;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13em), 1fr));
+  gap: 0.4em 1em;
   margin: 0;
   padding: 0;
   list-style: none;
