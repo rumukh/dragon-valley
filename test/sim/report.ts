@@ -176,8 +176,8 @@ export const TARGETS = {
    */
   coins: { low: 50, high: 80 },
   /**
-   * Days a known fact (bronze and up: box 2+, driver.ts `KNOWN_BOX`) may wait past its review
-   * day (testing.md §4: interval plus a grace). Facts in box 0-1 are still being learned.
+   * Days a known fact (Leitner box 2+, driver.ts `KNOWN_BOX`) may wait past its review day
+   * (testing.md §4: interval plus a grace). Facts in box 0-1 are still being learned.
    */
   graceDays: 7,
   /**
@@ -503,7 +503,7 @@ export const CHECKS: readonly Check[] = [
       );
       return {
         ok: worst.days <= TARGETS.graceDays,
-        name: `no known fact (bronze and up) waited more than ${TARGETS.graceDays} days past its review day (the longest: ${worst.days} days${worst.item ? `, ${worst.item} on day ${worst.day}` : ''})`,
+        name: `no known fact (box 2+) waited more than ${TARGETS.graceDays} days past its review day (the longest: ${worst.days} days${worst.item ? `, ${worst.item} on day ${worst.day}` : ''})`,
       };
     },
   },

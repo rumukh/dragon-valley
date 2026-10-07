@@ -92,8 +92,9 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
   youngling by the end of the first term (day 118 of a run from 5 October, or the run's end), and
   in a run of 365 days or more at least 3 times-table adults;
 - every bot earns coins every session and, except the perfect one, sees progress every week;
-- no known fact (Leitner box 2+) waits more than a week past its review day; facts
-  in box 0-1 are still being learned and are served as learning items;
+- no known fact (Leitner box 2+) waits more than a week past its review day; facts in box 0-1 are
+  still being learned and are served as learning items. The check counts the box, not the mastery
+  level: with the effort path (content 1.3.0) a fact in box 1 can show bronze;
 - no dead ends: the perfect, average and slow bots complete every level and win over every boss in
   12 weeks; the struggling bot keeps a steady path instead (its success matters more than its
   speed, and the rules' protection slows it by design): while levels remain, every week with play

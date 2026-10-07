@@ -35,7 +35,7 @@ passes but one, Mirror's egg for the struggling child (§5.8):
 - success: the average child's session median is 82 % (82-83 % over five seeds, 49-52 of 60
   sessions in the 70-90 % band); the struggling child's is 61 % (61-64 %), above its 60 % floor;
 - the average child grows all 11 times-table dragons to adult by day 70, on five of five seeds;
-- no known fact (bronze and up) waits more than 6 days past its review;
+- no known fact (box 2+) waits more than 6 days past its review;
 - coins: the average child earns a median of 77 a session (72-81 over five seeds; design 50-80);
 - the market: over a school year the average child gets something new every 5 sessions (median;
   never more than 10 apart) and has something to save for until its 117th session; every child
@@ -143,7 +143,7 @@ The checks are named; each label states what it measured.
 | hatch pace         | every egg hatches within 5 sessions of arriving                                      | design §4.1, §6.5         |
 | no dead end        | perfect, average, slow: every level completed, every boss won over                   | testing.md §4             |
 | steady path        | struggling: a new level every week with play; finished regions' bosses won; ≥ 45/59  | coordinator (1.2.0)       |
-| no starving        | no known fact (bronze and up, box 2+) waits more than 7 days past its review day     | testing.md §4             |
+| no starving        | no known fact (Leitner box 2+) waits more than 7 days past its review day            | testing.md §4             |
 | coins              | average: median 50-80 coins per session (a typical session; others as measured)      | design §7.1               |
 | market lasts       | average, 365 days: something on sale it cannot afford yet after 110 sessions         | coordinator (1.2.0)       |
 | market pace        | median wait for something new: average ≤ 6 (never > 10), slow ≤ 8, struggling ≤ 12   | coordinator (1.2.0)       |
@@ -178,8 +178,8 @@ carry the rest of the year.
 
 ## 4. Results
 
-Spreads are min / median / max over the sessions played. "Due" counts known facts (bronze and up)
-whose review day had come when a session began, over the last 10 sessions.
+Spreads are min / median / max over the sessions played. "Due" counts known facts (box 2+) whose
+review day had come when a session began, over the last 10 sessions.
 
 ### 4.1 Content 1.2.0 (seed `simulation`, reading modelled)
 
