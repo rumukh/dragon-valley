@@ -102,6 +102,7 @@ class QaSummary implements Reporter {
     const fixed = new Map<string, Set<string>>();
     const advice = new Map<string, number>();
     const evidence: string[] = [];
+    const measured: string[] = [];
     const met = new Set<string>();
     for (const { test, run } of this.results) {
       const project = projectOf(test);
@@ -126,6 +127,8 @@ class QaSummary implements Reporter {
           fixed.set(description, (fixed.get(description) ?? new Set()).add(project));
         } else if (/^DV-QA-\d+ evidence$/.test(note.type)) {
           evidence.push(`- ${note.type} _(${project})_: \`${description.replace(/`/g, "'")}\``);
+        } else if (note.type === 'performance') {
+          measured.push(`- ${description} _(${project})_`);
         } else if (note.type === 'axe advisory') {
           const rule = / ([a-z0-9-]+ \((?:minor|moderate|serious|critical|unknown)\)) at /.exec(
             description,
@@ -179,6 +182,10 @@ class QaSummary implements Reporter {
       lines.push(
         `- ${test.titlePath().slice(2).join(' › ')}: ${seconds(run.duration)} of ${seconds(test.timeout)} (${used} %) _(${projectOf(test)})_`,
       );
+    }
+    if (measured.length > 0) {
+      // Sizes and first-screen timings against their budgets (perf.spec.ts).
+      lines.push('', '### Performance', '', ...measured.sort());
     }
     lines.push('', '### Accessibility advice (moderate and minor axe findings, by rule)', '');
     if (advice.size === 0) lines.push('None.');

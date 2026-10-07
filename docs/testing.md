@@ -169,6 +169,7 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
 | `boards.spec.ts`      | Sharing Feast and Golem Orders by touch and by keyboard, played from what they show (deal the fruit, answer the division; pick the gear the order of operations does next, brackets first), a kind line for a wrong step; a feast of two-digit totals, then its two-digit divisions                                                                                                                                                                                    |
 | `bosses.spec.ts`      | A boss's mood meter fills by one per right answer and holds on a miss until the boss is won over; the Seven-Headed Dragon is won over head by head, each head asking its own skill in order (tables, division, remainders, two-digit × one-digit, order of operations, comparisons, stories)                                                                                                                                                                           |
 | `upgrade.spec.ts`     | (S3) A save from before a content update opens on its archived pack and moves to the newest at the hub; while that pack is out of reach the save waits on the recovery screen                                                                                                                                                                                                                                                                                          |
+| `perf.spec.ts`        | Performance budgets ([qa/performance.md](qa/performance.md)): the script, style sheet and offline pack sizes; a first visit until the title is ready on fast and slow 4G with a processor four times slower (Chromium), timed in the page, with what it downloaded                                                                                                                                                                                                     |
 
 ### How the tests drive the game
 
@@ -223,7 +224,8 @@ seen this time"), not taken for a fix. Nothing unlisted is tolerated.
 the default port) and the GitHub job summary: totals, known defects still reproducing (with the
 evidence a test recorded for them), markers that no longer reproduce, registered defects that no
 test met (in a full run: a layout or axe allowance whose problem is gone says nothing by itself),
-tests that used more than half their time budget, and axe advice by rule. With `DV_E2E_AUDIT=1`
+tests that used more than half their time budget, performance measurements against their budgets,
+and axe advice by rule. With `DV_E2E_AUDIT=1`
 it also fails the run if a spec file (of the job's part) did not run in a project or a test was
 skipped without a reason.
 
