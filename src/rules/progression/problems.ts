@@ -16,6 +16,7 @@ import { EVENTS, OPERATORS, expectedAnswer, firstStep, sameAnswer } from '../con
 import type {
   AnswerValue,
   InputMode,
+  ItemState,
   PlacementProgress,
   Problem,
   ProblemActivityKind,
@@ -27,12 +28,15 @@ import type {
 } from '../contract';
 import { canGenerate, choicesFor, keypadPossible, problemFor } from '../learning/generate';
 import { creditItem } from '../learning/credit';
-import { digits, responseBucket } from '../learning/items';
+import { digits, isDue, responseBucket } from '../learning/items';
 import {
   blockedRecent,
   isRuleFact,
+  lowSuccess,
+  missedTwice,
   pickArena,
   pickDue,
+  pickLikely,
   pickMixed,
   pickPlacement,
   pickSnack,
@@ -190,7 +194,11 @@ function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomS
   const tables = roundTables(skills);
   let pool = itemsOf(playableSkills(data, round.skills, index), index);
   const served = round.recent;
-  if (round.activity === 'snack') return pickSnack({ state, pool, blocked, served, random });
+  // Below the success band, snacks and reviews serve the likeliest successes first.
+  const protect = lowSuccess(state, data);
+  if (round.activity === 'snack') {
+    return pickSnack({ state, pool, blocked, served, random, likelyFirst: protect });
+  }
   if (round.activity === 'arena') return pickArena({ state, pool, blocked, served, random });
   if (!tables.has(0) && !tables.has(1) && served.some(isRuleFact)) {
     // At most one rule fact (× 0, × 1, 0 : n, n : 1) in a round that is not about them.
@@ -200,7 +208,7 @@ function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomS
   const source = round.source;
   const activity = roundActivity(data, round);
   if (round.activity === 'feeding' && activity?.options['draw'] === 'weakest') {
-    return pickSnack({ state, pool, blocked, served, random });
+    return pickSnack({ state, pool, blocked, served, random, likelyFirst: protect });
   }
   if (round.activity === 'boss' && source.kind === 'level') {
     const level = data.levels.find((l) => l.id === source.level);
@@ -224,7 +232,8 @@ function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomS
         return record.due <= day && record.lastDay < day;
       });
       const picked =
-        pickDue(state, due, random) ?? (review.length > 0 ? random.pick(review) : null);
+        (protect ? pickLikely(state, due, random) : pickDue(state, due, random)) ??
+        (review.length > 0 ? random.pick(review) : null);
       if (picked !== null) return picked;
     }
   }
@@ -258,6 +267,55 @@ function choicesAt(
     : null;
 }
 
+/**
+ * The input a problem is asked with: the round's mode (`auto`: choice while the item is below
+ * `keypadFromBox`, else keypad), by choice when the answer cannot be typed (comparisons, terms)
+ * or when retrieval is made `easier` (a review or re-ask while recent success is low).
+ */
+export function inputFor(options: {
+  round: InputMode;
+  box: number;
+  keypadFromBox: number;
+  easier: boolean;
+  typeable: boolean;
+}): ResolvedInputMode {
+  const resolved =
+    options.round === 'auto'
+      ? options.box < options.keypadFromBox
+        ? 'choice'
+        : 'keypad'
+      : options.round;
+  return resolved === 'keypad' && (options.easier || !options.typeable) ? 'choice' : resolved;
+}
+
+/** What a serving decision knows about the problem: its round and whether it is a re-ask. */
+interface Serving {
+  activity: ProblemActivityKind;
+  /** The placement check (a measurement): served as is. */
+  placement: boolean;
+  reask: boolean;
+}
+
+/**
+ * Whether retrieval is made easier (the problem is asked by choice): a re-ask or a review (a
+ * snack, a due fact) while recent success is `low`; never in the Arena (a race) or the
+ * placement check.
+ */
+export function easierRetrieval(serving: Serving & { due: boolean; low: boolean }): boolean {
+  const { activity, placement, reask, due, low } = serving;
+  return low && !placement && activity !== 'arena' && (reask || due || activity === 'snack');
+}
+
+/**
+ * Whether the item is taught before it is asked (the shell shows its picture model first): its
+ * last two answers were misses. Not in the Arena or the placement check.
+ */
+export function teachFirst(
+  serving: Serving & { record: DeepReadonly<ItemState> | undefined },
+): boolean {
+  return !serving.placement && serving.activity !== 'arena' && missedTwice(serving.record);
+}
+
 /** Serve the next problem: a fired re-ask first, else a fresh draw. */
 export function serveNext(ctx: Ctx, index: Index): void {
   const round = activeProblemRound(ctx);
@@ -278,15 +336,23 @@ export function serveNext(ctx: Ctx, index: Index): void {
     // Riddle Scrolls without the operation step: the story is answered directly.
     problem = { ...problem, operation: null };
   }
-  const box = ctx.state.items[item]?.box ?? 0;
-  const resolved =
-    round.input === 'auto'
-      ? box < data.balance.input.keypadFromBox
-        ? 'choice'
-        : 'keypad'
-      : round.input;
-  // Comparisons and terms cannot be typed: they are answered by choice whatever the input mode.
-  const input = resolved === 'keypad' && !keypadPossible(problem) ? 'choice' : resolved;
+  const record = ctx.state.items[item];
+  const serving = {
+    activity: round.activity,
+    placement: round.placement !== null,
+    reask: queued !== undefined,
+  };
+  const input = inputFor({
+    round: round.input,
+    box: record?.box ?? 0,
+    keypadFromBox: data.balance.input.keypadFromBox,
+    easier: easierRetrieval({
+      ...serving,
+      due: isDue(record, ctx.state.day ?? 0),
+      low: lowSuccess(ctx.state, data),
+    }),
+    typeable: keypadPossible(problem),
+  });
   const step = firstStep(problem);
   round.asked += 1;
   round.recent = [...round.recent, item].slice(-RECENT_LIMIT);
@@ -299,6 +365,7 @@ export function serveNext(ctx: Ctx, index: Index): void {
     step,
     reask: queued !== undefined,
     hinted: false,
+    ...(teachFirst({ ...serving, record }) ? { teach: true } : {}),
   };
 }
 

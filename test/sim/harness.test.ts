@@ -68,10 +68,15 @@ describe('the learner simulation', () => {
     expect(graded.length, 'a record per graded answer').toBe(day.answers);
     expect(graded.filter((r) => r.right).length, 'right answers').toBe(day.correct);
     const firsts = graded.filter((r, i) => graded.findIndex((o) => o.item === r.item) === i);
+    // A board (the Egg Grid) may credit a fact before its first problem: then it is in box 0-1.
     expect(
-      firsts.filter((r) => r.box !== null || r.tier !== 'learning').map((r) => r.item),
-      "an item's first answer: no box yet, a learning item",
+      firsts.filter((r) => r.tier !== 'learning' || (r.box ?? 0) > 1).map((r) => r.item),
+      "an item's first answer: a learning item, in box 0-1 at most",
     ).toEqual([]);
+    expect(
+      firsts.filter((r) => r.box === null).length,
+      'most first answers find no box yet',
+    ).toBeGreaterThan(firsts.length / 2);
     const again = graded.filter((r, i) => graded.findIndex((o) => o.item === r.item) !== i);
     expect(again.length, 'some items come back (re-asks, reviews)').toBeGreaterThan(0);
     expect(

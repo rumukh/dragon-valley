@@ -271,8 +271,17 @@ order:
    level, replayed on its own (`startLevel { level, activity }`, which never completes the level
    again);
 6. the **gift chest**, once the daily goal is reached;
-7. the next glowing level again;
+7. the next glowing level again, **while today's success is at least 70 %** (pacing, below); a
+   level already under way is always continued;
 8. free play (any open level, the Arena, the Market, the Album).
+
+**Pacing** (decided after the learner simulations): the game keeps a struggling child mostly
+succeeding, even if the valley takes longer. After the day's first level, a further _new_ level is
+offered only while today's success is at least 70 % (the lower edge of the success band). Below
+it the Daily Adventure reviews instead: snack time for hungry dragons, else a replay of one
+activity of the furthest finished level (the same `minigame` step as above, for any activity).
+Pacing only chooses the suggestion: every open level, including those a parent unlocked ahead,
+stays playable from the map. The day's first level is always offered.
 
 After the daily goal the dragons get **sleepy** (an expression, never a lock). Play can continue.
 The parent sets the goal and an optional time limit; when the limit is reached the shell ends the
@@ -409,7 +418,8 @@ of known facts against your own best. The shell keeps the time and ends the roun
 ### 5.12 Snack Time (`snack`) and Placement (`placement`)
 
 - **Snack time** serves a hungry dragon's due items (or all hungry dragons'), 6-10 problems, auto
-  input. Feeding hungry dragons _is_ the spaced review.
+  input; while recent success is below 70 % only 4-6, so a session is not dominated by reviews the
+  child cannot do yet (§6.3). Feeding hungry dragons _is_ the spaced review.
 - **Placement** ("Show the dragons what you know!") walks a ladder of skills
   (`placement.steps`), 2-4 problems per step, 12-24 problems in total. It stops early and gently
   after `stopAfterMisses` misses in a row. Passing a step (`passAccuracy`) marks its levels as placed:
@@ -456,7 +466,18 @@ Response buckets come from `elapsedMs` measured by the shell (paused time exclud
 - Target success per round: **≈80-85 %** _(balance `mix.successTarget` = 82)_.
 - About **70 %** likely successes (due reviews, then known facts) and **30 %** learning items
   _(`knownShare` = 70)_. The learning share moves between 10 % and 50 % with rolling accuracy over the
-  last 20 answers _(`minLearningShare`, `maxLearningShare`, `window`)_.
+  last 20 answers, across days _(`minLearningShare`, `maxLearningShare`, `window`)_: a hard yesterday
+  shrinks this morning's share of new facts.
+- **Protecting success** (decided after the learner simulations): while recent success (the same
+  20 answers) is below **70 %**, the lower edge of the success band, the game keeps the child mostly
+  succeeding. A due fact missed last time counts as a learning item, not a likely success; due
+  reviews, learning draws, snacks, boss reviews and the Feeding Time of the weakest facts serve the
+  likeliest successes first (facts answered right last time, the most recently practised first;
+  then new facts; then facts missed last time) instead of the most overdue; snacks are smaller
+  (§5.12); reviews and re-asks are asked by choice, never on the keypad (except in the Arena and
+  the placement check); and the Daily Adventure holds further new levels (§4.2). Inside the band
+  the spaced order (most overdue first) is unchanged: switching at the 82 % target instead slowed
+  an average child's mastery in the simulations.
 - No immediate repeats: an item is not served again within 2 problems _(`noRepeatWithin`)_, re-asks
   excepted, and inside each tier items not served in this round come first (known items: also
   not practised today). Tables are interleaved.
@@ -482,6 +503,10 @@ A miss schedules a runtime job to re-ask the item about **3 problems later** _(`
 turns; each answer is one turn)_, at most **2 per round** _(`reask.maxPerRound`)_. The re-ask shows the
 visual model first. Jobs are anchored to the round's runtime phase, so leaving a round cancels any
 that have not fired.
+
+**Teach, then ask**: a fact whose last two answers were misses is shown with its picture model
+before it is asked again (the problem's `teach` flag), in every round but the Arena (a race) and
+the placement check (a measurement). Its answer counts like a re-ask's.
 
 ### 6.5 Mastery, the Magic Window and dragon growth
 

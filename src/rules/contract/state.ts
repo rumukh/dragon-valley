@@ -143,6 +143,11 @@ export interface CurrentProblem {
   reask: boolean;
   /** The child asked for a hint on this problem. */
   hinted: boolean;
+  /**
+   * Present (true) when the last two answers to this item were misses: the shell shows the
+   * picture model before asking (teach, then ask). Optional so saves from before it restore.
+   */
+  teach?: boolean;
 }
 
 /** Feedback for the last answer, kept in state so it survives a reload. */
@@ -338,16 +343,19 @@ const problemRoundSchema: Schema<ProblemRound> = schema.object({
   queue: schema.array(itemIdSchema, { max: 20 }),
   recent: schema.array(itemIdSchema, { max: 20 }),
   current: nullable(
-    schema.object({
-      index: int(1, 1000),
-      item: itemIdSchema,
-      problem: problemSchema,
-      input: oneOf(['choice', 'keypad'] as const),
-      choices: nullable(schema.array(answerValueSchema, { min: 2, max: 6 })),
-      step: oneOf(['operation', 'answer'] as const),
-      reask: schema.boolean,
-      hinted: schema.boolean,
-    }),
+    objectWithOptional(
+      {
+        index: int(1, 1000),
+        item: itemIdSchema,
+        problem: problemSchema,
+        input: oneOf(['choice', 'keypad'] as const),
+        choices: nullable(schema.array(answerValueSchema, { min: 2, max: 6 })),
+        step: oneOf(['operation', 'answer'] as const),
+        reask: schema.boolean,
+        hinted: schema.boolean,
+      },
+      { teach: schema.boolean },
+    ),
   ),
   feedback: nullable(
     schema.object({

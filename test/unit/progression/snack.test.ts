@@ -19,7 +19,39 @@ async function hatched(): Promise<Player> {
 
 describe('snack time', () => {
   it('serves one problem per due fact, never fewer than 6 or more than 10', () => {
-    expect([0, 2, 6, 7, 10, 25].map(snackTarget)).toEqual([6, 6, 6, 7, 10, 10]);
+    expect([0, 2, 6, 7, 10, 25].map((due) => snackTarget(due))).toEqual([6, 6, 6, 7, 10, 10]);
+  });
+
+  it('is 4 to 6 problems while recent success is low', () => {
+    expect([0, 2, 4, 5, 6, 25].map((due) => snackTarget(due, true))).toEqual([4, 4, 4, 5, 6, 6]);
+  });
+
+  it('feeds a child whose yesterday was hard a smaller snack of what it got right', async () => {
+    const unsure = new Player(
+      { right: (n) => n % 2 === 0, elapsedMs: () => 4000, clumsy: false },
+      'snack',
+    );
+    await unsure.act({ type: 'startSession', day: '2026-10-06' });
+    await unsure.choose(null);
+    await unsure.choose('bubbles');
+    await unsure.playLevel('sunny-meadow.1');
+    const yesterday = unsure.state().daily!;
+    expect(yesterday.correct * 100, 'below 70 % yesterday').toBeLessThan(70 * yesterday.answers);
+    await unsure.act({ type: 'startSession', day: '2026-10-07' });
+    const day = unsure.state().day!;
+    const due = Object.entries(unsure.state().items).filter(
+      ([, item]) => item.correct > 0 && item.due <= day && item.lastDay < day,
+    );
+    const missed = new Set(
+      due.filter(([, item]) => item.recent.at(-1) === 'miss').map(([id]) => id),
+    );
+    expect(due.length - missed.size, 'some due facts were right last time').toBeGreaterThan(0);
+    await unsure.act({ type: 'startActivity', activity: { kind: 'snack', dragon: null } });
+    const round = unsure.view().round;
+    if (round?.type !== 'problems' || !round.problem) throw new Error('a snack is a problem round');
+    expect(round.progress.target).toBe(Math.min(6, Math.max(4, due.length)));
+    expect(missed.has(round.problem.item), 'right last time comes first').toBe(false);
+    await unsure.dispose();
   });
 
   it('has no hungry dragon on the day the facts were practised', async () => {

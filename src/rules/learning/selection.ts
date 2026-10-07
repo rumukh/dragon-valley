@@ -2,18 +2,24 @@
  * Item selection: which item a problem round serves next (the mix, docs/design.md §6.3).
  *
  * Items are sorted into three tiers on the child's current day:
- * - **due**: known items whose review day has come (spaced review, most overdue first);
+ * - **due**: items answered right before whose review day has come (spaced review, most overdue
+ *   first);
  * - **known**: items at bronze or better (box 2+) that are not due;
  * - **learning**: new items and items in box 0-1.
  *
  * Each draw first decides, from the `problems` stream, whether to serve a learning item. The
- * learning share starts at `100 - mix.knownShare` and follows today's success rate: above
- * `mix.successTarget` it grows, below it shrinks, within `mix.minLearningShare` …
- * `mix.maxLearningShare`; the adjustment reaches full strength after `mix.window` answers.
- * Otherwise a due review is served, else a known item, else a learning item. Items served in
- * the last `mix.noRepeatWithin` problems are skipped while anything else is available, and
- * inside a tier items not served in this round yet come first (known items: also not
+ * learning share starts at `100 - mix.knownShare` and follows recent success (`recentSuccess`:
+ * the last `mix.window` answers, across days): above `mix.successTarget` it grows, below it
+ * shrinks, within `mix.minLearningShare` … `mix.maxLearningShare`; a new child's first answers
+ * move it less. Otherwise a due review is served, else a known item, else a learning item. Items
+ * served in the last `mix.noRepeatWithin` problems are skipped while anything else is available,
+ * and inside a tier items not served in this round yet come first (known items: also not
  * practised today), so a small tier never makes a round repeat itself.
+ *
+ * Below the success band (recent success under `LOW_SUCCESS`) the mix protects the child's
+ * success: a due item missed last time counts as a learning item (`mixTier`), and due reviews,
+ * learning draws and snacks serve the likeliest successes first (`likely`: answered right last
+ * time, the most recently practised first; then new items; then items missed last time).
  *
  * Learning draws prefer the **focus egg**: the chosen first egg while it is an egg, else the
  * oldest owned egg, whose facts the round can serve and that were never answered right. Practice
@@ -22,14 +28,22 @@
  */
 import type { DeepReadonly, RandomStream } from '@aegis/runtime';
 import { parseItemId } from '../contract';
-import type { Dragon, Skill } from '../contract';
+import type { Dragon, ItemState, Skill } from '../contract';
 import { isDue } from './items';
 import type { Data, ReadState } from '../types';
 
 export type ItemTier = 'due' | 'known' | 'learning';
 
-/** Answers today before the learning share starts to follow the success rate. */
+/** Answers before success starts to guide the mix. */
 const MIN_SAMPLE = 5;
+
+/**
+ * The lower edge of the success band (70-90 %, docs/testing.md §4). Below it the game protects
+ * the child's success: the mix serves likely successes first, snacks are smaller, reviews and
+ * re-asks are asked by choice; and while today's success is below it the Daily Adventure holds
+ * new levels after the day's first.
+ */
+export const LOW_SUCCESS = 70;
 
 /** Signed integer division rounded toward zero (no floating-point fractions in rules). */
 function quotient(a: number, b: number): number {
@@ -40,6 +54,64 @@ export function clamp(value: number, low: number, high: number): number {
   return value < low ? low : value > high ? high : value;
 }
 
+/**
+ * The child's last `mix.window` answers, across days (the day records in `history`, today's
+ * last). A day's answers count at that day's success rate: the records keep no order within a day.
+ */
+function recentAnswers(state: ReadState, data: Data): { answers: number; correct: number } {
+  const window = data.balance.mix.window;
+  let answers = 0;
+  let correct = 0;
+  for (let i = state.history.length - 1; i >= 0 && answers < window; i--) {
+    const day = state.history[i]!;
+    if (day.answers === 0) continue;
+    const take = Math.min(day.answers, window - answers);
+    correct += quotient(day.correct * take, day.answers);
+    answers += take;
+  }
+  return { answers, correct };
+}
+
+/** Success (percent) over the last `mix.window` answers, or `null` before `MIN_SAMPLE` answers. */
+export function recentSuccess(state: ReadState, data: Data): number | null {
+  const { answers, correct } = recentAnswers(state, data);
+  return answers < MIN_SAMPLE ? null : quotient(correct * 100, answers);
+}
+
+/** Today's success (percent), or `null` before `MIN_SAMPLE` answers today. */
+export function todaySuccess(state: ReadState): number | null {
+  const daily = state.daily;
+  if (daily === null || daily.day !== state.day || daily.answers < MIN_SAMPLE) return null;
+  return quotient(daily.correct * 100, daily.answers);
+}
+
+/** Whether today's success is below `LOW_SUCCESS`: the Daily Adventure then holds new levels. */
+export function lowToday(state: ReadState): boolean {
+  const today = todaySuccess(state);
+  return today !== null && today < LOW_SUCCESS;
+}
+
+/** Whether recent success is below `LOW_SUCCESS`: the game then protects the child's success. */
+export function lowSuccess(state: ReadState, data: Data): boolean {
+  const success = recentSuccess(state, data);
+  return success !== null && success < LOW_SUCCESS;
+}
+
+/** Whether the last answer to the item was a miss. */
+export function missedLast(record: DeepReadonly<ItemState> | undefined): boolean {
+  return record !== undefined && record.recent[record.recent.length - 1] === 'miss';
+}
+
+/** Whether the last two answers to the item were misses: it is taught before it is asked. */
+export function missedTwice(record: DeepReadonly<ItemState> | undefined): boolean {
+  const recent = record?.recent ?? [];
+  return (
+    recent.length >= 2 &&
+    recent[recent.length - 1] === 'miss' &&
+    recent[recent.length - 2] === 'miss'
+  );
+}
+
 /** The tier of an item on `day`. */
 export function itemTier(state: ReadState, item: string, day: number): ItemTier {
   const record = state.items[item];
@@ -47,18 +119,25 @@ export function itemTier(state: ReadState, item: string, day: number): ItemTier 
   return record !== undefined && record.box >= 2 ? 'known' : 'learning';
 }
 
-/** The share (percent) of draws that serve a learning item, from today's success rate. */
+/**
+ * The item's tier in the mix: its `itemTier`, except that while the child's success is
+ * protected (`protect`, recent success below `LOW_SUCCESS`) a due item missed last time is a
+ * learning item rather than a likely success.
+ */
+export function mixTier(state: ReadState, item: string, day: number, protect: boolean): ItemTier {
+  const tier = itemTier(state, item, day);
+  return protect && tier === 'due' && missedLast(state.items[item]) ? 'learning' : tier;
+}
+
+/** The share (percent) of draws that serve a learning item, from recent success. */
 export function learningShare(state: ReadState, data: Data): number {
   const { knownShare, successTarget, minLearningShare, maxLearningShare, window } =
     data.balance.mix;
   const base = 100 - knownShare;
-  const daily = state.daily;
-  if (daily === null || daily.day !== state.day || daily.answers < MIN_SAMPLE) {
-    return clamp(base, minLearningShare, maxLearningShare);
-  }
-  const accuracy = quotient(daily.correct * 100, daily.answers);
-  const weight = daily.answers < window ? daily.answers : window;
-  const shift = quotient((accuracy - successTarget) * weight, window);
+  const { answers, correct } = recentAnswers(state, data);
+  if (answers < MIN_SAMPLE) return clamp(base, minLearningShare, maxLearningShare);
+  const accuracy = quotient(correct * 100, answers);
+  const shift = quotient((accuracy - successTarget) * answers, window);
   return clamp(base + shift, minLearningShare, maxLearningShare);
 }
 
@@ -170,9 +249,38 @@ export function pickDue(
   return random.pick(due.filter((item) => state.items[item]!.due === earliest));
 }
 
+/** The items practised most recently (the latest `lastDay`). */
+function mostRecent(state: ReadState, items: readonly string[]): string[] {
+  let latest = -1;
+  for (const item of items) latest = Math.max(latest, state.items[item]!.lastDay);
+  return items.filter((item) => state.items[item]!.lastDay === latest);
+}
+
+/**
+ * The likeliest successes among `items`: those answered right last time, the most recently
+ * practised first; else new items; else the most recently practised (missed last time).
+ */
+export function likely(state: ReadState, items: readonly string[]): string[] {
+  const seen = items.filter((item) => state.items[item] !== undefined);
+  const right = seen.filter((item) => !missedLast(state.items[item]));
+  if (right.length > 0) return mostRecent(state, right);
+  const fresh = items.filter((item) => state.items[item] === undefined);
+  return fresh.length > 0 ? fresh : mostRecent(state, seen);
+}
+
+/** One of the likeliest successes among `items` (`likely`), or `null` when there are none. */
+export function pickLikely(
+  state: ReadState,
+  items: readonly string[],
+  random: RandomStream,
+): string | null {
+  return items.length === 0 ? null : random.pick(likely(state, items));
+}
+
 /**
  * A learning item: the focus egg's first, items not served in this round before others, then
- * new and weak items in equal measure.
+ * new and weak items in equal measure; with `likelyFirst` (recent success below target), the
+ * likeliest successes instead (`likely`).
  */
 export function pickLearning(
   state: ReadState,
@@ -180,10 +288,12 @@ export function pickLearning(
   focus: readonly string[] | null,
   random: RandomStream,
   served: readonly string[] = [],
+  likelyFirst = false,
 ): string | null {
   if (learning.length === 0) return null;
   const focused = focus === null ? [] : learning.filter((item) => focus.includes(item));
   const from = prefer(focused.length > 0 ? focused : learning, (item) => !served.includes(item));
+  if (likelyFirst) return random.pick(likely(state, from));
   const fresh = from.filter((item) => state.items[item] === undefined);
   const weak = from.filter((item) => state.items[item] !== undefined);
   if (fresh.length > 0 && weak.length > 0) return random.pick(random.bool() ? fresh : weak);
@@ -224,23 +334,25 @@ export function pickMixed(options: {
   const day = state.day ?? 0;
   const candidates = withoutRecent(options.pool, options.blocked);
   const tiers: Record<ItemTier, string[]> = { due: [], known: [], learning: [] };
-  for (const item of candidates) tiers[itemTier(state, item, day)].push(item);
+  const protect = lowSuccess(state, data);
+  for (const item of candidates) tiers[mixTier(state, item, day, protect)].push(item);
   const learningFirst = random.int(0, 100) < learningShare(state, data);
   if (learningFirst) {
-    const item = pickLearning(state, tiers.learning, options.focus, random, served);
+    const item = pickLearning(state, tiers.learning, options.focus, random, served, protect);
     if (item !== null) return item;
   }
   return (
-    pickDue(state, tiers.due, random) ??
+    (protect ? pickLikely(state, tiers.due, random) : pickDue(state, tiers.due, random)) ??
     pickKnown(state, tiers.known, random, served) ??
-    pickLearning(state, tiers.learning, options.focus, random, served) ??
+    pickLearning(state, tiers.learning, options.focus, random, served, protect) ??
     random.pick(prefer(candidates, (item) => !served.includes(item)))
   );
 }
 
 /**
- * Snack time: due items first (most overdue), then the weakest known items (lowest box) not
- * served in this snack yet, then anything in the dragons' sets.
+ * Snack time: due items first (most overdue; with `likelyFirst`, while the child's success is
+ * protected, the likeliest successes), then the weakest known items (lowest box) not served in
+ * this snack yet, then anything in the dragons' sets.
  */
 export function pickSnack(options: {
   state: ReadState;
@@ -248,13 +360,14 @@ export function pickSnack(options: {
   blocked: readonly string[];
   served?: readonly string[];
   random: RandomStream;
+  likelyFirst?: boolean;
 }): string {
   const { state, random } = options;
   const served = options.served ?? [];
   const day = state.day ?? 0;
   const candidates = withoutRecent(options.pool, options.blocked);
   const due = candidates.filter((item) => isDue(state.items[item], day));
-  const picked = pickDue(state, due, random);
+  const picked = options.likelyFirst ? pickLikely(state, due, random) : pickDue(state, due, random);
   if (picked !== null) return picked;
   const known = prefer(
     candidates.filter((item) => (state.items[item]?.correct ?? 0) > 0),

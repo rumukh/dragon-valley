@@ -1,10 +1,12 @@
 /**
  * Snack time (docs/design.md §5.12): feed hungry dragons, one or all of them. A dragon is hungry
  * when at least `balance.hungry.minDue` of its facts are due; the snack serves those due facts
- * first (most overdue first), then the dragon's weakest known facts, 6 to 10 problems with auto
- * input. Feeding hungry dragons is the spaced review.
+ * first (most overdue first, or while recent success is below target the likeliest successes),
+ * then the dragon's weakest known facts, 6 to 10 problems with auto input; 4 to 6 while recent
+ * success is low, so a session is not dominated by reviews the child cannot do yet. Feeding
+ * hungry dragons is the spaced review.
  */
-import { clamp } from '../learning/selection';
+import { clamp, lowSuccess } from '../learning/selection';
 import { dueItems, hungryDragons, itemsOf } from './dragons';
 import { playableSkills, startProblemRound } from './problems';
 import type { Index } from './problems';
@@ -12,10 +14,13 @@ import type { Ctx, Data, ReadState } from '../types';
 
 export const SNACK_MIN = 6;
 export const SNACK_MAX = 10;
+/** Snack size while recent success is below `LOW_SUCCESS`. */
+export const SNACK_MIN_LOW = 4;
+export const SNACK_MAX_LOW = 6;
 
-/** Problems in a snack: one per due fact, at least `SNACK_MIN` and at most `SNACK_MAX`. */
-export function snackTarget(due: number): number {
-  return clamp(due, SNACK_MIN, SNACK_MAX);
+/** Problems in a snack: one per due fact, within `SNACK_MIN`…`SNACK_MAX` (or the `low` sizes). */
+export function snackTarget(due: number, low = false): number {
+  return low ? clamp(due, SNACK_MIN_LOW, SNACK_MAX_LOW) : clamp(due, SNACK_MIN, SNACK_MAX);
 }
 
 /** The dragons a snack feeds: the named hungry dragon, or every hungry dragon. */
@@ -58,7 +63,7 @@ export function startSnack(ctx: Ctx, index: Index, dragon: string | null): void 
     source: { kind: 'snack', dragon },
     skills,
     input: 'auto',
-    target: snackTarget(due),
+    target: snackTarget(due, lowSuccess(ctx.state, data)),
     meter: null,
   });
 }
