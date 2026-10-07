@@ -33,6 +33,7 @@ import { digits, isDue, readingAllowanceMs, responseBucket } from '../learning/i
 import {
   blockedRecent,
   isRuleFact,
+  isStrategyItem,
   lowSuccess,
   missedTwice,
   pickArena,
@@ -317,13 +318,17 @@ export function easierRetrieval(serving: Serving & { due: boolean; low: boolean 
 }
 
 /**
- * Whether the item is taught before it is asked (the shell shows its picture model first): its
- * last two answers were misses. Not in the Arena or the placement check.
+ * Whether the item is taught before it is asked (the shell shows its picture model first): a
+ * strategy item (`isStrategyItem`) the child meets for the first time, never answered nor
+ * credited by a board ("I do, we do, you do"), or any item whose last two answers were misses.
+ * Not in the Arena (a race) or the placement check (a measurement).
  */
 export function teachFirst(
-  serving: Serving & { record: DeepReadonly<ItemState> | undefined },
+  serving: Serving & { item: string; record: DeepReadonly<ItemState> | undefined },
 ): boolean {
-  return !serving.placement && serving.activity !== 'arena' && missedTwice(serving.record);
+  if (serving.placement || serving.activity === 'arena') return false;
+  const first = serving.record === undefined && isStrategyItem(serving.item);
+  return first || missedTwice(serving.record);
 }
 
 /**
@@ -380,7 +385,7 @@ export function serveNext(ctx: Ctx, index: Index): void {
     step,
     reask: queued !== undefined,
     hinted: false,
-    ...(teachFirst({ ...serving, record }) ? { teach: true } : {}),
+    ...(teachFirst({ ...serving, item, record }) ? { teach: true } : {}),
   };
 }
 

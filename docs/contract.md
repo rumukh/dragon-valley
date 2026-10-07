@@ -461,9 +461,9 @@ one-shots). It contains:
 - `run`: the level's activities and done flags, and the level result once finished.
 - `round`: for problem rounds the progress (answered, target, correct, streak, boss meter), the
   current `problem` (structured problem, resolved input, choices, step, re-ask and hint flags, and
-  `teach: true` when the item's last two answers were misses (not in the Arena or the placement
-  check), so the shell shows the picture model before asking, as for a re-ask; the field is absent
-  otherwise:
+  `teach: true` the first time a strategy item (a bucket) comes up and when the item's last two
+  answers were misses (not in the Arena or the placement check), so the shell shows the picture
+  model before asking, as for a re-ask; the field is absent otherwise:
   at a story's `operation` step the choices are the four operations, + − · : in that order; at the
   `answer` step answer options in seeded order for choice input, else `null`), the last `feedback` (with the expected answer for "Let's look"), coins, the dragon
   being fed with its expression, and for the placement check its ladder (`placement`: step,
@@ -641,7 +641,7 @@ Orders), replaying one activity of a finished level, the adaptive mix (due revie
 learning items, the learning share following recent success, the focus egg, no repeats, and below
 the success band likely successes first, smaller snacks, choice input for reviews and re-asks and
 the Daily Adventure's pacing with rotating reviews; the review guarantee and the valley's basket; every skill of an activity is served when several produce the same
-item), partial credit for commuted facts, re-ask jobs and teaching a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
+item), partial credit for commuted facts, re-ask jobs and teaching a strategy met for the first time or a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
 finale, the placement check, snack time, the Lightning Arena, grading (with the Riddle Scrolls
 operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth (rule facts counted
 from bronze up only for Puff and Mirror), stickers, the

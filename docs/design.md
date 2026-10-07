@@ -558,9 +558,21 @@ turns; each answer is one turn)_, at most **2 per round** _(`reask.maxPerRound`)
 visual model first. Jobs are anchored to the round's runtime phase, so leaving a round cancels any
 that have not fired.
 
-**Teach, then ask**: a fact whose last two answers were misses is shown with its picture model
-before it is asked again (the problem's `teach` flag), in every round but the Arena (a race) and
-the placement check (a measurement). Its answer counts like a re-ask's.
+**Teach, then ask** ("I do, we do, you do"): the problem's `teach` flag asks the shell to show the
+picture model before the problem is asked. It is set in every round but the Arena (a race) and the
+placement check (a measurement), in two cases:
+
+- **A strategy met for the first time** (refinement after the third playtest): the first time the
+  child meets a strategy item, a bucket of an open-ended skill (tens, powers of ten, 2-digit ×
+  1-digit and 2-digit : 1-digit, order of operations and brackets, remainders, comparisons, terms,
+  word problems), it is shown how before it is asked. Opening Break It Apart and getting `82 · 3`
+  cold is too much. An item a board already credited (a Golem Orders or Sharing Feast board, say)
+  has been met: the board was the scaffold. Small-table facts are never taught first: a 3rd-grader
+  knows most of them from 2nd grade, and showing every new fact first would be slow and
+  patronising.
+- **A fact missed twice in a row** is shown with its picture model before it is asked again.
+
+A taught problem's answer counts like a re-ask's.
 
 ### 6.5 Mastery, the Magic Window and dragon growth
 

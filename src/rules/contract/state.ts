@@ -144,8 +144,10 @@ export interface CurrentProblem {
   /** The child asked for a hint on this problem. */
   hinted: boolean;
   /**
-   * Present (true) when the last two answers to this item were misses: the shell shows the
-   * picture model before asking (teach, then ask). Optional so saves from before it restore.
+   * Present (true) when the shell shows the picture model before asking (teach, then ask): the
+   * first time a strategy item (a bucket: tens, 2-digit × 1-digit, order of operations, …) comes
+   * up, and whenever the last two answers to the item were misses. Optional so saves from before
+   * it restore.
    */
   teach?: boolean;
 }

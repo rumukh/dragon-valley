@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { createPrng } from '@aegis/core';
 import {
   LOW_SUCCESS,
+  isStrategyItem,
   itemTier,
   learningShare,
   likely,
@@ -267,13 +268,37 @@ describe('the input of a problem', () => {
   });
 
   it('teaches an item missed twice in a row, except in the Arena and the placement check', () => {
-    const serving = { activity: 'snack', placement: false, reask: false } as const;
+    const serving = { activity: 'snack', placement: false, reask: false, item: 'mul:6x7' } as const;
     const twice = item(['ok', 'miss', 'miss']);
     expect(teachFirst({ ...serving, record: twice })).toBe(true);
     expect(teachFirst({ ...serving, activity: 'boss', reask: true, record: twice })).toBe(true);
     expect(teachFirst({ ...serving, record: item(['miss', 'ok', 'miss']) })).toBe(false);
-    expect(teachFirst({ ...serving, record: undefined })).toBe(false);
+    expect(teachFirst({ ...serving, record: undefined }), 'a new small-table fact').toBe(false);
     expect(teachFirst({ ...serving, activity: 'arena', record: twice }), 'a race').toBe(false);
     expect(teachFirst({ ...serving, placement: true, record: twice }), 'placement').toBe(false);
+  });
+
+  it('teaches a strategy item the first time it comes up, never a small-table fact', () => {
+    const serving = { activity: 'feeding', placement: false, reask: false } as const;
+    for (const strategy of ['mul2d1d:carry', 'tens:d7', 'order:brackets', 'word:sharing']) {
+      expect(teachFirst({ ...serving, item: strategy, record: undefined }), strategy).toBe(true);
+      expect(teachFirst({ ...serving, item: strategy, record: item(['miss']) }), 'met').toBe(false);
+      expect(teachFirst({ ...serving, item: strategy, record: item(['ok', 'miss', 'miss']) })).toBe(
+        true,
+      );
+    }
+    for (const fact of ['mul:7x8', 'div:56:7']) {
+      expect(teachFirst({ ...serving, item: fact, record: undefined }), fact).toBe(false);
+    }
+    const first = { ...serving, item: 'div2d1d:regroup', record: undefined };
+    expect(teachFirst({ ...first, activity: 'arena' }), 'a race').toBe(false);
+    expect(teachFirst({ ...first, placement: true }), 'placement').toBe(false);
+    expect(teachFirst({ ...first, activity: 'boss' }), 'a boss round teaches too').toBe(true);
+  });
+
+  it('calls the bucket items strategy items', () => {
+    const strategies = ['rem:d7', 'pow10:x100', 'compare:fact-number', 'terms:quotient'];
+    expect(strategies.filter(isStrategyItem)).toEqual(strategies);
+    expect(['mul:0x0', 'mul:10x10', 'div:0:1', 'div:100:10'].some(isStrategyItem)).toBe(false);
   });
 });

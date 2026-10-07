@@ -220,6 +220,16 @@ export function roundFocus(
 }
 
 /**
+ * Strategy items are the open-ended skills grouped into buckets (`<family>:<bucket>`: remainders,
+ * powers of ten, tens, 2-digit × 1-digit and 2-digit : 1-digit, order of operations, comparisons,
+ * word problems, terms), solved with a strategy rather than recalled; small-table facts (`mul:`,
+ * `div:`) are not. The first time a strategy item comes up it is taught before it is asked.
+ */
+export function isStrategyItem(item: string): boolean {
+  return parseItemId(item)?.kind === 'bucket';
+}
+
+/**
  * Rule facts follow a rule instead of being remembered one by one: `n · 0`, `n · 1` (either
  * order), `0 : n` and `n : 1`. A round whose own tables do not include 0 or 1 serves at most one
  * of them (docs/design.md §6.3), so they never crowd out the facts the round is about.

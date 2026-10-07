@@ -22,7 +22,7 @@ vi.setConfig({ testTimeout: 300_000 });
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
 const GOLDEN_HASH = '7801301f26909881';
-const GOLDEN_TRAJECTORY = '722d59aa5347bfae';
+const GOLDEN_TRAJECTORY = '12b46dd224b51fe3';
 
 const SEED = 'golden-region-one';
 const LEVELS = [

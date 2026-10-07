@@ -26,7 +26,7 @@ vi.setConfig({ testTimeout: 300_000 });
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
 const GOLDEN_HASH = 'b87aa54a890f4b30';
-const GOLDEN_TRAJECTORY = '96fd9271010275e2';
+const GOLDEN_TRAJECTORY = 'e73276e8f4ac19de';
 
 const SEED = 'golden-struggling-child';
 const STRUGGLING: Style = {
