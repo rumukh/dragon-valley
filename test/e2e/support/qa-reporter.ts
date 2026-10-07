@@ -1,7 +1,8 @@
 /**
  * A Playwright reporter that turns one run into evidence a person can read without opening the
- * HTML report: totals, the known defects that still reproduce (or no longer do), and the
- * accessibility advice axe gave (moderate and minor findings, by rule). It writes
+ * HTML report: totals, the known defects that still reproduce (or no longer do), the tests that
+ * used more than half their time budget, and the accessibility advice axe gave (moderate and
+ * minor findings, by rule). It writes
  * `qa-summary.md` into the run's output folder (`test-results/` on the default port,
  * test/e2e/support/site.ts) and, on GitHub Actions, the job summary.
  *
@@ -164,6 +165,20 @@ class QaSummary implements Reporter {
       lines.push('', '### Registered defects no test met in this run (fixed?)', '');
       if (unmet.length === 0) lines.push('None.');
       for (const [id, defect] of unmet) lines.push(`- ${id} (${defect.owner}): ${defect.title}`);
+    }
+    // A test that used more than half its time budget would time out on a runner half as fast:
+    // raise its budget before it fails for no reason (docs/testing.md §5).
+    const thin = this.results
+      .filter(({ test, run }) => test.timeout > 0 && run.duration > test.timeout / 2)
+      .sort((a, b) => b.run.duration / b.test.timeout - a.run.duration / a.test.timeout);
+    lines.push('', '### Tests that used more than half their time budget', '');
+    if (thin.length === 0) lines.push('None.');
+    for (const { test, run } of thin) {
+      const seconds = (ms: number): string => `${Math.round(ms / 1000)} s`;
+      const used = Math.round((100 * run.duration) / test.timeout);
+      lines.push(
+        `- ${test.titlePath().slice(2).join(' › ')}: ${seconds(run.duration)} of ${seconds(test.timeout)} (${used} %) _(${projectOf(test)})_`,
+      );
     }
     lines.push('', '### Accessibility advice (moderate and minor axe findings, by rule)', '');
     if (advice.size === 0) lines.push('None.');

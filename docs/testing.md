@@ -189,6 +189,11 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
 - **Named waits only.** Feedback is observed in the page (`feedbackAfter`), so a half-second
   "Yes!" is never missed; there are no fixed sleeps except where a duration is the subject (the
   gate's two-second hold).
+- **Time budgets.** A test has 120 s, an `expect` 10 s. Whole rounds and other long flows declare
+  more: `test.slow()` triples the budget, and the walks, regions, boards, bosses and offline specs
+  set theirs (`test.setTimeout`). A budget is at least twice the test's slowest time on CI, and the
+  job summary lists every test that used more than half of its budget, so a budget is raised
+  before a slower runner turns it into a failure.
 - **Layout checks** (`support/layout.ts`): no sideways scrolling (naming the element that sticks
   out), no control outside the viewport or cut off by a clipping parent, every control at least
   48 × 48 px (a radio or switch measured by its label), no word broken in the middle.
@@ -216,8 +221,9 @@ unlisted is tolerated.
 the default port) and the GitHub job summary: totals, known defects still reproducing (with the
 evidence a test recorded for them), markers that no longer reproduce, registered defects that no
 test met (in a full run: a layout or axe allowance whose problem is gone says nothing by itself),
-and axe advice by rule. With `DV_E2E_AUDIT=1` it also fails the run if a spec file (of the job's
-part) did not run in a project or a test was skipped without a reason.
+tests that used more than half their time budget, and axe advice by rule. With `DV_E2E_AUDIT=1`
+it also fails the run if a spec file (of the job's part) did not run in a project or a test was
+skipped without a reason.
 
 ### Artifacts
 

@@ -50,6 +50,7 @@ async function settledCoins(page: Page): Promise<number> {
 test('a reload in the middle of a round resumes on the same problem with the same coins', async ({
   page,
 }) => {
+  test.slow();
   await newFamily(page, { name: 'Ada', avatar: 'keeper-2' });
   await startPlacement(page);
   await answerCorrectly(page, 'keyboard');
@@ -112,6 +113,7 @@ test('a finished round is kept: its coins survive a reload and it is not asked a
 });
 
 test('each keeper has their own progress', async ({ page }) => {
+  test.slow();
   await newFamily(page, { name: 'Cleo' }, { name: 'Dan', avatar: 'keeper-6' });
   await leaveHub(page);
   await playAs(page, 1, 'Cleo');
