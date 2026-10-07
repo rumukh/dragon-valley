@@ -28,7 +28,7 @@ review as written at `8d3236a`.
 
 **Addendum (main after #52, content 1.3.0):** I checked possessives against the brief's example
 "Bubbles' egg" (section [Possessives](#possessives)). One new minor finding for S3: the hub says
-"Bubbles's egg". It is registered as DV-QA-19 ([defects.md](defects.md)), with a check in
+"Bubbles's egg". It was registered as DV-QA-19 ([defects.md](defects.md)) and fixed by #57, with a check in
 `first-run.spec.ts`. Content (S2b) and the word templates (S2a) have nothing to change.
 
 One major finding: the new grown-ups' Progress label `parent.item.tens` said division for a
@@ -220,6 +220,10 @@ does Ember have?"
 Reviewed at `22cdedc` (main after #52), against the brief's example "Bubbles' egg": a name ending
 in "s" takes only the apostrophe. Every possessive in the catalogs comes from a `{name}'s`
 placeholder; no fixed text has the possessive of a word ending in "s" or "š".
+
+**Fixed by #57:** the shell forms every possessive in one place, `possessive(name)` in
+`src/app/i18n/messages.ts`, and passes it to the messages as `{owner}` ("{owner} egg"), the
+grown-ups' keeper texts included: "Bubbles' egg", "Jonas' dragons", "Sunny's egg".
 
 | Key(s)                                                                                                                                                                                                                                         | Names it takes                                                                                             | Finding                                                                                                                                                                   | Suggested                                                                                                   | Severity | Owner |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | -------- | ----- |

@@ -23,18 +23,18 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
       archived). Every later content change runs `npm run content:bump`, which archives `1.3.0` in
       `content/history/` so v1 saves upgrade ([contract.md](../contract.md),
       [content.md](../content.md) §1).
-- [ ] The README's four screenshots (`docs/images/`) show the release build. They date from #30;
-      `hub.jpg` still shows "Bubbles's egg" (DV-QA-19). S6 retakes them from the release commit's
-      tablet screen walks (`qa-screens-*` artifacts, 1180 × 820) as JPEGs of about 100 KB each.
+- [x] The README's four screenshots (`docs/images/`) show the release build: retaken by #57 from
+      the tablet screen walks (1180 × 820, `screens.spec.ts`) as JPEGs of about 100 KB each, the
+      hub now saying "Bubbles' egg". Retake them the same way after any visible change.
 
 ## 2. Defects and decisions
 
 - [x] No open blocker or major defect ([defects.md](defects.md)): the last major one, DV-QA-17,
-      was fixed by #46. Open today: three minor ones, all S3. Two are WebKit only (DV-QA-13 and
-      DV-QA-15); DV-QA-19 ("Bubbles's egg" on the hub) shows on every engine. Fix them or accept them for v1.
+      was fixed by #46. None is open: the last three minor ones (DV-QA-13 and DV-QA-15 in WebKit,
+      DV-QA-19 "Bubbles's egg" on every engine) were fixed by #57.
 - [x] _(person)_ The copy decisions are made ([copy-review.md](copy-review.md), "Needs a human
       decision") and the agreed changes merged (S2b: #38, #40, #43; S3: #41, #46). Possessives
-      were reviewed after #52; the one finding is DV-QA-19.
+      were reviewed after #52; the one finding, DV-QA-19, was fixed by #57.
 - [x] The accessibility advice is fixed or accepted ([accessibility.md](accessibility.md):
       `boot-status` hidden from screen readers, toasts, the startup-failure screen's heading): fixed
       by #46; no axe finding of any level since.
@@ -61,6 +61,22 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
       `rumukh.github.io/dragon-valley/`.
 
 ## 5. Tag and release (coordinator)
+
+### The release candidate
+
+Once §1 and §2 hold, the commit is tagged as a release candidate and published as a GitHub
+pre-release, so everyone doing the human checkpoints (§3, §4) checks the same known build:
+
+```powershell
+git tag -a v1.0.0-rc.1 -m "Dragon Valley v1.0.0-rc.1"
+git push origin v1.0.0-rc.1
+gh release create v1.0.0-rc.1 --repo rumukh/dragon-valley --verify-tag --prerelease --title "Dragon Valley v1.0.0-rc.1" --notes-file release-notes-rc.md
+```
+
+A finding from the checkpoints is fixed on `main` and the next candidate is tagged (`-rc.2`, …).
+v1.0.0 goes on the last candidate's commit once everything above holds.
+
+### v1.0.0
 
 On the release commit, once everything above holds:
 
