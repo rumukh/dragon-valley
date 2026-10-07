@@ -10,7 +10,7 @@
  */
 import { failure, schema, success, validateReferences } from '@aegis/runtime';
 import type { ContentRegistration, DeepReadonly, RuntimeDiagnostic, Schema } from '@aegis/runtime';
-import { validateNarrative } from '@aegis/narrative';
+import { tokenizeWords, validateNarrative } from '@aegis/narrative';
 import type { NarrativeGraph } from '@aegis/narrative';
 import { COSMETIC_SLOTS, DRAGON_STAGES } from './ids';
 import type { CosmeticSlot, DragonStage } from './ids';
@@ -277,7 +277,8 @@ export type WordModel =
  * `model` is the arithmetic the story asks for; `operation` is the operation the child picks
  * first (Riddle Scrolls), or `null`. Generators draw `int` vars from `problems` and `word` vars
  * from `words`, compute `calc` and `form` vars, and reject draws whose model is not a valid
- * problem.
+ * problem. `words` (optional) is the story's length in words (`storyWordCount` of its catalog
+ * text): with `balance.response.word` it gives the answer time to read the story (design §6.2).
  */
 export interface WordTemplate {
   id: string;
@@ -286,6 +287,28 @@ export interface WordTemplate {
   vars: Record<string, WordVar>;
   model: WordModel;
   operation: Operator | null;
+  words?: number;
+}
+
+/**
+ * The length of a story in words, as the child reads it: the words of its catalog text as the
+ * child profile counts them (`tokenizeWords`), a `{placeholder}` (a name, a number, an object)
+ * counting as one word, so that `{name}'s` stays one word.
+ */
+export function storyWordCount(text: string): number {
+  return tokenizeWords(text.replace(/\{[A-Za-z][A-Za-z0-9_]*\}/g, 'x')).length;
+}
+
+/**
+ * Reading time for word problems (design §6.2: time the arithmetic, not the reading). A story
+ * answered whole (no operation step) is allowed `words × perWordMs + wholeStoryMs` on top of the
+ * response limits; the number after an operation step `words × perWordMs × rereadPercent / 100`
+ * (the story was read for the operation: the child only glances back).
+ */
+export interface WordTiming {
+  perWordMs: number;
+  wholeStoryMs: number;
+  rereadPercent: number;
 }
 
 /** One rung of the placement check: a few problems of `skill`; passing marks `levels` placed. */
@@ -357,6 +380,8 @@ export interface Balance {
   response: {
     choice: { fastMs: number; okMs: number };
     keypad: { fastMs: number; okMs: number; perExtraDigitMs: number };
+    /** Reading time for word problems; without it (or a template's `words`) there is none. */
+    word?: WordTiming;
   };
   input: { keypadFromBox: number; choices: number };
   mix: {
@@ -534,35 +559,38 @@ const templateExprSchema: Schema<TemplateExpr> = lazy(() =>
   ),
 );
 
-const wordTemplateSchema: Schema<WordTemplate> = schema.object({
-  id: contentId,
-  family: wordFamilySchema,
-  textKey: catalogKey,
-  vars: schema.record(
-    schema.union(
-      refine(
-        schema.object({
-          kind: schema.literal('int'),
-          min: int(0, MAX_PROBLEM_NUMBER),
-          max: int(0, MAX_PROBLEM_NUMBER),
-        }),
-        (v) => (v.min <= v.max ? null : 'min must not exceed max'),
+const wordTemplateSchema: Schema<WordTemplate> = objectWithOptional(
+  {
+    id: contentId,
+    family: wordFamilySchema,
+    textKey: catalogKey,
+    vars: schema.record(
+      schema.union(
+        refine(
+          schema.object({
+            kind: schema.literal('int'),
+            min: int(0, MAX_PROBLEM_NUMBER),
+            max: int(0, MAX_PROBLEM_NUMBER),
+          }),
+          (v) => (v.min <= v.max ? null : 'min must not exceed max'),
+        ),
+        schema.object({ kind: schema.literal('word'), list: contentId }),
+        schema.object({ kind: schema.literal('calc'), expr: templateExprSchema }),
+        schema.object({ kind: schema.literal('form'), word: contentId, count: contentId }),
       ),
-      schema.object({ kind: schema.literal('word'), list: contentId }),
-      schema.object({ kind: schema.literal('calc'), expr: templateExprSchema }),
-      schema.object({ kind: schema.literal('form'), word: contentId, count: contentId }),
     ),
-  ),
-  model: schema.union(
-    schema.object({ kind: schema.literal('value'), expr: templateExprSchema }),
-    schema.object({
-      kind: schema.literal('divrem'),
-      dividend: templateExprSchema,
-      divisor: templateExprSchema,
-    }),
-  ),
-  operation: nullable(oneOf(OPERATORS)),
-});
+    model: schema.union(
+      schema.object({ kind: schema.literal('value'), expr: templateExprSchema }),
+      schema.object({
+        kind: schema.literal('divrem'),
+        dividend: templateExprSchema,
+        divisor: templateExprSchema,
+      }),
+    ),
+    operation: nullable(oneOf(OPERATORS)),
+  },
+  { words: int(1, 300) },
+);
 
 function narrativeGraphSchema(): Schema<NarrativeGraph> {
   return {
@@ -601,14 +629,23 @@ const grantSchema: Schema<Grant> = schema.union(
 
 const balanceSchema: Schema<Balance> = schema.object({
   leitner: schema.object({ intervals: schema.array(int(0, 365), { min: 6, max: 6 }) }),
-  response: schema.object({
-    choice: schema.object({ fastMs: int(500, 60_000), okMs: int(500, 120_000) }),
-    keypad: schema.object({
-      fastMs: int(500, 60_000),
-      okMs: int(500, 120_000),
-      perExtraDigitMs: int(0, 10_000),
-    }),
-  }),
+  response: objectWithOptional(
+    {
+      choice: schema.object({ fastMs: int(500, 60_000), okMs: int(500, 120_000) }),
+      keypad: schema.object({
+        fastMs: int(500, 60_000),
+        okMs: int(500, 120_000),
+        perExtraDigitMs: int(0, 10_000),
+      }),
+    },
+    {
+      word: schema.object({
+        perWordMs: int(0, 10_000),
+        wholeStoryMs: int(0, 120_000),
+        rereadPercent: percent,
+      }),
+    },
+  ),
   input: schema.object({ keypadFromBox: int(0, 6), choices: int(2, 6) }),
   mix: schema.object({
     successTarget: percent,
@@ -1285,6 +1322,30 @@ export function checkArtCatalog(
       file: 'dragon-valley.content.json',
       recordId: id,
     }));
+}
+
+/**
+ * Diagnostics for word templates whose `words` count is not the length of their story in
+ * `catalog` (`storyWordCount`): the reading time follows the words the child reads.
+ */
+export function checkStoryWords(
+  data: Read<ContentData>,
+  catalog: Readonly<Record<string, string>>,
+): RuntimeDiagnostic[] {
+  return data.wordTemplates.flatMap((template) => {
+    const text = catalog[template.textKey];
+    if (template.words === undefined || text === undefined) return [];
+    const count = storyWordCount(text);
+    if (template.words === count) return [];
+    return [
+      {
+        code: 'story-words',
+        message: `Word template "${template.id}" says ${template.words} words, but "${template.textKey}" has ${count}.`,
+        file: 'dragon-valley.content.json',
+        recordId: template.id,
+      },
+    ];
+  });
 }
 
 /**

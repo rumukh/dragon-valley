@@ -13,6 +13,7 @@ import type {
   MasteryLevel,
   ResolvedInputMode,
   ResponseBucket,
+  WordTiming,
 } from '../contract';
 
 type ReadBalance = DeepReadonly<Balance>;
@@ -24,23 +25,46 @@ export function digits(value: number): number {
   return count;
 }
 
-/** Sort a response into a bucket. Keypad answers get extra time per extra answer digit. */
+/**
+ * Sort a response into a bucket. Keypad answers get extra time per extra answer digit, and a
+ * word problem's answer its reading time (`allowanceMs`, from `readingAllowanceMs`).
+ */
 export function responseBucket(
   correct: boolean,
   elapsedMs: number,
   input: ResolvedInputMode,
   answerDigits: number,
   balance: ReadBalance,
+  allowanceMs = 0,
 ): ResponseBucket {
   if (!correct) return 'miss';
   const limits = balance.response[input];
   const extra =
-    input === 'keypad'
+    (input === 'keypad'
       ? Math.max(0, answerDigits - 1) * balance.response.keypad.perExtraDigitMs
-      : 0;
+      : 0) + allowanceMs;
   if (elapsedMs <= limits.fastMs + extra) return 'fast';
   if (elapsedMs <= limits.okMs + extra) return 'ok';
   return 'slow';
+}
+
+/**
+ * The reading time a word problem's answer is allowed (design §6.2: time the arithmetic, not
+ * the reading): for a story answered whole, `words × perWordMs + wholeStoryMs`; for the number
+ * after an operation step (`afterOperation`: the story was read for the operation), the share
+ * `rereadPercent` of `words × perWordMs`. None without the template's `words` count or the
+ * balance's `response.word`, so content without them keeps the plain limits.
+ */
+export function readingAllowanceMs(
+  words: number | undefined,
+  timing: DeepReadonly<WordTiming> | undefined,
+  afterOperation: boolean,
+): number {
+  if (words === undefined || timing === undefined) return 0;
+  const reading = words * timing.perWordMs;
+  if (!afterOperation) return reading + timing.wholeStoryMs;
+  const share = reading * timing.rereadPercent;
+  return (share - (share % 100)) / 100;
 }
 
 /** The item after one response on `day`. */

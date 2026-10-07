@@ -471,6 +471,22 @@ Response buckets come from `elapsedMs` measured by the shell (paused time exclud
 | choice | ≤ 2.5 s                                | ≤ 6 s                         | otherwise |
 | keypad | ≤ 3.5 s + 0.7 s per extra answer digit | ≤ 8 s + 0.7 s per extra digit | otherwise |
 
+**Time the arithmetic, not the reading** (decided after the learner simulations): a story takes
+time to read, and that time is no part of the child's fluency. Without an allowance a right answer
+to a two-step story was always slow, and an answer after an operation step was never fast: story
+items never moved up a box, story levels could not reach 3 stars, and the Seven-Headed Dragon could
+not be crowned. So a word problem's answer gets a reading allowance added to both limits above:
+
+- a story answered whole (no operation step, such as a two-step story): **its words × 1 s + 4 s**
+  to take it in _(`response.word.perWordMs`, `wholeStoryMs`)_;
+- the number after an operation step: **a quarter of its words × 1 s** _(`rereadPercent`)_. The
+  story was read for the operation, so the child only glances back.
+
+A story's length is its template's `words`: the words of its catalog text as the child profile
+counts them, a `{placeholder}` counting as one word (`storyWordCount`). The content gate checks
+every count against the text. Content without `words` or without `response.word` keeps the plain
+limits.
+
 ### 6.3 Round composition (the mix)
 
 - Target success per round: **≈80-85 %** _(balance `mix.successTarget` = 82)_.
