@@ -123,4 +123,44 @@ describe('learners', () => {
     expect(three - one).toBe(2 * LEARNERS.average.typingMs);
     expect(child.elapsedMs).toBe(one + three);
   });
+
+  it('reads a story only when reading is modelled: all of it before the first step', () => {
+    /** A 20-word story about `3 · 4`, at its operation step or its answer (with or without one). */
+    const story = (step: 'operation' | 'answer', operation: 'mul' | null): ProblemRoundView =>
+      ({
+        problem: {
+          index: 1,
+          item: 'word:times',
+          problem: {
+            kind: 'word',
+            template: 'word.times.fruit',
+            vars: {},
+            model: { kind: 'equation', left: op('mul', num(3), num(4)), right: BLANK },
+            operation,
+          },
+          input: 'choice',
+          choices: [{ kind: 'number', value: 12 }],
+          step,
+          reask: false,
+          hinted: false,
+        },
+      }) as unknown as ProblemRoundView;
+    const profile = LEARNERS.average;
+    const read = profile.readingMsPerWord * 20;
+    const extra = (view: ProblemRoundView) => {
+      const reader = new Learner(profile, 'story', true);
+      const plain = new Learner(profile, 'story');
+      return reader.respond(view, 2, 20).elapsedMs - plain.respond(view, 2, 20).elapsedMs;
+    };
+    expect(extra(story('operation', 'mul')), 'the whole story before the operation').toBe(read);
+    expect(extra(story('answer', 'mul')), 'a quarter of it to find the numbers').toBe(read / 4);
+    expect(extra(story('answer', null)), 'a story answered whole: read and two steps').toBe(
+      read + profile.choice.steady,
+    );
+    expect(extra(showing(3, 4)), 'no story, nothing to read').toBe(0);
+    const perfect = new Learner(LEARNERS.perfect, 'story', true);
+    expect(perfect.respond(story('answer', null), 2, 20).elapsedMs).toBe(
+      1500 + LEARNERS.perfect.readingMsPerWord * 20 + 1500,
+    );
+  });
 });

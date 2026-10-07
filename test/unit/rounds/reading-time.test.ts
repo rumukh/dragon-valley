@@ -22,14 +22,18 @@ const catalog: Record<string, string> = JSON.parse(
 );
 const TIMING = { perWordMs: 1000, wholeStoryMs: 4000, rereadPercent: 25 };
 const balance = loadPack().data.balance;
+/** Content 1.1.0 as shipped, with neither field. */
+const v110 = (): ContentPack<ContentData> => loadPack(join('content', 'history', '1.1.0.json'));
 
-/** A copy of the pack with every story's word count and/or the reading time. */
+/** A copy of the pack with or without every story's word count and the reading time. */
 function packWith(options: { words: boolean; timing: boolean }): ContentPack<ContentData> {
   const pack: ContentPack<ContentData> = JSON.parse(JSON.stringify(loadPack()));
-  if (options.words) {
-    for (const t of pack.data.wordTemplates) t.words = storyWordCount(catalog[t.textKey]!);
+  for (const t of pack.data.wordTemplates) {
+    if (options.words) t.words = storyWordCount(catalog[t.textKey]!);
+    else delete t.words;
   }
   if (options.timing) pack.data.balance.response.word = { ...TIMING };
+  else delete pack.data.balance.response.word;
   return pack;
 }
 
@@ -89,7 +93,7 @@ describe("a story's allowance", () => {
     expect(storyAllowance(packWith({ words: true, timing: false }).data, story(bags, null))).toBe(
       0,
     );
-    expect(storyAllowance(loadPack().data, story(bags, null)), 'content 1.1.0').toBe(0);
+    expect(storyAllowance(v110().data, story(bags, null)), 'content 1.1.0').toBe(0);
   });
 });
 
@@ -180,7 +184,7 @@ describe('answers to stories, timed in a real round', () => {
 
   it('keeps the plain limits for content without the fields', async () => {
     for (const pack of [
-      loadPack(),
+      v110(),
       packWith({ words: true, timing: false }),
       packWith({ words: false, timing: true }),
     ]) {

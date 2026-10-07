@@ -47,6 +47,7 @@ const fresh = (): Pack => JSON.parse(packText);
 const REVISIONS: Readonly<Record<string, string>> = {
   '1.0.0': 'af91e14b281b7452', // the Region 1 slice, deployed from main 373a5d2
   '1.1.0': 'e2acbc7228348abd', // v1: the nine regions
+  '1.2.0': '69494a787c9bab06', // the balance from the learner simulation (docs/balance-report.md)
 };
 
 function diagnostics(pack: Pack): readonly RuntimeDiagnostic[] {

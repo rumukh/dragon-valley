@@ -91,16 +91,31 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
 - every bot earns coins every session and, except the perfect one, sees progress every week;
 - no known fact (bronze and up: Leitner box 2+) waits more than a week past its review day; facts
   in box 0-1 are still being learned and are served as learning items;
-- no dead ends: every level is completed and every boss won over;
-- reward pacing stays inside targets (coins per session, a gift every day the goal is met, the
-  market not emptied in the first three weeks, every egg hatched within five sessions);
+- no dead ends: the perfect, average and slow bots complete every level and win over every boss in
+  12 weeks; the struggling bot keeps a steady path instead (its success matters more than its
+  speed, and the rules' protection slows it by design): while levels remain, every week with play
+  completes a new level, the boss of every region whose lessons it finished is won over, and at
+  least ¾ of the levels (45 of 59) are done in 12 weeks;
+- reward pacing stays inside targets (coins per session for the average bot, a gift every day the
+  goal is met, every egg hatched within five sessions). Coins come from right answers, so the slow
+  and struggling bots earn less than a typical session's 50-80 (design §7.1): their coins are
+  reported as measured, and their market waits below are their binding targets;
+- Glimmer's Market keeps something new coming (the 1.2.0 economy): the average bot still has
+  something on sale it cannot afford yet after 110 sessions (a 365-day run) and gets something new
+  with a median wait of at most 6 sessions and never more than 10; the slow bot waits at most 8
+  sessions (median), the struggling bot at most 12; every bot buys its first cosmetic in its first
+  week;
 - the first session hatches the first egg for every bot; the slow bot earns silver but never gold.
 
 A simulated day costs about a hundred commits, so the long runs live outside the gate:
 `node scripts/simulate.mjs --days 84 --check` runs the four bots for 12 weeks in parallel
 processes, writes `out/simulation/report.md` and fails when a check fails (`--balance file.json`
 simulates a changed balance block; `--answers` also writes every answer with its item, its tier
-and Leitner box before the answer and the bot's recall, for analyses like balance-report.md §5).
+and Leitner box before the answer, the bot's recall and the bucket the rules gave it, for analyses
+like balance-report.md §5). Since 1.2.0 the bots take time to read a story's English text (600 ms
+a word for the average bot, 900 for the slow and struggling bots, 300 for the perfect one: the
+whole story before its first step, a quarter of it again before the answer that follows an
+operation step); `--no-reading` reproduces the earlier runs without it.
 The gate runs only the bots' model tests, the checks against synthetic reports and a short first
 session (`test/sim/*.test.ts`). The measured results, the model's assumptions and the balance
 decisions are in [balance-report.md](balance-report.md).

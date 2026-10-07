@@ -258,19 +258,19 @@ level (`--strict-coverage`). The v1 pack passes both strict checks and `npm run 
 
 | Key                 | Default                                                                                                        | Meaning                           |
 | ------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `leitner.intervals` | `[0, 0, 1, 2, 4, 8]`                                                                                           | days until due, by box 0-5        |
+| `leitner.intervals` | `[0, 1, 2, 4, 8, 16]`                                                                                          | days until due, by box 0-5        |
 | `response.choice`   | fast ≤ 2500 ms, ok ≤ 6000 ms                                                                                   | response buckets for choice input |
 | `response.keypad`   | fast ≤ 3500, ok ≤ 8000, +700 ms per extra digit                                                                | response buckets for keypad input |
-| `response.word`     | optional: `perWordMs`, `wholeStoryMs`, `rereadPercent` (none in 1.1.0)                                         | reading time for word problems    |
+| `response.word`     | optional: `perWordMs`, `wholeStoryMs`, `rereadPercent` (1.2.0: 1000, 4000, 25; none in 1.1.0)                  | reading time for word problems    |
 | `input`             | keypad from box 2, 4 choices                                                                                   | `auto` input and option count     |
 | `mix`               | success 82 %, known 70 %, learning 10-50 %, window 20, no repeat within 2                                      | round composition                 |
 | `reask`             | delay 3 turns, at most 2 per round                                                                             | re-asking missed items            |
-| `coins`             | 1 per correct, +2 every 5 in a row, boss 30, placement 10                                                      | coin sources                      |
+| `coins`             | 1 per correct, +1 every 5 in a row, boss 15, placement 10                                                      | coin sources                      |
 | `stars`             | 2★ at 80 %, 3★ at 95 % with 60 % fast                                                                          | level stars                       |
 | `mastery`           | gold = box 5 and 2 fast of the last 3                                                                          | gold rule                         |
 | `growth`            | hatchling 30 % seen; youngling 60 % bronze + division; adult 90 % silver + division + boss; crowned 100 % gold | dragon stages                     |
 | `daily`             | goal 30 (10-100), 3 quests, 60 days of history                                                                 | daily goal and history            |
-| `gift`              | 10-25 coins or a cosmetic, weights 1 : 3                                                                       | the daily gift chest              |
+| `gift`              | 2-6 coins (cosmetic weight 0, coins weight 1)                                                                  | the daily gift chest              |
 | `arena`             | unlocked after `sunny-meadow.boss`, ≤ 60 problems                                                              | Lightning Arena                   |
 | `hungry`            | 1 due item                                                                                                     | when a dragon is hungry           |
 

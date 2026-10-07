@@ -68,6 +68,13 @@ export interface Summary {
   lastTableAdultDay: number | null;
   /** The day the child owned every cosmetic, or null. */
   marketFullDay: number | null;
+  /**
+   * Glimmer's Market: the last session that ended with something to save for, the waits between
+   * new cosmetics from the market or the gift, and the day of the first purchase.
+   */
+  lastSaving: number;
+  acquisitionWait: Spread;
+  firstPurchaseDay: number | null;
   coinsLeft: number;
   dimFacts: string[];
   failures: string[];
@@ -131,6 +138,9 @@ export function summarise(report: SimulationReport): Summary {
     lastTableAdultDay:
       adultDays.length === report.content.tableDragons.length ? Math.max(...adultDays) : null,
     marketFullDay: market?.index ?? null,
+    lastSaving: lastSavingSession(report),
+    acquisitionWait: spread(acquisitionGaps(report)),
+    firstPurchaseDay: sessions.find((d) => d.bought.length > 0)?.index ?? null,
     coinsLeft: report.coins,
     dimFacts: report.dimFacts,
     failures: report.failures,
@@ -160,7 +170,10 @@ export const TARGETS = {
    * succeeding (the coordinator's decision on balance-report.md §5.1, testing.md §4).
    */
   strugglingSuccess: { floor: 60 },
-  /** Coins per session, median (design §7.1: a 15-minute session earns roughly 50-80 coins). */
+  /**
+   * Coins per session, median, for the average child (design §7.1: a typical 15-minute session
+   * earns roughly 50-80 coins). The others are reported as measured.
+   */
   coins: { low: 50, high: 80 },
   /**
    * Days a known fact (bronze and up: box 2+, driver.ts `KNOWN_BOX`) may wait past its review
@@ -177,8 +190,40 @@ export const TARGETS = {
   perfectFinaleDays: 28,
   /** An egg hatches within this many sessions of the child receiving it. */
   hatchSessions: 5,
-  /** The market lasts: a child who buys whenever it can still has something to buy after 3 weeks. */
-  marketDays: 21,
+  /**
+   * The struggling child's steady path (the coordinator's decision for 1.2.0, replacing "every
+   * level and boss within the run" for this child only). For a struggling child success matters
+   * more than speed, and the rules' protection slows its progress by design, so it must keep
+   * moving rather than finish the valley in 12 weeks:
+   * - no stall: while levels remain, every week with play completes at least one new level;
+   * - every boss of a region whose lessons it finished is won over (lessons finished in the last
+   *   `bossGraceDays` days of the run may still have the boss ahead);
+   * - a regression floor: at least `floorShare` % of the levels within `floorDays` days (45 of
+   *   59; scaled down for a shorter run).
+   */
+  steadyPath: { floorShare: 75, floorDays: 84, bossGraceDays: 7 },
+  /**
+   * Glimmer's Market (the coordinator's O5 for the 1.2.0 economy): a new cosmetic about every 5
+   * sessions (about weekly) matters more to an 8-year-old than a market that lasts all year, and
+   * it is kinder to slower children; the valley's own rewards (stickers, hatching, growth, the
+   * Window, the finale) carry the rest of the year, and a later art update can add cosmetics. The
+   * gift chest gives coins only, so new cosmetics come from levels and the market.
+   * - `lastsSessions`: the average child still has something on sale it cannot afford yet after
+   *   this many sessions (a shorter run must end with something to save for);
+   * - `pace`: the median wait for something new from the market (or the gift) for each child,
+   *   and for the average child the longest wait while cosmetics remain;
+   * - `firstWeekDays`: every child buys its first cosmetic in its first week.
+   * The simulated child buys the cheapest item it can afford at the end of each session.
+   */
+  market: {
+    lastsSessions: 110,
+    pace: {
+      average: { median: 6, longest: 10 },
+      slow: { median: 8 },
+      struggling: { median: 12 },
+    } as Partial<Record<LearnerName, { median: number; longest?: number }>>,
+    firstWeekDays: 7,
+  },
 } as const;
 
 /** The learners each check applies to. */
@@ -195,11 +240,48 @@ function sessionsBetween(report: SimulationReport, from: number, to: number): nu
   return report.days.filter((d) => d.played && d.index >= from && d.index <= to).length;
 }
 
+/**
+ * The day a level was first completed: its completion event, or day 0 for a level the placement
+ * check completed (one star, no event); `null` when it was never completed.
+ */
+export function completionDay(report: SimulationReport, level: string): number | null {
+  const day = report.levelDays[level];
+  if (day !== undefined) return day;
+  return (report.stars[level] ?? 0) >= 1 ? 0 : null;
+}
+
 /** Success (whole percent) of every session with answers. */
 function successRates(report: SimulationReport): number[] {
   return sessionsOf(report)
     .filter((d) => d.answers > 0)
     .map((d) => percent(d.correct, d.answers));
+}
+
+/**
+ * Sessions waited between new cosmetics from the market or the gift chest (level rewards are
+ * not counted), and, while cosmetics are still missing at the end, the wait since the last one.
+ */
+export function acquisitionGaps(report: SimulationReport): number[] {
+  const sessions = sessionsOf(report);
+  const got: number[] = [];
+  sessions.forEach((d, i) => {
+    if (d.bought.length + d.gifted.length > 0) got.push(i);
+  });
+  const gaps = got.slice(1).map((at, k) => at - got[k]!);
+  const last = sessions[sessions.length - 1];
+  const missing = last !== undefined && last.cosmeticsOwned < report.content.cosmetics;
+  const tail = got.length > 0 ? sessions.length - 1 - got[got.length - 1]! : 0;
+  if (missing && tail > 0) gaps.push(tail);
+  return gaps;
+}
+
+/** The last session (1-based) that ended with something on sale the child could not afford. */
+export function lastSavingSession(report: SimulationReport): number {
+  let last = 0;
+  sessionsOf(report).forEach((d, i) => {
+    if (d.toSaveFor > 0) last = i + 1;
+  });
+  return last;
 }
 
 export const CHECKS: readonly Check[] = [
@@ -318,7 +400,7 @@ export const CHECKS: readonly Check[] = [
   },
   {
     id: 'no-dead-end',
-    learners: ALL,
+    learners: ['perfect', 'average', 'slow'],
     evaluate: (r) => {
       // A level placed out by the placement check counts as completed (one star, no event).
       const done = r.content.levels.filter((level) => (r.stars[level] ?? 0) >= 1);
@@ -331,13 +413,53 @@ export const CHECKS: readonly Check[] = [
   },
   {
     id: 'bosses',
-    learners: ALL,
+    learners: ['perfect', 'average', 'slow'],
     evaluate: (r) => {
       const won = r.content.bosses.filter((boss) => r.bossDays[boss] !== undefined);
       const last = Math.max(0, ...Object.values(r.bossDays));
       return {
         ok: won.length === r.content.bosses.length,
         name: `won over ${won.length} of ${r.content.bosses.length} bosses within ${r.daysSimulated} days (the last on day ${last})`,
+      };
+    },
+  },
+  {
+    id: 'steady-path',
+    learners: ['struggling'],
+    evaluate: (r) => {
+      const { floorShare, floorDays, bossGraceDays } = TARGETS.steadyPath;
+      const total = r.content.levels.length;
+      const day = (level: string) => completionDay(r, level);
+      const doneBefore = (end: number) =>
+        r.content.levels.filter((level) => {
+          const at = day(level);
+          return at !== null && at < end;
+        }).length;
+      const weeks: { start: number; newLevel: boolean }[] = [];
+      for (let start = 0; start < r.daysSimulated; start += 7) {
+        const days = r.days.slice(start, start + 7);
+        if (!days.some((d) => d.played) || doneBefore(start) >= total) continue;
+        weeks.push({ start, newLevel: days.some((d) => d.levels.length > 0) });
+      }
+      const stalled = weeks.filter((w) => !w.newLevel).map((w) => w.start);
+      const lastDay = r.daysSimulated - 1;
+      const finished = r.content.regions.filter(
+        (region) =>
+          region.boss !== null &&
+          region.lessons.every((level) => {
+            const at = day(level);
+            return at !== null && at <= lastDay - bossGraceDays;
+          }),
+      );
+      const won = finished.filter((region) => r.bossDays[region.boss!] !== undefined);
+      const cutoff = Math.min(floorDays, r.daysSimulated);
+      const needed = Math.ceil((total * floorShare * cutoff) / (100 * floorDays));
+      const byCutoff = doneBefore(cutoff);
+      const all = doneBefore(r.daysSimulated);
+      const last = Math.max(0, ...r.content.levels.map((level) => day(level) ?? 0));
+      return {
+        ok: stalled.length === 0 && won.length === finished.length && byCutoff >= needed,
+        name: `kept moving: a new level in ${weeks.length - stalled.length} of ${weeks.length} weeks with play while levels remained${stalled.length > 0 ? ` (none in the weeks from day ${stalled.join(', ')})` : ''}; won over the bosses of ${won.length} of ${finished.length} finished regions; ${byCutoff} of ${total} levels within ${cutoff} days (at least ${needed}); every level: ${all} of ${total} (the last on day ${last})`,
       };
     },
   },
@@ -373,7 +495,9 @@ export const CHECKS: readonly Check[] = [
   },
   {
     id: 'coins-pace',
-    learners: ['average', 'struggling', 'slow'],
+    // A typical session (design §7.1): the average child. Coins come from right answers, so the
+    // slow and struggling children earn less; their market pace is their own check.
+    learners: ['average'],
     evaluate: (r) => {
       const { low, high } = TARGETS.coins;
       const median = spread(sessionsOf(r).map((d) => d.coins)).median;
@@ -385,13 +509,41 @@ export const CHECKS: readonly Check[] = [
   },
   {
     id: 'market-lasts',
-    learners: ['average', 'struggling', 'slow'],
+    learners: ['average'],
     evaluate: (r) => {
-      // The day the child owned every cosmetic (bought, given by levels or by the gift chest).
-      const full = r.days.find((d) => d.played && d.cosmeticsOwned >= r.content.cosmetics);
+      const { lastsSessions } = TARGETS.market;
+      const sessions = sessionsOf(r);
+      const last = lastSavingSession(r);
+      const needed = Math.min(lastsSessions, sessions.length);
       return {
-        ok: full === undefined || full.index >= TARGETS.marketDays,
-        name: `still had cosmetics to get after ${TARGETS.marketDays} days (owned all ${r.content.cosmetics} on day ${full?.index ?? 'never'})`,
+        ok: sessions.length > 0 && last >= needed,
+        name: `still had something on sale to save for after ${last} of ${sessions.length} sessions (target ${lastsSessions}${sessions.length < lastsSessions ? `; a run this short must end with one` : ''})`,
+      };
+    },
+  },
+  {
+    id: 'market-pace',
+    learners: ['average', 'slow', 'struggling'],
+    evaluate: (r) => {
+      const limit = TARGETS.market.pace[r.learner]!;
+      const gaps = acquisitionGaps(r);
+      const { median, max } = spread(gaps);
+      const longestOk = limit.longest === undefined || max <= limit.longest;
+      return {
+        ok: gaps.length > 0 && median <= limit.median && longestOk,
+        name: `got something new from the market or the gift every ${median} sessions (median of ${gaps.length} waits, at most ${limit.median}; the longest ${max}${limit.longest === undefined ? '' : `, at most ${limit.longest}`})`,
+      };
+    },
+  },
+  {
+    id: 'starter-week',
+    learners: ALL,
+    evaluate: (r) => {
+      const { firstWeekDays } = TARGETS.market;
+      const first = r.days.find((d) => d.played && d.bought.length > 0);
+      return {
+        ok: first !== undefined && first.index < firstWeekDays,
+        name: `bought a first cosmetic within ${firstWeekDays} days (on day ${first?.index ?? 'never'})`,
       };
     },
   },
@@ -438,11 +590,11 @@ export function runChecks(reports: readonly SimulationReport[]): CheckResult[] {
 export function markdown(
   summaries: readonly Summary[],
   checks: readonly CheckResult[],
-  run: { days: number; seed: string; balance?: string },
+  run: { days: number; seed: string; balance?: string; reading?: boolean },
 ): string {
   const s3 = (s: Spread) => `${s.min} / ${s.median} / ${s.max}`;
   const lines = [
-    `# Learner simulation: ${run.days} days, seed "${run.seed}"${run.balance ? `, balance ${run.balance}` : ''}`,
+    `# Learner simulation: ${run.days} days, seed "${run.seed}"${run.balance ? `, balance ${run.balance}` : ''}${run.reading === undefined ? '' : run.reading ? ', reading modelled' : ', without reading'}`,
     '',
     'Spreads are min / median / max over the sessions played.',
     '',
@@ -462,8 +614,8 @@ export function markdown(
     '',
     '## Rewards',
     '',
-    '| Learner | Coins per session | Coins by source (total) | Daily goal | Gifts | Stickers | Every cosmetic owned (day) |',
-    '| --- | --- | --- | --- | --- | --- | --- |',
+    '| Learner | Coins per session | Coins by source (total) | Daily goal | Gifts | Stickers | First purchase (day) | Something to save for until (session) | Wait for something new (sessions) | Every cosmetic owned (day) |',
+    '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |',
   );
   for (const s of summaries) {
     const sources = Object.entries(s.coinsByReason)
@@ -471,7 +623,7 @@ export function markdown(
       .map(([reason, amount]) => `${reason} ${amount}`)
       .join(', ');
     lines.push(
-      `| ${s.learner} | ${s3(s.coinsPerSession)} | ${sources} | ${s.goalSessions} of ${s.sessions} | ${s.giftSessions} | ${s.stickers} | ${s.marketFullDay ?? 'not yet'} |`,
+      `| ${s.learner} | ${s3(s.coinsPerSession)} | ${sources} | ${s.goalSessions} of ${s.sessions} | ${s.giftSessions} | ${s.stickers} | ${s.firstPurchaseDay ?? 'never'} | ${s.lastSaving} | ${s3(s.acquisitionWait)} | ${s.marketFullDay ?? 'not yet'} |`,
     );
   }
   lines.push('', '## Checks', '');

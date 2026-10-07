@@ -20,8 +20,8 @@ import { PERFECT, Player, oracle, trajectoryDigest } from './support';
 vi.setConfig({ testTimeout: 300_000 });
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '6b59ef5207d1b2b6';
-const GOLDEN_TRAJECTORY = 'e2f3482ff8fb1eea';
+const GOLDEN_HASH = '8e668bbdd317a658';
+const GOLDEN_TRAJECTORY = 'b4f8e35418f8c6f4';
 
 const SEED = 'golden-riddle-scrolls';
 

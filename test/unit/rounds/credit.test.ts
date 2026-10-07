@@ -1,7 +1,7 @@
 /**
  * Commuted facts share partial credit (docs/design.md §6.1): a right answer to one order is a
  * review of the other for scheduling only. Days and boxes are the test's own numbers; intervals
- * come from the balance (box 3: two days).
+ * come from the balance (box 3: four days).
  */
 import { describe, expect, it } from 'vitest';
 import { creditItem } from '../../../src/rules/learning/credit';
@@ -36,7 +36,7 @@ describe('commuted facts', () => {
     const { ctx, state } = context({ 'mul:8x7': known });
     expect(isDue(state.items['mul:8x7'], DAY), 'due before').toBe(true);
     creditItem(ctx, 'mul:7x8', 'fast');
-    expect(state.items['mul:8x7']).toEqual({ ...known, due: DAY + 2, lastDay: DAY });
+    expect(state.items['mul:8x7']).toEqual({ ...known, due: DAY + 4, lastDay: DAY });
     expect(isDue(state.items['mul:8x7'], DAY), 'not due after').toBe(false);
     expect(state.items['mul:7x8']).toMatchObject({ box: 1, seen: 1, correct: 1 });
   });

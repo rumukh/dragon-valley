@@ -1,6 +1,6 @@
 {
   "id": "dragon-valley",
-  "revision": "1.2.0",
+  "revision": "1.1.0",
   "schemaVersion": 1,
   "data": {
     "objectives": [
@@ -260,7 +260,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -297,7 +297,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": ["bubbles", "sunny", "goldie"],
           "cosmetics": []
         },
@@ -335,7 +335,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": ["mirror", "puff"],
           "cosmetics": []
         },
@@ -377,7 +377,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": ["scarf-striped"]
         },
@@ -414,7 +414,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -444,7 +444,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -472,7 +472,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": [],
           "cosmetics": ["hat-party"]
         },
@@ -525,7 +525,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": ["clover", "petal"],
           "cosmetics": []
         },
@@ -562,7 +562,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -599,7 +599,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -641,7 +641,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": ["glasses-square"]
         },
@@ -676,7 +676,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -706,7 +706,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -734,7 +734,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": ["clover", "petal"],
           "cosmetics": ["hat-wizard"]
         },
@@ -771,7 +771,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": ["ember", "rainbow"],
           "cosmetics": []
         },
@@ -808,7 +808,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -846,7 +846,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -881,7 +881,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": ["nest-lantern"]
         },
@@ -918,7 +918,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -948,7 +948,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -976,7 +976,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": ["ember", "rainbow"],
           "cosmetics": ["hat-cap"]
         },
@@ -1013,7 +1013,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": ["crystal", "starry"],
           "cosmetics": []
         },
@@ -1050,7 +1050,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1088,7 +1088,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1130,7 +1130,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": ["nest-treasure"]
         },
@@ -1165,7 +1165,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1195,7 +1195,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1223,7 +1223,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": ["crystal", "starry"],
           "cosmetics": ["hat-propeller"]
         },
@@ -1258,7 +1258,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1286,7 +1286,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1324,7 +1324,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1354,7 +1354,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": ["nest-quilt"]
         },
@@ -1391,7 +1391,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1419,7 +1419,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1447,7 +1447,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": [],
           "cosmetics": ["hat-pirate"]
         },
@@ -1489,7 +1489,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": ["pearl"],
           "cosmetics": []
         },
@@ -1517,7 +1517,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1554,7 +1554,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1584,7 +1584,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": ["paint-hearts"]
         },
@@ -1612,7 +1612,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1640,7 +1640,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": ["pearl"],
           "cosmetics": ["pearl-necklace"]
         },
@@ -1678,7 +1678,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": ["boulder"],
           "cosmetics": []
         },
@@ -1716,7 +1716,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1744,7 +1744,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1772,7 +1772,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": ["nest-number-blocks"]
         },
@@ -1807,7 +1807,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1837,7 +1837,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1865,7 +1865,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": ["boulder"],
           "cosmetics": ["hat-top"]
         },
@@ -1900,7 +1900,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": ["clockwork"],
           "cosmetics": []
         },
@@ -1935,7 +1935,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -1963,7 +1963,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -2001,7 +2001,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": ["nest-books"]
         },
@@ -2031,7 +2031,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -2071,7 +2071,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -2105,7 +2105,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": ["clockwork"],
           "cosmetics": ["hat-chef"]
         },
@@ -2140,7 +2140,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -2179,7 +2179,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -2224,7 +2224,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [2, 4, 6],
+          "coins": [5, 10, 15],
           "eggs": [],
           "cosmetics": []
         },
@@ -2260,7 +2260,7 @@
         ],
         "stars": null,
         "rewards": {
-          "coins": [4, 8, 12],
+          "coins": [10, 20, 30],
           "eggs": ["seven-headed"],
           "cosmetics": ["gold-medal"]
         },
@@ -3261,7 +3261,7 @@
         "slot": "neck",
         "assetId": "bow-tie",
         "nameKey": "cosmetic.bow-tie",
-        "price": 175,
+        "price": 15,
         "unlock": "sunny-meadow.1"
       },
       {
@@ -3269,7 +3269,7 @@
         "slot": "nest",
         "assetId": "nest-flowers",
         "nameKey": "cosmetic.nest-flowers",
-        "price": 196,
+        "price": 30,
         "unlock": "sunny-meadow.2"
       },
       {
@@ -3277,7 +3277,7 @@
         "slot": "wings",
         "assetId": "paint-dots",
         "nameKey": "cosmetic.paint-dots",
-        "price": 218,
+        "price": 30,
         "unlock": "sunny-meadow.2"
       },
       {
@@ -3285,7 +3285,7 @@
         "slot": "head",
         "assetId": "hat-beanie",
         "nameKey": "cosmetic.hat-beanie",
-        "price": 239,
+        "price": 25,
         "unlock": "sunny-meadow.3"
       },
       {
@@ -3293,7 +3293,7 @@
         "slot": "neck",
         "assetId": "ribbon-bow",
         "nameKey": "cosmetic.ribbon-bow",
-        "price": 261,
+        "price": 20,
         "unlock": "sunny-meadow.3"
       },
       {
@@ -3301,7 +3301,7 @@
         "slot": "wings",
         "assetId": "paint-stars",
         "nameKey": "cosmetic.paint-stars",
-        "price": 282,
+        "price": 40,
         "unlock": "sunny-meadow.4"
       },
       {
@@ -3309,7 +3309,7 @@
         "slot": "eyes",
         "assetId": "glasses-star",
         "nameKey": "cosmetic.glasses-star",
-        "price": 304,
+        "price": 35,
         "unlock": "sunny-meadow.5"
       },
       {
@@ -3317,7 +3317,7 @@
         "slot": "nest",
         "assetId": "nest-pillow",
         "nameKey": "cosmetic.nest-pillow",
-        "price": 325,
+        "price": 30,
         "unlock": "sunny-meadow.5"
       },
       {
@@ -3325,7 +3325,7 @@
         "slot": "head",
         "assetId": "hat-party",
         "nameKey": "cosmetic.hat-party",
-        "price": 325,
+        "price": 60,
         "unlock": "sunny-meadow.boss"
       },
       {
@@ -3333,7 +3333,7 @@
         "slot": "nest",
         "assetId": "nest-mushrooms",
         "nameKey": "cosmetic.nest-mushrooms",
-        "price": 375,
+        "price": 35,
         "unlock": "whispering-woods.1"
       },
       {
@@ -3341,7 +3341,7 @@
         "slot": "wings",
         "assetId": "paint-stripes",
         "nameKey": "cosmetic.paint-stripes",
-        "price": 400,
+        "price": 30,
         "unlock": "whispering-woods.2"
       },
       {
@@ -3349,7 +3349,7 @@
         "slot": "neck",
         "assetId": "scarf-cozy",
         "nameKey": "cosmetic.scarf-cozy",
-        "price": 425,
+        "price": 35,
         "unlock": "whispering-woods.3"
       },
       {
@@ -3357,7 +3357,7 @@
         "slot": "eyes",
         "assetId": "glasses-square",
         "nameKey": "cosmetic.glasses-square",
-        "price": 425,
+        "price": 40,
         "unlock": "whispering-woods.4"
       },
       {
@@ -3365,7 +3365,7 @@
         "slot": "head",
         "assetId": "hat-wizard",
         "nameKey": "cosmetic.hat-wizard",
-        "price": 425,
+        "price": 60,
         "unlock": "whispering-woods.boss"
       },
       {
@@ -3373,7 +3373,7 @@
         "slot": "wings",
         "assetId": "paint-flames",
         "nameKey": "cosmetic.paint-flames",
-        "price": 425,
+        "price": 40,
         "unlock": "fire-mountain.1"
       },
       {
@@ -3381,7 +3381,7 @@
         "slot": "neck",
         "assetId": "bandana",
         "nameKey": "cosmetic.bandana",
-        "price": 450,
+        "price": 35,
         "unlock": "fire-mountain.2"
       },
       {
@@ -3389,7 +3389,7 @@
         "slot": "eyes",
         "assetId": "goggles",
         "nameKey": "cosmetic.goggles",
-        "price": 475,
+        "price": 45,
         "unlock": "fire-mountain.3"
       },
       {
@@ -3397,7 +3397,7 @@
         "slot": "nest",
         "assetId": "nest-lantern",
         "nameKey": "cosmetic.nest-lantern",
-        "price": 475,
+        "price": 40,
         "unlock": "fire-mountain.4"
       },
       {
@@ -3405,7 +3405,7 @@
         "slot": "head",
         "assetId": "hat-cap",
         "nameKey": "cosmetic.hat-cap",
-        "price": 475,
+        "price": 60,
         "unlock": "fire-mountain.boss"
       },
       {
@@ -3413,7 +3413,7 @@
         "slot": "wings",
         "assetId": "paint-galaxy",
         "nameKey": "cosmetic.paint-galaxy",
-        "price": 475,
+        "price": 45,
         "unlock": "crystal-caves.1"
       },
       {
@@ -3421,7 +3421,7 @@
         "slot": "eyes",
         "assetId": "monocle",
         "nameKey": "cosmetic.monocle",
-        "price": 525,
+        "price": 40,
         "unlock": "crystal-caves.3"
       },
       {
@@ -3429,7 +3429,7 @@
         "slot": "nest",
         "assetId": "nest-treasure",
         "nameKey": "cosmetic.nest-treasure",
-        "price": 525,
+        "price": 45,
         "unlock": "crystal-caves.4"
       },
       {
@@ -3437,7 +3437,7 @@
         "slot": "head",
         "assetId": "hat-propeller",
         "nameKey": "cosmetic.hat-propeller",
-        "price": 525,
+        "price": 65,
         "unlock": "crystal-caves.boss"
       },
       {
@@ -3445,7 +3445,7 @@
         "slot": "eyes",
         "assetId": "sunglasses",
         "nameKey": "cosmetic.sunglasses",
-        "price": 525,
+        "price": 50,
         "unlock": "sharing-lake.1"
       },
       {
@@ -3453,7 +3453,7 @@
         "slot": "neck",
         "assetId": "bell-collar",
         "nameKey": "cosmetic.bell-collar",
-        "price": 575,
+        "price": 50,
         "unlock": "sharing-lake.3"
       },
       {
@@ -3461,7 +3461,7 @@
         "slot": "nest",
         "assetId": "nest-quilt",
         "nameKey": "cosmetic.nest-quilt",
-        "price": 575,
+        "price": 55,
         "unlock": "sharing-lake.4"
       },
       {
@@ -3469,7 +3469,7 @@
         "slot": "head",
         "assetId": "hat-pirate",
         "nameKey": "cosmetic.hat-pirate",
-        "price": 575,
+        "price": 70,
         "unlock": "sharing-lake.boss"
       },
       {
@@ -3477,7 +3477,7 @@
         "slot": "eyes",
         "assetId": "glasses-heart",
         "nameKey": "cosmetic.glasses-heart",
-        "price": 590,
+        "price": 55,
         "unlock": "leftover-lagoon.1"
       },
       {
@@ -3485,7 +3485,7 @@
         "slot": "wings",
         "assetId": "paint-hearts",
         "nameKey": "cosmetic.paint-hearts",
-        "price": 590,
+        "price": 60,
         "unlock": "leftover-lagoon.4"
       },
       {
@@ -3493,7 +3493,7 @@
         "slot": "neck",
         "assetId": "pearl-necklace",
         "nameKey": "cosmetic.pearl-necklace",
-        "price": 590,
+        "price": 70,
         "unlock": "leftover-lagoon.boss"
       },
       {
@@ -3501,7 +3501,7 @@
         "slot": "eyes",
         "assetId": "mask-hero",
         "nameKey": "cosmetic.mask-hero",
-        "price": 600,
+        "price": 60,
         "unlock": "giants-peaks.1"
       },
       {
@@ -3509,7 +3509,7 @@
         "slot": "nest",
         "assetId": "nest-number-blocks",
         "nameKey": "cosmetic.nest-number-blocks",
-        "price": 600,
+        "price": 65,
         "unlock": "giants-peaks.4"
       },
       {
@@ -3517,7 +3517,7 @@
         "slot": "head",
         "assetId": "hat-top",
         "nameKey": "cosmetic.hat-top",
-        "price": 600,
+        "price": 75,
         "unlock": "giants-peaks.boss"
       },
       {
@@ -3525,7 +3525,7 @@
         "slot": "wings",
         "assetId": "paint-checker",
         "nameKey": "cosmetic.paint-checker",
-        "price": 600,
+        "price": 65,
         "unlock": "riddle-ruins.1"
       },
       {
@@ -3533,7 +3533,7 @@
         "slot": "nest",
         "assetId": "nest-books",
         "nameKey": "cosmetic.nest-books",
-        "price": 600,
+        "price": 70,
         "unlock": "riddle-ruins.4"
       },
       {
@@ -3541,7 +3541,7 @@
         "slot": "head",
         "assetId": "hat-chef",
         "nameKey": "cosmetic.hat-chef",
-        "price": 600,
+        "price": 75,
         "unlock": "riddle-ruins.boss"
       },
       {
@@ -3549,7 +3549,7 @@
         "slot": "wings",
         "assetId": "paint-rainbow",
         "nameKey": "cosmetic.paint-rainbow",
-        "price": 600,
+        "price": 80,
         "unlock": "dragon-castle.1"
       },
       {
@@ -3557,7 +3557,7 @@
         "slot": "neck",
         "assetId": "gold-medal",
         "nameKey": "cosmetic.gold-medal",
-        "price": 600,
+        "price": 80,
         "unlock": "dragon-castle.boss"
       }
     ],
@@ -4246,7 +4246,7 @@
         "titleKey": "quest.correct-20",
         "goal": "correct-answers",
         "target": 20,
-        "coins": 3,
+        "coins": 10,
         "weight": 10,
         "unlock": null
       },
@@ -4255,7 +4255,7 @@
         "titleKey": "quest.fast-10",
         "goal": "fast-answers",
         "target": 10,
-        "coins": 3,
+        "coins": 10,
         "weight": 10,
         "unlock": null
       },
@@ -4264,7 +4264,7 @@
         "titleKey": "quest.snack-5",
         "goal": "feed-hungry",
         "target": 5,
-        "coins": 2,
+        "coins": 8,
         "weight": 10,
         "unlock": "sunny-meadow.1"
       },
@@ -4273,7 +4273,7 @@
         "titleKey": "quest.minigame-1",
         "goal": "play-minigame",
         "target": 1,
-        "coins": 2,
+        "coins": 5,
         "weight": 10,
         "unlock": null
       },
@@ -4282,7 +4282,7 @@
         "titleKey": "quest.level-1",
         "goal": "finish-level",
         "target": 1,
-        "coins": 3,
+        "coins": 10,
         "weight": 10,
         "unlock": null
       },
@@ -4291,7 +4291,7 @@
         "titleKey": "quest.streak-8",
         "goal": "best-streak",
         "target": 8,
-        "coins": 3,
+        "coins": 10,
         "weight": 5,
         "unlock": null
       },
@@ -4300,7 +4300,7 @@
         "titleKey": "quest.correct-40",
         "goal": "correct-answers",
         "target": 40,
-        "coins": 5,
+        "coins": 15,
         "weight": 6,
         "unlock": "whispering-woods.1"
       },
@@ -4309,7 +4309,7 @@
         "titleKey": "quest.snack-10",
         "goal": "feed-hungry",
         "target": 10,
-        "coins": 4,
+        "coins": 12,
         "weight": 6,
         "unlock": "whispering-woods.1"
       },
@@ -4318,7 +4318,7 @@
         "titleKey": "quest.minigame-2",
         "goal": "play-minigame",
         "target": 2,
-        "coins": 2,
+        "coins": 8,
         "weight": 6,
         "unlock": "whispering-woods.1"
       },
@@ -4327,7 +4327,7 @@
         "titleKey": "quest.fast-20",
         "goal": "fast-answers",
         "target": 20,
-        "coins": 5,
+        "coins": 15,
         "weight": 6,
         "unlock": "fire-mountain.1"
       },
@@ -4336,7 +4336,7 @@
         "titleKey": "quest.level-2",
         "goal": "finish-level",
         "target": 2,
-        "coins": 5,
+        "coins": 15,
         "weight": 5,
         "unlock": "fire-mountain.1"
       },
@@ -4345,7 +4345,7 @@
         "titleKey": "quest.streak-12",
         "goal": "best-streak",
         "target": 12,
-        "coins": 5,
+        "coins": 15,
         "weight": 4,
         "unlock": "crystal-caves.1"
       }
@@ -4474,8 +4474,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 14
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.bikes",
@@ -4508,8 +4507,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 16
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.stars",
@@ -4546,8 +4544,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 14
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.crayons",
@@ -4584,8 +4581,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 16
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.baskets",
@@ -4626,8 +4622,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 14
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.clovers",
@@ -4664,8 +4659,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 14
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.dragons",
@@ -4698,8 +4692,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 17
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.eggs",
@@ -4732,8 +4725,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 17
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.weeks",
@@ -4766,8 +4758,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 12
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.beetles",
@@ -4804,8 +4795,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 14
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.rainbows",
@@ -4842,8 +4832,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 14
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.spiders",
@@ -4876,8 +4865,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 16
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.gems",
@@ -4910,8 +4898,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 18
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.market",
@@ -4952,8 +4939,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 18
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.tickets",
@@ -5001,8 +4987,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 14
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.pencils",
@@ -5035,8 +5020,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 15
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.books",
@@ -5069,8 +5053,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 13
+        "operation": "mul"
       },
       {
         "id": "word.equal-groups.trucks",
@@ -5103,8 +5086,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 14
+        "operation": "mul"
       },
       {
         "id": "word.sharing.berries",
@@ -5156,8 +5138,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 20
+        "operation": "div"
       },
       {
         "id": "word.sharing.friends",
@@ -5212,8 +5193,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 14
+        "operation": "div"
       },
       {
         "id": "word.sharing.pancakes",
@@ -5261,8 +5241,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 20
+        "operation": "div"
       },
       {
         "id": "word.sharing.plums",
@@ -5310,8 +5289,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 13
+        "operation": "div"
       },
       {
         "id": "word.sharing.gnomes",
@@ -5359,8 +5337,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 22
+        "operation": "div"
       },
       {
         "id": "word.sharing.class",
@@ -5412,8 +5389,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 16
+        "operation": "div"
       },
       {
         "id": "word.sharing.books",
@@ -5461,8 +5437,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 22
+        "operation": "div"
       },
       {
         "id": "word.sharing.giant",
@@ -5510,8 +5485,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 21
+        "operation": "div"
       },
       {
         "id": "word.grouping.bags",
@@ -5567,8 +5541,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 16
+        "operation": "div"
       },
       {
         "id": "word.grouping.teams",
@@ -5616,8 +5589,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 15
+        "operation": "div"
       },
       {
         "id": "word.grouping.eggs",
@@ -5665,8 +5637,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 17
+        "operation": "div"
       },
       {
         "id": "word.grouping.holiday",
@@ -5718,8 +5689,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 17
+        "operation": "div"
       },
       {
         "id": "word.grouping.spiders",
@@ -5771,8 +5741,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 15
+        "operation": "div"
       },
       {
         "id": "word.grouping.chests",
@@ -5820,8 +5789,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 18
+        "operation": "div"
       },
       {
         "id": "word.grouping.market",
@@ -5877,8 +5845,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 17
+        "operation": "div"
       },
       {
         "id": "word.grouping.giant",
@@ -5926,8 +5893,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 16
+        "operation": "div"
       },
       {
         "id": "word.times-as-many.fruit",
@@ -5977,8 +5943,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 15
+        "operation": "mul"
       },
       {
         "id": "word.times-as-many.sparks",
@@ -6011,8 +5976,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 16
+        "operation": "mul"
       },
       {
         "id": "word.times-as-many.treasure",
@@ -6058,8 +6022,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 19
+        "operation": "mul"
       },
       {
         "id": "word.times-as-many.pond",
@@ -6105,8 +6068,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 18
+        "operation": "mul"
       },
       {
         "id": "word.times-as-many.savings",
@@ -6147,8 +6109,7 @@
             }
           }
         },
-        "operation": "mul",
-        "words": 16
+        "operation": "mul"
       },
       {
         "id": "word.times-fewer.fruit",
@@ -6208,8 +6169,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 18
+        "operation": "div"
       },
       {
         "id": "word.times-fewer.scales",
@@ -6257,8 +6217,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 19
+        "operation": "div"
       },
       {
         "id": "word.times-fewer.treasure",
@@ -6314,8 +6273,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 21
+        "operation": "div"
       },
       {
         "id": "word.times-fewer.pond",
@@ -6367,8 +6325,7 @@
             }
           }
         },
-        "operation": "div",
-        "words": 18
+        "operation": "div"
       },
       {
         "id": "word.more-than.flowers",
@@ -6409,8 +6366,7 @@
             }
           }
         },
-        "operation": "add",
-        "words": 14
+        "operation": "add"
       },
       {
         "id": "word.more-than.fruit",
@@ -6460,8 +6416,7 @@
             }
           }
         },
-        "operation": "add",
-        "words": 13
+        "operation": "add"
       },
       {
         "id": "word.more-than.inverse",
@@ -6521,8 +6476,7 @@
             }
           }
         },
-        "operation": "sub",
-        "words": 16
+        "operation": "sub"
       },
       {
         "id": "word.more-than.plums",
@@ -6555,8 +6509,7 @@
             }
           }
         },
-        "operation": "add",
-        "words": 14
+        "operation": "add"
       },
       {
         "id": "word.fewer-than.fruit",
@@ -6601,8 +6554,7 @@
             }
           }
         },
-        "operation": "sub",
-        "words": 13
+        "operation": "sub"
       },
       {
         "id": "word.fewer-than.inverse",
@@ -6652,8 +6604,7 @@
             }
           }
         },
-        "operation": "add",
-        "words": 16
+        "operation": "add"
       },
       {
         "id": "word.fewer-than.class",
@@ -6686,8 +6637,7 @@
             }
           }
         },
-        "operation": "sub",
-        "words": 17
+        "operation": "sub"
       },
       {
         "id": "word.leftover.bags",
@@ -6752,8 +6702,7 @@
             "name": "size"
           }
         },
-        "operation": "div",
-        "words": 21
+        "operation": "div"
       },
       {
         "id": "word.leftover.boats",
@@ -6810,8 +6759,7 @@
             "name": "size"
           }
         },
-        "operation": "div",
-        "words": 22
+        "operation": "div"
       },
       {
         "id": "word.leftover.necklaces",
@@ -6868,8 +6816,7 @@
             "name": "size"
           }
         },
-        "operation": "div",
-        "words": 23
+        "operation": "div"
       },
       {
         "id": "word.leftover.plates",
@@ -6934,8 +6881,7 @@
             "name": "size"
           }
         },
-        "operation": "div",
-        "words": 19
+        "operation": "div"
       },
       {
         "id": "word.leftover.album",
@@ -6996,8 +6942,7 @@
             "name": "size"
           }
         },
-        "operation": "div",
-        "words": 21
+        "operation": "div"
       },
       {
         "id": "word.two-step.bags",
@@ -7056,8 +7001,7 @@
             }
           }
         },
-        "operation": null,
-        "words": 20
+        "operation": null
       },
       {
         "id": "word.two-step.tickets",
@@ -7107,8 +7051,7 @@
             }
           }
         },
-        "operation": null,
-        "words": 20
+        "operation": null
       },
       {
         "id": "word.two-step.chairs",
@@ -7154,8 +7097,7 @@
             }
           }
         },
-        "operation": null,
-        "words": 20
+        "operation": null
       },
       {
         "id": "word.two-step.bowls",
@@ -7208,8 +7150,7 @@
             }
           }
         },
-        "operation": null,
-        "words": 20
+        "operation": null
       },
       {
         "id": "word.two-step.pocket",
@@ -7263,8 +7204,7 @@
             }
           }
         },
-        "operation": null,
-        "words": 17
+        "operation": null
       },
       {
         "id": "word.two-step.stickers",
@@ -7318,8 +7258,7 @@
             }
           }
         },
-        "operation": null,
-        "words": 20
+        "operation": null
       },
       {
         "id": "word.two-step.garden",
@@ -7369,8 +7308,7 @@
             }
           }
         },
-        "operation": null,
-        "words": 22
+        "operation": null
       }
     ],
     "placement": {
@@ -9919,7 +9857,7 @@
     },
     "balance": {
       "leitner": {
-        "intervals": [0, 1, 2, 4, 8, 16]
+        "intervals": [0, 0, 1, 2, 4, 8]
       },
       "response": {
         "choice": {
@@ -9930,11 +9868,6 @@
           "fastMs": 3500,
           "okMs": 8000,
           "perExtraDigitMs": 700
-        },
-        "word": {
-          "perWordMs": 1000,
-          "wholeStoryMs": 4000,
-          "rereadPercent": 25
         }
       },
       "input": {
@@ -9956,8 +9889,8 @@
       "coins": {
         "correct": 1,
         "streakEvery": 5,
-        "streakBonus": 1,
-        "bossDefeated": 15,
+        "streakBonus": 2,
+        "bossDefeated": 30,
         "placementDone": 10
       },
       "stars": {
@@ -10012,9 +9945,9 @@
         "historyDays": 60
       },
       "gift": {
-        "coinsMin": 2,
-        "coinsMax": 6,
-        "cosmeticWeight": 0,
+        "coinsMin": 10,
+        "coinsMax": 25,
+        "cosmeticWeight": 3,
         "coinsWeight": 1
       },
       "arena": {

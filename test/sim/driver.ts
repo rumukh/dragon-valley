@@ -16,6 +16,8 @@
  * stickers, eggs, hatches and growth, lit panes, new levels and bosses, quests, the goal, the gift
  * and the market) and how overdue the oldest due fact was when the session began.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { ContentPack } from '@aegis/runtime';
 import { dayNumber, isoDay } from '../../src/rules/contract';
 import type {
@@ -26,9 +28,9 @@ import type {
   MasteryLevel,
   ProblemRoundView,
 } from '../../src/rules/contract';
-import { itemTier } from '../../src/rules/learning/selection';
+import { lowSuccess, mixTier } from '../../src/rules/learning/selection';
 import type { ItemTier } from '../../src/rules/learning/selection';
-import { Player, loadPack, oracle } from '../traces/support';
+import { Player, loadPack, oracle, root } from '../traces/support';
 import type { Style } from '../traces/support';
 import { LEARNERS, Learner, knowledgeKey } from './learners';
 import type { LearnerName } from './learners';
@@ -62,6 +64,15 @@ export interface DayReport {
   /** Cosmetics bought in the market, and cosmetics owned at the end of the day. */
   bought: string[];
   cosmeticsOwned: number;
+  /** Cosmetics the daily gift gave. */
+  gifted: string[];
+  /**
+   * The market at the end of the session, after shopping: coins left, items on sale (unlocked,
+   * not owned) and those the child cannot afford yet (something to save for).
+   */
+  coinsAtEnd: number;
+  forSale: number;
+  toSaveFor: number;
   quests: number;
   goalReached: boolean;
   giftOpened: boolean;
@@ -83,6 +94,8 @@ export interface SimulationReport {
     revision: string;
     levels: string[];
     bosses: string[];
+    /** Each region's lesson levels and its boss (for the struggling child's steady path). */
+    regions: { id: string; lessons: string[]; boss: string | null }[];
     tableDragons: string[];
     cosmetics: number;
   };
@@ -128,6 +141,8 @@ export interface SimulationReport {
 /** The trace harness with plain dispatch steps and a mistake for every kind of answer. */
 class SimPlayer extends Player {
   private simSteps = 0;
+  /** Called after each graded answer with the bucket the rules gave it (null: a step on the way). */
+  onGraded?: (bucket: string | null) => void;
 
   override async act(action: GameAction): Promise<boolean> {
     // A simulated month is long: let the test runner's messages through now and then.
@@ -150,7 +165,23 @@ class SimPlayer extends Player {
     const expected = oracle(round.problem.problem, round.problem.step);
     const value = right ? expected : mistake(round, expected);
     const type = round.activity === 'placement' ? 'placementAnswer' : 'answer';
-    return this.act({ type, value, elapsedMs: this.style.elapsedMs(this.answered, round) });
+    const from = this.events.length;
+    const done = await this.act({
+      type,
+      value,
+      elapsedMs: this.style.elapsedMs(this.answered, round),
+    });
+    const graded = this.events
+      .slice(from)
+      .find((e) => e.type === 'answer.correct' || e.type === 'answer.incorrect');
+    const bucket =
+      graded === undefined
+        ? null
+        : graded.type === 'answer.incorrect'
+          ? 'miss'
+          : event<{ bucket: string }>(graded.data).bucket;
+    this.onGraded?.(bucket);
+    return done;
   }
 }
 
@@ -326,7 +357,7 @@ async function playSession(player: Player, budget: number): Promise<void> {
   await shop(player);
 }
 
-function emptyDay(index: number, day: string, played: boolean): DayReport {
+export function emptyDay(index: number, day: string, played: boolean): DayReport {
   return {
     index,
     day,
@@ -346,6 +377,10 @@ function emptyDay(index: number, day: string, played: boolean): DayReport {
     panes: 0,
     bought: [],
     cosmeticsOwned: 0,
+    gifted: [],
+    coinsAtEnd: 0,
+    forSale: 0,
+    toSaveFor: 0,
     quests: 0,
     goalReached: false,
     giftOpened: false,
@@ -373,6 +408,10 @@ export interface SimulateOptions {
   onDay?: (day: DayReport) => void;
   /** Called for every problem the learner answers (analysis: `simulate.mjs --answers`). */
   onAnswer?: (answer: AnswerRecord) => void;
+  /** Model the time a child takes to read a story (`simulate.mjs --reading`; off by default). */
+  reading?: boolean;
+  /** The English catalog the stories come from (default: content/catalogs/en.content.json). */
+  catalog?: Readonly<Record<string, unknown>>;
 }
 
 /** One answer of the learner, with what the rules and the learner knew before it. */
@@ -386,15 +425,26 @@ export interface AnswerRecord {
   item: string;
   /** `operation` for a story's first step (which operation?), else `answer`. */
   step: 'answer' | 'operation';
-  /** The item's tier in the mix and its Leitner box before the answer (`null`: never answered). */
+  /**
+   * The item's tier as the mix saw it (`mixTier`: a due fact missed last time is a learning item
+   * while the child is protected), whether the mix was protecting the child (recent success
+   * below the protection line), and the item's Leitner box before the answer (`null`: never
+   * answered).
+   */
   tier: ItemTier;
+  protected: boolean;
   box: number | null;
   reask: boolean;
   input: 'choice' | 'keypad';
-  /** How well the learner recalled the fact (0-100), and the answer. */
+  /** A story's length in words (0 for other problems). */
+  storyWords: number;
+  /** How well the learner recalled the fact (0-100), the answer and its time. */
   recall: number;
   right: boolean;
   elapsedMs: number;
+  /** The rules' bucket for the answer (
+ull for a right operation step, which is not graded). */
+  bucket: string | null;
 }
 
 /**
@@ -427,6 +477,95 @@ export function dueAtSessionStart(
   };
 }
 
+/** The English catalog the stories are read from (`scripts/simulate.mjs` passes its own). */
+export function loadCatalog(): Readonly<Record<string, unknown>> {
+  return JSON.parse(
+    readFileSync(join(root, 'content', 'catalogs', 'en.content.json'), 'utf8'),
+  ) as Record<string, unknown>;
+}
+
+/** The length of a story's English text in words, each placeholder counting as one. */
+export function storyWords(textKey: string, catalog: Readonly<Record<string, unknown>>): number {
+  const entry = catalog[textKey];
+  if (entry === undefined) return 0;
+  const text = typeof entry === 'string' ? entry : JSON.stringify(entry);
+  return text
+    .replace(/\{[^}]+\}/g, 'X')
+    .split(/\s+/)
+    .filter((word) => word.length > 0).length;
+}
+
+/** A day report's market fields when the session ends (after shopping). */
+export function marketAtEnd(
+  view: Pick<GameView, 'coins' | 'market'>,
+): Pick<DayReport, 'coinsAtEnd' | 'forSale' | 'toSaveFor'> {
+  const forSale = view.market.items.filter((item) => item.available && !item.owned);
+  return {
+    coinsAtEnd: view.coins,
+    forSale: forSale.length,
+    toSaveFor: forSale.filter((item) => item.price > view.coins).length,
+  };
+}
+
+/**
+ * Add a day's events to its report: answers, coins by reason, stickers, eggs, hatches and growth,
+ * lit panes, purchases and gifts, levels and bosses, quests, the goal and the gift.
+ */
+export function tallyEvents(
+  report: SimulationReport,
+  entry: DayReport,
+  events: readonly { type: string; data: unknown }[],
+): void {
+  const index = entry.index;
+  for (const e of events) {
+    if (e.type === 'answer.incorrect') entry.answers += 1;
+    else if (e.type === 'answer.correct') {
+      entry.answers += 1;
+      entry.correct += 1;
+      if (event<{ bucket: string }>(e.data).bucket === 'fast') entry.fast += 1;
+    } else if (e.type === 'coins.earned') {
+      const { amount, reason } = event<{ amount: number; reason: string }>(e.data);
+      entry.coins += amount;
+      entry.coinsBy[reason] = (entry.coinsBy[reason] ?? 0) + amount;
+    } else if (e.type === 'sticker.earned') {
+      entry.stickers.push(event<{ sticker: string }>(e.data).sticker);
+    } else if (e.type === 'egg.received') {
+      const dragon = event<{ dragon: string }>(e.data).dragon;
+      entry.eggs.push(dragon);
+      report.eggDays[dragon] ??= index;
+    } else if (e.type === 'pane.lit') {
+      entry.panes += 1;
+    } else if (e.type === 'item.purchased') {
+      entry.bought.push(event<{ item: string }>(e.data).item);
+    } else if (e.type === 'dragon.hatched') {
+      const dragon = event<{ dragon: string }>(e.data).dragon;
+      entry.hatched.push(dragon);
+      (report.stages[dragon] ??= {})['hatchling'] ??= index;
+    } else if (e.type === 'dragon.grew' || e.type === 'dragon.crowned') {
+      const { dragon, stage } = event<{ dragon: string; stage?: string }>(e.data);
+      const reached = stage ?? 'crowned';
+      entry.grew.push(`${dragon}:${reached}`);
+      (report.stages[dragon] ??= {})[reached] ??= index;
+    } else if (e.type === 'level.completed') {
+      const { level, firstTime } = event<{ level: string; firstTime: boolean }>(e.data);
+      if (firstTime) {
+        entry.levels.push(level);
+        report.levelDays[level] ??= index;
+      }
+    } else if (e.type === 'boss.defeated') {
+      const boss = event<{ boss: string }>(e.data).boss;
+      entry.bosses.push(boss);
+      report.bossDays[boss] ??= index;
+    } else if (e.type === 'finale.completed') report.finaleDay ??= index;
+    else if (e.type === 'quest.claimed') entry.quests += 1;
+    else if (e.type === 'daily.goal-reached') entry.goalReached = true;
+    else if (e.type === 'gift.opened') {
+      entry.giftOpened = true;
+      const { grant } = event<{ grant: { kind: string; item?: string } }>(e.data);
+      if (grant.kind === 'cosmetic' && grant.item !== undefined) entry.gifted.push(grant.item);
+    }
+  }
+}
 /** Simulate `days` days of a learner, from `FIRST_DAY`. */
 export async function simulate(
   learner: LearnerName,
@@ -435,8 +574,10 @@ export async function simulate(
 ): Promise<SimulationReport> {
   const seed = options.seed ?? 'simulation';
   const profile = LEARNERS[learner];
-  const child = new Learner(profile, seed);
+  const child = new Learner(profile, seed, options.reading ?? false);
+  const catalog = options.catalog ?? (options.reading ? loadCatalog() : {});
   let decision: { n: number; right: boolean; elapsedMs: number } | null = null;
+  let pending: Omit<AnswerRecord, 'bucket'> | null = null;
   let today = 0;
   const style: Style = {
     right: (n: number, view: ProblemRoundView) => {
@@ -444,25 +585,30 @@ export async function simulate(
       const expected = oracle(problem.problem, problem.step);
       const digits = expected.kind === 'number' ? String(expected.value).length : 2;
       const recall = child.recall(knowledgeKey(problem.item));
-      decision = { n, ...child.respond(view, digits) };
+      const words =
+        problem.problem.kind === 'word' ? storyWords(problem.problem.template, catalog) : 0;
+      decision = { n, ...child.respond(view, digits, words) };
       if (options.onAnswer) {
         const state = player.state();
         const level = view.source.kind === 'level' ? view.source.level : null;
-        options.onAnswer({
+        const protecting = lowSuccess(state, pack.data);
+        pending = {
           day: today,
           activity: view.activity,
           level,
           replay: level !== null && (state.levels[level]?.stars ?? 0) > 0,
           item: problem.item,
           step: problem.step,
-          tier: itemTier(state, problem.item, state.day ?? 0),
+          tier: mixTier(state, problem.item, state.day ?? 0, protecting),
+          protected: protecting,
           box: state.items[problem.item]?.box ?? null,
           reask: problem.reask,
           input: problem.input,
+          storyWords: words,
           recall,
           right: decision.right,
           elapsedMs: decision.elapsedMs,
-        });
+        };
       }
       return decision.right;
     },
@@ -471,6 +617,10 @@ export async function simulate(
   };
   const pack = options.pack ?? loadPack();
   const player = new SimPlayer(style, `${seed}:${learner}`, undefined, pack);
+  player.onGraded = (bucket) => {
+    if (pending !== null) options.onAnswer?.({ ...pending, bucket });
+    pending = null;
+  };
   const report: SimulationReport = {
     learner,
     seed,
@@ -479,6 +629,14 @@ export async function simulate(
       revision: pack.revision,
       levels: pack.data.levels.map((level) => level.id),
       bosses: pack.data.bosses.map((boss) => boss.id),
+      regions: pack.data.regions.map((region) => {
+        const levels = pack.data.levels.filter((level) => level.region === region.id);
+        return {
+          id: region.id,
+          lessons: levels.filter((level) => level.boss === null).map((level) => level.id),
+          boss: levels.find((level) => level.boss !== null)?.boss ?? null,
+        };
+      }),
       tableDragons: pack.data.dragons.filter((d) => d.kind === 'table').map((d) => d.id),
       cosmetics: pack.data.cosmetics.length,
     },
@@ -519,51 +677,9 @@ export async function simulate(
     await playSession(player, options.answersPerDay ?? profile.answersPerDay);
     entry.answerMs = child.elapsedMs - elapsedBefore;
     entry.cosmeticsOwned = player.state().cosmetics.owned.length;
+    Object.assign(entry, marketAtEnd(player.view()));
     entry.commits = player.hashes.length - fromCommit;
-    for (const e of player.events.slice(fromEvent)) {
-      if (e.type === 'answer.incorrect') entry.answers += 1;
-      else if (e.type === 'answer.correct') {
-        entry.answers += 1;
-        entry.correct += 1;
-        if (event<{ bucket: string }>(e.data).bucket === 'fast') entry.fast += 1;
-      } else if (e.type === 'coins.earned') {
-        const { amount, reason } = event<{ amount: number; reason: string }>(e.data);
-        entry.coins += amount;
-        entry.coinsBy[reason] = (entry.coinsBy[reason] ?? 0) + amount;
-      } else if (e.type === 'sticker.earned') {
-        entry.stickers.push(event<{ sticker: string }>(e.data).sticker);
-      } else if (e.type === 'egg.received') {
-        const dragon = event<{ dragon: string }>(e.data).dragon;
-        entry.eggs.push(dragon);
-        report.eggDays[dragon] ??= index;
-      } else if (e.type === 'pane.lit') {
-        entry.panes += 1;
-      } else if (e.type === 'item.purchased') {
-        entry.bought.push(event<{ item: string }>(e.data).item);
-      } else if (e.type === 'dragon.hatched') {
-        const dragon = event<{ dragon: string }>(e.data).dragon;
-        entry.hatched.push(dragon);
-        (report.stages[dragon] ??= {})['hatchling'] ??= index;
-      } else if (e.type === 'dragon.grew' || e.type === 'dragon.crowned') {
-        const { dragon, stage } = event<{ dragon: string; stage?: string }>(e.data);
-        const reached = stage ?? 'crowned';
-        entry.grew.push(`${dragon}:${reached}`);
-        (report.stages[dragon] ??= {})[reached] ??= index;
-      } else if (e.type === 'level.completed') {
-        const { level, firstTime } = event<{ level: string; firstTime: boolean }>(e.data);
-        if (firstTime) {
-          entry.levels.push(level);
-          report.levelDays[level] ??= index;
-        }
-      } else if (e.type === 'boss.defeated') {
-        const boss = event<{ boss: string }>(e.data).boss;
-        entry.bosses.push(boss);
-        report.bossDays[boss] ??= index;
-      } else if (e.type === 'finale.completed') report.finaleDay ??= index;
-      else if (e.type === 'quest.claimed') entry.quests += 1;
-      else if (e.type === 'daily.goal-reached') entry.goalReached = true;
-      else if (e.type === 'gift.opened') entry.giftOpened = true;
-    }
+    tallyEvents(report, entry, player.events.slice(fromEvent));
     options.onDay?.(entry);
   }
   const view: GameView = player.view();
