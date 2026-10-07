@@ -26,18 +26,17 @@ const OUT = join(ROOT, 'out', 'models-gallery');
 const KINDS = ['place-shift', 'tens-groups', 'split-mul', 'split-div', 'order-steps'];
 
 /**
- * The model slot at 100 % text: its width and the height free for a model. Normal rounds were
- * measured in the real round with a hatched dragon, the worst and by Giant's Peaks the usual case
- * (main 53a2e08). Boss rounds are S3's measurements of PR D, where the dragon and the boss stand side
- * by side: the cast column's width, and the height left in the Seven-Headed Dragon's round (the
- * tightest boss), capped at 260 px at 1366 x 657 as S3 asked.
+ * The model slot at 100 % text in S3's round layout (PR D, measured in the real round with a
+ * hatched dragon): the slot's width, which is the round's left column, and the height free for a
+ * picture. A boss round's height is the Seven-Headed Dragon's, the tightest boss (its heads line
+ * takes room), capped at 260 px at 1366 x 657 as S3 asked.
  */
 const BUDGET = [
-  { viewport: [1024, 768], normal: [244, 367], boss: [293, 355] },
-  { viewport: [1180, 820], normal: [282, 373], boss: [339, 392] },
-  { viewport: [1280, 800], normal: [306, 353], boss: [370, 378] },
-  { viewport: [1366, 657], normal: [329, 259], boss: [400, 260] },
-  { viewport: [1536, 730], normal: [374, 307], boss: [451, 328] },
+  { viewport: [1024, 768], normal: [246, 419], boss: [293, 355] },
+  { viewport: [1180, 820], normal: [284, 453], boss: [339, 392] },
+  { viewport: [1280, 800], normal: [311, 440], boss: [370, 378] },
+  { viewport: [1366, 657], normal: [335, 347], boss: [400, 260] },
+  { viewport: [1536, 730], normal: [379, 394], boss: [451, 328] },
 ];
 
 const ENTRY = `
