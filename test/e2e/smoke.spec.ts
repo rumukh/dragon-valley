@@ -6,6 +6,25 @@
  */
 import { expect, test } from './support/fixtures';
 import type { Page } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/** The content pack's revision, which the build packs: it moves with every content bump. */
+const CONTENT_REVISION = (
+  JSON.parse(
+    readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        '..',
+        '..',
+        'content',
+        'dragon-valley.content.json',
+      ),
+      'utf8',
+    ),
+  ) as { revision: string }
+).revision;
 
 interface Observations {
   consoleErrors: string[];
@@ -53,7 +72,11 @@ test('the game boots at the Pages base with no errors and only same-origin reque
   // The shell opens on its title screen once the content pack was loaded and validated in this
   // browser (the rules run when a keeper plays; test/e2e/profiles.spec.ts covers that).
   await expect(page.getByTestId('boot-status')).toHaveAttribute('data-screen', 'title');
-  await expect(page.getByTestId('boot-status')).toHaveAttribute('data-content-revision', '1.3.0');
+  expect(CONTENT_REVISION, 'the pack names its revision').toMatch(/^\d+\.\d+\.\d+$/);
+  await expect(page.getByTestId('boot-status')).toHaveAttribute(
+    'data-content-revision',
+    CONTENT_REVISION,
+  );
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Dragon Valley');
   await expect(page.locator('#app')).not.toHaveAttribute('aria-busy', 'true');
   await page.waitForLoadState('networkidle');
