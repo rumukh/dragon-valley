@@ -88,8 +88,8 @@ Every check passes in every 84-day run. By day 84 the struggling child has 6-11 
 (none on 1.2.0), and 5-8 adults within a year (three seeds). The average child's 11th adult comes
 on day 39-70 over five seeds (median 56; 72 on 1.2.0). Over a year, weekly progress runs out for
 the slow child (21 of 53 weeks): a lit pane no longer goes dark after a miss to be lit again. The
-coordinator made weekly progress a 12-week target and set the slow child's market limit to 9
-sessions (§9).
+coordinator made weekly progress and the success band 12-week targets and set the slow child's
+market limit to 9 sessions (§9): every check passes in the year runs too.
 
 ## 2. The children
 
@@ -145,7 +145,7 @@ The checks are named; each label states what it measured.
 
 | Check              | Target                                                                               | Source                    |
 | ------------------ | ------------------------------------------------------------------------------------ | ------------------------- |
-| success band       | average: 75 % of sessions at 70-90 % success, median inside                          | testing.md §4             |
+| success band       | average, weeks 1-12: 75 % of sessions at 70-90 % success, median inside              | testing.md §4             |
 | struggling success | struggling: median success per session at least 60 % (acceptance), 70-90 % (stretch) | testing.md §4, after §5.1 |
 | tables mastered    | average: every times-table dragon adult within 12 weeks                              | brief; a school trimester |
 | growing up         | struggling: the first table youngling by day 118; in a year, at least 3 table adults | coordinator (1.3.0)       |
@@ -301,7 +301,8 @@ own; "dearer" those it cannot afford with its coins; level rewards are given and
   cosmetics in a later art batch would let the market last longer at the same pace.
 - Over a year the average child's success climbs above the band (session medians by quarter: 82,
   87, 92 and 95 %), so its band check fails on the year run (147 of 261 sessions): the band is a
-  12-week target, and a child who has mastered the tables answers right more often. The slow
+  12-week target, and a child who has mastered the tables answers right more often. (From content
+  1.3.0 the check judges the first 12 weeks and reports the whole run as measured, §9.) The slow
   child grows all 11 table dragons to adult by day 149, still without gold.
 - **The struggling child grows no dragon to adult in a year**: 50 window and 15 division panes
   silver at the end, success 61-65 % by quarter. It practises 140 answers a week on four days and
@@ -690,9 +691,12 @@ s2 and s3, which 1.3.0 reproduces exactly, give 8 adults from day 168 and 5 from
    on day 247 instead of 228. **Decision: accepted.** The slow child's limit is now 9 sessions:
    PR F's first tastes trade a little success for coverage.
 
-With these decisions every check passes in the year runs too, except the average child's success
-band, a 12-week target that a year run misses, as in 1.2.0 (§4.4): a child who has mastered the
-tables answers right more often (here 171 of 261 sessions in the band, median 88 %).
+The coordinator then scoped the average child's success band the same way: `success-band` judges
+the first 12 weeks and reports the whole run as measured, since a child who has mastered the
+tables answers right more often (§4.4). The year run's band reads 52 of 60 sessions in its first
+12 weeks (86 %, median 79 %, as in the 84-day run) and 171 of 261 over the whole year (65 %,
+median 88 %). With these decisions every check passes in every run, the year runs included: 195
+of 195 checks over the 15 validation runs.
 
 **Limits.** As §8: the model does not feel the motivation of a growing dragon, and its struggling
 child forgets fast. One seed for the year runs and for the slow and perfect children.

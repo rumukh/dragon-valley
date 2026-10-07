@@ -162,8 +162,13 @@ export interface CheckResult {
  * measured values and the reasons.
  */
 export const TARGETS = {
-  /** Success per session of the average child (testing.md §4: 70-90 %). */
-  success: { low: 70, high: 90, sessionsShare: 75 },
+  /**
+   * Success per session of the average child (testing.md §4: 70-90 %), in `sessionsShare` % of
+   * its sessions and at the median, over its first `weeks` weeks: a 12-week target. A longer run
+   * reports the whole run as measured (the coordinator's decision after content 1.3.0,
+   * balance-report.md §9): a child who has mastered the tables answers right more often.
+   */
+  success: { low: 70, high: 90, sessionsShare: 75, weeks: 12 },
   /**
    * The struggling child's median success per session: at least `floor` (acceptance), inside
    * the average child's band as a stretch. A struggling child progresses more slowly but keeps
@@ -290,9 +295,10 @@ export function completionDay(report: SimulationReport, level: string): number |
 }
 
 /** Success (whole percent) of every session with answers. */
-function successRates(report: SimulationReport): number[] {
+/** Success (percent) of each session with answers, within the run's first `days` days if given. */
+function successRates(report: SimulationReport, days = Infinity): number[] {
   return sessionsOf(report)
-    .filter((d) => d.answers > 0)
+    .filter((d) => d.answers > 0 && d.index < days)
     .map((d) => percent(d.correct, d.answers));
 }
 
@@ -347,14 +353,23 @@ export const CHECKS: readonly Check[] = [
     id: 'success-band',
     learners: ['average'],
     evaluate: (r) => {
-      const { low, high, sessionsShare } = TARGETS.success;
-      const rates = successRates(r);
-      const inside = rates.filter((rate) => rate >= low && rate <= high).length;
-      const median = spread(rates).median;
-      const share = percent(inside, rates.length);
+      const { low, high, sessionsShare, weeks } = TARGETS.success;
+      const band = (rates: readonly number[]) => {
+        const inside = rates.filter((rate) => rate >= low && rate <= high).length;
+        const { median } = spread(rates);
+        return { inside, sessions: rates.length, share: percent(inside, rates.length), median };
+      };
+      const judged = band(successRates(r, weeks * 7));
+      const all = band(successRates(r));
+      const longer = all.sessions > judged.sessions;
       return {
-        ok: share >= sessionsShare && median >= low && median <= high,
-        name: `success per session within ${low}-${high} % in ${inside} of ${rates.length} sessions (${share} %, target ${sessionsShare} %), median ${median} %`,
+        ok: judged.share >= sessionsShare && judged.median >= low && judged.median <= high,
+        name:
+          `success per session within ${low}-${high} % in ${judged.inside} of ${judged.sessions} sessions` +
+          `${longer ? ` of the first ${weeks} weeks` : ''} (${judged.share} %, target ${sessionsShare} %), median ${judged.median} %` +
+          (longer
+            ? ` (the whole run, as measured: ${all.inside} of ${all.sessions} sessions, ${all.share} %, median ${all.median} %)`
+            : ''),
       };
     },
   },
