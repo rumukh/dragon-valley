@@ -224,6 +224,25 @@
   }
 }
 
+/* On a landscape window the editor's card widens and the eight pictures stand in one row, so the
+   name, the pictures and "Start my adventure" fit without scrolling. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-editor__card {
+    width: min(100%, 54em);
+  }
+
+  .dv-avatar-grid {
+    grid-template-columns: repeat(8, minmax(0, 5.4em));
+    gap: 0.5em;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 860px) {
+  .dv-editor__card {
+    gap: 0.6em;
+  }
+}
+
 .dv-avatar-choice {
   position: relative;
   display: grid;
