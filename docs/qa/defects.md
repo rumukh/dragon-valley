@@ -155,6 +155,18 @@ history: `git log -p -- docs/qa/defects.md`.
 | DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                        | #17      | `persistence.spec.ts` › "a finished round is kept…"                                      |
 | DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)       | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                      |
 
+### The coordinator's Region 1 playtest (the deployed `5848964`)
+
+Found by hand and fixed before the suite pinned them; `playtest.spec.ts` now holds each one on
+every engine (measured on Edge, Chromium, Firefox and WebKit before it was merged):
+
+| Finding                                                                                                                          | Fixed by | Regression check (`playtest.spec.ts`)                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Riddle Scrolls' sign step showed number tiles under "Which sign do we need?" and marked the right number a miss (Sunny Meadow 6) | #14, #17 | "Sunny Meadow 6: …": every story asks its sign on sign tiles only (`+ − · :`), then its number; both answers praised                                                                      |
+| The hub, the results and the Egg Grid needed page scrolling at 1180 × 820 and 1024 × 768                                         | #17      | "on a tablet …": the hub, the Egg Grid, a round, each hatch and the results at both sizes (with `profiles.spec.ts`, which plays at 1024 × 768)                                            |
+| The hatched dragon was small among the results' words                                                                            | #17      | "on a tablet …": at least 200 px each way, wholly on screen, no word on it (Bubbles measured 365 × 400 px at 1180 × 820, 318 × 348 px at 1024 × 768)                                      |
+| A change of screen showed an empty sky for a moment (the new screen faded in from nothing)                                       | #17      | "a change of screen …": a journey of 24 steps through every kind of screen, never blank for more than 300 ms (none blank at all), Chromium with a 4× slower processor; also a whole level |
+
 ## Observations for design review (not defects)
 
 - A new keeper's placement results also award "Dressed Up" (criterion: owns one cosmetic) before

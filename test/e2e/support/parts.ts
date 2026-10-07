@@ -25,6 +25,8 @@ export const NAMED_PARTS = {
   days: ['daily', 'collections'],
   // The grown-ups' remaining controls, and the pause when the page is hidden.
   controls: ['grown-ups', 'visibility'],
+  // The coordinator's playtest findings on the Region 1 slice, as regression checks.
+  playtest: ['playtest'],
 } as const satisfies Record<string, readonly string[]>;
 
 type NamedPart = keyof typeof NAMED_PARTS;
