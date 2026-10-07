@@ -1033,6 +1033,21 @@
   font-size: min(2rem, 7.5vw);
 }
 
+/* A short landscape window: a problem's numbers follow its height too. */
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 860px) {
+  .dv-problem {
+    font-size: min(3rem, 11vw, 9vh);
+  }
+
+  .dv-problem[data-size='m'] {
+    font-size: min(2.4rem, 9vw, 7.5vh);
+  }
+
+  .dv-problem[data-size='s'] {
+    font-size: min(2rem, 7.5vw, 6.2vh);
+  }
+}
+
 .dv-problem__sign {
   color: var(--dv-primary-deep);
 }
