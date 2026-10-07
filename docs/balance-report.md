@@ -6,12 +6,13 @@ report records what they measured, what the balance block can fix, and what it c
 - **Code**: the learner model `test/sim/learners.ts`, the driver `test/sim/driver.ts` and the named
   checks `test/sim/report.ts`. [testing.md §4](testing.md#4-learner-simulation-bots) explains how
   they fit together.
-- **Content**: 1.0.0, nine regions, 59 levels and 15 dragons (S2b's v1 pack). The runs are 84 days
-  from Monday 2026-10-05 with seed `simulation`.
+- **Content**: 1.1.0, nine regions, 59 levels and 15 dragons (S2b's v1 pack, with the order of
+  operations fix of #22). The runs are 84 days from Monday 2026-10-05 with seed `simulation`.
 - **Reproduce**:
   - `node scripts/simulate.mjs --days 84 --check` runs the content's balance.
-  - Add `--balance file.json` to merge a partial balance block first (§6 lists the one proposed).
-  - Each run takes about 16 minutes on four processes, 4,000-6,500 commits per child.
+  - Add `--balance file.json` to merge a partial balance block first (§6 lists the one proposed),
+    and `--answers` to write every answer with its tier, box and the child's recall (§5.1).
+  - Each run takes about 4 minutes on four processes, 4,000-6,500 commits per child.
 
 ## 1. Summary
 
@@ -39,7 +40,8 @@ needs quick answers. Its due facts fall from 132 to 28.
 
 **What balance cannot fix** (§5, for S2b and the design):
 
-- the struggling child's success (median 37 % per session);
+- the struggling child's success (median 37 % per session): a selection defect S2b is fixing,
+  and the pace of new material;
 - facts no dragon owns, which are never reviewed;
 - rule facts (n · 0, n · 1, 0 : n, n : 1), which block dragons from adult and crowned;
 - coins earned during the valley: two to four times the design's 50-80 per session;
@@ -111,7 +113,7 @@ The checks are named; each label states what it measured.
 Spreads are min / median / max over the sessions played. "Due" counts known facts whose review
 day had come when a session began, over the last 10 sessions.
 
-### 4.1 Current balance (content 1.0.0)
+### 4.1 Current balance (content 1.1.0)
 
 | Child      | Sessions | Success | Success per session | Quick | Valley done | Table dragons adult | Crowned | Window dim / bronze / silver / gold | Division panel   | Due             | Longest overdue |
 | ---------- | -------- | ------- | ------------------- | ----- | ----------- | ------------------- | ------- | ----------------------------------- | ---------------- | --------------- | --------------- |
@@ -168,19 +170,33 @@ Changes in the checks:
 These go to S2b (rules and content) and to the design.
 
 1. **The struggling child is flooded.**
-   - The Daily Adventure serves a new level whenever nothing else is due, and a level completes
-     with one star at any accuracy. The struggling child finishes the valley by day 36-38.
-   - Each session then starts with about 170-187 facts due. The mix serves the most overdue fact
-     first, which this child has mostly forgotten.
-   - Success per session falls to 10-40 % for the last six weeks, and the daily goal is reached
-     once or twice in 48 sessions.
-   - No balance candidate moved its median above 40 %. The candidates were longer intervals, a
-     wider "ok", and both.
-   - Possible fixes, for the design to decide:
-     - hold the next new level while many facts are due or today's success is low;
-     - serve likely-known facts (higher box, recently right) before the most overdue ones when
-       success is low;
-     - smaller snack rounds.
+   - The Daily Adventure serves new levels one after another, and a level completes with one star
+     at any accuracy. The struggling child finishes the valley by day 36-38, nearly three new
+     levels a session.
+   - Its answer records (`--answers`, proposed balance, 1,972 answers) show where the misses come
+     from:
+     - 66 % of its answers are due reviews, right 37 % of the time. Three quarters of those are
+       facts in box 1 (missed, or right only once), due again the next day: right 32 %.
+     - 63 % are snacks, right 35 %. Every dragon is hungry every day, and a snack serves the most
+       overdue facts first.
+     - 55 % are facts it recalls below 25, where it can only guess.
+     - Success falls as the material piles up: 67 % in week 1, 46-52 % in weeks 3-5 and 27-36 %
+       from week 6. Sessions then start with 170-187 facts due, and the daily goal is reached
+       once or twice in 48 sessions.
+   - No balance candidate moved its median above 40 %: longer intervals, a wider "ok", or both.
+   - The cause in the rules (found by S2b from these numbers): the mix counts every due fact as a
+     likely success, even one missed last time. When success is low the learning share shrinks
+     to 10 %, so about 90 % of draws go to the most overdue misses. Snacks have no success control
+     at all. S2b is fixing it; the balance PR re-measures after the fix.
+   - Two prototypes, measured but not merged (proposed balance; median success per session):
+     - Due facts in box 0-1 drawn as learning items, in mixed rounds and snacks: struggling 37 %
+       (over all its answers 39 → 43 %); slow 77 → 80 %. It also slowed the perfect child's dragons
+       (adult 10 → 7), because box 1 also holds facts just answered right for the first time.
+     - The same, plus pacing (after the day's first level, another new level only while today's
+       success is at least 70 %): struggling 46 %, valley done on day 81 instead of 38. The average
+       and slow children stay inside their targets.
+   - Neither reaches the 70-90 % band: at 140 answers a week this model cannot hold the year's
+     ~230 facts. Slower new material for such a child is a design decision.
 2. **Rule facts block growth.**
    - n · 0, n · 1, 0 : n and n : 1 are served at most once per round outside the 0 and 1 levels.
      Yet they are 4 of the 21 facts of every table dragon and most of Mirror's set.
@@ -245,8 +261,10 @@ override:
 - `daily.goalAnswers`: the struggling child reaches 30 right answers once in 48 sessions. That is
   better solved by §5.1 than by lowering the goal for everyone; parents can lower it.
 
-**Not decided by this report.** Widening "ok" relaxes the design's "correct but slow stays" line
-(§6.2): answers of 6-9 s now move boxes up to silver. The coordinator decides whether to accept it.
+**Decided.** Widening "ok" relaxes the design's "correct but slow stays" line (§6.2): answers of
+6-9 s now move boxes up to silver. The coordinator approved it: spaced retrieval should promote a
+right answer, and fluency is rewarded separately by gold, crowned dragons and three stars, which
+stay tied to `fastMs`. The balance PR rewords design §6.2 accordingly.
 
 ## 7. Limits
 
@@ -259,6 +277,6 @@ override:
     average child.
 - **One seed.** Every run uses the seed `simulation`. Single checks near a threshold can move with
   the path (hatch pace in §4.2), and the band checks have some margin.
-- **Cost.** A commit costs 50-200 ms with the v1 pack (rumukh/aegis-engine#7), so the 12-week runs
-  stay outside the gate. A scheduled CI job running `node scripts/simulate.mjs --check` would
-  catch balance and content regressions.
+- **Cost.** A simulated child costs about 30 ms a commit with the v1 pack and the Aegis SDK of #20
+  (50-200 ms before it), so the 12-week runs stay outside the gate. A scheduled CI job running
+  `node scripts/simulate.mjs --check` would catch balance and content regressions.
