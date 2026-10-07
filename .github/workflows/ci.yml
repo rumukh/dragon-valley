@@ -87,11 +87,16 @@ jobs:
               workers: 2,
             }
           - { engine: firefox, label: walks+rest, part: 'walks,rest', workers: 2 }
-          - { engine: firefox, label: rounds+controls, part: 'rounds,controls', workers: 2 }
           - {
               engine: firefox,
-              label: regions+valley+activities+days+playtest,
-              part: 'regions,valley,activities,days,playtest',
+              label: rounds+controls+playtest,
+              part: 'rounds,controls,playtest',
+              workers: 2,
+            }
+          - {
+              engine: firefox,
+              label: regions+valley+activities+days,
+              part: 'regions,valley,activities,days',
               workers: 2,
             }
           - { engine: webkit, label: walks, part: walks, workers: 3 }

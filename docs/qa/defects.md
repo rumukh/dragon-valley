@@ -22,6 +22,7 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 | DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys                |
 | DV-QA-16 | minor    | S3    | Two announcements within 40 ms: only the second is heard (intermittent)               |
 | DV-QA-17 | major    | S3    | Memory Match's term cards do not show which number of the example is meant            |
+| DV-QA-18 | major    | S3    | A missed × 0 fact is re-asked and taught with "Look first!" but has no picture        |
 
 ### DV-QA-05 (minor, S3; WebKit): the grown-ups' Settings still scroll sideways on a phone
 
@@ -131,6 +132,31 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
   problem line does, and name it in the card's label.
 - **Evidence**: `test/e2e/activities.spec.ts` › "Memory Match term cards…": the first example
   turned over must mark one number and say which.
+
+### DV-QA-18 (major, S3): a missed × 0 fact is sent to "look at the picture", but it has none
+
+- **Repro** (every engine, at `568ee65` after #41): a new keeper plays Sunny Meadow, whose Feeding
+  Times serve × 0 facts from the first level on. Miss one (say `4 · 0 = ?`), answer the next two,
+  and it comes back with "Let's try this one again. Look first!". Miss it again: the next time it
+  comes (Sunny Meadow 3 serves Times 0, 1 and 10), it is taught with "Look at the picture first.
+  Then answer!".
+- **Expected**: the child who missed a fact is shown something to look at, as for every fact
+  with a picture (its array or its groups, drawn unsolved), or else is not told to look.
+- **Actual**: no picture either time; only the note and the problem. `modelFor`
+  (`src/app/math/model.ts`) has no picture for zero groups or a zero total (`productModel` needs
+  both factors at least 1; `countable` a total of at least 1), so `0 · n`, `n · 0`, `0 : n` and a
+  missing factor with product 0 have none, and Show me is (rightly) not offered for them. But the
+  notes come from the rules' flags alone (`problemNote`, `pictureFirst` in
+  `src/app/game/view.ts`) and do not ask whether a picture exists. Major: it is the moment "teach,
+  then ask" is for, × 0 is the classic mistake (`2 · 0 = 2`), and Sunny Meadow serves these facts
+  from its first level.
+- **Likely fix** (S3, with S2b or S4 for words or art): for a fact without a picture, say it
+  without "look" ("Let's try this one again!"), or show the rule instead (a card such as "Any
+  number times 0 is 0.", or a picture of empty baskets); then the teach note can stay as it is.
+- **Evidence**: `test/e2e/teach.spec.ts` › "a × 0 fact asked again…" and "a × 0 fact taught…" (a
+  game the rules played to the moment, `missedFactBackup`); the job summary records what was said
+  (`DV-QA-18 evidence`: `4 · 0 = ? asked again: "Let's try this one again. Look first!"; a
+picture: none`, `0 · 2 = ? taught: "Look at the picture first. Then answer!"; a picture: none`).
 
 ## Fixed
 
