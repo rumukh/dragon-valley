@@ -57,7 +57,7 @@ test('a new family goes from the title through the prologue to their first egg a
   const line = page.getByTestId('story-line');
   await expect(line).toHaveText('Long ago, the Seven-Headed Dragon caught a cold.');
   await page.getByTestId('story-next').click();
-  await expect(line).toHaveText('Achoo! The Magic Window shattered into sparkly panes.');
+  await expect(line).toHaveText('A-choo! The Magic Window broke into shiny pieces.');
   await page.getByTestId('story-skip').click();
   await expect(line).toHaveText('Choose your first egg. Which one feels warm?');
   await expect(page.getByTestId('story-skip')).toHaveCount(0);
