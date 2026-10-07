@@ -28,7 +28,7 @@ import type {
 } from '../contract';
 import { canGenerate, choicesFor, keypadPossible, problemFor } from '../learning/generate';
 import { creditItem } from '../learning/credit';
-import { digits, isDue, responseBucket } from '../learning/items';
+import { digits, isDue, readingAllowanceMs, responseBucket } from '../learning/items';
 import {
   blockedRecent,
   isRuleFact,
@@ -372,6 +372,20 @@ export function serveNext(ctx: Ctx, index: Index): void {
   };
 }
 
+/**
+ * The reading time a problem's answer is allowed: a word problem's (`readingAllowanceMs`, from
+ * its template's `words`), answered after its operation step when it has one; else none.
+ */
+export function storyAllowance(data: Data, problem: Problem): number {
+  if (problem.kind !== 'word') return 0;
+  const template = data.wordTemplates.find((t) => t.textKey === problem.template);
+  return readingAllowanceMs(
+    template?.words,
+    data.balance.response.word,
+    problem.operation !== null,
+  );
+}
+
 /** Grade the answer to the current problem (the `answer`/`placementAnswer` command's start). */
 export function gradeAnswer(ctx: Ctx, value: AnswerValue, elapsedMs: number): void {
   const round = activeProblemRound(ctx)!;
@@ -399,7 +413,14 @@ export function gradeAnswer(ctx: Ctx, value: AnswerValue, elapsedMs: number): vo
     return;
   }
   const answerDigits = expected.kind === 'number' ? digits(expected.value) : 1;
-  const bucket = responseBucket(correct, elapsedMs, current.input, answerDigits, data.balance);
+  const bucket = responseBucket(
+    correct,
+    elapsedMs,
+    current.input,
+    answerDigits,
+    data.balance,
+    storyAllowance(data, current.problem),
+  );
   creditItem(ctx, current.item, bucket);
   round.answered += 1;
   let coins = 0;
