@@ -16,6 +16,8 @@
  * stickers, eggs, hatches and growth, lit panes, new levels and bosses, quests, the goal, the gift
  * and the market) and how overdue the oldest due fact was when the session began.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { ContentPack } from '@aegis/runtime';
 import { dayNumber, isoDay } from '../../src/rules/contract';
 import type {
@@ -28,7 +30,7 @@ import type {
 } from '../../src/rules/contract';
 import { lowSuccess, mixTier } from '../../src/rules/learning/selection';
 import type { ItemTier } from '../../src/rules/learning/selection';
-import { Player, loadPack, oracle } from '../traces/support';
+import { Player, loadPack, oracle, root } from '../traces/support';
 import type { Style } from '../traces/support';
 import { LEARNERS, Learner, knowledgeKey } from './learners';
 import type { LearnerName } from './learners';
@@ -139,6 +141,8 @@ export interface SimulationReport {
 /** The trace harness with plain dispatch steps and a mistake for every kind of answer. */
 class SimPlayer extends Player {
   private simSteps = 0;
+  /** Called after each graded answer with the bucket the rules gave it (null: a step on the way). */
+  onGraded?: (bucket: string | null) => void;
 
   override async act(action: GameAction): Promise<boolean> {
     // A simulated month is long: let the test runner's messages through now and then.
@@ -161,7 +165,23 @@ class SimPlayer extends Player {
     const expected = oracle(round.problem.problem, round.problem.step);
     const value = right ? expected : mistake(round, expected);
     const type = round.activity === 'placement' ? 'placementAnswer' : 'answer';
-    return this.act({ type, value, elapsedMs: this.style.elapsedMs(this.answered, round) });
+    const from = this.events.length;
+    const done = await this.act({
+      type,
+      value,
+      elapsedMs: this.style.elapsedMs(this.answered, round),
+    });
+    const graded = this.events
+      .slice(from)
+      .find((e) => e.type === 'answer.correct' || e.type === 'answer.incorrect');
+    const bucket =
+      graded === undefined
+        ? null
+        : graded.type === 'answer.incorrect'
+          ? 'miss'
+          : event<{ bucket: string }>(graded.data).bucket;
+    this.onGraded?.(bucket);
+    return done;
   }
 }
 
@@ -388,6 +408,10 @@ export interface SimulateOptions {
   onDay?: (day: DayReport) => void;
   /** Called for every problem the learner answers (analysis: `simulate.mjs --answers`). */
   onAnswer?: (answer: AnswerRecord) => void;
+  /** Model the time a child takes to read a story (`simulate.mjs --reading`; off by default). */
+  reading?: boolean;
+  /** The English catalog the stories come from (default: content/catalogs/en.content.json). */
+  catalog?: Readonly<Record<string, unknown>>;
 }
 
 /** One answer of the learner, with what the rules and the learner knew before it. */
@@ -412,10 +436,15 @@ export interface AnswerRecord {
   box: number | null;
   reask: boolean;
   input: 'choice' | 'keypad';
-  /** How well the learner recalled the fact (0-100), and the answer. */
+  /** A story's length in words (0 for other problems). */
+  storyWords: number;
+  /** How well the learner recalled the fact (0-100), the answer and its time. */
   recall: number;
   right: boolean;
   elapsedMs: number;
+  /** The rules' bucket for the answer (
+ull for a right operation step, which is not graded). */
+  bucket: string | null;
 }
 
 /**
@@ -448,7 +477,25 @@ export function dueAtSessionStart(
   };
 }
 
-/** What a day report records about the market when the session ends (after shopping). */
+/** The English catalog the stories are read from (`scripts/simulate.mjs` passes its own). */
+export function loadCatalog(): Readonly<Record<string, unknown>> {
+  return JSON.parse(
+    readFileSync(join(root, 'content', 'catalogs', 'en.content.json'), 'utf8'),
+  ) as Record<string, unknown>;
+}
+
+/** The length of a story's English text in words, each placeholder counting as one. */
+export function storyWords(textKey: string, catalog: Readonly<Record<string, unknown>>): number {
+  const entry = catalog[textKey];
+  if (entry === undefined) return 0;
+  const text = typeof entry === 'string' ? entry : JSON.stringify(entry);
+  return text
+    .replace(/\{[^}]+\}/g, 'X')
+    .split(/\s+/)
+    .filter((word) => word.length > 0).length;
+}
+
+/** A day report's market fields when the session ends (after shopping). */
 export function marketAtEnd(
   view: Pick<GameView, 'coins' | 'market'>,
 ): Pick<DayReport, 'coinsAtEnd' | 'forSale' | 'toSaveFor'> {
@@ -527,8 +574,10 @@ export async function simulate(
 ): Promise<SimulationReport> {
   const seed = options.seed ?? 'simulation';
   const profile = LEARNERS[learner];
-  const child = new Learner(profile, seed);
+  const child = new Learner(profile, seed, options.reading ?? false);
+  const catalog = options.catalog ?? (options.reading ? loadCatalog() : {});
   let decision: { n: number; right: boolean; elapsedMs: number } | null = null;
+  let pending: Omit<AnswerRecord, 'bucket'> | null = null;
   let today = 0;
   const style: Style = {
     right: (n: number, view: ProblemRoundView) => {
@@ -536,12 +585,14 @@ export async function simulate(
       const expected = oracle(problem.problem, problem.step);
       const digits = expected.kind === 'number' ? String(expected.value).length : 2;
       const recall = child.recall(knowledgeKey(problem.item));
-      decision = { n, ...child.respond(view, digits) };
+      const words =
+        problem.problem.kind === 'word' ? storyWords(problem.problem.template, catalog) : 0;
+      decision = { n, ...child.respond(view, digits, words) };
       if (options.onAnswer) {
         const state = player.state();
         const level = view.source.kind === 'level' ? view.source.level : null;
         const protecting = lowSuccess(state, pack.data);
-        options.onAnswer({
+        pending = {
           day: today,
           activity: view.activity,
           level,
@@ -553,10 +604,11 @@ export async function simulate(
           box: state.items[problem.item]?.box ?? null,
           reask: problem.reask,
           input: problem.input,
+          storyWords: words,
           recall,
           right: decision.right,
           elapsedMs: decision.elapsedMs,
-        });
+        };
       }
       return decision.right;
     },
@@ -565,6 +617,10 @@ export async function simulate(
   };
   const pack = options.pack ?? loadPack();
   const player = new SimPlayer(style, `${seed}:${learner}`, undefined, pack);
+  player.onGraded = (bucket) => {
+    if (pending !== null) options.onAnswer?.({ ...pending, bucket });
+    pending = null;
+  };
   const report: SimulationReport = {
     learner,
     seed,

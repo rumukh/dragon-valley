@@ -105,6 +105,11 @@ describe('summaries', () => {
     const text = markdown([summarise(r)], runChecks([r]), { days: 14, seed: 'test' });
     expect(text).toContain('| average | 14 |');
     expect(text).toContain('PASS average: success per session within 70-90 %');
+    const header = (reading?: boolean) =>
+      markdown([summarise(r)], runChecks([r]), { days: 14, seed: 'test', reading }).split('\n')[0];
+    expect(header(true)).toBe('# Learner simulation: 14 days, seed "test", reading modelled');
+    expect(header(false)).toBe('# Learner simulation: 14 days, seed "test", without reading');
+    expect(header(undefined)).toBe('# Learner simulation: 14 days, seed "test"');
   });
 });
 

@@ -41,6 +41,11 @@ export interface LearnerProfile {
   clumsy: boolean;
   /** Answers a day: about a 15-minute session. */
   answersPerDay: number;
+  /**
+   * Reading a story in English (a second language for a Czech child), in milliseconds per word.
+   * Used only when a simulation models reading (`SimulateOptions.reading`).
+   */
+  readingMsPerWord: number;
   /** Plays on the n-th day of the simulation (0-based; day 0 is a Monday). */
   playsOn(dayIndex: number): boolean;
 }
@@ -105,6 +110,7 @@ export const LEARNERS: Readonly<Record<LearnerName, LearnerProfile>> = {
     perfect: true,
     clumsy: false,
     answersPerDay: 45,
+    readingMsPerWord: 300,
     playsOn: () => true,
   },
   /** Knows the 2nd-grade tables well, learns a fact in a few exposures, forgets slowly. */
@@ -127,6 +133,7 @@ export const LEARNERS: Readonly<Record<LearnerName, LearnerProfile>> = {
     perfect: false,
     clumsy: false,
     answersPerDay: 45,
+    readingMsPerWord: 600,
     playsOn: weekdays,
   },
   /**
@@ -152,6 +159,7 @@ export const LEARNERS: Readonly<Record<LearnerName, LearnerProfile>> = {
     perfect: false,
     clumsy: true,
     answersPerDay: 35,
+    readingMsPerWord: 900,
     playsOn: (day) => day % 7 !== 2 && weekdays(day),
   },
   /**
@@ -178,6 +186,7 @@ export const LEARNERS: Readonly<Record<LearnerName, LearnerProfile>> = {
     perfect: false,
     clumsy: false,
     answersPerDay: 35,
+    readingMsPerWord: 900,
     playsOn: weekdays,
   },
 };
@@ -200,6 +209,8 @@ export class Learner {
   constructor(
     readonly profile: LearnerProfile,
     seed: string,
+    /** Model reading a story's text (off by default, so earlier runs stay comparable). */
+    readonly reading = false,
   ) {
     this.random = createPrng(`learner:${profile.name}:${seed}`);
   }
@@ -227,13 +238,20 @@ export class Learner {
 
   /**
    * Answer the problem on screen: right or wrong, and how long it takes. `answerDigits` is the
-   * length of the answer the child types on the keypad.
+   * length of the answer the child types on the keypad; `storyWords` the length of a word
+   * problem's story.
    */
-  respond(view: ProblemRoundView, answerDigits = 2): { right: boolean; elapsedMs: number } {
+  respond(
+    view: ProblemRoundView,
+    answerDigits = 2,
+    storyWords = 0,
+  ): { right: boolean; elapsedMs: number } {
     const problem = view.problem!;
     const keypad = problem.input === 'keypad' && problem.step === 'answer';
     if (this.profile.perfect) {
-      const elapsedMs = keypad ? 1500 + answerDigits * this.profile.typingMs : 1500;
+      const elapsedMs =
+        (keypad ? 1500 + answerDigits * this.profile.typingMs : 1500) +
+        this.readingMs(view, storyWords, 1500);
       this.elapsedMs += elapsedMs;
       return { right: true, elapsedMs };
     }
@@ -246,9 +264,27 @@ export class Learner {
     this.practise(key, right);
     const pace = keypad ? this.profile.keypad : this.profile.choice;
     const think = recall >= 85 ? pace.fluent : recall >= 55 ? pace.steady : pace.unsure;
-    const elapsedMs = think + (keypad ? answerDigits * this.profile.typingMs : 0);
+    const elapsedMs =
+      think +
+      (keypad ? answerDigits * this.profile.typingMs : 0) +
+      this.readingMs(view, storyWords, pace.steady);
     this.elapsedMs += elapsedMs;
     return { right, elapsedMs };
+  }
+
+  /**
+   * Time spent reading a story when the simulation models reading: the whole story before the
+   * operation step (or before the answer of a story without one, which also takes a second step
+   * of thinking, `secondStepMs`), and a quarter of it to find the numbers again before the answer
+   * that follows an operation step.
+   */
+  private readingMs(view: ProblemRoundView, storyWords: number, secondStepMs: number): number {
+    const problem = view.problem!;
+    if (!this.reading || problem.problem.kind !== 'word') return 0;
+    const story = storyWords * this.profile.readingMsPerWord;
+    if (problem.step === 'operation') return story;
+    if (problem.problem.operation === null) return story + secondStepMs;
+    return Math.floor(story / 4);
   }
 
   /** One practice of key, right or wrong (a wrong answer still shows the right one). */

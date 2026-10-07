@@ -109,7 +109,11 @@ A simulated day costs about a hundred commits, so the long runs live outside the
 `node scripts/simulate.mjs --days 84 --check` runs the four bots for 12 weeks in parallel
 processes, writes `out/simulation/report.md` and fails when a check fails (`--balance file.json`
 simulates a changed balance block; `--answers` also writes every answer with its item, its tier
-and Leitner box before the answer and the bot's recall, for analyses like balance-report.md §5).
+and Leitner box before the answer, the bot's recall and the bucket the rules gave it, for analyses
+like balance-report.md §5). Since 1.2.0 the bots take time to read a story's English text (600 ms
+a word for the average bot, 900 for the slow and struggling bots, 300 for the perfect one: the
+whole story before its first step, a quarter of it again before the answer that follows an
+operation step); `--no-reading` reproduces the earlier runs without it.
 The gate runs only the bots' model tests, the checks against synthetic reports and a short first
 session (`test/sim/*.test.ts`). The measured results, the model's assumptions and the balance
 decisions are in [balance-report.md](balance-report.md).

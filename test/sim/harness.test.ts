@@ -13,10 +13,12 @@ import {
   KNOWN_BOX,
   dueAtSessionStart,
   emptyDay,
+  loadCatalog,
   marketAtEnd,
   mistake,
   overdueKnown,
   simulate,
+  storyWords,
   tallyEvents,
 } from './driver';
 import type { AnswerRecord, SimulationReport } from './driver';
@@ -105,10 +107,22 @@ describe('the learner simulation', () => {
       answers.get('perfect')!.filter((r) => r.protected).length,
       'a child who is always right is never protected',
     ).toBe(0);
+    const buckets = graded.map((r) => `${r.right ? 'right' : 'wrong'}:${r.bucket}`);
+    expect(
+      buckets.filter((b) => !/^right:(fast|ok|slow)$|^wrong:miss$/.test(b)),
+      "each graded answer carries the rules' bucket",
+    ).toEqual([]);
+    expect(graded.filter((r) => r.bucket === 'fast').length, 'quick answers').toBe(day.fast);
   });
 });
 
 describe('the market a day report records', () => {
+  it('counts a story in words, each placeholder as one', () => {
+    expect(storyWords('s', { s: '{name} buys {bags} bags of {things}.' })).toBe(6);
+    expect(storyWords('missing', {}), 'no text, no words').toBe(0);
+    expect(storyWords('word.two-step.bags', loadCatalog()), 'a shipped two-step story').toBe(20);
+  });
+
   it('tallies purchases, gifted cosmetics and gift coins from the day events', () => {
     const entry = emptyDay(3, '2026-10-08', true);
     const report = {

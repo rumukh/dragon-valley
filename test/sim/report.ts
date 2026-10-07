@@ -585,11 +585,11 @@ export function runChecks(reports: readonly SimulationReport[]): CheckResult[] {
 export function markdown(
   summaries: readonly Summary[],
   checks: readonly CheckResult[],
-  run: { days: number; seed: string; balance?: string },
+  run: { days: number; seed: string; balance?: string; reading?: boolean },
 ): string {
   const s3 = (s: Spread) => `${s.min} / ${s.median} / ${s.max}`;
   const lines = [
-    `# Learner simulation: ${run.days} days, seed "${run.seed}"${run.balance ? `, balance ${run.balance}` : ''}`,
+    `# Learner simulation: ${run.days} days, seed "${run.seed}"${run.balance ? `, balance ${run.balance}` : ''}${run.reading === undefined ? '' : run.reading ? ', reading modelled' : ', without reading'}`,
     '',
     'Spreads are min / median / max over the sessions played.',
     '',
