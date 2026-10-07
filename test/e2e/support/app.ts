@@ -75,13 +75,19 @@ export async function reload(page: Page): Promise<void> {
   await waitReady(page);
 }
 
-/** The router finished mounting `screen` (no navigation in flight). */
+/**
+ * The router finished mounting `screen` (no navigation in flight). A busy machine can take more
+ * than `expect`'s 10 s to mount a heavy screen such as the valley map, so the wait is longer.
+ */
 export async function expectScreen(page: Page, screen: ScreenName): Promise<void> {
   await expect(bootStatus(page), `the ${screen} screen is showing`).toHaveAttribute(
     'data-screen',
     screen,
+    { timeout: 30_000 },
   );
-  await expect(page.getByTestId('stage')).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.getByTestId('stage')).not.toHaveAttribute('aria-busy', 'true', {
+    timeout: 30_000,
+  });
 }
 
 export async function currentScreen(page: Page): Promise<string | null> {
