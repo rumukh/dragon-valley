@@ -339,6 +339,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
         testId: 'round-hint',
         onPress: async () => {
           await taken(active.commands.captureSend()({ type: 'hint' }));
+          // The hint is a commit of its own: the answer must be sent against the view after it,
+          // or the stale-view guard refuses it ("Let's try that again.").
+          send = active.commands.captureSend();
           hintSlot.replaceChildren();
           showModel(problem.problem);
           app.kit.announcer.announce(t('round.hintShown'));
