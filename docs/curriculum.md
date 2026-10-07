@@ -159,7 +159,7 @@ Shown in the parent area and used in the terminology levels. The UI uses the Eng
 | sharing (equal parts)    | dělení na stejné části  | 12 berries into 3 baskets                              |
 | grouping (equal amounts) | dělení po částech       | 12 berries, 3 in each basket                           |
 | N times as many          | N-krát více             | Eva has 4. Tom has 3 times as many: 12                 |
-| that is N times as many  | N-krát méně             | Tom has 12. That is 3 times as many as Eva has: 4      |
+| N times as many as       | N-krát méně             | Tom has 12. Tom has 3 times as many as Eva: 4          |
 | N more / N fewer         | o N více / o N méně     | Eva has 4, Tom has 3 more: 7                           |
 | brackets                 | závorky                 | `(2 + 3) · 4`                                          |
 | order of operations      | pořadí početních výkonů | `2 + 3 · 4 = 14`                                       |
@@ -169,7 +169,7 @@ Shown in the parent area and used in the terminology levels. The UI uses the Eng
 **Editorial ruling.** Child-facing English never says "N times fewer": it is how Czech _N-krát méně_
 is often translated for children, but it is awkward English. Both directions use "times as many":
 "Eva has 4 apples. Tom has 3 times as many. How many does Tom have?" (_N-krát více_) and "Tom has 12
-apples. That is 3 times as many as Eva has. How many does Eva have?" (_N-krát méně_), side by side
+apples. Tom has 3 times as many as Eva. How many apples does Eva have?" (_N-krát méně_), side by side
 with the additive "3 more" and "3 fewer" (_o N více / o N méně_). This glossary maps the English to
 the Czech terms for parents. The word families keep their IDs (`times-as-many`, `times-fewer`); see
 [learning.md](learning.md) for the templates.

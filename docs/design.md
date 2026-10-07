@@ -392,8 +392,8 @@ the child first picks the operation and then answers the number: the operation s
 the four operations, + − · : in that order, and the number step its own options (or the keypad). A
 wrong operation pick counts as a miss for the item and shows the right operation. Families: equal
 groups, sharing,
-grouping, N times as many in both directions ("Tom has 3 times as many" and "Tom has 12. That is 3
-times as many as Eva has", Czech _N-krát více_ and _N-krát méně_; the stories never say "N times
+grouping, N times as many in both directions ("Tom has 3 times as many" and "Tom has 12. Tom has 3
+times as many as Eva", Czech _N-krát více_ and _N-krát méně_; the stories never say "N times
 fewer", see [curriculum.md](curriculum.md) §6), N more, N fewer, leftovers, two-step. Additive
 families are included on purpose: "3 more" versus "3 times as many" is the classic confusion, so
 Sunny Meadow 6, Sharing Lake 5 and the bosses contrast them.

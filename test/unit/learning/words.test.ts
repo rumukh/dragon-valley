@@ -109,14 +109,21 @@ describe('word-problem English', () => {
     expect(long).toEqual([]);
   });
 
-  it('never says "times fewer"; "that is N times as many as" asks for the smaller number', () => {
+  it('never says "times fewer"; the larger owner has "N times as many as" the one asked about', () => {
     expect(
       data.wordTemplates.filter((t) => /times fewer/i.test(textOf(t))).map((t) => t.id),
     ).toEqual([]);
     for (const t of data.wordTemplates.filter((t) => t.family === 'times-fewer')) {
-      expect(textOf(t), t.id).toMatch(/That is \{times\} times as many as/);
+      // Copy review (S6): "That is…" left the owner unnamed; the comparison names it.
+      expect(textOf(t), t.id).toMatch(
+        /\. (\{name\}|[A-Z][a-z]*(?: [a-z]+)?) (has|catches) \{times\} times as many as (\{\w+\}|[A-Z]\w*)\./,
+      );
       expect(t.operation, t.id).toBe('div');
     }
+    expect(
+      data.wordTemplates.filter((t) => /That is/.test(textOf(t))).map((t) => t.id),
+      'no comparison leaves its owner unnamed',
+    ).toEqual([]);
     // Parents see objectives and skills too: no content string uses the phrase.
     expect(
       Object.entries(catalog)

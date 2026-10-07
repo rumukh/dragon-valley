@@ -200,10 +200,11 @@ These are checked by `scripts/validate-content.mjs` and `test/unit/learning/word
 - "she" and "he" appear only with names from the `girls` and `boys` lists, or with a fixed
   character such as Grandma, Grandpa or the Gnome King.
 - **Editorial ruling.** The text never says "N times fewer". The `times-fewer` family is written
-  with "times as many" in the other direction: "Tom has 12 apples. That is 3 times as many as Eva
-  has. How many does Eva have?" Each comparison family has an additive twin, worded the same except
-  for the comparison ("3 times as many" and "3 more"; "that is 3 times as many as" and "that is 3
-  more than"). The contrast levels (Sunny Meadow 6, Sharing Lake 5, the bosses) can serve them side
+  with "times as many" in the other direction, naming the larger owner: "Tom has 12 apples. Tom
+  has 3 times as many as Eva. How many apples does Eva have?" (the copy review found "That is…"
+  left the owner unnamed). Each comparison family has an additive twin, worded the same except for
+  the comparison ("3 times as many" and "3 more"; "has 3 times as many as" and "has 3 more
+  than"). The contrast levels (Sunny Meadow 6, Sharing Lake 5, the bosses) can serve them side
   by side.
 - Czech life: orchards and markets, Grandma's eggs, plum dumplings, crowns (Kč), school, the
   valley's dragons (Ember, Rainbow), the Gnome King and the Lake Nymphs. Names are Czech and easy
