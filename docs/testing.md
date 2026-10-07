@@ -113,13 +113,14 @@ browsers; `$env:DV_E2E_ALL_ENGINES = '1'` runs Chromium, WebKit and Firefox wher
 builds are installed. CI runs each engine in parallel jobs with `DV_E2E_AUDIT=1`, one or more parts
 of the suite each (`DV_E2E_PART`, comma-separated; `support/parts.ts`): `walks` (`screens`,
 `reflow`), `rounds` (`input`, `persistence`, `recovery`, `settings`), `regions` (`regions`),
-`valley` (`boards`, `bosses`, `upgrade`, `finale`, `map`) and `rest` (every other spec, including
-any new one). Chromium and Firefox run two jobs each with two workers, `walks+rest` and
-`rounds+regions+valley`; WebKit, about twice as slow per test on a hosted runner, runs one job per
-part with three workers (its tests mostly wait on the engine, so the third worker shortens a job
-on the four-processor runner). The split follows measured run times, so each job takes about seven
-minutes, installation included; `harness.spec.ts` checks that the matrix runs every part once per
-engine. Setup is under a minute: `setup-node`
+`valley` (`boards`, `bosses`, `upgrade`, `finale`, `map`), `activities` (`activities`), `days`
+(`daily`, `collections`), `controls` (`grown-ups`, `visibility`) and `rest` (every other spec,
+including any new one). Chromium and Firefox run three jobs each with two workers, `walks+rest`,
+`rounds+regions+controls` and `valley+activities+days`; WebKit, about twice as slow per test on a
+hosted runner, runs one job per part with three workers (its tests mostly wait on the engine, so
+the third worker shortens a job on the four-processor runner). The split follows measured run
+times, so each job takes about seven minutes, installation included; `harness.spec.ts` checks that
+the matrix runs every part once per engine. Setup is under a minute: `setup-node`
 restores npm's cache, and Playwright's browsers are downloaded, not cached, because the download
 is 4–9 s of the install step and the rest is the system packages (apt: about 15 s for Chromium
 and Firefox, 45 s for WebKit), which a browser cache would not skip. A slow Ubuntu mirror once
@@ -174,6 +175,8 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
 | `perf.spec.ts`        | Performance budgets ([qa/performance.md](qa/performance.md)): the script, style sheet and offline pack sizes; a first visit until the title is ready on fast and slow 4G with a processor four times slower (Chromium), timed in the page, with what it downloaded                                                                                                                                                                                                     |
 | `visibility.spec.ts`  | A hidden page pauses the game: hidden time does not make answers slow (three stars where the same waits in view give two), the Lightning Arena's clock stands still, read-aloud stops                                                                                                                                                                                                                                                                                  |
 | `activities.spec.ts`  | Memory Match by touch and by keyboard (a mismatch turned back first; the family, term and remainder cards), Number Trail by touch and by keyboard (a trail of tens too), the Fact Family nest, and an Egg Grid built by touch from a split goal, each played from what the board shows                                                                                                                                                                                 |
+| `collections.spec.ts` | Glimmer's Market (an item too dear says so and takes nothing; bought for its price), the Dragon Den (dressed, kept after a reload, taken off), the Sticker Album (earned and unearned stickers on their region's page; pages by Next and by the arrow keys), the Magic Window (dark at first, then the practised × and : facts lit)                                                                                                                                    |
+| `daily.spec.ts`       | The Daily Adventure with a lowered goal: the goal reached, the dragons sleepy, the gift once; the next day (the page's clock moved): both days practised, snack time first, the gift again. Pacing: after today's level and the day's mini-game, a day under 70 % suggests snack time or a review, never a new level; a good day the next level                                                                                                                        |
 | `grown-ups.spec.ts`   | Starting a keeper over (a confirmation, the dragons and progress erased, the settings kept), asking the browser to keep progress (only on a grown-up's tap; granted or declined), running the placement check again, the Lightning Arena switch (a keeper past the Bridge Troll, from a backup the rules played to: `support/saves.ts`)                                                                                                                                |
 
 ### How the tests drive the game
