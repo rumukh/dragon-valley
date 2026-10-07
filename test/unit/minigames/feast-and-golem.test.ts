@@ -108,11 +108,75 @@ describe('Sharing Feast', () => {
     expect(view(done)).toMatchObject({ inBaskets: [4, 4, 4, 4, 4], bowl: 3, attempts: 1 });
   });
 
+  it('accepts the right answer at any time: the baskets jump to the fair share', () => {
+    // Nothing dealt yet: a child who knows 23 : 5 = 4 r 3 is not sent to deal the fruit first.
+    const early = play(feast, [{ type: 'submit', each: 4, left: 3 }]);
+    expect(early.status).toBe('completed');
+    expect(view(early)).toEqual({
+      total: 23,
+      baskets: 5,
+      remainder: true,
+      inBaskets: [4, 4, 4, 4, 4],
+      bowl: 3,
+      last: null,
+      attempts: 1,
+    });
+    expect(restoreMinigame(feast, JSON.parse(JSON.stringify(early)), MINIGAMES)).toEqual(early);
+    // 5 : 2 = 2 r 1, the playtest's own feast.
+    const small = definition('dv.sharing-feast', { total: 5, baskets: 2, remainder: true });
+    const pears = play(small, [{ type: 'submit', each: 2, left: 1 }]);
+    expect(pears.status).toBe('completed');
+    expect(
+      (projectMinigame(small, pears, MINIGAMES).view as unknown as SharingFeastBoard).inBaskets,
+    ).toEqual([2, 2]);
+  });
+
+  it('still guides a wrong early answer toward the model: the bowl can go round again', () => {
+    const early = play(feast, [{ type: 'submit', each: 5, left: 0 }]);
+    expect(early.status).toBe('active');
+    expect(view(early)).toMatchObject({ inBaskets: [0, 0, 0, 0, 0], bowl: 23, last: 'more' });
+    const dealt = play(feast, [{ type: 'deal' }, { type: 'submit', each: 4, left: 2 }]);
+    expect(view(dealt).last, 'nearly right, with 18 still to share').toBe('more');
+  });
+
+  it('accepts the right answer over uneven baskets, and evens them out', () => {
+    const uneven: MinigameMove[] = [
+      { type: 'put', basket: 0, count: 6 },
+      { type: 'put', basket: 3 },
+    ];
+    expect(view(play(feast, [...uneven, { type: 'submit', each: 6, left: 0 }])).last).toBe(
+      'uneven',
+    );
+    const done = play(feast, [...uneven, { type: 'submit', each: 4, left: 3 }]);
+    expect(done.status).toBe('completed');
+    expect(view(done)).toMatchObject({ inBaskets: [4, 4, 4, 4, 4], bowl: 3, last: null });
+  });
+
   it('round-trips through JSON and restore, and refuses a forged "shared"', () => {
     const half = play(feast, [{ type: 'deal' }, { type: 'deal' }]);
     expect(restoreMinigame(feast, JSON.parse(JSON.stringify(half)), MINIGAMES)).toEqual(half);
     const forged = { ...half, progress: { ...(half.progress as object), shared: true } };
     expect(() => restoreMinigame(feast, forged, MINIGAMES)).toThrow(ToolkitError);
+    // A completed board whose baskets are not shared out: only the adapter can tell.
+    const done = play(feast, [{ type: 'submit', each: 4, left: 3 }]);
+    const baskets = (inBaskets: number[]) => ({
+      ...done,
+      progress: { ...(done.progress as object), inBaskets },
+    });
+    expect(() => restoreMinigame(feast, baskets([8, 4, 4, 4, 0]), MINIGAMES), 'uneven').toThrow(
+      ToolkitError,
+    );
+    // 23 : 5 with 3 in every basket: the 8 in the bowl can still go round.
+    expect(() => restoreMinigame(feast, baskets([3, 3, 3, 3, 3]), MINIGAMES)).toThrow(ToolkitError);
+    // 20 : 5 with 3 in every basket: the 5 in the bowl can still go round exactly once.
+    const even = definition('dv.sharing-feast', { total: 20, baskets: 5, remainder: false });
+    const shared = play(even, [{ type: 'submit', each: 4, left: 0 }]);
+    const once = {
+      ...shared,
+      progress: { ...(shared.progress as object), inBaskets: [3, 3, 3, 3, 3] },
+    };
+    expect(() => restoreMinigame(even, once, MINIGAMES)).toThrow(ToolkitError);
+    expect(restoreMinigame(even, JSON.parse(JSON.stringify(shared)), MINIGAMES)).toEqual(shared);
   });
 
   it('rejects impossible moves', () => {

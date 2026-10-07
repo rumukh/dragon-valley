@@ -282,8 +282,9 @@ export type FactFamilyMove =
  * Sharing Feast (`sharing-feast`, custom `dv.sharing-feast`): share `total` fruit between
  * `baskets` baskets so every basket has the same number; what cannot be shared stays in the bowl
  * (the remainder, always fewer than the baskets). The child moves fruit, then says how many each
- * basket got and how many are left. Complete when the baskets are equal, the bowl cannot go round
- * again and the answer matches. The narrative projection is this object without `kind`.
+ * basket gets and how many are left. A right answer (the fair share) completes the board at any
+ * time, even with fruit still in the bowl: the baskets then show the fair share. The narrative
+ * projection is this object without `kind`.
  */
 export interface SharingFeastBoard {
   kind: 'sharing-feast';
@@ -295,8 +296,9 @@ export interface SharingFeastBoard {
   inBaskets: number[];
   /** Fruit still in the bowl. */
   bowl: number;
-  /** The last check that was not right yet: baskets `uneven`, `more` to share, or a `count`
-   * that does not match the baskets. A right check completes the board. */
+  /** The last check that was not right, guiding toward the model: baskets `uneven`, `more` to
+   * share, or a `count` that does not match the shared-out baskets. A right check completes the
+   * board. */
   last: 'uneven' | 'more' | 'count' | null;
   attempts: number;
 }

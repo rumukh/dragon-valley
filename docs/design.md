@@ -375,8 +375,17 @@ right, as correct but slow (no box move) after more checks. A coin per equation.
 Share fruit between baskets: tap or drag fruit into baskets so that every basket has the same number;
 leftovers stay in the bowl. Teaches division as sharing and grouping, and remainders ("the leftover
 is always fewer than the baskets"). Config `{ total, baskets, remainder: boolean }`; moves
-`{ type: 'put', basket }`, `{ type: 'take', basket }`, `{ type: 'submit', each, left }`. Uses
-`createPlacement`.
+`{ type: 'put', basket }`, `{ type: 'take', basket }`, `{ type: 'deal' }` (one into every basket),
+`{ type: 'submit', each, left }`. Uses `createPlacement`.
+
+**A right answer is accepted at any time** (refinement after the third playtest): a submitted fair
+share, `each` = total : baskets and `left` = its remainder, completes the board at once, even with
+all the fruit still in the bowl; the baskets then show the fair share (the shell animates the
+jump). A child who knows `5 : 2 = 2 r 1` is never told "not yet" and sent to deal the fruit. Any
+other answer gets the guidance toward the model, as before: `uneven` (the baskets differ), `more`
+(the bowl can still give every basket one more) or `count` (the baskets are shared out and the
+numbers do not match them). Credits the division item on completion: as correct (ok) when the first
+answer was right, as correct but slow (no box move) after more answers.
 
 ### 5.7 Compare Stones (`compare-stones`): problem activity
 

@@ -2,12 +2,15 @@
  * Sharing Feast (`dv.sharing-feast`): share `total` fruit between `baskets` baskets so that every
  * basket has the same number; what cannot be shared stays in the bowl (the remainder, always
  * fewer than the baskets). The child moves fruit (`put`, `take`, or `deal` one into every basket),
- * then says how many each basket got and how many are left (`submit`). The board is complete when
- * the baskets are equal, the bowl cannot go round once more, and the answer matches the baskets.
+ * then says how many each basket gets and how many are left (`submit`). A right answer, the fair
+ * share (`fairShare`: `total : baskets` and its remainder), completes the board at once, however
+ * much fruit is still in the bowl: the baskets then show the fair share. A child who knows the
+ * answer is never sent to deal the fruit first.
  *
  * Config `{ total, baskets, remainder }` (`remainder`: leftovers are expected); a check that is
- * not right answers `uneven` (the baskets differ), `more` (the bowl can go round again) or `count`
- * (the numbers do not match the baskets). Nothing is ever taken away.
+ * not right guides toward the model: `uneven` (the baskets differ), `more` (the bowl can go round
+ * again) or `count` (the baskets are shared out and the numbers do not match them). Nothing is
+ * ever taken away.
  */
 import type { MinigameAdapter } from '@aegis/narrative';
 import type { SharingFeastBoard, SharingFeastMove } from '../contract';
@@ -36,18 +39,33 @@ export function bowlOf(config: SharingFeastConfig, inBaskets: readonly number[])
   return config.total - sum(inBaskets);
 }
 
-/** The check of a submitted answer against the baskets: `null` when it is right. */
+/** The fair share: how many every basket gets (`total : baskets`) and how many are left over. */
+export function fairShare(config: SharingFeastConfig): { each: number; left: number } {
+  const left = config.total % config.baskets;
+  return { each: (config.total - left) / config.baskets, left };
+}
+
+/** Whether the fruit is shared out: the baskets are equal and the bowl cannot go round again. */
+export function sharedOut(config: SharingFeastConfig, inBaskets: readonly number[]): boolean {
+  const first = inBaskets[0] ?? 0;
+  return inBaskets.every((count) => count === first) && bowlOf(config, inBaskets) < config.baskets;
+}
+
+/**
+ * The check of a submitted answer: `null` when it is the fair share, whatever the baskets show;
+ * else the guidance toward it from the baskets: `uneven`, `more` or `count`.
+ */
 export function checkShare(
   config: SharingFeastConfig,
   inBaskets: readonly number[],
   each: number,
   left: number,
 ): 'uneven' | 'more' | 'count' | null {
+  const fair = fairShare(config);
+  if (each === fair.each && left === fair.left) return null;
   const first = inBaskets[0] ?? 0;
   if (inBaskets.some((count) => count !== first)) return 'uneven';
-  const bowl = bowlOf(config, inBaskets);
-  if (bowl >= config.baskets) return 'more';
-  return each === first && left === bowl ? null : 'count';
+  return bowlOf(config, inBaskets) >= config.baskets ? 'more' : 'count';
 }
 
 export const sharingFeastAdapter: MinigameAdapter<
@@ -78,10 +96,8 @@ export const sharingFeastAdapter: MinigameAdapter<
     }).map((count, i) => integer(count, `$.progress.inBaskets[${i}]`, 0, config.total));
     if (sum(inBaskets) > config.total) invalid('$.progress.inBaskets', 'More fruit than exists.');
     const shared = boolean(o.shared, '$.progress.shared');
-    if (shared) {
-      const first = inBaskets[0]!;
-      const answer = checkShare(config, inBaskets, first, bowlOf(config, inBaskets));
-      if (answer !== null) invalid('$.progress.shared', 'The fruit is not shared out yet.');
+    if (shared && !sharedOut(config, inBaskets)) {
+      invalid('$.progress.shared', 'The fruit is not shared out yet.');
     }
     return {
       inBaskets,
@@ -124,7 +140,11 @@ export const sharingFeastAdapter: MinigameAdapter<
   reduce(config, state, move) {
     if (move.type === 'submit') {
       const last = checkShare(config, state.inBaskets, move.each, move.left);
-      return { ...state, last, shared: last === null, attempts: state.attempts + 1 };
+      const attempts = state.attempts + 1;
+      if (last !== null) return { ...state, last, attempts };
+      // The fair share: the baskets show it at once, wherever the fruit was.
+      const { each } = fairShare(config);
+      return { inBaskets: state.inBaskets.map(() => each), last: null, shared: true, attempts };
     }
     const bowl = bowlOf(config, state.inBaskets);
     if (move.type === 'deal') {
