@@ -7,13 +7,24 @@
  * Supported forms (everything the shell renders today, and the problem kinds of the contract
  * that have a single numeric answer):
  * - an equation with one answer box anywhere, with `+ − · × : ÷` and brackets
- *   (`7 · 8 = ?`, `? · 6 = 42`, `(3 + 4) · 2 = ?`);
- * - division with remainder (`23 : 5 = ? r ?`, `23 ÷ 5 = ? R ?`).
+ *   (`7 · 8 = ?`, `? · 6 = 42`, `(3 + 4) · 2 = ?`), by the school order of operations;
+ * - division with remainder (`23 : 5 = ? r ?`, `23 ÷ 5 = ? R ?`);
+ * - a comparison, two sides with a box between them (`3 · 4 ? 2 · 6`): the relation `<` `>` `=`;
+ * - a term question, a whole sentence with one number marked (`6 · 7 = 42`): what that number is
+ *   called (factor, product, dividend, divisor, quotient, remainder);
+ * - a story's sign step (`5 ○ 4 = ?` under a story): the operation the story asks for. Numbers
+ *   cannot tell it, so the story is read: its words are matched against the pack's word-problem
+ *   templates (`content/`), and the matching template's operation is the answer.
  */
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Page } from '@playwright/test';
 
 export type Operator = 'add' | 'sub' | 'mul' | 'div';
 export type Notation = 'czech' | 'international';
+export type Relation = 'lt' | 'gt' | 'eq';
+export type Term = 'factor' | 'product' | 'dividend' | 'divisor' | 'quotient' | 'remainder';
 
 export type Token =
   | { readonly kind: 'number'; readonly value: number; readonly asked: boolean }
@@ -22,11 +33,15 @@ export type Token =
   | { readonly kind: 'remainder'; readonly symbol: string }
   | { readonly kind: 'open' }
   | { readonly kind: 'close' }
-  | { readonly kind: 'blank' };
+  | { readonly kind: 'blank' }
+  | { readonly kind: 'slot' };
 
 export type AnswerValue =
   | { readonly kind: 'number'; readonly value: number }
-  | { readonly kind: 'remainder'; readonly quotient: number; readonly remainder: number };
+  | { readonly kind: 'remainder'; readonly quotient: number; readonly remainder: number }
+  | { readonly kind: 'relation'; readonly relation: Relation }
+  | { readonly kind: 'operation'; readonly operation: Operator }
+  | { readonly kind: 'term'; readonly term: Term };
 
 const OPERATORS: Readonly<Record<string, { op: Operator; notation: Notation | null }>> = {
   '+': { op: 'add', notation: null },
@@ -46,6 +61,7 @@ export interface RenderedToken {
 export function toToken(raw: RenderedToken): Token {
   const text = raw.text.trim();
   if (raw.className.includes('dv-problem__blank')) return { kind: 'blank' };
+  if (raw.className.includes('dv-problem__slot')) return { kind: 'slot' };
   if (raw.className.includes('dv-problem__number')) {
     if (!/^\d+$/.test(text)) throw new Error(`Not a number token: "${text}"`);
     return {
@@ -136,8 +152,34 @@ export function evaluate(tokens: readonly Token[], blank: number): number {
   return value;
 }
 
+/** What the marked number of a term sentence (`left op right = result [r remainder]`) is called. */
+function termOf(tokens: readonly Token[], asked: number): Term {
+  const op = tokens[1];
+  if (op?.kind !== 'op' || (op.op !== 'mul' && op.op !== 'div') || tokens[3]?.kind !== 'equals') {
+    throw new Error('A term question reads "a · b = c" or "a : b = c [r d]".');
+  }
+  const multiply = op.op === 'mul';
+  switch (asked) {
+    case 0:
+      return multiply ? 'factor' : 'dividend';
+    case 2:
+      return multiply ? 'factor' : 'divisor';
+    case 4:
+      return multiply ? 'product' : 'quotient';
+    case 6:
+      return 'remainder';
+    default:
+      throw new Error(`No term is marked at position ${asked}.`);
+  }
+}
+
 /** Solve the written problem by its own arithmetic. */
 export function solve(tokens: readonly Token[]): AnswerValue {
+  if (tokens.some((token) => token.kind === 'slot')) {
+    throw new Error('The sign is asked for: only the story tells which one (see readAnswer).');
+  }
+  const asked = tokens.findIndex((token) => token.kind === 'number' && token.asked);
+  if (asked >= 0) return { kind: 'term', term: termOf(tokens, asked) };
   const remainderAt = tokens.findIndex((token) => token.kind === 'remainder');
   if (remainderAt >= 0) {
     const [dividend, op, divisor, equals] = tokens;
@@ -154,8 +196,17 @@ export function solve(tokens: readonly Token[]): AnswerValue {
     return { kind: 'remainder', quotient: (dividend.value - remainder) / divisor.value, remainder };
   }
   const equals = tokens.findIndex((token) => token.kind === 'equals');
-  if (equals < 0) throw new Error('The problem has no equals sign.');
-  if (tokens.filter((token) => token.kind === 'blank').length !== 1) {
+  const boxes = tokens.filter((token) => token.kind === 'blank').length;
+  if (equals < 0) {
+    // A comparison: the box stands between the two sides for the sign.
+    const at = tokens.findIndex((token) => token.kind === 'blank');
+    if (boxes !== 1) throw new Error('The problem has no equals sign and no single box.');
+    const left = evaluate(tokens.slice(0, at), 0);
+    const right = evaluate(tokens.slice(at + 1), 0);
+    if (Number.isNaN(left) || Number.isNaN(right)) throw new Error('A side is not a whole number.');
+    return { kind: 'relation', relation: left < right ? 'lt' : left > right ? 'gt' : 'eq' };
+  }
+  if (boxes !== 1) {
     throw new Error('The problem has more than one answer box.');
   }
   const left = tokens.slice(0, equals);
@@ -167,8 +218,67 @@ export function solve(tokens: readonly Token[]): AnswerValue {
   throw new Error('No whole number answers the problem.');
 }
 
+interface WordTemplate {
+  readonly id: string;
+  readonly textKey: string;
+  readonly operation: Operator | null;
+}
+
+let storyPatterns: { readonly pattern: RegExp; readonly template: WordTemplate }[] | undefined;
+
+/** Each word-problem template of the pack as a pattern over its English story text. */
+function stories(): { readonly pattern: RegExp; readonly template: WordTemplate }[] {
+  if (storyPatterns) return storyPatterns;
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', 'content');
+  const pack = JSON.parse(readFileSync(join(root, 'dragon-valley.content.json'), 'utf8')) as {
+    data: { wordTemplates: WordTemplate[] };
+  };
+  const catalog = JSON.parse(
+    readFileSync(join(root, 'catalogs', 'en.content.json'), 'utf8'),
+  ) as Record<string, string>;
+  const words = (text: string): string => text.trim().replace(/\s+/g, ' ');
+  storyPatterns = pack.data.wordTemplates.map((template) => {
+    const text = catalog[template.textKey];
+    if (text === undefined) throw new Error(`No story text for ${template.textKey}.`);
+    const source = words(text)
+      .split(/(\{[A-Za-z][A-Za-z0-9_]*\})/)
+      .map((part) =>
+        /^\{.+\}$/.test(part) ? '(.+?)' : part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+      )
+      .join('');
+    return { pattern: new RegExp(`^${source}$`), template };
+  });
+  return storyPatterns;
+}
+
+/** The operation a story asks for, from the pack's template whose words it matches. */
+export function storyOperation(story: string): Operator {
+  const text = story.trim().replace(/\s+/g, ' ');
+  const found = stories().filter(({ pattern }) => pattern.test(text));
+  const operations = [...new Set(found.map(({ template }) => template.operation))];
+  if (found.length === 0) throw new Error(`No word-problem template tells this story: "${text}"`);
+  if (operations.length !== 1 || !operations[0]) {
+    throw new Error(
+      `The story matches ${found.map(({ template }) => template.id).join(', ')}, which do not name one operation.`,
+    );
+  }
+  return operations[0];
+}
+
+/** The problem on screen: its tokens, its step (a story's sign, then its answer) and story. */
+export async function readProblem(
+  page: Page,
+): Promise<{ tokens: Token[]; step: string; story: string }> {
+  const tokens = await readTokens(page);
+  const step = (await page.getByTestId('problem').getAttribute('data-step')) ?? 'answer';
+  const story = (await page.getByTestId('round-story').textContent()) ?? '';
+  return { tokens, step, story };
+}
+
 export async function readAnswer(page: Page): Promise<AnswerValue> {
-  return solve(await readTokens(page));
+  const { tokens, step, story } = await readProblem(page);
+  if (step === 'operation') return { kind: 'operation', operation: storyOperation(story) };
+  return solve(tokens);
 }
 
 /** The problem as a child would read it aloud from the screen, e.g. `2 · 4 = ?`. */
@@ -190,6 +300,8 @@ export function written(tokens: readonly Token[]): string {
           return ')';
         case 'blank':
           return '?';
+        case 'slot':
+          return '○';
       }
     })
     .join(' ')
@@ -260,6 +372,8 @@ export function spokenFor(tokens: readonly Token[]): string {
         return 'open bracket,';
       case 'close':
         return ', close bracket';
+      case 'slot':
+        return 'which sign';
     }
   });
   const sentence = words.join(' ').replace(/ ,/g, ',');
