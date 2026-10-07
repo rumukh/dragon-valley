@@ -6,7 +6,10 @@
  * recent success is low, the likeliest successes), then the dragons' weakest known facts. It has
  * 6 to 10 problems with auto input; 4 to 6 while recent success is low, so a session is not
  * dominated by reviews the child cannot do yet. Feeding hungry dragons is the spaced review.
+ * A snack of the basket alone (no dragon is hungry) is never longer than the basket: each answer
+ * takes its fact out, and a right answer its twin too (`7 · 8` reviews `8 · 7`).
  */
+import { commutedId } from '../contract';
 import { clamp, lowSuccess } from '../learning/selection';
 import { basketItems, dueItems, hungryDragons, itemsOf } from './dragons';
 import { playableSkills, startProblemRound } from './problems';
@@ -22,6 +25,16 @@ export const SNACK_MAX_LOW = 6;
 /** Problems in a snack: one per due fact, within `SNACK_MIN`…`SNACK_MAX` (or the `low` sizes). */
 export function snackTarget(due: number, low = false): number {
   return low ? clamp(due, SNACK_MIN_LOW, SNACK_MAX_LOW) : clamp(due, SNACK_MIN, SNACK_MAX);
+}
+
+/** Facts among `items`, a fact and its commuted twin counted once (a right answer reviews both). */
+export function distinctFacts(items: readonly string[]): number {
+  const counted = new Set<string>();
+  for (const item of items) {
+    const twin = commutedId(item);
+    if (twin === null || !counted.has(twin)) counted.add(item);
+  }
+  return counted.size;
 }
 
 /** The dragons a snack feeds: the named hungry dragon, or every hungry dragon. */
@@ -59,14 +72,16 @@ export function startSnack(ctx: Ctx, index: Index, dragon: string | null): void 
   const data = ctx.content.data;
   const dragons = fed(ctx.state, data, index, dragon);
   const skills = snackSkills(data, dragons, index);
-  const basket = dragon === null ? basketItems(ctx.state, data, index).length : 0;
-  const due = dueItems(ctx.state, itemsOf(skills, index)) + basket;
+  const basket = dragon === null ? basketItems(ctx.state, data, index) : [];
+  const due = dueItems(ctx.state, itemsOf(skills, index)) + basket.length;
+  const target = snackTarget(due, lowSuccess(ctx.state, data));
   startProblemRound(ctx, index, {
     activity: 'snack',
     source: { kind: 'snack', dragon },
     skills,
     input: 'auto',
-    target: snackTarget(due, lowSuccess(ctx.state, data)),
+    // The dragons' facts can always be served again; the basket alone runs out (a round asks 1+).
+    target: skills.length > 0 ? target : Math.max(1, Math.min(target, distinctFacts(basket))),
     meter: null,
   });
 }

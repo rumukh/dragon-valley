@@ -8,7 +8,8 @@
  *
  * Which item comes next is learning/selection.ts: re-asks first, then the activity's draw (the
  * mix for Feeding Time, spaced review for the boss's `reviewShare`, due reviews for snacks, the
- * current ladder step for placement).
+ * current ladder step for placement). A round whose draw comes back empty serves nothing and
+ * finishes: a snack of the valley's basket alone empties the basket as it goes.
  */
 import { requireValue } from '@aegis/runtime';
 import type { DeepReadonly, RandomStream } from '@aegis/runtime';
@@ -175,7 +176,13 @@ function roundActivity(data: Data, round: DeepReadonly<ProblemRound>) {
     : undefined;
 }
 
-function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomStream): string {
+/** The round's next item from its activity's draw, or `null` when it has nothing left to serve. */
+function chooseItem(
+  ctx: Ctx,
+  round: ProblemRound,
+  index: Index,
+  random: RandomStream,
+): string | null {
   const state = ctx.state;
   const data = ctx.content.data;
   const blocked = blockedRecent(round.recent, data.balance.mix.noRepeatWithin);
@@ -319,7 +326,11 @@ export function teachFirst(
   return !serving.placement && serving.activity !== 'arena' && missedTwice(serving.record);
 }
 
-/** Serve the next problem: a fired re-ask first, else a fresh draw. */
+/**
+ * Serve the next problem: a fired re-ask first, else a fresh draw. When the round has nothing
+ * left to serve (a snack of the valley's basket empties it as it goes), nothing is put on screen
+ * and the round finishes (`settleRound` in the adapter).
+ */
 export function serveNext(ctx: Ctx, index: Index): void {
   const round = activeProblemRound(ctx);
   if (!round) return;
@@ -327,6 +338,7 @@ export function serveNext(ctx: Ctx, index: Index): void {
   const problems = ctx.random('problems');
   const queued = round.queue.shift();
   const item = queued ?? chooseItem(ctx, round, index, problems);
+  if (item === null) return;
   const skillIds =
     round.placement !== null ? [data.placement.steps[round.placement.step]!.skill] : round.skills;
   const skill = skillFor(data, skillIds, item, index, problems)!;

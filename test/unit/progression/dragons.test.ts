@@ -134,7 +134,7 @@ describe("Puff's and Mirror's facts", () => {
     expect(pickSnack({ state: s, pool, blocked: [], random }), 'the due fact').toBe('mul:0x4');
     const served = ['mul:0x4'];
     for (let i = 0; i < 5; i++) {
-      const next = pickSnack({ state: s, pool, blocked: served, served, random });
+      const next = pickSnack({ state: s, pool, blocked: served, served, random })!;
       expect(s.items[next], `a new fact, not the known 0 · 3 (${next})`).toBeUndefined();
     }
     // With one new fact left, it comes before the known 0 · 3 every time.

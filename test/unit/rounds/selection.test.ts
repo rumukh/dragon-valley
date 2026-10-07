@@ -196,7 +196,7 @@ describe('mixed draws', () => {
           blocked: [],
           focus: null,
           random,
-        }),
+        })!,
       );
     }
     expect(picks.has('mul:2x3')).toBe(true);
