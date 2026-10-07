@@ -88,6 +88,9 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
   median is at least 60 %, with the band as its stretch goal (it progresses more slowly but keeps
   succeeding: never wrong more often than right);
 - the average bot grows every times-table dragon to adult within 12 weeks;
+- the struggling bot sees its dragons grow (content 1.3.0's effort path): its first times-table
+  youngling by the end of the first term (day 118 of a run from 5 October, or the run's end), and
+  in a run of 365 days or more at least 3 times-table adults;
 - every bot earns coins every session and, except the perfect one, sees progress every week;
 - no known fact (Leitner box 2+) waits more than a week past its review day; facts
   in box 0-1 are still being learned and are served as learning items;

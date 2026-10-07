@@ -181,11 +181,20 @@ export const TARGETS = {
    */
   graceDays: 7,
   /**
-   * The average child grows every times-table dragon to adult (90 % of its multiplication and
-   * division facts at silver, its boss won over) within 12 weeks of play, five days a week: the
-   * new tables 6-9 belong to the first half of 3rd grade, and 12 weeks is a school trimester.
+   * The average child grows every times-table dragon to adult (its multiplication and division
+   * facts at the adult gate's share of silver, its boss won over) within 12 weeks of play, five
+   * days a week: the new tables 6-9 belong to the first half of 3rd grade, and 12 weeks is a
+   * school trimester.
    */
   tablesAdultDays: 84,
+  /**
+   * The struggling child sees its dragons grow (the coordinator's decision for content 1.3.0,
+   * after the growth study in balance-report.md §8: the effort path and adult at 80 %): its first
+   * times-table dragon reaches youngling within the first school term (by 31 January, day
+   * `youngDay` of a run from 5 October; within the run when it is shorter), and in a run of a
+   * school year (`yearDays` or more) at least `adults` times-table dragons grow to adult.
+   */
+  growingUp: { youngDay: 118, yearDays: 365, adults: 3 },
   /** The perfect child reaches the finale within 4 weeks of daily play. */
   perfectFinaleDays: 28,
   /** An egg hatches within this many sessions of the child receiving it. */
@@ -238,6 +247,24 @@ interface Check {
 /** Sessions played from day `from` to day `to` (inclusive). */
 function sessionsBetween(report: SimulationReport, from: number, to: number): number {
   return report.days.filter((d) => d.played && d.index >= from && d.index <= to).length;
+}
+
+const GROWN_STAGES = ['hatchling', 'youngling', 'adult', 'crowned'] as const;
+
+/**
+ * The first day a dragon was at `stage` or later. A dragon can pass two stages in one step, and
+ * the report then holds only the last of them.
+ */
+export function stageReached(
+  report: SimulationReport,
+  dragon: string,
+  stage: (typeof GROWN_STAGES)[number],
+): number | null {
+  const stages = report.stages[dragon] ?? {};
+  const days = GROWN_STAGES.slice(GROWN_STAGES.indexOf(stage))
+    .map((s) => stages[s])
+    .filter((at): at is number => at !== undefined);
+  return days.length > 0 ? Math.min(...days) : null;
 }
 
 /**
@@ -489,7 +516,27 @@ export const CHECKS: readonly Check[] = [
       const last = reached.length === days.length ? Math.max(...reached) : null;
       return {
         ok: last !== null && last <= TARGETS.tablesAdultDays,
-        name: `grew every times-table dragon to adult (90 % silver) within ${TARGETS.tablesAdultDays} days (${reached.length} of ${days.length} adult${last !== null ? `, the last on day ${last}` : ''})`,
+        name: `grew every times-table dragon to adult within ${TARGETS.tablesAdultDays} days (${reached.length} of ${days.length} adult${last !== null ? `, the last on day ${last}` : ''})`,
+      };
+    },
+  },
+  {
+    id: 'growing-up',
+    learners: ['struggling'],
+    evaluate: (r) => {
+      const { youngDay, yearDays, adults } = TARGETS.growingUp;
+      const young = r.content.tableDragons
+        .map((dragon) => stageReached(r, dragon, 'youngling'))
+        .filter((at): at is number => at !== null);
+      const first = young.length > 0 ? Math.min(...young) : null;
+      const deadline = Math.min(youngDay, r.daysSimulated - 1);
+      const grown = r.content.tableDragons.filter(
+        (dragon) => stageReached(r, dragon, 'adult') !== null,
+      ).length;
+      const year = r.daysSimulated >= yearDays;
+      return {
+        ok: first !== null && first <= deadline && (!year || grown >= adults),
+        name: `saw its dragons grow: the first times-table youngling on day ${first ?? '-'} (by day ${deadline}, the end of the first term${deadline < youngDay ? ' or of the run' : ''}); ${grown} times-table adult${grown === 1 ? '' : 's'} ${year ? `within the year (at least ${adults})` : `within ${r.daysSimulated} days`}`,
       };
     },
   },

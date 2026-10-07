@@ -458,6 +458,50 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     expect(ids).not.toContain('bosses');
     expect(runChecks([report('average')]).map((c) => c.id)).toContain('no-dead-end');
   });
+
+  it('a struggling child whose dragons do not grow up', () => {
+    const tables = ['bubbles', 'sunny', 'goldie', 'petal'];
+    const grown = (days: number, stages: SimulationReport['stages']) =>
+      check(
+        report('struggling', {
+          daysSimulated: days,
+          days: Array.from({ length: days }, (_, i) => day(i)),
+          content: { ...report('struggling').content, tableDragons: tables },
+          stages,
+        }),
+        'growing-up',
+      );
+    const twelveWeeks = grown(84, { bubbles: { hatchling: 0, youngling: 60 } });
+    expect(twelveWeeks.ok, twelveWeeks.name).toBe(true);
+    expect(twelveWeeks.name).toBe(
+      'struggling: saw its dragons grow: the first times-table youngling on day 60 (by day 83, the end of the first term or of the run); 0 times-table adults within 84 days',
+    );
+    expect(grown(84, { bubbles: { hatchling: 0 } }).ok, 'no youngling in 12 weeks').toBe(false);
+    expect(
+      grown(84, { bubbles: { hatchling: 0, adult: 70 } }).ok,
+      'a dragon that passed youngling in one step',
+    ).toBe(true);
+    const year = (youngling: number, adults: number) =>
+      grown(
+        365,
+        Object.fromEntries(
+          tables.map((dragon, i): [string, Record<string, number>] => [
+            dragon,
+            i < adults
+              ? { hatchling: 0, youngling: youngling + i, adult: 200 + i }
+              : { hatchling: 0, youngling: youngling + i },
+          ]),
+        ),
+      );
+    const several = year(118, 3);
+    expect(several.ok, several.name).toBe(true);
+    expect(several.name).toBe(
+      'struggling: saw its dragons grow: the first times-table youngling on day 118 (by day 118, the end of the first term); 3 times-table adults within the year (at least 3)',
+    );
+    expect(year(119, 3).ok, 'the first youngling after the first term').toBe(false);
+    expect(year(100, 2).ok, 'only two adults in a year').toBe(false);
+    expect(runChecks([report('average')]).map((c) => c.id)).not.toContain('growing-up');
+  });
   it('a slow child with gold panes or a crowned dragon', () => {
     const gold = report('slow', { window: { dim: 0, bronze: 0, silver: 100, gold: 21 } });
     expect(check(gold, 'fluency').ok).toBe(false);
