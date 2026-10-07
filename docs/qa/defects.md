@@ -1,213 +1,67 @@
 # Defects found by the QA suite
 
-Product defects found by the end-to-end suite, reported to the coordinator for routing. Each one
-is pinned by a test that states the behaviour the game should have; while the defect reproduces,
-the test records it (a `known defect` annotation in the report and the CI job summary) and goes on,
-and once a fix lands the same assertion passes and the summary lists the marker as "fixed?" so it
-can be removed. The registry is `DEFECTS` (with `KNOWN_LAYOUT` for layout findings) in
-`test/e2e/support/known-issues.ts`, and `KNOWN_AXE` in `test/e2e/support/a11y.ts` for axe
-findings.
+Product defects found by the end-to-end suite, reported to the coordinator for routing. Each open
+defect is pinned by a test that states the behaviour the game should have; while it reproduces,
+the test records it (a `known defect` annotation in the report and the CI job summary) and goes
+on. When a fix lands the same assertion passes and the summary lists the marker under "fixed?";
+once the fix is verified on every engine the defect leaves the registry and its assertion stays
+as a plain regression check. The registry is `DEFECTS` (with `KNOWN_LAYOUT` for layout findings)
+in `test/e2e/support/known-issues.ts`, and `KNOWN_AXE` in `test/e2e/support/a11y.ts` for axe
+findings. A full run also lists the registered defects no test met, so an allowance cannot
+outlive its defect unnoticed.
 
 Severity: **blocker** stops a release; **major** breaks a promised behaviour for some children or
-devices; **minor** is a rough edge. Engines: all three unless stated. Found against `main` at
-`5848964` (S3 phase 2, the Region 1 vertical slice); DV-QA-13 and DV-QA-06's phone egg labels on
-CI at `373a5d2`; DV-QA-14 at `5a9c633` (#17); DV-QA-15 at `061e433`.
+devices; **minor** is a rough edge. Engines: all three unless stated.
 
-| ID       | Severity | Owner | Summary                                                                     |
-| -------- | -------- | ----- | --------------------------------------------------------------------------- |
-| DV-QA-01 | minor    | S3    | After a failed save and Retry, the held answer is never acknowledged        |
-| DV-QA-02 | minor    | S3    | "You got 1 coins!" / "1 coins": no singular                                 |
-| DV-QA-04 | minor    | S3    | Retry in the "Not saved" pill is 40 px tall                                 |
-| DV-QA-05 | major    | S3    | Grown-ups' Settings scroll sideways on a phone                              |
-| DV-QA-06 | major    | S3    | Words and numbers break inside (200 % tiles "1" over "8"; phone egg labels) |
-| DV-QA-08 | major    | S3    | Screen focus targets drop out of the Tab order and lose their ring          |
-| DV-QA-09 | major    | S3    | After a click on Read aloud, Enter re-reads instead of sending the answer   |
-| DV-QA-10 | major    | S3    | 200 % text on a phone: the hub and Egg Grid scroll sideways                 |
-| DV-QA-11 | minor    | S3    | Map and road hotspots are cut off by the picture frame                      |
-| DV-QA-13 | minor    | S3    | WebKit: a keeper's hub at 200 % text first shows at normal size             |
-| DV-QA-14 | major    | S3    | The results' scrolling celebrations cannot be reached by keyboard           |
-| DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys      |
+## Open
 
-DV-QA-03 (Enter ignored when a round opened on a keypad problem) and DV-QA-07 (a missed tile's
-badge pushing the round sideways at 200 %) were found against the phase-1 shell and no longer
-reproduce after #13; DV-QA-12 (the placement results celebrating the prologue's egg as "A new
-egg") was fixed by #17. Their tests stay as regression checks.
+| ID       | Severity | Owner | Summary                                                                       |
+| -------- | -------- | ----- | ----------------------------------------------------------------------------- |
+| DV-QA-05 | minor    | S3    | WebKit: the grown-ups' Settings still scroll sideways on a phone (voice list) |
+| DV-QA-13 | minor    | S3    | WebKit: a keeper's hub at 200 % text first appears at normal size             |
+| DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys        |
 
-## DV-QA-01 (minor, S3): the held answer is never acknowledged after Retry
+### DV-QA-05 (minor, S3; WebKit): the grown-ups' Settings still scroll sideways on a phone
 
-- **Repro**: make a keeper, start the placement check, answer one problem. Let the next save fail
-  (a full disk; the test injects it) and answer the next problem: the pill says **Not saved**
-  with **Retry**; the round keeps the problem and the typed answer. Free the disk, tap **Retry**.
-- **Expected**: the stored answer gets its "Yes!", its coins, and the round moves on.
-- **Actual**: **Saved** shows, but the round keeps the old problem; pressing OK again shows
-  "Saving stopped. Tap Retry at the top." (also after the save worked), and the next OK silently
-  moves to the next problem. The answer was stored once (a reload resumes after it), but the
-  child never saw it praised and the purse in the round stays behind until the round is left.
-- **Evidence**: `test/e2e/recovery.spec.ts` › "a failed save says Not saved, holds the answer…".
-  Suspected place: `src/app/screens/problems.ts` `submit`: an accepted action whose checkpoint
-  failed is rethrown and ignored (`CommandRejectedError.accepted`), and nothing re-reads the
-  view when `retry()` completes it.
+- **Repro** (Safari, or Playwright's WebKit 26.6; 390 × 844 with local English voices): the
+  grown-ups' area, Settings.
+- **Expected**: no sideways scrolling (WCAG 1.4.10).
+- **Actual**: #19 fixed this in Chromium and Firefox (single-column grids, a voice list that can
+  shrink), and in WebKit the panel now fits too, but the page is still 511 px wide, with blank sky
+  to the right of the panel. The voice list's box is 335 px and fits; WebKit counts the text of
+  its longest option, "Device default (English (United Kingdom))" (about 483 px from the list's
+  left edge), in the page's scrollable width. Hiding the list, or shortening that option, brings
+  the page back to 390 px. Nothing is cut off any more, hence minor (it was major).
+- **Likely fix** (tried in WebKit): `.dv-select { contain: paint; }`, or `overflow: clip` on the
+  row around it; `overflow: hidden` on the select itself has no effect in WebKit.
+- **Evidence**: `test/e2e/screens.spec.ts` stops `26-parent-settings` and `44-settings-saved`
+  (phone, WebKit: "the page scrolls sideways: 511px of content in 390px").
 
-## DV-QA-02 (minor, S3, copy): "1 coins"
+### DV-QA-13 (minor, S3; WebKit): a keeper's hub at 200 % text first appears at normal size
 
-- **Repro**: answer one problem right: the polite announcer says "You got 1 coins!"; a purse with
-  one coin is named "1 coins".
-- **Expected**: "You got 1 coin!", "1 coin".
-- **Evidence**: `test/e2e/live.spec.ts`. `coins.earned`, `results.coins` and `coins.label` in
-  `content/catalogs/en.ui.json` need a singular (or a count-free wording such as "Coins: 1").
+- **Repro** (Playwright's WebKit 26.6, on Windows, and on the Ubuntu runner before #19): give a
+  keeper Text size **200%** in the grown-ups' area, then open that keeper from "Who is playing?".
+- **Expected**: the hub appears at 200 %, as in Chromium and Firefox (6 of 6 openings each).
+- **Actual** (at `0827c3a`, after #19): in 6 of 6 openings the hub's text is drawn at its normal
+  size first. The greeting is 43.2 px, not 86.4 px, for 140-435 ms, then everything jumps to
+  200 %. `<html>` already carries the scale (`--aegis-text-scale: 2`, `data-text-scale="2"`), yet
+  its computed size is still 24 px in 2 of 6. #19 mirrors the scale in `data-text-scale` so that
+  WebKit restyles the root, but no rule reads that attribute, so it restyles nothing; the root's
+  size is right more often since, the text below it is not. Two further tries, through a test
+  shim and not in the game: setting the root's `font-size` inline whenever the scale changes
+  changed nothing; forcing a style and layout flush right after it made the root right in 6 of 6,
+  but the hub's text still lagged 145-185 ms. WebKit keeps the newly mounted screen's text styled
+  against the old root size until its next rendering update.
+- **Ideas** (untested): keep the new screen hidden until the next animation frame after a text
+  size change (e.g. `visibility: hidden` on the stage until `requestAnimationFrame`), so no child
+  sees it at the wrong size; or apply the keeper's presentation earlier, before "Who is playing?"
+  starts the change of screen. Minor: the setting is never lost, but a 200 % reader sees small
+  text flash for up to half a second whenever their keeper opens.
+- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…" compares the root and the
+  greeting as the hub appears with the same hub at 100 %; in WebKit it records how long until
+  200 % (`DV-QA-13 evidence` in the job summary).
 
-## DV-QA-04 (minor, S3): Retry is smaller than the child-safe target
-
-- **Repro**: make a save fail during a round (as DV-QA-01).
-- **Expected**: every control at least 48 × 48 CSS px (`CHILD_SAFE_PRESET`, docs/app.md §7).
-- **Actual**: **Retry** is 116 × 40 px: `.dv-save .dv-button { min-height: calc(var(--dv-target) -
-8px) }` in `src/app/styles/components.css`. It is the one action the child is told to tap.
-- **Evidence**: `test/e2e/screens.spec.ts` stop `41-save-failed`, all sizes.
-
-## DV-QA-05 (major, S3): the grown-ups' Settings tab scrolls sideways on a phone
-
-- **Repro**: on a 390 px wide screen with local English voices (an Android device lists them as
-  "English (United Kingdom)"), open the grown-ups' area, Settings.
-- **Expected**: the panel reflows to the screen (WCAG 1.4.10).
-- **Actual**: the page is about 555 px wide: the voice list's option "Device default (English
-  (United Kingdom))" sets the minimum width of the panel's grid column (grid items default to
-  `min-width: auto`), and the notation buttons, switches, sliders and the 200 % button stick out.
-  Likely fix: `grid-template-columns: minmax(0, 1fr)` on `.dv-parent__panel` and
-  `.dv-parent__section`, or `min-width: 0` / `width: 100%` on `.dv-select`.
-- **Evidence**: `test/e2e/screens.spec.ts` stops `26-parent-settings` and `44-settings-saved`,
-  phone size; screenshot `out/qa-screens/<engine>/phone/26-parent-settings.png`.
-
-## DV-QA-06 (major, S3): words and numbers break inside narrow boxes
-
-- **Repro**: grown-ups' area, Settings, Text size **200%**; play as that keeper. Or, at normal
-  size on a 390 px wide phone, make a new keeper and reach the prologue's egg choice.
-- **Expected**: whole numbers and words (plan §2.11 "text scales to 200 % with reflow").
-- **Actual**: on a tablet, two-digit choice tiles stack their digits, "1" over "8" for 18, so an
-  answer reads as two numbers; the keypad's **OK** splits into "O / K"; the hub's adventure button
-  ("drag / ons", "know / !") and "Today' / s goal" break; on a phone the level card ("Feedin / g",
-  "Memor / y") and Egg Grid ("Ro / ws", "Egg / s") break too. Narrow boxes with
-  `overflow-wrap: anywhere` (body) break inside words and numbers.
-- **Also at normal size, on a phone**: the three egg buttons of the prologue share the 390 px width
-  (106 px each, 82 px inside their padding, one word per line in 24 px bold), so "The bubbl / y
-  blue egg" and "The shiny golde / n egg" break mid-word (WebKit on Linux and Windows, Chromium on
-  Linux; the words just fit with Firefox's and Edge-on-Windows' font metrics). The eggs could
-  stack, or wrap two and one, on a narrow screen.
-- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…" (the layout check names each
-  broken word); screenshots `out/qa-screens/<engine>/text-200/tablet/16-round-choice.png`,
-  `07-round-keypad.png`, `06-hub.png`; `test/e2e/screens.spec.ts` stop `05-story-eggs` (phone),
-  screenshot `out/qa-screens/webkit/phone/05-story-eggs.png`.
-
-## DV-QA-08 (major, S3): screen focus targets drop out of the Tab order
-
-- **Repro**: Play on the title of a new family: the editor opens with focus in the name field.
-  Tab to the pictures, then Shift+Tab: focus skips the name field and goes to **Back**; from
-  **Back**, Tab goes to the pictures. The error screen's **Back to the start** is the same, and
-  shows no focus ring while focused.
-- **Expected**: every control stays in the Tab order (WCAG 2.1.1, 2.4.3) with a visible ring
-  (2.4.7).
-- **Actual**: `src/app/router/router.ts` (`mount`, `focus`) gives the screen's focus target
-  `tabindex="-1"` when it has none (right for headings), which takes inputs and buttons out of
-  sequential navigation for good, and `[tabindex='-1']:focus` in `base.css` hides their ring.
-- **What a keyboard-only child can still do** (checked on `061e433`, the live site, in all three
-  engines): the name **can** be typed. The field has focus when the editor opens, and every name
-  problem ("Please type a name.", too long, odd signs, taken) puts focus back into it; Enter in
-  it sends the form. What they cannot do is come back to it: once they Tab on to the pictures to
-  choose one, a typo can be fixed only by sending the form (a valid name is saved as typed and
-  renamed later, where the field again has focus on arrival) or by leaving the editor. The same
-  goes for renaming.
-- **The ring, measured by pixels**: the game's ring (outline and halo) never shows on the name
-  field. On arrival only its border turns violet. After a name problem the border is the error
-  orange whether the field is focused or not (`.dv-input[aria-invalid='true']` comes after
-  `.dv-input:focus-visible`), so the focused field shows nothing but the caret: 0 pixels change
-  around it when focus leaves.
-- **Likely fix** (one line): add `tabindex="-1"` only to targets that cannot take focus by
-  themselves, e.g. `if (target && target.tabIndex < 0 && !target.hasAttribute('tabindex'))`
-  (inputs and buttons have `tabIndex` 0, headings -1). That restores both the Tab order and the
-  ring.
-- **Evidence**: `test/e2e/keyboard.spec.ts` › "a keyboard alone makes a keeper…", "the keeper
-  editor by keyboard alone › the name can always be typed…" (arrival, Shift+Tab, both problems,
-  the ring by pixels before and after a problem) and "the error screen offers its one button to
-  the keyboard".
-
-## DV-QA-09 (major, S3): Enter after a click on Read aloud re-reads the problem
-
-- **Repro**: in a round, click **Read aloud** (or **Show me**), type the answer on the keyboard,
-  press **Enter**.
-- **Expected**: Enter sends the answer (docs/app.md §8: "Enter always submits").
-- **Actual**: the clicked button keeps focus, so the keyboard layer leaves Enter to the browser,
-  which presses Read aloud again; the answer waits until OK is pressed. Mouse plus keyboard is the
-  usual way to play on the family PC. Likely fix: like the keypad keys, these buttons should not
-  take focus on pointer down, or Enter should go to the answer whenever an answer is typed.
-- **Evidence**: `test/e2e/input.spec.ts` › "Enter still sends the answer after the child used Read
-  aloud" (annotation `DV-QA-09 evidence` names the focused element).
-
-## DV-QA-10 (major, S3): at 200 % text on a phone, the hub and Egg Grid scroll sideways
-
-- **Repro**: Text size 200 %; play as that keeper on a 390 px wide screen.
-- **Actual**: the hub is 551 px wide (`.dv-hub__side` and its card do not shrink); the adventure
-  button and the place buttons (Valley map, Market, Dragon Den, Stickers, Magic Window) stick out.
-  The Egg Grid board is 478 px wide; "More: Rows", "More: Eggs in a row" and **Check** stick out.
-- **Evidence**: `test/e2e/reflow.spec.ts`, stops `text-200/06-hub`, `12-hub-after` and
-  `17-egg-grid` at phone size; screenshots under `out/qa-screens/<engine>/text-200/phone/`.
-
-## DV-QA-11 (minor, S3): map and road hotspots are cut off by the picture frame
-
-- **Repro**: open the valley map on a phone, or the Sunny Meadow road at 200 % text or zoom.
-- **Actual**: on a phone the one awake place's label, "Sunny Meadow", starts 63 px left of the
-  screen and is clipped by the map frame; at 200 % text or browser zoom, level 1's marker and the
-  boss are clipped at the road picture's edge, and on a phone at 200 % several level markers stick
-  out of the screen. Hotspots are placed in picture coordinates without keeping them inside the
-  frame.
-- **Evidence**: `test/e2e/screens.spec.ts` stops `13-map` and `14-region` (phone),
-  `test/e2e/reflow.spec.ts` (`text-200` and zoom); screenshot
-  `out/qa-screens/<engine>/phone/13-map.png`.
-
-## DV-QA-13 (minor, S3; WebKit): a keeper's hub at 200 % text first shows at normal size
-
-- **Repro** (WebKit; seen in Playwright's WebKit 26.6 on the Ubuntu CI runner): make a keeper, go
-  back to the keepers, grown-ups' area, Settings, Text size **200%**, close the grown-ups' area and
-  play as that keeper.
-- **Expected**: the hub appears at 200 % (root font size 48 px), like everything after it.
-- **Actual**: `<html>` carries `--aegis-text-scale: 2` from the moment the keeper opens (the
-  trace's DOM snapshots show it), yet as the hub appears `getComputedStyle(html).fontSize` is
-  still `24px` (the greeting 43.2 px, its normal size). WebKit catches up by itself, but how soon
-  varies: 37 ms (1 frame) and 337 ms (7 frames) later in two CI runs of the same code
-  (`DV-QA-13 evidence`: `openedAt 24px`, `caughtUp after … ms`). At `373a5d2` the failure
-  screenshot, taken just after, showed the hub at normal size, so those frames are painted: the
-  hub flashes at 100 % for up to a third of a second, then the whole layout jumps to 200 %. The
-  setting is not lost. The root font size is
-  `calc(var(--dv-reading, 24px) * var(--aegis-text-scale, 1))` (`base.css`), and the SDK's
-  `applyPresentationPreferences` changes only that custom property on `<html>`. Not seen in
-  Chromium, Firefox or WebKit on Windows; `settings.spec.ts`, which changes Reduce motion at the
-  same time (an attribute on `<html>`), always sees 48 px at once.
-- **Likely fix** (S3, in `applyPresentation`): also set the root `font-size` itself (or mirror the
-  scale in an attribute on `<html>`, for example `data-text-scale`), so WebKit restyles the root
-  at once; an SDK note: `applyPresentationPreferences` could do the same for every consumer.
-- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…": the size as the hub
-  appears, then (if it is not 48 px) what `<html>` says and how many frames it takes to catch up
-  (or, after five seconds, whether a passing attribute restyles it), attached and in the job
-  summary.
-
-## DV-QA-14 (major, S3): the results' scrolling celebrations cannot be reached by keyboard
-
-- **Repro**: on a tablet (1180 × 820) or a phone, a new keeper takes the placement check to its
-  results: six celebrations (four new eggs, two stickers) do not fit, and the list scrolls inside
-  the card (#17: "the results card scrolls its celebrations inside itself").
-- **Expected**: everything on the screen can be reached by keyboard (WCAG 2.1.1).
-- **Actual**: axe `scrollable-region-focusable` (serious) at `.dv-results__celebrations`, in all
-  three engines: the `<div class="dv-results__celebrations" data-many="true">` has
-  `overflow-y: auto` (`screens.css`, `.dv-results__card > .dv-results__celebrations`) but no
-  focusable content and no `tabindex`, so the celebrations below the card's fold (here "New
-  sticker: Show …") cannot be scrolled into view without a pointer where the browser does not
-  focus scrollers by itself (Safari does not; recent Chromium and Firefox do). Desktop is not
-  affected (the list fits).
-- **Likely fix**: make the scrolling list a focusable, named region: `tabindex="0"`,
-  `role="region"` and an `aria-label` from the catalog (for example "What you got"), with the
-  usual focus ring; or let it grow and scroll the card as a whole, keeping the button in view.
-- **Evidence**: `test/e2e/screens.spec.ts` stop `11-round-results` (tablet and phone, all three
-  engines); screenshot `out/qa-screens/<engine>/tablet/11-round-results.png`.
-
-## DV-QA-15 (minor, S3; WebKit): the keeper pictures lose their focus ring under the arrow keys
+### DV-QA-15 (minor, S3; WebKit): the keeper pictures lose their focus ring under the arrow keys
 
 - **Repro** (Safari, or Playwright's WebKit 26.6): in the keeper editor, Tab to the pictures (the
   focused picture shows its dark ring), then press an arrow key.
@@ -226,6 +80,27 @@ egg") was fixed by #17. Their tests stay as regression checks.
   are one named radio group…" (the ring by pixels after the arrows; strict in Chromium and
   Firefox).
 
+## Fixed
+
+Each was verified fixed by the suite in Chromium (Edge), Firefox and WebKit, and its assertion now
+runs as a regression check. (DV-QA-05 and DV-QA-13 are fixed in Chromium and Firefox and stay open for WebKit.) The full write-ups (repro, cause, suggested fix) are in this file's
+history: `git log -p -- docs/qa/defects.md`.
+
+| ID       | Was                                                                                       | Fixed by | Regression check                                                                         |
+| -------- | ----------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
+| DV-QA-01 | After a failed save and Retry, the stored answer was never praised; the round stood still | #19      | `recovery.spec.ts` › a failed save says "Not saved"…                                     |
+| DV-QA-02 | "You got 1 coins!", "1 coins": no singular                                                | #19      | `live.spec.ts` › "a round speaks its feedback…" ("You got 1 coin!")                      |
+| DV-QA-03 | Enter was ignored when a round opened on a keypad problem (phase-1 shell)                 | #13      | `input.spec.ts` › "a round that opens on a keypad problem takes Enter from the keyboard" |
+| DV-QA-04 | Retry in the "Not saved" pill was 40 px tall                                              | #19      | layout checks at `screens.spec.ts` stop `41-save-failed`                                 |
+| DV-QA-06 | Words and numbers broke inside narrow boxes (200 % tiles "1" over "8"; phone egg labels)  | #19      | layout checks in `reflow.spec.ts` (`text-200`) and at stop `05-story-eggs` (phone)       |
+| DV-QA-07 | A missed tile's badge pushed the round sideways at 200 % (phase-1 shell)                  | #13      | layout checks in `reflow.spec.ts` (`text-200`, `16-round-choice`)                        |
+| DV-QA-08 | Screens' focus targets dropped out of the Tab order and lost their ring                   | #19      | `keyboard.spec.ts`: the editor (by pixels) and the error screen                          |
+| DV-QA-09 | Enter after a click on Read aloud re-read the problem instead of sending the answer       | #19      | `input.spec.ts` › "Enter still sends the answer after the child used Read aloud"         |
+| DV-QA-10 | At 200 % text on a phone the hub and the Egg Grid scrolled sideways                       | #19      | layout checks in `reflow.spec.ts` (`text-200`, phone)                                    |
+| DV-QA-11 | Map and road hotspots were cut off by the picture's frame                                 | #19      | layout checks at stops `13-map` and `14-region`, and in `reflow.spec.ts`                 |
+| DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                        | #17      | `persistence.spec.ts` › "a finished round is kept…"                                      |
+| DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)       | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                      |
+
 ## Observations for design review (not defects)
 
 - A new keeper's placement results also award "Dressed Up" (criterion: owns one cosmetic) before
@@ -234,10 +109,10 @@ egg") was fixed by #17. Their tests stay as regression checks.
 - At 200 % text the problem itself is capped by the viewport (`.dv-problem` uses
   `min(3rem, 11vw)`, `min(2rem, 7.5vw)` for long problems), so on a phone it is smaller than the
   prompt and buttons around it.
-- Strict durability makes feedback wait for the save: on a heavily loaded machine (Firefox,
-  Windows, parallel tests) one answer took over 8 s to show "Yes!". On real devices this is
-  usually instant; the performance budgets in PR C will measure it.
-- Apart from DV-QA-14, axe reports only moderate findings: `region` (toasts, the announcer and the
+- Feedback no longer waits on a slow save (#19: the praise comes when the answer is saved, or 250 ms
+  after it is committed if saving takes longer); the performance budgets in PR C will measure the
+  time from an answer to its feedback on a throttled device.
+- axe reports only moderate findings: `region` (toasts, the announcer and the
   boot status sit outside landmarks) and `page-has-heading-one` on the startup failure screen.
 - Remainder mode (`4 r 3` / `4 R 3`) cannot be reached in play until Region 6 content lands; the
   keypad logic is unit-tested and the e2e parity check covers number mode.

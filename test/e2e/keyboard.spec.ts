@@ -8,11 +8,11 @@
  * page and Shift+Tab back to its start. Together they cover the screen in every engine, however
  * the engine wraps around through its own controls.
  *
- * The keeper editor is also played by keyboard alone end to end: the name (typed on arrival, and
- * back in the field after a problem), the eight pictures as one named radio group (arrows and
- * Space choose, the choice reads as checked and is the keeper's picture afterwards), with each
- * focus indicator checked by its pixels (`focusPixels`), since the pictures' radios are hidden
- * under their art and draw their ring on the label.
+ * The keeper editor is also played by keyboard alone end to end: the name (focused on arrival, in
+ * the Tab order, focused again after a problem), the eight pictures as one named radio group
+ * (arrows and Space choose, the choice reads as checked and is the keeper's picture afterwards),
+ * with each focus indicator checked by its pixels (`focusPixels`), since the pictures' radios are
+ * hidden under their art and draw their ring on the label.
  */
 import type { Page } from '@playwright/test';
 import { expect, test } from './support/fixtures';
@@ -84,10 +84,8 @@ test('a keyboard alone makes a keeper and starts a round, with focus always visi
   ]);
   expectVisibleFocus(editor.stops, 'editor');
   await page.getByTestId('back').focus();
-  await unlessKnown(test.info(), 'DV-QA-08', async () => {
-    await page.keyboard.press('Tab');
-    expect(await focusedId(page), 'Tab from Back returns to the name field').toBe('keeper-name');
-  });
+  await page.keyboard.press('Tab');
+  expect(await focusedId(page), 'Tab from Back returns to the name field').toBe('keeper-name');
 
   // Pictures are a radio group: one Tab stop, arrows choose.
   await page.getByTestId('keeper-name').focus();
@@ -165,9 +163,9 @@ test.describe('the keeper editor by keyboard alone', () => {
   // Focus indicators are compared pixel by pixel, so nothing else may move.
   test.use({ reducedMotion: 'reduce' });
 
-  test('the name can always be typed: on arrival, and back in the field after a problem with it', async ({
+  test('the name field takes focus, stays in the Tab order and shows its ring, also after a problem', async ({
     page,
-  }, testInfo) => {
+  }) => {
     await boot(page);
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
@@ -179,15 +177,11 @@ test.describe('the keeper editor by keyboard alone', () => {
     await expect(name, 'the keyboard types the name').toHaveValue('Ada');
     expect(
       await focusPixels(page, () => page.keyboard.press('Tab')),
-      'the focused name field can be seen (its border turns violet)',
+      'the focused name field shows its ring',
     ).toBeGreaterThanOrEqual(SEEN_PIXELS);
     expect((await pictures(page)).focused, 'Tab goes on to the pictures').toBe('keeper-1');
-    await unlessKnown(testInfo, 'DV-QA-08', async () => {
-      await page.keyboard.press('Shift+Tab');
-      await expect(name, 'Shift+Tab from the pictures returns to the name').toBeFocused({
-        timeout: 1000,
-      });
-    });
+    await page.keyboard.press('Shift+Tab');
+    await expect(name, 'Shift+Tab from the pictures returns to the name').toBeFocused();
 
     // A fresh editor: Save without a picture or a name. Each problem says what to do and the
     // name problem puts focus back into the field, so the name can always be typed.
@@ -226,13 +220,10 @@ test.describe('the keeper editor by keyboard alone', () => {
       'Up to 16 letters. Please type a name.',
     );
     await page.keyboard.type('Bea');
-    const afterProblem = await focusPixels(page, () => page.keyboard.press('Tab'));
-    await unlessKnown(testInfo, 'DV-QA-08', async () => {
-      expect(
-        afterProblem,
-        'the name field shows its focus after a problem (more than the caret)',
-      ).toBeGreaterThanOrEqual(SEEN_PIXELS);
-    });
+    expect(
+      await focusPixels(page, () => page.keyboard.press('Tab')),
+      'the name field shows its ring after a problem too (more than the caret)',
+    ).toBeGreaterThanOrEqual(SEEN_PIXELS);
     expect((await pictures(page)).focused, 'Tab goes on to the chosen picture').toBe(
       entered.focused,
     );
@@ -468,13 +459,8 @@ test('the error screen offers its one button to the keyboard', async ({ page }) 
   await expectScreen(page, 'error');
   const restart = page.getByTestId('error-restart');
   await expect(restart, 'the way out takes focus').toBeFocused();
-  await unlessKnown(test.info(), 'DV-QA-08', async () => {
-    await expect(restart, 'it stays in the Tab order').not.toHaveAttribute('tabindex', '-1', {
-      timeout: 1000,
-    });
-    // tabindex="-1" also hides the focus ring ([tabindex='-1']:focus in base.css).
-    expect((await focusStop(page)).ring, 'and shows its focus ring').toBe(true);
-  });
+  await expect(restart, 'it stays in the Tab order').not.toHaveAttribute('tabindex', '-1');
+  expect((await focusStop(page)).ring, 'and shows its focus ring').toBe(true);
   await page.keyboard.press('Enter');
   await expectScreen(page, 'title');
 });

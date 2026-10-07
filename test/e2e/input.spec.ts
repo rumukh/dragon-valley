@@ -28,7 +28,6 @@ import {
   startLevel,
   startPlacement,
 } from './support/app';
-import { unlessKnown } from './support/known-issues';
 import { readAnswer, readTokens, written } from './support/problem';
 import { installSpeech, TYPICAL_VOICES } from './support/speech';
 
@@ -157,23 +156,15 @@ test('a round that opens on a keypad problem takes Enter from the keyboard', asy
   ).toBe('correct');
 });
 
-test('Enter still sends the answer after the child used Read aloud', async ({ page }, testInfo) => {
+test('Enter still sends the answer after the child used Read aloud', async ({ page }) => {
   await startPlacement(page);
   await page.getByTestId('read-aloud').click();
   const answer = await readAnswer(page);
   await page.keyboard.type(String(answer.kind === 'number' ? answer.value : 0));
-  let sent = 'no';
-  await unlessKnown(testInfo, 'DV-QA-09', async () => {
-    sent = await feedbackAfter(page, () => page.keyboard.press('Enter'), 3000);
-    expect(sent, 'Enter sends the typed answer').toBe('correct');
-  });
-  if (sent !== 'correct') {
-    testInfo.annotations.push({
-      type: 'DV-QA-09 evidence',
-      description: `focused after the click: ${await page.evaluate(() => document.activeElement?.getAttribute('data-testid') ?? document.activeElement?.localName)}`,
-    });
-    expect(await feedbackAfter(page, () => page.getByTestId('keypad-ok').click())).toBe('correct');
-  }
+  expect(
+    await feedbackAfter(page, () => page.keyboard.press('Enter')),
+    'Enter sends the typed answer (Read aloud does not keep the focus)',
+  ).toBe('correct');
 });
 
 test('choice tiles: digits pick, arrows move, Enter and Space choose', async ({ page }) => {

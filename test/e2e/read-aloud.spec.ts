@@ -57,7 +57,7 @@ test.describe('with local English voices on the device', () => {
     );
     expect(line?.lang).toBe('en-GB');
 
-    // Tapped, not typed: Enter after a click on the speaker is DV-QA-09 (input.spec.ts).
+    // Tapped on the keypad, as at a tablet (typing after a click on the speaker: input.spec.ts).
     for (let step = 0; step < 7; step++) await answerCorrectly(page, 'pointer');
     const laterWords = spokenFor(await readTokens(page));
     await page.getByTestId('read-aloud').click();

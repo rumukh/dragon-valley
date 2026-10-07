@@ -196,7 +196,8 @@ it (`engines`), and stays a failure everywhere else. Nothing unlisted is tolerat
 
 `support/qa-reporter.ts` writes `test-results/qa-summary.md` and the GitHub job summary: totals,
 known defects still reproducing (with the evidence a test recorded for them), markers that no
-longer reproduce, and axe advice by rule. With `DV_E2E_AUDIT=1` it also fails the run if a spec
+longer reproduce, registered defects that no test met (in a full run: a layout or axe allowance
+whose problem is gone says nothing by itself), and axe advice by rule. With `DV_E2E_AUDIT=1` it also fails the run if a spec
 file (of the job's part) did not run in a project or a test was skipped without a reason.
 
 ### Artifacts

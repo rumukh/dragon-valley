@@ -42,6 +42,12 @@ function projectOf(test: TestCase): string {
   return test.parent.project()?.name ?? '?';
 }
 
+/** The engine a test ran on (the Edge and Chrome channels are Chromium). */
+function engineOfProject(test: TestCase): string {
+  const use = test.parent.project()?.use;
+  return use?.browserName ?? use?.defaultBrowserType ?? 'chromium';
+}
+
 class QaSummary implements Reporter {
   private config: FullConfig | undefined;
   private readonly results: { test: TestCase; run: TestResult }[] = [];
@@ -93,10 +99,15 @@ class QaSummary implements Reporter {
     const fixed = new Map<string, Set<string>>();
     const advice = new Map<string, number>();
     const evidence: string[] = [];
+    const met = new Set<string>();
     for (const { test, run } of this.results) {
       const project = projectOf(test);
       for (const note of notes(test, run)) {
         const description = note.description ?? '';
+        if (note.type === 'known defect' || note.type === 'defect fixed?') {
+          const id = /^DV-QA-\d+/.exec(description)?.[0];
+          if (id) met.add(id);
+        }
         if (note.type === 'known defect') {
           const id = /^DV-QA-\d+/.exec(description)?.[0];
           const defect = id ? (DEFECTS as Record<string, Defect>)[id] : undefined;
@@ -137,6 +148,17 @@ class QaSummary implements Reporter {
     lines.push('', '### Defect markers that did not reproduce (fixed?)', '');
     if (fixed.size === 0) lines.push('None.');
     for (const [description, set] of [...fixed].sort()) lines.push(`- ${description}${where(set)}`);
+    if (!part) {
+      // A layout or axe allowance says nothing when its problem is gone: list what no test met.
+      const engines = new Set(this.results.map(({ test }) => engineOfProject(test)));
+      const unmet = Object.entries(DEFECTS as Record<string, Defect>).filter(
+        ([id, defect]) =>
+          !met.has(id) && (!defect.engines || defect.engines.some((engine) => engines.has(engine))),
+      );
+      lines.push('', '### Registered defects no test met in this run (fixed?)', '');
+      if (unmet.length === 0) lines.push('None.');
+      for (const [id, defect] of unmet) lines.push(`- ${id} (${defect.owner}): ${defect.title}`);
+    }
     lines.push('', '### Accessibility advice (moderate and minor axe findings, by rule)', '');
     if (advice.size === 0) lines.push('None.');
     for (const [rule, total] of [...advice].sort()) lines.push(`- ${rule}: ${total}`);

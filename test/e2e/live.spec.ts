@@ -21,7 +21,6 @@ import {
   startPlacement,
 } from './support/app';
 import { readTokens, solve, written } from './support/problem';
-import { unlessKnown } from './support/known-issues';
 
 interface Announcement {
   readonly region: string;
@@ -130,10 +129,7 @@ test('a round speaks its feedback, the typed answer, coins and the result', asyn
   }
   expect(await feedbackAfter(page, () => page.keyboard.press('Enter'))).toBe('correct');
   await expectHeard(page, 'feedback', `Yes! ${written(tokens).replace('?', digits)}`);
-  await unlessKnown(test.info(), 'DV-QA-02', () =>
-    expectHeard(page, 'announcer-polite', 'You got 1 coin!', 2000),
-  );
-  await expectHeard(page, 'announcer-polite', /^You got \d+ coins?!$/);
+  await expectHeard(page, 'announcer-polite', 'You got 1 coin!');
 
   // The praise stays a moment; the round goes on with the next problem.
   await expectNextProblem(page);

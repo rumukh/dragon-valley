@@ -10,7 +10,7 @@
  * - Every screen also grows with the browser's zoom: checked at 200 % zoom of a tablet and a
  *   desktop window (half as many CSS pixels), keeper screens and grown-up screens alike.
  */
-import type { Page, TestInfo } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expect, test } from './support/fixtures';
 import {
   chooseSetting,
@@ -37,61 +37,15 @@ function readingSize(page: Page): Promise<number> {
   return page.locator('html').evaluate((node) => parseFloat(getComputedStyle(node).fontSize));
 }
 
-async function expectReadingSize(page: Page, pixels: number): Promise<void> {
-  await expect
-    .poll(() => readingSize(page), {
-      message: `the reading size is ${pixels} px`,
-      timeout: 5_000,
-    })
-    .toBe(pixels);
-}
-
-/**
- * DV-QA-13 (WebKit): the hub showed while <html> already carried the keeper's text scale but
- * still had the old font size. Record what the page says and how long the size takes to catch
- * up by itself, frame by frame; if it does not within five seconds, record whether a passing
- * attribute (which the game never reads) restyles <html>, so the rest of the test still checks
- * the screens at 200 %.
- */
-async function staleRootEvidence(page: Page, testInfo: TestInfo, opened: number): Promise<void> {
-  const seen = await page.evaluate(async (deadline) => {
-    const root = document.documentElement;
-    const size = (): string => getComputedStyle(root).fontSize;
-    const frame = (): Promise<void> =>
-      new Promise((resolve) => {
-        requestAnimationFrame(() => resolve());
-        setTimeout(resolve, 50);
-      });
+/** The root's size and the hub greeting's, as drawn now. */
+function hubSizes(page: Page): Promise<{ root: number; greeting: number }> {
+  return page.evaluate(() => {
     const greeting = document.querySelector('[data-testid="hub-greeting"]');
-    const evidence: Record<string, string> = {
-      userAgent: navigator.userAgent,
-      inlineTextScale: root.style.getPropertyValue('--aegis-text-scale'),
-      computedTextScale: getComputedStyle(root).getPropertyValue('--aegis-text-scale').trim(),
-      rootFontSize: size(),
-      greetingFontSize: greeting ? getComputedStyle(greeting).fontSize : 'no greeting',
+    return {
+      root: parseFloat(getComputedStyle(document.documentElement).fontSize),
+      greeting: greeting ? parseFloat(getComputedStyle(greeting).fontSize) : Number.NaN,
     };
-    const started = performance.now();
-    let frames = 0;
-    while (size() !== '48px' && performance.now() - started < deadline) {
-      await frame();
-      frames += 1;
-    }
-    const waited = Math.round(performance.now() - started);
-    evidence['caughtUp'] =
-      size() === '48px' ? `after ${waited} ms (${frames} frames)` : `not within ${waited} ms`;
-    if (size() !== '48px') {
-      root.setAttribute('data-qa-restyle', '');
-      evidence['afterAnAttributeChange'] = size();
-      root.removeAttribute('data-qa-restyle');
-    }
-    return evidence;
-  }, 5_000);
-  const evidence = { openedAt: `${opened}px`, ...seen };
-  await testInfo.attach('DV-QA-13 evidence', {
-    body: JSON.stringify(evidence, null, 2),
-    contentType: 'application/json',
   });
-  testInfo.annotations.push({ type: 'DV-QA-13 evidence', description: JSON.stringify(evidence) });
 }
 
 test("a keeper's text at 200 %: the hub and a whole round reflow at every size", async ({
@@ -99,19 +53,39 @@ test("a keeper's text at 200 %: the hub and a whole round reflow at every size",
 }, testInfo) => {
   test.setTimeout(600_000);
   await newFamily(page, { name: 'Ada' });
+  const normal = await hubSizes(page);
+  expect(normal.root, 'the reading size is 24 px at 100 %').toBe(24);
   await leaveHub(page);
   await openGrownUps(page, 'settings');
   await chooseSetting(page, 'setting-text-200');
   await closeGrownUps(page);
   await playAs(page, 1, 'Ada');
-  const opened = await readingSize(page);
+  // Read at once, as the hub appears: the text must not show at 100 % first.
+  const opened = await hubSizes(page);
+  const doubled = (sizes: { root: number; greeting: number }): boolean =>
+    sizes.root === normal.root * 2 && Math.abs(sizes.greeting - normal.greeting * 2) < 0.5;
   await unlessKnown(testInfo, 'DV-QA-13', async () => {
-    expect(opened, "the hub opens at the keeper's 200 % (a 48 px root)").toBe(48);
+    expect(opened.root, "the hub appears at the keeper's 200 %: a 48 px root").toBe(48);
+    expect(opened.greeting, 'and the greeting twice its size at 100 %').toBeCloseTo(
+      normal.greeting * 2,
+      0,
+    );
   });
-  if (opened !== 48) {
-    await staleRootEvidence(page, testInfo, opened);
-    await expectReadingSize(page, 48);
+  if (!doubled(opened)) {
+    const started = Date.now();
+    await expect
+      .poll(async () => doubled(await hubSizes(page)), {
+        message: 'the hub reaches 200 %',
+        timeout: 5_000,
+        intervals: [25],
+      })
+      .toBe(true);
+    testInfo.annotations.push({
+      type: 'DV-QA-13 evidence',
+      description: `as the hub appeared: root ${opened.root} px, greeting ${opened.greeting} px (at 100 %: ${normal.root} and ${normal.greeting}); 200 % about ${Date.now() - started} ms later`,
+    });
   }
+  expect(await readingSize(page), 'the reading size doubled to 48 px').toBe(48);
 
   const stops: Stop[] = [];
   const visit = async (stop: Stop): Promise<void> => {

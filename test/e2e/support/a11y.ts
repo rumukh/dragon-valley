@@ -25,9 +25,7 @@ export interface KnownAxe {
   readonly target: RegExp;
 }
 
-export const KNOWN_AXE: readonly KnownAxe[] = [
-  { defect: 'DV-QA-14', rule: 'scrollable-region-focusable', target: /\.dv-results__celebrations/ },
-];
+export const KNOWN_AXE: readonly KnownAxe[] = [];
 
 export interface AxeOutcome {
   /** Serious or critical violations that are not known defects: each must be fixed. */
