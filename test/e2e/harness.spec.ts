@@ -1,9 +1,10 @@
 /**
  * The harness proves itself (docs/testing.md §2.4, "mutation-check"): each guard, the
- * accessibility audit, the layout checks, the focus check and the answer oracle is shown a
- * planted fault and must report it. A check that cannot see a console message, a foreign
- * request, a nameless button, a cut-off control or a ring nobody can see would let every other
- * spec pass vacuously. The CI matrix is checked too: every part of the suite on every engine.
+ * accessibility audit, the layout checks, the focus check, the blank-screen watch and the answer
+ * oracle is shown a planted fault and must report it. A check that cannot see a console message,
+ * a foreign request, a nameless button, a cut-off control, a ring nobody can see or a screen with
+ * nothing on it would let every other spec pass vacuously. The CI matrix is checked too: every
+ * part of the suite on every engine.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -14,6 +15,7 @@ import { expect, test } from './support/fixtures';
 import type { FindingKind, Guard } from './support/guard';
 import { boot, newFamily, startPlacement } from './support/app';
 import { audit, focusPixels, focusStop, SEEN_PIXELS } from './support/a11y';
+import { blankReport, markBlankWatch, resetBlankWatch, watchBlankScreens } from './support/blank';
 import { layoutProblems } from './support/layout';
 import { PARTS } from './support/parts';
 import { evaluate, notationOf, solve, storyOperation, toToken, written } from './support/problem';
@@ -142,6 +144,54 @@ test.describe('the accessibility audit and the layout checks see planted faults'
     expect(problems).toContainEqual(
       expect.stringMatching(/^the word "Multiplication" breaks as "Mul.* \/ .*" in <p qa-narrow>/),
     );
+  });
+});
+
+test.describe('the blank-screen watch sees a screen with nothing to see', () => {
+  type Blank = 'faded' | 'no words' | 'no screen';
+  /** In the page: make the screen blank for a second the planted way, then put it back. */
+  const plant = (how: Blank): Promise<void> =>
+    new Promise<void>((done) => {
+      const stage = document.querySelector('[data-testid="stage"]')!;
+      const screen = stage.querySelector(':scope > .dv-screen')!;
+      const style = document.createElement('style');
+      style.textContent =
+        how === 'faded'
+          ? '.dv-screen { opacity: 0.1 !important; }'
+          : '.dv-screen * { visibility: hidden !important; }';
+      if (how === 'no screen') screen.remove();
+      else document.head.append(style);
+      setTimeout(() => {
+        if (how === 'no screen') stage.append(screen);
+        else style.remove();
+        // Two frames, so the watch has seen the screen come back.
+        requestAnimationFrame(() => requestAnimationFrame(() => done()));
+      }, 1_000);
+    });
+
+  test('a faded screen, a screen whose words are hidden and an empty stage are blank runs; the hub as drawn is not', async ({
+    page,
+  }) => {
+    await watchBlankScreens(page);
+    await newFamily(page, { name: 'Ada' });
+    await resetBlankWatch(page);
+    // Headless WebKit on Windows draws a page at rest only a few times a second.
+    await expect
+      .poll(async () => (await blankReport(page)).frames, {
+        message: 'the watch runs',
+        timeout: 20_000,
+      })
+      .toBeGreaterThan(5);
+    expect((await blankReport(page)).runs, 'the hub as the game draws it is never blank').toEqual(
+      [],
+    );
+    for (const how of ['faded', 'no words', 'no screen'] as const) {
+      await markBlankWatch(page, how);
+      await page.evaluate(plant, how);
+      const run = (await blankReport(page)).runs.find((candidate) => candidate.label === how);
+      expect(run?.why, `a ${how} plant is seen for what it is`).toBe(how);
+      expect(run!.durationMs, `the ${how} run lasts about its second`).toBeGreaterThan(300);
+    }
   });
 });
 
