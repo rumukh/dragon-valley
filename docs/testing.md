@@ -96,8 +96,10 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
   speed, and the rules' protection slows it by design): while levels remain, every week with play
   completes a new level, the boss of every region whose lessons it finished is won over, and at
   least ¾ of the levels (45 of 59) are done in 12 weeks;
-- reward pacing stays inside targets (coins per session, a gift every day the goal is met, every
-  egg hatched within five sessions);
+- reward pacing stays inside targets (coins per session for the average bot, a gift every day the
+  goal is met, every egg hatched within five sessions). Coins come from right answers, so the slow
+  and struggling bots earn less than a typical session's 50-80 (design §7.1): their coins are
+  reported as measured, and their market waits below are their binding targets;
 - Glimmer's Market keeps something new coming (the 1.2.0 economy): the average bot still has
   something on sale it cannot afford yet after 110 sessions (a 365-day run) and gets something new
   with a median wait of at most 6 sessions and never more than 10; the slow bot waits at most 8

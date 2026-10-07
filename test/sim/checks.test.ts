@@ -235,6 +235,10 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     r.days = r.days.map((d, i) => day(i, { coins: 150 }));
     expect(check(r, 'coins-pace').name).toContain('median of 150 coins');
     expect(check(r, 'coins-pace').ok).toBe(false);
+    expect(
+      runChecks([report('struggling'), report('slow')]).map((c) => c.id),
+      'a typical session is the average one',
+    ).not.toContain('coins-pace');
   });
 
   it('a market with nothing left to save for before 110 sessions', () => {

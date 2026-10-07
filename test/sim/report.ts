@@ -170,7 +170,10 @@ export const TARGETS = {
    * succeeding (the coordinator's decision on balance-report.md §5.1, testing.md §4).
    */
   strugglingSuccess: { floor: 60 },
-  /** Coins per session, median (design §7.1: a 15-minute session earns roughly 50-80 coins). */
+  /**
+   * Coins per session, median, for the average child (design §7.1: a typical 15-minute session
+   * earns roughly 50-80 coins). The others are reported as measured.
+   */
   coins: { low: 50, high: 80 },
   /**
    * Days a known fact (bronze and up: box 2+, driver.ts `KNOWN_BOX`) may wait past its review
@@ -492,7 +495,9 @@ export const CHECKS: readonly Check[] = [
   },
   {
     id: 'coins-pace',
-    learners: ['average', 'struggling', 'slow'],
+    // A typical session (design §7.1): the average child. Coins come from right answers, so the
+    // slow and struggling children earn less; their market pace is their own check.
+    learners: ['average'],
     evaluate: (r) => {
       const { low, high } = TARGETS.coins;
       const median = spread(sessionsOf(r).map((d) => d.coins)).median;

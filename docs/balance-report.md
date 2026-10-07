@@ -105,7 +105,7 @@ The checks are named; each label states what it measured.
 | no dead end        | perfect, average, slow: every level completed, every boss won over                   | testing.md §4             |
 | steady path        | struggling: a new level every week with play; finished regions' bosses won; ≥ 45/59  | coordinator (1.2.0)       |
 | no starving        | no known fact (bronze and up, box 2+) waits more than 7 days past its review day     | testing.md §4             |
-| coins              | median 50-80 coins per session                                                       | design §7.1               |
+| coins              | average: median 50-80 coins per session (a typical session; others as measured)      | design §7.1               |
 | market lasts       | average, 365 days: something on sale it cannot afford yet after 110 sessions         | coordinator (1.2.0)       |
 | market pace        | median wait for something new: average ≤ 6 (never > 10), slow ≤ 8, struggling ≤ 12   | coordinator (1.2.0)       |
 | starter week       | every child buys its first cosmetic in its first week                                | coordinator (1.2.0)       |
