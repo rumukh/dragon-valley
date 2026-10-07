@@ -1,8 +1,9 @@
 /**
  * Review draws while the child's success is protected (docs/design.md §6.3): the boss's spaced
  * review, snack time and the Feeding Time that draws the weakest facts serve the likeliest success
- * first, and the most overdue fact otherwise. Each round is started on a hand-built state through
- * the rules' own round start; the expectations are worked out here.
+ * first, and the most overdue fact otherwise; a starving known fact comes before both (the review
+ * guarantee). Each round is started on a hand-built state through the rules' own round start; the
+ * expectations are worked out here.
  */
 import { describe, expect, it } from 'vitest';
 import { createPrng } from '@aegis/core';
@@ -43,10 +44,10 @@ interface Round {
 }
 
 /** The first item a round serves when today's 20 answers had `correct` right ones. */
-function firstItem(round: Round, correct: number): string {
+function firstItem(round: Round, correct: number, items = ITEMS): string {
   const state = initialProfileState({ dailyGoal: 30, arena: true });
   state.day = DAY;
-  state.items = structuredClone(ITEMS);
+  state.items = structuredClone(items);
   state.history = [{ day: DAY, answers: 20, correct, fast: 0 }];
   const streams = new Map<string, ReturnType<typeof createPrng>>();
   const ctx = {
@@ -90,6 +91,13 @@ describe('review draws', () => {
     it(`${name}: the likeliest success below 70 %, the most overdue fact inside the band`, () => {
       expect(firstItem(round, 8), '40 %: right last time').toBe('mul:2x3');
       expect(firstItem(round, 18), '90 %: five days overdue').toBe('mul:2x4');
+    });
+
+    it(`${name}: a starving known fact first, whatever the child's success`, () => {
+      // Silver, four days past its review day: the review guarantee serves it before both.
+      const items = { ...ITEMS, 'mul:2x7': { ...ITEMS['mul:2x3']!, box: 3, due: DAY - 4 } };
+      expect(firstItem(round, 8, items), '40 %').toBe('mul:2x7');
+      expect(firstItem(round, 18, items), '90 %').toBe('mul:2x7');
     });
   }
 

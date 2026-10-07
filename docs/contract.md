@@ -390,7 +390,7 @@ logical turn (`ACTION_TURNS`); re-ask jobs count turns.
 | ------------------------------------------------------ | ----- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `startSession { day: 'YYYY-MM-DD' }`                   | 0     | always (first action of a profile)                                                                             | new day: daily record, history; first session: prologue                                                                                                                                    |
 | `startLevel { level, activity? }`                      | 0     | level open, no active round, no blocking beat; with `activity`: the level completed and that activity playable | start a run and its first playable activity, with the level-start beat; with `activity`, replay just that activity (the level is not completed again; the Daily Adventure's minigame step) |
-| `startActivity { activity }`                           | 0     | `level` (index ≤ next), `arena` (open and on), `snack` (a hungry dragon), `placement`                          | start a round                                                                                                                                                                              |
+| `startActivity { activity }`                           | 0     | `level` (index ≤ next), `arena` (open and on), `snack` (a hungry dragon, or due basket facts), `placement`     | start a round                                                                                                                                                                              |
 | `answer { value, elapsedMs }`                          | 1     | a problem is on screen (not in the placement check)                                                            | grade, Leitner move, coins, re-ask job, next problem                                                                                                                                       |
 | `placementAnswer { value, elapsedMs }`                 | 1     | a placement-check problem is on screen                                                                         | grade, climb the ladder (no re-asks); at the end place levels                                                                                                                              |
 | `minigameMove { revision, move }`                      | 0     | a minigame board is active, `revision` is its revision, the move is legal (minigames.ts)                       | reduce the board; credit facts and coins; next board or the end of the round                                                                                                               |
@@ -409,7 +409,7 @@ logical turn (`ACTION_TURNS`); re-ask jobs count turns.
   `owned`, `insufficient-coins`, `unknown-dragon`, `not-owned`, `wrong-slot`, `gift-not-ready`,
   `story-choice`, `invalid-setting`, `not-implemented`, and (rules work) `no-board` (no minigame
   board to play), `stale-move` (the board changed since the move was made), `invalid-move` (the
-  board's rules do not allow that move), `not-hungry` (snack time without a hungry dragon),
+  board's rules do not allow that move), `not-hungry` (snack time with nothing due to eat),
   `arena-locked` (the Arena is not open yet or switched off), `unknown-quest`, `quest-not-done`,
   `quest-claimed`. The shell localizes by `code` (`error.<code>` in `en.ui.json`) and never
   shows diagnostic text to a child.
@@ -470,8 +470,10 @@ one-shots). It contains:
   view (`minigame`, whose `revision` every `minigameMove` must carry) and the typed board
   `current` (§11.1).
 - `dragons`: owned dragons with stage, expression, mastery shares (percent, rounded down),
-  hunger, outfit and the next stage with its exact counts (`next.have` of `mastery.items` facts at
-  the stage's mastery level, `next.need` to reach it: the shell's "4 of 7 facts").
+  hunger, outfit and the next stage with its exact counts (`next.have` facts at the stage's mastery
+  level, `next.need` to reach it: the shell's "4 of 7 facts"). `mastery.items` is the size of the
+  mastery set; from bronze up the shares and counts leave out the rule facts of a dragon not of the
+  0 or 1 table, as growth does (docs/design.md §6.5).
 - `window`: the **11 × 11** Magic Window (`cells`: 121 multiplication facts, row = first factor,
   column = second factor) and the division panel (110 cells, row = divisor, column = quotient), each
   cell with `level` (`dim/bronze/silver/gold`) and `needsPolish`.
@@ -486,14 +488,17 @@ A dragon is **hungry** when at least `balance.hungry.minDue` of its facts (multi
 division) are due. A fact is due when it was answered right before, its review day has come and
 it was not already practised today, so a dragon is never hungry on the day it hatched. `hub.next`
 is, in order: a pending beat (`story`); the placement check while `onboarding.placement` is
-`pending`; `snack` time when a dragon is hungry and nothing was answered yet today; the next
+`pending`; `snack` time when a dragon is hungry or the valley's basket has due facts, and nothing
+was answered yet today; the next
 glowing `level` until a level was finished today; then, once a day that had no minigame yet,
 `minigame { level, activity }` (a minigame of the furthest finished level, replayed with
-`startLevel { level, activity }`); the `gift` once the goal is reached; the next `level` while
+`startLevel { level, activity }`); the `gift` once the goal is reached; `snack` time again while a
+known fact is starving (the review guarantee) and no level is under way; the next `level` while
 today's success is at least 70 % (`LOW_SUCCESS`; a level already under way always continues);
-below it a review: `snack` time when a dragon is hungry, else `minigame { level, activity }` naming
-a problem activity (not the boss) of the furthest finished level (the step replays any one
-activity of a finished level); `free-play`. Pacing only chooses `next`: level availability never
+below it a review: `snack` time as above, else `minigame { level, activity }` naming an activity
+of the last three finished levels (problem activities, or minigames too while there are fewer than
+two; never the boss), rotating with `roundCounter` so successive reviews differ (the step
+replays any one activity of a finished level); `free-play`. Pacing only chooses `next`: level availability never
 depends on it.
 
 While recent success (the last `mix.window` answers, across days) is below `LOW_SUCCESS`, the rules
@@ -501,6 +506,12 @@ protect the child's success: likely successes first in the mix and in snacks, a 
 last time treated as a learning item, snacks of 4-6 problems instead of 6-10, and reviews (due
 items, snacks) and re-asks resolved to choice input outside the Arena and the placement check
 (docs/design.md §6.3).
+
+Snack time for every dragon (`startActivity { snack, dragon: null }`) also serves the valley's
+basket: due facts no hatched dragon eats (docs/design.md §5.12). The round's `dragon` is then the
+first owned dragon, as for any fact no owned dragon eats. Wherever reviews are served, a known fact
+(box 2+) four or more days past its review day (`STARVING_DAYS`) comes first: the review guarantee
+(§6.3).
 
 Word problems with an operation (Riddle Scrolls, and stories in boss and mixed rounds) are asked
 in two steps: the operation, then the number. A right operation moves the problem to its answer
@@ -623,10 +634,11 @@ value, family and term modes, Number Trail, Egg Grid, Fact Family Nest, Sharing 
 Orders), replaying one activity of a finished level, the adaptive mix (due reviews, known and
 learning items, the learning share following recent success, the focus egg, no repeats, and below
 the success band likely successes first, smaller snacks, choice input for reviews and re-asks and
-the Daily Adventure's pacing; every skill of an activity is served when several produce the same
+the Daily Adventure's pacing with rotating reviews; the review guarantee and the valley's basket; every skill of an activity is served when several produce the same
 item), partial credit for commuted facts, re-ask jobs and teaching a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
 finale, the placement check, snack time, the Lightning Arena, grading (with the Riddle Scrolls
-operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth, stickers, the
+operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth (rule facts counted
+from bronze up only for Puff and Mirror), stickers, the
 market, outfits, settings (with unlock-ahead), state validation and the complete view. Every
 generator of §6 is implemented with its distractors ([learning.md](learning.md)); comparisons and
 terms are answered by choice whatever the input mode (`keypadPossible`).

@@ -264,24 +264,29 @@ order:
 
 1. a pending story beat;
 2. the placement check, if not done yet;
-3. **snack time** for hungry dragons (their due reviews), at the start of the day;
+3. **snack time** for hungry dragons (their due reviews) and the valley's basket (§5.12), at the
+   start of the day;
 4. the next glowing level (or the next activity of a level in progress), until a level is done
    today;
 5. a **minigame for variety**, once, if the day had none yet: a minigame of the furthest finished
    level, replayed on its own (`startLevel { level, activity }`, which never completes the level
    again);
 6. the **gift chest**, once the daily goal is reached;
-7. the next glowing level again, **while today's success is at least 70 %** (pacing, below); a
+7. **snack time** again while a known fact is starving (the review guarantee, §6.3), unless a level
+   is under way;
+8. the next glowing level again, **while today's success is at least 70 %** (pacing, below); a
    level already under way is always continued;
-8. free play (any open level, the Arena, the Market, the Album).
+9. free play (any open level, the Arena, the Market, the Album).
 
 **Pacing** (decided after the learner simulations): the game keeps a struggling child mostly
 succeeding, even if the valley takes longer. After the day's first level, a further _new_ level is
 offered only while today's success is at least 70 % (the lower edge of the success band). Below
-it the Daily Adventure reviews instead: snack time for hungry dragons, else a replay of one
-activity of the furthest finished level (the same `minigame` step as above, for any activity).
-Pacing only chooses the suggestion: every open level, including those a parent unlocked ahead,
-stays playable from the map. The day's first level is always offered.
+it the Daily Adventure reviews instead: snack time when something is due (§5.12), else a replay of
+one activity (the same `minigame` step as above, for any activity) of the last three finished
+levels: their problem activities, or their minigames too while there are fewer than two. The
+review rotates with every round played, so a review that did not lift the day is not offered
+again straight away. Pacing only chooses the suggestion: every open level, including those a
+parent unlocked ahead, stays playable from the map. The day's first level is always offered.
 
 After the daily goal the dragons get **sleepy** (an expression, never a lock). Play can continue.
 The parent sets the goal and an optional time limit; when the limit is reached the shell ends the
@@ -420,6 +425,11 @@ of known facts against your own best. The shell keeps the time and ends the roun
 - **Snack time** serves a hungry dragon's due items (or all hungry dragons'), 6-10 problems, auto
   input; while recent success is below 70 % only 4-6, so a session is not dominated by reviews the
   child cannot do yet (§6.3). Feeding hungry dragons _is_ the spaced review.
+- **The valley's basket** (added after the learner simulations): due facts that no hatched dragon
+  eats wait in the basket. These are comparisons, terms and word problems until the Seven-Headed
+  Dragon hatches, and the facts of eggs not hatched yet. Snack time for every dragon serves them
+  with the dragons' due facts, and the Daily Adventure offers snack time when only the basket has
+  something due, so every fact the child knows is reviewed.
 - **Placement** ("Show the dragons what you know!") walks a ladder of skills
   (`placement.steps`), 2-4 problems per step, 12-24 problems in total. It stops early and gently
   after `stopAfterMisses` misses in a row. Passing a step (`passAccuracy`) marks its levels as placed:
@@ -478,6 +488,12 @@ Response buckets come from `elapsedMs` measured by the shell (paused time exclud
   the placement check); and the Daily Adventure holds further new levels (§4.2). Inside the band
   the spaced order (most overdue first) is unchanged: switching at the 82 % target instead slowed
   an average child's mastery in the simulations.
+- **The review guarantee** (added with the basket): a known fact (bronze or better, box 2+) that
+  has waited **4 days** past its review day is _starving_. Wherever reviews are served (the mix's
+  due draws, snacks, the boss's spaced review), a starving fact comes first, the most overdue
+  first, whatever the child's success; and while one is starving the Daily Adventure offers snack
+  time before any new level (§4.2). A child who plays on weekdays therefore sees every known fact
+  within a week of its review day: the weekend adds at most three days.
 - No immediate repeats: an item is not served again within 2 problems _(`noRepeatWithin`)_, re-asks
   excepted, and inside each tier items not served in this round come first (known items: also
   not practised today). Tables are interleaved.
@@ -532,6 +548,15 @@ table dragon, the 21 facts of its table in both orders).
 | youngling | 60 % at bronze or better, and 60 % of its division facts at bronze     |
 | adult     | 90 % at silver or better (division too) and its region's boss defeated |
 | crowned   | 100 % gold (division too)                                              |
+
+**Rule facts and growth** (after the learner simulations): from bronze up, a dragon counts the rule
+facts of its set (`n · 0`, `n · 1`, `0 : n`, `n : 1`) only if it is Puff (×0) or Mirror (×1), whose
+facts they are. A round not about 0 or 1 serves at most one of them (§6.3), so they come round too
+rarely to be reviewed to silver and gold, and they would hold every other dragon back from adult
+and crowned. Bubbles therefore grows on 17 of its 21 facts (and 10 of its 11 division facts). They
+still count toward hatching, which needs each fact answered right only once, and they still light
+their panes in the Magic Window. Snack time serves rule facts never answered right as soon as the
+due facts are fed, so Puff and Mirror meet all of theirs.
 
 **Kindness rules.** Dragons never shrink; mastery that fades only makes panes need polishing and
 dragons hungry. A dragon with at least one due fact is **hungry for snacks** _(`hungry.minDue`)_.
