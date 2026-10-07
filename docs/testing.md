@@ -116,6 +116,11 @@ like balance-report.md §5). Since 1.2.0 the bots take time to read a story's En
 a word for the average bot, 900 for the slow and struggling bots, 300 for the perfect one: the
 whole story before its first step, a quarter of it again before the answer that follows an
 operation step); `--no-reading` reproduces the earlier runs without it.
+Each report also records the day each fact was first met (an answer or a board's credit), the
+measure of coverage; and `--growth test/sim/growth-study.json` follows other growth rules
+alongside the shipped ones (`test/sim/growth.ts`). Growth past hatching never feeds back into
+play, so the stage days a variant records are those it would give on the same run; the shipped
+rules as a variant reproduce the game's own stage days (balance-report.md §8).
 The gate runs only the bots' model tests, the checks against synthetic reports and a short first
 session (`test/sim/*.test.ts`). The measured results, the model's assumptions and the balance
 decisions are in [balance-report.md](balance-report.md).

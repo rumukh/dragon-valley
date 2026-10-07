@@ -76,7 +76,9 @@ F1b the stories bucket as if reading took no time, or better.
 **What the balance block cannot fix** (§5): Mirror's egg for the struggling child (9-13 sessions
 on four of five seeds) and Ember's two facts the perfect child is never asked, both in S2b's
 PR F; the struggling child's stretch band (70-90 %: 4-8 of its 48 sessions); and the struggling
-child grows no dragon to adult in a school year (§4.4).
+child grows no dragon to adult in a school year (§4.4). PR F (#40) has since fixed Mirror's egg and
+Ember's facts (§5.8, §5.9). The growth study in §8 compares ways to let the struggling child see
+its dragons grow up.
 
 ## 2. The children
 
@@ -415,3 +417,140 @@ Content 1.2.0 changes only the balance block, prices, coin rewards and the stori
 - **Cost.** A simulated child costs about 30 ms a commit with the v1 pack, so the 12-week and
   year runs stay outside the gate. A scheduled CI job running `node scripts/simulate.mjs --check`
   would catch balance and content regressions.
+
+## 8. Growing up: the struggling child's dragons (a study for 1.3.0 or v1.1)
+
+**The question.** Over a school year the struggling child grows no dragon to adult (§4.4): the
+child who most needs to see a dragon grow up never does. The coordinator asked for four options,
+measured over 365 days with numbers for all four children: (a) adult at 80 % silver instead of
+90 %; (b) a threshold of their own for the easy tables (× 0, × 1, × 2, × 5, × 10); (c) an
+effort-weighted path, where enough well-spaced practice counts alongside silver; (d) anything
+better. The average child should still need until about day 60-70 for 11 of 11 adults, so that
+crowning stays the long goal.
+
+**Why it does not grow.** The gates (`balance.growth`): hatchling at 30 % of the facts answered
+right once; youngling at 60 % bronze, of the multiplication and the division facts; adult at 90 %
+silver, both, and the region's boss; crowned at 100 % gold. Bronze and silver are Leitner boxes 2
+and 3+. A right answer slower than "ok" (6 s by choice) does not move its box, and the struggling
+child's steady answers take 6.7 s, so only its fluent answers move facts up, and a miss sends a
+fact back to box 1. After a year it has 50 of 121 window facts and 15 of 110 division facts at
+silver: every table dragon fails the youngling gate's division share. Lowering the adult share
+cannot help while the youngling gate holds.
+
+**Method.** Growth past hatching never feeds back into play: the rules read a dragon's stage only
+for its egg, the view and sticker criteria; stickers pay nothing; no quest or story beat waits on
+growth; growth draws no random numbers. So each candidate is followed during the same runs
+(`node scripts/simulate.mjs --growth test/sim/growth-study.json`, `test/sim/growth.ts`): after
+every step that can credit a fact or win over a boss, each variant's stage for each dragon, never
+going down, as in the game. The shipped rules as a variant reproduced the game's own stage days
+in all 17 runs (348 of 348). Content 1.2.0 with PR F (#40), reading on:
+
+- the struggling child over 365 days on seeds `simulation`, s2, s3 and s4 (the effort + 80 %
+  variants on the first three);
+- the average child over 365 days (`simulation`) and 84 days (s2, s3): variants only add ways
+  to grow, so 84 days show its 11th adult;
+- the slow child over 365 days (182 for the effort + 80 % variants);
+- the perfect child over 84 days.
+
+Crowning is the same in every variant (100 % gold, which implies every earlier gate): the average
+child crowns 5 table dragons in a year, the perfect child all 11 by day 84, the slow and
+struggling children none.
+
+**The variants** (the shipped gates unless said):
+
+- (a) `a-adult80`: adult at 80 %; `a-adult80-young50`: youngling at 50 % as well.
+- (b) `b-easy-adult75`: Puff, Mirror, Bubbles, Sunny and Goldie adult at 75 %;
+  `b-easy-young40-adult75`: and youngling at 40 %.
+- (c) The effort path: a fact also counts as bronze once it was answered right on B different
+  days, and as silver on S days, each counted day at least 2 days after the last (well spaced):
+  `c-effort-3-6`, `c-effort-3-5`, `c-effort-2-4`; `c-effort-2-4-gap1` counts any different days.
+- (d) `d-division-lag`: division facts count at 30 % for youngling and 60 % for adult;
+  `d-division-lag-effort`: with effort 3/6; `d-youngling-mul`: youngling from multiplication
+  alone; `d-effort-S-adult80`: the effort path with adult at 80 %.
+
+**The struggling child** (table dragons; one value per seed):
+
+| Variant                  | Younglings by day 84 | Younglings in a year | Adults in a year | First adult (day) |
+| ------------------------ | -------------------- | -------------------- | ---------------- | ----------------- |
+| shipped                  | 0 / 0 / 0 / 0        | 1 / 0 / 0 / 0        | 0 / 0 / 0 / 0    | none              |
+| `a-adult80`              | 0 / 0 / 0 / 0        | 1 / 0 / 0 / 0        | 0 / 0 / 0 / 0    | none              |
+| `a-adult80-young50`      | 0 / 0 / 0 / 0        | 1 / 2 / 0 / 2        | 0 / 0 / 0 / 0    | none              |
+| `b-easy-adult75`         | 0 / 0 / 0 / 0        | 1 / 0 / 0 / 0        | 0 / 0 / 0 / 0    | none              |
+| `b-easy-young40-adult75` | 0 / 0 / 0 / 0        | 2 / 2 / 0 / 3        | 0 / 0 / 0 / 0    | none              |
+| `c-effort-3-6`           | 1 / 1 / 3 / 1        | 10 / 11 / 10 / 11    | 1 / 1 / 0 / 0    | 304, 311          |
+| `c-effort-3-5`           | 1 / 1 / 3            | 10 / 11 / 10         | 1 / 2 / 2        | 304-319           |
+| `c-effort-2-4`           | 9 / 8 / 7 / 6        | 10 / 11 / 10 / 11    | 2 / 4 / 2 / 0    | 232-304           |
+| `c-effort-2-4-gap1`      | 9 / 10 / 7           | 10 / 11 / 10         | 2 / 4 / 2        | 206-304           |
+| `d-division-lag`         | 0 / 0 / 0 / 0        | 4 / 3 / 0 / 1        | 0 / 0 / 0 / 0    | none              |
+| `d-division-lag-effort`  | 6 / 7 / 8 / 7        | 11 / 11 / 11 / 11    | 3 / 2 / 5 / 0    | 224-304           |
+| `d-youngling-mul`        | 0 / 1 / 0 / 0        | 7 / 6 / 6 / 2        | 0 / 0 / 0 / 0    | none              |
+| `d-effort-3-6-adult80`   | 1 / 1 / 3            | 10 / 11 / 10         | 3 / 2 / 2        | 273-322           |
+| `d-effort-3-5-adult80`   | 1 / 1 / 3            | 10 / 11 / 10         | 4 / 5 / 3        | 227-270           |
+| `d-effort-2-4-adult80`   | 9 / 8 / 7            | 10 / 11 / 10         | 6 / 8 / 5        | 168-266           |
+
+**The other children** (the 11th table dragon to adult, or adults by day 84, as said):
+
+| Variant                  | Average: 11th adult (day; seeds `simulation` / s2 / s3) | Slow: adults by day 84 | Slow: first / 11th adult (day) | Perfect: 11th adult (day) |
+| ------------------------ | ------------------------------------------------------- | ---------------------- | ------------------------------ | ------------------------- |
+| shipped                  | 57 / 72 / 78                                            | 2                      | 63 / 179                       | 20                        |
+| `a-adult80`              | 56 / 71 / 67                                            | 3                      | 23 / 163                       | 18                        |
+| `a-adult80-young50`      | 56 / 71 / 67                                            | 3                      | 23 / 163                       | 18                        |
+| `b-easy-adult75`         | 57 / 72 / 78                                            | 4                      | 23 / 179                       | 20                        |
+| `b-easy-young40-adult75` | 57 / 72 / 78                                            | 4                      | 23 / 179                       | 20                        |
+| `c-effort-3-6`           | 56 / 70 / 78                                            | 3                      | 35 / 179                       | 20                        |
+| `c-effort-3-5`           | 56 / 70 / 78                                            | 3                      | 31 / 179                       | 20                        |
+| `c-effort-2-4`           | 52 / 70 / 78                                            | 8                      | 29 / 179                       | 20                        |
+| `c-effort-2-4-gap1`      | 46 / 70 / 78                                            | 8                      | 29 / 176                       | 20                        |
+| `d-division-lag`         | 52 / 52 / 50                                            | 2                      | 63 / 158                       | 18                        |
+| `d-division-lag-effort`  | 52 / 50 / 50                                            | 5                      | 35 / 158                       | 18                        |
+| `d-youngling-mul`        | 57 / 72 / 78                                            | 2                      | 63 / 179                       | 20                        |
+| `d-effort-3-6-adult80`   | 51 / 70 / 67                                            | 9                      | 23 / 116                       | 18                        |
+| `d-effort-3-5-adult80`   | 49 / 70 / 67                                            | 9                      | 23 / 100                       | 18                        |
+| `d-effort-2-4-adult80`   | 46 / 70 / 67                                            | 9                      | 23 / 94                        | 18                        |
+
+**Findings.**
+
+1. (a) and (b) do nothing for the struggling child: the youngling gate's division share holds
+   every table dragon at hatchling for the whole year. They are content-only, and mostly bring the
+   slow child's first adult forward (day 63 to 23).
+2. The effort path (c) is the lever that works, and it leaves the average and perfect children
+   much as they are. With bronze after 2 days and silver after 4 (`c-effort-2-4`) the struggling
+   child sees 6-9 younglings by day 84 and 10-11 within the year, and 0-4 adults. The average
+   child's 11th adult moves 0-5 days (median 70 against 72); the perfect child's not at all. The
+   slow child's younglings come by day 84 and its first adult on day 29 instead of 63.
+3. Spacing matters: counting any different days (`gap1`) brings the average child's 11th adult
+   forward by up to 11 days on one seed, and gives the struggling child no more adults (only a
+   first adult some weeks earlier on two seeds).
+4. Easing the division gate (`d-division-lag`) alone gives the struggling child at most 4
+   younglings and no adult; with the effort path, 0-5 adults. Either way the average child's 11
+   adults come on day 50-52, outside the 60-70 window.
+5. The effort path with adult at 80 % (`d-effort-2-4-adult80`) is the strongest: 5-8 adults for
+   the struggling child within the year, the first on day 168-266. The average child's 11th adult
+   comes on day 46 / 70 / 67 (median 67 against 72), and the slow child's on day 94 instead of 179.
+
+**Recommendation.** The effort path, bronze after 2 and silver after 4 different days with a
+right answer, at least 2 days apart (`c-effort-2-4`). It reads as a clear rule for children and
+parents: a dragon grows up when you know its facts, shown by getting them right on several
+separate days at any speed, and it is crowned when you know them by heart (fast answers). If the
+struggling child should see several adults within the year (5-8 instead of 0-4), add the 80 %
+adult share (`d-effort-2-4-adult80`). The price is the slow child's adults three months earlier
+and the average child's about a week earlier, still near the 60-70 window. Crowning stays the long
+goal in every variant.
+
+**What it takes** (rules and contract, S2b's area, so a coordinator decision between 1.3.0 and
+v1.1):
+
+- the item state counts, for each fact, the days it was answered right, each at least `gap` days
+  after the last counted one (new optional fields; saves without them start counting at 0, and
+  growth never goes down, so nothing is lost);
+- `balance.growth` gets an optional `effort: { bronze, silver, gap }`, and the adult share if (d)
+  is chosen: a content revision;
+- the view's progress toward the next stage counts the effort path too. A design question remains:
+  whether practice lights the Magic Window panes as well, or only grows the dragons (the window
+  would then keep meaning Leitner mastery);
+- the simulation's `--growth` variants give the expected numbers before and after.
+
+**Limits.** The model does not feel the motivation a growing dragon gives; its struggling child
+forgets fast (`forget` 6) and never benefits from the picture model (§7), so a real struggling
+child may grow faster under any variant. The struggling child ran four seeds (three for the
+effort + 80 % variants), the others one to three.
