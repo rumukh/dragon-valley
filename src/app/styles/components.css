@@ -812,6 +812,9 @@
   border: 0.1em solid var(--dv-line-strong);
   border-radius: 0.6em;
   background: var(--dv-card);
+  /* WebKit counts the longest option's text in the page's width (DV-QA-05); paint containment
+     keeps it inside the list's own box. */
+  contain: paint;
 }
 
 /* ---- Meter ------------------------------------------------------------------------------ */
