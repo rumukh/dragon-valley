@@ -324,6 +324,18 @@ describe('Sharing Feast boards', () => {
     expect(credit(def, ['div:12:3'], true).items).toEqual([{ item: 'div:12:3', bucket: 'slow' }]);
   });
 
+  it('credits a right answer given before any fruit was dealt as ok, at the first attempt', () => {
+    const def = feast({ pool: ['rem:d4'], skills: [leftovers] });
+    const { total } = def.config as { total: number };
+    const left = total % 4;
+    const states = run(def, [{ type: 'submit', each: (total - left) / 4, left }]);
+    expect(states[1]!.status, `${total} : 4 answered at once`).toBe('completed');
+    expect(boardCredits(def, states[0]!, states[1]!, new Set(['rem:d4']))).toEqual({
+      items: [{ item: 'rem:d4', bucket: 'ok' }],
+      coins: 4,
+    });
+  });
+
   it('leaves leftovers in the bowl for a remainder skill, fewer than the baskets', () => {
     for (let seed = 0; seed < 20; seed++) {
       const def = feast({

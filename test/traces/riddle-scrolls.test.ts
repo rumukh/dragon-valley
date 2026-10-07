@@ -21,7 +21,7 @@ vi.setConfig({ testTimeout: 300_000 });
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
 const GOLDEN_HASH = '8e668bbdd317a658';
-const GOLDEN_TRAJECTORY = 'b4f8e35418f8c6f4';
+const GOLDEN_TRAJECTORY = 'b1b5543f1c0cb409';
 
 const SEED = 'golden-riddle-scrolls';
 

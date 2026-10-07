@@ -136,7 +136,10 @@ export interface ProblemView {
   step: ProblemStep;
   reask: boolean;
   hinted: boolean;
-  /** Present when the item was missed twice in a row: show the picture model before asking. */
+  /**
+   * Present when the picture model is shown before asking: a strategy item met for the first
+   * time, or an item missed twice in a row.
+   */
   teach?: boolean;
 }
 

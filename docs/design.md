@@ -375,8 +375,17 @@ right, as correct but slow (no box move) after more checks. A coin per equation.
 Share fruit between baskets: tap or drag fruit into baskets so that every basket has the same number;
 leftovers stay in the bowl. Teaches division as sharing and grouping, and remainders ("the leftover
 is always fewer than the baskets"). Config `{ total, baskets, remainder: boolean }`; moves
-`{ type: 'put', basket }`, `{ type: 'take', basket }`, `{ type: 'submit', each, left }`. Uses
-`createPlacement`.
+`{ type: 'put', basket }`, `{ type: 'take', basket }`, `{ type: 'deal' }` (one into every basket),
+`{ type: 'submit', each, left }`. Uses `createPlacement`.
+
+**A right answer is accepted at any time** (refinement after the third playtest): a submitted fair
+share, `each` = total : baskets and `left` = its remainder, completes the board at once, even with
+all the fruit still in the bowl; the baskets then show the fair share (the shell animates the
+jump). A child who knows `5 : 2 = 2 r 1` is never told "not yet" and sent to deal the fruit. Any
+other answer gets the guidance toward the model, as before: `uneven` (the baskets differ), `more`
+(the bowl can still give every basket one more) or `count` (the baskets are shared out and the
+numbers do not match them). Credits the division item on completion: as correct (ok) when the first
+answer was right, as correct but slow (no box move) after more answers.
 
 ### 5.7 Compare Stones (`compare-stones`): problem activity
 
@@ -424,18 +433,33 @@ of known facts against your own best. The shell keeps the time and ends the roun
 
 ### 5.12 Snack Time (`snack`) and Placement (`placement`)
 
-- **Snack time** serves a hungry dragon's due items (or all hungry dragons'), 6-10 problems, auto
-  input; while recent success is below 70 % only 4-6, so a session is not dominated by reviews the
-  child cannot do yet (§6.3). Feeding hungry dragons _is_ the spaced review.
+- **Snack time** serves a hungry dragon's due items (or all hungry dragons'), a problem per due fact
+  or first taste (below), 6-10 problems, auto input; while recent success is below 70 % only 4-6,
+  so a session is not dominated by reviews the child cannot do yet (§6.3). Feeding hungry dragons
+  _is_ the spaced review.
 - **The valley's basket** (added after the learner simulations): due facts that no hatched dragon
   eats wait in the basket. These are comparisons, terms and word problems until the Seven-Headed
   Dragon hatches, and the facts of eggs not hatched yet. Snack time for every dragon serves them
   with the dragons' due facts, and the Daily Adventure offers snack time when only the basket has
   something due, so every fact the child knows is reviewed. A snack of the basket alone (no
-  dragon is hungry) is as long as the basket, within the usual maximum: one problem per fact, a
-  fact and its twin once (a right answer to 6 · 8 reviews 8 · 6), so a single due fact is a
-  one-problem snack. Any round that runs out of things to ask finishes normally, with its results
-  and coins.
+  dragon is hungry) is as long as the basket and its first tastes (below), within the usual
+  maximum: one problem per fact, a fact and its twin once (a right answer to 6 · 8 reviews 8 · 6),
+  so a single due fact is a one-problem snack. Any round that runs out of things to ask finishes
+  normally, with its results and coins.
+- **First tastes** (added after the learner simulations): a level's round draws new facts at
+  random, so a taught fact can be missed, and a child who earns three stars never replays a level:
+  the perfect child never met 6 : 6 or 54 : 6, and Ember could not grow up. Snack time therefore
+  serves _first tastes_, facts of the child's dragons that a finished level taught but the child
+  has never answered (nor met on a board): every other problem of a snack (the 2nd, 4th and 6th),
+  up to three. Starving facts (§6.3) come before them, except the snack's first taste: it is served
+  even on a busy day, unless the child's success is protected, so that a long review backlog cannot
+  hold every new fact back for weeks (the slow learner lost two thirds of its tastes to starving
+  facts). Eggs' facts come first, as they warm the egg (so every egg hatches within a few
+  sessions); then the hatched dragons', the oldest dragon first, multiplication before division.
+  A snack makes room for its tastes (it is longer by up to three problems, within its size), so
+  they do not crowd out the due facts. Snack time serves no fact the child has neither met nor been
+  taught (a dragon's division facts wait for the division levels), a dragon's own snack tastes only
+  its own facts, and the Seven-Headed Dragon's egg is left out (the finale hatches it).
 - **Placement** ("Show the dragons what you know!") walks a ladder of skills
   (`placement.steps`), 2-4 problems per step, 12-24 problems in total. It stops early and gently
   after `stopAfterMisses` misses in a row. Passing a step (`passAccuracy`) marks its levels as placed:
@@ -549,9 +573,21 @@ turns; each answer is one turn)_, at most **2 per round** _(`reask.maxPerRound`)
 visual model first. Jobs are anchored to the round's runtime phase, so leaving a round cancels any
 that have not fired.
 
-**Teach, then ask**: a fact whose last two answers were misses is shown with its picture model
-before it is asked again (the problem's `teach` flag), in every round but the Arena (a race) and
-the placement check (a measurement). Its answer counts like a re-ask's.
+**Teach, then ask** ("I do, we do, you do"): the problem's `teach` flag asks the shell to show the
+picture model before the problem is asked. It is set in every round but the Arena (a race) and the
+placement check (a measurement), in two cases:
+
+- **A strategy met for the first time** (refinement after the third playtest): the first time the
+  child meets a strategy item, a bucket of an open-ended skill (tens, powers of ten, 2-digit ×
+  1-digit and 2-digit : 1-digit, order of operations and brackets, remainders, comparisons, terms,
+  word problems), it is shown how before it is asked. Opening Break It Apart and getting `82 · 3`
+  cold is too much. An item a board already credited (a Golem Orders or Sharing Feast board, say)
+  has been met: the board was the scaffold. Small-table facts are never taught first: a 3rd-grader
+  knows most of them from 2nd grade, and showing every new fact first would be slow and
+  patronising.
+- **A fact missed twice in a row** is shown with its picture model before it is asked again.
+
+A taught problem's answer counts like a re-ask's.
 
 ### 6.5 Mastery, the Magic Window and dragon growth
 
@@ -660,7 +696,7 @@ pipeline, so new stickers need no new art.
 | Crystal Caves    | Crystal Hatched, Starry Hatched, Finger Trick (×9 at silver), Cave Explorer, The Gnome King's Dance, Coin Collector (500 coins)                             |
 | Sharing Lake     | Fair Sharer (30 division facts at bronze), First Youngling, Lake Explorer, The Goblin's Teacups, Quest Helper (10 quests)                                   |
 | Leftover Lagoon  | Pearl Hatched, Leftover Expert (remainders at silver), Lagoon Explorer, The Nymph Dance, Ten Days                                                           |
-| Giant's Peaks    | Boulder Hatched, Big Numbers (carrying at bronze), Peak Explorer, The Giant's Nap, Arena Runner (Arena best 20), First Grown-Up Dragon                      |
+| Giant's Peaks    | Boulder Hatched, Big Numbers (carrying at bronze), Peak Explorer, The Giant's Nap, Arena Runner (Arena best 20), First Adult Dragon                         |
 | Riddle Ruins     | Clockwork Hatched, Bracket Boss (brackets at silver), Ruins Explorer, The Golem's Orders, Word Wizard (all six terms), Twenty Days                          |
 | Dragon Castle    | Half the Window (61 panes silver), Golden Window (121 panes gold), First Crown, Castle Explorer, Seven Heads Cured, Every Table (all table dragons hatched) |
 

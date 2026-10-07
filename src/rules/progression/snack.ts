@@ -3,16 +3,18 @@
  * when at least `balance.hungry.minDue` of its facts are due. Feeding every dragon (`dragon:
  * null`) also empties the valley's basket: due facts no hatched dragon eats (`basketItems`).
  * The snack serves due facts first (`pickReview`: starving facts, then the most overdue or, while
- * recent success is low, the likeliest successes), then the dragons' weakest known facts. It has
- * 6 to 10 problems with auto input; 4 to 6 while recent success is low, so a session is not
- * dominated by reviews the child cannot do yet. Feeding hungry dragons is the spaced review.
- * A snack of the basket alone (no dragon is hungry) is never longer than the basket: each answer
- * takes its fact out, and a right answer its twin too (`7 · 8` reviews `8 · 7`).
+ * recent success is low, the likeliest successes), with a first taste (`firstTastes`: a taught fact
+ * never answered) at every other problem, up to `TASTES_PER_SNACK`, then the dragons' weakest known
+ * facts. It has 6 to 10 problems with auto input; 4 to 6 while recent success is low, so a session
+ * is not dominated by reviews the child cannot do yet. Feeding hungry dragons is the spaced review.
+ * A snack of the basket alone (no dragon is hungry) is never longer than the basket and its first
+ * tastes: each answer takes its fact out, and a right answer its twin too (`7 · 8` reviews
+ * `8 · 7`).
  */
 import { commutedId } from '../contract';
 import { clamp, lowSuccess } from '../learning/selection';
-import { basketItems, dueItems, hungryDragons, itemsOf } from './dragons';
-import { playableSkills, startProblemRound } from './problems';
+import { basketItems, dueItems, firstTastes, hungryDragons, itemsOf } from './dragons';
+import { TASTES_PER_SNACK, playableSkills, startProblemRound } from './problems';
 import type { Index } from './problems';
 import type { Ctx, Data, ReadState } from '../types';
 
@@ -22,7 +24,10 @@ export const SNACK_MAX = 10;
 export const SNACK_MIN_LOW = 4;
 export const SNACK_MAX_LOW = 6;
 
-/** Problems in a snack: one per due fact, within `SNACK_MIN`…`SNACK_MAX` (or the `low` sizes). */
+/**
+ * Problems in a snack: one per due fact or first taste, within `SNACK_MIN`…`SNACK_MAX` (or the
+ * `low` sizes).
+ */
 export function snackTarget(due: number, low = false): number {
   return low ? clamp(due, SNACK_MIN_LOW, SNACK_MAX_LOW) : clamp(due, SNACK_MIN, SNACK_MAX);
 }
@@ -74,14 +79,18 @@ export function startSnack(ctx: Ctx, index: Index, dragon: string | null): void 
   const skills = snackSkills(data, dragons, index);
   const basket = dragon === null ? basketItems(ctx.state, data, index) : [];
   const due = dueItems(ctx.state, itemsOf(skills, index)) + basket.length;
-  const target = snackTarget(due, lowSuccess(ctx.state, data));
+  // Room for the first tastes as well, so that they do not crowd out the due facts.
+  const tastes = Math.min(TASTES_PER_SNACK, firstTastes(ctx.state, data, index, dragon).length);
+  const target = snackTarget(due + tastes, lowSuccess(ctx.state, data));
   startProblemRound(ctx, index, {
     activity: 'snack',
     source: { kind: 'snack', dragon },
     skills,
     input: 'auto',
-    // The dragons' facts can always be served again; the basket alone runs out (a round asks 1+).
-    target: skills.length > 0 ? target : Math.max(1, Math.min(target, distinctFacts(basket))),
+    // The dragons' facts can always be served again; the basket and the tastes run out (a round
+    // asks 1+).
+    target:
+      skills.length > 0 ? target : Math.max(1, Math.min(target, distinctFacts(basket) + tastes)),
     meter: null,
   });
 }

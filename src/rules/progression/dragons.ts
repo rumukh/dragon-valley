@@ -16,7 +16,7 @@ import type { Dragon, DragonStage, GrowthRule } from '../contract';
 import { canGenerate } from '../learning/generate';
 import { atLeast, isDue } from '../learning/items';
 import { growsWith, starving } from '../learning/selection';
-import { percentOf } from './levels';
+import { isComplete, percentOf } from './levels';
 import type { Ctx, Data, ReadState } from '../types';
 
 export function itemsOf(
@@ -158,8 +158,8 @@ export function basketItems(
 }
 
 /**
- * Whether a known fact snack time can serve is starving (`starving`: three days past its review):
- * the review guarantee then puts snack time before anything new (docs/design.md §6.3).
+ * Whether a known fact snack time can serve is starving (`starving`: `STARVING_DAYS` past its
+ * review): the review guarantee then puts snack time before anything new (docs/design.md §6.3).
  */
 export function anyStarving(
   state: ReadState,
@@ -173,6 +173,59 @@ export function anyStarving(
   );
 }
 
+/**
+ * The facts the child was taught: the items of a finished level's skills (docs/design.md §5.12).
+ * Snack time serves no fact the child has neither met nor been taught (no division before the
+ * division levels).
+ */
+export function taughtItems(
+  state: ReadState,
+  data: Data,
+  index: ReadonlyMap<string, readonly string[]>,
+): Set<string> {
+  return new Set(
+    data.levels
+      .filter((level) => isComplete(state, level.id))
+      .flatMap((level) => level.activities.flatMap((activity) => activity.skills))
+      .flatMap((skill) => index.get(skill) ?? []),
+  );
+}
+
+/**
+ * First tastes (docs/design.md §5.12): the facts of the child's dragons that it was taught
+ * (`taughtItems`) but never answered, in the order snack time introduces them. A level's round
+ * draws new facts at random, so some can be missed and would never come up again: snack time
+ * serves them. Eggs come first, the oldest first, all their facts (they warm them); then the
+ * hatched dragons', the oldest first (in content order on the same day). A dragon's
+ * multiplication facts come before its division facts. With `dragon`, only that dragon's. The
+ * finale dragon's egg is left out, because the finale hatches it.
+ */
+export function firstTastes(
+  state: ReadState,
+  data: Data,
+  index: ReadonlyMap<string, readonly string[]>,
+  dragon: string | null,
+  taught: ReadonlySet<string> = taughtItems(state, data, index),
+): string[] {
+  const owners = data.dragons
+    .map((d, order) => ({ d, order, owned: state.dragons[d.id] }))
+    .filter(
+      ({ d, owned }) =>
+        owned !== undefined &&
+        (dragon === null || d.id === dragon) &&
+        !(d.kind === 'finale' && owned.stage === 'egg'),
+    )
+    .sort(
+      (a, b) =>
+        Number(b.owned!.stage === 'egg') - Number(a.owned!.stage === 'egg') ||
+        a.owned!.obtainedDay - b.owned!.obtainedDay ||
+        a.order - b.order,
+    );
+  const tastes = owners
+    .flatMap(({ d }) => [...itemsOf(d.skills, index), ...itemsOf(d.divisionSkills, index)])
+    .filter((item) => state.items[item] === undefined && taught.has(item));
+  return [...new Set(tastes)];
+}
 /** Owned, hatched dragons with enough due facts (multiplication or division). */
 export function hungryDragons(
   state: ReadState,

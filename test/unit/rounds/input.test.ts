@@ -3,11 +3,11 @@
  * keypad round; numbers keep the activity's input. A copy of the pack opens Riddle Ruins ahead
  * and makes its term round a keypad round. While recent success is low, re-asks and reviews are
  * asked by choice; a fact missed twice in a row is taught (its picture model shown) before it is
- * asked again.
+ * asked again, and so is every strategy item the first time it comes up.
  */
 import { describe, expect, it } from 'vitest';
 import type { ContentPack } from '@aegis/runtime';
-import { isRuleFact } from '../../../src/rules/learning/selection';
+import { isRuleFact, isStrategyItem } from '../../../src/rules/learning/selection';
 import type { ContentData, ProblemView } from '../../../src/rules/contract';
 import { PERFECT, Player, loadPack } from '../../traces/support';
 
@@ -126,5 +126,65 @@ describe('input modes', () => {
     expect(asked.filter((p) => p.item !== hard).every((p) => p.teach === undefined)).toBe(true);
     expect(player.failures).toEqual([]);
     await player.dispose();
+  });
+
+  /** Every problem a level serves, with whether its item had been met before it was served. */
+  async function serveLevel(level: string, region: string) {
+    const player = new Player(PERFECT, `teach-${level}`);
+    await player.act({ type: 'startSession', day: '2026-10-06' });
+    await player.choose(null);
+    await player.choose('sunny');
+    await player.act({ type: 'setSetting', setting: { key: 'unlockAhead', value: [region] } });
+    const served: { item: string; teach: boolean; met: boolean }[] = [];
+    let last = -1;
+    player.host.subscribeCommits(({ view }) => {
+      const problem = view.round?.type === 'problems' ? view.round.problem : null;
+      if (problem === null || problem.index === last) return;
+      last = problem.index;
+      const met = player.state().items[problem.item] !== undefined;
+      served.push({ item: problem.item, teach: problem.teach === true, met });
+    });
+    await player.act({ type: 'startLevel', level });
+    await player.settleStory();
+    await player.playRound();
+    expect(player.failures).toEqual([]);
+    await player.dispose();
+    return served;
+  }
+
+  it('teaches each strategy the first time it comes up, then asks it plainly', async () => {
+    // Break It Apart: 2-digit × 1-digit with carrying, 10 problems on the keypad.
+    const served = await serveLevel('giants-peaks.4', 'giants-peaks');
+    expect(served.length).toBe(10);
+    expect(served.every((p) => isStrategyItem(p.item))).toBe(true);
+    expect(served[0], 'the very first problem is taught').toMatchObject({
+      teach: true,
+      met: false,
+    });
+    const again = served.filter((p) => p.met);
+    expect(again.length, 'its buckets come back in the round').toBeGreaterThan(0);
+    expect(
+      again.every((p) => !p.teach),
+      'a strategy met before is asked plainly',
+    ).toBe(true);
+    expect(served.filter((p) => p.teach).map((p) => p.item)).toEqual([
+      ...new Set(served.map((p) => p.item)),
+    ]);
+  });
+
+  it('never teaches a new small-table fact first, in a round mixing facts and strategies', async () => {
+    const served = await serveLevel('riddle-ruins.6', 'riddle-ruins');
+    const facts = served.filter((p) => !isStrategyItem(p.item));
+    const strategies = served.filter((p) => isStrategyItem(p.item));
+    expect([facts.length > 0, strategies.length > 0], 'both are served').toEqual([true, true]);
+    expect(
+      facts.some((p) => !p.met),
+      'some facts are new',
+    ).toBe(true);
+    for (const p of served) {
+      expect(p.teach, `${p.item} (${p.met ? 'met before' : 'new'})`).toBe(
+        isStrategyItem(p.item) && !p.met,
+      );
+    }
   });
 });

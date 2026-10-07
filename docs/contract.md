@@ -461,9 +461,9 @@ one-shots). It contains:
 - `run`: the level's activities and done flags, and the level result once finished.
 - `round`: for problem rounds the progress (answered, target, correct, streak, boss meter), the
   current `problem` (structured problem, resolved input, choices, step, re-ask and hint flags, and
-  `teach: true` when the item's last two answers were misses (not in the Arena or the placement
-  check), so the shell shows the picture model before asking, as for a re-ask; the field is absent
-  otherwise:
+  `teach: true` the first time a strategy item (a bucket) comes up and when the item's last two
+  answers were misses (not in the Arena or the placement check), so the shell shows the picture
+  model before asking, as for a re-ask; the field is absent otherwise:
   at a story's `operation` step the choices are the four operations, + − · : in that order; at the
   `answer` step answer options in seeded order for choice input, else `null`), the last `feedback` (with the expected answer for "Let's look"), coins, the dragon
   being fed with its expression, and for the placement check its ladder (`placement`: step,
@@ -512,11 +512,20 @@ Snack time for every dragon (`startActivity { snack, dragon: null }`) also serve
 basket: due facts no hatched dragon eats (docs/design.md §5.12). The round's `dragon` is then the
 first owned dragon, as for any fact no owned dragon eats. A snack of the basket alone (no dragon
 is hungry) has one problem per basket fact, counting a fact and its commuted twin once (a right
-answer reviews both), within the usual maximum. Wherever reviews are served, a known fact
-(box 2+) four or more days past its review day (`STARVING_DAYS`) comes first: the review guarantee
-(§6.3). A problem round whose draw finds nothing left to serve finishes as if its target were
-reached (`round.completed`, `status: 'complete'`, `endReason: 'finished'`), at the next answer or
-at its start, so no round can wait for an answer it cannot ask.
+answer reviews both), and per first taste (below), within the usual maximum. Wherever reviews are
+served, a known fact (box 2+) four or more days past its review day (`STARVING_DAYS`) comes first:
+the review guarantee (§6.3). A problem round whose draw finds nothing left to serve finishes as if
+its target were reached (`round.completed`, `status: 'complete'`, `endReason: 'finished'`), at the
+next answer or at its start, so no round can wait for an answer it cannot ask.
+
+Snack time also serves **first tastes** (`firstTastes`): at its 2nd, 4th and 6th problem, a fact of
+an owned dragon that a finished level taught and the child never answered nor met on a board: eggs'
+facts first, then the hatched dragons', the oldest first; for one dragon's snack only its own, and
+never the finale's egg. Starving facts come before the 4th and 6th problem's tastes, and before the
+2nd's too while success is protected. A taste is an ordinary problem of the round: nothing in the
+view marks it. A snack has a problem per due fact and per first taste (three at most), within its
+size limits, and serves no fact the child has neither answered nor been taught (`taughtItems`: the
+items of a finished level's skills).
 
 Word problems with an operation (Riddle Scrolls, and stories in boss and mixed rounds) are asked
 in two steps: the operation, then the number. A right operation moves the problem to its answer
@@ -555,17 +564,18 @@ ambiguous.
 | `sharing-feast` | `total`, `baskets`, `remainder` (leftovers expected), `inBaskets[]`, `bowl`, `last` (`uneven`, `more`, `count`), `attempts`   | `{ type: 'put' \| 'take', basket, count? }`, `{ type: 'deal' }`, `{ type: 'submit', each, left }`  |
 | `golem-orders`  | `expr` (as it stands), `start`, `picked` (a path or null), `last` (`right`, `not-first`, `wrong-value`), `steps`, `mistakes`  | `{ type: 'pick', path }` (`left`/`right`/`inner` steps from the root), `{ type: 'answer', value }` |
 
-The Egg Grid's config is `{ product, maxSide, split, find }` and the board is complete when
-`found` has `find` rectangles; the rules set `find` to every rectangle up to 10 × 10 (both
-orders of each factor pair, at most four). A Sharing Feast is complete when the baskets are
-equal, the bowl cannot go round once more and `submit` says how many each basket has and how many
-are left; Golem Orders when one number is left. A Golem expression is always worked out the way
-it reads (brackets only where they are written, · and : before + and −, each rank from left to
-right: `60 + 6 + 45 : 5` is the tree `(60 + 6) + 45 : 5`); the adapter refuses any other tree, and
-the rules redraw a generated expression whose tree reads differently. The operation that may go
-first follows the textbook: inside brackets first (the innermost pair that still holds an
-operation; separate pairs in either order), then · and :, then + and −, from left to right;
-independent operations of the same rank (`2 · 3 + 4 · 5`) in either order.
+The Egg Grid's config is `{ product, maxSide, split, find }` and the board is complete when `found`
+has `find` rectangles; the rules set `find` to every rectangle up to 10 × 10 (both orders of each
+factor pair, at most four). A Sharing Feast is complete when `submit` gives the fair share
+(`total : baskets` each and its remainder left), at any time: the baskets then show the fair share
+even if fruit was still in the bowl; any other answer sets `last` (`uneven`, `more` or `count`,
+guiding toward the model). Golem Orders is complete when one number is left. A Golem expression is
+always worked out the way it reads (brackets only where they are written, · and : before + and −,
+each rank from left to right: `60 + 6 + 45 : 5` is the tree `(60 + 6) + 45 : 5`); the adapter
+refuses any other tree, and the rules redraw a generated expression whose tree reads differently.
+The operation that may go first follows the textbook: inside brackets first (the innermost pair that
+still holds an operation; separate pairs in either order), then · and :, then + and −, from left to
+right; independent operations of the same rank (`2 · 3 + 4 · 5`) in either order.
 
 A finished step earns `balance.coins.correct` (a matched pair, a new rectangle, an equation, a
 trail stone, a basket, a Golem step) and credits facts to the Leitner boxes: a matched pair its
@@ -640,7 +650,7 @@ Orders), replaying one activity of a finished level, the adaptive mix (due revie
 learning items, the learning share following recent success, the focus egg, no repeats, and below
 the success band likely successes first, smaller snacks, choice input for reviews and re-asks and
 the Daily Adventure's pacing with rotating reviews; the review guarantee and the valley's basket; every skill of an activity is served when several produce the same
-item), partial credit for commuted facts, re-ask jobs and teaching a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
+item), partial credit for commuted facts, re-ask jobs and teaching a strategy met for the first time or a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
 finale, the placement check, snack time, the Lightning Arena, grading (with the Riddle Scrolls
 operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth (rule facts counted
 from bronze up only for Puff and Mirror), stickers, the

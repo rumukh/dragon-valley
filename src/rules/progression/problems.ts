@@ -33,6 +33,7 @@ import { digits, isDue, readingAllowanceMs, responseBucket } from '../learning/i
 import {
   blockedRecent,
   isRuleFact,
+  isStrategyItem,
   lowSuccess,
   missedTwice,
   pickArena,
@@ -45,12 +46,14 @@ import {
 } from '../learning/selection';
 import { recordAnswer } from '../economy/daily';
 import { earnCoins } from '../economy/rewards';
-import { basketItems, itemsOf } from './dragons';
+import { basketItems, firstTastes, itemsOf, taughtItems } from './dragons';
 import { advanceLadder, ladderDone } from './ladder';
 import type { Ctx, Data, ReadState } from '../types';
 
 /** A phase allowance large enough that rounds are never limited by it. */
 export const ROUND_ALLOWANCE = 1_000_000;
+/** First tastes a snack serves at most (facts taught but never answered, every other problem). */
+export const TASTES_PER_SNACK = 3;
 /** Items remembered per round (the state schema's cap), for no-repeat and served-first draws. */
 const RECENT_LIMIT = 20;
 
@@ -203,12 +206,28 @@ function chooseItem(
   // Below the success band, snacks and reviews serve the likeliest successes first.
   const protect = lowSuccess(state, data);
   if (round.activity === 'snack') {
-    if (round.source.kind === 'snack' && round.source.dragon === null) {
+    const snack = round.source.kind === 'snack' ? round.source.dragon : null;
+    if (round.source.kind === 'snack' && snack === null) {
       // Feeding every dragon empties the valley's basket too: due facts no hatched dragon eats.
       const basket = basketItems(state, data, index).filter((item) => !pool.includes(item));
       pool = [...pool, ...basket];
     }
-    return pickSnack({ state, pool, blocked, served, random, likelyFirst: protect });
+    // Only facts the child has met or was taught (no division before the division levels), and
+    // those it was taught but never answered as first tastes, at every other problem.
+    const taught = taughtItems(state, data, index);
+    pool = pool.filter((item) => state.items[item] !== undefined || taught.has(item));
+    const tastes = firstTastes(state, data, index, snack, taught);
+    pool = [...pool, ...tastes.filter((item) => !pool.includes(item))];
+    return pickSnack({
+      state,
+      pool,
+      blocked,
+      served,
+      random,
+      likelyFirst: protect,
+      tastes,
+      tastesPerSnack: TASTES_PER_SNACK,
+    });
   }
   if (round.activity === 'arena') return pickArena({ state, pool, blocked, served, random });
   if (!tables.has(0) && !tables.has(1) && served.some(isRuleFact)) {
@@ -317,13 +336,17 @@ export function easierRetrieval(serving: Serving & { due: boolean; low: boolean 
 }
 
 /**
- * Whether the item is taught before it is asked (the shell shows its picture model first): its
- * last two answers were misses. Not in the Arena or the placement check.
+ * Whether the item is taught before it is asked (the shell shows its picture model first): a
+ * strategy item (`isStrategyItem`) the child meets for the first time, never answered nor
+ * credited by a board ("I do, we do, you do"), or any item whose last two answers were misses.
+ * Not in the Arena (a race) or the placement check (a measurement).
  */
 export function teachFirst(
-  serving: Serving & { record: DeepReadonly<ItemState> | undefined },
+  serving: Serving & { item: string; record: DeepReadonly<ItemState> | undefined },
 ): boolean {
-  return !serving.placement && serving.activity !== 'arena' && missedTwice(serving.record);
+  if (serving.placement || serving.activity === 'arena') return false;
+  const first = serving.record === undefined && isStrategyItem(serving.item);
+  return first || missedTwice(serving.record);
 }
 
 /**
@@ -380,7 +403,7 @@ export function serveNext(ctx: Ctx, index: Index): void {
     step,
     reask: queued !== undefined,
     hinted: false,
-    ...(teachFirst({ ...serving, record }) ? { teach: true } : {}),
+    ...(teachFirst({ ...serving, item, record }) ? { teach: true } : {}),
   };
 }
 

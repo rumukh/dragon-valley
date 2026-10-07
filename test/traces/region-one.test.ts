@@ -21,8 +21,8 @@ import type { Adapter } from './support';
 vi.setConfig({ testTimeout: 300_000 });
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '7801301f26909881';
-const GOLDEN_TRAJECTORY = '722d59aa5347bfae';
+const GOLDEN_HASH = '3b4758bdfe2cec43';
+const GOLDEN_TRAJECTORY = '2940336f9df721e7';
 
 const SEED = 'golden-region-one';
 const LEVELS = [
@@ -42,6 +42,8 @@ interface Observation {
   /** Hub views at key moments. */
   day2Next: GameView['hub']['next'] | null;
   snackItems: string[];
+  /** Items with a record (answered or met on a board) when day two's snack started. */
+  metBeforeSnack: string[];
   arenaBeforeBoss: boolean;
   beatAtBossStart: string | null;
   /** Every problem served, by level, as first shown. */
@@ -69,6 +71,7 @@ async function playRegion(adapter: Adapter = dragonValleyAdapter, seed = SEED) {
     stages: [],
     day2Next: null,
     snackItems: [],
+    metBeforeSnack: [],
     arenaBeforeBoss: false,
     beatAtBossStart: null,
     served: [],
@@ -112,6 +115,7 @@ async function playRegion(adapter: Adapter = dragonValleyAdapter, seed = SEED) {
 
   await player.act({ type: 'startSession', day: '2026-10-07' });
   observation.day2Next = player.view().hub.next;
+  observation.metBeforeSnack = Object.keys(player.state().items);
   await player.act({ type: 'startActivity', activity: { kind: 'snack', dragon: null } });
   for (let guard = 0; guard < 20; guard++) {
     const round = player.view().round;
@@ -188,6 +192,11 @@ function checks(o: Observation): Record<string, boolean> {
       stories.length >= 6 && stories.every((s) => s.step === 'operation'),
     'day two opened with snack time for the hungry dragons':
       o.day2Next?.kind === 'snack' && o.snackItems.length >= 6,
+    'the snack gave first tastes of facts taught on day one: its 2nd, 4th and 6th problems':
+      [1, 3, 5].every((n) => {
+        const item = o.snackItems[n];
+        return item !== undefined && !o.metBeforeSnack.includes(item);
+      }) && [0, 2, 4].every((n) => o.metBeforeSnack.includes(o.snackItems[n] ?? '')),
     'the troll was introduced, laughed, and left his party hat':
       o.beatAtBossStart === 'beat.bridge-troll' &&
       JSON.stringify(p.data('boss.defeated')) === '[{"boss":"bridge-troll"}]' &&
