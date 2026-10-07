@@ -20,7 +20,6 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 | DV-QA-13 | minor    | S3    | WebKit, sometimes Chromium: a keeper's hub at 200 % text appears at normal size first |
 | DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys                |
 | DV-QA-17 | major    | S3    | Memory Match's term cards do not show which number of the example is meant            |
-| DV-QA-18 | major    | S3    | A missed × 0 fact is re-asked and taught with "Look first!" but has no picture        |
 
 ### DV-QA-13 (minor, S3; WebKit, sometimes Chromium): a keeper's hub at 200 % text first appears at normal size
 
@@ -96,31 +95,6 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 - **Evidence**: `test/e2e/activities.spec.ts` › "Memory Match term cards…": the first example
   turned over must mark one number and say which.
 
-### DV-QA-18 (major, S3): a missed × 0 fact is sent to "look at the picture", but it has none
-
-- **Repro** (every engine, at `568ee65` after #41): a new keeper plays Sunny Meadow, whose Feeding
-  Times serve × 0 facts from the first level on. Miss one (say `4 · 0 = ?`), answer the next two,
-  and it comes back with "Let's try this one again. Look first!". Miss it again: the next time it
-  comes (Sunny Meadow 3 serves Times 0, 1 and 10), it is taught with "Look at the picture first.
-  Then answer!".
-- **Expected**: the child who missed a fact is shown something to look at, as for every fact
-  with a picture (its array or its groups, drawn unsolved), or else is not told to look.
-- **Actual**: no picture either time; only the note and the problem. `modelFor`
-  (`src/app/math/model.ts`) has no picture for zero groups or a zero total (`productModel` needs
-  both factors at least 1; `countable` a total of at least 1), so `0 · n`, `n · 0`, `0 : n` and a
-  missing factor with product 0 have none, and Show me is (rightly) not offered for them. But the
-  notes come from the rules' flags alone (`problemNote`, `pictureFirst` in
-  `src/app/game/view.ts`) and do not ask whether a picture exists. Major: it is the moment "teach,
-  then ask" is for, × 0 is the classic mistake (`2 · 0 = 2`), and Sunny Meadow serves these facts
-  from its first level.
-- **Likely fix** (S3, with S2b or S4 for words or art): for a fact without a picture, say it
-  without "look" ("Let's try this one again!"), or show the rule instead (a card such as "Any
-  number times 0 is 0.", or a picture of empty baskets); then the teach note can stay as it is.
-- **Evidence**: `test/e2e/teach.spec.ts` › "a × 0 fact asked again…" and "a × 0 fact taught…" (a
-  game the rules played to the moment, `missedFactBackup`); the job summary records what was said
-  (`DV-QA-18 evidence`: `4 · 0 = ? asked again: "Let's try this one again. Look first!"; a
-picture: none`, `0 · 2 = ? taught: "Look at the picture first. Then answer!"; a picture: none`).
-
 ## Fixed
 
 Each was verified fixed by the suite in Chromium (Edge), Firefox and WebKit, and its assertion now
@@ -128,22 +102,23 @@ runs as a regression check. (DV-QA-13 stays open for WebKit and, sometimes, Chro
 write-ups (repro, cause, suggested fix) are in this file's history:
 `git log -p -- docs/qa/defects.md`.
 
-| ID       | Was                                                                                       | Fixed by | Regression check                                                                                           |
-| -------- | ----------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| DV-QA-01 | After a failed save and Retry, the stored answer was never praised; the round stood still | #19      | `recovery.spec.ts` › a failed save says "Not saved"…                                                       |
-| DV-QA-02 | "You got 1 coins!", "1 coins": no singular                                                | #19      | `live.spec.ts` › "a round speaks its feedback…" ("You got 1 coin!")                                        |
-| DV-QA-03 | Enter was ignored when a round opened on a keypad problem (phase-1 shell)                 | #13      | `input.spec.ts` › "a round that opens on a keypad problem takes Enter from the keyboard"                   |
-| DV-QA-04 | Retry in the "Not saved" pill was 40 px tall                                              | #19      | layout checks at `screens.spec.ts` stop `41-save-failed`                                                   |
-| DV-QA-05 | The grown-ups' Settings scrolled sideways on a phone (last in WebKit: the voice list)     | #19, #41 | layout checks at `screens.spec.ts` stops `26-parent-settings`, `44-settings-saved` (phone)                 |
-| DV-QA-06 | Words and numbers broke inside narrow boxes (200 % tiles "1" over "8"; phone egg labels)  | #19      | layout checks in `reflow.spec.ts` (`text-200`) and at stop `05-story-eggs` (phone)                         |
-| DV-QA-07 | A missed tile's badge pushed the round sideways at 200 % (phase-1 shell)                  | #13      | layout checks in `reflow.spec.ts` (`text-200`, `16-round-choice`)                                          |
-| DV-QA-08 | Screens' focus targets dropped out of the Tab order and lost their ring                   | #19      | `keyboard.spec.ts`: the editor (by pixels) and the error screen                                            |
-| DV-QA-09 | Enter after a click on Read aloud re-read the problem instead of sending the answer       | #19      | `input.spec.ts` › "Enter still sends the answer after the child used Read aloud"                           |
-| DV-QA-10 | At 200 % text on a phone the hub and the Egg Grid scrolled sideways                       | #19      | layout checks in `reflow.spec.ts` (`text-200`, phone)                                                      |
-| DV-QA-11 | Map and road hotspots were cut off by the picture's frame                                 | #19      | layout checks at stops `13-map` and `14-region`, and in `reflow.spec.ts`                                   |
-| DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                        | #17      | `persistence.spec.ts` › "a finished round is kept…"                                                        |
-| DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)       | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                                        |
-| DV-QA-16 | Two announcements within 40 ms: only the second was heard (the results' headline lost)    | #41      | `live.spec.ts` › "a round speaks its feedback…" (the headline heard; S3's announcer unit test queues them) |
+| ID       | Was                                                                                          | Fixed by | Regression check                                                                                           |
+| -------- | -------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| DV-QA-01 | After a failed save and Retry, the stored answer was never praised; the round stood still    | #19      | `recovery.spec.ts` › a failed save says "Not saved"…                                                       |
+| DV-QA-02 | "You got 1 coins!", "1 coins": no singular                                                   | #19      | `live.spec.ts` › "a round speaks its feedback…" ("You got 1 coin!")                                        |
+| DV-QA-03 | Enter was ignored when a round opened on a keypad problem (phase-1 shell)                    | #13      | `input.spec.ts` › "a round that opens on a keypad problem takes Enter from the keyboard"                   |
+| DV-QA-04 | Retry in the "Not saved" pill was 40 px tall                                                 | #19      | layout checks at `screens.spec.ts` stop `41-save-failed`                                                   |
+| DV-QA-05 | The grown-ups' Settings scrolled sideways on a phone (last in WebKit: the voice list)        | #19, #41 | layout checks at `screens.spec.ts` stops `26-parent-settings`, `44-settings-saved` (phone)                 |
+| DV-QA-06 | Words and numbers broke inside narrow boxes (200 % tiles "1" over "8"; phone egg labels)     | #19      | layout checks in `reflow.spec.ts` (`text-200`) and at stop `05-story-eggs` (phone)                         |
+| DV-QA-07 | A missed tile's badge pushed the round sideways at 200 % (phase-1 shell)                     | #13      | layout checks in `reflow.spec.ts` (`text-200`, `16-round-choice`)                                          |
+| DV-QA-08 | Screens' focus targets dropped out of the Tab order and lost their ring                      | #19      | `keyboard.spec.ts`: the editor (by pixels) and the error screen                                            |
+| DV-QA-09 | Enter after a click on Read aloud re-read the problem instead of sending the answer          | #19      | `input.spec.ts` › "Enter still sends the answer after the child used Read aloud"                           |
+| DV-QA-10 | At 200 % text on a phone the hub and the Egg Grid scrolled sideways                          | #19      | layout checks in `reflow.spec.ts` (`text-200`, phone)                                                      |
+| DV-QA-11 | Map and road hotspots were cut off by the picture's frame                                    | #19      | layout checks at stops `13-map` and `14-region`, and in `reflow.spec.ts`                                   |
+| DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                           | #17      | `persistence.spec.ts` › "a finished round is kept…"                                                        |
+| DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)          | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                                        |
+| DV-QA-16 | Two announcements within 40 ms: only the second was heard (the results' headline lost)       | #41      | `live.spec.ts` › "a round speaks its feedback…" (the headline heard; S3's announcer unit test queues them) |
+| DV-QA-18 | A missed × 0 fact was sent to "Look first!" and "Look at the picture first", with no picture | #45      | `teach.spec.ts` › "a × 0 fact asked again…" and "…taught…": the rule drawn as plates, first                |
 
 ### The coordinator's Region 1 playtest (the deployed `5848964`)
 

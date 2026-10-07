@@ -55,12 +55,12 @@ The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest
 
 ## Plan §2.6: the adaptive learning engine, in the browser
 
-| Promise                                                             | Evidence                                                                                                                                                                                       | Status                               |
-| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| A miss is asked again about three problems later, its picture first | `teach.spec.ts` (missed in the browser; "Let's try this one again. Look first!", the picture, no Show me); the scheduling in `test/traces/` and `test/unit/progression/`                       | Covered                              |
-| A fact missed twice in a row is taught before it is asked           | `teach.spec.ts` (a game the rules played to the moment: "Look at the picture first. Then answer!", the picture drawn unsolved); a × 0 fact has no picture but is still told to look (DV-QA-18) | Covered; DV-QA-18 open for × 0 facts |
-| Show me shows the picture, and the answer after it counts           | `hint.spec.ts` (S3)                                                                                                                                                                            | Covered                              |
-| Leitner boxes, mix control, distractors, time only as data          | `test/unit/learning/`, `test/unit/progression/`, `test/traces/`, `test/sim/` (headless; the browser sends `elapsedMs` and the day, `visibility.spec.ts` and `daily.spec.ts`)                   | Covered                              |
+| Promise                                                             | Evidence                                                                                                                                                                     | Status  |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| A miss is asked again about three problems later, its picture first | `teach.spec.ts` (missed in the browser; "Let's try this one again. Look first!", the picture, no Show me); the scheduling in `test/traces/` and `test/unit/progression/`     | Covered |
+| A fact missed twice in a row is taught before it is asked           | `teach.spec.ts` (a game the rules played to the moment: "Look at the picture first. Then answer!", the picture drawn unsolved; a × 0 fact's rule drawn as plates)            | Covered |
+| Show me shows the picture, and the answer after it counts           | `hint.spec.ts` (S3)                                                                                                                                                          | Covered |
+| Leitner boxes, mix control, distractors, time only as data          | `test/unit/learning/`, `test/unit/progression/`, `test/traces/`, `test/sim/` (headless; the browser sends `elapsedMs` and the day, `visibility.spec.ts` and `daily.spec.ts`) | Covered |
 
 ## Plan §2.7: rewards and economy
 
