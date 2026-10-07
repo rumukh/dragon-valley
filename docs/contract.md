@@ -261,7 +261,7 @@ level (`--strict-coverage`). The v1 pack passes both strict checks and `npm run 
 | `leitner.intervals` | `[0, 1, 2, 4, 8, 16]`                                                                                          | days until due, by box 0-5        |
 | `response.choice`   | fast ≤ 2500 ms, ok ≤ 6000 ms                                                                                   | response buckets for choice input |
 | `response.keypad`   | fast ≤ 3500, ok ≤ 8000, +700 ms per extra digit                                                                | response buckets for keypad input |
-| `response.word`     | optional: `perWordMs`, `wholeStoryMs`, `rereadPercent` (none in 1.1.0)                                         | reading time for word problems    |
+| `response.word`     | optional: `perWordMs`, `wholeStoryMs`, `rereadPercent` (1.2.0: 1000, 4000, 25; none in 1.1.0)                  | reading time for word problems    |
 | `input`             | keypad from box 2, 4 choices                                                                                   | `auto` input and option count     |
 | `mix`               | success 82 %, known 70 %, learning 10-50 %, window 20, no repeat within 2                                      | round composition                 |
 | `reask`             | delay 3 turns, at most 2 per round                                                                             | re-asking missed items            |

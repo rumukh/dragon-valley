@@ -616,9 +616,10 @@ All values are balance data. Coins are earned only by playing; nothing is bought
 | Daily quest                    | 2-5 each (3 quests a day)      |
 | Daily gift                     | 2-6                            |
 
-A typical 15-minute session earns roughly 50-80 coins, most of it from right answers (the average
-child of the learner simulation earns about 60 a session once the valley is done; the 1.2.0
-economy in docs/balance-report.md).
+A typical 15-minute session earns roughly 50-80 coins, most of it from right answers. The average
+child of the learner simulation earns a median of 77 a session in its first 12 weeks: about 90
+while the valley's levels pay their stars, then about 60 (the 1.2.0 economy in
+docs/balance-report.md).
 
 ### 7.2 Glimmer's Market
 
@@ -640,9 +641,11 @@ every five sessions, rather than emptying the market with the valley:
 | Crystal Caves, Sharing Lake      | 475-575 |
 | Leftover Lagoon to Dragon Castle | 590-600 |
 
-Every child can buy a starter in its first session. The average child of the learner simulation
-still has something to save for after about 110 sessions; more cosmetics (a later art batch) would
-let the market last longer at the same pace.
+Every child can buy a starter in its first session. Over a simulated school year the average child
+gets something new every 5 sessions (median; never more than 10 apart) and still has something to
+save for until its 117th session (day 163); the slow child until its 164th, and the struggling
+child never runs out. More cosmetics (a later art batch) would let the market last longer at the
+same pace.
 
 ### 7.3 Stickers (about 50, one album page per region)
 
