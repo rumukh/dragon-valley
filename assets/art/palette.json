@@ -114,6 +114,8 @@
     { "fg": "brand.primary", "bg": "surface.paper", "min": 3, "use": "Arrows of moving digits (graphics)" },
     { "fg": "brand.primaryDeep", "bg": "surface.card", "min": 3, "use": "Edges of ten-rods and tens blocks (graphics)" },
     { "fg": "brand.sunDeep", "bg": "surface.card", "min": 3, "use": "Edges of ones dots and ones blocks (graphics)" },
-    { "fg": "feedback.missDeep", "bg": "surface.paper", "min": 3, "use": "Strike through a dropped zero (graphics)" }
+    { "fg": "feedback.missDeep", "bg": "surface.paper", "min": 3, "use": "Strike through a dropped zero (graphics)" },
+    { "fg": "ink.inkMuted", "bg": "surface.paper", "min": 3, "use": "Frames of groups and plates of dots (graphics)" },
+    { "fg": "feedback.missDeep", "bg": "surface.paper", "min": 3, "use": "Leftover rings and their dashed frame (graphics)" }
   ]
 }

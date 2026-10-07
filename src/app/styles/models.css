@@ -11,6 +11,25 @@
  * wraps after a + or −, and as a last resort inside.
  */
 
+/* The card every picture stands on. Its side padding stops growing at 24 px, so a picture keeps
+   room in a narrow slot at large text; the pictures to count reckon with it (`--model-pad`). */
+.dv-model {
+  --model-pad: min(0.9em, 24px);
+  display: grid;
+  justify-items: center;
+  gap: 0.4em;
+  max-width: 100%;
+  margin: 0;
+  padding: 0.6em var(--model-pad);
+  border-radius: 1em;
+  background: color-mix(in srgb, var(--dv-paper) 92%, transparent);
+}
+
+.dv-model figcaption {
+  font-weight: 700;
+  color: var(--dv-ink-soft);
+}
+
 .dv-model--strategy {
   justify-self: stretch;
   min-width: 0;
@@ -103,6 +122,7 @@
   font-size: 0.8rem;
   line-height: 1.25;
   color: var(--dv-ink-soft);
+  text-wrap: balance;
 }
 
 /* ---- Order of operations: one row per step, the step that goes first marked ---------------- */
@@ -257,4 +277,92 @@
  */
 .dv-round--boss .dv-model__art {
   max-height: 17vh;
+}
+
+/* ---- Pictures to count in the small tables: an array, equal groups ------------------------ */
+
+/*
+ * Every length in these pictures is a multiple of one dot (`--dot`): the gaps between dots are
+ * 0.4 of a dot, a group frame's padding 0.6 and the gaps between groups 0.8. A picture is
+ * therefore a fixed number of dots wide and tall, and the dot is the largest that fits the slot's
+ * width (`cqw`, less the card's padding) and a quarter of the window's height
+ * (26vh), up to 0.7em. Dots never shrink below 6 px, so every group stays countable; the layout
+ * (ui/models.ts) keeps them well above that in every slot the round has.
+ */
+
+/* A row of n dots is (1.4n - 0.4) dots long. */
+.dv-model__array {
+  --dot: max(
+    6px,
+    min(
+      0.7em,
+      calc(26vh / (var(--rows, 1) * 1.4 - 0.4)),
+      calc((100cqw - 2 * var(--model-pad)) / (var(--columns, 1) * 1.4 - 0.4))
+    )
+  );
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 1), var(--dot));
+  gap: calc(var(--dot) * 0.4);
+}
+
+/* Groups in a grid, `--columns` across; the whole picture is `--across` by `--down` dots. */
+.dv-model__groups {
+  --dot: max(
+    6px,
+    min(
+      0.7em,
+      calc(26vh / var(--down, 1)),
+      calc((100cqw - 2 * var(--model-pad)) / var(--across, 1))
+    )
+  );
+  --frame-line: max(1px, calc(var(--dot) * 0.14));
+  display: grid;
+  grid-template-columns: repeat(var(--columns, 1), auto);
+  justify-content: center;
+  gap: calc(var(--dot) * 0.8);
+}
+
+/* A group: its dots in a frame of up to five a row (ten is 2 x 5). The frame line is drawn inside
+   the padding, so it takes no room of its own. */
+.dv-model__group {
+  display: grid;
+  grid-template-columns: repeat(var(--frame-columns, 1), var(--dot));
+  grid-template-rows: repeat(var(--frame-rows, 1), var(--dot));
+  gap: calc(var(--dot) * 0.4);
+  padding: calc(var(--dot) * 0.6);
+  border-radius: calc(var(--dot) * 0.6);
+  background: var(--dv-card);
+  outline: var(--frame-line) solid var(--dv-ink-muted);
+  outline-offset: calc(var(--frame-line) * -1);
+}
+
+/* The leftovers: rings in a dashed frame the size of a group, so it shows they are too few. */
+.dv-model__group--left {
+  background: transparent;
+  outline-style: dashed;
+  outline-color: var(--dv-miss-deep);
+}
+
+.dv-model__dot {
+  width: var(--dot, 0.7em);
+  height: var(--dot, 0.7em);
+  border-radius: 50%;
+  background: var(--dv-sun);
+  box-shadow: inset 0 0 0 calc(var(--dot, 0.7em) * 0.12) var(--dv-sun-deep);
+}
+
+.dv-model__dot--left {
+  background: transparent;
+  box-shadow: inset 0 0 0 calc(var(--dot, 0.7em) * 0.2) var(--dv-miss-deep);
+}
+
+/* Rule facts (n · 0, 1 · n, n : n ...): plates are round frames, empty or with their dots; 0 · n
+   has no plates at all, only an empty dotted tray where one would stand. */
+.dv-model__plate {
+  border-radius: 999px;
+}
+
+.dv-model__plate--none {
+  background: transparent;
+  outline-style: dotted;
 }

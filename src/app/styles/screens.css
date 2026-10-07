@@ -1269,77 +1269,8 @@
   background: color-mix(in srgb, var(--dv-primary) 14%, var(--dv-paper));
 }
 
-/* Models after a miss: dots in rows and columns, or equal groups with leftovers as rings. */
-.dv-model {
-  display: grid;
-  justify-items: center;
-  gap: 0.4em;
-  max-width: 100%;
-  margin: 0;
-  padding: 0.6em 0.9em;
-  border-radius: 1em;
-  background: color-mix(in srgb, var(--dv-paper) 92%, transparent);
-}
-
-.dv-model figcaption {
-  font-weight: 700;
-  color: var(--dv-ink-soft);
-}
-
-/* Dots shrink for tall pictures, so a whole array fits beside the problem, and for wide ones, so
-   it fits its slot's width (`cqw`, less the picture's padding) at any text size. The gaps are
-   0.4 of a dot, so a row of n dots is (1.4n - 0.4) dots long. */
-.dv-model__array {
-  --dot: min(
-    0.7em,
-    calc(26vh / (var(--rows, 1) * 1.4 - 0.4)),
-    calc((100cqw - 1.8em) / (var(--columns, 1) * 1.4 - 0.4))
-  );
-  display: grid;
-  grid-template-columns: repeat(var(--columns, 1), var(--dot));
-  gap: calc(var(--dot) * 0.4);
-}
-
-.dv-model__array .dv-model__dot {
-  width: var(--dot);
-  height: var(--dot);
-}
-
-.dv-model__dot {
-  width: 0.7em;
-  height: 0.7em;
-  border-radius: 50%;
-  background: var(--dv-sun);
-  box-shadow: inset 0 0 0 0.08em var(--dv-sun-deep);
-}
-
-.dv-model__groups {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5em;
-}
-
-.dv-model__group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.22em;
-  max-width: 4.4em;
-  padding: 0.3em;
-  border: 0.08em solid var(--dv-line-strong);
-  border-radius: 0.6em;
-  background: var(--dv-card);
-}
-
-.dv-model__group--left {
-  border-style: dashed;
-  background: transparent;
-}
-
-.dv-model__dot--left {
-  background: transparent;
-  box-shadow: inset 0 0 0 0.12em var(--dv-miss-deep);
-}
+/* The picture behind a problem (its card, the pictures to count and the strategy pictures) is
+   styled in models.css, sized to its slot under the dragon. */
 
 /* ---- Minigames ------------------------------------------------------------------------- */
 

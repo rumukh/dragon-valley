@@ -4,7 +4,9 @@
  *
  * In the small tables: an array of dots in rows and columns (multiplication as equal groups), or
  * equal groups with the leftovers set apart (division with remainder). Leftovers differ in shape
- * (ring, not dot), not only in color.
+ * (ring, not dot), not only in color. A rule fact (n · 0, 1 · n, n : n ...) shows its rule as
+ * plates of dots, its fact and a sentence. All of these are drawn in dots that the stylesheet sizes
+ * to the slot (`groupsLayout`, models.css).
  *
  * Beyond them, the written strategy, drawn: a place-value chart whose digits move, ten-rods in
  * equal groups, and area models of tens and ones. An expression of several operations is worked
@@ -44,19 +46,111 @@ export function arrayModel(rows: number, columns: number, label: string): HTMLEl
   );
 }
 
+/** Dots across and down one group: up to five a row, so ten is a 2 × 5 frame and eight 2 × 4. */
+export function groupFrame(size: number): { readonly columns: number; readonly rows: number } {
+  const rows = Math.max(1, Math.ceil(size / 5));
+  return { columns: Math.max(1, Math.ceil(size / rows)), rows };
+}
+
+/**
+ * How equal groups are laid out. Every length in the picture is a multiple of the dot: a group
+ * frame is its dots, their gaps (0.4 of a dot) and its padding (0.6 a side); groups stand 0.8 of
+ * a dot apart. So the whole picture is `across` dots wide and `down` dots tall, and the stylesheet
+ * sizes the dot to fit the slot's width and the window's height (models.css).
+ */
+export interface GroupsLayout {
+  /** Full groups, and the dots left over (drawn as rings in a frame of their own). */
+  readonly groups: number;
+  readonly leftover: number;
+  /** One group's frame: dots across and down. */
+  readonly frame: { readonly columns: number; readonly rows: number };
+  /** Groups across and down. */
+  readonly columns: number;
+  readonly rows: number;
+  /** The picture's width and height, in dots. */
+  readonly across: number;
+  readonly down: number;
+}
+
+/** A frame of `dots` dots across (or down), in dots: the dots, their gaps and the padding. */
+export const frameSpan = (dots: number): number => 1.4 * dots + 0.8;
+/** The gap between two groups, in dots. */
+export const GROUP_GAP = 0.8;
+/**
+ * The pictures the layout plans for, in px (a slot's width less the card's padding, and the 26vh
+ * the dots may take). Groups are arranged to give the biggest dots in a typical slot (a 300 px
+ * lesson column under a 768 px window), keeping at least `minDot` in the narrowest one (a 246 px
+ * column at 200 % text under a 657 px window); the stylesheet then scales the dots to each slot.
+ */
+export const GROUPS_PLAN = {
+  typical: { width: 257, height: 200 },
+  narrowest: { width: 198, height: 171 },
+  minDot: 7,
+  /** The dot never grows past 0.7em (16.8 px at 100 % text): bigger plans do not count. */
+  maxDot: 16.8,
+} as const;
+
+const dotIn = (room: { width: number; height: number }, across: number, down: number): number =>
+  Math.min(room.width / across, room.height / down);
+
+type Frame = GroupsLayout['frame'];
+type Arrangement = Pick<GroupsLayout, 'frame' | 'columns' | 'rows' | 'across' | 'down'>;
+
+/** `boxes` equal frames in a grid: the columns that give the biggest dots (`GROUPS_PLAN`). */
+export function arrangeFrames(boxes: number, frame: Frame): Arrangement {
+  // Rank by the dots in a typical slot (up to the largest dot drawn), then by fewer rows, so ten
+  // plates stand 5 + 5; an arrangement too small for the narrowest slot ranks last.
+  let best: Arrangement | null = null;
+  let bestScore = -Infinity;
+  for (let columns = 1; columns <= Math.max(1, boxes); columns++) {
+    const rows = Math.ceil(Math.max(1, boxes) / columns);
+    const across = columns * frameSpan(frame.columns) + (columns - 1) * GROUP_GAP;
+    const down = rows * frameSpan(frame.rows) + (rows - 1) * GROUP_GAP;
+    const narrowest = dotIn(GROUPS_PLAN.narrowest, across, down);
+    const typical = Math.min(GROUPS_PLAN.maxDot, dotIn(GROUPS_PLAN.typical, across, down));
+    const score = (narrowest >= GROUPS_PLAN.minDot ? typical : narrowest - 100) - rows * 1e-3;
+    if (score > bestScore + 1e-9) {
+      best = { frame, columns, rows, across, down };
+      bestScore = score;
+    }
+  }
+  return best!;
+}
+
+export function groupsLayout(total: number, size: number): GroupsLayout {
+  const per = Math.max(1, size);
+  const groups = Math.floor(total / per);
+  const leftover = total - groups * per;
+  const boxes = groups + (leftover > 0 ? 1 : 0);
+  return { groups, leftover, ...arrangeFrames(boxes, groupFrame(per)) };
+}
+
+const units = (value: number): string => String(Math.round(value * 100) / 100);
+
+/** The grid of frames, its arrangement handed to the stylesheet in dots. */
+function framesGrid(layout: Arrangement, className = 'dv-model__groups'): HTMLElement {
+  const grid = h('div', { className, attributes: { 'aria-hidden': 'true' } });
+  grid.style.setProperty('--columns', String(layout.columns));
+  grid.style.setProperty('--frame-columns', String(layout.frame.columns));
+  grid.style.setProperty('--frame-rows', String(layout.frame.rows));
+  grid.style.setProperty('--across', units(layout.across));
+  grid.style.setProperty('--down', units(layout.down));
+  return grid;
+}
+
 export function groupsModel(total: number, size: number, label: string): HTMLElement {
-  const groups = h('div', { className: 'dv-model__groups', attributes: { 'aria-hidden': 'true' } });
-  const full = Math.floor(total / Math.max(1, size));
-  for (let group = 0; group < full; group++) {
+  const layout = groupsLayout(total, size);
+  const groups = framesGrid(layout);
+  for (let group = 0; group < layout.groups; group++) {
     const box = h('span', { className: 'dv-model__group' });
-    for (let index = 0; index < size; index++)
+    for (let index = 0; index < Math.max(1, size); index++)
       box.append(h('span', { className: 'dv-model__dot' }));
     groups.append(box);
   }
-  const leftover = total - full * size;
-  if (leftover > 0) {
+  if (layout.leftover > 0) {
+    // The leftovers get a frame the size of a group, so it shows they are not enough for one.
     const rest = h('span', { className: 'dv-model__group dv-model__group--left' });
-    for (let index = 0; index < leftover; index++) {
+    for (let index = 0; index < layout.leftover; index++) {
       rest.append(h('span', { className: 'dv-model__dot dv-model__dot--left' }));
     }
     groups.append(rest);
@@ -97,6 +191,8 @@ export function modelFigure(model: ProblemModel, options: ModelOptions): HTMLEle
       return splitModel(model, options);
     case 'order-steps':
       return orderStepsModel(model, options);
+    case 'rule':
+      return ruleFigure(model, options);
   }
 }
 
@@ -117,7 +213,10 @@ function exprPart(expr: Expr, notation: Notation): LinePart {
     tokens:
       expr.kind === 'blank'
         ? [{ kind: 'blank' }]
-        : pathTokens(expr, notation).map(({ kind, text }) => ({ kind, text })),
+        : pathTokens(expr, notation).map(({ kind, text }) =>
+            // An unknown inside the line (`? · 5 = 0`) is the same empty box as one after it.
+            kind === 'number' && text === '?' ? { kind: 'blank' } : { kind, text },
+          ),
     spoken: speakExpr(expr),
   };
 }
@@ -669,4 +768,78 @@ function orderStepsModel(
       }),
     ],
   );
+}
+
+// ---- rule: the rule facts as plates ------------------------------------------------------------
+
+/** One sentence per rule; literal keys, so the catalog test sees them used. */
+const RULE_KEYS = {
+  'times-zero': 'model.rule.times-zero',
+  'zero-times': 'model.rule.zero-times',
+  'times-one': 'model.rule.times-one',
+  'one-times': 'model.rule.times-one',
+  'divide-one': 'model.rule.divide-one',
+  'zero-shared': 'model.rule.zero-shared',
+  'divide-self': 'model.rule.divide-self',
+} as const;
+
+type RuleModel = Extract<ProblemModel, { kind: 'rule' }>;
+
+/**
+ * The plates a rule fact is drawn with, and the dots on each: n · 0 and 0 : n are n empty plates,
+ * n · 1 and n : 1 are n plates of one, 1 · n and n : n one plate of n. 0 · n has no plates at all.
+ */
+export function rulePlates(model: RuleModel): { readonly plates: number; readonly dots: number } {
+  const { left, right } = model;
+  switch (model.rule) {
+    case 'times-zero':
+      return { plates: left, dots: 0 };
+    case 'zero-times':
+      return { plates: 0, dots: right };
+    case 'times-one':
+    case 'divide-one':
+      return { plates: left, dots: 1 };
+    case 'one-times':
+      return { plates: 1, dots: right };
+    case 'zero-shared':
+      return { plates: right, dots: 0 };
+    case 'divide-self':
+      return { plates: 1, dots: left };
+  }
+}
+
+function ruleFigure(model: RuleModel, { t, notation, solved }: ModelOptions): HTMLElement {
+  const { plates, dots } = rulePlates(model);
+  const grid = framesGrid(
+    arrangeFrames(Math.max(1, plates), groupFrame(Math.max(1, dots))),
+    'dv-model__groups dv-model__groups--rule',
+  );
+  if (plates === 0) {
+    // No plates at all: an empty tray where a plate of n would stand.
+    grid.append(
+      h('span', {
+        className: 'dv-model__group dv-model__plate dv-model__plate--none',
+        testId: 'model-no-plates',
+      }),
+    );
+  }
+  for (let plate = 0; plate < plates; plate++) {
+    const node = h('span', { className: 'dv-model__group dv-model__plate' });
+    for (let dot = 0; dot < dots; dot++) node.append(h('span', { className: 'dv-model__dot' }));
+    grid.append(node);
+  }
+  const shown = (part: RuleModel['unknown'], value: number): Expr =>
+    solved || model.unknown !== part ? num(value) : BLANK;
+  const fact = [
+    exprPart(op(model.op, shown('left', model.left), shown('right', model.right)), notation),
+    exprPart(shown('result', model.result), notation),
+  ];
+  return strategyFigure('rule', solved, grid, [
+    ...lineCaption(fact, notation),
+    h('span', {
+      className: 'dv-model__rule-text',
+      testId: 'model-rule',
+      text: t(RULE_KEYS[model.rule]),
+    }),
+  ]);
 }

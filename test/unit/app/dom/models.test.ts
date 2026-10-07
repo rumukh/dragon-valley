@@ -1,16 +1,23 @@
 // @vitest-environment happy-dom
 /**
- * The strategy pictures in the DOM (src/app/ui/models.ts): each figure draws its picture for the
- * eyes only and writes its worked line in the child's notation, ending with the answer only
- * after the child has answered. Colors come from the stylesheet (palette tokens), never from
- * the markup.
+ * The pictures behind a problem in the DOM (src/app/ui/models.ts): each figure draws its picture
+ * for the eyes only and writes its worked line in the child's notation, ending with the answer
+ * only after the child has answered. Colors come from the stylesheet (palette tokens), never from
+ * the markup. The pictures to count hand their size to the stylesheet in dots, so it can fit them
+ * to the slot (the browser check in scripts/art/models-gallery.mjs measures the result).
  */
 import { describe, expect, it } from 'vitest';
 import { BLANK, group, num, op } from '../../../../src/rules/contract';
 import type { Expr, Notation, Problem } from '../../../../src/rules/contract';
 import { createTranslator } from '../../../../src/app/i18n/messages';
 import { modelFor } from '../../../../src/app/math/model';
-import { modelFigure } from '../../../../src/app/ui/models';
+import {
+  GROUPS_PLAN,
+  arrangeFrames,
+  groupFrame,
+  groupsLayout,
+  modelFigure,
+} from '../../../../src/app/ui/models';
 
 const t = createTranslator();
 const eq = (left: Expr): Problem => ({ kind: 'equation', left, right: BLANK });
@@ -255,5 +262,149 @@ describe('the small-table pictures', () => {
     const groups = figure(div(12, 3));
     expect(groups.dataset['kind']).toBe('groups');
     expect(groups.querySelector('figcaption')?.textContent).toBe('Groups of 3.');
+  });
+});
+
+const property = (node: Element | null, name: string): string =>
+  (node as HTMLElement | null)?.style.getPropertyValue(name) ?? '';
+const frames = (node: HTMLElement): HTMLElement[] => [
+  ...node.querySelectorAll<HTMLElement>('.dv-model__group'),
+];
+
+describe('pictures to count, scaled to the slot', () => {
+  it('give an array its rows and columns, from which the stylesheet sizes the dots', () => {
+    const array = figure(mul(10, 10)).querySelector('.dv-model__array');
+    expect(property(array, '--rows')).toBe('10');
+    expect(property(array, '--columns')).toBe('10');
+  });
+
+  it('frame each group with up to five dots a row: ten is 2 × 5, eight 2 × 4', () => {
+    expect([1, 3, 5, 6, 7, 8, 9, 10].map((size) => groupFrame(size))).toEqual([
+      { columns: 1, rows: 1 },
+      { columns: 3, rows: 1 },
+      { columns: 5, rows: 1 },
+      { columns: 3, rows: 2 },
+      { columns: 4, rows: 2 },
+      { columns: 4, rows: 2 },
+      { columns: 5, rows: 2 },
+      { columns: 5, rows: 2 },
+    ]);
+  });
+
+  it('hand the stylesheet the picture in dots: frames, groups across, width and height', () => {
+    const groups = figure({
+      kind: 'equation',
+      left: op('mul', BLANK, num(10)),
+      right: num(100),
+    }).querySelector('.dv-model__groups');
+    const layout = groupsLayout(100, 10);
+    expect(layout).toMatchObject({ groups: 10, leftover: 0, frame: { columns: 5, rows: 2 } });
+    expect(property(groups, '--columns')).toBe(String(layout.columns));
+    expect(property(groups, '--frame-columns')).toBe('5');
+    expect(property(groups, '--frame-rows')).toBe('2');
+    // A frame is 1.4 dots a dot plus 0.8 (gaps and padding); groups stand 0.8 apart.
+    const across = layout.columns * (1.4 * 5 + 0.8) + (layout.columns - 1) * 0.8;
+    const down = layout.rows * (1.4 * 2 + 0.8) + (layout.rows - 1) * 0.8;
+    expect(Number(property(groups, '--across'))).toBeCloseTo(across, 2);
+    expect(Number(property(groups, '--down'))).toBeCloseTo(down, 2);
+    expect(frames(groups as HTMLElement)).toHaveLength(10);
+    for (const frame of frames(groups as HTMLElement)) {
+      expect(frame.querySelectorAll('.dv-model__dot')).toHaveLength(10);
+    }
+  });
+
+  it('keep the leftovers apart: rings, not dots, in a dashed frame the size of a group', () => {
+    const node = figure({ kind: 'divrem', dividend: 23, divisor: 5 });
+    const all = frames(node);
+    expect(all).toHaveLength(5);
+    const left = all.at(-1)!;
+    expect(left.classList.contains('dv-model__group--left')).toBe(true);
+    expect(left.querySelectorAll('.dv-model__dot--left')).toHaveLength(3);
+    expect(
+      all.slice(0, 4).every((frame) => frame.querySelectorAll('.dv-model__dot').length === 5),
+    ).toBe(true);
+    expect(property(node.querySelector('.dv-model__groups'), '--frame-columns')).toBe('5');
+  });
+
+  it('arrange every group the tables can ask for with dots of at least 7 px in the narrowest slot', () => {
+    const { narrowest, minDot } = GROUPS_PLAN;
+    for (let size = 1; size <= 10; size++) {
+      for (let groups = 0; groups <= 10; groups++) {
+        for (let leftover = 0; leftover < size; leftover++) {
+          const total = groups * size + leftover;
+          if (total < 1 || total > 100) continue;
+          const layout = groupsLayout(total, size);
+          const dot = Math.min(narrowest.width / layout.across, narrowest.height / layout.down);
+          expect(dot, `${total} in groups of ${size}`).toBeGreaterThanOrEqual(minDot);
+        }
+      }
+    }
+    // Ten plates of the rule pictures stand 5 + 5.
+    expect(arrangeFrames(10, groupFrame(1))).toMatchObject({ columns: 5, rows: 2 });
+  });
+});
+
+describe('rule facts', () => {
+  const plates = (node: HTMLElement): HTMLElement[] => [
+    ...node.querySelectorAll<HTMLElement>('.dv-model__plate'),
+  ];
+  const dots = (plate: Element): number => plate.querySelectorAll('.dv-model__dot').length;
+  const rule = (node: HTMLElement): string =>
+    node.querySelector('[data-testid="model-rule"]')?.textContent ?? '';
+
+  it('draw n · 0 as n empty plates, and 0 · n as no plates at all', () => {
+    const times = figure(mul(4, 0));
+    expect(times.dataset['kind']).toBe('rule');
+    expect(plates(times).map(dots)).toEqual([0, 0, 0, 0]);
+    expect(rule(times)).toBe('Any number times 0 is 0.');
+    expect(line(times)).toBe('4 · 0 = 0');
+    const zero = figure(mul(0, 4));
+    expect(zero.querySelectorAll('[data-testid="model-no-plates"]')).toHaveLength(1);
+    expect(zero.querySelectorAll('.dv-model__dot')).toHaveLength(0);
+    expect(rule(zero)).toBe('No groups means nothing at all.');
+  });
+
+  it('draw n · 1 as n plates of one, and 1 · n as one plate of n', () => {
+    expect(plates(figure(mul(7, 1))).map(dots)).toEqual([1, 1, 1, 1, 1, 1, 1]);
+    const one = figure(mul(1, 7));
+    expect(plates(one).map(dots)).toEqual([7]);
+    expect(rule(one)).toBe('Times 1 keeps the number the same.');
+    expect(property(one.querySelector('.dv-model__groups'), '--frame-columns')).toBe('4');
+  });
+
+  it('draw n : 1, 0 : n and n : n', () => {
+    const byOne = figure(div(7, 1));
+    expect(plates(byOne).map(dots)).toEqual([1, 1, 1, 1, 1, 1, 1]);
+    expect(rule(byOne)).toBe('Divided by 1 stays the same.');
+    const shared = figure(div(0, 5));
+    expect(plates(shared).map(dots)).toEqual([0, 0, 0, 0, 0]);
+    expect(rule(shared)).toBe('0 shared out is 0 for everyone.');
+    const self = figure(div(9, 9));
+    expect(plates(self).map(dots)).toEqual([9]);
+    expect(rule(self)).toBe('A number divided by itself is 1.');
+  });
+
+  it('keep the answer back until the child has answered, wherever the unknown is', () => {
+    const before = figure(mul(4, 0), 'czech', false);
+    expect(before.dataset['solved']).toBe('false');
+    expect(line(before)).toBe('4 · 0 = ?');
+    expect(before.querySelector('[data-testid="model-spoken"]')?.textContent).toBe(
+      'Four times zero equals what?',
+    );
+    const missing = (solved: boolean): string =>
+      line(
+        figure(
+          { kind: 'equation', left: op('mul', BLANK, num(5)), right: num(0) },
+          'czech',
+          solved,
+        ),
+      );
+    expect(missing(false)).toBe('? · 5 = 0');
+    expect(missing(true)).toBe('0 · 5 = 0');
+  });
+
+  it('write the fact in the chosen notation', () => {
+    expect(line(figure(div(7, 1), 'international'))).toBe('7 ÷ 1 = 7');
+    expect(line(figure(mul(1, 7), 'international'))).toBe('1 × 7 = 7');
   });
 });

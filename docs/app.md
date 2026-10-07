@@ -209,8 +209,13 @@ gets kind, specific help after a miss.
   Term questions mark the asked-about number with a marker **and** an underline.
 - **The picture behind a problem** (`math/model.ts` chooses it, `ui/models.ts` draws it) shows
   after a miss, before a re-ask, when a fact is taught and on Show me. The small tables keep
-  pictures to count: an array up to 10 × 10, and equal groups, with leftovers apart. Beyond them
-  the written strategy is drawn:
+  pictures to count: an array up to 10 × 10, and equal groups, with leftovers apart. A group is a
+  frame of up to five dots a row (ten is 2 × 5); the leftovers are rings in a dashed frame the size
+  of a group. The rule facts (`rule`) show their rule as plates: n · 0 and 0 : n are n empty
+  plates, 0 · n no plates at all, n · 1 and n : 1 plates of one dot, 1 · n and n : n one plate of
+  n. Each has its fact, written like a strategy line, and a sentence such as "Any number times 0
+  is 0." A missing factor that makes one (`? · 5 = 0`) gets it too. Beyond the small tables the
+  written strategy is drawn:
   - `place-shift`: · 10, · 100, : 10 and : 100. The digits move in an H T O chart, and the new
     zeros are marked.
   - `tens-groups`: `30 · 3` as ten-rods in groups, "3 tens · 3 = 9 tens = 90". With many rods
@@ -227,10 +232,13 @@ gets kind, specific help after a miss.
   its drawing scales with it up to a fifth of the screen's height (a sixth in a boss round). Its
   steps are written one per line in rem; a long step wraps after a + or − and never sideways.
   `node scripts/art/models-gallery.mjs` draws every kind for review. It also checks each one in
-  the slot's budget at the five child viewports, in normal and boss rounds at 100 % and 200 %
-  text, and fails when a figure is too tall or reaches out of the column. The slot is exactly
-  the cast column's width (`min-width: 0` and inline-size containment, so a picture may size
-  itself in `cqw`); an array's dots shrink with the slot's width as well as the window's height.
+  the slot's budget at the five child viewports, in lessons, ordinary boss rounds and the
+  Seven-Headed Dragon's, at 100 % and 200 % text. It fails when a figure is too tall, reaches out
+  of the column or draws a dot under 6 px. The slot is exactly the cast column's width
+  (`min-width: 0` and inline-size containment, so a picture may size itself in `cqw`). Every
+  length in an array, groups or plates is a multiple of the dot, so the dot is the largest that
+  fits the slot's width and 26vh, never under 6 px; groups are arranged (`groupsLayout`) for big
+  dots. The card's side padding stops growing at 24 px, so a narrow slot keeps room at large text.
   On a landscape window a hatched dragon steps back to 26vh while a picture shows in a lesson
   round.
 
