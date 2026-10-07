@@ -8,7 +8,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { parseContentJson, validateContent } from '@aegis/runtime';
+import { parseContentJson, validateContent, dataHash } from '@aegis/runtime';
 import type { RuntimeDiagnostic } from '@aegis/runtime';
 import {
   CANONICAL_BOSS_IDS,
@@ -38,6 +38,17 @@ interface Pack {
 }
 const fresh = (): Pack => JSON.parse(packText);
 
+/**
+ * Every content revision merged to main, with the content hash a save made on it pins (the
+ * runtime's `dataHash` of the pack; literal values, docs/content.md §1). An archived pack never
+ * changes, and a content change needs a revision of its own: `npm run content:bump -- <revision>`
+ * archives the deployed pack, then pin the new revision here.
+ */
+const REVISIONS: Readonly<Record<string, string>> = {
+  '1.0.0': 'af91e14b281b7452', // the Region 1 slice, deployed from main 373a5d2
+  '1.1.0': 'e2acbc7228348abd', // v1: the nine regions
+};
+
 function diagnostics(pack: Pack): readonly RuntimeDiagnostic[] {
   const outcome = validateContent(pack, contentRegistration, 'test.json');
   return outcome.ok ? [] : outcome.error.diagnostics;
@@ -52,29 +63,25 @@ function expectDiagnostic(pack: Pack, code: string, recordId?: string): void {
 }
 
 describe('the sample content pack', () => {
-  it('validates under the registration and is the 1.0.0 dragon-valley pack', () => {
+  it('validates under the registration and is a pinned revision of the dragon-valley pack', () => {
     const outcome = parseContentJson(packText, contentRegistration, 'dragon-valley.content.json');
     expect(outcome.ok, JSON.stringify(outcome.ok ? null : outcome.error.diagnostics)).toBe(true);
     if (!outcome.ok) return;
     expect(outcome.value.id).toBe(CONTENT_PACK_ID);
-    expect(outcome.value.revision).toBe('1.0.0');
+    expect(Object.keys(REVISIONS)).toContain(outcome.value.revision);
     expect(outcome.value.schemaVersion).toBe(1);
   });
 
-  it('is the Region 1 skeleton: Sunny Meadow, six lessons and the Bridge Troll', () => {
+  it('is the v1 valley: nine regions, 50 lessons, nine bosses and every dragon', () => {
     const data = fresh().data;
-    expect(data.regions.map((r) => r.id)).toEqual(['sunny-meadow']);
-    expect(data.levels.filter((l) => l.kind === 'lesson')).toHaveLength(6);
-    expect(data.levels.filter((l) => l.kind === 'boss').map((l) => l.boss)).toEqual([
-      'bridge-troll',
-    ]);
-    expect(data.dragons.map((d) => d.id).sort()).toEqual([
-      'bubbles',
-      'goldie',
-      'mirror',
-      'puff',
-      'sunny',
-    ]);
+    const byOrder = [...data.regions].sort((a, b) => a.order - b.order);
+    expect(byOrder.map((r) => r.id)).toEqual([...CANONICAL_REGION_IDS]);
+    expect(data.levels.filter((l) => l.kind === 'lesson')).toHaveLength(50);
+    const bossLevels = byOrder.map((r) =>
+      data.levels.filter((l) => l.region === r.id && l.kind === 'boss').map((l) => l.boss),
+    );
+    expect(bossLevels).toEqual(CANONICAL_BOSS_IDS.map((boss) => [boss]));
+    expect(data.dragons.map((d) => d.id).sort()).toEqual([...CANONICAL_DRAGON_IDS].sort());
   });
 
   it('uses only canonical region, dragon and boss IDs', () => {
@@ -102,10 +109,13 @@ describe('the sample content pack', () => {
     expect(items).toContain('mul:2x2');
   });
 
-  it('reports the objectives later regions must still cover', () => {
-    const gaps = curriculumGaps(fresh().data).map((gap) => gap.objective);
-    expect(gaps).toContain('obj.mul.table-6-7');
-    expect(gaps).not.toContain('obj.mul.table-2-5-10');
+  it('covers every objective with a lesson and a boss level, and reports a gap', () => {
+    expect(curriculumGaps(fresh().data)).toEqual([]);
+    // giants-peaks.2 is the only lesson for tens times a one-digit number.
+    const pack = fresh();
+    const tens = pack.data.levels.find((l) => l.id === 'giants-peaks.2')!;
+    tens.objectives = tens.objectives.filter((o) => o !== 'obj.big.tens');
+    expect(curriculumGaps(pack.data)).toEqual([{ objective: 'obj.big.tens', missing: ['level'] }]);
   });
 });
 
@@ -256,6 +266,45 @@ describe('content validation reports authoring mistakes', () => {
     pack.data['extra'] = true;
     expect(validateContent(pack, contentRegistration).ok).toBe(false);
   });
+
+  it('rejects a many-headed boss whose meter does not share evenly between the heads', () => {
+    const pack = fresh();
+    pack.data.bosses.find((b) => b.id === 'seven-headed')!.meter = 20;
+    expectDiagnostic(pack, 'invalid-content', 'seven-headed');
+  });
+
+  it('rejects a many-headed boss level with fewer skills than heads', () => {
+    const pack = fresh();
+    const level = pack.data.levels.find((l) => l.id === 'dragon-castle.boss')!;
+    level.activities[0]!.skills = level.activities[0]!.skills.slice(0, 6);
+    expectDiagnostic(pack, 'invalid-content', 'dragon-castle.boss');
+  });
+
+  it('rejects a second finale boss', () => {
+    const pack = fresh();
+    pack.data.bosses.find((b) => b.id === 'golem')!.finale = true;
+    expectDiagnostic(pack, 'invalid-content', 'bosses');
+  });
+
+  it('rejects a mastery sticker for an unknown skill', () => {
+    const pack = fresh();
+    const sticker = pack.data.stickers.find((s) => s.criteria.kind === 'skill-mastered')!;
+    sticker.criteria = { kind: 'skill-mastered', skill: 'no-such-skill', level: 'gold', share: 50 };
+    expectDiagnostic(pack, 'missing-reference', sticker.id);
+  });
+
+  it('rejects an unknown Memory Match mode or Feeding Time draw', () => {
+    const match = fresh();
+    const memory = match.data.levels.find((l) => l.id === 'sunny-meadow.2')!.activities[1]!;
+    memory.options = { pairs: 6, match: 'colour' };
+    expectDiagnostic(match, 'invalid-content', 'sunny-meadow.2');
+
+    const draw = fresh();
+    draw.data.levels.find((l) => l.id === 'sunny-meadow.2')!.activities[0]!.options = {
+      draw: 'random',
+    };
+    expectDiagnostic(draw, 'invalid-content', 'sunny-meadow.2');
+  });
 });
 
 describe('cross-file references', () => {
@@ -274,11 +323,52 @@ describe('cross-file references', () => {
 describe('content history', () => {
   const historyDir = join(root, 'content', 'history');
   const shipped = readdirSync(historyDir).filter((name) => name.endsWith('.json'));
+  const archived = (name: string): Pack => JSON.parse(readFileSync(join(historyDir, name), 'utf8'));
+  const order = (revision: string): number[] => revision.split('.').map(Number);
+  const older = (a: string, b: string): boolean => {
+    const [x, y] = [order(a), order(b)];
+    const at = x.findIndex((part, i) => part !== y[i]);
+    return at >= 0 && x[at]! < y[at]!;
+  };
 
-  it('archives exactly the shipped revisions (none before the v1 release)', () => {
-    // The release-v1 work copies the shipped pack to content/history/1.0.0.json and updates
-    // this list; every later content release adds its revision here (docs/contract.md).
-    expect(shipped).toEqual([]);
+  it('archives every revision merged to main before the current one', () => {
+    const current = fresh().revision;
+    expect([...shipped].sort()).toEqual(
+      Object.keys(REVISIONS)
+        .filter((revision) => revision !== current)
+        .map((revision) => `${revision}.json`)
+        .sort(),
+    );
+    for (const name of shipped) {
+      expect(older(archived(name).revision, current), `${name} is older than ${current}`).toBe(
+        true,
+      );
+    }
+  });
+
+  it('pins the current pack to its revision: changed content needs a new revision', () => {
+    const current = fresh();
+    const hash = dataHash(current);
+    expect(
+      hash,
+      `the content of revision ${current.revision} is new (hash ${hash}): run ` +
+        '`npm run content:bump -- <next revision>` and pin the new revision and its hash in ' +
+        'REVISIONS (docs/content.md §1)',
+    ).toBe(REVISIONS[current.revision]);
+  });
+
+  it('never changes an archived pack: saves made on it pin its hash', () => {
+    for (const name of shipped) {
+      const pack = archived(name);
+      expect(dataHash(pack), name).toBe(REVISIONS[pack.revision]);
+    }
+  });
+
+  it('keeps every catalog key an archived pack uses: a restored old save still shows them', () => {
+    for (const name of shipped) {
+      const lost = collectCatalogKeys(archived(name).data).filter(({ key }) => !(key in catalog));
+      expect(lost, name).toEqual([]);
+    }
   });
 
   it('keeps every shipped pack valid under the current schema, named by its revision', () => {

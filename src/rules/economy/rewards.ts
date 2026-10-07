@@ -9,6 +9,7 @@ import { grantCosmetic } from '@aegis/narrative';
 import type { CosmeticItem } from '@aegis/narrative';
 import { COSMETIC_SLOTS, DRAGON_STAGES, EVENTS, weekday } from '../contract';
 import type { CoinReason, Grant, StickerCriteria } from '../contract';
+import { itemIndex } from '../learning/index-cache';
 import { atLeast } from '../learning/items';
 import { isComplete } from '../progression/levels';
 import type { Ctx, Data, ReadState } from '../types';
@@ -64,6 +65,7 @@ function criterionMet(
   state: ReadState,
   data: Data,
   criteria: DeepReadonly<StickerCriteria>,
+  skillItems: (skill: string) => readonly string[],
 ): boolean {
   switch (criteria.kind) {
     case 'level-complete':
@@ -80,6 +82,25 @@ function criterionMet(
           (criteria.dragon === null || criteria.dragon === id) &&
           DRAGON_STAGES.indexOf(dragon.stage) >= wanted,
       );
+    }
+    case 'dragons-stage': {
+      const wanted = DRAGON_STAGES.indexOf(criteria.stage);
+      const ofKind = data.dragons.filter(
+        (d) => criteria.dragonKind === null || d.kind === criteria.dragonKind,
+      );
+      const reached = ofKind.filter((d) => {
+        const owned = state.dragons[d.id];
+        return owned !== undefined && DRAGON_STAGES.indexOf(owned.stage) >= wanted;
+      }).length;
+      return reached >= (criteria.count ?? Math.max(1, ofKind.length));
+    }
+    case 'skill-mastered': {
+      const items = skillItems(criteria.skill);
+      if (items.length === 0) return false;
+      const good = items.filter((item) =>
+        atLeast(state.items[item], criteria.level, data.balance),
+      ).length;
+      return good * 100 >= criteria.share * items.length;
     }
     case 'facts-mastered':
       return (
@@ -123,9 +144,12 @@ function criterionMet(
 /** Award every sticker whose criteria are now met. */
 export function awardStickers(ctx: Ctx): void {
   const day = ctx.state.day ?? 0;
-  for (const sticker of ctx.content.data.stickers) {
+  const data = ctx.content.data;
+  let index: ReadonlyMap<string, readonly string[]> | null = null;
+  const skillItems = (skill: string) => (index ??= itemIndex(data)).get(skill) ?? [];
+  for (const sticker of data.stickers) {
     if (ctx.state.stickers[sticker.id]) continue;
-    if (criterionMet(ctx.state, ctx.content.data, sticker.criteria)) {
+    if (criterionMet(ctx.state, data, sticker.criteria, skillItems)) {
       ctx.state.stickers[sticker.id] = { day };
       ctx.emit(EVENTS.stickerEarned, { sticker: sticker.id });
     }

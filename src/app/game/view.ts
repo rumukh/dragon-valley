@@ -106,6 +106,7 @@ export function bossPose(
 
 export type Adventure =
   | { readonly kind: 'level'; readonly level: string; readonly resume: number | null }
+  | { readonly kind: 'minigame'; readonly level: string; readonly activity: number }
   | { readonly kind: 'snack'; readonly dragon: string | null }
   | { readonly kind: 'placement' }
   | { readonly kind: 'gift' }
@@ -114,7 +115,8 @@ export type Adventure =
 
 /**
  * What the Daily Adventure button does now (docs/design.md §4.2). A level already in progress
- * resumes at its next activity instead of starting over.
+ * resumes at its next activity instead of starting over; a `minigame` step replays one game of a
+ * finished level.
  */
 export function adventureFor(view: GameView): Adventure {
   const next = view.hub.next;
@@ -125,6 +127,8 @@ export function adventureFor(view: GameView): Adventure {
         run !== null && run.level === next.level && run.result === null ? run.next : null;
       return { kind: 'level', level: next.level, resume };
     }
+    case 'minigame':
+      return { kind: 'minigame', level: next.level, activity: next.activity };
     case 'snack':
       return { kind: 'snack', dragon: next.dragon };
     case 'placement':

@@ -34,8 +34,8 @@ Everything it ships becomes part of the offline resource graph (exact bytes and 
 - **Art catalog** `assets/art/catalog.json`: the published list of art IDs (dragon recipes,
   characters, cosmetics, avatars, icons, emblems, regions; later bosses, stickers, backgrounds).
   Content refers to art only by these IDs (`region.background`, `dragon.rig`, `cosmetic.assetId`,
-  `sticker.icon`, `sticker.frame`), and `scripts/validate-content.mjs` cross-checks them (report-only
-  until art and content converge, then `--strict-art`). New stickers need no new art: the sticker
+  `sticker.icon`, `sticker.frame`), and `scripts/validate-content.mjs` cross-checks them (a gate in
+  `npm run verify` with `--strict-art` since the v1 content). New stickers need no new art: the sticker
   composer renders `{ icon, color, frame }`.
 - **Audio manifest** `assets/audio/manifest.json`: the published sound IDs. Rules know no sound IDs;
   the shell maps rules events (contract §12) to sounds.

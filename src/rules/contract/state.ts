@@ -32,7 +32,17 @@ import type {
 } from './kinds';
 import { answerValueSchema, itemIdSchema, problemSchema } from './problems';
 import type { AnswerValue, Problem, ProblemStep } from './problems';
-import { contentId, counter, idRecord, int, nullable, oneOf, percent, uniqueArray } from './schema';
+import {
+  contentId,
+  counter,
+  idRecord,
+  int,
+  nullable,
+  objectWithOptional,
+  oneOf,
+  percent,
+  uniqueArray,
+} from './schema';
 
 /**
  * The adapter's `stateVersion`. Bump it whenever a change to rules semantics or to this schema
@@ -90,6 +100,13 @@ export interface DailyState {
   answers: number;
   correct: number;
   fast: number;
+  /**
+   * Levels completed today and minigame rounds finished today (the Daily Adventure's order).
+   * Optional so saves from before these counters still restore: absent reads as 0, and every day
+   * started since writes both.
+   */
+  levels?: number;
+  minigames?: number;
   /** The goal for this day (copied from settings when the day starts). */
   goal: number;
   quests: QuestState[];
@@ -420,23 +437,26 @@ export const profileStateSchema: Schema<ProfileState> = schema.object({
   cosmetics: cosmeticStateSchema,
   stickers: idRecord(schema.object({ day })),
   daily: nullable(
-    schema.object({
-      day,
-      answers: counter,
-      correct: counter,
-      fast: counter,
-      goal: int(1, 1000),
-      quests: schema.array(
-        schema.object({
-          id: schema.string({ minLength: 3, maxLength: 96, pattern: /^[a-z0-9.:-]+@[0-9]+$/ }),
-          template: contentId,
-          progress: counter,
-          claimed: schema.boolean,
-        }),
-        { max: 5 },
-      ),
-      gift: oneOf(['locked', 'ready', 'opened'] as const),
-    }),
+    objectWithOptional(
+      {
+        day,
+        answers: counter,
+        correct: counter,
+        fast: counter,
+        goal: int(1, 1000),
+        quests: schema.array(
+          schema.object({
+            id: schema.string({ minLength: 3, maxLength: 96, pattern: /^[a-z0-9.:-]+@[0-9]+$/ }),
+            template: contentId,
+            progress: counter,
+            claimed: schema.boolean,
+          }),
+          { max: 5 },
+        ),
+        gift: oneOf(['locked', 'ready', 'opened'] as const),
+      },
+      { levels: counter, minigames: counter },
+    ),
   ),
   history: schema.array(schema.object({ day, answers: counter, correct: counter, fast: counter }), {
     max: 366,

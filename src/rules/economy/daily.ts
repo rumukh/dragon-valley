@@ -63,6 +63,8 @@ export function startDay(ctx: Ctx, day: number): void {
     answers: 0,
     correct: 0,
     fast: 0,
+    levels: 0,
+    minigames: 0,
     goal: state.settings.dailyGoal,
     quests: [],
     gift: 'locked',
@@ -88,6 +90,16 @@ export function questProgress(ctx: Ctx, goal: QuestGoal, amount: number): void {
     quest.progress = Math.min(template.target, next);
     if (quest.progress >= template.target) ctx.emit(EVENTS.questCompleted, { quest: quest.id });
   }
+}
+
+/**
+ * Count one thing done today towards the Daily Adventure's order: a completed level or a finished
+ * minigame round.
+ */
+export function countToday(ctx: Ctx, what: 'levels' | 'minigames'): void {
+  const daily = ctx.state.daily;
+  // A day begun before these counters existed has none yet: it counts from 0.
+  if (daily && daily.day === ctx.state.day) daily[what] = (daily[what] ?? 0) + 1;
 }
 
 /**

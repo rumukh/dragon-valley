@@ -14,6 +14,11 @@ export interface KeypadOptions {
   maxDigits?: number;
   /** `r` (Czech) or `R` (international), shown between the remainder fields. */
   remainderSymbol?: string;
+  /**
+   * Typing on the keyboard moves focus to the keypad, so Enter then sends the answer instead of
+   * pressing the button that had focus (boards with their own buttons beside the keypad).
+   */
+  claimFocus?: boolean;
   onSubmit(answer: KeypadAnswer): void | Promise<void>;
   testIdPrefix?: string;
 }
@@ -175,6 +180,13 @@ export function createKeypad(kit: UiKit, options: KeypadOptions): KeypadView {
     const input = keyToInput(event.key, options.mode);
     if (!input) return 'pass';
     if (event.repeat && input.type === 'submit') return 'handled';
+    if (options.claimFocus && input.type !== 'submit') {
+      const focused = element.ownerDocument.activeElement;
+      if (!(focused instanceof Node) || !element.contains(focused)) {
+        element.tabIndex = -1;
+        element.focus({ preventScroll: true });
+      }
+    }
     flash(input);
     apply(input);
     return 'handled';

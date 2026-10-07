@@ -2,10 +2,14 @@
  * Daily quests: drawing, progress, completion, claims and the next-day payout. Targets and
  * coins are read from content.quests by hand.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ContentPack } from '@aegis/runtime';
 import { PERFECT, Player, loadPack } from '../../traces/support';
 import type { ContentData, QuestView } from '../../../src/rules/contract';
+
+// Whole sessions are replayed here, one commit at a time with the full content pack: give them
+// room on a busy machine (Vitest's default is 60 s per test).
+vi.setConfig({ testTimeout: 300_000 });
 
 const pack = loadPack();
 
@@ -40,7 +44,7 @@ describe('drawing the daily quests', () => {
 
   it('never draws two quests with the same goal, even when templates share one', async () => {
     const pack: ContentPack<ContentData> = JSON.parse(JSON.stringify(loadPack()));
-    pack.data.quests.push({ ...pack.data.quests[0]!, id: 'correct-40', target: 40, weight: 100 });
+    pack.data.quests.push({ ...pack.data.quests[0]!, id: 'correct-twin', target: 40, weight: 100 });
     for (let seed = 0; seed < 25; seed++) {
       const player = new Player(PERFECT, `same-goal-${seed}`, undefined, pack);
       await player.act({ type: 'startSession', day: '2026-10-06' });

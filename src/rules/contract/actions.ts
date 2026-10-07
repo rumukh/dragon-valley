@@ -14,7 +14,7 @@ import { COSMETIC_SLOTS } from './ids';
 import type { CosmeticSlot } from './ids';
 import { answerValueSchema } from './problems';
 import type { AnswerValue } from './problems';
-import { contentId, int, nullable, oneOf, uniqueArray } from './schema';
+import { contentId, int, nullable, objectWithOptional, oneOf, uniqueArray } from './schema';
 
 /** Longest response time recorded; anything slower is simply `slow`. */
 export const MAX_ELAPSED_MS = 600_000;
@@ -37,8 +37,12 @@ export type SettingChange =
 export type GameAction =
   /** Start (or resume) a play session on the child's local date `YYYY-MM-DD`. */
   | { type: 'startSession'; day: string }
-  /** Enter a level and start its first activity. */
-  | { type: 'startLevel'; level: string }
+  /**
+   * Enter a level and start its first activity. With `activity` (a completed level only), replay
+   * just that activity: the Daily Adventure's minigame step. A replay never completes the level
+   * again.
+   */
+  | { type: 'startLevel'; level: string; activity?: number }
   | { type: 'startActivity'; activity: ActivityRequest }
   /** Answer the current problem. `elapsedMs` excludes paused time. */
   | { type: 'answer'; value: AnswerValue; elapsedMs: number }
@@ -103,7 +107,10 @@ export const gameActionSchema: Schema<GameAction> = schema.union(
     type: schema.literal('startSession'),
     day: schema.string({ minLength: 10, maxLength: 10, pattern: /^\d{4}-\d{2}-\d{2}$/ }),
   }),
-  schema.object({ type: schema.literal('startLevel'), level: contentId }),
+  objectWithOptional(
+    { type: schema.literal('startLevel'), level: contentId },
+    { activity: int(0, 7) },
+  ),
   schema.object({ type: schema.literal('startActivity'), activity: activityRequestSchema }),
   schema.object({ type: schema.literal('answer'), value: answerValueSchema, elapsedMs }),
   schema.object({

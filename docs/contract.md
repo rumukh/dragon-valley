@@ -189,27 +189,30 @@ by `contentRegistration` (`parseContentJson(text, contentRegistration, file)`).
 
 ### 7.1 Records
 
-| Collection      | Record fields                                                                                                                                                                                                                      |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `objectives`    | `id`, `strand`, `titleKey` (docs/curriculum.md)                                                                                                                                                                                    |
-| `regions`       | `id`, `order` (map order), `titleKey`, `unlock: { after: levelId[] }`, `boss`, `background` (art ID)                                                                                                                               |
-| `levels`        | `id`, `region`, `order`, `titleKey`, `kind: lesson/boss`, `unlock`, `activities`, `stars` (null = balance), `rewards: { coins: [1★, 2★, 3★], eggs, cosmetics }`, `boss`, `storyBeat`, `objectives`                                 |
-| `activities`    | `kind`, `skills`, `count` (problems or boards), `input: auto/choice/keypad`, `options` (per kind, `ACTIVITY_OPTION_SCHEMAS`: Riddle Scrolls `pickOperation`, Memory Match `pairs`, Number Trail `length`/`gaps`, Egg Grid `split`) |
-| `skills`        | §6                                                                                                                                                                                                                                 |
-| `dragons`       | `id`, `kind: table/special/finale`, `table`, `nameKey`, `region`, `rig` (art ID), `skills` (mastery set), `divisionSkills`, `boss`                                                                                                 |
-| `bosses`        | `id`, `region`, `nameKey`, `mood: sleepy/laughing/happy`, `meter` (correct answers), `reviewShare`                                                                                                                                 |
-| `cosmetics`     | `id`, `slot`, `assetId` (art ID), `nameKey`, `price`, `unlock` (level or null); `{id, slot, assetId}` is the narrative `CosmeticItem`                                                                                              |
-| `stickers`      | `id`, `nameKey`, `page` (region), `criteria`, `icon` (art ID), `color` (`#rrggbb`), `frame` (art ID)                                                                                                                               |
-| `quests`        | `id`, `titleKey`, `goal`, `target`, `coins`, `weight`, `unlock`                                                                                                                                                                    |
-| `wordLists`     | `id`, `kind: name/thing`, `entries` (catalog keys; things have `.one` / `.other` plural forms)                                                                                                                                     |
-| `wordTemplates` | `id`, `family`, `textKey` (with `{placeholders}`), `vars` (`int` / `word` / `calc` / `form`), `model` (`value` or `divrem` over template expressions), `operation`                                                                 |
-| `placement`     | `steps: { skill, problems, passAccuracy, levels }[]`, `minProblems`, `maxProblems`, `stopAfterMisses`                                                                                                                              |
-| `story`         | `beats: { id, trigger, skippable, graph }[]` (each graph a `@aegis/narrative` `NarrativeGraph`, validated by `validateNarrative`) and `rewards: { reward, grant }[]`                                                               |
-| `balance`       | every tunable number (§7.3)                                                                                                                                                                                                        |
+| Collection      | Record fields                                                                                                                                                                                                                                                                                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `objectives`    | `id`, `strand`, `titleKey` (docs/curriculum.md)                                                                                                                                                                                                                                                                                                                                     |
+| `regions`       | `id`, `order` (map order), `titleKey`, `unlock: { after: levelId[] }`, `boss`, `background` (art ID)                                                                                                                                                                                                                                                                                |
+| `levels`        | `id`, `region`, `order`, `titleKey`, `kind: lesson/boss`, `unlock`, `activities`, `stars` (null = balance), `rewards: { coins: [1★, 2★, 3★], eggs, cosmetics }`, `boss`, `storyBeat`, `objectives`                                                                                                                                                                                  |
+| `activities`    | `kind`, `skills`, `count` (problems or boards), `input: auto/choice/keypad`, `options` (per kind, `ACTIVITY_OPTION_SCHEMAS`: Feeding Time `draw` (`mix`, or `weakest`: due and weakest facts first), Riddle Scrolls `pickOperation`, Memory Match `pairs` and `match` (`value`, `family`: × ↔ ÷ sentences, `term`: term ↔ example), Number Trail `length`/`gaps`, Egg Grid `split`) |
+| `skills`        | §6                                                                                                                                                                                                                                                                                                                                                                                  |
+| `dragons`       | `id`, `kind: table/special/finale`, `table`, `nameKey`, `region`, `rig` (art ID), `skills` (mastery set), `divisionSkills`, `boss`                                                                                                                                                                                                                                                  |
+| `bosses`        | `id`, `region`, `nameKey`, `mood: sleepy/laughing/happy`, `meter` (correct answers), `reviewShare`; optional `heads` (default 1: a boss with several heads shares its meter evenly and serves its boss activity's skills one per head, in order) and `finale` (winning over this boss completes the game)                                                                           |
+| `cosmetics`     | `id`, `slot`, `assetId` (art ID), `nameKey`, `price`, `unlock` (level or null); `{id, slot, assetId}` is the narrative `CosmeticItem`                                                                                                                                                                                                                                               |
+| `stickers`      | `id`, `nameKey`, `page` (region), `criteria`, `icon` (art ID), `color` (`#rrggbb`), `frame` (art ID)                                                                                                                                                                                                                                                                                |
+| `quests`        | `id`, `titleKey`, `goal`, `target`, `coins`, `weight`, `unlock`                                                                                                                                                                                                                                                                                                                     |
+| `wordLists`     | `id`, `kind: name/thing`, `entries` (catalog keys; things have `.one` / `.other` plural forms)                                                                                                                                                                                                                                                                                      |
+| `wordTemplates` | `id`, `family`, `textKey` (with `{placeholders}`), `vars` (`int` / `word` / `calc` / `form`), `model` (`value` or `divrem` over template expressions), `operation`                                                                                                                                                                                                                  |
+| `placement`     | `steps: { skill, problems, passAccuracy, levels }[]`, `minProblems`, `maxProblems`, `stopAfterMisses`                                                                                                                                                                                                                                                                               |
+| `story`         | `beats: { id, trigger, skippable, graph }[]` (each graph a `@aegis/narrative` `NarrativeGraph`, validated by `validateNarrative`) and `rewards: { reward, grant }[]`                                                                                                                                                                                                                |
+| `balance`       | every tunable number (§7.3)                                                                                                                                                                                                                                                                                                                                                         |
 
 **Sticker criteria** (`kind`): `level-complete {level, stars}`, `boss-defeated {boss}`,
-`dragon-stage {dragon | null, stage}`, `facts-mastered {family: mul/div, level, count}`,
-`streak {count}`, `days-practiced`, `week-days`, `coins-earned`, `cosmetics-owned`,
+`dragon-stage {dragon | null, stage}`, `dragons-stage {dragonKind | null, stage, count | null}`
+(that many dragons of a kind at a stage or later; `count: null` means every such dragon in the
+content), `facts-mastered {family: mul/div, level, count}`,
+`skill-mastered {skill, level: seen/bronze/silver/gold, share}` (a percentage of the skill's
+items), `streak {count}`, `days-practiced`, `week-days`, `coins-earned`, `cosmetics-owned`,
 `dragons-dressed {count}` (dragons wearing at least one cosmetic: what the child did, so placement
 and level rewards never earn it), `arena-best`, `quests-claimed`, `placement-done`, `finale`.
 
@@ -237,6 +240,8 @@ Beyond the strict schemas (unknown fields are rejected), a pack is valid only if
 - activity options belong to their kind; minigames use `input: 'auto'`; Compare Stones is never
   keypad; a boss level ends with its boss activity and lessons have none;
 - map order is unique per region and per level; the region boss has a boss level;
+- a boss with several `heads` has a meter that shares evenly between them and a boss activity
+  with at least one skill per head; at most one boss is the `finale`;
 - the unlock graph is acyclic and every level is reachable from a start level (`unreachable`);
 - growth rules list hatchling, youngling, adult, crowned in order; Leitner intervals never decrease;
   goal, gift, mix and response ranges are consistent;
@@ -246,8 +251,8 @@ Beyond the strict schemas (unknown fields are rejected), a pack is valid only if
 `scripts/validate-content.mjs` (part of `npm run verify`) adds the cross-file checks: every catalog
 key the pack uses exists in `en.content.json`; word-template placeholders are template variables;
 story lines keep to 10 words per sentence (`CHILD_PROFILE`); shipped history packs stay valid; art
-IDs exist in `assets/art/catalog.json` (reported now, `--strict-art` later); curriculum coverage
-(reported now, `--strict-coverage` once v1 content is complete).
+IDs exist in `assets/art/catalog.json` (`--strict-art`); every objective has a lesson and a boss
+level (`--strict-coverage`). The v1 pack passes both strict checks and `npm run verify` runs them.
 
 ### 7.3 Balance defaults
 
@@ -284,33 +289,48 @@ equal to the dragon ID), `cosmetic.assetId`, `sticker.icon`, `sticker.frame`, an
 story beats (a scene ID is a background ID: `castle-hall`, `valley-map` or a region ID; bosses are
 drawn by the shell from the boss ID, not the scene). `collectArtIds(data)` lists them;
 `checkArtCatalog(data, ids)` reports the missing ones. The validator gathers catalog IDs from every
-`id` field and every string under `icons` in `assets/art/catalog.json`. With the art catalog of
-art part 1 the Region 1 pack resolves everything except the three sticker frames (`frame-round`,
-`frame-star`, `frame-shield`) and the `castle-hall` and `valley-map` backgrounds, which arrive with
-the art pipeline's second part. Sound IDs are not in content: the shell maps events to sounds from
-S5's `assets/audio/manifest.json`.
+`id` field and every string under `icons` in `assets/art/catalog.json`; the v1 pack resolves all of
+them, and S4's `test/unit/art/content-art.test.ts` also checks each reference in its role (region
+scenes, rigs of the right table, boss moods matching the won pose, cosmetic slots, stickers that
+compose). Sound IDs are not in content: the shell maps events to sounds from S5's
+`assets/audio/manifest.json`.
 
 ### 7.6 Revisions, history and save migration
 
 - A save pins the exact pack it was played with: pack ID, revision and content hash (the runtime
   refuses to restore a save against any other pack).
-- **Every content change merged after a release bumps `revision`** (semver-like: patch for balance or
-  text, minor for new levels or regions). Before the first release the pack stays `1.0.0`.
-- **Every shipped revision is archived** byte-for-byte as `content/history/<revision>.json` and
-  shipped with the site. A revision string is never reused for different content (tests and the
-  validator enforce it).
+- **Every content change merged to `main` bumps `revision`** (MAJOR.MINOR.PATCH: patch for balance
+  or text, minor for new levels or regions) with `npm run content:bump -- <revision>`
+  ([content.md §1](content.md#1-files-and-revisions)): `main` deploys, so its pack is what saves
+  pin. The Region 1 slice went live as `1.0.0` (main `373a5d2`); v1 is `1.1.0`.
+- **Every deployed revision is archived** byte-for-byte as `content/history/<revision>.json` and
+  shipped with the site. A revision string is never reused for different content: every
+  revision's content hash is pinned (`REVISIONS` in `test/unit/contract/content.test.ts`), so
+  changed content under a pinned revision, or a changed archive, fails the tests, and the validator
+  refuses a current revision archived with other content. Every catalog key an archived pack uses
+  stays in the catalog (the validator checks).
 - **The schema only grows compatibly.** Every archived pack must stay valid under the current
   `contentRegistration`, so `CONTENT_SCHEMA_VERSION` stays 1 and changes are limited to new union
   variants (new activity kinds, generators, criteria) and new optional fields
   (`objectWithOptional`). Anything else needs a coordinator decision and a history plan.
 - **Content IDs are append-only.** New content adds regions, levels, skills, dragons, cosmetics and
   stickers; it does not rename or delete them.
-- **Upgrade path** (plan §3.4): create the host with the save's archived pack, `restore` the save,
-  `stageContent(current)`, then at the hub (`canActivateContent`: no round, no pending beat, no
-  pending jobs) `activateContent(current, 'boundary')`. The adapter's `activateContent` carries
-  progress forward; with append-only IDs v1 needs no transformation, and a revision that retires an
-  ID must migrate the state there. The save-migration work proves this with a fixture save upgraded to
-  a v1.1 pack that adds an island.
+- **Upgrade path** (plan §3.4), as the shell does it (`src/app/persistence/game-session.ts`):
+  create the host with the save's pack (the archived one for an old save), stage the current pack,
+  `restore` the save, then at the hub (`canActivateContent`: no round, no pending beat, no pending
+  jobs) `activateContent(current, 'boundary')`. The adapter's `activateContent` carries progress
+  forward; with append-only IDs no transformation is needed, and a revision that retires an ID
+  must migrate the state there. `test/migration/slice-save.test.ts` proves it with a real save made
+  by the deployed Region 1 slice's rules on its pack (fixture `slice-save.json`): refused by the
+  current pack alone, restored exactly as saved with `content/history/1.0.0.json`, and moved to
+  `1.1.0` at the hub with all progress unchanged (the v1 content under `1.0.0` is refused as
+  `content-revision-reused`). `test/migration/next-revision.test.ts` does the same for the next
+  release (a fixture island under the next minor revision, `test/migration/fixtures/island.json`):
+  refused mid-round, activated at the hub with all progress carried forward, an old save still
+  restoring against its own revision.
+- **State compatibility.** New state fields are optional (`objectWithOptional`) with a default
+  that old saves get by omission, so every save keeps restoring under newer rules without bumping
+  `STATE_VERSION` (the day counters `daily.levels` and `daily.minigames` are the first such fields).
 
 ## 8. Per-profile state (`state.ts`)
 
@@ -319,27 +339,27 @@ and is saved after every commit. `STATE_VERSION` (the adapter's `stateVersion`, 
 bumped, with an explicit save migration, whenever a change means an old snapshot cannot continue
 unchanged.
 
-| Field                                  | Meaning                                                                                                 |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `day`, `firstDay`                      | current and first session day (day numbers: days since 1970-01-01, local)                               |
-| `sessions`, `daysPracticed`            | counters                                                                                                |
-| `onboarding`                           | `firstEgg`, `placement: pending/done/skipped`                                                           |
-| `items`                                | per item: `box` 0-5, `due` day, `seen`, `correct`, `recent` (last 3 buckets), `lastDay`                 |
-| `levels`                               | per level: best `stars`, `bestAccuracy`, `plays`, `placed`, `paidStars`                                 |
-| `bosses`                               | defeated bosses and the day                                                                             |
-| `dragons`                              | owned dragons: `stage`, `obtainedDay`, `stageDay`, `outfit` (one item or null per slot)                 |
-| `coins`, `coinsEarned`                 | wallet and lifetime earnings                                                                            |
-| `cosmetics`                            | `@aegis/narrative` `CosmeticState` (owned + idempotent grant claims; `equipped` stays empty)            |
-| `stickers`                             | earned stickers and the day                                                                             |
-| `daily`                                | today's answers, goal, quests, gift (`locked/ready/opened`)                                             |
-| `history`                              | the last 60 days' records (answers, correct, fast)                                                      |
-| `arena`, `questsClaimed`, `bestStreak` | records for stickers and the parent view                                                                |
-| `story`                                | the beat in progress (`NarrativeState`), `pending`, `queue`, `done` (finished beats keep only their ID) |
-| `run`                                  | the level being played: `level`, `next` activity, `results`                                             |
-| `round`                                | the active or finished round (problem round or minigame round)                                          |
-| `roundCounter`                         | for round IDs `r1`, `r2`, …                                                                             |
-| `settings`                             | rule settings: `dailyGoal`, `arena`, `unlockAhead`                                                      |
-| `finale`                               | the day the finale was completed                                                                        |
+| Field                                  | Meaning                                                                                                                        |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `day`, `firstDay`                      | current and first session day (day numbers: days since 1970-01-01, local)                                                      |
+| `sessions`, `daysPracticed`            | counters                                                                                                                       |
+| `onboarding`                           | `firstEgg`, `placement: pending/done/skipped`                                                                                  |
+| `items`                                | per item: `box` 0-5, `due` day, `seen`, `correct`, `recent` (last 3 buckets), `lastDay`                                        |
+| `levels`                               | per level: best `stars`, `bestAccuracy`, `plays`, `placed`, `paidStars`                                                        |
+| `bosses`                               | defeated bosses and the day                                                                                                    |
+| `dragons`                              | owned dragons: `stage`, `obtainedDay`, `stageDay`, `outfit` (one item or null per slot)                                        |
+| `coins`, `coinsEarned`                 | wallet and lifetime earnings                                                                                                   |
+| `cosmetics`                            | `@aegis/narrative` `CosmeticState` (owned + idempotent grant claims; `equipped` stays empty)                                   |
+| `stickers`                             | earned stickers and the day                                                                                                    |
+| `daily`                                | today's answers, goal, quests, gift (`locked/ready/opened`), levels and minigames finished today (optional; absent reads as 0) |
+| `history`                              | the last 60 days' records (answers, correct, fast)                                                                             |
+| `arena`, `questsClaimed`, `bestStreak` | records for stickers and the parent view                                                                                       |
+| `story`                                | the beat in progress (`NarrativeState`), `pending`, `queue`, `done` (finished beats keep only their ID)                        |
+| `run`                                  | the level being played: `level`, `next` activity, `results`                                                                    |
+| `round`                                | the active or finished round (problem round or minigame round)                                                                 |
+| `roundCounter`                         | for round IDs `r1`, `r2`, …                                                                                                    |
+| `settings`                             | rule settings: `dailyGoal`, `arena`, `unlockAhead`                                                                             |
+| `finale`                               | the day the finale was completed                                                                                               |
 
 A **problem round** keeps the activity, source, skills, input, target or boss meter, counters
 (asked, answered, correct, fast, streak), the re-ask queue, recent items, the `current` problem
@@ -366,22 +386,22 @@ Every action is validated by `gameActionSchema` and then by the rules' legality 
 A rejected action changes nothing, costs nothing and draws no randomness. Only answers cost a
 logical turn (`ACTION_TURNS`); re-ask jobs count turns.
 
-| Action                                              | Turns   | Legal when                                                                               | Effect                                                                                       |
-| --------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `startSession { day: 'YYYY-MM-DD' }`                | 0       | always (first action of a profile)                                                       | new day: daily record, history; first session: prologue                                      |
-| `startLevel { level }`                              | 0       | level open, no active round, no blocking beat                                            | start a run and its first playable activity; level-start beat                                |
-| `startActivity { activity }`                        | 0       | `level` (index ≤ next), `arena` (open and on), `snack` (a hungry dragon), `placement`    | start a round                                                                                |
-| `answer { value, elapsedMs }`                       | 1       | a problem is on screen (not in the placement check)                                      | grade, Leitner move, coins, re-ask job, next problem                                         |
-| `placementAnswer { value, elapsedMs }`              | 1       | a placement-check problem is on screen                                                   | grade, climb the ladder (no re-asks); at the end place levels                                |
-| `minigameMove { revision, move }`                   | 0       | a minigame board is active, `revision` is its revision, the move is legal (minigames.ts) | reduce the board; credit facts and coins; next board or the end of the round                 |
-| `hint`                                              | 0       | a problem is on screen, not yet hinted                                                   | mark hinted (shell shows the model)                                                          |
-| `endRound { reason: done/quit/time-up/time-limit }` | 0       | `done`: round finished; `quit`, `time-limit`: round active; `time-up`: the Arena only    | close or end the round; cancel pending re-asks; only a finished round completes its activity |
-| `buy { item }`                                      | 0       | item available, not owned, affordable                                                    | pay, grant (`buy:<item>`)                                                                    |
-| `equip { dragon, slot, item                         | null }` | 0                                                                                        | dragon owned; item owned and fits the slot                                                   | dress the dragon                                  |
-| `claimQuest { quest }`                              | 0       | quest done and unclaimed                                                                 | pay the quest coins                                                                          |
-| `openGift`                                          | 0       | daily gift ready                                                                         | weighted grant from `rewards`                                                                |
-| `storyChoice { beat, node, revision, choice         | null }` | 0                                                                                        | the pending beat, current node and revision                                                  | advance (or skip a skippable beat); grant rewards |
-| `setSetting { setting }`                            | 0       | values in range                                                                          | `dailyGoal`, `arena`, `unlockAhead`                                                          |
+| Action                                                 | Turns | Legal when                                                                                                     | Effect                                                                                                                                                                                     |
+| ------------------------------------------------------ | ----- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `startSession { day: 'YYYY-MM-DD' }`                   | 0     | always (first action of a profile)                                                                             | new day: daily record, history; first session: prologue                                                                                                                                    |
+| `startLevel { level, activity? }`                      | 0     | level open, no active round, no blocking beat; with `activity`: the level completed and that activity playable | start a run and its first playable activity, with the level-start beat; with `activity`, replay just that activity (the level is not completed again; the Daily Adventure's minigame step) |
+| `startActivity { activity }`                           | 0     | `level` (index ≤ next), `arena` (open and on), `snack` (a hungry dragon), `placement`                          | start a round                                                                                                                                                                              |
+| `answer { value, elapsedMs }`                          | 1     | a problem is on screen (not in the placement check)                                                            | grade, Leitner move, coins, re-ask job, next problem                                                                                                                                       |
+| `placementAnswer { value, elapsedMs }`                 | 1     | a placement-check problem is on screen                                                                         | grade, climb the ladder (no re-asks); at the end place levels                                                                                                                              |
+| `minigameMove { revision, move }`                      | 0     | a minigame board is active, `revision` is its revision, the move is legal (minigames.ts)                       | reduce the board; credit facts and coins; next board or the end of the round                                                                                                               |
+| `hint`                                                 | 0     | a problem is on screen, not yet hinted                                                                         | mark hinted (shell shows the model)                                                                                                                                                        |
+| `endRound { reason: done/quit/time-up/time-limit }`    | 0     | `done`: round finished; `quit`, `time-limit`: round active; `time-up`: the Arena only                          | close or end the round; cancel pending re-asks; only a finished round completes its activity                                                                                               |
+| `buy { item }`                                         | 0     | item available, not owned, affordable                                                                          | pay, grant (`buy:<item>`)                                                                                                                                                                  |
+| `equip { dragon, slot, item \| null }`                 | 0     | dragon owned; item owned and fits the slot                                                                     | dress the dragon                                                                                                                                                                           |
+| `claimQuest { quest }`                                 | 0     | quest done and unclaimed                                                                                       | pay the quest coins                                                                                                                                                                        |
+| `openGift`                                             | 0     | daily gift ready                                                                                               | weighted grant from `rewards`                                                                                                                                                              |
+| `storyChoice { beat, node, revision, choice \| null }` | 0     | the pending beat, current node and revision                                                                    | advance (or skip a skippable beat); grant rewards                                                                                                                                          |
+| `setSetting { setting }`                               | 0     | values in range                                                                                                | `dailyGoal`, `arena`, `unlockAhead`                                                                                                                                                        |
 
 - **Rejections** are `RuntimeError`s with stable `code`s: `no-session`, `invalid-day`,
   `story-pending`, `round-active`, `unknown-level`, `locked-level`, `no-level`, `locked-activity`,
@@ -433,8 +453,10 @@ one-shots). It contains:
 - `screen`: `story` (a beat is pending), `round` (a round is active), `results` (a round finished),
   `hub` (otherwise). The shell may navigate elsewhere (market, album, parent) without an action.
 - `story`: the pending beat's projection (`node`, `text` key, `choices`, `skippable`, `finished`).
-- `hub`: regions with backgrounds, boss status and level cards (`locked/open/completed`, stars,
-  placed, `glowing`); `next` (the Daily Adventure step); `hungry` dragons; arena availability.
+- `hub`: regions with backgrounds, boss status (`heads`: 1, or 7 for the Seven-Headed Dragon; the
+  head being won over is `floor(meter.value × heads / meter.target)`) and level cards
+  (`locked/open/completed`, stars, placed, `glowing`); `next` (the Daily Adventure step); `hungry`
+  dragons; arena availability.
 - `run`: the level's activities and done flags, and the level result once finished.
 - `round`: for problem rounds the progress (answered, target, correct, streak, boss meter), the
   current `problem` (structured problem, resolved input, choices, step, re-ask and hint flags:
@@ -460,9 +482,18 @@ correct answer, `proud` on a streak milestone, `sleepy` after the daily goal, `h
 A dragon is **hungry** when at least `balance.hungry.minDue` of its facts (multiplication and
 division) are due. A fact is due when it was answered right before, its review day has come and
 it was not already practised today, so a dragon is never hungry on the day it hatched. `hub.next`
-is, in order: a pending beat; the placement check while `onboarding.placement` is `pending`;
-snack time when a dragon is hungry and nothing was answered yet today; the next glowing level;
-the gift once the goal is reached; free play.
+is, in order: a pending beat (`story`); the placement check while `onboarding.placement` is
+`pending`; `snack` time when a dragon is hungry and nothing was answered yet today; the next
+glowing `level` until a level was finished today; then, once a day that had no minigame yet,
+`minigame { level, activity }` (a minigame of the furthest finished level, replayed with
+`startLevel { level, activity }`); the `gift` once the goal is reached; the next `level`;
+`free-play`.
+
+Word problems with an operation (Riddle Scrolls, and stories in boss and mixed rounds) are asked
+in two steps: the operation, then the number. A right operation moves the problem to its answer
+step with no credit yet; a wrong one is the problem's miss (shown with the right operation, the
+item goes back a box and is re-asked later) and the round moves on. Riddle Scrolls with
+`pickOperation: false` serve the story without the operation step.
 
 ### 11.1 Minigame boards (`minigames.ts`)
 
@@ -472,33 +503,53 @@ and the same board typed (`round.current`, a union keyed by the activity kind, w
 `revision = round.minigame.revision`.
 
 Card and stone faces are notation-agnostic labels in the narrative projection (`labelKey`):
-`fact:<item ID>` (`fact:mul:7x8` is `7 · 8`, `fact:div:56:7` is `56 : 7`), `num:<n>`,
+`fact:<item ID>` (`fact:mul:7x8` is `7 · 8`, `fact:div:56:7` is `56 : 7`), `expr:<op>:<a>:<b>`
+(any other single operation, such as the remainder division `expr:div:23:5`), `num:<n>`,
 `term:<term>` (term ↔ example pairs), `rem:<quotient>:<remainder>`,
 `example:<op>:<left>:<right>:<result>:<remainder or ->:<highlight or none>`; every card back is
 `card:back`. `parseCardLabel(label)` turns a label into a structured `CardFace` (`expr`,
 `answer` or `sentence`), `cardLabel(face)` back, and `formatFace(face, notation)` renders it; the
 typed boards carry the parsed face directly (`null` while face down).
 
-| Board          | View (besides `kind`)                                                                                                         | Moves                                                                 |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `memory-match` | `cards[{ id, face, faceUp, matched }]`, `clearAvailable`, `pairs`, `matched`, `attempts`                                      | `{ type: 'select', card }`, `{ type: 'clear' }`                       |
-| `number-trail` | `step`, `path[{ value, gap }]` (a fixed number or a gap index), `stones[{ id, value }]` in gap order, `submitted`, `attempts` | `{ type: 'place', item, index }`, `{ type: 'submit' }`                |
-| `egg-grid`     | `product`, `maxSide`, `split`, `find`, `rows`, `columns`, `found[{ rows, columns }]`, `last` (`found`, `again`, `wrong`)      | `{ type: 'set', rows, columns }` (1..`maxSide`), `{ type: 'submit' }` |
-| `fact-family`  | `numbers` (the nest), `equations[{ op, slots, correct }]` (two ·, two :), `submitted`, `attempts`                             | `{ type: 'fill', equation, slot, value }`, `{ type: 'submit' }`       |
+Memory Match pairs by its `match` option: `value` (a fact and its product or quotient,
+`7 · 8` ↔ `56`, or a division with leftovers and its answer, `23 : 5` ↔ `4 r 3`), `family`
+(`6 · 7 = 42` ↔ `42 : 7 = 6`, both sentences without a highlight) or `term` (`product` ↔
+`6 · 7 = 42` with 42 highlighted). Every pair on one board is different, so a match is never
+ambiguous.
+
+| Board           | View (besides `kind`)                                                                                                         | Moves                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `memory-match`  | `cards[{ id, face, faceUp, matched }]`, `clearAvailable`, `pairs`, `matched`, `attempts`                                      | `{ type: 'select', card }`, `{ type: 'clear' }`                                                    |
+| `number-trail`  | `step`, `path[{ value, gap }]` (a fixed number or a gap index), `stones[{ id, value }]` in gap order, `submitted`, `attempts` | `{ type: 'place', item, index }`, `{ type: 'submit' }`                                             |
+| `egg-grid`      | `product`, `maxSide`, `split`, `find`, `rows`, `columns`, `found[{ rows, columns }]`, `last` (`found`, `again`, `wrong`)      | `{ type: 'set', rows, columns }` (1..`maxSide`), `{ type: 'submit' }`                              |
+| `fact-family`   | `numbers` (the nest), `equations[{ op, slots, correct }]` (two ·, two :), `submitted`, `attempts`                             | `{ type: 'fill', equation, slot, value }`, `{ type: 'submit' }`                                    |
+| `sharing-feast` | `total`, `baskets`, `remainder` (leftovers expected), `inBaskets[]`, `bowl`, `last` (`uneven`, `more`, `count`), `attempts`   | `{ type: 'put' \| 'take', basket, count? }`, `{ type: 'deal' }`, `{ type: 'submit', each, left }`  |
+| `golem-orders`  | `expr` (as it stands), `start`, `picked` (a path or null), `last` (`right`, `not-first`, `wrong-value`), `steps`, `mistakes`  | `{ type: 'pick', path }` (`left`/`right`/`inner` steps from the root), `{ type: 'answer', value }` |
 
 The Egg Grid's config is `{ product, maxSide, split, find }` and the board is complete when
 `found` has `find` rectangles; the rules set `find` to every rectangle up to 10 × 10 (both
-orders of each factor pair, at most four).
+orders of each factor pair, at most four). A Sharing Feast is complete when the baskets are
+equal, the bowl cannot go round once more and `submit` says how many each basket has and how many
+are left; Golem Orders when one number is left. A Golem expression is always worked out the way
+it reads (brackets only where they are written, · and : before + and −, each rank from left to
+right: `60 + 6 + 45 : 5` is the tree `(60 + 6) + 45 : 5`); the adapter refuses any other tree, and
+the rules redraw a generated expression whose tree reads differently. The operation that may go
+first follows the textbook: inside brackets first (the innermost pair that still holds an
+operation; separate pairs in either order), then · and :, then + and −, from left to right;
+independent operations of the same rank (`2 · 3 + 4 · 5`) in either order.
 
 A finished step earns `balance.coins.correct` (a matched pair, a new rectangle, an equation, a
-trail stone) and credits facts to the Leitner boxes: a matched pair its fact (fast if no pair was
-mismatched on the board before, else ok); a new rectangle `rows × columns` its fact `mul:RxC`
-when that fact belongs to the activity's skills (each order is its own fact, so 3 × 4 and 4 × 3
-each count when found); a finished family its four facts and a finished trail its `k · n` facts
-(ok when the first check was right, slow after more checks). A finished board is replaced by the
-next one (`minigame.completed`); the last one finishes the round. Minigame credits do not count
-as daily answers. Sharing Feast and Golem Orders boards arrive as new union variants with the
-rest of the rules work.
+trail stone, a basket, a Golem step) and credits facts to the Leitner boxes: a matched pair its
+fact (a family pair both its facts, a remainder pair `rem:d<divisor>`, a term pair
+`terms:<term>`; fast if no pair was mismatched on the board before, else ok); a new rectangle
+`rows × columns` its fact `mul:RxC` when that fact belongs to the activity's skills (each order is
+its own fact, so 3 × 4 and 4 × 3 each count when found); a finished family its four facts, a
+finished trail its `k · n` facts (a trail of tens `tens:d<k>`), a finished feast its division
+fact, `rem:d<baskets>` or `div2d1d:<regroup|noregroup>`, and a finished Golem board
+`order:<brackets|no-brackets>` (ok when the first check was right or no mistake was made, slow
+otherwise). Only items of the activity's own skills are credited. A finished board is replaced by
+the next one (`minigame.completed`); the last one finishes the round. Minigame credits do not count
+as daily answers.
 
 ## 12. Events (`events.ts`)
 
@@ -552,21 +603,19 @@ rebuilds the screen from the view.
 
 `src/rules/adapter.ts` with `learning/`, `progression/`, `minigames/`, `economy/`, `story/` and
 `view.ts` implements the contract deterministically. Implemented: sessions and days (daily goal,
-three daily quests with claims and a next-day payout, the gift chest, the week's habit dots),
-story beats with the first-egg choice, level runs of problem rounds and minigame boards (Memory
-Match, Number Trail, Egg Grid, Fact Family Nest), the adaptive mix (due reviews, known and
-learning items, the learning share following today's success, the focus egg, no repeats), re-ask
-jobs, the boss meter with its kindness cap and spaced review, the placement check, snack time,
-the Lightning Arena, grading, Leitner moves, coins and streak bonuses, stars, eggs, growth,
-stickers, the market, outfits, settings, state validation and the complete view. Every generator
-of §6 is implemented with its distractors ([learning.md](learning.md)), so problem rounds play
-word problems (with the Riddle Scrolls operation step), remainders, beyond-the-tables problems,
-order of operations, comparisons and terms as soon as content lists such skills.
-
-Not implemented yet (the rest of the rules work): the Sharing Feast and Golem Orders boards,
-Compare Stones and Riddle Scrolls flows beyond what the generic problem round already does
-(`auto` input still resolves by Leitner box alone, while comparisons and terms need choice input:
-`keypadPossible`), partial credit for commuted facts, unlock-ahead review, the finale.
+three daily quests with claims and a next-day payout, the gift chest, the week's habit dots, the
+Daily Adventure steps), story beats with the first-egg choice and every region's welcome, boss
+and finale beats, level runs of problem rounds and all six minigame boards (Memory Match in its
+value, family and term modes, Number Trail, Egg Grid, Fact Family Nest, Sharing Feast, Golem
+Orders), replaying one activity of a finished level, the adaptive mix (due reviews, known and
+learning items, the learning share following today's success, the focus egg, no repeats; every
+skill of an activity is served when several produce the same item), partial credit for commuted
+facts, re-ask jobs, the boss meter with its kindness cap, spaced review and many heads, the
+finale, the placement check, snack time, the Lightning Arena, grading (with the Riddle Scrolls
+operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth, stickers, the
+market, outfits, settings (with unlock-ahead), state validation and the complete view. Every
+generator of §6 is implemented with its distractors ([learning.md](learning.md)); comparisons and
+terms are answered by choice whatever the input mode (`keypadPossible`).
 
 The command traces in `test/traces/` (`first-session`, `region-one`, `struggling-child`) pin the
 rules with named checks, literal golden hashes and trajectories, and mutation checks. When the

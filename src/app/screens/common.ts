@@ -142,7 +142,7 @@ export function keeperBadge(keeper: Keeper, large = false): HTMLElement {
  * and gifts can earn others): one toast each. Their sound already played with the commit.
  */
 export function toastStickers(app: App, active: ActiveKeeper): void {
-  const stickers = app.game.content.data.stickers;
+  const stickers = active.game.content().data.stickers;
   for (const event of active.events.take(['sticker.earned'])) {
     if (event.type !== 'sticker.earned') continue;
     const sticker = stickers.find((candidate) => candidate.id === event.data.sticker);

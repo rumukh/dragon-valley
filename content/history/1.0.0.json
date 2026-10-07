@@ -1,0 +1,4512 @@
+{
+  "id": "dragon-valley",
+  "revision": "1.0.0",
+  "schemaVersion": 1,
+  "data": {
+    "objectives": [
+      {
+        "id": "obj.mul.meaning",
+        "strand": "meaning",
+        "titleKey": "objective.mul.meaning"
+      },
+      {
+        "id": "obj.mul.commutative",
+        "strand": "meaning",
+        "titleKey": "objective.mul.commutative"
+      },
+      {
+        "id": "obj.mul.rules-0-1",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.rules-0-1"
+      },
+      {
+        "id": "obj.mul.table-2-5-10",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.table-2-5-10"
+      },
+      {
+        "id": "obj.mul.table-3-4",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.table-3-4"
+      },
+      {
+        "id": "obj.mul.table-6-7",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.table-6-7"
+      },
+      {
+        "id": "obj.mul.table-8-9",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.table-8-9"
+      },
+      {
+        "id": "obj.mul.fluency",
+        "strand": "multiplication",
+        "titleKey": "objective.mul.fluency"
+      },
+      {
+        "id": "obj.div.meaning",
+        "strand": "division",
+        "titleKey": "objective.div.meaning"
+      },
+      {
+        "id": "obj.div.tables",
+        "strand": "division",
+        "titleKey": "objective.div.tables"
+      },
+      {
+        "id": "obj.div.fact-families",
+        "strand": "division",
+        "titleKey": "objective.div.fact-families"
+      },
+      {
+        "id": "obj.div.missing-factor",
+        "strand": "division",
+        "titleKey": "objective.div.missing-factor"
+      },
+      {
+        "id": "obj.rem.divide",
+        "strand": "remainder",
+        "titleKey": "objective.rem.divide"
+      },
+      {
+        "id": "obj.rem.word",
+        "strand": "remainder",
+        "titleKey": "objective.rem.word"
+      },
+      {
+        "id": "obj.big.mul-10-100",
+        "strand": "beyond-tables",
+        "titleKey": "objective.big.mul-10-100"
+      },
+      {
+        "id": "obj.big.tens",
+        "strand": "beyond-tables",
+        "titleKey": "objective.big.tens"
+      },
+      {
+        "id": "obj.big.mul-2d1d",
+        "strand": "beyond-tables",
+        "titleKey": "objective.big.mul-2d1d"
+      },
+      {
+        "id": "obj.big.div-2d1d",
+        "strand": "beyond-tables",
+        "titleKey": "objective.big.div-2d1d"
+      },
+      {
+        "id": "obj.order.precedence",
+        "strand": "order-of-operations",
+        "titleKey": "objective.order.precedence"
+      },
+      {
+        "id": "obj.order.brackets",
+        "strand": "order-of-operations",
+        "titleKey": "objective.order.brackets"
+      },
+      {
+        "id": "obj.compare.expressions",
+        "strand": "comparison",
+        "titleKey": "objective.compare.expressions"
+      },
+      {
+        "id": "obj.word.equal-groups",
+        "strand": "word-problems",
+        "titleKey": "objective.word.equal-groups"
+      },
+      {
+        "id": "obj.word.times-more-fewer",
+        "strand": "word-problems",
+        "titleKey": "objective.word.times-more-fewer"
+      },
+      {
+        "id": "obj.word.more-fewer-contrast",
+        "strand": "word-problems",
+        "titleKey": "objective.word.more-fewer-contrast"
+      },
+      {
+        "id": "obj.word.two-step",
+        "strand": "word-problems",
+        "titleKey": "objective.word.two-step"
+      },
+      {
+        "id": "obj.terms.mul",
+        "strand": "terminology",
+        "titleKey": "objective.terms.mul"
+      },
+      {
+        "id": "obj.terms.div",
+        "strand": "terminology",
+        "titleKey": "objective.terms.div"
+      }
+    ],
+    "regions": [
+      {
+        "id": "sunny-meadow",
+        "order": 1,
+        "titleKey": "region.sunny-meadow",
+        "unlock": {
+          "after": []
+        },
+        "boss": "bridge-troll",
+        "background": "sunny-meadow"
+      }
+    ],
+    "levels": [
+      {
+        "id": "sunny-meadow.1",
+        "region": "sunny-meadow",
+        "order": 1,
+        "titleKey": "level.sunny-meadow.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-2-5-10"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["mul-2-5-10"],
+            "count": 8,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.meadow-welcome",
+        "objectives": ["obj.mul.meaning", "obj.mul.table-2-5-10"]
+      },
+      {
+        "id": "sunny-meadow.2",
+        "region": "sunny-meadow",
+        "order": 2,
+        "titleKey": "level.sunny-meadow.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.1"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-2-5"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["mul-2-5"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["bubbles", "sunny", "goldie"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-2-5-10", "obj.mul.commutative"]
+      },
+      {
+        "id": "sunny-meadow.3",
+        "region": "sunny-meadow",
+        "order": 3,
+        "titleKey": "level.sunny-meadow.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.2"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-0-1-10"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "number-trail",
+            "skills": ["mul-10"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "length": 10,
+              "gaps": 3
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["mirror", "puff"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.meadow-new-eggs",
+        "objectives": ["obj.mul.rules-0-1", "obj.mul.table-2-5-10"]
+      },
+      {
+        "id": "sunny-meadow.4",
+        "region": "sunny-meadow",
+        "order": 4,
+        "titleKey": "level.sunny-meadow.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.3"]
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-2-5"],
+            "count": 2,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "fact-family",
+            "skills": ["div-2-5-10"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["div-2-5-10", "missing-2-5-10"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["scarf-striped"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.commutative", "obj.div.meaning", "obj.div.fact-families"]
+      },
+      {
+        "id": "sunny-meadow.5",
+        "region": "sunny-meadow",
+        "order": 5,
+        "titleKey": "level.sunny-meadow.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.4"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-meadow", "div-2-5-10"],
+            "count": 12,
+            "input": "keypad",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["div-2-5-10"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-2-5-10", "obj.mul.rules-0-1", "obj.div.tables"]
+      },
+      {
+        "id": "sunny-meadow.6",
+        "region": "sunny-meadow",
+        "order": 6,
+        "titleKey": "level.sunny-meadow.6",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sunny-meadow.5"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-meadow"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.word.equal-groups", "obj.word.more-fewer-contrast"]
+      },
+      {
+        "id": "sunny-meadow.boss",
+        "region": "sunny-meadow",
+        "order": 7,
+        "titleKey": "level.sunny-meadow.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["sunny-meadow.6"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": ["mul-meadow", "div-2-5-10", "missing-2-5-10"],
+            "count": 20,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": [],
+          "cosmetics": ["hat-party"]
+        },
+        "boss": "bridge-troll",
+        "storyBeat": "beat.bridge-troll",
+        "objectives": [
+          "obj.mul.meaning",
+          "obj.mul.commutative",
+          "obj.mul.rules-0-1",
+          "obj.mul.table-2-5-10",
+          "obj.div.meaning",
+          "obj.div.fact-families",
+          "obj.word.equal-groups"
+        ]
+      }
+    ],
+    "skills": [
+      {
+        "id": "mul-0",
+        "titleKey": "skill.mul-0",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [0],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-1",
+        "titleKey": "skill.mul-1",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [1],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-2",
+        "titleKey": "skill.mul-2",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [2],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-5",
+        "titleKey": "skill.mul-5",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [5],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-10",
+        "titleKey": "skill.mul-10",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-2-5",
+        "titleKey": "skill.mul-2-5",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [2, 5],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-2-5-10",
+        "titleKey": "skill.mul-2-5-10",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [2, 5, 10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-0-1-10",
+        "titleKey": "skill.mul-0-1-10",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [0, 1, 10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-meadow",
+        "titleKey": "skill.mul-meadow",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [0, 1, 2, 5, 10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-1",
+        "titleKey": "skill.div-1",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [1],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "div-2",
+        "titleKey": "skill.div-2",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [2],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "div-5",
+        "titleKey": "skill.div-5",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [5],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "div-10",
+        "titleKey": "skill.div-10",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [10],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "div-2-5-10",
+        "titleKey": "skill.div-2-5-10",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [2, 5, 10],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "missing-2-5-10",
+        "titleKey": "skill.missing-2-5-10",
+        "generator": "mul.missing",
+        "params": {
+          "tables": [2, 5, 10],
+          "factors": [0, 10],
+          "position": "both"
+        }
+      },
+      {
+        "id": "word-meadow",
+        "titleKey": "skill.word-meadow",
+        "generator": "word",
+        "params": {
+          "templates": ["word.equal-groups.nests", "word.sharing.berries", "word.more-than.flowers"]
+        }
+      }
+    ],
+    "dragons": [
+      {
+        "id": "puff",
+        "kind": "table",
+        "table": 0,
+        "nameKey": "dragon.puff",
+        "region": "sunny-meadow",
+        "rig": "puff",
+        "skills": ["mul-0"],
+        "divisionSkills": [],
+        "boss": "bridge-troll"
+      },
+      {
+        "id": "mirror",
+        "kind": "table",
+        "table": 1,
+        "nameKey": "dragon.mirror",
+        "region": "sunny-meadow",
+        "rig": "mirror",
+        "skills": ["mul-1"],
+        "divisionSkills": ["div-1"],
+        "boss": "bridge-troll"
+      },
+      {
+        "id": "bubbles",
+        "kind": "table",
+        "table": 2,
+        "nameKey": "dragon.bubbles",
+        "region": "sunny-meadow",
+        "rig": "bubbles",
+        "skills": ["mul-2"],
+        "divisionSkills": ["div-2"],
+        "boss": "bridge-troll"
+      },
+      {
+        "id": "sunny",
+        "kind": "table",
+        "table": 5,
+        "nameKey": "dragon.sunny",
+        "region": "sunny-meadow",
+        "rig": "sunny",
+        "skills": ["mul-5"],
+        "divisionSkills": ["div-5"],
+        "boss": "bridge-troll"
+      },
+      {
+        "id": "goldie",
+        "kind": "table",
+        "table": 10,
+        "nameKey": "dragon.goldie",
+        "region": "sunny-meadow",
+        "rig": "goldie",
+        "skills": ["mul-10"],
+        "divisionSkills": ["div-10"],
+        "boss": "bridge-troll"
+      }
+    ],
+    "bosses": [
+      {
+        "id": "bridge-troll",
+        "region": "sunny-meadow",
+        "nameKey": "boss.bridge-troll",
+        "mood": "laughing",
+        "meter": 15,
+        "reviewShare": 20
+      }
+    ],
+    "cosmetics": [
+      {
+        "id": "hat-flower-crown",
+        "slot": "head",
+        "assetId": "hat-flower-crown",
+        "nameKey": "cosmetic.hat-flower-crown",
+        "price": 20,
+        "unlock": null
+      },
+      {
+        "id": "scarf-striped",
+        "slot": "neck",
+        "assetId": "scarf-striped",
+        "nameKey": "cosmetic.scarf-striped",
+        "price": 15,
+        "unlock": null
+      },
+      {
+        "id": "glasses-round",
+        "slot": "eyes",
+        "assetId": "glasses-round",
+        "nameKey": "cosmetic.glasses-round",
+        "price": 25,
+        "unlock": null
+      },
+      {
+        "id": "hat-straw",
+        "slot": "head",
+        "assetId": "hat-straw",
+        "nameKey": "cosmetic.hat-straw",
+        "price": 20,
+        "unlock": null
+      },
+      {
+        "id": "bow-tie",
+        "slot": "neck",
+        "assetId": "bow-tie",
+        "nameKey": "cosmetic.bow-tie",
+        "price": 15,
+        "unlock": "sunny-meadow.1"
+      },
+      {
+        "id": "nest-flowers",
+        "slot": "nest",
+        "assetId": "nest-flowers",
+        "nameKey": "cosmetic.nest-flowers",
+        "price": 30,
+        "unlock": "sunny-meadow.2"
+      },
+      {
+        "id": "paint-dots",
+        "slot": "wings",
+        "assetId": "paint-dots",
+        "nameKey": "cosmetic.paint-dots",
+        "price": 30,
+        "unlock": "sunny-meadow.2"
+      },
+      {
+        "id": "hat-beanie",
+        "slot": "head",
+        "assetId": "hat-beanie",
+        "nameKey": "cosmetic.hat-beanie",
+        "price": 25,
+        "unlock": "sunny-meadow.3"
+      },
+      {
+        "id": "ribbon-bow",
+        "slot": "neck",
+        "assetId": "ribbon-bow",
+        "nameKey": "cosmetic.ribbon-bow",
+        "price": 20,
+        "unlock": "sunny-meadow.3"
+      },
+      {
+        "id": "paint-stars",
+        "slot": "wings",
+        "assetId": "paint-stars",
+        "nameKey": "cosmetic.paint-stars",
+        "price": 40,
+        "unlock": "sunny-meadow.4"
+      },
+      {
+        "id": "glasses-star",
+        "slot": "eyes",
+        "assetId": "glasses-star",
+        "nameKey": "cosmetic.glasses-star",
+        "price": 35,
+        "unlock": "sunny-meadow.5"
+      },
+      {
+        "id": "nest-pillow",
+        "slot": "nest",
+        "assetId": "nest-pillow",
+        "nameKey": "cosmetic.nest-pillow",
+        "price": 30,
+        "unlock": "sunny-meadow.5"
+      },
+      {
+        "id": "hat-party",
+        "slot": "head",
+        "assetId": "hat-party",
+        "nameKey": "cosmetic.hat-party",
+        "price": 60,
+        "unlock": "sunny-meadow.boss"
+      }
+    ],
+    "stickers": [
+      {
+        "id": "first-hatch",
+        "nameKey": "sticker.first-hatch",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": null,
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#f7b955",
+        "frame": "frame-round"
+      },
+      {
+        "id": "show-what-you-know",
+        "nameKey": "sticker.show-what-you-know",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "placement-done"
+        },
+        "icon": "star-filled",
+        "color": "#5bb8f5",
+        "frame": "frame-round"
+      },
+      {
+        "id": "meadow-first-steps",
+        "nameKey": "sticker.meadow-first-steps",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "sunny-meadow.1",
+          "stars": 1
+        },
+        "icon": "emblem-sunny-meadow",
+        "color": "#8bd36b",
+        "frame": "frame-round"
+      },
+      {
+        "id": "meadow-three-stars",
+        "nameKey": "sticker.meadow-three-stars",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "sunny-meadow.5",
+          "stars": 3
+        },
+        "icon": "node-stars-3",
+        "color": "#ffd23f",
+        "frame": "frame-star"
+      },
+      {
+        "id": "streak-ten",
+        "nameKey": "sticker.streak-ten",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "streak",
+          "count": 10
+        },
+        "icon": "badge-correct",
+        "color": "#ff8c42",
+        "frame": "frame-round"
+      },
+      {
+        "id": "first-outfit",
+        "nameKey": "sticker.first-outfit",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "dragons-dressed",
+          "count": 1
+        },
+        "icon": "hat-party",
+        "color": "#c77dff",
+        "frame": "frame-round"
+      },
+      {
+        "id": "troll-giggles",
+        "nameKey": "sticker.troll-giggles",
+        "page": "sunny-meadow",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "bridge-troll"
+        },
+        "icon": "chest-open",
+        "color": "#6ccff6",
+        "frame": "frame-shield"
+      }
+    ],
+    "quests": [
+      {
+        "id": "correct-20",
+        "titleKey": "quest.correct-20",
+        "goal": "correct-answers",
+        "target": 20,
+        "coins": 10,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "fast-10",
+        "titleKey": "quest.fast-10",
+        "goal": "fast-answers",
+        "target": 10,
+        "coins": 10,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "snack-5",
+        "titleKey": "quest.snack-5",
+        "goal": "feed-hungry",
+        "target": 5,
+        "coins": 8,
+        "weight": 10,
+        "unlock": "sunny-meadow.1"
+      },
+      {
+        "id": "minigame-1",
+        "titleKey": "quest.minigame-1",
+        "goal": "play-minigame",
+        "target": 1,
+        "coins": 5,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "level-1",
+        "titleKey": "quest.level-1",
+        "goal": "finish-level",
+        "target": 1,
+        "coins": 10,
+        "weight": 10,
+        "unlock": null
+      },
+      {
+        "id": "streak-8",
+        "titleKey": "quest.streak-8",
+        "goal": "best-streak",
+        "target": 8,
+        "coins": 10,
+        "weight": 5,
+        "unlock": null
+      }
+    ],
+    "wordLists": [
+      {
+        "id": "names",
+        "kind": "name",
+        "entries": [
+          "word.name.anna",
+          "word.name.tom",
+          "word.name.ela",
+          "word.name.kuba",
+          "word.name.maya",
+          "word.name.leo",
+          "word.name.eva",
+          "word.name.adam",
+          "word.name.nela",
+          "word.name.filip",
+          "word.name.klara",
+          "word.name.ondra"
+        ]
+      },
+      {
+        "id": "girls",
+        "kind": "name",
+        "entries": [
+          "word.name.anna",
+          "word.name.ela",
+          "word.name.maya",
+          "word.name.eva",
+          "word.name.nela",
+          "word.name.klara"
+        ]
+      },
+      {
+        "id": "boys",
+        "kind": "name",
+        "entries": [
+          "word.name.tom",
+          "word.name.kuba",
+          "word.name.leo",
+          "word.name.adam",
+          "word.name.filip",
+          "word.name.ondra"
+        ]
+      },
+      {
+        "id": "fruit",
+        "kind": "thing",
+        "entries": [
+          "word.thing.apple",
+          "word.thing.pear",
+          "word.thing.plum",
+          "word.thing.cherry",
+          "word.thing.apricot",
+          "word.thing.strawberry"
+        ]
+      },
+      {
+        "id": "treats",
+        "kind": "thing",
+        "entries": [
+          "word.thing.bun",
+          "word.thing.cookie",
+          "word.thing.pancake",
+          "word.thing.dumpling",
+          "word.thing.muffin"
+        ]
+      },
+      {
+        "id": "school",
+        "kind": "thing",
+        "entries": [
+          "word.thing.pencil",
+          "word.thing.crayon",
+          "word.thing.sticker",
+          "word.thing.marble",
+          "word.thing.card"
+        ]
+      },
+      {
+        "id": "treasure",
+        "kind": "thing",
+        "entries": ["word.thing.gem", "word.thing.crystal", "word.thing.coin", "word.thing.pearl"]
+      },
+      {
+        "id": "pond",
+        "kind": "thing",
+        "entries": ["word.thing.fish", "word.thing.frog", "word.thing.duck", "word.thing.snail"]
+      }
+    ],
+    "wordTemplates": [
+      {
+        "id": "word.equal-groups.nests",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.nests",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "nests": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "eggs": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "nests"
+            },
+            "right": {
+              "kind": "var",
+              "name": "eggs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.bikes",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.bikes",
+        "vars": {
+          "bikes": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "wheels": {
+            "kind": "int",
+            "min": 2,
+            "max": 2
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "bikes"
+            },
+            "right": {
+              "kind": "var",
+              "name": "wheels"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.stars",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.stars",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "stars": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "points": {
+            "kind": "int",
+            "min": 5,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "stars"
+            },
+            "right": {
+              "kind": "var",
+              "name": "points"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.crayons",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.crayons",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "packs": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 10,
+            "max": 10
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "packs"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.baskets",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.baskets",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "baskets": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "each": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "baskets"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.clovers",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.clovers",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "clovers": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "leaves": {
+            "kind": "int",
+            "min": 3,
+            "max": 3
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "clovers"
+            },
+            "right": {
+              "kind": "var",
+              "name": "leaves"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.dragons",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.dragons",
+        "vars": {
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "legs": {
+            "kind": "int",
+            "min": 4,
+            "max": 4
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "legs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.eggs",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.eggs",
+        "vars": {
+          "boxes": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 6,
+            "max": 6
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "boxes"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.weeks",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.weeks",
+        "vars": {
+          "days": {
+            "kind": "int",
+            "min": 7,
+            "max": 7
+          },
+          "weeks": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "weeks"
+            },
+            "right": {
+              "kind": "var",
+              "name": "days"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.beetles",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.beetles",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "beetles": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "legs": {
+            "kind": "int",
+            "min": 6,
+            "max": 6
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "beetles"
+            },
+            "right": {
+              "kind": "var",
+              "name": "legs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.rainbows",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.rainbows",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "colours": {
+            "kind": "int",
+            "min": 7,
+            "max": 7
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "colours"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.spiders",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.spiders",
+        "vars": {
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "legs": {
+            "kind": "int",
+            "min": 8,
+            "max": 8
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "legs"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.gems",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.gems",
+        "vars": {
+          "rows": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 9,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "rows"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.market",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.market",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "bags": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "bags"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.tickets",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.tickets",
+        "vars": {
+          "tens": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          },
+          "price": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "tens"
+              },
+              "right": {
+                "kind": "num",
+                "value": 10
+              }
+            }
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "price"
+            },
+            "right": {
+              "kind": "var",
+              "name": "count"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.pencils",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.pencils",
+        "vars": {
+          "each": {
+            "kind": "int",
+            "min": 10,
+            "max": 10
+          },
+          "packs": {
+            "kind": "int",
+            "min": 11,
+            "max": 60
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "packs"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.books",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.books",
+        "vars": {
+          "pages": {
+            "kind": "int",
+            "min": 100,
+            "max": 100
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "pages"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.equal-groups.trucks",
+        "family": "equal-groups",
+        "textKey": "word.equal-groups.trucks",
+        "vars": {
+          "each": {
+            "kind": "int",
+            "min": 12,
+            "max": 48
+          },
+          "trucks": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "each"
+            },
+            "right": {
+              "kind": "var",
+              "name": "trucks"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.sharing.berries",
+        "family": "sharing",
+        "textKey": "word.sharing.berries",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "baskets": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "baskets"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "baskets"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.friends",
+        "family": "sharing",
+        "textKey": "word.sharing.friends",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "half": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "half"
+              },
+              "right": {
+                "kind": "num",
+                "value": 2
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "num",
+              "value": 2
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.pancakes",
+        "family": "sharing",
+        "textKey": "word.sharing.pancakes",
+        "vars": {
+          "plates": {
+            "kind": "int",
+            "min": 3,
+            "max": 4
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "plates"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "plates"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.plums",
+        "family": "sharing",
+        "textKey": "word.sharing.plums",
+        "vars": {
+          "dragons": {
+            "kind": "int",
+            "min": 6,
+            "max": 7
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "dragons"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "dragons"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.gnomes",
+        "family": "sharing",
+        "textKey": "word.sharing.gnomes",
+        "vars": {
+          "gnomes": {
+            "kind": "int",
+            "min": 8,
+            "max": 9
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "gnomes"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "gnomes"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.class",
+        "family": "sharing",
+        "textKey": "word.sharing.class",
+        "vars": {
+          "children": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "children"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "school"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "children"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.books",
+        "family": "sharing",
+        "textKey": "word.sharing.books",
+        "vars": {
+          "classes": {
+            "kind": "int",
+            "min": 2,
+            "max": 4
+          },
+          "each": {
+            "kind": "int",
+            "min": 11,
+            "max": 24
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "classes"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "classes"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.sharing.giant",
+        "family": "sharing",
+        "textKey": "word.sharing.giant",
+        "vars": {
+          "friends": {
+            "kind": "int",
+            "min": 5,
+            "max": 6
+          },
+          "each": {
+            "kind": "int",
+            "min": 10,
+            "max": 16
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "friends"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "friends"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.bags",
+        "family": "grouping",
+        "textKey": "word.grouping.bags",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "girls"
+          },
+          "bags": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "each": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "bags"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.teams",
+        "family": "grouping",
+        "textKey": "word.grouping.teams",
+        "vars": {
+          "size": {
+            "kind": "int",
+            "min": 3,
+            "max": 4
+          },
+          "teams": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "teams"
+              },
+              "right": {
+                "kind": "var",
+                "name": "size"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "size"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.eggs",
+        "family": "grouping",
+        "textKey": "word.grouping.eggs",
+        "vars": {
+          "each": {
+            "kind": "int",
+            "min": 6,
+            "max": 6
+          },
+          "boxes": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "boxes"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.holiday",
+        "family": "grouping",
+        "textKey": "word.grouping.holiday",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "week": {
+            "kind": "int",
+            "min": 7,
+            "max": 7
+          },
+          "weeks": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "days": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "weeks"
+              },
+              "right": {
+                "kind": "var",
+                "name": "week"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "days"
+            },
+            "right": {
+              "kind": "var",
+              "name": "week"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.spiders",
+        "family": "grouping",
+        "textKey": "word.grouping.spiders",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "each": {
+            "kind": "int",
+            "min": 8,
+            "max": 8
+          },
+          "spiders": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "legs": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "spiders"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "legs"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.chests",
+        "family": "grouping",
+        "textKey": "word.grouping.chests",
+        "vars": {
+          "each": {
+            "kind": "int",
+            "min": 9,
+            "max": 9
+          },
+          "chests": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "chests"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.market",
+        "family": "grouping",
+        "textKey": "word.grouping.market",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "boys"
+          },
+          "each": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "bags": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "bags"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "treats"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "each"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.grouping.giant",
+        "family": "grouping",
+        "textKey": "word.grouping.giant",
+        "vars": {
+          "size": {
+            "kind": "int",
+            "min": 3,
+            "max": 6
+          },
+          "groups": {
+            "kind": "int",
+            "min": 10,
+            "max": 16
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "groups"
+              },
+              "right": {
+                "kind": "var",
+                "name": "size"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "size"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.times-as-many.fruit",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.fruit",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 4
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-as-many.sparks",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.sparks",
+        "vars": {
+          "small": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 6,
+            "max": 7
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-as-many.treasure",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.treasure",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 8,
+            "max": 9
+          },
+          "things": {
+            "kind": "word",
+            "list": "treasure"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-as-many.pond",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.pond",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "pond"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-as-many.savings",
+        "family": "times-as-many",
+        "textKey": "word.times-as-many.savings",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 11,
+            "max": 30
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "mul",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "mul"
+      },
+      {
+        "id": "word.times-fewer.fruit",
+        "family": "times-fewer",
+        "textKey": "word.times-fewer.fruit",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "times"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.times-fewer.scales",
+        "family": "times-fewer",
+        "textKey": "word.times-fewer.scales",
+        "vars": {
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 6,
+            "max": 7
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "times"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.times-fewer.treasure",
+        "family": "times-fewer",
+        "textKey": "word.times-fewer.treasure",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 8,
+            "max": 9
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "times"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "treasure"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.times-fewer.pond",
+        "family": "times-fewer",
+        "textKey": "word.times-fewer.pond",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "times": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "times"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "times"
+            }
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.more-than.flowers",
+        "family": "more-than",
+        "textKey": "word.more-than.flowers",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "picked": {
+            "kind": "int",
+            "min": 2,
+            "max": 20
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "var",
+              "name": "picked"
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": "add"
+      },
+      {
+        "id": "word.more-than.fruit",
+        "family": "more-than",
+        "textKey": "word.more-than.fruit",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": "add"
+      },
+      {
+        "id": "word.more-than.inverse",
+        "family": "more-than",
+        "textKey": "word.more-than.inverse",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "var",
+                "name": "small"
+              },
+              "right": {
+                "kind": "var",
+                "name": "more"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": "sub"
+      },
+      {
+        "id": "word.more-than.plums",
+        "family": "more-than",
+        "textKey": "word.more-than.plums",
+        "vars": {
+          "eaten": {
+            "kind": "int",
+            "min": 6,
+            "max": 20
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "var",
+              "name": "eaten"
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": "add"
+      },
+      {
+        "id": "word.fewer-than.fruit",
+        "family": "fewer-than",
+        "textKey": "word.fewer-than.fruit",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "total": {
+            "kind": "int",
+            "min": 6,
+            "max": 20
+          },
+          "fewer": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "total"
+            },
+            "right": {
+              "kind": "var",
+              "name": "fewer"
+            }
+          }
+        },
+        "operation": "sub"
+      },
+      {
+        "id": "word.fewer-than.inverse",
+        "family": "fewer-than",
+        "textKey": "word.fewer-than.inverse",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "small": {
+            "kind": "int",
+            "min": 1,
+            "max": 10
+          },
+          "fewer": {
+            "kind": "int",
+            "min": 2,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "small"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "var",
+              "name": "small"
+            },
+            "right": {
+              "kind": "var",
+              "name": "fewer"
+            }
+          }
+        },
+        "operation": "add"
+      },
+      {
+        "id": "word.fewer-than.class",
+        "family": "fewer-than",
+        "textKey": "word.fewer-than.class",
+        "vars": {
+          "count": {
+            "kind": "int",
+            "min": 10,
+            "max": 16
+          },
+          "fewer": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "count"
+            },
+            "right": {
+              "kind": "var",
+              "name": "fewer"
+            }
+          }
+        },
+        "operation": "sub"
+      },
+      {
+        "id": "word.leftover.bags",
+        "family": "leftover",
+        "textKey": "word.leftover.bags",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "girls"
+          },
+          "size": {
+            "kind": "int",
+            "min": 3,
+            "max": 5
+          },
+          "full": {
+            "kind": "int",
+            "min": 1,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 2
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.leftover.boats",
+        "family": "leftover",
+        "textKey": "word.leftover.boats",
+        "vars": {
+          "size": {
+            "kind": "int",
+            "min": 5,
+            "max": 9
+          },
+          "full": {
+            "kind": "int",
+            "min": 1,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 4
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.leftover.necklaces",
+        "family": "leftover",
+        "textKey": "word.leftover.necklaces",
+        "vars": {
+          "size": {
+            "kind": "int",
+            "min": 6,
+            "max": 9
+          },
+          "full": {
+            "kind": "int",
+            "min": 1,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 5
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.leftover.plates",
+        "family": "leftover",
+        "textKey": "word.leftover.plates",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "boys"
+          },
+          "size": {
+            "kind": "int",
+            "min": 2,
+            "max": 4
+          },
+          "full": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 1
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          },
+          "things": {
+            "kind": "word",
+            "list": "treats"
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.leftover.album",
+        "family": "leftover",
+        "textKey": "word.leftover.album",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "size": {
+            "kind": "int",
+            "min": 6,
+            "max": 10
+          },
+          "full": {
+            "kind": "int",
+            "min": 1,
+            "max": 9
+          },
+          "left": {
+            "kind": "int",
+            "min": 1,
+            "max": 5
+          },
+          "total": {
+            "kind": "calc",
+            "expr": {
+              "kind": "op",
+              "op": "add",
+              "left": {
+                "kind": "op",
+                "op": "mul",
+                "left": {
+                  "kind": "var",
+                  "name": "size"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "full"
+                }
+              },
+              "right": {
+                "kind": "var",
+                "name": "left"
+              }
+            }
+          }
+        },
+        "model": {
+          "kind": "divrem",
+          "dividend": {
+            "kind": "var",
+            "name": "total"
+          },
+          "divisor": {
+            "kind": "var",
+            "name": "size"
+          }
+        },
+        "operation": "div"
+      },
+      {
+        "id": "word.two-step.bags",
+        "family": "two-step",
+        "textKey": "word.two-step.bags",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "bags": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "each": {
+            "kind": "int",
+            "min": 3,
+            "max": 10
+          },
+          "eaten": {
+            "kind": "int",
+            "min": 1,
+            "max": 5
+          },
+          "things": {
+            "kind": "word",
+            "list": "fruit"
+          },
+          "thing": {
+            "kind": "form",
+            "word": "things",
+            "count": "eaten"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "bags"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "eaten"
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.tickets",
+        "family": "two-step",
+        "textKey": "word.two-step.tickets",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "price": {
+            "kind": "int",
+            "min": 5,
+            "max": 20
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "paid": {
+            "kind": "int",
+            "min": 100,
+            "max": 100
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "paid"
+            },
+            "right": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "price"
+              },
+              "right": {
+                "kind": "var",
+                "name": "count"
+              }
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.chairs",
+        "family": "two-step",
+        "textKey": "word.two-step.chairs",
+        "vars": {
+          "rows": {
+            "kind": "int",
+            "min": 3,
+            "max": 9
+          },
+          "each": {
+            "kind": "int",
+            "min": 5,
+            "max": 10
+          },
+          "kids": {
+            "kind": "int",
+            "min": 10,
+            "max": 40
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "rows"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "kids"
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.bowls",
+        "family": "two-step",
+        "textKey": "word.two-step.bowls",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "girls"
+          },
+          "plums": {
+            "kind": "int",
+            "min": 5,
+            "max": 20
+          },
+          "pears": {
+            "kind": "int",
+            "min": 5,
+            "max": 20
+          },
+          "bowls": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "div",
+            "left": {
+              "kind": "group",
+              "inner": {
+                "kind": "op",
+                "op": "add",
+                "left": {
+                  "kind": "var",
+                  "name": "plums"
+                },
+                "right": {
+                  "kind": "var",
+                  "name": "pears"
+                }
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "bowls"
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.pocket",
+        "family": "two-step",
+        "textKey": "word.two-step.pocket",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "start": {
+            "kind": "int",
+            "min": 30,
+            "max": 100
+          },
+          "count": {
+            "kind": "int",
+            "min": 2,
+            "max": 5
+          },
+          "price": {
+            "kind": "int",
+            "min": 3,
+            "max": 10
+          },
+          "things": {
+            "kind": "word",
+            "list": "school"
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "var",
+              "name": "start"
+            },
+            "right": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "count"
+              },
+              "right": {
+                "kind": "var",
+                "name": "price"
+              }
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.stickers",
+        "family": "two-step",
+        "textKey": "word.two-step.stickers",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "friend": {
+            "kind": "word",
+            "list": "names"
+          },
+          "packs": {
+            "kind": "int",
+            "min": 2,
+            "max": 6
+          },
+          "each": {
+            "kind": "int",
+            "min": 5,
+            "max": 10
+          },
+          "given": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "sub",
+            "left": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "packs"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "given"
+            }
+          }
+        },
+        "operation": null
+      },
+      {
+        "id": "word.two-step.garden",
+        "family": "two-step",
+        "textKey": "word.two-step.garden",
+        "vars": {
+          "name": {
+            "kind": "word",
+            "list": "names"
+          },
+          "rows": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          },
+          "each": {
+            "kind": "int",
+            "min": 3,
+            "max": 10
+          },
+          "more": {
+            "kind": "int",
+            "min": 2,
+            "max": 9
+          }
+        },
+        "model": {
+          "kind": "value",
+          "expr": {
+            "kind": "op",
+            "op": "add",
+            "left": {
+              "kind": "op",
+              "op": "mul",
+              "left": {
+                "kind": "var",
+                "name": "rows"
+              },
+              "right": {
+                "kind": "var",
+                "name": "each"
+              }
+            },
+            "right": {
+              "kind": "var",
+              "name": "more"
+            }
+          }
+        },
+        "operation": null
+      }
+    ],
+    "placement": {
+      "steps": [
+        {
+          "skill": "mul-2-5",
+          "problems": 4,
+          "passAccuracy": 75,
+          "levels": ["sunny-meadow.2"]
+        },
+        {
+          "skill": "mul-0-1-10",
+          "problems": 3,
+          "passAccuracy": 100,
+          "levels": ["sunny-meadow.3"]
+        },
+        {
+          "skill": "div-2-5-10",
+          "problems": 3,
+          "passAccuracy": 67,
+          "levels": ["sunny-meadow.4"]
+        },
+        {
+          "skill": "missing-2-5-10",
+          "problems": 3,
+          "passAccuracy": 67,
+          "levels": ["sunny-meadow.5"]
+        }
+      ],
+      "minProblems": 4,
+      "maxProblems": 24,
+      "stopAfterMisses": 3
+    },
+    "story": {
+      "beats": [
+        {
+          "id": "beat.prologue",
+          "trigger": {
+            "kind": "first-session"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.prologue",
+            "revision": "1",
+            "start": "prologue-1",
+            "catalogs": {
+              "scene": ["castle-hall"],
+              "text": [
+                "story.prologue.1",
+                "story.next",
+                "story.prologue.2",
+                "story.prologue.3",
+                "story.prologue.4"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "prologue-1",
+                "scene": "castle-hall",
+                "text": "story.prologue.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "prologue-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "prologue-2",
+                "scene": "castle-hall",
+                "text": "story.prologue.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "prologue-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "prologue-3",
+                "scene": "castle-hall",
+                "text": "story.prologue.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "prologue-4",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "prologue-4",
+                "scene": "castle-hall",
+                "text": "story.prologue.4",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.first-egg",
+          "trigger": {
+            "kind": "after-beat",
+            "beat": "beat.prologue"
+          },
+          "skippable": false,
+          "graph": {
+            "schema": 1,
+            "id": "story.first-egg",
+            "revision": "1",
+            "start": "choose",
+            "catalogs": {
+              "scene": ["valley-map"],
+              "text": [
+                "story.first-egg.choose",
+                "story.first-egg.bubbles",
+                "story.first-egg.sunny",
+                "story.first-egg.goldie",
+                "story.first-egg.chosen"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["first-egg.bubbles", "first-egg.sunny", "first-egg.goldie"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-bubbles",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "first-egg.bubbles"
+              },
+              {
+                "id": "claim-sunny",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "first-egg.sunny"
+              },
+              {
+                "id": "claim-goldie",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "first-egg.goldie"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "choose",
+                "scene": "valley-map",
+                "text": "story.first-egg.choose",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "bubbles",
+                    "text": "story.first-egg.bubbles",
+                    "to": "chosen",
+                    "guard": null,
+                    "effects": ["claim-bubbles"]
+                  },
+                  {
+                    "id": "sunny",
+                    "text": "story.first-egg.sunny",
+                    "to": "chosen",
+                    "guard": null,
+                    "effects": ["claim-sunny"]
+                  },
+                  {
+                    "id": "goldie",
+                    "text": "story.first-egg.goldie",
+                    "to": "chosen",
+                    "guard": null,
+                    "effects": ["claim-goldie"]
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "chosen",
+                "scene": "valley-map",
+                "text": "story.first-egg.chosen",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.meadow-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sunny-meadow.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.meadow-welcome",
+            "revision": "1",
+            "start": "meadow-welcome-1",
+            "catalogs": {
+              "scene": ["sunny-meadow"],
+              "text": ["story.meadow-welcome.1", "story.next", "story.meadow-welcome.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "meadow-welcome-1",
+                "scene": "sunny-meadow",
+                "text": "story.meadow-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "meadow-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "meadow-welcome-2",
+                "scene": "sunny-meadow",
+                "text": "story.meadow-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.meadow-new-eggs",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sunny-meadow.3"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.meadow-new-eggs",
+            "revision": "1",
+            "start": "meadow-new-eggs-1",
+            "catalogs": {
+              "scene": ["sunny-meadow"],
+              "text": ["story.meadow-new-eggs.1", "story.next", "story.meadow-new-eggs.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.mirror", "egg.puff"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-mirror",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.mirror"
+              },
+              {
+                "id": "claim-puff",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.puff"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "meadow-new-eggs-1",
+                "scene": "sunny-meadow",
+                "text": "story.meadow-new-eggs.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-mirror", "claim-puff"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "meadow-new-eggs-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "meadow-new-eggs-2",
+                "scene": "sunny-meadow",
+                "text": "story.meadow-new-eggs.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.bridge-troll",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sunny-meadow.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.bridge-troll",
+            "revision": "1",
+            "start": "bridge-troll-1",
+            "catalogs": {
+              "scene": ["sunny-meadow"],
+              "text": [
+                "story.bridge-troll.1",
+                "story.next",
+                "story.bridge-troll.2",
+                "story.bridge-troll.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "bridge-troll-1",
+                "scene": "sunny-meadow",
+                "text": "story.bridge-troll.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "bridge-troll-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "bridge-troll-2",
+                "scene": "sunny-meadow",
+                "text": "story.bridge-troll.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "bridge-troll-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "bridge-troll-3",
+                "scene": "sunny-meadow",
+                "text": "story.bridge-troll.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.troll-laughs",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "bridge-troll"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.troll-laughs",
+            "revision": "1",
+            "start": "troll-laughs-1",
+            "catalogs": {
+              "scene": ["sunny-meadow"],
+              "text": ["story.troll-laughs.1", "story.next", "story.troll-laughs.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "troll-laughs-1",
+                "scene": "sunny-meadow",
+                "text": "story.troll-laughs.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "troll-laughs-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "troll-laughs-2",
+                "scene": "sunny-meadow",
+                "text": "story.troll-laughs.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        }
+      ],
+      "rewards": [
+        {
+          "reward": "first-egg.bubbles",
+          "grant": {
+            "kind": "egg",
+            "dragon": "bubbles"
+          }
+        },
+        {
+          "reward": "first-egg.sunny",
+          "grant": {
+            "kind": "egg",
+            "dragon": "sunny"
+          }
+        },
+        {
+          "reward": "first-egg.goldie",
+          "grant": {
+            "kind": "egg",
+            "dragon": "goldie"
+          }
+        },
+        {
+          "reward": "egg.mirror",
+          "grant": {
+            "kind": "egg",
+            "dragon": "mirror"
+          }
+        },
+        {
+          "reward": "egg.puff",
+          "grant": {
+            "kind": "egg",
+            "dragon": "puff"
+          }
+        }
+      ]
+    },
+    "balance": {
+      "leitner": {
+        "intervals": [0, 0, 1, 2, 4, 8]
+      },
+      "response": {
+        "choice": {
+          "fastMs": 2500,
+          "okMs": 6000
+        },
+        "keypad": {
+          "fastMs": 3500,
+          "okMs": 8000,
+          "perExtraDigitMs": 700
+        }
+      },
+      "input": {
+        "keypadFromBox": 2,
+        "choices": 4
+      },
+      "mix": {
+        "successTarget": 82,
+        "knownShare": 70,
+        "minLearningShare": 10,
+        "maxLearningShare": 50,
+        "window": 20,
+        "noRepeatWithin": 2
+      },
+      "reask": {
+        "delay": 3,
+        "maxPerRound": 2
+      },
+      "coins": {
+        "correct": 1,
+        "streakEvery": 5,
+        "streakBonus": 2,
+        "bossDefeated": 30,
+        "placementDone": 10
+      },
+      "stars": {
+        "twoStars": {
+          "accuracy": 80
+        },
+        "threeStars": {
+          "accuracy": 95,
+          "fastShare": 60
+        }
+      },
+      "mastery": {
+        "goldBox": 5,
+        "goldFast": 2,
+        "goldOfLast": 3
+      },
+      "growth": [
+        {
+          "stage": "hatchling",
+          "share": 30,
+          "mastery": "seen",
+          "division": false,
+          "boss": false
+        },
+        {
+          "stage": "youngling",
+          "share": 60,
+          "mastery": "bronze",
+          "division": true,
+          "boss": false
+        },
+        {
+          "stage": "adult",
+          "share": 90,
+          "mastery": "silver",
+          "division": true,
+          "boss": true
+        },
+        {
+          "stage": "crowned",
+          "share": 100,
+          "mastery": "gold",
+          "division": true,
+          "boss": true
+        }
+      ],
+      "daily": {
+        "goalAnswers": 30,
+        "goalMin": 10,
+        "goalMax": 100,
+        "quests": 3,
+        "historyDays": 60
+      },
+      "gift": {
+        "coinsMin": 10,
+        "coinsMax": 25,
+        "cosmeticWeight": 3,
+        "coinsWeight": 1
+      },
+      "arena": {
+        "unlockAfter": "sunny-meadow.boss",
+        "maxProblems": 60
+      },
+      "hungry": {
+        "minDue": 1
+      }
+    }
+  }
+}

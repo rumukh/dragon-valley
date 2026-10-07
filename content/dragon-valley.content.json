@@ -1,6 +1,6 @@
 {
   "id": "dragon-valley",
-  "revision": "1.0.0",
+  "revision": "1.1.0",
   "schemaVersion": 1,
   "data": {
     "objectives": [
@@ -144,12 +144,92 @@
       {
         "id": "sunny-meadow",
         "order": 1,
-        "titleKey": "region.sunny-meadow",
+        "titleKey": "region.sunny-meadow.name",
         "unlock": {
           "after": []
         },
         "boss": "bridge-troll",
         "background": "sunny-meadow"
+      },
+      {
+        "id": "whispering-woods",
+        "order": 2,
+        "titleKey": "region.whispering-woods.name",
+        "unlock": {
+          "after": ["sunny-meadow.boss"]
+        },
+        "boss": "forest-witch",
+        "background": "whispering-woods"
+      },
+      {
+        "id": "fire-mountain",
+        "order": 3,
+        "titleKey": "region.fire-mountain.name",
+        "unlock": {
+          "after": ["whispering-woods.boss"]
+        },
+        "boss": "krakonos",
+        "background": "fire-mountain"
+      },
+      {
+        "id": "crystal-caves",
+        "order": 4,
+        "titleKey": "region.crystal-caves.name",
+        "unlock": {
+          "after": ["fire-mountain.boss"]
+        },
+        "boss": "gnome-king",
+        "background": "crystal-caves"
+      },
+      {
+        "id": "sharing-lake",
+        "order": 5,
+        "titleKey": "region.sharing-lake.name",
+        "unlock": {
+          "after": ["crystal-caves.boss"]
+        },
+        "boss": "water-goblin",
+        "background": "sharing-lake"
+      },
+      {
+        "id": "leftover-lagoon",
+        "order": 6,
+        "titleKey": "region.leftover-lagoon.name",
+        "unlock": {
+          "after": ["sharing-lake.boss"]
+        },
+        "boss": "lake-nymphs",
+        "background": "leftover-lagoon"
+      },
+      {
+        "id": "giants-peaks",
+        "order": 7,
+        "titleKey": "region.giants-peaks.name",
+        "unlock": {
+          "after": ["leftover-lagoon.boss"]
+        },
+        "boss": "friendly-giant",
+        "background": "giants-peaks"
+      },
+      {
+        "id": "riddle-ruins",
+        "order": 8,
+        "titleKey": "region.riddle-ruins.name",
+        "unlock": {
+          "after": ["giants-peaks.boss"]
+        },
+        "boss": "golem",
+        "background": "riddle-ruins"
+      },
+      {
+        "id": "dragon-castle",
+        "order": 9,
+        "titleKey": "region.dragon-castle.name",
+        "unlock": {
+          "after": ["riddle-ruins.boss"]
+        },
+        "boss": "seven-headed",
+        "background": "dragon-castle"
       }
     ],
     "levels": [
@@ -223,7 +303,7 @@
         },
         "boss": null,
         "storyBeat": null,
-        "objectives": ["obj.mul.table-2-5-10", "obj.mul.commutative"]
+        "objectives": ["obj.mul.commutative", "obj.mul.table-2-5-10"]
       },
       {
         "id": "sunny-meadow.3",
@@ -340,7 +420,7 @@
         },
         "boss": null,
         "storyBeat": null,
-        "objectives": ["obj.mul.table-2-5-10", "obj.mul.rules-0-1", "obj.div.tables"]
+        "objectives": ["obj.mul.rules-0-1", "obj.mul.table-2-5-10", "obj.div.tables"]
       },
       {
         "id": "sunny-meadow.6",
@@ -407,6 +487,1786 @@
           "obj.div.fact-families",
           "obj.word.equal-groups"
         ]
+      },
+      {
+        "id": "whispering-woods.1",
+        "region": "whispering-woods",
+        "order": 1,
+        "titleKey": "level.whispering-woods.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-3"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "number-trail",
+            "skills": ["mul-3"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "length": 10,
+              "gaps": 3
+            }
+          },
+          {
+            "kind": "feeding",
+            "skills": ["mul-3"],
+            "count": 8,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["clover", "petal"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.whispering-woods-welcome",
+        "objectives": ["obj.mul.meaning", "obj.mul.table-3-4"]
+      },
+      {
+        "id": "whispering-woods.2",
+        "region": "whispering-woods",
+        "order": 2,
+        "titleKey": "level.whispering-woods.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["whispering-woods.1"]
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-4"],
+            "count": 2,
+            "input": "auto",
+            "options": {
+              "split": "double"
+            }
+          },
+          {
+            "kind": "feeding",
+            "skills": ["mul-4"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.commutative", "obj.mul.table-3-4"]
+      },
+      {
+        "id": "whispering-woods.3",
+        "region": "whispering-woods",
+        "order": 3,
+        "titleKey": "level.whispering-woods.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["whispering-woods.2"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-3-4"],
+            "count": 12,
+            "input": "keypad",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["mul-3-4"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-3-4"]
+      },
+      {
+        "id": "whispering-woods.4",
+        "region": "whispering-woods",
+        "order": 4,
+        "titleKey": "level.whispering-woods.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["whispering-woods.3"]
+        },
+        "activities": [
+          {
+            "kind": "fact-family",
+            "skills": ["div-3-4"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "sharing-feast",
+            "skills": ["div-3-4"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["div-3-4"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["glasses-square"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.div.tables", "obj.div.fact-families"]
+      },
+      {
+        "id": "whispering-woods.5",
+        "region": "whispering-woods",
+        "order": 5,
+        "titleKey": "level.whispering-woods.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["whispering-woods.4"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-2-3-4-5-10"],
+            "count": 12,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "compare-stones",
+            "skills": ["compare-woods"],
+            "count": 6,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-3-4", "obj.compare.expressions"]
+      },
+      {
+        "id": "whispering-woods.6",
+        "region": "whispering-woods",
+        "order": 6,
+        "titleKey": "level.whispering-woods.6",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["whispering-woods.5"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-woods"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.word.equal-groups"]
+      },
+      {
+        "id": "whispering-woods.boss",
+        "region": "whispering-woods",
+        "order": 7,
+        "titleKey": "level.whispering-woods.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["whispering-woods.6"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": ["mul-3-4", "div-3-4"],
+            "count": 20,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": ["clover", "petal"],
+          "cosmetics": ["hat-wizard"]
+        },
+        "boss": "forest-witch",
+        "storyBeat": "beat.forest-witch",
+        "objectives": ["obj.mul.table-3-4"]
+      },
+      {
+        "id": "fire-mountain.1",
+        "region": "fire-mountain",
+        "order": 1,
+        "titleKey": "level.fire-mountain.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-6"],
+            "count": 3,
+            "input": "auto",
+            "options": {
+              "split": "five-plus"
+            }
+          },
+          {
+            "kind": "feeding",
+            "skills": ["mul-6"],
+            "count": 8,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["ember", "rainbow"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.fire-mountain-welcome",
+        "objectives": ["obj.mul.table-6-7"]
+      },
+      {
+        "id": "fire-mountain.2",
+        "region": "fire-mountain",
+        "order": 2,
+        "titleKey": "level.fire-mountain.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["fire-mountain.1"]
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-7"],
+            "count": 3,
+            "input": "auto",
+            "options": {
+              "split": "five-plus"
+            }
+          },
+          {
+            "kind": "feeding",
+            "skills": ["mul-7"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-6-7"]
+      },
+      {
+        "id": "fire-mountain.3",
+        "region": "fire-mountain",
+        "order": 3,
+        "titleKey": "level.fire-mountain.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["fire-mountain.2"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-6-7"],
+            "count": 12,
+            "input": "keypad",
+            "options": {}
+          },
+          {
+            "kind": "number-trail",
+            "skills": ["mul-7"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "length": 10,
+              "gaps": 3
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-6-7"]
+      },
+      {
+        "id": "fire-mountain.4",
+        "region": "fire-mountain",
+        "order": 4,
+        "titleKey": "level.fire-mountain.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["fire-mountain.3"]
+        },
+        "activities": [
+          {
+            "kind": "fact-family",
+            "skills": ["div-6-7"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["div-6-7", "missing-6-7"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["nest-lantern"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.div.tables", "obj.div.fact-families", "obj.div.missing-factor"]
+      },
+      {
+        "id": "fire-mountain.5",
+        "region": "fire-mountain",
+        "order": 5,
+        "titleKey": "level.fire-mountain.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["fire-mountain.4"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-2-to-7"],
+            "count": 12,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["mul-6-7"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-6-7"]
+      },
+      {
+        "id": "fire-mountain.6",
+        "region": "fire-mountain",
+        "order": 6,
+        "titleKey": "level.fire-mountain.6",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["fire-mountain.5"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-mountain"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.word.times-more-fewer"]
+      },
+      {
+        "id": "fire-mountain.boss",
+        "region": "fire-mountain",
+        "order": 7,
+        "titleKey": "level.fire-mountain.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["fire-mountain.6"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": ["mul-6-7", "div-6-7", "missing-6-7"],
+            "count": 23,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": ["ember", "rainbow"],
+          "cosmetics": ["hat-cap"]
+        },
+        "boss": "krakonos",
+        "storyBeat": "beat.krakonos",
+        "objectives": ["obj.mul.table-6-7"]
+      },
+      {
+        "id": "crystal-caves.1",
+        "region": "crystal-caves",
+        "order": 1,
+        "titleKey": "level.crystal-caves.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-8"],
+            "count": 3,
+            "input": "auto",
+            "options": {
+              "split": "double"
+            }
+          },
+          {
+            "kind": "feeding",
+            "skills": ["mul-8"],
+            "count": 8,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["crystal", "starry"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.crystal-caves-welcome",
+        "objectives": ["obj.mul.table-8-9"]
+      },
+      {
+        "id": "crystal-caves.2",
+        "region": "crystal-caves",
+        "order": 2,
+        "titleKey": "level.crystal-caves.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["crystal-caves.1"]
+        },
+        "activities": [
+          {
+            "kind": "egg-grid",
+            "skills": ["mul-9"],
+            "count": 3,
+            "input": "auto",
+            "options": {
+              "split": "ten-minus"
+            }
+          },
+          {
+            "kind": "feeding",
+            "skills": ["mul-9"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-8-9"]
+      },
+      {
+        "id": "crystal-caves.3",
+        "region": "crystal-caves",
+        "order": 3,
+        "titleKey": "level.crystal-caves.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["crystal-caves.2"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-8-9"],
+            "count": 12,
+            "input": "keypad",
+            "options": {}
+          },
+          {
+            "kind": "number-trail",
+            "skills": ["mul-9"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "length": 10,
+              "gaps": 3
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-8-9"]
+      },
+      {
+        "id": "crystal-caves.4",
+        "region": "crystal-caves",
+        "order": 4,
+        "titleKey": "level.crystal-caves.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["crystal-caves.3"]
+        },
+        "activities": [
+          {
+            "kind": "fact-family",
+            "skills": ["div-8-9"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "sharing-feast",
+            "skills": ["div-8-9"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["div-8-9"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["nest-treasure"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.div.tables"]
+      },
+      {
+        "id": "crystal-caves.5",
+        "region": "crystal-caves",
+        "order": 5,
+        "titleKey": "level.crystal-caves.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["crystal-caves.4"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-all"],
+            "count": 14,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "compare-stones",
+            "skills": ["compare-caves"],
+            "count": 6,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.table-8-9", "obj.mul.fluency", "obj.compare.expressions"]
+      },
+      {
+        "id": "crystal-caves.6",
+        "region": "crystal-caves",
+        "order": 6,
+        "titleKey": "level.crystal-caves.6",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["crystal-caves.5"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-caves"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.word.equal-groups"]
+      },
+      {
+        "id": "crystal-caves.boss",
+        "region": "crystal-caves",
+        "order": 7,
+        "titleKey": "level.crystal-caves.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["crystal-caves.6"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": ["mul-8-9", "div-8-9"],
+            "count": 23,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": ["crystal", "starry"],
+          "cosmetics": ["hat-propeller"]
+        },
+        "boss": "gnome-king",
+        "storyBeat": "beat.gnome-king",
+        "objectives": ["obj.mul.table-8-9"]
+      },
+      {
+        "id": "sharing-lake.1",
+        "region": "sharing-lake",
+        "order": 1,
+        "titleKey": "level.sharing-lake.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "sharing-feast",
+            "skills": ["div-all"],
+            "count": 5,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["div-all"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.sharing-lake-welcome",
+        "objectives": ["obj.div.meaning", "obj.div.tables"]
+      },
+      {
+        "id": "sharing-lake.2",
+        "region": "sharing-lake",
+        "order": 2,
+        "titleKey": "level.sharing-lake.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sharing-lake.1"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["missing-all"],
+            "count": 12,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.div.missing-factor"]
+      },
+      {
+        "id": "sharing-lake.3",
+        "region": "sharing-lake",
+        "order": 3,
+        "titleKey": "level.sharing-lake.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sharing-lake.2"]
+        },
+        "activities": [
+          {
+            "kind": "fact-family",
+            "skills": ["div-all"],
+            "count": 4,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["mul-all", "div-all"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6,
+              "match": "family"
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.div.fact-families"]
+      },
+      {
+        "id": "sharing-lake.4",
+        "region": "sharing-lake",
+        "order": 4,
+        "titleKey": "level.sharing-lake.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sharing-lake.3"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-times"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["nest-quilt"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.word.times-more-fewer"]
+      },
+      {
+        "id": "sharing-lake.5",
+        "region": "sharing-lake",
+        "order": 5,
+        "titleKey": "level.sharing-lake.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sharing-lake.4"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-contrast"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          },
+          {
+            "kind": "compare-stones",
+            "skills": ["compare-lake"],
+            "count": 6,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.compare.expressions", "obj.word.more-fewer-contrast"]
+      },
+      {
+        "id": "sharing-lake.6",
+        "region": "sharing-lake",
+        "order": 6,
+        "titleKey": "level.sharing-lake.6",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["sharing-lake.5"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["div-all"],
+            "count": 14,
+            "input": "keypad",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.div.tables"]
+      },
+      {
+        "id": "sharing-lake.boss",
+        "region": "sharing-lake",
+        "order": 7,
+        "titleKey": "level.sharing-lake.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["sharing-lake.6"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": ["div-all", "missing-all", "word-contrast"],
+            "count": 25,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": [],
+          "cosmetics": ["hat-pirate"]
+        },
+        "boss": "water-goblin",
+        "storyBeat": "beat.water-goblin",
+        "objectives": [
+          "obj.div.meaning",
+          "obj.div.tables",
+          "obj.div.fact-families",
+          "obj.div.missing-factor",
+          "obj.word.times-more-fewer",
+          "obj.word.more-fewer-contrast"
+        ]
+      },
+      {
+        "id": "leftover-lagoon.1",
+        "region": "leftover-lagoon",
+        "order": 1,
+        "titleKey": "level.leftover-lagoon.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "sharing-feast",
+            "skills": ["rem-small"],
+            "count": 4,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["rem-small"],
+            "count": 8,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["pearl"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.leftover-lagoon-welcome",
+        "objectives": ["obj.rem.divide"]
+      },
+      {
+        "id": "leftover-lagoon.2",
+        "region": "leftover-lagoon",
+        "order": 2,
+        "titleKey": "level.leftover-lagoon.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["leftover-lagoon.1"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["rem-all"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.rem.divide"]
+      },
+      {
+        "id": "leftover-lagoon.3",
+        "region": "leftover-lagoon",
+        "order": 3,
+        "titleKey": "level.leftover-lagoon.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["leftover-lagoon.2"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["rem-all"],
+            "count": 12,
+            "input": "keypad",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["rem-all"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.rem.divide"]
+      },
+      {
+        "id": "leftover-lagoon.4",
+        "region": "leftover-lagoon",
+        "order": 4,
+        "titleKey": "level.leftover-lagoon.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["leftover-lagoon.3"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-leftover"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["paint-hearts"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.rem.word"]
+      },
+      {
+        "id": "leftover-lagoon.5",
+        "region": "leftover-lagoon",
+        "order": 5,
+        "titleKey": "level.leftover-lagoon.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["leftover-lagoon.4"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["rem-mixed", "div-all"],
+            "count": 14,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.rem.divide"]
+      },
+      {
+        "id": "leftover-lagoon.boss",
+        "region": "leftover-lagoon",
+        "order": 6,
+        "titleKey": "level.leftover-lagoon.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["leftover-lagoon.5"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": ["rem-mixed", "word-leftover"],
+            "count": 23,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": ["pearl"],
+          "cosmetics": ["pearl-necklace"]
+        },
+        "boss": "lake-nymphs",
+        "storyBeat": "beat.lake-nymphs",
+        "objectives": ["obj.rem.divide", "obj.rem.word"]
+      },
+      {
+        "id": "giants-peaks.1",
+        "region": "giants-peaks",
+        "order": 1,
+        "titleKey": "level.giants-peaks.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["pow10"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "number-trail",
+            "skills": ["mul-10"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "length": 10,
+              "gaps": 3
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["boulder"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.giants-peaks-welcome",
+        "objectives": ["obj.big.mul-10-100"]
+      },
+      {
+        "id": "giants-peaks.2",
+        "region": "giants-peaks",
+        "order": 2,
+        "titleKey": "level.giants-peaks.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["giants-peaks.1"]
+        },
+        "activities": [
+          {
+            "kind": "number-trail",
+            "skills": ["tens-1d"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "length": 9,
+              "gaps": 3
+            }
+          },
+          {
+            "kind": "feeding",
+            "skills": ["tens-1d"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.big.tens"]
+      },
+      {
+        "id": "giants-peaks.3",
+        "region": "giants-peaks",
+        "order": 3,
+        "titleKey": "level.giants-peaks.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["giants-peaks.2"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul2d1d-nocarry"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.big.mul-2d1d"]
+      },
+      {
+        "id": "giants-peaks.4",
+        "region": "giants-peaks",
+        "order": 4,
+        "titleKey": "level.giants-peaks.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["giants-peaks.3"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul2d1d-carry"],
+            "count": 10,
+            "input": "keypad",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["nest-number-blocks"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.big.mul-2d1d"]
+      },
+      {
+        "id": "giants-peaks.5",
+        "region": "giants-peaks",
+        "order": 5,
+        "titleKey": "level.giants-peaks.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["giants-peaks.4"]
+        },
+        "activities": [
+          {
+            "kind": "sharing-feast",
+            "skills": ["div2d1d"],
+            "count": 3,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["div2d1d"],
+            "count": 10,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.big.div-2d1d"]
+      },
+      {
+        "id": "giants-peaks.6",
+        "region": "giants-peaks",
+        "order": 6,
+        "titleKey": "level.giants-peaks.6",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["giants-peaks.5"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-peaks"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.word.two-step"]
+      },
+      {
+        "id": "giants-peaks.boss",
+        "region": "giants-peaks",
+        "order": 7,
+        "titleKey": "level.giants-peaks.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["giants-peaks.6"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": ["pow10", "tens-1d", "mul2d1d-nocarry", "mul2d1d-carry", "div2d1d"],
+            "count": 23,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": ["boulder"],
+          "cosmetics": ["hat-top"]
+        },
+        "boss": "friendly-giant",
+        "storyBeat": "beat.friendly-giant",
+        "objectives": ["obj.big.mul-10-100", "obj.big.tens", "obj.big.mul-2d1d", "obj.big.div-2d1d"]
+      },
+      {
+        "id": "riddle-ruins.1",
+        "region": "riddle-ruins",
+        "order": 1,
+        "titleKey": "level.riddle-ruins.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "golem-orders",
+            "skills": ["order-precedence"],
+            "count": 4,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["order-precedence"],
+            "count": 8,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": ["clockwork"],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.riddle-ruins-welcome",
+        "objectives": ["obj.order.precedence"]
+      },
+      {
+        "id": "riddle-ruins.2",
+        "region": "riddle-ruins",
+        "order": 2,
+        "titleKey": "level.riddle-ruins.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["riddle-ruins.1"]
+        },
+        "activities": [
+          {
+            "kind": "golem-orders",
+            "skills": ["order-brackets"],
+            "count": 4,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "feeding",
+            "skills": ["order-brackets"],
+            "count": 8,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.order.brackets"]
+      },
+      {
+        "id": "riddle-ruins.3",
+        "region": "riddle-ruins",
+        "order": 3,
+        "titleKey": "level.riddle-ruins.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["riddle-ruins.2"]
+        },
+        "activities": [
+          {
+            "kind": "compare-stones",
+            "skills": ["compare-expression"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.compare.expressions"]
+      },
+      {
+        "id": "riddle-ruins.4",
+        "region": "riddle-ruins",
+        "order": 4,
+        "titleKey": "level.riddle-ruins.4",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["riddle-ruins.3"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["terms-all"],
+            "count": 10,
+            "input": "choice",
+            "options": {}
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["terms-all"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6,
+              "match": "term"
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": ["nest-books"]
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.terms.mul", "obj.terms.div"]
+      },
+      {
+        "id": "riddle-ruins.5",
+        "region": "riddle-ruins",
+        "order": 5,
+        "titleKey": "level.riddle-ruins.5",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["riddle-ruins.4"]
+        },
+        "activities": [
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-two-step"],
+            "count": 6,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.word.two-step"]
+      },
+      {
+        "id": "riddle-ruins.6",
+        "region": "riddle-ruins",
+        "order": 6,
+        "titleKey": "level.riddle-ruins.6",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["riddle-ruins.5"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": [
+              "div-all",
+              "missing-all",
+              "rem-mixed",
+              "pow10",
+              "tens-1d",
+              "mul2d1d-carry",
+              "div2d1d",
+              "order-mixed",
+              "compare-expression",
+              "terms-all",
+              "word-times"
+            ],
+            "count": 14,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": []
+      },
+      {
+        "id": "riddle-ruins.boss",
+        "region": "riddle-ruins",
+        "order": 7,
+        "titleKey": "level.riddle-ruins.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["riddle-ruins.6"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": [
+              "order-precedence",
+              "order-brackets",
+              "compare-expression",
+              "terms-all",
+              "word-two-step"
+            ],
+            "count": 25,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": ["clockwork"],
+          "cosmetics": ["hat-chef"]
+        },
+        "boss": "golem",
+        "storyBeat": "beat.golem",
+        "objectives": [
+          "obj.order.precedence",
+          "obj.order.brackets",
+          "obj.compare.expressions",
+          "obj.word.two-step",
+          "obj.terms.mul",
+          "obj.terms.div"
+        ]
+      },
+      {
+        "id": "dragon-castle.1",
+        "region": "dragon-castle",
+        "order": 1,
+        "titleKey": "level.dragon-castle.1",
+        "kind": "lesson",
+        "unlock": {
+          "after": []
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-all", "div-all"],
+            "count": 15,
+            "input": "keypad",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": "beat.dragon-castle-welcome",
+        "objectives": ["obj.mul.fluency"]
+      },
+      {
+        "id": "dragon-castle.2",
+        "region": "dragon-castle",
+        "order": 2,
+        "titleKey": "level.dragon-castle.2",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["dragon-castle.1"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": ["mul-all", "div-all"],
+            "count": 12,
+            "input": "auto",
+            "options": {
+              "draw": "weakest"
+            }
+          },
+          {
+            "kind": "memory-match",
+            "skills": ["mul-all"],
+            "count": 1,
+            "input": "auto",
+            "options": {
+              "pairs": 6
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": ["obj.mul.fluency"]
+      },
+      {
+        "id": "dragon-castle.3",
+        "region": "dragon-castle",
+        "order": 3,
+        "titleKey": "level.dragon-castle.3",
+        "kind": "lesson",
+        "unlock": {
+          "after": ["dragon-castle.2"]
+        },
+        "activities": [
+          {
+            "kind": "feeding",
+            "skills": [
+              "mul-all",
+              "div-all",
+              "rem-mixed",
+              "mul2d1d-carry",
+              "order-mixed",
+              "compare-expression",
+              "word-castle"
+            ],
+            "count": 14,
+            "input": "auto",
+            "options": {}
+          },
+          {
+            "kind": "riddle-scrolls",
+            "skills": ["word-castle"],
+            "count": 4,
+            "input": "auto",
+            "options": {
+              "pickOperation": true
+            }
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [5, 10, 15],
+          "eggs": [],
+          "cosmetics": []
+        },
+        "boss": null,
+        "storyBeat": null,
+        "objectives": []
+      },
+      {
+        "id": "dragon-castle.boss",
+        "region": "dragon-castle",
+        "order": 4,
+        "titleKey": "level.dragon-castle.boss",
+        "kind": "boss",
+        "unlock": {
+          "after": ["dragon-castle.3"]
+        },
+        "activities": [
+          {
+            "kind": "boss",
+            "skills": [
+              "mul-all",
+              "div-all",
+              "rem-mixed",
+              "mul2d1d-carry",
+              "order-mixed",
+              "compare-expression",
+              "word-castle"
+            ],
+            "count": 28,
+            "input": "auto",
+            "options": {}
+          }
+        ],
+        "stars": null,
+        "rewards": {
+          "coins": [10, 20, 30],
+          "eggs": ["seven-headed"],
+          "cosmetics": ["gold-medal"]
+        },
+        "boss": "seven-headed",
+        "storyBeat": "beat.seven-headed",
+        "objectives": ["obj.mul.fluency"]
       }
     ],
     "skills": [
@@ -562,6 +2422,554 @@
         "params": {
           "templates": ["word.equal-groups.nests", "word.sharing.berries", "word.more-than.flowers"]
         }
+      },
+      {
+        "id": "mul-3",
+        "titleKey": "skill.mul-3",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [3],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-3",
+        "titleKey": "skill.div-3",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [3],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-4",
+        "titleKey": "skill.mul-4",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [4],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-4",
+        "titleKey": "skill.div-4",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [4],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-6",
+        "titleKey": "skill.mul-6",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [6],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-6",
+        "titleKey": "skill.div-6",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [6],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-7",
+        "titleKey": "skill.mul-7",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [7],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-7",
+        "titleKey": "skill.div-7",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [7],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-8",
+        "titleKey": "skill.mul-8",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [8],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-8",
+        "titleKey": "skill.div-8",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [8],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-9",
+        "titleKey": "skill.mul-9",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [9],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-9",
+        "titleKey": "skill.div-9",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [9],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-3-4",
+        "titleKey": "skill.mul-3-4",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [3, 4],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-3-4",
+        "titleKey": "skill.div-3-4",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [3, 4],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-6-7",
+        "titleKey": "skill.mul-6-7",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [6, 7],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-6-7",
+        "titleKey": "skill.div-6-7",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [6, 7],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-8-9",
+        "titleKey": "skill.mul-8-9",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [8, 9],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-8-9",
+        "titleKey": "skill.div-8-9",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [8, 9],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "mul-2-3-4-5-10",
+        "titleKey": "skill.mul-2-3-4-5-10",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [2, 3, 4, 5, 10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-2-to-7",
+        "titleKey": "skill.mul-2-to-7",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [2, 3, 4, 5, 6, 7],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "mul-all",
+        "titleKey": "skill.mul-all",
+        "generator": "mul.fact",
+        "params": {
+          "tables": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "factors": [0, 10],
+          "order": "both"
+        }
+      },
+      {
+        "id": "div-all",
+        "titleKey": "skill.div-all",
+        "generator": "div.fact",
+        "params": {
+          "divisors": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "quotients": [0, 10]
+        }
+      },
+      {
+        "id": "missing-6-7",
+        "titleKey": "skill.missing-6-7",
+        "generator": "mul.missing",
+        "params": {
+          "tables": [6, 7],
+          "factors": [0, 10],
+          "position": "both"
+        }
+      },
+      {
+        "id": "missing-all",
+        "titleKey": "skill.missing-all",
+        "generator": "mul.missing",
+        "params": {
+          "tables": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "factors": [0, 10],
+          "position": "both"
+        }
+      },
+      {
+        "id": "rem-small",
+        "titleKey": "skill.rem-small",
+        "generator": "div.remainder",
+        "params": {
+          "divisors": [2, 3, 4, 5],
+          "quotients": [1, 9],
+          "dividendMax": 49,
+          "remainder": "required"
+        }
+      },
+      {
+        "id": "rem-all",
+        "titleKey": "skill.rem-all",
+        "generator": "div.remainder",
+        "params": {
+          "divisors": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "quotients": [1, 9],
+          "dividendMax": 99,
+          "remainder": "required"
+        }
+      },
+      {
+        "id": "rem-mixed",
+        "titleKey": "skill.rem-mixed",
+        "generator": "div.remainder",
+        "params": {
+          "divisors": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "quotients": [1, 10],
+          "dividendMax": 99,
+          "remainder": "allowed"
+        }
+      },
+      {
+        "id": "pow10",
+        "titleKey": "skill.pow10",
+        "generator": "mul.power10",
+        "params": {
+          "powers": [10, 100],
+          "factors": [1, 99],
+          "resultMax": 1000
+        }
+      },
+      {
+        "id": "tens-1d",
+        "titleKey": "skill.tens-1d",
+        "generator": "mul.tens",
+        "params": {
+          "tens": [2, 9],
+          "digits": [2, 3, 4, 5, 6, 7, 8, 9],
+          "resultMax": 1000
+        }
+      },
+      {
+        "id": "mul2d1d-nocarry",
+        "titleKey": "skill.mul2d1d-nocarry",
+        "generator": "mul.2d1d",
+        "params": {
+          "twoDigit": [11, 99],
+          "oneDigit": [2, 9],
+          "carry": "forbidden",
+          "resultMax": 1000
+        }
+      },
+      {
+        "id": "mul2d1d-carry",
+        "titleKey": "skill.mul2d1d-carry",
+        "generator": "mul.2d1d",
+        "params": {
+          "twoDigit": [11, 99],
+          "oneDigit": [2, 9],
+          "carry": "required",
+          "resultMax": 1000
+        }
+      },
+      {
+        "id": "div2d1d",
+        "titleKey": "skill.div2d1d",
+        "generator": "div.2d1d",
+        "params": {
+          "divisors": [2, 3, 4, 5, 6, 7, 8, 9],
+          "quotients": [10, 49],
+          "dividendMax": 99,
+          "regroup": "allowed",
+          "remainder": "forbidden"
+        }
+      },
+      {
+        "id": "order-precedence",
+        "titleKey": "skill.order-precedence",
+        "generator": "order.ops",
+        "params": {
+          "operators": ["add", "sub", "mul", "div"],
+          "brackets": "forbidden",
+          "operations": [2, 3],
+          "operands": [0, 100],
+          "resultMax": 1000
+        }
+      },
+      {
+        "id": "order-brackets",
+        "titleKey": "skill.order-brackets",
+        "generator": "order.ops",
+        "params": {
+          "operators": ["add", "sub", "mul", "div"],
+          "brackets": "required",
+          "operations": [2, 3],
+          "operands": [0, 100],
+          "resultMax": 1000
+        }
+      },
+      {
+        "id": "order-mixed",
+        "titleKey": "skill.order-mixed",
+        "generator": "order.ops",
+        "params": {
+          "operators": ["add", "sub", "mul", "div"],
+          "brackets": "allowed",
+          "operations": [2, 3],
+          "operands": [0, 100],
+          "resultMax": 1000
+        }
+      },
+      {
+        "id": "compare-woods",
+        "titleKey": "skill.compare-woods",
+        "generator": "compare",
+        "params": {
+          "sides": "fact-number",
+          "tables": [2, 3, 4, 5, 10],
+          "equalShare": 20
+        }
+      },
+      {
+        "id": "compare-caves",
+        "titleKey": "skill.compare-caves",
+        "generator": "compare",
+        "params": {
+          "sides": "fact-fact",
+          "tables": [6, 7, 8, 9],
+          "equalShare": 20
+        }
+      },
+      {
+        "id": "compare-lake",
+        "titleKey": "skill.compare-lake",
+        "generator": "compare",
+        "params": {
+          "sides": "fact-fact",
+          "tables": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+          "equalShare": 20
+        }
+      },
+      {
+        "id": "compare-expression",
+        "titleKey": "skill.compare-expression",
+        "generator": "compare",
+        "params": {
+          "sides": "expression",
+          "tables": [2, 3, 4, 5, 6, 7, 8, 9],
+          "equalShare": 20
+        }
+      },
+      {
+        "id": "terms-all",
+        "titleKey": "skill.terms-all",
+        "generator": "terms",
+        "params": {
+          "terms": ["factor", "product", "dividend", "divisor", "quotient", "remainder"],
+          "tables": [2, 3, 4, 5, 6, 7, 8, 9]
+        }
+      },
+      {
+        "id": "word-woods",
+        "titleKey": "skill.word-woods",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.equal-groups.baskets",
+            "word.equal-groups.clovers",
+            "word.equal-groups.dragons",
+            "word.sharing.pancakes",
+            "word.grouping.bags",
+            "word.grouping.teams",
+            "word.times-as-many.fruit"
+          ]
+        }
+      },
+      {
+        "id": "word-mountain",
+        "titleKey": "skill.word-mountain",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.times-as-many.sparks",
+            "word.times-fewer.fruit",
+            "word.times-fewer.scales",
+            "word.more-than.plums",
+            "word.equal-groups.beetles",
+            "word.equal-groups.rainbows",
+            "word.sharing.plums",
+            "word.grouping.holiday"
+          ]
+        }
+      },
+      {
+        "id": "word-caves",
+        "titleKey": "skill.word-caves",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.equal-groups.spiders",
+            "word.equal-groups.gems",
+            "word.sharing.gnomes",
+            "word.grouping.spiders",
+            "word.grouping.chests",
+            "word.times-as-many.treasure",
+            "word.times-fewer.treasure"
+          ]
+        }
+      },
+      {
+        "id": "word-times",
+        "titleKey": "skill.word-times",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.times-as-many.pond",
+            "word.times-fewer.pond",
+            "word.times-as-many.fruit",
+            "word.times-fewer.fruit"
+          ]
+        }
+      },
+      {
+        "id": "word-contrast",
+        "titleKey": "skill.word-contrast",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.times-as-many.fruit",
+            "word.more-than.fruit",
+            "word.times-fewer.fruit",
+            "word.more-than.inverse",
+            "word.fewer-than.fruit",
+            "word.fewer-than.inverse",
+            "word.fewer-than.class",
+            "word.more-than.plums"
+          ]
+        }
+      },
+      {
+        "id": "word-leftover",
+        "titleKey": "skill.word-leftover",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.leftover.bags",
+            "word.leftover.boats",
+            "word.leftover.necklaces",
+            "word.leftover.plates",
+            "word.leftover.album"
+          ]
+        }
+      },
+      {
+        "id": "word-peaks",
+        "titleKey": "skill.word-peaks",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.equal-groups.tickets",
+            "word.equal-groups.pencils",
+            "word.equal-groups.books",
+            "word.equal-groups.trucks",
+            "word.sharing.books",
+            "word.sharing.giant",
+            "word.grouping.giant",
+            "word.times-as-many.savings",
+            "word.two-step.bags",
+            "word.two-step.stickers",
+            "word.two-step.garden"
+          ]
+        }
+      },
+      {
+        "id": "word-two-step",
+        "titleKey": "skill.word-two-step",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.two-step.bags",
+            "word.two-step.tickets",
+            "word.two-step.chairs",
+            "word.two-step.bowls",
+            "word.two-step.pocket",
+            "word.two-step.stickers",
+            "word.two-step.garden"
+          ]
+        }
+      },
+      {
+        "id": "word-castle",
+        "titleKey": "skill.word-castle",
+        "generator": "word",
+        "params": {
+          "templates": [
+            "word.equal-groups.market",
+            "word.sharing.class",
+            "word.grouping.market",
+            "word.times-as-many.pond",
+            "word.times-fewer.pond",
+            "word.more-than.fruit",
+            "word.leftover.boats",
+            "word.two-step.garden"
+          ]
+        }
       }
     ],
     "dragons": [
@@ -619,6 +3027,124 @@
         "skills": ["mul-10"],
         "divisionSkills": ["div-10"],
         "boss": "bridge-troll"
+      },
+      {
+        "id": "clover",
+        "kind": "table",
+        "table": 3,
+        "nameKey": "dragon.clover",
+        "region": "whispering-woods",
+        "rig": "clover",
+        "skills": ["mul-3"],
+        "divisionSkills": ["div-3"],
+        "boss": "forest-witch"
+      },
+      {
+        "id": "petal",
+        "kind": "table",
+        "table": 4,
+        "nameKey": "dragon.petal",
+        "region": "whispering-woods",
+        "rig": "petal",
+        "skills": ["mul-4"],
+        "divisionSkills": ["div-4"],
+        "boss": "forest-witch"
+      },
+      {
+        "id": "ember",
+        "kind": "table",
+        "table": 6,
+        "nameKey": "dragon.ember",
+        "region": "fire-mountain",
+        "rig": "ember",
+        "skills": ["mul-6"],
+        "divisionSkills": ["div-6"],
+        "boss": "krakonos"
+      },
+      {
+        "id": "rainbow",
+        "kind": "table",
+        "table": 7,
+        "nameKey": "dragon.rainbow",
+        "region": "fire-mountain",
+        "rig": "rainbow",
+        "skills": ["mul-7"],
+        "divisionSkills": ["div-7"],
+        "boss": "krakonos"
+      },
+      {
+        "id": "crystal",
+        "kind": "table",
+        "table": 8,
+        "nameKey": "dragon.crystal",
+        "region": "crystal-caves",
+        "rig": "crystal",
+        "skills": ["mul-8"],
+        "divisionSkills": ["div-8"],
+        "boss": "gnome-king"
+      },
+      {
+        "id": "starry",
+        "kind": "table",
+        "table": 9,
+        "nameKey": "dragon.starry",
+        "region": "crystal-caves",
+        "rig": "starry",
+        "skills": ["mul-9"],
+        "divisionSkills": ["div-9"],
+        "boss": "gnome-king"
+      },
+      {
+        "id": "pearl",
+        "kind": "special",
+        "table": null,
+        "nameKey": "dragon.pearl",
+        "region": "leftover-lagoon",
+        "rig": "pearl",
+        "skills": ["rem-all"],
+        "divisionSkills": [],
+        "boss": "lake-nymphs"
+      },
+      {
+        "id": "boulder",
+        "kind": "special",
+        "table": null,
+        "nameKey": "dragon.boulder",
+        "region": "giants-peaks",
+        "rig": "boulder",
+        "skills": ["pow10", "tens-1d", "mul2d1d-nocarry", "mul2d1d-carry", "div2d1d"],
+        "divisionSkills": [],
+        "boss": "friendly-giant"
+      },
+      {
+        "id": "clockwork",
+        "kind": "special",
+        "table": null,
+        "nameKey": "dragon.clockwork",
+        "region": "riddle-ruins",
+        "rig": "clockwork",
+        "skills": ["order-precedence", "order-brackets"],
+        "divisionSkills": [],
+        "boss": "golem"
+      },
+      {
+        "id": "seven-headed",
+        "kind": "finale",
+        "table": null,
+        "nameKey": "dragon.seven-headed",
+        "region": "dragon-castle",
+        "rig": "seven-headed",
+        "skills": [
+          "mul-all",
+          "div-all",
+          "rem-mixed",
+          "mul2d1d-carry",
+          "order-mixed",
+          "compare-expression",
+          "word-castle"
+        ],
+        "divisionSkills": [],
+        "boss": "seven-headed"
       }
     ],
     "bosses": [
@@ -629,6 +3155,72 @@
         "mood": "laughing",
         "meter": 15,
         "reviewShare": 20
+      },
+      {
+        "id": "forest-witch",
+        "region": "whispering-woods",
+        "nameKey": "boss.forest-witch",
+        "mood": "happy",
+        "meter": 15,
+        "reviewShare": 20
+      },
+      {
+        "id": "krakonos",
+        "region": "fire-mountain",
+        "nameKey": "boss.krakonos",
+        "mood": "laughing",
+        "meter": 18,
+        "reviewShare": 20
+      },
+      {
+        "id": "gnome-king",
+        "region": "crystal-caves",
+        "nameKey": "boss.gnome-king",
+        "mood": "happy",
+        "meter": 18,
+        "reviewShare": 20
+      },
+      {
+        "id": "water-goblin",
+        "region": "sharing-lake",
+        "nameKey": "boss.water-goblin",
+        "mood": "happy",
+        "meter": 20,
+        "reviewShare": 20
+      },
+      {
+        "id": "lake-nymphs",
+        "region": "leftover-lagoon",
+        "nameKey": "boss.lake-nymphs",
+        "mood": "laughing",
+        "meter": 18,
+        "reviewShare": 20
+      },
+      {
+        "id": "friendly-giant",
+        "region": "giants-peaks",
+        "nameKey": "boss.friendly-giant",
+        "mood": "sleepy",
+        "meter": 18,
+        "reviewShare": 20
+      },
+      {
+        "id": "golem",
+        "region": "riddle-ruins",
+        "nameKey": "boss.golem",
+        "mood": "happy",
+        "meter": 20,
+        "reviewShare": 20
+      },
+      {
+        "id": "seven-headed",
+        "region": "dragon-castle",
+        "nameKey": "boss.seven-headed",
+        "mood": "happy",
+        "meter": 21,
+        "reviewShare": 0,
+        "heads": 7,
+        "finale": true
       }
     ],
     "cosmetics": [
@@ -735,6 +3327,238 @@
         "nameKey": "cosmetic.hat-party",
         "price": 60,
         "unlock": "sunny-meadow.boss"
+      },
+      {
+        "id": "nest-mushrooms",
+        "slot": "nest",
+        "assetId": "nest-mushrooms",
+        "nameKey": "cosmetic.nest-mushrooms",
+        "price": 35,
+        "unlock": "whispering-woods.1"
+      },
+      {
+        "id": "paint-stripes",
+        "slot": "wings",
+        "assetId": "paint-stripes",
+        "nameKey": "cosmetic.paint-stripes",
+        "price": 30,
+        "unlock": "whispering-woods.2"
+      },
+      {
+        "id": "scarf-cozy",
+        "slot": "neck",
+        "assetId": "scarf-cozy",
+        "nameKey": "cosmetic.scarf-cozy",
+        "price": 35,
+        "unlock": "whispering-woods.3"
+      },
+      {
+        "id": "glasses-square",
+        "slot": "eyes",
+        "assetId": "glasses-square",
+        "nameKey": "cosmetic.glasses-square",
+        "price": 40,
+        "unlock": "whispering-woods.4"
+      },
+      {
+        "id": "hat-wizard",
+        "slot": "head",
+        "assetId": "hat-wizard",
+        "nameKey": "cosmetic.hat-wizard",
+        "price": 60,
+        "unlock": "whispering-woods.boss"
+      },
+      {
+        "id": "paint-flames",
+        "slot": "wings",
+        "assetId": "paint-flames",
+        "nameKey": "cosmetic.paint-flames",
+        "price": 40,
+        "unlock": "fire-mountain.1"
+      },
+      {
+        "id": "bandana",
+        "slot": "neck",
+        "assetId": "bandana",
+        "nameKey": "cosmetic.bandana",
+        "price": 35,
+        "unlock": "fire-mountain.2"
+      },
+      {
+        "id": "goggles",
+        "slot": "eyes",
+        "assetId": "goggles",
+        "nameKey": "cosmetic.goggles",
+        "price": 45,
+        "unlock": "fire-mountain.3"
+      },
+      {
+        "id": "nest-lantern",
+        "slot": "nest",
+        "assetId": "nest-lantern",
+        "nameKey": "cosmetic.nest-lantern",
+        "price": 40,
+        "unlock": "fire-mountain.4"
+      },
+      {
+        "id": "hat-cap",
+        "slot": "head",
+        "assetId": "hat-cap",
+        "nameKey": "cosmetic.hat-cap",
+        "price": 60,
+        "unlock": "fire-mountain.boss"
+      },
+      {
+        "id": "paint-galaxy",
+        "slot": "wings",
+        "assetId": "paint-galaxy",
+        "nameKey": "cosmetic.paint-galaxy",
+        "price": 45,
+        "unlock": "crystal-caves.1"
+      },
+      {
+        "id": "monocle",
+        "slot": "eyes",
+        "assetId": "monocle",
+        "nameKey": "cosmetic.monocle",
+        "price": 40,
+        "unlock": "crystal-caves.3"
+      },
+      {
+        "id": "nest-treasure",
+        "slot": "nest",
+        "assetId": "nest-treasure",
+        "nameKey": "cosmetic.nest-treasure",
+        "price": 45,
+        "unlock": "crystal-caves.4"
+      },
+      {
+        "id": "hat-propeller",
+        "slot": "head",
+        "assetId": "hat-propeller",
+        "nameKey": "cosmetic.hat-propeller",
+        "price": 65,
+        "unlock": "crystal-caves.boss"
+      },
+      {
+        "id": "sunglasses",
+        "slot": "eyes",
+        "assetId": "sunglasses",
+        "nameKey": "cosmetic.sunglasses",
+        "price": 50,
+        "unlock": "sharing-lake.1"
+      },
+      {
+        "id": "bell-collar",
+        "slot": "neck",
+        "assetId": "bell-collar",
+        "nameKey": "cosmetic.bell-collar",
+        "price": 50,
+        "unlock": "sharing-lake.3"
+      },
+      {
+        "id": "nest-quilt",
+        "slot": "nest",
+        "assetId": "nest-quilt",
+        "nameKey": "cosmetic.nest-quilt",
+        "price": 55,
+        "unlock": "sharing-lake.4"
+      },
+      {
+        "id": "hat-pirate",
+        "slot": "head",
+        "assetId": "hat-pirate",
+        "nameKey": "cosmetic.hat-pirate",
+        "price": 70,
+        "unlock": "sharing-lake.boss"
+      },
+      {
+        "id": "glasses-heart",
+        "slot": "eyes",
+        "assetId": "glasses-heart",
+        "nameKey": "cosmetic.glasses-heart",
+        "price": 55,
+        "unlock": "leftover-lagoon.1"
+      },
+      {
+        "id": "paint-hearts",
+        "slot": "wings",
+        "assetId": "paint-hearts",
+        "nameKey": "cosmetic.paint-hearts",
+        "price": 60,
+        "unlock": "leftover-lagoon.4"
+      },
+      {
+        "id": "pearl-necklace",
+        "slot": "neck",
+        "assetId": "pearl-necklace",
+        "nameKey": "cosmetic.pearl-necklace",
+        "price": 70,
+        "unlock": "leftover-lagoon.boss"
+      },
+      {
+        "id": "mask-hero",
+        "slot": "eyes",
+        "assetId": "mask-hero",
+        "nameKey": "cosmetic.mask-hero",
+        "price": 60,
+        "unlock": "giants-peaks.1"
+      },
+      {
+        "id": "nest-number-blocks",
+        "slot": "nest",
+        "assetId": "nest-number-blocks",
+        "nameKey": "cosmetic.nest-number-blocks",
+        "price": 65,
+        "unlock": "giants-peaks.4"
+      },
+      {
+        "id": "hat-top",
+        "slot": "head",
+        "assetId": "hat-top",
+        "nameKey": "cosmetic.hat-top",
+        "price": 75,
+        "unlock": "giants-peaks.boss"
+      },
+      {
+        "id": "paint-checker",
+        "slot": "wings",
+        "assetId": "paint-checker",
+        "nameKey": "cosmetic.paint-checker",
+        "price": 65,
+        "unlock": "riddle-ruins.1"
+      },
+      {
+        "id": "nest-books",
+        "slot": "nest",
+        "assetId": "nest-books",
+        "nameKey": "cosmetic.nest-books",
+        "price": 70,
+        "unlock": "riddle-ruins.4"
+      },
+      {
+        "id": "hat-chef",
+        "slot": "head",
+        "assetId": "hat-chef",
+        "nameKey": "cosmetic.hat-chef",
+        "price": 75,
+        "unlock": "riddle-ruins.boss"
+      },
+      {
+        "id": "paint-rainbow",
+        "slot": "wings",
+        "assetId": "paint-rainbow",
+        "nameKey": "cosmetic.paint-rainbow",
+        "price": 80,
+        "unlock": "dragon-castle.1"
+      },
+      {
+        "id": "gold-medal",
+        "slot": "neck",
+        "assetId": "gold-medal",
+        "nameKey": "cosmetic.gold-medal",
+        "price": 80,
+        "unlock": "dragon-castle.boss"
       }
     ],
     "stickers": [
@@ -823,6 +3647,597 @@
         "icon": "chest-open",
         "color": "#6ccff6",
         "frame": "frame-shield"
+      },
+      {
+        "id": "clover-hatched",
+        "nameKey": "sticker.clover-hatched",
+        "page": "whispering-woods",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "clover",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#4fbf66",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "petal-hatched",
+        "nameKey": "sticker.petal-hatched",
+        "page": "whispering-woods",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "petal",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#ff86b9",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "double-double",
+        "nameKey": "sticker.double-double",
+        "page": "whispering-woods",
+        "criteria": {
+          "kind": "skill-mastered",
+          "skill": "mul-4",
+          "level": "silver",
+          "share": 100
+        },
+        "icon": "node-stars-2",
+        "color": "#c0c7d6",
+        "frame": "frame-hexagon"
+      },
+      {
+        "id": "whispering-woods-explorer",
+        "nameKey": "sticker.whispering-woods-explorer",
+        "page": "whispering-woods",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "whispering-woods.1",
+          "stars": 1
+        },
+        "icon": "emblem-whispering-woods",
+        "color": "#3aa65b",
+        "frame": "frame-round"
+      },
+      {
+        "id": "witch-gingerbread",
+        "nameKey": "sticker.witch-gingerbread",
+        "page": "whispering-woods",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "forest-witch"
+        },
+        "icon": "hat-wizard",
+        "color": "#3aa65b",
+        "frame": "frame-shield"
+      },
+      {
+        "id": "three-days",
+        "nameKey": "sticker.three-days",
+        "page": "whispering-woods",
+        "criteria": {
+          "kind": "days-practiced",
+          "count": 3
+        },
+        "icon": "check",
+        "color": "#8bd36b",
+        "frame": "frame-cloud"
+      },
+      {
+        "id": "ember-hatched",
+        "nameKey": "sticker.ember-hatched",
+        "page": "fire-mountain",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "ember",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#ff5f3d",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "rainbow-hatched",
+        "nameKey": "sticker.rainbow-hatched",
+        "page": "fire-mountain",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "rainbow",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#a66cf0",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "hot-streak",
+        "nameKey": "sticker.hot-streak",
+        "page": "fire-mountain",
+        "criteria": {
+          "kind": "streak",
+          "count": 15
+        },
+        "icon": "badge-correct",
+        "color": "#ff6b3d",
+        "frame": "frame-star"
+      },
+      {
+        "id": "fire-mountain-explorer",
+        "nameKey": "sticker.fire-mountain-explorer",
+        "page": "fire-mountain",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "fire-mountain.1",
+          "stars": 1
+        },
+        "icon": "emblem-fire-mountain",
+        "color": "#f26a2e",
+        "frame": "frame-round"
+      },
+      {
+        "id": "krakonos-laughs",
+        "nameKey": "sticker.krakonos-laughs",
+        "page": "fire-mountain",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "krakonos"
+        },
+        "icon": "paint-flames",
+        "color": "#f26a2e",
+        "frame": "frame-shield"
+      },
+      {
+        "id": "week-warrior",
+        "nameKey": "sticker.week-warrior",
+        "page": "fire-mountain",
+        "criteria": {
+          "kind": "week-days",
+          "count": 5
+        },
+        "icon": "node-current",
+        "color": "#ffb547",
+        "frame": "frame-ribbon"
+      },
+      {
+        "id": "crystal-hatched",
+        "nameKey": "sticker.crystal-hatched",
+        "page": "crystal-caves",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "crystal",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#6fd3f5",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "starry-hatched",
+        "nameKey": "sticker.starry-hatched",
+        "page": "crystal-caves",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "starry",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#3d3b94",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "finger-trick",
+        "nameKey": "sticker.finger-trick",
+        "page": "crystal-caves",
+        "criteria": {
+          "kind": "skill-mastered",
+          "skill": "mul-9",
+          "level": "silver",
+          "share": 100
+        },
+        "icon": "hint",
+        "color": "#9aa5b8",
+        "frame": "frame-hexagon"
+      },
+      {
+        "id": "crystal-caves-explorer",
+        "nameKey": "sticker.crystal-caves-explorer",
+        "page": "crystal-caves",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "crystal-caves.1",
+          "stars": 1
+        },
+        "icon": "emblem-crystal-caves",
+        "color": "#8b5cf6",
+        "frame": "frame-round"
+      },
+      {
+        "id": "gnome-dance",
+        "nameKey": "sticker.gnome-dance",
+        "page": "crystal-caves",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "gnome-king"
+        },
+        "icon": "nest-treasure",
+        "color": "#8b5cf6",
+        "frame": "frame-shield"
+      },
+      {
+        "id": "coin-collector",
+        "nameKey": "sticker.coin-collector",
+        "page": "crystal-caves",
+        "criteria": {
+          "kind": "coins-earned",
+          "count": 500
+        },
+        "icon": "coin",
+        "color": "#f5c542",
+        "frame": "frame-round"
+      },
+      {
+        "id": "fair-sharer",
+        "nameKey": "sticker.fair-sharer",
+        "page": "sharing-lake",
+        "criteria": {
+          "kind": "facts-mastered",
+          "family": "div",
+          "level": "bronze",
+          "count": 30
+        },
+        "icon": "berries",
+        "color": "#4aa3f0",
+        "frame": "frame-heart"
+      },
+      {
+        "id": "first-youngling",
+        "nameKey": "sticker.first-youngling",
+        "page": "sharing-lake",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": null,
+          "stage": "youngling"
+        },
+        "icon": "star-filled",
+        "color": "#7bd389",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "sharing-lake-explorer",
+        "nameKey": "sticker.sharing-lake-explorer",
+        "page": "sharing-lake",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "sharing-lake.1",
+          "stars": 1
+        },
+        "icon": "emblem-sharing-lake",
+        "color": "#2d8ce6",
+        "frame": "frame-round"
+      },
+      {
+        "id": "goblin-teacups",
+        "nameKey": "sticker.goblin-teacups",
+        "page": "sharing-lake",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "water-goblin"
+        },
+        "icon": "cherries",
+        "color": "#2d8ce6",
+        "frame": "frame-shield"
+      },
+      {
+        "id": "quest-helper",
+        "nameKey": "sticker.quest-helper",
+        "page": "sharing-lake",
+        "criteria": {
+          "kind": "quests-claimed",
+          "count": 10
+        },
+        "icon": "chest-closed",
+        "color": "#c77dff",
+        "frame": "frame-ribbon"
+      },
+      {
+        "id": "pearl-hatched",
+        "nameKey": "sticker.pearl-hatched",
+        "page": "leftover-lagoon",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "pearl",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#f2c9dd",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "leftover-expert",
+        "nameKey": "sticker.leftover-expert",
+        "page": "leftover-lagoon",
+        "criteria": {
+          "kind": "skill-mastered",
+          "skill": "rem-all",
+          "level": "silver",
+          "share": 100
+        },
+        "icon": "pearl-necklace",
+        "color": "#5fd3c9",
+        "frame": "frame-hexagon"
+      },
+      {
+        "id": "leftover-lagoon-explorer",
+        "nameKey": "sticker.leftover-lagoon-explorer",
+        "page": "leftover-lagoon",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "leftover-lagoon.1",
+          "stars": 1
+        },
+        "icon": "emblem-leftover-lagoon",
+        "color": "#13b2a6",
+        "frame": "frame-round"
+      },
+      {
+        "id": "nymph-dance",
+        "nameKey": "sticker.nymph-dance",
+        "page": "leftover-lagoon",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "lake-nymphs"
+        },
+        "icon": "music",
+        "color": "#13b2a6",
+        "frame": "frame-shield"
+      },
+      {
+        "id": "ten-days",
+        "nameKey": "sticker.ten-days",
+        "page": "leftover-lagoon",
+        "criteria": {
+          "kind": "days-practiced",
+          "count": 10
+        },
+        "icon": "check",
+        "color": "#3ec1d3",
+        "frame": "frame-cloud"
+      },
+      {
+        "id": "boulder-hatched",
+        "nameKey": "sticker.boulder-hatched",
+        "page": "giants-peaks",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "boulder",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#9a8f86",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "big-numbers",
+        "nameKey": "sticker.big-numbers",
+        "page": "giants-peaks",
+        "criteria": {
+          "kind": "skill-mastered",
+          "skill": "mul2d1d-carry",
+          "level": "bronze",
+          "share": 100
+        },
+        "icon": "plus",
+        "color": "#e86fa8",
+        "frame": "frame-star"
+      },
+      {
+        "id": "giants-peaks-explorer",
+        "nameKey": "sticker.giants-peaks-explorer",
+        "page": "giants-peaks",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "giants-peaks.1",
+          "stars": 1
+        },
+        "icon": "emblem-giants-peaks",
+        "color": "#e35d9b",
+        "frame": "frame-round"
+      },
+      {
+        "id": "giant-nap",
+        "nameKey": "sticker.giant-nap",
+        "page": "giants-peaks",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "friendly-giant"
+        },
+        "icon": "hat-top",
+        "color": "#e35d9b",
+        "frame": "frame-shield"
+      },
+      {
+        "id": "arena-runner",
+        "nameKey": "sticker.arena-runner",
+        "page": "giants-peaks",
+        "criteria": {
+          "kind": "arena-best",
+          "count": 20
+        },
+        "icon": "play",
+        "color": "#ff8c42",
+        "frame": "frame-ribbon"
+      },
+      {
+        "id": "first-adult",
+        "nameKey": "sticker.first-adult",
+        "page": "giants-peaks",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": null,
+          "stage": "adult"
+        },
+        "icon": "star-filled",
+        "color": "#ffd23f",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "clockwork-hatched",
+        "nameKey": "sticker.clockwork-hatched",
+        "page": "riddle-ruins",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": "clockwork",
+          "stage": "hatchling"
+        },
+        "icon": "egg",
+        "color": "#c9773a",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "bracket-boss",
+        "nameKey": "sticker.bracket-boss",
+        "page": "riddle-ruins",
+        "criteria": {
+          "kind": "skill-mastered",
+          "skill": "order-brackets",
+          "level": "silver",
+          "share": 100
+        },
+        "icon": "settings",
+        "color": "#a3b84a",
+        "frame": "frame-hexagon"
+      },
+      {
+        "id": "riddle-ruins-explorer",
+        "nameKey": "sticker.riddle-ruins-explorer",
+        "page": "riddle-ruins",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "riddle-ruins.1",
+          "stars": 1
+        },
+        "icon": "emblem-riddle-ruins",
+        "color": "#93a83a",
+        "frame": "frame-round"
+      },
+      {
+        "id": "golem-orders",
+        "nameKey": "sticker.golem-orders",
+        "page": "riddle-ruins",
+        "criteria": {
+          "kind": "boss-defeated",
+          "boss": "golem"
+        },
+        "icon": "nest-number-blocks",
+        "color": "#93a83a",
+        "frame": "frame-shield"
+      },
+      {
+        "id": "word-wizard",
+        "nameKey": "sticker.word-wizard",
+        "page": "riddle-ruins",
+        "criteria": {
+          "kind": "skill-mastered",
+          "skill": "terms-all",
+          "level": "bronze",
+          "share": 100
+        },
+        "icon": "nest-books",
+        "color": "#9d7bd8",
+        "frame": "frame-star"
+      },
+      {
+        "id": "twenty-days",
+        "nameKey": "sticker.twenty-days",
+        "page": "riddle-ruins",
+        "criteria": {
+          "kind": "days-practiced",
+          "count": 20
+        },
+        "icon": "check",
+        "color": "#93a83a",
+        "frame": "frame-cloud"
+      },
+      {
+        "id": "half-window",
+        "nameKey": "sticker.half-window",
+        "page": "dragon-castle",
+        "criteria": {
+          "kind": "facts-mastered",
+          "family": "mul",
+          "level": "silver",
+          "count": 61
+        },
+        "icon": "node-stars-2",
+        "color": "#c0c7d6",
+        "frame": "frame-round"
+      },
+      {
+        "id": "golden-window",
+        "nameKey": "sticker.golden-window",
+        "page": "dragon-castle",
+        "criteria": {
+          "kind": "facts-mastered",
+          "family": "mul",
+          "level": "gold",
+          "count": 121
+        },
+        "icon": "node-stars-3",
+        "color": "#ffc53d",
+        "frame": "frame-star"
+      },
+      {
+        "id": "first-crown",
+        "nameKey": "sticker.first-crown",
+        "page": "dragon-castle",
+        "criteria": {
+          "kind": "dragon-stage",
+          "dragon": null,
+          "stage": "crowned"
+        },
+        "icon": "hat-flower-crown",
+        "color": "#ffd23f",
+        "frame": "frame-scallop"
+      },
+      {
+        "id": "dragon-castle-explorer",
+        "nameKey": "sticker.dragon-castle-explorer",
+        "page": "dragon-castle",
+        "criteria": {
+          "kind": "level-complete",
+          "level": "dragon-castle.1",
+          "stars": 1
+        },
+        "icon": "emblem-dragon-castle",
+        "color": "#d93a57",
+        "frame": "frame-round"
+      },
+      {
+        "id": "seven-heads-cured",
+        "nameKey": "sticker.seven-heads-cured",
+        "page": "dragon-castle",
+        "criteria": {
+          "kind": "finale"
+        },
+        "icon": "gold-medal",
+        "color": "#d93a57",
+        "frame": "frame-shield"
+      },
+      {
+        "id": "every-table",
+        "nameKey": "sticker.every-table",
+        "page": "dragon-castle",
+        "criteria": {
+          "kind": "dragons-stage",
+          "dragonKind": "table",
+          "stage": "hatchling",
+          "count": null
+        },
+        "icon": "egg",
+        "color": "#ff8fab",
+        "frame": "frame-heart"
       }
     ],
     "quests": [
@@ -879,6 +4294,60 @@
         "coins": 10,
         "weight": 5,
         "unlock": null
+      },
+      {
+        "id": "correct-40",
+        "titleKey": "quest.correct-40",
+        "goal": "correct-answers",
+        "target": 40,
+        "coins": 15,
+        "weight": 6,
+        "unlock": "whispering-woods.1"
+      },
+      {
+        "id": "snack-10",
+        "titleKey": "quest.snack-10",
+        "goal": "feed-hungry",
+        "target": 10,
+        "coins": 12,
+        "weight": 6,
+        "unlock": "whispering-woods.1"
+      },
+      {
+        "id": "minigame-2",
+        "titleKey": "quest.minigame-2",
+        "goal": "play-minigame",
+        "target": 2,
+        "coins": 8,
+        "weight": 6,
+        "unlock": "whispering-woods.1"
+      },
+      {
+        "id": "fast-20",
+        "titleKey": "quest.fast-20",
+        "goal": "fast-answers",
+        "target": 20,
+        "coins": 15,
+        "weight": 6,
+        "unlock": "fire-mountain.1"
+      },
+      {
+        "id": "level-2",
+        "titleKey": "quest.level-2",
+        "goal": "finish-level",
+        "target": 2,
+        "coins": 15,
+        "weight": 5,
+        "unlock": "fire-mountain.1"
+      },
+      {
+        "id": "streak-12",
+        "titleKey": "quest.streak-12",
+        "goal": "best-streak",
+        "target": 12,
+        "coins": 15,
+        "weight": 4,
+        "unlock": "crystal-caves.1"
       }
     ],
     "wordLists": [
@@ -3867,6 +7336,18 @@
           "problems": 3,
           "passAccuracy": 67,
           "levels": ["sunny-meadow.5"]
+        },
+        {
+          "skill": "mul-3-4",
+          "problems": 4,
+          "passAccuracy": 75,
+          "levels": ["whispering-woods.2", "whispering-woods.3"]
+        },
+        {
+          "skill": "div-3-4",
+          "problems": 3,
+          "passAccuracy": 67,
+          "levels": ["whispering-woods.4"]
         }
       ],
       "minProblems": 4,
@@ -4144,81 +7625,6 @@
           }
         },
         {
-          "id": "beat.meadow-new-eggs",
-          "trigger": {
-            "kind": "level-start",
-            "level": "sunny-meadow.3"
-          },
-          "skippable": true,
-          "graph": {
-            "schema": 1,
-            "id": "story.meadow-new-eggs",
-            "revision": "1",
-            "start": "meadow-new-eggs-1",
-            "catalogs": {
-              "scene": ["sunny-meadow"],
-              "text": ["story.meadow-new-eggs.1", "story.next", "story.meadow-new-eggs.2"],
-              "asset": [],
-              "clue": [],
-              "fact": [],
-              "glossary": [],
-              "reward": ["egg.mirror", "egg.puff"],
-              "completion": []
-            },
-            "flags": [],
-            "items": [],
-            "data": [],
-            "effects": [
-              {
-                "id": "claim-mirror",
-                "kind": "claim",
-                "catalog": "reward",
-                "ref": "egg.mirror"
-              },
-              {
-                "id": "claim-puff",
-                "kind": "claim",
-                "catalog": "reward",
-                "ref": "egg.puff"
-              }
-            ],
-            "nodes": [
-              {
-                "id": "meadow-new-eggs-1",
-                "scene": "sunny-meadow",
-                "text": "story.meadow-new-eggs.1",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": ["claim-mirror", "claim-puff"],
-                "choices": [
-                  {
-                    "id": "next",
-                    "text": "story.next",
-                    "to": "meadow-new-eggs-2",
-                    "guard": null,
-                    "effects": []
-                  }
-                ],
-                "automatic": [],
-                "resolveEnding": false
-              },
-              {
-                "id": "meadow-new-eggs-2",
-                "scene": "sunny-meadow",
-                "text": "story.meadow-new-eggs.2",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [],
-                "automatic": [],
-                "resolveEnding": false
-              }
-            ],
-            "endings": [],
-            "maxAutomaticSteps": 4
-          }
-        },
-        {
           "id": "beat.bridge-troll",
           "trigger": {
             "kind": "level-start",
@@ -4365,6 +7771,2008 @@
             "endings": [],
             "maxAutomaticSteps": 4
           }
+        },
+        {
+          "id": "beat.meadow-new-eggs",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sunny-meadow.3"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.meadow-new-eggs",
+            "revision": "1",
+            "start": "meadow-new-eggs-1",
+            "catalogs": {
+              "scene": ["sunny-meadow"],
+              "text": ["story.meadow-new-eggs.1", "story.next", "story.meadow-new-eggs.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.mirror", "egg.puff"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-mirror",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.mirror"
+              },
+              {
+                "id": "claim-puff",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.puff"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "meadow-new-eggs-1",
+                "scene": "sunny-meadow",
+                "text": "story.meadow-new-eggs.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-mirror", "claim-puff"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "meadow-new-eggs-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "meadow-new-eggs-2",
+                "scene": "sunny-meadow",
+                "text": "story.meadow-new-eggs.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.whispering-woods-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "whispering-woods.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.whispering-woods-welcome",
+            "revision": "1",
+            "start": "whispering-woods-welcome-1",
+            "catalogs": {
+              "scene": ["whispering-woods"],
+              "text": [
+                "story.whispering-woods-welcome.1",
+                "story.next",
+                "story.whispering-woods-welcome.2",
+                "story.whispering-woods-welcome.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.clover"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-clover",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.clover"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "whispering-woods-welcome-1",
+                "scene": "whispering-woods",
+                "text": "story.whispering-woods-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-clover"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "whispering-woods-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "whispering-woods-welcome-2",
+                "scene": "whispering-woods",
+                "text": "story.whispering-woods-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "whispering-woods-welcome-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "whispering-woods-welcome-3",
+                "scene": "whispering-woods",
+                "text": "story.whispering-woods-welcome.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.forest-witch",
+          "trigger": {
+            "kind": "level-start",
+            "level": "whispering-woods.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.forest-witch",
+            "revision": "1",
+            "start": "forest-witch-1",
+            "catalogs": {
+              "scene": ["whispering-woods"],
+              "text": [
+                "story.forest-witch.1",
+                "story.next",
+                "story.forest-witch.2",
+                "story.forest-witch.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "forest-witch-1",
+                "scene": "whispering-woods",
+                "text": "story.forest-witch.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "forest-witch-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "forest-witch-2",
+                "scene": "whispering-woods",
+                "text": "story.forest-witch.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "forest-witch-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "forest-witch-3",
+                "scene": "whispering-woods",
+                "text": "story.forest-witch.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.witch-agrees",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "forest-witch"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.witch-agrees",
+            "revision": "1",
+            "start": "witch-agrees-1",
+            "catalogs": {
+              "scene": ["whispering-woods"],
+              "text": ["story.witch-agrees.1", "story.next", "story.witch-agrees.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "witch-agrees-1",
+                "scene": "whispering-woods",
+                "text": "story.witch-agrees.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "witch-agrees-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "witch-agrees-2",
+                "scene": "whispering-woods",
+                "text": "story.witch-agrees.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.fire-mountain-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "fire-mountain.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.fire-mountain-welcome",
+            "revision": "1",
+            "start": "fire-mountain-welcome-1",
+            "catalogs": {
+              "scene": ["fire-mountain"],
+              "text": [
+                "story.fire-mountain-welcome.1",
+                "story.next",
+                "story.fire-mountain-welcome.2",
+                "story.fire-mountain-welcome.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.ember"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-ember",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.ember"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "fire-mountain-welcome-1",
+                "scene": "fire-mountain",
+                "text": "story.fire-mountain-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-ember"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "fire-mountain-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "fire-mountain-welcome-2",
+                "scene": "fire-mountain",
+                "text": "story.fire-mountain-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "fire-mountain-welcome-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "fire-mountain-welcome-3",
+                "scene": "fire-mountain",
+                "text": "story.fire-mountain-welcome.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.krakonos",
+          "trigger": {
+            "kind": "level-start",
+            "level": "fire-mountain.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.krakonos",
+            "revision": "1",
+            "start": "krakonos-1",
+            "catalogs": {
+              "scene": ["fire-mountain"],
+              "text": ["story.krakonos.1", "story.next", "story.krakonos.2", "story.krakonos.3"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "krakonos-1",
+                "scene": "fire-mountain",
+                "text": "story.krakonos.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "krakonos-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "krakonos-2",
+                "scene": "fire-mountain",
+                "text": "story.krakonos.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "krakonos-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "krakonos-3",
+                "scene": "fire-mountain",
+                "text": "story.krakonos.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.krakonos-laughs",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "krakonos"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.krakonos-laughs",
+            "revision": "1",
+            "start": "krakonos-laughs-1",
+            "catalogs": {
+              "scene": ["fire-mountain"],
+              "text": ["story.krakonos-laughs.1", "story.next", "story.krakonos-laughs.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "krakonos-laughs-1",
+                "scene": "fire-mountain",
+                "text": "story.krakonos-laughs.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "krakonos-laughs-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "krakonos-laughs-2",
+                "scene": "fire-mountain",
+                "text": "story.krakonos-laughs.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.crystal-caves-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "crystal-caves.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.crystal-caves-welcome",
+            "revision": "1",
+            "start": "crystal-caves-welcome-1",
+            "catalogs": {
+              "scene": ["crystal-caves"],
+              "text": [
+                "story.crystal-caves-welcome.1",
+                "story.next",
+                "story.crystal-caves-welcome.2",
+                "story.crystal-caves-welcome.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.crystal"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-crystal",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.crystal"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "crystal-caves-welcome-1",
+                "scene": "crystal-caves",
+                "text": "story.crystal-caves-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-crystal"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "crystal-caves-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "crystal-caves-welcome-2",
+                "scene": "crystal-caves",
+                "text": "story.crystal-caves-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "crystal-caves-welcome-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "crystal-caves-welcome-3",
+                "scene": "crystal-caves",
+                "text": "story.crystal-caves-welcome.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.gnome-king",
+          "trigger": {
+            "kind": "level-start",
+            "level": "crystal-caves.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.gnome-king",
+            "revision": "1",
+            "start": "gnome-king-1",
+            "catalogs": {
+              "scene": ["crystal-caves"],
+              "text": [
+                "story.gnome-king.1",
+                "story.next",
+                "story.gnome-king.2",
+                "story.gnome-king.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "gnome-king-1",
+                "scene": "crystal-caves",
+                "text": "story.gnome-king.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "gnome-king-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "gnome-king-2",
+                "scene": "crystal-caves",
+                "text": "story.gnome-king.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "gnome-king-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "gnome-king-3",
+                "scene": "crystal-caves",
+                "text": "story.gnome-king.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.gnome-king-dances",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "gnome-king"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.gnome-king-dances",
+            "revision": "1",
+            "start": "gnome-king-dances-1",
+            "catalogs": {
+              "scene": ["crystal-caves"],
+              "text": ["story.gnome-king-dances.1", "story.next", "story.gnome-king-dances.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "gnome-king-dances-1",
+                "scene": "crystal-caves",
+                "text": "story.gnome-king-dances.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "gnome-king-dances-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "gnome-king-dances-2",
+                "scene": "crystal-caves",
+                "text": "story.gnome-king-dances.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.sharing-lake-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sharing-lake.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.sharing-lake-welcome",
+            "revision": "1",
+            "start": "sharing-lake-welcome-1",
+            "catalogs": {
+              "scene": ["sharing-lake"],
+              "text": [
+                "story.sharing-lake-welcome.1",
+                "story.next",
+                "story.sharing-lake-welcome.2"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "sharing-lake-welcome-1",
+                "scene": "sharing-lake",
+                "text": "story.sharing-lake-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "sharing-lake-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "sharing-lake-welcome-2",
+                "scene": "sharing-lake",
+                "text": "story.sharing-lake-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.water-goblin",
+          "trigger": {
+            "kind": "level-start",
+            "level": "sharing-lake.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.water-goblin",
+            "revision": "1",
+            "start": "water-goblin-1",
+            "catalogs": {
+              "scene": ["sharing-lake"],
+              "text": [
+                "story.water-goblin.1",
+                "story.next",
+                "story.water-goblin.2",
+                "story.water-goblin.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "water-goblin-1",
+                "scene": "sharing-lake",
+                "text": "story.water-goblin.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "water-goblin-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "water-goblin-2",
+                "scene": "sharing-lake",
+                "text": "story.water-goblin.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "water-goblin-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "water-goblin-3",
+                "scene": "sharing-lake",
+                "text": "story.water-goblin.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.goblin-agrees",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "water-goblin"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.goblin-agrees",
+            "revision": "1",
+            "start": "goblin-agrees-1",
+            "catalogs": {
+              "scene": ["sharing-lake"],
+              "text": ["story.goblin-agrees.1", "story.next", "story.goblin-agrees.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "goblin-agrees-1",
+                "scene": "sharing-lake",
+                "text": "story.goblin-agrees.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "goblin-agrees-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "goblin-agrees-2",
+                "scene": "sharing-lake",
+                "text": "story.goblin-agrees.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.leftover-lagoon-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "leftover-lagoon.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.leftover-lagoon-welcome",
+            "revision": "1",
+            "start": "leftover-lagoon-welcome-1",
+            "catalogs": {
+              "scene": ["leftover-lagoon"],
+              "text": [
+                "story.leftover-lagoon-welcome.1",
+                "story.next",
+                "story.leftover-lagoon-welcome.2",
+                "story.leftover-lagoon-welcome.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.pearl"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-pearl",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.pearl"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "leftover-lagoon-welcome-1",
+                "scene": "leftover-lagoon",
+                "text": "story.leftover-lagoon-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-pearl"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "leftover-lagoon-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "leftover-lagoon-welcome-2",
+                "scene": "leftover-lagoon",
+                "text": "story.leftover-lagoon-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "leftover-lagoon-welcome-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "leftover-lagoon-welcome-3",
+                "scene": "leftover-lagoon",
+                "text": "story.leftover-lagoon-welcome.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.lake-nymphs",
+          "trigger": {
+            "kind": "level-start",
+            "level": "leftover-lagoon.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.lake-nymphs",
+            "revision": "1",
+            "start": "lake-nymphs-1",
+            "catalogs": {
+              "scene": ["leftover-lagoon"],
+              "text": [
+                "story.lake-nymphs.1",
+                "story.next",
+                "story.lake-nymphs.2",
+                "story.lake-nymphs.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "lake-nymphs-1",
+                "scene": "leftover-lagoon",
+                "text": "story.lake-nymphs.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "lake-nymphs-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "lake-nymphs-2",
+                "scene": "leftover-lagoon",
+                "text": "story.lake-nymphs.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "lake-nymphs-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "lake-nymphs-3",
+                "scene": "leftover-lagoon",
+                "text": "story.lake-nymphs.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.nymphs-laugh",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "lake-nymphs"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.nymphs-laugh",
+            "revision": "1",
+            "start": "nymphs-laugh-1",
+            "catalogs": {
+              "scene": ["leftover-lagoon"],
+              "text": ["story.nymphs-laugh.1", "story.next", "story.nymphs-laugh.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "nymphs-laugh-1",
+                "scene": "leftover-lagoon",
+                "text": "story.nymphs-laugh.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "nymphs-laugh-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "nymphs-laugh-2",
+                "scene": "leftover-lagoon",
+                "text": "story.nymphs-laugh.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.giants-peaks-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "giants-peaks.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.giants-peaks-welcome",
+            "revision": "1",
+            "start": "giants-peaks-welcome-1",
+            "catalogs": {
+              "scene": ["giants-peaks"],
+              "text": [
+                "story.giants-peaks-welcome.1",
+                "story.next",
+                "story.giants-peaks-welcome.2",
+                "story.giants-peaks-welcome.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.boulder"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-boulder",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.boulder"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "giants-peaks-welcome-1",
+                "scene": "giants-peaks",
+                "text": "story.giants-peaks-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-boulder"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "giants-peaks-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "giants-peaks-welcome-2",
+                "scene": "giants-peaks",
+                "text": "story.giants-peaks-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "giants-peaks-welcome-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "giants-peaks-welcome-3",
+                "scene": "giants-peaks",
+                "text": "story.giants-peaks-welcome.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.friendly-giant",
+          "trigger": {
+            "kind": "level-start",
+            "level": "giants-peaks.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.friendly-giant",
+            "revision": "1",
+            "start": "friendly-giant-1",
+            "catalogs": {
+              "scene": ["giants-peaks"],
+              "text": [
+                "story.friendly-giant.1",
+                "story.next",
+                "story.friendly-giant.2",
+                "story.friendly-giant.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "friendly-giant-1",
+                "scene": "giants-peaks",
+                "text": "story.friendly-giant.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "friendly-giant-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "friendly-giant-2",
+                "scene": "giants-peaks",
+                "text": "story.friendly-giant.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "friendly-giant-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "friendly-giant-3",
+                "scene": "giants-peaks",
+                "text": "story.friendly-giant.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.giant-sleeps",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "friendly-giant"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.giant-sleeps",
+            "revision": "1",
+            "start": "giant-sleeps-1",
+            "catalogs": {
+              "scene": ["giants-peaks"],
+              "text": ["story.giant-sleeps.1", "story.next", "story.giant-sleeps.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "giant-sleeps-1",
+                "scene": "giants-peaks",
+                "text": "story.giant-sleeps.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "giant-sleeps-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "giant-sleeps-2",
+                "scene": "giants-peaks",
+                "text": "story.giant-sleeps.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.riddle-ruins-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "riddle-ruins.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.riddle-ruins-welcome",
+            "revision": "1",
+            "start": "riddle-ruins-welcome-1",
+            "catalogs": {
+              "scene": ["riddle-ruins"],
+              "text": [
+                "story.riddle-ruins-welcome.1",
+                "story.next",
+                "story.riddle-ruins-welcome.2",
+                "story.riddle-ruins-welcome.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": ["egg.clockwork"],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [
+              {
+                "id": "claim-clockwork",
+                "kind": "claim",
+                "catalog": "reward",
+                "ref": "egg.clockwork"
+              }
+            ],
+            "nodes": [
+              {
+                "id": "riddle-ruins-welcome-1",
+                "scene": "riddle-ruins",
+                "text": "story.riddle-ruins-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": ["claim-clockwork"],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "riddle-ruins-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "riddle-ruins-welcome-2",
+                "scene": "riddle-ruins",
+                "text": "story.riddle-ruins-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "riddle-ruins-welcome-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "riddle-ruins-welcome-3",
+                "scene": "riddle-ruins",
+                "text": "story.riddle-ruins-welcome.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.golem",
+          "trigger": {
+            "kind": "level-start",
+            "level": "riddle-ruins.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.golem",
+            "revision": "1",
+            "start": "golem-1",
+            "catalogs": {
+              "scene": ["riddle-ruins"],
+              "text": ["story.golem.1", "story.next", "story.golem.2", "story.golem.3"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "golem-1",
+                "scene": "riddle-ruins",
+                "text": "story.golem.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "golem-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "golem-2",
+                "scene": "riddle-ruins",
+                "text": "story.golem.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "golem-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "golem-3",
+                "scene": "riddle-ruins",
+                "text": "story.golem.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.golem-agrees",
+          "trigger": {
+            "kind": "boss-defeated",
+            "boss": "golem"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.golem-agrees",
+            "revision": "1",
+            "start": "golem-agrees-1",
+            "catalogs": {
+              "scene": ["riddle-ruins"],
+              "text": ["story.golem-agrees.1", "story.next", "story.golem-agrees.2"],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "golem-agrees-1",
+                "scene": "riddle-ruins",
+                "text": "story.golem-agrees.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "golem-agrees-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "golem-agrees-2",
+                "scene": "riddle-ruins",
+                "text": "story.golem-agrees.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.dragon-castle-welcome",
+          "trigger": {
+            "kind": "level-start",
+            "level": "dragon-castle.1"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.dragon-castle-welcome",
+            "revision": "1",
+            "start": "dragon-castle-welcome-1",
+            "catalogs": {
+              "scene": ["dragon-castle"],
+              "text": [
+                "story.dragon-castle-welcome.1",
+                "story.next",
+                "story.dragon-castle-welcome.2",
+                "story.dragon-castle-welcome.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "dragon-castle-welcome-1",
+                "scene": "dragon-castle",
+                "text": "story.dragon-castle-welcome.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "dragon-castle-welcome-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "dragon-castle-welcome-2",
+                "scene": "dragon-castle",
+                "text": "story.dragon-castle-welcome.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "dragon-castle-welcome-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "dragon-castle-welcome-3",
+                "scene": "dragon-castle",
+                "text": "story.dragon-castle-welcome.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.seven-headed",
+          "trigger": {
+            "kind": "level-start",
+            "level": "dragon-castle.boss"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.seven-headed",
+            "revision": "1",
+            "start": "seven-headed-1",
+            "catalogs": {
+              "scene": ["castle-hall"],
+              "text": [
+                "story.seven-headed.1",
+                "story.next",
+                "story.seven-headed.2",
+                "story.seven-headed.3"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "seven-headed-1",
+                "scene": "castle-hall",
+                "text": "story.seven-headed.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "seven-headed-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "seven-headed-2",
+                "scene": "castle-hall",
+                "text": "story.seven-headed.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "seven-headed-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "seven-headed-3",
+                "scene": "castle-hall",
+                "text": "story.seven-headed.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
+        },
+        {
+          "id": "beat.finale",
+          "trigger": {
+            "kind": "finale"
+          },
+          "skippable": true,
+          "graph": {
+            "schema": 1,
+            "id": "story.finale",
+            "revision": "1",
+            "start": "finale-1",
+            "catalogs": {
+              "scene": ["castle-hall"],
+              "text": [
+                "story.finale.1",
+                "story.next",
+                "story.finale.2",
+                "story.finale.3",
+                "story.finale.4"
+              ],
+              "asset": [],
+              "clue": [],
+              "fact": [],
+              "glossary": [],
+              "reward": [],
+              "completion": []
+            },
+            "flags": [],
+            "items": [],
+            "data": [],
+            "effects": [],
+            "nodes": [
+              {
+                "id": "finale-1",
+                "scene": "castle-hall",
+                "text": "story.finale.1",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "finale-2",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "finale-2",
+                "scene": "castle-hall",
+                "text": "story.finale.2",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "finale-3",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "finale-3",
+                "scene": "castle-hall",
+                "text": "story.finale.3",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [
+                  {
+                    "id": "next",
+                    "text": "story.next",
+                    "to": "finale-4",
+                    "guard": null,
+                    "effects": []
+                  }
+                ],
+                "automatic": [],
+                "resolveEnding": false
+              },
+              {
+                "id": "finale-4",
+                "scene": "castle-hall",
+                "text": "story.finale.4",
+                "narration": null,
+                "revisit": "allow",
+                "entryEffects": [],
+                "choices": [],
+                "automatic": [],
+                "resolveEnding": false
+              }
+            ],
+            "endings": [],
+            "maxAutomaticSteps": 4
+          }
         }
       ],
       "rewards": [
@@ -4401,6 +9809,48 @@
           "grant": {
             "kind": "egg",
             "dragon": "puff"
+          }
+        },
+        {
+          "reward": "egg.clover",
+          "grant": {
+            "kind": "egg",
+            "dragon": "clover"
+          }
+        },
+        {
+          "reward": "egg.ember",
+          "grant": {
+            "kind": "egg",
+            "dragon": "ember"
+          }
+        },
+        {
+          "reward": "egg.crystal",
+          "grant": {
+            "kind": "egg",
+            "dragon": "crystal"
+          }
+        },
+        {
+          "reward": "egg.pearl",
+          "grant": {
+            "kind": "egg",
+            "dragon": "pearl"
+          }
+        },
+        {
+          "reward": "egg.boulder",
+          "grant": {
+            "kind": "egg",
+            "dragon": "boulder"
+          }
+        },
+        {
+          "reward": "egg.clockwork",
+          "grant": {
+            "kind": "egg",
+            "dragon": "clockwork"
           }
         }
       ]

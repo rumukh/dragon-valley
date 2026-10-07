@@ -1,0 +1,30 @@
+{
+  "regions": [
+    {
+      "id": "pearl-island",
+      "order": 10,
+      "titleKey": "region.pearl-island.name",
+      "unlock": { "after": ["sunny-meadow.1"] },
+      "boss": null,
+      "background": "sharing-lake"
+    }
+  ],
+  "levels": [
+    {
+      "id": "pearl-island.1",
+      "region": "pearl-island",
+      "order": 1,
+      "titleKey": "level.pearl-island.1",
+      "kind": "lesson",
+      "unlock": { "after": [] },
+      "activities": [
+        { "kind": "feeding", "skills": ["mul-all"], "count": 10, "input": "auto", "options": {} }
+      ],
+      "stars": null,
+      "rewards": { "coins": [5, 10, 15], "eggs": [], "cosmetics": [] },
+      "boss": null,
+      "storyBeat": null,
+      "objectives": ["obj.mul.fluency"]
+    }
+  ]
+}

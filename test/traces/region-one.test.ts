@@ -8,17 +8,21 @@
  *
  * Named checks first; the golden hash and trajectory are change detectors checked last.
  */
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 import { success } from '@aegis/runtime';
 import { dragonValleyAdapter } from '../../src/rules/adapter';
 import { DRAGON_STAGES } from '../../src/rules/contract';
-import type { GameView } from '../../src/rules/contract';
+import type { GameView, Problem } from '../../src/rules/contract';
 import { PERFECT, Player, trajectoryDigest } from './support';
 import type { Adapter } from './support';
 
+// Whole sessions are replayed here, one commit at a time with the full content pack: give them
+// room on a busy machine (Vitest's default is 60 s per test).
+vi.setConfig({ testTimeout: 300_000 });
+
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = 'e8247696ab7bc89a';
-const GOLDEN_TRAJECTORY = '8a0ba3fc8e71d60a';
+const GOLDEN_HASH = '483f5d023e6dd109';
+const GOLDEN_TRAJECTORY = 'fe234ac8ed3c56d1';
 
 const SEED = 'golden-region-one';
 const LEVELS = [
@@ -40,8 +44,17 @@ interface Observation {
   snackItems: string[];
   arenaBeforeBoss: boolean;
   beatAtBossStart: string | null;
+  /** Every problem served, by level, as first shown. */
+  served: { level: string | null; item: string; problem: Problem; step: string }[];
   final: GameView;
 }
+
+/** A missing-factor problem: `? · 5 = 20` or `5 · ? = 20`. */
+const missingFactor = (problem: Problem) =>
+  problem.kind === 'equation' &&
+  problem.left.kind === 'op' &&
+  problem.left.op === 'mul' &&
+  (problem.left.left.kind === 'blank' || problem.left.right.kind === 'blank');
 
 async function claimAll(player: Player): Promise<void> {
   for (const quest of player.view().daily?.quests ?? []) {
@@ -58,8 +71,23 @@ async function playRegion(adapter: Adapter = dragonValleyAdapter, seed = SEED) {
     snackItems: [],
     arenaBeforeBoss: false,
     beatAtBossStart: null,
+    served: [],
     final: player.view(),
   };
+  const seen = new Set<string>();
+  player.host.subscribeCommits(({ view }) => {
+    const round = view.round;
+    if (round?.type !== 'problems' || !round.problem) return;
+    const key = `${round.id}:${round.problem.index}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    observation.served.push({
+      level: round.source.kind === 'level' ? round.source.level : null,
+      item: round.problem.item,
+      problem: round.problem.problem,
+      step: round.problem.step,
+    });
+  });
   const level = async (id: string) => {
     if (id === 'sunny-meadow.boss') {
       observation.arenaBeforeBoss = player.view().hub.arena.available;
@@ -124,6 +152,10 @@ function checks(o: Observation): Record<string, boolean> {
     p.events.find((e) => e.type === 'egg.received' && JSON.stringify(e.data).includes(dragon));
   const levelAt = (level: string) =>
     p.events.find((e) => e.type === 'level.completed' && JSON.stringify(e.data).includes(level));
+  const divisions = o.served.filter(
+    (s) => s.level === 'sunny-meadow.4' || s.level === 'sunny-meadow.boss',
+  );
+  const stories = o.served.filter((s) => s.problem.kind === 'word');
   return {
     'every step was accepted at the expected logical turn': p.failures.length === 0,
     'going straight to the map skipped the placement check':
@@ -149,6 +181,11 @@ function checks(o: Observation): Record<string, boolean> {
     'every Region 1 dragon hatched':
       o.final.dragons.length === 5 && o.final.dragons.every((d) => d.stage !== 'egg'),
     'dragons never shrank': neverShrank,
+    'Sunny Meadow 4 and the troll served missing factors as well as divisions':
+      divisions.some((s) => missingFactor(s.problem)) &&
+      divisions.some((s) => s.item.startsWith('div:') && !missingFactor(s.problem)),
+    'Meadow Stories told stories, each asking for the operation first':
+      stories.length >= 6 && stories.every((s) => s.step === 'operation'),
     'day two opened with snack time for the hungry dragons':
       o.day2Next?.kind === 'snack' && o.snackItems.length >= 6,
     'the troll was introduced, laughed, and left his party hat':

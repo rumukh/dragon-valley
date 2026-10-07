@@ -72,9 +72,19 @@ describe('the placement check as played', () => {
     await player.playRound();
     const levels = player.state().levels;
     expect(player.data('placement.completed')).toEqual([
-      { placed: ['sunny-meadow.2', 'sunny-meadow.3', 'sunny-meadow.4', 'sunny-meadow.5'] },
+      {
+        placed: [
+          'sunny-meadow.2',
+          'sunny-meadow.3',
+          'sunny-meadow.4',
+          'sunny-meadow.5',
+          'whispering-woods.2',
+          'whispering-woods.3',
+          'whispering-woods.4',
+        ],
+      },
     ]);
-    expect(player.answered, 'four steps: 4 + 3 + 3 + 3 problems').toBe(13);
+    expect(player.answered, 'six steps: 4 + 3 + 3 + 3 + 4 + 3 problems').toBe(20);
     expect(levels['sunny-meadow.3']).toMatchObject({ stars: 1, placed: true, paidStars: 0 });
     expect(levels['sunny-meadow.1'], 'the intro level is always played').toBeUndefined();
     expect(player.state().onboarding.placement).toBe('done');
@@ -89,7 +99,14 @@ describe('the placement check as played', () => {
       'mirror',
       'puff',
     ]);
-    expect(player.state().cosmetics.owned, 'and their cosmetics').toContain('scarf-striped');
+    expect(player.state().cosmetics.owned, 'and their cosmetics').toEqual([
+      'scarf-striped',
+      'glasses-square',
+    ]);
+    expect(
+      player.view().hub.regions[1]!.unlocked,
+      'placed Whispering Woods lessons wait for the Bridge Troll',
+    ).toBe(false);
     await player.act({ type: 'endRound', reason: 'done' });
     expect(player.view().hub.next).toEqual({ kind: 'level', level: 'sunny-meadow.1' });
     await player.dispose();

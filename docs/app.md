@@ -98,8 +98,19 @@ copy). Identifiers come from `src/rules/contract/ids.ts` and `persistence.ts`.
   `profileSeed(id)`. A stored envelope is validated by the codec, then restored into a throwaway
   **probe** host with the exact content revision it pinned; only then does the real host
   restore it with `durableRevision` (the record was read back from storage). Old saves keep
-  their pack until `activateLatestContent()` moves them at a safe boundary (the hub; never
-  mid-round), which the real adapter refuses while a round or story beat is open.
+  their pack until `activateLatestContent()` moves them at a safe boundary (the play screen,
+  before today's session starts; never mid-round), which the real adapter refuses while a round
+  or story beat is open. `session.content()` is the pack the game is on now; screens read
+  content from it, never from the build's newest pack.
+- **Content upgrades** (`content/history.ts`): every shipped pack is archived in
+  `content/history/<revision>.json` and shipped with the site (and the offline install). A save
+  that pins a revision the build does not hold fetches just that file
+  (`GameDefinition.loadHistory`, once per page; a failed fetch is forgotten), validated with the
+  contract's registration and required to be that pack and revision; revisions that could not
+  name a file are never fetched. A pack that cannot be fetched (offline before the game was
+  installed) or does not match leaves the save untouched: the recovery screen explains it to a
+  grown-up (`content-unavailable`) and "Try opening again" fetches it again. Backups of older
+  saves load the same way.
 - **Save status** (`save-status.ts`): derived only from acknowledged facts. `Saved` when the
   durable revision equals the committed revision; `Saving…` while a checkpoint is pending;
   `Not saved` + **Retry** after a failed write, which calls `retryCheckpoint()` and then
@@ -168,9 +179,11 @@ gets kind, specific help after a miss.
   text and on a phone in portrait, and words and numbers stay whole: a box is never narrower than
   its longest word (`overflow-wrap: break-word`), choice tiles wrap onto more rows instead of
   splitting a label, meters, steppers and the week wrap their parts, and single-column grids use
-  `minmax(0, 1fr)` so nothing pushes the page sideways. The text size is also mirrored as
-  `data-text-scale` on `<html>`, so WebKit restyles the root at once. On a landscape tablet
-  (1180 × 820, 1024 × 768) the game
+  `minmax(0, 1fr)` so nothing pushes the page sideways. The keeper's text size is set on `<html>`
+  directly (its font size, plus `data-text-scale`) together with the SDK's `--aegis-text-scale`,
+  because an engine can keep the root's old size after a custom property changes (DV-QA-13:
+  WebKit, once Chromium); the next screen's first frame is already at the keeper's size. On a
+  landscape tablet (1180 × 820, 1024 × 768) the game
   screens fit without page scrolling: the hub sets the dragon, its week and the places beside
   today's card; the results card scrolls its celebrations inside itself (a named region in the
   Tab order) with the button onward always in view; a round's title and progress share a line
@@ -286,9 +299,10 @@ count have a singular and a plural key (`coins.earned.one` / `.other`, …), cho
 
 **The play screen** (`screens/play.ts`) is one router entry per keeper (`play:<id>`) that shows
 whatever the view requires: a story beat, the active round (a problem round or a minigame
-board), the results of a finished round, or else the hub. Entering it starts the day's session
-when the local date changed (`startSession`; time reaches the rules only as this date) and, at
-the hub, activates newer content. After an action that changes what the game shows, a screen
+board), the results of a finished round, or else the hub. Building it first activates newer
+content for a save from before an update (unless a round or a story is still open), then starts
+the day's session when the local date changed (`startSession`; time reaches the rules only as
+this date). After an action that changes what the game shows, a screen
 calls `app.continueGame(id)`, which returns to the play entry and rebuilds it; maps, level cards
 and collections open on top of it. A restore rebuilds it from the restored view. Live commit
 events are kept briefly in the keeper's **event inbox** for the screens that celebrate them
@@ -308,9 +322,10 @@ toast where they were earned.
   days (a habit view, never a streak), today's
   goal and quests (with their claim buttons), the gift chest and one **Daily Adventure** button
   that does what `hub.next` suggests (placement, snack, the next level or the level in
-  progress, the gift, or free play on the map). Places: the valley map, Market, Dragon Den,
-  Sticker Album, Magic Window and, once open, the Lightning Arena. When the grown-ups' time limit
-  is used up, it offers a goodbye instead.
+  progress, once a day a replay of one game of a finished level ("Play again: Memory Match",
+  `startLevel` with its `activity`), the gift, or free play on the map). Places: the valley map,
+  Market, Dragon Den, Sticker Album, Magic Window and, once open, the Lightning Arena. When the
+  grown-ups' time limit is used up, it offers a goodbye instead.
 - **Map, region road and level card** (`map.ts`): S4's `valley-map` with the content's regions
   as the SDK's `createHotspotList` buttons placed over the picture (a tap anywhere inside a
   region works through `logicalPoint` and `hitHotspot`; places the content does not have yet
@@ -341,6 +356,19 @@ toast where they were earned.
   keyboard), the nest is told in words ("5 rows of 7") and only Check tells its total ("Yes! 5
   rows of 7 is 35.", or after a wrong nest "5 rows of 8 is 40. We need 35."); the strategy
   pictures (five-plus, double, ten-minus) are drawn on the field.
+  - **Sharing Feast** (`boards/feast.ts`): a bowl over a row of baskets. A tap gives a basket one
+    fruit, its minus takes one back, "One for each basket" deals a round, and from 20 fruit on a
+    bag of ten goes in at once (drawn as a bag marked 10). The question is the division the
+    baskets show, `12 : 3 = ?` or `13 : 3 = ? r ?`, on the keypad; the rules' checks come back
+    as kind lines (not fair yet, the bowl can still go round, count again). An answer bigger
+    than the whole feast is answered on the board, since the rules refuse that move.
+  - **Golem Orders** (`boards/golem.ts`): the expression as numbers and gears; a gear is the
+    sign of its operation (`pathTokens` give every sign its operation's path), picking one marks
+    its part of the line and the keypad asks its result. The steps are written the school way
+    (`8 + 2 · 3 = 8 + 6`, each step on one line), and the finished board's chain stays on show
+    while the next one starts.
+  - Boards with a keypad beside their own buttons use the keypad's `claimFocus`: typing moves
+    focus to the keypad, so Enter sends the answer instead of pressing the focused button.
 - **Results** (`results.ts`): an egg that hatched first gets its own full-size celebration
   (`hatch.ts`), one dragon at a time: S4's hatch sequence cropped to the egg and drawn big, the
   hatch sounds started so the fanfare lands on the pop (not when the answer was committed),
@@ -348,7 +376,13 @@ toast where they were earned.
   celebrations: growing, new eggs, stickers, regions, the Arena's best. Then the level's next
   activity, or back to the valley.
 - **Collections** (`collections.ts`): Glimmer's Market (`buy`), the Dragon Den (`equip`, eggs only
-  in the nest), the Sticker Album and the Magic Window (S4's window with a legend).
+  in the nest), the Sticker Album and the Magic Window (S4's window with a legend). Long
+  collections show one part at a time (`ui/tabs.ts`: toggle buttons in a labelled group, Left
+  and Right between them): the Album one region page (emblem tabs with a check on a full page,
+  arrows that turn around the ends; it opens at the page looked at last, else the furthest open
+  region's), the Market one shelf per slot (each tab shows one of its things; it opens at the
+  shelf looked at last, else the first with something to buy now). Sticker and item pictures
+  keep a picture's size at 200 % text.
 - **The grown-ups' settings** add the time limit for one sitting (a preference; the shell counts
   play time per keeper and page and ends a round gently with `endRound{ reason: 'time-limit' }`)
   and the settings the rules own, sent as actions: the daily goal, the Arena, opening regions
@@ -360,28 +394,34 @@ Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.t
 
 - **Unit** (`test/unit/app/`, Vitest): router stack, keypad state machine (incl. remainder
   mode), gate questions, family and preference schemas, records and recovery, game sessions
-  (checkpoints, retry, restore, content activation), backups, save status, the catalog (with every
+  (checkpoints, retry, restore, content activation), content upgrades (`content-upgrade.test.ts`:
+  fetching the pinned pack, recovery while it is out of reach, mismatched files, backups, and S2b's
+  real save of the deployed slice restored with the shipped `content/history/1.0.0.json` and
+  moved to the newest pack with its progress), backups, save status, the catalog (with every
   vocabulary the screens build keys from), tokens, fonts, notation and the verbalizer, voices, the
   audio manifest, sound mapping and game audio; and for the game screens: view readings checked
   against the real rules, response time and the play clock, problem pictures, answer labels,
-  card faces, the map layout and the content strings.
+  card faces, the map layout, the content strings, the v1 boards (`boards.test.ts`) and the
+  collections' pages and shelves (`collections.test.ts`).
 - **DOM** (`test/unit/app/dom/`, happy-dom): keypad, choice tiles and the router.
 - **Browser** (`test/e2e/profiles.spec.ts`, Playwright): a new keeper's prologue, first egg and
   hub, kept after a reload; the placement check by keyboard with a kind miss, results and saved
   coins after a reload; the grown-ups' gate; notation, a rule setting, a rename and the pause
   dialog; a tablet screen (1180 × 820, 1024 × 768) holding the hub, the Egg Grid (built by
-  tapping, totals told by Check) and the results without page scrolling. CI runs Chromium,
-  WebKit and Firefox. Locally the default project is the installed
+  tapping, totals told by Check) and the results without page scrolling. `upgrade.spec.ts`: the
+  slice's save loaded as a backup opens on the newest pack with its coins, and while the archived
+  pack is out of reach it waits on the recovery screen until "Try opening again". CI runs
+  Chromium, WebKit and Firefox. Locally the default project is the installed
   Edge; `$env:DV_E2E_ALL_ENGINES = '1'; npm run test:e2e` runs all three (set `DV_E2E_PORT` to a
   free port when another checkout already serves 4321).
 
 ## 16. Phase 3 and later
 
-The remaining activities (Compare Stones and Riddle Scrolls visuals, Sharing Feast, Golem
-Orders), the Dragon Diary, the grown-ups' progress dashboard (window, tables, hardest facts,
-trend), printables (flashcards and certificates through `@aegis/narrative` `layoutPrint` /
-`renderPrintHtml`), `fx.*` cues for the remaining moments, and a persisted per-day time limit
-(today it counts per page load).
+The remaining activity visuals (Compare Stones and Riddle Scrolls), the Dragon Diary, the
+grown-ups' progress dashboard (window, tables, hardest facts, trend), printables (flashcards and
+certificates through `@aegis/narrative` `layoutPrint` / `renderPrintHtml`), the Seven-Headed
+Dragon's heads and the finale celebration, `fx.*` cues for the remaining moments, and a
+persisted per-day time limit (today it counts per page load).
 
 ## 17. SDK notes
 

@@ -1,8 +1,10 @@
 /**
- * The keeper's collections, opened from the hub: Glimmer's Market (cosmetics for coins), the
- * Dragon Den (dress each dragon, one item per slot), the Sticker Album (one page per region) and
- * the Magic Window (every fact as a pane of stained glass). They render the view and send the
- * two actions they need (`buy`, `equip`); everything else is the rules' business.
+ * The keeper's collections, opened from the hub: Glimmer's Market (cosmetics for coins, one
+ * shelf per slot), the Dragon Den (dress each dragon, one item per slot), the Sticker Album (one
+ * page per region, turned with tabs) and the Magic Window (every fact as a pane of stained
+ * glass). They render the view and send the two actions they need (`buy`, `equip`); everything
+ * else is the rules' business. Long collections show one shelf or page at a time, so no screen
+ * grows many screens tall at 200 % text.
  */
 import { COSMETIC_SLOTS } from '../../rules/contract';
 import type {
@@ -15,6 +17,7 @@ import type {
 import { renderMagicWindow } from '../art/window';
 import type { PaneState } from '../art/window';
 import type { StickerFrame } from '../art/stickers';
+import { REGION_EMBLEM_IDS } from '../art/icons/emblems';
 import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { artIcon, cosmeticIconArt, stickerArt, svgElement, viewDragonArt } from '../ui/art';
@@ -22,6 +25,7 @@ import { candyButton } from '../ui/button';
 import { h } from '../ui/dom';
 import { icon } from '../ui/icons';
 import { createCoinCounter } from '../ui/meters';
+import { createTabs } from '../ui/tabs';
 import type { Screen, ScreenEntry } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
 import { createSaveStatus, toastStickers, topBar } from './common';
@@ -70,6 +74,24 @@ function collection(
 
 // ---- Glimmer's Market -----------------------------------------------------------------------
 
+/** The Market shelf each keeper last looked at, while the app is open. */
+const marketShelves = new Map<string, CosmeticSlot>();
+
+/**
+ * The shelf (cosmetic slot) to open the Market at: the one looked at last, else the first with
+ * something the keeper can buy now, else the first with anything on it.
+ */
+export function marketStartShelf(
+  items: readonly Pick<MarketItem, 'slot' | 'owned' | 'affordable'>[],
+  remembered?: CosmeticSlot,
+): CosmeticSlot | undefined {
+  const slots = COSMETIC_SLOTS.filter((slot) => items.some((item) => item.slot === slot));
+  if (remembered !== undefined && slots.includes(remembered)) return remembered;
+  const buyable = (slot: CosmeticSlot): boolean =>
+    items.some((item) => item.slot === slot && !item.owned && item.affordable);
+  return slots.find(buyable) ?? slots[0];
+}
+
 export function marketScreen(app: App, keeperId: string): ScreenEntry {
   return {
     key: `market:${keeperId}`,
@@ -80,11 +102,51 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
       const host = active.game.host;
       const shelf = h('ul', { className: 'dv-shelf', testId: 'market-items' });
       const note = h('p', { className: 'dv-note', testId: 'market-note' });
+      const available = (): MarketItem[] =>
+        host.getView().market.items.filter((entry) => entry.available);
+      let shown = marketStartShelf(available(), marketShelves.get(keeperId));
+      const slots = COSMETIC_SLOTS.filter((slot) =>
+        available().some((entry) => entry.slot === slot),
+      );
+      const shelfTitle = h('h2', { className: 'dv-shelf__title', testId: 'market-shelf' });
+      // One shelf at a time: every item at once makes a page many screens tall at 200 % text.
+      // A shelf's tab shows one of its things; its name is the tab's label and the title.
+      const tabs =
+        shown !== undefined && slots.length > 1
+          ? createTabs(app.kit, {
+              label: t('market.shelves'),
+              tabs: slots.map((slot) => {
+                const sample = available().find((entry) => entry.slot === slot)!;
+                return {
+                  id: slot,
+                  name: t(`slot.${slot}` as MessageKey),
+                  art: () => cosmeticIconArt(sample.assetId, 'dv-cosmetic-art dv-tabs__emblem'),
+                };
+              }),
+              current: shown,
+              testIdPrefix: 'market',
+              iconOnly: true,
+              onChange: (slot) => {
+                shown = slot;
+                marketShelves.set(keeperId, slot);
+                paint();
+              },
+            })
+          : null;
       const frame = collection(app, active, {
         title: t('market.heading'),
         testId: 'screen-market',
         music: 'market',
-        body: [h('section', { className: 'dv-card dv-collection__card' }, note, shelf)],
+        body: [
+          h(
+            'section',
+            { className: 'dv-card dv-collection__card' },
+            note,
+            tabs?.element ?? null,
+            shelfTitle,
+            shelf,
+          ),
+        ],
       });
       const item = (entry: MarketItem): HTMLElement => {
         const name = text(entry.nameKey);
@@ -136,9 +198,13 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
       const paint = (): void => {
         const view = host.getView();
         frame.coins.set(view.coins);
-        const items = view.market.items.filter((entry) => entry.available);
+        const items = available();
         note.textContent = items.length === 0 ? t('market.empty') : t('market.intro');
-        shelf.replaceChildren(...items.map(item));
+        shelfTitle.textContent = shown === undefined ? '' : t(`slot.${shown}` as MessageKey);
+        shelfTitle.hidden = shown === undefined;
+        shelf.replaceChildren(
+          ...items.filter((entry) => shown === undefined || entry.slot === shown).map(item),
+        );
       };
       paint();
       return { ...frame.screen, focusTarget: () => frame.heading };
@@ -279,6 +345,25 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
 
 // ---- Sticker Album --------------------------------------------------------------------------
 
+/** The album page each keeper last looked at, while the app is open. */
+const albumPages = new Map<string, string>();
+
+/**
+ * The page to open the album at: the one looked at last, else the furthest open region's (where
+ * new stickers come from), else the first.
+ */
+export function albumStartPage(
+  pages: readonly { readonly region: string }[],
+  regions: readonly { readonly id: string; readonly unlocked: boolean }[],
+  remembered?: string,
+): string | undefined {
+  const has = (id: string | undefined): id is string =>
+    id !== undefined && pages.some((page) => page.region === id);
+  if (has(remembered)) return remembered;
+  const open = regions.filter((region) => region.unlocked && has(region.id));
+  return open[open.length - 1]?.id ?? pages[0]?.region;
+}
+
 export function albumScreen(app: App, keeperId: string): ScreenEntry {
   return {
     key: `album:${keeperId}`,
@@ -287,40 +372,94 @@ export function albumScreen(app: App, keeperId: string): ScreenEntry {
       const text = app.text;
       const active = await app.openKeeper(keeperId);
       const view = active.game.host.getView();
-      const pages = view.album.pages.map((page) => {
-        const region = view.hub.regions.find((candidate) => candidate.id === page.region);
-        return h(
-          'section',
-          { className: 'dv-card dv-album__page', testId: `album-${page.region}` },
-          h('h2', { text: region ? text(region.titleKey) : page.region }),
+      const regionTitle = (id: string): string => {
+        const region = view.hub.regions.find((candidate) => candidate.id === id);
+        return region ? text(region.titleKey) : id;
+      };
+      const pageOf = (id: string) => view.album.pages.find((page) => page.region === id);
+      const earnedOn = (id: string): number =>
+        pageOf(id)?.stickers.filter((sticker) => sticker.earned).length ?? 0;
+      const slot = h('div', { className: 'dv-album__slot' });
+
+      const showPage = (id: string): void => {
+        const page = pageOf(id);
+        if (!page) return;
+        albumPages.set(keeperId, id);
+        const heading = h('h2', {
+          text: regionTitle(id),
+          attributes: { id: `album-page-${id}` },
+        });
+        slot.replaceChildren(
           h(
-            'ul',
-            { className: 'dv-album__stickers' },
-            ...page.stickers.map((sticker) =>
-              h(
-                'li',
-                { className: 'dv-album__sticker', dataset: { earned: String(sticker.earned) } },
-                sticker.earned
-                  ? stickerArt({
-                      frame: sticker.frame as StickerFrame,
-                      color: sticker.color,
-                      icon: sticker.icon,
-                    })
-                  : h(
-                      'span',
-                      { className: 'dv-album__empty', attributes: { 'aria-hidden': 'true' } },
-                      icon('question'),
-                    ),
-                h('span', { className: 'dv-album__name', text: text(sticker.nameKey) }),
-                h('span', {
-                  className: 'dv-visually-hidden',
-                  text: sticker.earned ? t('album.earned') : t('album.notYet'),
-                }),
+            'section',
+            {
+              className: 'dv-card dv-album__page',
+              testId: `album-${page.region}`,
+              attributes: { 'aria-labelledby': heading.id },
+            },
+            heading,
+            h('p', {
+              className: 'dv-note',
+              testId: 'album-page-count',
+              text: t('album.count', { earned: earnedOn(id), total: page.stickers.length }),
+            }),
+            h(
+              'ul',
+              { className: 'dv-album__stickers' },
+              ...page.stickers.map((sticker) =>
+                h(
+                  'li',
+                  { className: 'dv-album__sticker', dataset: { earned: String(sticker.earned) } },
+                  sticker.earned
+                    ? stickerArt({
+                        frame: sticker.frame as StickerFrame,
+                        color: sticker.color,
+                        icon: sticker.icon,
+                      })
+                    : h(
+                        'span',
+                        { className: 'dv-album__empty', attributes: { 'aria-hidden': 'true' } },
+                        icon('question'),
+                      ),
+                  h('span', { className: 'dv-album__name', text: text(sticker.nameKey) }),
+                  h('span', {
+                    className: 'dv-visually-hidden',
+                    text: sticker.earned ? t('album.earned') : t('album.notYet'),
+                  }),
+                ),
               ),
             ),
           ),
         );
-      });
+      };
+
+      const start = albumStartPage(view.album.pages, view.hub.regions, albumPages.get(keeperId));
+      const tabs =
+        start === undefined
+          ? null
+          : createTabs(app.kit, {
+              label: t('album.pages'),
+              tabs: view.album.pages.map((page) => ({
+                id: page.region,
+                name: t('album.tab', {
+                  region: regionTitle(page.region),
+                  earned: earnedOn(page.region),
+                  total: page.stickers.length,
+                }),
+                ...((REGION_EMBLEM_IDS as readonly string[]).includes(`emblem-${page.region}`)
+                  ? {
+                      art: () => artIcon(`emblem-${page.region}`, { className: 'dv-tabs__emblem' }),
+                    }
+                  : {}),
+                done: page.stickers.length > 0 && earnedOn(page.region) === page.stickers.length,
+              })),
+              current: start,
+              testIdPrefix: 'album',
+              iconOnly: true,
+              arrows: { previous: t('album.previous'), next: t('album.next') },
+              onChange: showPage,
+            });
+      if (start !== undefined) showPage(start);
       const frame = collection(app, active, {
         title: t('album.heading'),
         testId: 'screen-album',
@@ -331,7 +470,8 @@ export function albumScreen(app: App, keeperId: string): ScreenEntry {
             testId: 'album-count',
             text: t('album.count', { earned: view.album.earned, total: view.album.total }),
           }),
-          ...pages,
+          ...(tabs ? [tabs.element] : []),
+          slot,
         ],
       });
       return { ...frame.screen, focusTarget: () => frame.heading };

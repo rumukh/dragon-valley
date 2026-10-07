@@ -40,11 +40,27 @@ export class RecoveryRequired extends Error {
   }
 }
 
+/**
+ * A save pins a content pack this build cannot give it: never shipped, not reachable right now
+ * (offline before the game was installed), or a file that is not that pack.
+ */
+export class ContentUnavailable extends Error {
+  readonly code = 'content-unavailable';
+  constructor(
+    readonly revision: string,
+    options?: ErrorOptions,
+  ) {
+    super(`Content revision ${revision} is not available.`, options);
+    this.name = 'ContentUnavailable';
+  }
+}
+
 /** A short, non-private code for an error, safe to show to a grown-up. */
 export function errorCode(cause: unknown): string {
   if (cause instanceof BrowserServiceError) return cause.code;
   if (cause instanceof RuntimeFault) return cause.error.code;
   if (cause instanceof RecoveryRequired) return cause.code;
+  if (cause instanceof ContentUnavailable) return cause.code;
   if (cause instanceof DOMException) return cause.name;
   return 'unexpected';
 }

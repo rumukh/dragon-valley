@@ -8,6 +8,7 @@
 import { requireValue, schema } from '@aegis/runtime';
 import { applyPresentationPreferences } from '@aegis/browser/ui';
 import { loadAudioMap } from './audio/manifest';
+import { createHistoryLoader } from './content/history';
 import { loadContent, loadContentText } from './content/load';
 import { loadFonts } from './design/fonts';
 import { applyTokens } from './design/tokens';
@@ -90,8 +91,12 @@ async function boot(): Promise<void> {
   app.screens = createScreens(app);
   const [pack, family] = await Promise.allSettled([content, app.family.open()]);
   if (pack.status === 'fulfilled') {
-    app.useContent(dragonValleyGame(pack.value.pack), pack.value.text);
-    app.markContent(pack.value.pack.revision);
+    const current = pack.value.pack;
+    app.useContent(
+      dragonValleyGame(current, [], createHistoryLoader(env.baseUrl, current)),
+      pack.value.text,
+    );
+    app.markContent(current.revision);
   }
   // A broken pack stops the game for everyone; a broken family record asks for a grown-up.
   let first: ScreenEntry;

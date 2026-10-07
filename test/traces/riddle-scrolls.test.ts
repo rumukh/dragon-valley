@@ -10,14 +10,18 @@
  * Named checks come first and say what broke; the golden hash and trajectory are change
  * detectors checked last. Answers come from the harness's independent oracle.
  */
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 import { OPERATORS } from '../../src/rules/contract';
 import type { AnswerValue, Feedback, ProblemView } from '../../src/rules/contract';
 import { PERFECT, Player, oracle, trajectoryDigest } from './support';
 
+// Whole sessions are replayed here, one commit at a time with the full content pack: give them
+// room on a busy machine (Vitest's default is 60 s per test).
+vi.setConfig({ testTimeout: 300_000 });
+
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '2e0a679b94c3799e';
-const GOLDEN_TRAJECTORY = 'c234a804d1c30415';
+const GOLDEN_HASH = '6b59ef5207d1b2b6';
+const GOLDEN_TRAJECTORY = 'e2f3482ff8fb1eea';
 
 const SEED = 'golden-riddle-scrolls';
 

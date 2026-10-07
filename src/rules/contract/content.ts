@@ -148,6 +148,14 @@ export interface Boss {
   meter: number;
   /** Share of boss problems drawn as spaced review of earlier skills. */
   reviewShare: number;
+  /**
+   * Heads to win over one after another (default 1). A boss with several heads shares its meter
+   * evenly between them and serves its boss activity's skills in order, one skill per head (the
+   * Seven-Headed Dragon: one strand per head).
+   */
+  heads?: number;
+  /** Winning over this boss completes the game (the finale). Default false. */
+  finale?: boolean;
 }
 
 /** A cosmetic: the narrative `CosmeticItem` (`id`, `slot`, `assetId`) plus shop data. */
@@ -181,7 +189,22 @@ export type StickerCriteria =
   | { kind: 'arena-best'; count: number }
   | { kind: 'quests-claimed'; count: number }
   | { kind: 'placement-done' }
-  | { kind: 'finale' };
+  | { kind: 'finale' }
+  /** `share` percent of a skill's items at `level` or better (`seen`: answered right once). */
+  | {
+      kind: 'skill-mastered';
+      skill: string;
+      level: 'seen' | 'bronze' | 'silver' | 'gold';
+      share: number;
+    }
+  /** `count` owned dragons of `kind` (any kind when `null`) at `stage` or later; `count: null`
+   * means every dragon of that kind in the content. */
+  | {
+      kind: 'dragons-stage';
+      dragonKind: DragonKind | null;
+      stage: DragonStage;
+      count: number | null;
+    };
 
 /**
  * A sticker for the album, composed by the art pipeline from `icon`, `color` and `frame`, so a new
@@ -396,15 +419,21 @@ const starRuleSchema: Schema<StarRule> = schema.object({
   threeStars: schema.object({ accuracy: percent, fastShare: percent }),
 });
 
+/** Memory Match pairs: a fact and its value, a × and ÷ sentence of one family, or a term and an
+ * example sentence. */
+export const MEMORY_MATCH_MODES = ['value', 'family', 'term'] as const;
+/** Feeding Time draws: the mix (default), or the child's weakest known facts first. */
+export const FEEDING_DRAWS = ['mix', 'weakest'] as const;
+
 /** Per-kind activity options: allowed keys and their schemas. Absent keys take the default. */
 export const ACTIVITY_OPTION_SCHEMAS: Readonly<
   Record<LevelActivityKind, Readonly<Record<string, Schema<number | boolean | string>>>>
 > = {
-  feeding: {},
+  feeding: { draw: oneOf(FEEDING_DRAWS) },
   'compare-stones': {},
   'riddle-scrolls': { pickOperation: schema.boolean },
   boss: {},
-  'memory-match': { pairs: int(3, 8) },
+  'memory-match': { pairs: int(3, 8), match: oneOf(MEMORY_MATCH_MODES) },
   'number-trail': { length: int(5, 12), gaps: int(1, 6) },
   'egg-grid': { split: oneOf(EGG_GRID_SPLITS) },
   'fact-family': {},
@@ -414,11 +443,11 @@ export const ACTIVITY_OPTION_SCHEMAS: Readonly<
 export const ACTIVITY_OPTION_DEFAULTS: Readonly<
   Record<LevelActivityKind, Readonly<Record<string, number | boolean | string>>>
 > = {
-  feeding: {},
+  feeding: { draw: 'mix' },
   'compare-stones': {},
   'riddle-scrolls': { pickOperation: true },
   boss: {},
-  'memory-match': { pairs: 6 },
+  'memory-match': { pairs: 6, match: 'value' },
   'number-trail': { length: 10, gaps: 3 },
   'egg-grid': { split: 'none' },
   'fact-family': {},
@@ -477,6 +506,18 @@ const stickerCriteriaSchema: Schema<StickerCriteria> = schema.union(
   schema.object({ kind: schema.literal('quests-claimed'), count: int(1, 10_000) }),
   schema.object({ kind: schema.literal('placement-done') }),
   schema.object({ kind: schema.literal('finale') }),
+  schema.object({
+    kind: schema.literal('skill-mastered'),
+    skill: contentId,
+    level: oneOf(['seen', 'bronze', 'silver', 'gold'] as const),
+    share: int(1, 100),
+  }),
+  schema.object({
+    kind: schema.literal('dragons-stage'),
+    dragonKind: nullable(oneOf(['table', 'special', 'finale'] as const)),
+    stage: oneOf(DRAGON_STAGES),
+    count: nullable(int(1, 100)),
+  }),
 );
 
 const templateExprSchema: Schema<TemplateExpr> = lazy(() =>
@@ -648,14 +689,17 @@ export const contentDataSchema: Schema<ContentData> = objectWithOptional(
       { min: 1, max: 100 },
     ),
     bosses: schema.array(
-      schema.object({
-        id: contentId,
-        region: contentId,
-        nameKey: catalogKey,
-        mood: oneOf(['sleepy', 'laughing', 'happy'] as const),
-        meter: int(3, 100),
-        reviewShare: percent,
-      }),
+      objectWithOptional(
+        {
+          id: contentId,
+          region: contentId,
+          nameKey: catalogKey,
+          mood: oneOf(['sleepy', 'laughing', 'happy'] as const),
+          meter: int(3, 100),
+          reviewShare: percent,
+        },
+        { heads: int(1, 10), finale: schema.boolean },
+      ),
       { max: 100 },
     ),
     cosmetics: schema.array(
@@ -909,6 +953,9 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
     if (c.kind === 'dragon-stage') {
       need('stickers', s.id, 'criteria.dragon', one(c.dragon), dragons, 'dragon');
     }
+    if (c.kind === 'skill-mastered') {
+      need('stickers', s.id, 'criteria.skill', [c.skill], skills, 'skill');
+    }
   }
   for (const q of data.quests) need('quests', q.id, 'unlock', one(q.unlock), levels, 'level');
   for (const t of data.wordTemplates) {
@@ -1061,6 +1108,23 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
     if (region.boss !== null && !bossLevels.some((l) => l.boss === region.boss)) {
       problem(region.id, 'boss', 'The region boss needs a boss level in the region.');
     }
+  }
+
+  // Multi-head bosses share the meter evenly and need a skill per head; one finale at most.
+  for (const boss of data.bosses) {
+    const heads = boss.heads ?? 1;
+    if (boss.meter % heads !== 0) {
+      problem(boss.id, 'heads', 'The meter must share evenly between the heads.');
+    }
+    for (const level of data.levels.filter((l) => l.boss === boss.id)) {
+      const last = level.activities[level.activities.length - 1];
+      if (last && last.kind === 'boss' && last.skills.length < heads) {
+        problem(level.id, 'activities', 'A boss with several heads needs a skill per head.');
+      }
+    }
+  }
+  if (data.bosses.filter((b) => b.finale === true).length > 1) {
+    problem('bosses', 'finale', 'Only one boss can be the finale.');
   }
 
   // Unlock graph: acyclic and every level reachable from the start.

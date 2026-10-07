@@ -12,8 +12,8 @@
  * Boards never punish: a wrong rectangle, a mismatched pair or a wrong order stays on the board
  * as gentle feedback and can be corrected. Faces of hidden cards are never in the view.
  */
-import { TERMS } from './kinds';
-import type { Term } from './kinds';
+import { OPERATORS, TERMS } from './kinds';
+import type { Operator, Term } from './kinds';
 import { mulFactId, num, op, parseItemId } from './problems';
 import type { AnswerValue, Expr, TermProblem } from './problems';
 
@@ -44,6 +44,7 @@ export type CardFace =
  * | ----------------------------- | ------------------------------------------------------- |
  * | `fact:mul:7x8`                | the fact `7 · 8` (`fact:` + a small-table item ID)      |
  * | `fact:div:56:7`               | the fact `56 : 7`                                       |
+ * | `expr:div:23:5`               | any other single operation (`23 : 5`, `14 · 3`)         |
  * | `num:56`                      | the number 56                                           |
  * | `term:product`                | the term "product" (term ↔ example pairs)               |
  * | `rem:4:3`                     | the remainder answer `4 r 3`                            |
@@ -54,18 +55,19 @@ export const CARD_BACK_LABEL = 'card:back';
 
 const HIGHLIGHTS = ['left', 'right', 'result', 'remainder', 'none'] as const;
 
-/** The label of a face (throws for a face no board uses, such as a big-number expression). */
+/** The label of a face (throws for a face no board uses, such as a nested expression). */
 export function cardLabel(face: CardFace): string {
   if (face.kind === 'expr') {
     const expr = face.expr;
     if (expr.kind === 'op' && expr.left.kind === 'num' && expr.right.kind === 'num') {
       const [left, right] = [expr.left.value, expr.right.value];
-      if (expr.op === 'mul') return `fact:${mulFactId(left, right)}`;
+      if (expr.op === 'mul' && left <= 10 && right <= 10) return `fact:${mulFactId(left, right)}`;
       if (expr.op === 'div' && parseItemId(`div:${left}:${right}`)?.kind === 'div') {
         return `fact:div:${left}:${right}`;
       }
+      return `expr:${expr.op}:${left}:${right}`;
     }
-    throw new RangeError('Only small-table facts a · b and a : b are card faces.');
+    throw new RangeError('Only a single operation of two numbers is a card face.');
   }
   if (face.kind === 'answer') {
     const answer = face.answer;
@@ -104,6 +106,15 @@ export function parseCardLabel(label: string): CardFace | null {
   }
   const parts = label.split(':');
   const [tag] = parts;
+  if (tag === 'expr' && parts.length === 4) {
+    const operator = parts[1] as Operator;
+    const left = labelNumber(parts[2]);
+    const right = labelNumber(parts[3]);
+    if (!(OPERATORS as readonly string[]).includes(operator) || left === null || right === null) {
+      return null;
+    }
+    return { kind: 'expr', expr: op(operator, num(left), num(right)) };
+  }
   if (tag === 'num' && parts.length === 2) {
     const value = labelNumber(parts[1]);
     return value === null ? null : { kind: 'answer', answer: { kind: 'number', value } };
@@ -265,10 +276,90 @@ export interface FactFamilyBoard {
 export type FactFamilyMove =
   { type: 'fill'; equation: number; slot: number; value: number | null } | { type: 'submit' };
 
+// ------------------------------------------------------------------------------ Sharing Feast
+
+/**
+ * Sharing Feast (`sharing-feast`, custom `dv.sharing-feast`): share `total` fruit between
+ * `baskets` baskets so every basket has the same number; what cannot be shared stays in the bowl
+ * (the remainder, always fewer than the baskets). The child moves fruit, then says how many each
+ * basket got and how many are left. Complete when the baskets are equal, the bowl cannot go round
+ * again and the answer matches. The narrative projection is this object without `kind`.
+ */
+export interface SharingFeastBoard {
+  kind: 'sharing-feast';
+  total: number;
+  baskets: number;
+  /** Leftovers are expected (a division with remainder): show the "left over" answer. */
+  remainder: boolean;
+  /** Fruit in each basket, basket 0 first. */
+  inBaskets: number[];
+  /** Fruit still in the bowl. */
+  bowl: number;
+  /** The last check that was not right yet: baskets `uneven`, `more` to share, or a `count`
+   * that does not match the baskets. A right check completes the board. */
+  last: 'uneven' | 'more' | 'count' | null;
+  attempts: number;
+}
+
+/**
+ * Move fruit from the bowl into a basket (`put`) or back (`take`), `count` pieces (default 1);
+ * `deal` one into every basket (needs at least `baskets` in the bowl); `submit` the answer: how
+ * many each basket has and how many are left.
+ */
+export type SharingFeastMove =
+  | { type: 'put'; basket: number; count?: number }
+  | { type: 'take'; basket: number; count?: number }
+  | { type: 'deal' }
+  | { type: 'submit'; each: number; left: number };
+
+// ------------------------------------------------------------------------------ Golem Orders
+
+/** A path from the root of an expression to a node: `left`/`right` of an operation, `inner` of
+ * brackets. `[]` is the root. */
+export type ExprPath = ('left' | 'right' | 'inner')[];
+
+/**
+ * Golem Orders (`golem-orders`, custom `dv.golem-orders`): an expression shown as gears. The
+ * child picks the operation that goes first and says its result; the expression shrinks until
+ * one number is left. The tree is always the expression as it reads (brackets only where written,
+ * · and : before + and −, each rank from left to right), and the operations that may go first
+ * follow the textbook: inside brackets first (the innermost pair holding an operation; separate
+ * pairs in either order), then · and :, then + and −, from left to right. Independent operations
+ * of the same rank (`2 · 3 + 4 · 5`) may go in either order. The narrative projection is this
+ * object without `kind`.
+ */
+export interface GolemOrdersBoard {
+  kind: 'golem-orders';
+  /** The expression as it stands now. */
+  expr: Expr;
+  /** The expression the board started with. */
+  start: Expr;
+  /** The operation picked to go next, waiting for its value. */
+  picked: ExprPath | null;
+  /** The last move: `right`, a pick that is `not-first` yet, or a `wrong-value`. */
+  last: 'right' | 'not-first' | 'wrong-value' | null;
+  steps: number;
+  mistakes: number;
+}
+
+export type GolemOrdersMove = { type: 'pick'; path: ExprPath } | { type: 'answer'; value: number };
+
 // ------------------------------------------------------------------------------ unions
 
 /** The typed board of a minigame round; `kind` is the activity kind. */
-export type BoardView = MemoryMatchBoard | NumberTrailBoard | EggGridBoard | FactFamilyBoard;
+export type BoardView =
+  | MemoryMatchBoard
+  | NumberTrailBoard
+  | EggGridBoard
+  | FactFamilyBoard
+  | SharingFeastBoard
+  | GolemOrdersBoard;
 
 /** A move for `minigameMove.move`. */
-export type MinigameMove = MemoryMatchMove | NumberTrailMove | EggGridMove | FactFamilyMove;
+export type MinigameMove =
+  | MemoryMatchMove
+  | NumberTrailMove
+  | EggGridMove
+  | FactFamilyMove
+  | SharingFeastMove
+  | GolemOrdersMove;

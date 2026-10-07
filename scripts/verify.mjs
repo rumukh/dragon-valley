@@ -65,8 +65,8 @@ export const STEPS = [
   },
   {
     id: 'content',
-    label: 'Validate content packs, history and catalogs',
-    args: ['scripts/validate-content.mjs'],
+    label: 'Validate content packs, history, catalogs, art references and curriculum coverage',
+    args: ['scripts/validate-content.mjs', '--strict-art', '--strict-coverage'],
   },
   {
     id: 'test',

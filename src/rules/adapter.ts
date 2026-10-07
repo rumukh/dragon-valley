@@ -36,7 +36,6 @@ import {
   isoDay,
   itemIdSchema,
   profileStateSchema,
-  skillItemIndex,
 } from './contract';
 import type { ContentData, GameAction, GameView, ProfileState } from './contract';
 import { checkDailyGoal, claimProblem, claimQuest, startDay } from './economy/daily';
@@ -47,10 +46,12 @@ import {
   grantItem,
   openGift,
 } from './economy/rewards';
+import { itemIndex } from './learning/index-cache';
+import type { Index } from './learning/index-cache';
 import { MINIGAMES } from './minigames/boards';
 import { arenaProblem, startArena } from './progression/arena';
 import { applyGrowth } from './progression/dragons';
-import { isPlayable } from './progression/levels';
+import { isComplete, isPlayable } from './progression/levels';
 import { applyMinigameMove, moveProblem } from './progression/minigame-rounds';
 import { placementProblem, startPlacement } from './progression/placement';
 import { activeProblemRound, gradeAnswer, roundDone, serveNext } from './progression/problems';
@@ -90,19 +91,27 @@ function legality(action: GameAction, read: Read): Reject | null {
   switch (action.type) {
     case 'startSession':
       return dayNumber(action.day) === null ? reject('invalid-day', 'Not a calendar date.') : null;
-    case 'startLevel':
+    case 'startLevel': {
       if (pendingBlocking) return reject('story-pending', 'Finish the story first.');
       if (activeRound) return reject('round-active', 'Finish or leave the current round first.');
-      if (!data.levels.some((l) => l.id === action.level))
-        return reject('unknown-level', 'No such level.');
-      return isPlayable(state, data, action.level)
+      const level = data.levels.find((l) => l.id === action.level);
+      if (!level) return reject('unknown-level', 'No such level.');
+      if (!isPlayable(state, data, action.level)) {
+        return reject('locked-level', 'This level is still locked.');
+      }
+      if (action.activity === undefined) return null;
+      if (!isComplete(state, level.id)) {
+        return reject('locked-activity', 'Replay single activities of finished levels.');
+      }
+      return canPlay(data, level, action.activity, itemIndex(data))
         ? null
-        : reject('locked-level', 'This level is still locked.');
+        : reject('locked-activity', 'This activity cannot be played.');
+    }
     case 'startActivity': {
       if (pendingBlocking) return reject('story-pending', 'Finish the story first.');
       if (activeRound) return reject('round-active', 'Finish or leave the current round first.');
       const request = action.activity;
-      const index = skillItemIndex(data);
+      const index = itemIndex(data);
       if (request.kind === 'placement') {
         const problem = placementProblem(data, index);
         return problem === null ? null : reject('locked-activity', problem);
@@ -207,8 +216,8 @@ function legality(action: GameAction, read: Read): Reject | null {
   }
 }
 
-function indexOf(ctx: Ctx | Read): Map<string, string[]> {
-  return skillItemIndex(ctx.content.data);
+function indexOf(ctx: Ctx | Read): Index {
+  return itemIndex(ctx.content.data);
 }
 
 function startSession(ctx: Ctx, iso: string): void {
@@ -367,6 +376,13 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
           if (ctx.state.onboarding.placement === 'pending') {
             ctx.state.onboarding.placement = 'skipped';
           }
+          if (action.activity !== undefined) {
+            // A replay of one activity: the run is already over, so it never completes again.
+            const level = ctx.content.data.levels.find((l) => l.id === action.level)!;
+            ctx.state.run = { level: action.level, next: level.activities.length, results: [] };
+            startRunActivity(ctx, index, action.activity);
+            return;
+          }
           ctx.state.run = { level: action.level, next: 0, results: [] };
           triggerBeats(
             ctx,
@@ -492,7 +508,7 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
         if (active && active.id === round && !active.queue.includes(item)) active.queue.push(item);
       },
     })),
-    view: (read) => projectView(read, skillItemIndex(read.content.data)),
+    view: (read) => projectView(read, itemIndex(read.content.data)),
     validate: validateState,
     canActivateContent: (read) => read.state.round === null && read.state.story.pending === null,
     activateContent() {

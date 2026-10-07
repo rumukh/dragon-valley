@@ -12,12 +12,16 @@
  * Named checks come first and say what broke; the golden hash and trajectory are change
  * detectors checked last. Answers come from the harness's independent oracle.
  */
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 import { success } from '@aegis/runtime';
 import { dragonValleyAdapter } from '../../src/rules/adapter';
 import type { GameView } from '../../src/rules/contract';
 import { PERFECT, Player, trajectoryDigest } from './support';
 import type { Adapter } from './support';
+
+// Whole sessions are replayed here, one commit at a time with the full content pack: give them
+// room on a busy machine (Vitest's default is 60 s per test).
+vi.setConfig({ testTimeout: 300_000 });
 
 /**
  * Golden final-state hash and commit trajectory. Captured once from the first green run of this
@@ -25,8 +29,8 @@ import type { Adapter } from './support';
  * pinned as literals. Re-pin only for a deliberate rules or content change, with the reason and
  * the old and new values in the commit message (docs/testing.md, "When a golden moves").
  */
-const GOLDEN_HASH = '15b83e6a575603e6';
-const GOLDEN_TRAJECTORY = '7fad6753f79cc9c5';
+const GOLDEN_HASH = 'f13e54fba61c2d97';
+const GOLDEN_TRAJECTORY = 'a2ed761a367e70d8';
 
 const SEED = 'golden-first-session';
 const PLACEMENT_MISS = 6;

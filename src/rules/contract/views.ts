@@ -82,16 +82,26 @@ export interface RegionView {
   order: number;
   background: string;
   unlocked: boolean;
-  boss: { id: string; nameKey: string; mood: BossMood; defeated: boolean } | null;
+  /** `heads`: 1, or more for a boss won over head by head (the meter is shared evenly; heads
+   * cured = floor(meter.value * heads / meter.target)). */
+  boss: {
+    id: string;
+    nameKey: string;
+    mood: BossMood;
+    defeated: boolean;
+    heads: number;
+  } | null;
   levels: LevelCard[];
 }
 
-/** The Daily Adventure's next step, in priority order (docs/design.md §9). */
+/** The Daily Adventure's next step, in priority order (docs/design.md §4.2). */
 export type NextStep =
   | { kind: 'story'; beat: string }
   | { kind: 'placement' }
   | { kind: 'snack'; dragon: string | null }
   | { kind: 'level'; level: string }
+  /** Replay a minigame activity of a completed level (once a day, after the day's first level). */
+  | { kind: 'minigame'; level: string; activity: number }
   | { kind: 'gift' }
   | { kind: 'free-play' };
 

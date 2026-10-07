@@ -43,7 +43,17 @@ function state(patch: Partial<ProfileState> = {}): ProfileState {
 }
 
 function daily(answers: number, correct: number): ProfileState['daily'] {
-  return { day: DAY, answers, correct, fast: 0, goal: 30, quests: [], gift: 'locked' };
+  return {
+    day: DAY,
+    answers,
+    correct,
+    fast: 0,
+    levels: 0,
+    minigames: 0,
+    goal: 30,
+    quests: [],
+    gift: 'locked',
+  };
 }
 
 describe('item tiers', () => {
