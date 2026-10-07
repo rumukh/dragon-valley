@@ -62,23 +62,35 @@ jobs:
     runs-on: ubuntu-latest
     # Each engine runs in parallel jobs, one or more parts of the suite each
     # (test/e2e/support/parts.ts), balanced by measured run times so every job takes about seven
-    # minutes: Chromium and Firefox in two, WebKit, about twice as slow on a hosted runner, in
-    # five. Every part runs once per engine (test/e2e/harness.spec.ts checks this matrix).
+    # minutes: Chromium and Firefox in two jobs with two workers each; WebKit, about twice as slow
+    # per test on a hosted runner, in five jobs with three workers each (its tests mostly wait on
+    # the engine, so a third worker on the 4-vCPU runner shortens a job; docs/testing.md §5).
+    # Every part runs once per engine (test/e2e/harness.spec.ts checks this matrix).
     # The limit is a guard against a hang: room for a slow package mirror, not a budget.
     timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { engine: chromium, label: walks+rest, part: 'walks,rest' }
-          - { engine: chromium, label: rounds+regions+valley, part: 'rounds,regions,valley' }
-          - { engine: firefox, label: walks+rest, part: 'walks,rest' }
-          - { engine: firefox, label: rounds+regions+valley, part: 'rounds,regions,valley' }
-          - { engine: webkit, label: walks, part: walks }
-          - { engine: webkit, label: rounds, part: rounds }
-          - { engine: webkit, label: rest, part: rest }
-          - { engine: webkit, label: regions, part: regions }
-          - { engine: webkit, label: valley, part: valley }
+          - { engine: chromium, label: walks+rest, part: 'walks,rest', workers: 2 }
+          - {
+              engine: chromium,
+              label: rounds+regions+valley,
+              part: 'rounds,regions,valley',
+              workers: 2,
+            }
+          - { engine: firefox, label: walks+rest, part: 'walks,rest', workers: 2 }
+          - {
+              engine: firefox,
+              label: rounds+regions+valley,
+              part: 'rounds,regions,valley',
+              workers: 2,
+            }
+          - { engine: webkit, label: walks, part: walks, workers: 3 }
+          - { engine: webkit, label: rounds, part: rounds, workers: 3 }
+          - { engine: webkit, label: rest, part: rest, workers: 3 }
+          - { engine: webkit, label: regions, part: regions, workers: 3 }
+          - { engine: webkit, label: valley, part: valley, workers: 3 }
     env:
       NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
       # test/e2e/support/qa-reporter.ts: every spec (of the parts) must run, no unexplained skips.
@@ -108,7 +120,7 @@ jobs:
       # requests, no outbound links), and the job summary lists known defects and axe advice
       # (docs/testing.md §5).
       - name: End-to-end and accessibility on ${{ matrix.engine }}
-        run: npx playwright test --project=${{ matrix.engine }}
+        run: npx playwright test --project=${{ matrix.engine }} --workers=${{ matrix.workers }}
 
       # Screens for human review at tablet, desktop and phone sizes (docs/qa/screens.md); only the
       # walks take them: qa-screens-chromium-walks+rest, -firefox-walks+rest and -webkit-walks.

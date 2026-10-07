@@ -16,8 +16,9 @@ export const NAMED_PARTS = {
   rounds: ['input', 'persistence', 'recovery', 'settings'],
   // One activity in each region of the valley.
   regions: ['regions'],
-  // The v1 boards, the bosses and the finale, and saves from before an update.
-  valley: ['boards', 'bosses', 'upgrade'],
+  // The v1 boards, the bosses, the finale and the map with every region awake, and saves from
+  // before an update.
+  valley: ['boards', 'bosses', 'upgrade', 'finale', 'map'],
 } as const satisfies Record<string, readonly string[]>;
 
 type NamedPart = keyof typeof NAMED_PARTS;

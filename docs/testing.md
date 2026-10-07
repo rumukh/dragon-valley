@@ -113,11 +113,13 @@ browsers; `$env:DV_E2E_ALL_ENGINES = '1'` runs Chromium, WebKit and Firefox wher
 builds are installed. CI runs each engine in parallel jobs with `DV_E2E_AUDIT=1`, one or more parts
 of the suite each (`DV_E2E_PART`, comma-separated; `support/parts.ts`): `walks` (`screens`,
 `reflow`), `rounds` (`input`, `persistence`, `recovery`, `settings`), `regions` (`regions`),
-`valley` (`boards`, `bosses`, `upgrade`) and `rest` (every other spec, including any new one).
-Chromium and Firefox run two jobs each, `walks+rest` and `rounds+regions+valley`; WebKit, about
-twice as slow on a hosted runner, runs one job per part. The split follows measured run times, so
-each job, with two workers, takes about seven minutes, installation included; `harness.spec.ts`
-checks that the matrix runs every part once per engine. Setup is under a minute: `setup-node`
+`valley` (`boards`, `bosses`, `upgrade`, `finale`, `map`) and `rest` (every other spec, including
+any new one). Chromium and Firefox run two jobs each with two workers, `walks+rest` and
+`rounds+regions+valley`; WebKit, about twice as slow per test on a hosted runner, runs one job per
+part with three workers (its tests mostly wait on the engine, so the third worker shortens a job
+on the four-processor runner). The split follows measured run times, so each job takes about seven
+minutes, installation included; `harness.spec.ts` checks that the matrix runs every part once per
+engine. Setup is under a minute: `setup-node`
 restores npm's cache, and Playwright's browsers are downloaded, not cached, because the download
 is 4–9 s of the install step and the rest is the system packages (apt: about 15 s for Chromium
 and Firefox, 45 s for WebKit), which a browser cache would not skip. A slow Ubuntu mirror once
