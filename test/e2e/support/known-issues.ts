@@ -38,75 +38,43 @@ export interface Defect {
   readonly title: string;
   /** Only these engines show it; on the others its assertions stay strict. */
   readonly engines?: readonly Engine[];
+  /** It shows only under some timings, so a passing check is not taken for a fix. */
+  readonly intermittent?: boolean;
 }
 
+/**
+ * Open defects. Fixed ones leave this list once their fix is verified on every engine (their
+ * write-ups and the PR that fixed them are in docs/qa/defects.md); the assertions that pinned
+ * them stay in the specs as plain regression checks.
+ */
 export const DEFECTS = {
-  'DV-QA-01': {
-    owner: 'S3',
-    severity: 'minor',
-    title:
-      'After a failed save, Retry stores the held answer but the round never says so: it keeps the old problem with "Saving stopped. Tap Retry at the top.", no "Yes!", the purse stays behind, and the next OK silently moves on.',
-  },
-  'DV-QA-02': {
-    owner: 'S3',
-    severity: 'minor',
-    title:
-      'Coin messages say "1 coins" ("You got 1 coins!", "1 coins"): the catalog has no singular.',
-  },
-  'DV-QA-04': {
-    owner: 'S3',
-    severity: 'minor',
-    title:
-      'The Retry button in the "Not saved" pill is 40 px tall (.dv-save .dv-button min-height: calc(var(--dv-target) - 8px)), under the 48 px child-safe target.',
-  },
   'DV-QA-05': {
     owner: 'S3',
-    severity: 'major',
-    title:
-      "The grown-ups' Settings tab scrolls sideways on a phone: the voice list's long option text widens the panel's grid column (min-width: auto), pushing the notation and text-size buttons off screen.",
-  },
-  'DV-QA-06': {
-    owner: 'S3',
-    severity: 'major',
-    title:
-      'Words and numbers break inside narrow boxes: at 200 % text two-digit choice tiles stack their digits ("1" over "8"), the keypad\'s OK splits into "O/K", and the hub\'s adventure button, "Today\'s goal", level-card activities and Egg Grid labels break mid-word; on a phone the prologue\'s egg labels break even at normal size ("bubbl/y", "golde/n").',
-  },
-  'DV-QA-08': {
-    owner: 'S3',
-    severity: 'major',
-    title:
-      "The router gives every screen's focus target tabindex=-1 (router.ts, mount: focus), so the editor's name field and the error screen's button drop out of the Tab order: Tab and Shift+Tab never return to them, and their focus ring is hidden.",
-  },
-  'DV-QA-09': {
-    owner: 'S3',
-    severity: 'major',
-    title:
-      'After a click on Read aloud (or Show me), Enter presses that button again instead of sending the typed answer: the button keeps focus.',
-  },
-  'DV-QA-10': {
-    owner: 'S3',
-    severity: 'major',
-    title:
-      "At 200 % text on a phone, the hub and the Egg Grid board scroll sideways (551 and 478 px of content in 390 px): the hub's side column and the board do not reflow, and the place buttons and Egg Grid controls stick out.",
-  },
-  'DV-QA-11': {
-    owner: 'S3',
     severity: 'minor',
+    engines: ['webkit'],
     title:
-      "Map and road hotspots are cut off by the picture's frame: on a phone the one awake place's label, \"Sunny Meadow\", is clipped at the left edge; at 200 % text or zoom level 1's marker and the boss are clipped too.",
+      "In WebKit the grown-ups' Settings still scroll sideways on a phone (511 px of page in 390 px, blank sky to the right): the voice list's box fits, but WebKit counts its longest option's text (\"Device default (English (United Kingdom))\") in the page width. contain: paint on .dv-select stops it.",
   },
   'DV-QA-13': {
     owner: 'S3',
     severity: 'minor',
     engines: ['webkit'],
     title:
-      "In WebKit on Linux a keeper's hub at 200 % text shows at normal size for a frame: as it appears, <html> already carries --aegis-text-scale: 2 but its font size is still 24 px; it catches up one frame later (37 ms on CI).",
+      "In WebKit a keeper's hub at 200 % text first appears at normal size: the greeting is drawn at 43 px, not 86 px, for 140-435 ms (6 of 6 openings), and the root still reports 24 px in 2 of 6. #19's data-text-scale (no rule reads it) did not change this; Chromium and Firefox are right at once.",
   },
-  'DV-QA-14': {
+  'DV-QA-15': {
     owner: 'S3',
-    severity: 'major',
+    severity: 'minor',
+    engines: ['webkit'],
     title:
-      "The results card's celebrations scroll inside the card, but the scrolling list cannot take keyboard focus (axe scrollable-region-focusable, serious): on a tablet or phone a keyboard user cannot reach the eggs and stickers below its edge.",
+      "In WebKit (Safari) the keeper pictures lose their focus ring once an arrow key moves the choice: WebKit does not match :focus-visible on a radio focused by an arrow key (a plain page does the same), and the ring is drawn only for :focus-visible. The moving 'chosen' ring still marks the picture.",
+  },
+  'DV-QA-16': {
+    owner: 'S3',
+    severity: 'minor',
+    intermittent: true,
+    title:
+      "Two announcements within 40 ms: only the second is heard (the announcer drops a pending message). Seen on CI WebKit as a round ended: the last answer's coin line ('You got 11 coins!'), announced only after its coins finish flying, came as the results appeared and replaced their headline.",
   },
 } as const satisfies Record<string, Defect>;
 
@@ -122,36 +90,9 @@ export interface KnownLayout {
 
 export const KNOWN_LAYOUT: readonly KnownLayout[] = [
   {
-    defect: 'DV-QA-04',
-    where: /./,
-    problem: /^<button save-retry> "Retry" is [\d.]+×4\d(\.\d)?px, under 48px$/,
-  },
-  {
     defect: 'DV-QA-05',
-    where: /settings/,
-    problem: /^the page scrolls sideways|sticks out of the \d+px viewport/,
-  },
-  {
-    defect: 'DV-QA-06',
-    where: /^text-200\//,
-    problem: /^the word ".+" breaks as ".+" in </,
-  },
-  {
-    // Even at normal size the three eggs share a phone's width (WebKit, and Chromium on Linux).
-    defect: 'DV-QA-06',
-    where: /^05-story-eggs \(phone portrait\)$/,
-    problem: /^the word ".+" breaks as ".+" in <span story-choice-[a-z]+>/,
-  },
-  {
-    defect: 'DV-QA-10',
-    where: /^text-200\/(06-hub|12-hub-after|17-egg-grid) \(phone portrait\)$/,
-    problem: /^the page scrolls sideways|sticks out of the 390px viewport/,
-  },
-  {
-    defect: 'DV-QA-11',
-    where: /(13-map|14-region) \(/,
-    problem:
-      /is cut off by <div screen-(map|region)>|^<button (map-region|level)-[a-z0-9.-]+> .* sticks out of the/,
+    where: /^(26-parent-settings|44-settings-saved) \(phone portrait\)$/,
+    problem: /^the page scrolls sideways: \d+px of content in 390px/,
   },
 ];
 
@@ -212,10 +153,17 @@ export async function unlessKnown(
   }
   try {
     await assertion();
-    testInfo.annotations.push({
-      type: 'defect fixed?',
-      description: `${id} did not reproduce; remove its marker if it is fixed: ${defect.title}`,
-    });
+    testInfo.annotations.push(
+      defect.intermittent
+        ? {
+            type: 'defect not seen this time',
+            description: `${id} did not show in this run (it shows only under some timings): ${defect.title}`,
+          }
+        : {
+            type: 'defect fixed?',
+            description: `${id} did not reproduce; remove its marker if it is fixed: ${defect.title}`,
+          },
+    );
   } catch {
     testInfo.annotations.push({
       type: 'known defect',

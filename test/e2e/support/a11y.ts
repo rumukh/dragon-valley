@@ -25,9 +25,7 @@ export interface KnownAxe {
   readonly target: RegExp;
 }
 
-export const KNOWN_AXE: readonly KnownAxe[] = [
-  { defect: 'DV-QA-14', rule: 'scrollable-region-focusable', target: /\.dv-results__celebrations/ },
-];
+export const KNOWN_AXE: readonly KnownAxe[] = [];
 
 export interface AxeOutcome {
   /** Serious or critical violations that are not known defects: each must be fixed. */
@@ -108,7 +106,10 @@ export interface FocusStop {
   readonly id: string | null;
   readonly tag: string;
   readonly name: string;
-  /** A visible focus indicator: an outline or ring on the element or its label. */
+  /**
+   * A focus indicator by computed style: an outline or ring on the element (or its label), or
+   * only on the label for a visually hidden radio or checkbox. `focusPixels` checks the pixels.
+   */
   readonly ring: boolean;
   /** The focus indicator's box is inside the viewport. */
   readonly onScreen: boolean;
@@ -136,13 +137,16 @@ export async function focusStop(page: Page): Promise<FocusStop> {
     const hasRing = (style: CSSStyleDeclaration): boolean =>
       (style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0) ||
       (style.boxShadow !== '' && style.boxShadow !== 'none');
-    // A visually hidden radio or checkbox shows its focus on the label around it.
+    // A visually hidden radio or checkbox shows its focus on the label around it; its own
+    // outline cannot be seen, so only the label's counts.
     const label = element.closest('label');
-    const tiny = element.getBoundingClientRect().width <= 2;
-    const indicator = tiny && label ? label : element;
+    const hidden =
+      element.getBoundingClientRect().width <= 2 || getComputedStyle(element).opacity === '0';
+    const indicator = hidden && label ? label : element;
     const ring =
       element.matches(':focus-visible') &&
-      (hasRing(getComputedStyle(element)) || (label !== null && hasRing(getComputedStyle(label))));
+      (hasRing(getComputedStyle(indicator)) ||
+        (!hidden && label !== null && hasRing(getComputedStyle(label))));
     const box = indicator.getBoundingClientRect();
     const onScreen =
       box.width > 0 &&
@@ -204,4 +208,116 @@ export async function tabPass(page: Page, backwards = false, limit = 40): Promis
 
 export function ids(stops: readonly FocusStop[]): (string | null)[] {
   return stops.filter((stop) => !stop.page).map((stop) => stop.id);
+}
+
+/** At least this many CSS pixels must change for a focus indicator to count as seen. */
+export const SEEN_PIXELS = 100;
+
+/** Pixels (one per CSS pixel) that differ clearly between two screenshots of the same clip. */
+async function changedPixels(page: Page, before: Buffer, after: Buffer): Promise<number> {
+  // The page decodes the pictures itself; nothing is fetched or attached to its document.
+  return page.evaluate(
+    async ([first, second]) => {
+      const decode = async (base64: string): Promise<Uint8ClampedArray> => {
+        const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+        const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }));
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('no 2d canvas');
+        context.drawImage(bitmap, 0, 0);
+        return context.getImageData(0, 0, bitmap.width, bitmap.height).data;
+      };
+      const [a, b] = await Promise.all([decode(first), decode(second)]);
+      if (a.length !== b.length) return Number.POSITIVE_INFINITY;
+      let changed = 0;
+      for (let index = 0; index < a.length; index += 4) {
+        let difference = 0;
+        for (let channel = 0; channel < 3; channel++) {
+          difference += Math.abs(a[index + channel]! - b[index + channel]!);
+        }
+        // Anti-aliasing never differs between two shots of the same state; a ring does, a lot.
+        if (difference > 48) changed += 1;
+      }
+      return changed;
+    },
+    [before.toString('base64'), after.toString('base64')] as const,
+  );
+}
+
+/**
+ * The focus indicator as a person sees it: how many pixels around the focused control (its label,
+ * for a visually hidden radio) change when focus leaves it by `leave` (a key press, as a keyboard
+ * user would). Computed styles can promise a ring that art covers, a clip cuts off, a later rule
+ * takes away or a browser never draws; pixels cannot. The text caret is hidden in both shots, so a
+ * text field counts only its own ring or border. If the key scrolled the page to its next stop, the
+ * page is scrolled back first, so the same pixels are compared. At least SEEN_PIXELS means the
+ * focus is seen. It throws rather than answer 0 when it cannot look (nothing focused, nothing on
+ * screen, or the control itself moved), so "not seen" is always a measurement.
+ */
+export async function focusPixels(page: Page, leave: () => Promise<void>): Promise<number> {
+  const handle = await page.evaluateHandle(() => {
+    const element = document.activeElement;
+    if (!(element instanceof HTMLElement) || element === document.body) return null;
+    const label = element.closest('label');
+    const hidden =
+      element.getBoundingClientRect().width <= 2 || getComputedStyle(element).opacity === '0';
+    return hidden && label ? label : element;
+  });
+  const indicator = handle.asElement();
+  if (!indicator) {
+    await handle.dispose();
+    throw new Error('nothing on the page has focus, so no focus indicator can be seen');
+  }
+  const clipOf = (): Promise<{ x: number; y: number; width: number; height: number }> =>
+    indicator.evaluate((node) => {
+      const box = node.getBoundingClientRect();
+      // Room for an outline and its offset, and no more: a neighbour's ring stays out of it.
+      const room = 10;
+      const x = Math.max(0, Math.floor(box.left - room));
+      const y = Math.max(0, Math.floor(box.top - room));
+      return {
+        x,
+        y,
+        width: Math.min(innerWidth, Math.ceil(box.right + room)) - x,
+        height: Math.min(innerHeight, Math.ceil(box.bottom + room)) - y,
+      };
+    });
+  const place = (): Promise<{ left: number; top: number }> =>
+    indicator.evaluate((node) => {
+      const { left, top } = node.getBoundingClientRect();
+      return { left, top };
+    });
+  const shot = (clip: { x: number; y: number; width: number; height: number }): Promise<Buffer> =>
+    page.screenshot({ clip, animations: 'disabled', caret: 'hide', scale: 'css' });
+  try {
+    await indicator.scrollIntoViewIfNeeded();
+    const before = await clipOf();
+    if (before.width <= 0 || before.height <= 0) {
+      throw new Error(
+        'the focused control is not on screen, so its focus indicator cannot be seen',
+      );
+    }
+    const start = await place();
+    const focused = await shot(before);
+    await leave();
+    const now = await place();
+    if (now.left !== start.left || now.top !== start.top) {
+      // The key scrolled the page to its next stop: scroll back by exactly as much.
+      await page.evaluate(([left, top]) => window.scrollBy({ left, top, behavior: 'instant' }), [
+        now.left - start.left,
+        now.top - start.top,
+      ] as const);
+    }
+    const after = await clipOf();
+    if (JSON.stringify(after) !== JSON.stringify(before)) {
+      throw new Error(
+        `the focused control moved when focus left it (${JSON.stringify(before)} to ${JSON.stringify(after)}), so its focus indicator cannot be compared`,
+      );
+    }
+    return await changedPixels(page, focused, await shot(after));
+  } finally {
+    await handle.dispose();
+  }
 }

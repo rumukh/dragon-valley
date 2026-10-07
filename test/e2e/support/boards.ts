@@ -1,0 +1,418 @@
+/**
+ * Playing the v1 boards from what they show (docs/app.md §14): Sharing Feast deals the fruit the
+ * question names and answers the division it shows; Golem Orders reads its expression and picks
+ * the gear the school order of operations does next (the deepest brackets first, then · and :
+ * before + and −, left to right), then types that step's result. Every move comes from the
+ * rendered question, controls and board text, never from the game's state.
+ */
+import type { Locator, Page } from '@playwright/test';
+import { expect } from './fixtures';
+import { results } from './app';
+
+export type BoardVia = 'keyboard' | 'touch';
+
+interface FeastProblem {
+  readonly written: string;
+  readonly total: number;
+  readonly baskets: number;
+  readonly quotient: number;
+  readonly remainder: number;
+  readonly asksRemainder: boolean;
+}
+
+interface GolemToken {
+  readonly kind: 'number' | 'sign' | 'open' | 'close';
+  readonly text: string;
+  readonly testId: string | null;
+}
+
+interface GolemStep {
+  readonly gear: string;
+  readonly expression: string;
+  readonly value: number;
+}
+
+export function minigameStatus(page: Page): Locator {
+  return page.getByTestId('minigame-status');
+}
+
+async function writtenProblem(page: Page): Promise<string> {
+  return page.getByTestId('problem').evaluate((line) =>
+    [...line.querySelectorAll('.dv-problem__part > span')]
+      .map((span) => span.textContent?.trim() || '?')
+      .join(' ')
+      .replace(/\( /g, '(')
+      .replace(/ \)/g, ')'),
+  );
+}
+
+export async function readFeastProblem(page: Page): Promise<FeastProblem> {
+  const written = await writtenProblem(page);
+  const match = /^(\d+) (:|÷) (\d+) = \?(?: (r|R) \?)?$/.exec(written);
+  expect(match, `the Sharing Feast question is a rendered division: "${written}"`).not.toBeNull();
+  const total = Number(match![1]);
+  const baskets = Number(match![3]);
+  const remainder = total % baskets;
+  return {
+    written,
+    total,
+    baskets,
+    quotient: (total - remainder) / baskets,
+    remainder,
+    asksRemainder: match![4] !== undefined,
+  };
+}
+
+async function pressButton(button: Locator, via: BoardVia): Promise<void> {
+  if (via === 'touch') {
+    await button.tap();
+  } else {
+    await button.focus();
+    await button.page().keyboard.press('Enter');
+  }
+}
+
+async function typeBoardNumber(
+  page: Page,
+  prefix: string,
+  value: number,
+  via: BoardVia,
+): Promise<void> {
+  const digits = String(value);
+  if (via === 'touch') {
+    for (const digit of digits) await page.getByTestId(`${prefix}-${digit}`).tap();
+  } else {
+    await page.keyboard.type(digits);
+  }
+}
+
+async function submitFeastAnswer(
+  page: Page,
+  answer: Pick<FeastProblem, 'quotient' | 'remainder' | 'asksRemainder'>,
+  via: BoardVia,
+): Promise<void> {
+  await typeBoardNumber(page, 'feast-keypad', answer.quotient, via);
+  if (answer.asksRemainder) {
+    if (via === 'touch') await page.getByTestId('feast-keypad-field-1').tap();
+    else await page.keyboard.press('r');
+    await typeBoardNumber(page, 'feast-keypad', answer.remainder, via);
+  }
+  if (via === 'touch') await page.getByTestId('feast-keypad-ok').tap();
+  else await page.keyboard.press('Enter');
+}
+
+async function clearFeastAnswer(page: Page, via: BoardVia): Promise<void> {
+  for (let press = 0; press < 8; press++) {
+    if (via === 'touch') await page.getByTestId('feast-keypad-backspace').tap();
+    else await page.keyboard.press('Backspace');
+  }
+}
+
+async function waitForBoardAdvance(page: Page, before: number, boardTestId: string): Promise<void> {
+  await expect(
+    results(page)
+      .or(page.locator(`[data-testid="${boardTestId}"]`))
+      .or(page.getByTestId('screen-round')),
+    'the level keeps moving after a board is completed',
+  ).toBeVisible({ timeout: 20_000 });
+  if (await page.getByTestId(boardTestId).isVisible()) {
+    await expect
+      .poll(
+        async () =>
+          Number(
+            (await page.getByTestId('minigame-progress').getAttribute('aria-valuenow')) ?? '0',
+          ),
+        { message: 'the minigame progress advances after the completed board' },
+      )
+      .toBeGreaterThan(before);
+  }
+}
+
+export async function playSharingFeast(page: Page, via: BoardVia): Promise<void> {
+  await expect(
+    page.getByTestId('screen-minigame'),
+    'the Sharing Feast activity opens as a minigame',
+  ).toBeVisible();
+  let provedKindFeedback = false;
+  let provedCompletion = false;
+
+  for (let board = 0; board < 10 && (await page.getByTestId('feast').isVisible()); board++) {
+    const progress = Number(
+      (await page.getByTestId('minigame-progress').getAttribute('aria-valuenow')) ?? '0',
+    );
+    const problem = await readFeastProblem(page);
+    await expect(
+      page.getByTestId('feast-goal'),
+      'the Sharing Feast goal is visible on the board',
+    ).toContainText(`${problem.total} fruit`);
+    await expect(
+      page.getByTestId('feast-question'),
+      'the Sharing Feast prompt asks what the baskets show',
+    ).toContainText(problem.asksRemainder ? 'left over' : 'each basket');
+
+    if (!provedKindFeedback) {
+      await submitFeastAnswer(page, { ...problem, quotient: problem.quotient + 1 }, via);
+      await expect(
+        minigameStatus(page),
+        'a wrong Sharing Feast answer gets a kind correction instead of completing the board',
+      ).toContainText('The bowl can still give every basket one more.');
+      await clearFeastAnswer(page, via);
+      provedKindFeedback = true;
+    }
+
+    for (let round = 0; round < problem.quotient; round++) {
+      const expectedBowl = problem.total - (round + 1) * problem.baskets;
+      await pressButton(page.getByTestId('feast-deal'), via);
+      await expect(
+        page.getByTestId('feast-bowl-count'),
+        'dealing a round removes one fruit per basket from the bowl',
+      ).toHaveText(`In the bowl: ${expectedBowl}`);
+    }
+
+    for (let index = 0; index < problem.baskets; index++) {
+      await expect(
+        page.getByTestId(`feast-basket-${index}`),
+        `basket ${index + 1} shows the fair share before the answer is submitted`,
+      ).toHaveAttribute('data-count', String(problem.quotient));
+    }
+    await expect(
+      page.getByTestId('feast-bowl-count'),
+      'the leftover fruit stays in the bowl before the answer',
+    ).toHaveText(`In the bowl: ${problem.remainder}`);
+
+    await submitFeastAnswer(page, problem, via);
+    await waitForBoardAdvance(page, progress, 'feast');
+    if (await page.getByTestId('feast').isVisible()) {
+      await expect(
+        minigameStatus(page),
+        'a completed Sharing Feast board cheers before the next board is played',
+      ).toHaveText('Well done! Here is the next one.');
+      provedCompletion = true;
+    }
+  }
+
+  expect(provedKindFeedback, 'Sharing Feast gave kind feedback for a wrong step').toBe(true);
+  expect(
+    provedCompletion,
+    'Sharing Feast completed at least one board and advanced the chain',
+  ).toBe(true);
+}
+
+function opRank(op: string): 1 | 2 {
+  return op === '·' || op === '×' || op === ':' || op === '÷' ? 2 : 1;
+}
+
+function calculate(left: number, op: string, right: number): number {
+  if (op === '+') return left + right;
+  if (op === '−' || op === '-') return left - right;
+  if (op === '·' || op === '×') return left * right;
+  if (right === 0 || left % right !== 0)
+    throw new Error(`The rendered operation ${left} ${op} ${right} is not whole.`);
+  return left / right;
+}
+
+async function readGolemTokens(page: Page): Promise<GolemToken[]> {
+  return page.getByTestId('golem-orders').evaluate((orders) =>
+    [...orders.children].map((child) => {
+      const text = child.textContent?.trim() ?? '';
+      const testId = child.getAttribute('data-testid');
+      if (child.tagName === 'BUTTON') return { kind: 'sign' as const, text, testId };
+      if (text === '(') return { kind: 'open' as const, text, testId };
+      if (text === ')') return { kind: 'close' as const, text, testId };
+      return { kind: 'number' as const, text, testId };
+    }),
+  );
+}
+
+function depthBefore(tokens: readonly GolemToken[]): number[] {
+  let depth = 0;
+  return tokens.map((token) => {
+    if (token.kind === 'close') depth--;
+    const current = depth;
+    if (token.kind === 'open') depth++;
+    return current;
+  });
+}
+
+function primaryBounds(
+  tokens: readonly GolemToken[],
+  depths: readonly number[],
+  at: number,
+  direction: -1 | 1,
+): [number, number] {
+  const depth = depths[at]!;
+  const index = at + direction;
+  if (tokens[index]?.kind === 'number' && depths[index] === depth) return [index, index];
+  if (direction < 0 && tokens[index]?.kind === 'close' && depths[index] === depth) {
+    let open = index - 1;
+    while (open >= 0 && !(tokens[open]?.kind === 'open' && depths[open] === depth)) open--;
+    return [open, index];
+  }
+  if (direction > 0 && tokens[index]?.kind === 'open' && depths[index] === depth) {
+    let close = index + 1;
+    while (close < tokens.length && !(tokens[close]?.kind === 'close' && depths[close] === depth))
+      close++;
+    return [index, close];
+  }
+  throw new Error(`The rendered Golem operation at token ${at} does not have visible operands.`);
+}
+
+function evaluateTokens(tokens: readonly GolemToken[]): number {
+  let at = 0;
+  const depths = depthBefore(tokens);
+  const sum = (): number => {
+    let value = product();
+    while (tokens[at]?.kind === 'sign' && opRank(tokens[at]!.text) === 1) {
+      const op = tokens[at++]!.text;
+      value = calculate(value, op, product());
+    }
+    return value;
+  };
+  const product = (): number => {
+    let value = primary();
+    while (tokens[at]?.kind === 'sign' && opRank(tokens[at]!.text) === 2) {
+      const op = tokens[at++]!.text;
+      value = calculate(value, op, primary());
+    }
+    return value;
+  };
+  const primary = (): number => {
+    const token = tokens[at++];
+    if (token?.kind === 'number') return Number(token.text);
+    if (token?.kind === 'open') {
+      const value = sum();
+      if (tokens[at++]?.kind !== 'close')
+        throw new Error('The rendered Golem expression has an unclosed bracket.');
+      return value;
+    }
+    throw new Error(`Unexpected ${token?.kind ?? 'end'} in the rendered Golem expression.`);
+  };
+  const value = sum();
+  if (at !== tokens.length || depths.length !== tokens.length) {
+    throw new Error('The rendered Golem expression has trailing tokens.');
+  }
+  return value;
+}
+
+export function nextGolemStep(tokens: readonly GolemToken[]): GolemStep {
+  const depths = depthBefore(tokens);
+  const signIndexes = tokens
+    .map((token, index) => ({ token, index, depth: depths[index]! }))
+    .filter((item) => item.token.kind === 'sign' && item.token.testId !== null);
+  expect(signIndexes.length, 'the Golem expression has at least one visible gear').toBeGreaterThan(
+    0,
+  );
+  const deepest = Math.max(...signIndexes.map((item) => item.depth));
+  const scope = signIndexes.filter((item) => item.depth === deepest);
+  const strong = scope.find((item) => opRank(item.token.text) === 2);
+  const chosen = strong ?? scope[0]!;
+  const [leftStart, leftEnd] = primaryBounds(tokens, depths, chosen.index, -1);
+  const [rightStart, rightEnd] = primaryBounds(tokens, depths, chosen.index, 1);
+  const left = evaluateTokens(tokens.slice(leftStart, leftEnd + 1));
+  const right = evaluateTokens(tokens.slice(rightStart, rightEnd + 1));
+  const expression = tokens
+    .slice(leftStart, rightEnd + 1)
+    .map((token) => token.text)
+    .join(' ')
+    .replace(/\( /g, '(')
+    .replace(/ \)/g, ')');
+  return {
+    gear: chosen.token.testId!,
+    expression,
+    value: calculate(left, chosen.token.text, right),
+  };
+}
+
+async function submitGolemValue(page: Page, value: number, via: BoardVia): Promise<void> {
+  await typeBoardNumber(page, 'golem-keypad', value, via);
+  if (via === 'touch') await page.getByTestId('golem-keypad-ok').tap();
+  else await page.keyboard.press('Enter');
+}
+
+export async function playGolemOrders(page: Page, via: BoardVia): Promise<void> {
+  await expect(
+    page.getByTestId('screen-minigame'),
+    'the Golem Orders activity opens as a minigame',
+  ).toBeVisible();
+  let provedKindFeedback = false;
+  let provedSolvedChain = false;
+
+  for (let board = 0; board < 10 && (await page.getByTestId('golem').isVisible()); board++) {
+    let progress = Number(
+      (await page.getByTestId('minigame-progress').getAttribute('aria-valuenow')) ?? '0',
+    );
+    await expect(
+      page.getByTestId('golem-ask'),
+      'the Golem board asks which sign goes first',
+    ).toContainText('sign');
+    await expect(
+      page.getByTestId('golem-orders'),
+      'the Golem expression is rendered as visible orders',
+    ).toBeVisible();
+
+    if (!provedKindFeedback) {
+      const tokens = await readGolemTokens(page);
+      const right = nextGolemStep(tokens);
+      const wrong = tokens.find(
+        (token) => token.kind === 'sign' && token.testId && token.testId !== right.gear,
+      );
+      if (wrong?.testId) {
+        await pressButton(page.getByTestId(wrong.testId), via);
+        await expect(
+          minigameStatus(page),
+          'a Golem gear chosen out of order gets kind order-of-operations feedback',
+        ).toContainText('Not yet! First brackets');
+      } else {
+        await pressButton(page.getByTestId(right.gear), via);
+        await submitGolemValue(page, right.value + 1, via);
+        await expect(
+          minigameStatus(page),
+          'a wrong Golem result gets kind arithmetic feedback',
+        ).toContainText('Almost!');
+      }
+      provedKindFeedback = true;
+    }
+
+    for (let step = 0; step < 12 && (await page.getByTestId('golem').isVisible()); step++) {
+      progress = Number(
+        (await page.getByTestId('minigame-progress').getAttribute('aria-valuenow')) ?? '0',
+      );
+      const tokens = await readGolemTokens(page);
+      const next = nextGolemStep(tokens);
+      await pressButton(page.getByTestId(next.gear), via);
+      await expect(
+        page.getByTestId('golem-ask'),
+        'after a gear is picked, Golem Orders asks for that visible operation result',
+      ).toHaveText(`${next.expression} = ?`);
+      await submitGolemValue(page, next.value, via);
+
+      await expect(
+        results(page).or(page.getByTestId('golem')).or(page.getByTestId('screen-round')),
+        'the Golem board keeps moving after a correct order step',
+      ).toBeVisible({ timeout: 20_000 });
+
+      if (await page.getByTestId('golem').isVisible()) {
+        const newProgress = Number(
+          (await page.getByTestId('minigame-progress').getAttribute('aria-valuenow')) ?? '0',
+        );
+        if (newProgress > progress) {
+          await expect(
+            page.getByTestId('golem-solved'),
+            "a finished Golem board's chain stays visible when the next board starts",
+          ).toContainText('Done:');
+          provedSolvedChain = true;
+          break;
+        }
+        await expect(
+          page.getByTestId('golem-trail'),
+          'a correct Golem step leaves the written chain visible',
+        ).toBeVisible();
+      } else {
+        break;
+      }
+    }
+  }
+
+  expect(provedKindFeedback, 'Golem Orders gave kind feedback for a wrong step').toBe(true);
+  expect(provedSolvedChain, "Golem Orders kept a finished board's chain on show").toBe(true);
+}

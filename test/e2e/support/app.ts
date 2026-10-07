@@ -5,8 +5,8 @@
  */
 import type { Locator, Page } from '@playwright/test';
 import { expect } from './fixtures';
-import { readAnswer } from './problem';
-import type { AnswerValue } from './problem';
+import { readAnswer, readProblem, written } from './problem';
+import type { AnswerValue, Token } from './problem';
 
 /** The router's screens (`data-screen` on the boot status, docs/app.md §2). */
 export const SCREENS = [
@@ -172,9 +172,13 @@ export async function finishStory(page: Page): Promise<void> {
 export async function startLevel(page: Page, region: string, level: string): Promise<void> {
   await page.getByTestId('hub-map').click();
   await expectScreen(page, 'map');
-  await page.getByTestId(`map-region-${region}`).click();
+  const place = page.getByTestId(`map-region-${region}`);
+  await expect(place, `${region} is awake on the valley map`).toBeVisible();
+  await place.click();
   await expectScreen(page, 'region');
-  await page.getByTestId(`level-${level}`).click();
+  const marker = page.getByTestId(`level-${level}`);
+  await expect(marker, `${level} is on the region's road`).toBeVisible();
+  await marker.click();
   await expectScreen(page, 'level');
   await page.getByTestId('level-play').click();
   await expectScreen(page, 'play');
@@ -280,6 +284,44 @@ export async function setSwitch(page: Page, testId: string, on: boolean): Promis
   await expect(page.getByTestId(testId)).toBeChecked({ checked: on });
 }
 
+/**
+ * The grown-ups open regions early ("Game settings for …", Settings tab): every level of an open
+ * region can be played, its boss included. Only locked regions have a switch, so the section is
+ * waited for (it is built once the keeper's game is open) before a missing switch counts as open.
+ */
+export async function openRegionsEarly(page: Page, regions: readonly string[]): Promise<void> {
+  const rules = page.getByTestId('parent-rules');
+  await expect(rules, "the keeper's game settings are shown").toBeVisible();
+  await expect(
+    rules.getByText(/These settings appear after/),
+    'the keeper has played, so their game settings can be changed',
+  ).toHaveCount(0);
+  for (const region of regions) {
+    const toggle = page.getByTestId(`setting-unlock-${region}`);
+    if ((await toggle.count()) === 0 || (await toggle.isChecked())) continue;
+    await changeOnPanel(page, () => toggle.click());
+    await expect(page.getByTestId('toast').last()).toHaveText('Game setting saved.');
+    // An open region leaves the list of locked ones; if its switch is still there, it is on.
+    if ((await toggle.count()) > 0) {
+      await expect(toggle, `${region} is open early`).toBeChecked();
+    }
+  }
+}
+
+/** A new family whose one keeper has heard the prologue and has `regions` open early. */
+export async function keeperWithRegions(
+  page: Page,
+  name: string,
+  regions: readonly string[],
+): Promise<void> {
+  await newFamily(page, { name });
+  await leaveHub(page);
+  await openGrownUps(page, 'settings');
+  await openRegionsEarly(page, regions);
+  await closeGrownUps(page);
+  await playAs(page, 1, name);
+}
+
 export async function setVolume(page: Page, testId: string, percent: number): Promise<void> {
   await changeOnPanel(page, () => page.getByTestId(testId).fill(String(percent)));
   await expectSettingsSaved(page);
@@ -330,17 +372,40 @@ export async function answerMode(page: Page): Promise<AnswerMode> {
   return 'keypad';
 }
 
+/** The choice tile id the shell gives an answer (`choice-<id>`): the number, `4r3`, or the name. */
+export function choiceId(answer: AnswerValue): string {
+  switch (answer.kind) {
+    case 'number':
+      return String(answer.value);
+    case 'remainder':
+      return `${answer.quotient}r${answer.remainder}`;
+    case 'relation':
+      return answer.relation;
+    case 'operation':
+      return answer.operation;
+    case 'term':
+      return answer.term;
+  }
+}
+
 /** Enter `answer` the way a child would: typed on the keyboard, or tapped on screen. */
 export async function giveAnswer(page: Page, answer: AnswerValue, via: Via): Promise<void> {
   const mode = await answerMode(page);
   if (mode === 'choice') {
-    if (answer.kind !== 'number') throw new Error('Choice tiles here take a number.');
-    if (via === 'pointer') await page.getByTestId(`choice-${answer.value}`).click();
-    else {
+    const tile = page.getByTestId(`choice-${choiceId(answer)}`);
+    if (via === 'pointer') await tile.click();
+    else if (answer.kind === 'number') {
+      // Number tiles pick by their digits.
       await page.keyboard.type(String(answer.value));
+      await page.keyboard.press('Enter');
+    } else {
+      await tile.focus();
       await page.keyboard.press('Enter');
     }
     return;
+  }
+  if (answer.kind !== 'number' && answer.kind !== 'remainder') {
+    throw new Error(`A ${answer.kind} is chosen on tiles, but this problem has the keypad.`);
   }
   if (via === 'keyboard') {
     if (answer.kind === 'number') await page.keyboard.type(String(answer.value));
@@ -366,12 +431,29 @@ export async function giveAnswer(page: Page, answer: AnswerValue, via: Via): Pro
 
 /** A plausible wrong answer for the problem on screen (another tile, or one more). */
 export async function wrongAnswerFor(page: Page, right: AnswerValue): Promise<AnswerValue> {
-  if ((await answerMode(page)) === 'choice' && right.kind === 'number') {
+  if ((await answerMode(page)) === 'choice') {
     for (const tile of await page.getByTestId('choices').getByRole('button').all()) {
-      const value = Number((await tile.textContent())?.trim());
-      if (value !== right.value && (await tile.isEnabled())) return { kind: 'number', value };
+      const id = (await tile.getAttribute('data-testid'))?.replace(/^choice-/, '');
+      if (!id || id === choiceId(right) || !(await tile.isEnabled())) continue;
+      switch (right.kind) {
+        case 'number':
+          return { kind: 'number', value: Number(id) };
+        case 'remainder': {
+          const [quotient = 0, remainder = 0] = id.split('r').map(Number);
+          return { kind: 'remainder', quotient, remainder };
+        }
+        case 'relation':
+          return { kind: 'relation', relation: id as typeof right.relation };
+        case 'operation':
+          return { kind: 'operation', operation: id as typeof right.operation };
+        case 'term':
+          return { kind: 'term', term: id as typeof right.term };
+      }
     }
     throw new Error('No wrong tile left to choose.');
+  }
+  if (right.kind !== 'number' && right.kind !== 'remainder') {
+    throw new Error(`A ${right.kind} is chosen on tiles, but this problem has the keypad.`);
   }
   return right.kind === 'remainder'
     ? { ...right, quotient: right.quotient + 1 }
@@ -417,16 +499,32 @@ export async function feedbackAfter(
   );
 }
 
-/** The round shows its next problem (feedback cleared) or has ended with the results. */
+/** The round shows its next problem (feedback cleared) or has ended with a story or the results. */
 export async function expectNextProblem(page: Page): Promise<void> {
   await expect(
-    results(page).or(page.locator('[data-testid="feedback"][data-kind="none"]')),
-    'the next problem or the results',
+    results(page)
+      .or(page.getByTestId('screen-story'))
+      .or(page.locator('[data-testid="feedback"][data-kind="none"]')),
+    'the next problem, a story or the results',
+  ).toBeAttached({ timeout: 20_000 });
+}
+
+/**
+ * Wait out a "Yes!" still on screen: its problem is answered and the next one is on its way (the
+ * coins fly, then the round pauses). Reading the screen before then would read the old problem.
+ */
+async function awaitOpenProblem(page: Page): Promise<void> {
+  await expect(
+    results(page)
+      .or(page.getByTestId('screen-story'))
+      .or(page.locator('[data-testid="feedback"]:not([data-kind="correct"])')),
+    'no "Yes!" is still waiting to move on',
   ).toBeAttached({ timeout: 20_000 });
 }
 
 /** Answer the problem on screen correctly and wait for the next problem or the results. */
 export async function answerCorrectly(page: Page, via: Via): Promise<AnswerValue> {
+  await awaitOpenProblem(page);
   const answer = await readAnswer(page);
   const kind = await feedbackAfter(page, () => giveAnswer(page, answer, via));
   expect(kind, `the right answer ${JSON.stringify(answer)} is praised`).toBe('correct');
@@ -439,6 +537,7 @@ export async function answerCorrectly(page: Page, via: Via): Promise<AnswerValue
  * its picture until the child goes on (`goOn`).
  */
 export async function answerWrongly(page: Page, via: Via): Promise<AnswerValue> {
+  await awaitOpenProblem(page);
   const right = await readAnswer(page);
   const wrong = await wrongAnswerFor(page, right);
   const kind = await feedbackAfter(page, () => giveAnswer(page, wrong, via));
@@ -465,6 +564,67 @@ export async function finishRound(page: Page, via: Via): Promise<AnswerValue[]> 
   }
   await expect(results(page)).toBeVisible();
   return given;
+}
+
+/** A problem as it was asked and answered: its written form, its step, its story. */
+export interface Played {
+  readonly written: string;
+  readonly tokens: readonly Token[];
+  readonly step: string;
+  readonly story: string;
+  readonly answer: AnswerValue;
+  /** The boss meter's value when the problem was asked, if the round has one. */
+  readonly meter: number | null;
+}
+
+/**
+ * Answer every remaining problem of the activity correctly (a story's sign, then its number),
+ * recording what each one asked; ends on the results.
+ */
+export async function playRound(page: Page, via: Via, limit = 80): Promise<Played[]> {
+  const played: Played[] = [];
+  const meter = page.getByTestId('boss-meter');
+  for (let step = 0; step < limit; step++) {
+    await awaitOpenProblem(page);
+    if (await results(page).isVisible()) break;
+    if (await page.getByTestId('screen-story').isVisible()) {
+      // A won boss ends its level with the closing lines of its story, then the results.
+      await finishStory(page);
+      continue;
+    }
+    if (await page.getByTestId('feedback-next').isVisible()) {
+      await goOn(page);
+      continue;
+    }
+    const problem = await readProblem(page);
+    const value = (await meter.count()) > 0 ? await meter.getAttribute('aria-valuenow') : null;
+    const answer = await answerCorrectly(page, via);
+    played.push({
+      written: written(problem.tokens),
+      tokens: problem.tokens,
+      step: problem.step,
+      story: problem.story.trim(),
+      answer,
+      meter: value === null ? null : Number(value),
+    });
+  }
+  await expect(results(page), 'the activity ends on its results').toBeVisible();
+  return played;
+}
+
+/** Through any hatch celebration ("Hooray!" for each new dragon) to the results card. */
+export async function throughHatches(page: Page): Promise<void> {
+  const hooray = page.getByTestId('hatch-continue');
+  const card = page.getByTestId('round-results');
+  for (let dragon = 0; dragon < 10; dragon++) {
+    await expect
+      .poll(async () => (await hooray.isVisible()) || (await card.isVisible()), {
+        message: 'a hatching dragon or the results card',
+      })
+      .toBe(true);
+    if (!(await hooray.isVisible())) return;
+    await hooray.click();
+  }
 }
 
 /** From the results, back to the valley (the hub). */

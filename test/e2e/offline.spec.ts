@@ -32,6 +32,7 @@ import {
 } from './support/app';
 // The project's own static server (scripts/serve.mjs), serving the build the web server made.
 import { serveDirectory } from '../../scripts/serve.mjs';
+import { siteFolder } from './support/site';
 
 const status = (page: Page) => page.getByTestId('offline-status');
 
@@ -69,7 +70,7 @@ test('installed for offline play, the game opens and saves after the server is g
 }, testInfo) => {
   test.setTimeout(180_000);
   const root = testInfo.config.configFile ? dirname(testInfo.config.configFile) : process.cwd();
-  const site = join(root, 'out', 'e2e-site');
+  const site = join(root, siteFolder());
   const server = await serveDirectory({ directory: () => site });
   const url = server.url('/dragon-valley/');
   guard.addOrigin(new URL(url).origin);

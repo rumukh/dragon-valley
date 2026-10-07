@@ -1,17 +1,18 @@
 /**
  * The harness proves itself (docs/testing.md §2.4, "mutation-check"): each guard, the
- * accessibility audit, the layout checks and the answer oracle is shown a planted fault and
- * must report it. A check that cannot see a console message, a foreign request, a nameless
- * button or a cut-off control would let every other spec pass vacuously.
+ * accessibility audit, the layout checks, the focus check and the answer oracle is shown a
+ * planted fault and must report it. A check that cannot see a console message, a foreign
+ * request, a nameless button, a cut-off control or a ring nobody can see would let every other
+ * spec pass vacuously.
  */
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import { expect, test } from './support/fixtures';
 import type { FindingKind, Guard } from './support/guard';
 import { boot, newFamily, startPlacement } from './support/app';
-import { audit } from './support/a11y';
+import { audit, focusPixels, focusStop, SEEN_PIXELS } from './support/a11y';
 import { layoutProblems } from './support/layout';
-import { evaluate, notationOf, solve, toToken, written } from './support/problem';
+import { evaluate, notationOf, solve, storyOperation, toToken, written } from './support/problem';
 import type { Token } from './support/problem';
 
 function seen(guard: Guard, kind: FindingKind, pattern: RegExp): boolean {
@@ -140,6 +141,65 @@ test.describe('the accessibility audit and the layout checks see planted faults'
   });
 });
 
+test.describe('the focus check sees rings by their pixels', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('a drawn ring is seen; a removed or covered one is not, even when the next stop scrolls', async ({
+    page,
+  }) => {
+    await boot(page);
+    await page.evaluate(() => {
+      const button = (id: string, style = ''): HTMLButtonElement => {
+        const node = document.createElement('button');
+        node.textContent = id;
+        node.setAttribute('data-testid', id);
+        node.style.cssText = style;
+        return node;
+      };
+      const room = (): HTMLDivElement => {
+        const node = document.createElement('div');
+        node.style.height = '2000px';
+        return node;
+      };
+      // Art over a control: its ring is drawn, then painted over.
+      const covered = document.createElement('div');
+      covered.style.cssText = 'position:relative;display:inline-block';
+      const art = document.createElement('div');
+      art.style.cssText = 'position:absolute;inset:-24px;background:#fff';
+      covered.append(button('qa-covered'), art);
+      document
+        .querySelector('main')
+        ?.append(
+          button('qa-start'),
+          button('qa-ring'),
+          button('qa-no-ring', 'outline:none !important;box-shadow:none !important'),
+          room(),
+          covered,
+          room(),
+          button('qa-end'),
+        );
+    });
+    await page.getByTestId('qa-start').focus();
+    await page.keyboard.press('Tab');
+    await expect(page.getByTestId('qa-ring')).toBeFocused();
+    expect(
+      await focusPixels(page, () => page.keyboard.press('Tab')),
+      'the ring the game draws is seen',
+    ).toBeGreaterThanOrEqual(SEEN_PIXELS);
+    await expect(page.getByTestId('qa-no-ring')).toBeFocused();
+    expect(
+      await focusPixels(page, () => page.keyboard.press('Tab')),
+      'a ring a rule takes away is not seen, though Tab scrolled the page to the next stop',
+    ).toBeLessThan(SEEN_PIXELS);
+    await expect(page.getByTestId('qa-covered')).toBeFocused();
+    expect((await focusStop(page)).ring, 'its computed style still promises a ring').toBe(true);
+    expect(
+      await focusPixels(page, () => page.keyboard.press('Tab')),
+      'a ring under art is not seen',
+    ).toBeLessThan(SEEN_PIXELS);
+  });
+});
+
 base.describe('the answer oracle works the written problem out by itself', () => {
   const tokens = (text: string): Token[] =>
     text
@@ -179,5 +239,60 @@ base.describe('the answer oracle works the written problem out by itself', () =>
     }
     expect(evaluate(tokens('7 : 2'), 0), 'division must come out whole').toBeNaN();
     expect(() => solve(tokens('2 · 4'))).toThrow('no equals sign');
+  });
+
+  base("comparisons, term questions and a story's sign", () => {
+    // `*` marks the number a term question asks about; `○` is a story's empty sign slot.
+    const marked = (text: string): Token[] =>
+      text.split(' ').map((part) =>
+        part.startsWith('*')
+          ? toToken({
+              className: 'dv-problem__number dv-problem__number--asked',
+              text: part.slice(1),
+            })
+          : part === '○'
+            ? toToken({ className: 'dv-problem__slot', text: '' })
+            : tokens(part)[0]!,
+      );
+    const relations: [string, string][] = [
+      ['3 · 4 ? 2 · 6', 'eq'],
+      ['8 · ( 6 + 4 ) ? 8 · 6 + 4', 'gt'],
+      ['2 · 4 + 5 ? 2 · ( 4 + 5 )', 'lt'],
+      ['56 ? 7 · 8', 'eq'],
+    ];
+    for (const [text, relation] of relations) {
+      expect(solve(tokens(text)), text).toEqual({ kind: 'relation', relation });
+    }
+    const terms: [string, string][] = [
+      ['*7 · 8 = 56', 'factor'],
+      ['7 · *8 = 56', 'factor'],
+      ['7 · 8 = *56', 'product'],
+      ['*56 : 7 = 8', 'dividend'],
+      ['56 : *7 = 8', 'divisor'],
+      ['56 : 7 = *8', 'quotient'],
+      ['35 : 9 = 3 r *8', 'remainder'],
+    ];
+    for (const [text, term] of terms) {
+      expect(solve(marked(text)), text).toEqual({ kind: 'term', term });
+    }
+    expect(() => solve(marked('8 ○ 2 = ?')), 'numbers alone cannot tell a sign').toThrow(
+      'only the story tells',
+    );
+    const stories: [string, string][] = [
+      ['There are 6 bikes at school. Each bike has 2 wheels. How many wheels are there?', 'mul'],
+      ['Anna has 24 apples. She puts 6 in each bag. How many bags does she fill?', 'div'],
+      ['Anna has 9 plums. Tom has 3 fewer. How many does Tom have?', 'sub'],
+    ];
+    for (const [story, operation] of stories) expect(storyOperation(story), story).toBe(operation);
+    expect(
+      () =>
+        storyOperation(
+          'Anna plants 3 rows of carrots. Each row has 4 carrots. Then Anna plants 5 more carrots. How many carrots are there?',
+        ),
+      'a two-step story asks no sign',
+    ).toThrow('do not name one operation');
+    expect(() => storyOperation('A dragon sneezes.'), 'an unknown story').toThrow(
+      'No word-problem template',
+    );
   });
 });

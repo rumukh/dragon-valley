@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import type { Project, ReporterDescription } from '@playwright/test';
-import { partFilter, selectedPart } from './test/e2e/support/parts';
+import { partFilter, selectedParts } from './test/e2e/support/parts';
+import { e2ePort, outputFolder, siteFolder } from './test/e2e/support/site';
 
 /**
  * Browser end-to-end tests (test/e2e/**). The web server builds the site with the GitHub Pages
@@ -8,9 +9,8 @@ import { partFilter, selectedPart } from './test/e2e/support/parts';
  *
  * Engines:
  * - CI (`CI` is set by GitHub Actions) installs Playwright's Chromium, WebKit and Firefox with
- *   `npx playwright install --with-deps` and runs one engine per job (`--project=<engine>`);
- *   WebKit, the slowest, runs in three parallel jobs, one per part of the suite
- *   (`DV_E2E_PART`, test/e2e/support/parts.ts).
+ *   `npx playwright install --with-deps` and runs each engine (`--project=<engine>`) in parallel
+ *   jobs, one or more parts of the suite each (`DV_E2E_PART`, test/e2e/support/parts.ts).
  * - Locally, Playwright never downloads browsers (corporate proxy). It drives the installed
  *   system browser through a channel: Microsoft Edge by default, or Chrome with
  *   `DV_BROWSER_CHANNEL=chrome`. Set `DV_E2E_ALL_ENGINES=1` to run all three engines locally
@@ -22,10 +22,10 @@ import { partFilter, selectedPart } from './test/e2e/support/parts';
  * every wait is for a named condition.
  */
 const ci = Boolean(process.env.CI);
-const port = Number(process.env.DV_E2E_PORT ?? 4321);
+const port = e2ePort();
 const base = '/dragon-valley/';
 const channel = process.env.DV_BROWSER_CHANNEL ?? 'msedge';
-const { testMatch, testIgnore } = partFilter(selectedPart());
+const { testMatch, testIgnore } = partFilter(selectedParts());
 
 const allEngines: Project[] = [
   { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
@@ -51,7 +51,7 @@ export default defineConfig({
   timeout: 120_000,
   expect: { timeout: 10_000 },
   reporter: [...reporters, ['./test/e2e/support/qa-reporter.ts']],
-  outputDir: 'test-results',
+  outputDir: outputFolder(port),
   use: {
     baseURL: `http://127.0.0.1:${port}${base}`,
     trace: 'retain-on-failure',
@@ -59,7 +59,7 @@ export default defineConfig({
   },
   projects: ci || process.env.DV_E2E_ALL_ENGINES ? allEngines : systemBrowser,
   webServer: {
-    command: `node scripts/serve.mjs --build --out out/e2e-site --base ${base} --port ${port}`,
+    command: `node scripts/serve.mjs --build --out ${siteFolder(port).replace(/\\/g, '/')} --base ${base} --port ${port}`,
     url: `http://127.0.0.1:${port}${base}`,
     reuseExistingServer: !ci,
     timeout: 120_000,

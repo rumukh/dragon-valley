@@ -33,7 +33,6 @@ import {
   waitReady,
 } from './support/app';
 import { readAnswer, readTokens, written } from './support/problem';
-import { unlessKnown } from './support/known-issues';
 import {
   corruptRecord,
   FAMILY_KEY,
@@ -104,21 +103,13 @@ test.describe('the save status', () => {
     await page.getByTestId('save-retry').click();
     await expect(saveStatus(page)).toHaveAttribute('data-state', 'failed');
 
-    // With room again, Retry stores the held answer.
+    // With room again, Retry stores the held answer: it is praised and the round moves on.
     await setStorageFaults(page, { failWrites: false });
-    await page.getByTestId('save-retry').click();
+    expect(
+      await feedbackAfter(page, () => page.getByTestId('save-retry').click()),
+      'the stored answer is praised',
+    ).toBe('correct');
     await expectSaved(page);
-    await unlessKnown(test.info(), 'DV-QA-01', async () => {
-      await expect(feedback(page), 'the stored answer is praised').toHaveAttribute(
-        'data-kind',
-        'correct',
-        { timeout: 2000 },
-      );
-    });
-    if ((await feedback(page).getAttribute('data-kind')) !== 'correct') {
-      // As a child would: press OK once more to go on.
-      await page.keyboard.press('Enter');
-    }
     await expect
       .poll(async () => written(await readTokens(page)), { message: 'the round moves on' })
       .not.toBe(held);

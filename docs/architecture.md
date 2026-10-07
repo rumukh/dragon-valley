@@ -126,8 +126,8 @@ All storage is local IndexedDB through `@aegis/browser` (no accounts, no cloud):
 | `npm run test:e2e`                        | Playwright flows, accessibility and screenshots at the Pages base (system Edge/Chrome locally; three engines on CI)                          |
 
 CI (`.github/workflows/ci.yml`) runs the gate on Ubuntu and Windows and audits its record in a
-separate step; the e2e jobs run the browser suite (`docs/testing.md` §5), one job per engine (WebKit
-in three parts). Pages
+separate step; the e2e jobs run the browser suite (`docs/testing.md` §5), each engine in parallel jobs
+(Chromium and Firefox in two, WebKit in five). Pages
 (`.github/workflows/pages.yml`) builds with base `/dragon-valley/`, re-checks the artifact and
 deploys it. The SDK is a pinned, digest-checked tarball set (`docs/sdk-update.md`).
 

@@ -130,15 +130,14 @@ test('a round speaks its feedback, the typed answer, coins and the result', asyn
   }
   expect(await feedbackAfter(page, () => page.keyboard.press('Enter'))).toBe('correct');
   await expectHeard(page, 'feedback', `Yes! ${written(tokens).replace('?', digits)}`);
-  await unlessKnown(test.info(), 'DV-QA-02', () =>
-    expectHeard(page, 'announcer-polite', 'You got 1 coin!', 2000),
-  );
-  await expectHeard(page, 'announcer-polite', /^You got \d+ coins?!$/);
+  await expectHeard(page, 'announcer-polite', 'You got 1 coin!');
 
   // The praise stays a moment; the round goes on with the next problem.
   await expectNextProblem(page);
   await finishRound(page, 'keyboard');
-  await expectHeard(page, 'announcer-polite', 'The dragons saw what you know!');
+  await unlessKnown(test.info(), 'DV-QA-16', () =>
+    expectHeard(page, 'announcer-polite', 'The dragons saw what you know!'),
+  );
 
   const all = await heard(page);
   expect(

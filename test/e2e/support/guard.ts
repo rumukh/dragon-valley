@@ -61,6 +61,8 @@ const LABELS: Record<FindingKind, string> = {
 
 /** Error texts engines use for a request cancelled by its own page (navigation, reload, close). */
 const CANCELLED = /ERR_ABORTED|NS_BINDING_ABORTED|NS_ERROR_ABORT|cancelled|canceled|aborted/i;
+/** The browser's own pages, such as Edge's downloads hub, opened in the context by the browser. */
+const BROWSER_PAGE = /^(edge|chrome|devtools):/i;
 
 export function isWebUrl(url: string): boolean {
   return /^(https?|wss?):/i.test(url);
@@ -298,7 +300,13 @@ export async function watchContext(context: BrowserContext, guard: Guard): Promi
   };
   context.pages().forEach(watchPage);
   context.on('page', watchPage);
-  context.on('console', (message) => guard.record('console', describeConsole(message)));
+  context.on('console', (message) => {
+    // The browser's own pages (Edge opens edge://downloads-hub after a download) are not the
+    // game: what they write is noted, never a finding.
+    const source = message.page()?.url() ?? message.location().url;
+    if (BROWSER_PAGE.test(source)) guard.note(`browser page: ${describeConsole(message)}`);
+    else guard.record('console', describeConsole(message));
+  });
   context.on('weberror', (error) => guard.record('page-error', String(error.error())));
   context.on('request', (request) => {
     const url = request.url();
