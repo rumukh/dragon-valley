@@ -2,8 +2,8 @@
  * The grown-ups' Progress tab: what a keeper knows and how practice went, from the game view
  * (`parent/progress.ts` shapes it). A summary, the Magic Window as two plain grids with their
  * axes (S4's `renderMasteryGrid`), the times tables (facts mastered, right and quick answers), the
- * hardest facts, the practised days as bars (with the same numbers as a table), and every skill
- * begun. Calm and plain: no sounds, no animation, nothing to press but the details.
+ * hardest facts, the last 60 days as bars (with the practised days' numbers as a list), and every
+ * skill begun. Calm and plain: no sounds, no animation, nothing to press but the details.
  */
 import { renderMasteryGrid } from '../art/window';
 import type { GameView, MasteryLevel, Notation } from '../../rules/contract';
@@ -15,7 +15,9 @@ import {
   multiplicationPanes,
   paneCounts,
   practisedSkills,
+  TREND_DAYS,
   trendChart,
+  unansweredTables,
 } from '../parent/progress';
 import { svgElement } from '../ui/art';
 import { h } from '../ui/dom';
@@ -55,37 +57,46 @@ export function shortDay(day: string): string {
   }).format(new Date(Date.UTC(year, month - 1, date)));
 }
 
+/** A row of numbers: a name and its values, or a note instead of values. */
+interface StatRow {
+  readonly name: string;
+  readonly values?: readonly string[];
+  readonly note?: string;
+}
+
 /**
  * Rows of numbers as a list rather than a table, so they reflow on a phone at any text size:
- * each row is a name and its labelled values ("Right answers: 92 %").
+ * each row is a name and its labelled values ("Right answers: 92 %"), one to a line.
  */
 function statList(
   label: string,
-  head: readonly string[],
-  rows: readonly (readonly string[])[],
+  labels: readonly string[],
+  rows: readonly StatRow[],
   testId: string,
 ): HTMLElement {
-  const [, ...labels] = head;
   return h(
     'ul',
     { className: 'dv-stats', testId, attributes: { 'aria-label': label } },
-    ...rows.map(([first = '', ...values]) =>
+    ...rows.map((row) =>
       h(
         'li',
         { className: 'dv-stats__row' },
-        h('span', { className: 'dv-stats__name', text: first }),
-        h(
-          'dl',
-          { className: 'dv-stats__values' },
-          ...values.map((value, index) =>
-            h(
-              'div',
-              { className: 'dv-stats__value' },
-              h('dt', { text: labels[index] ?? '' }),
-              h('dd', { text: value }),
-            ),
-          ),
-        ),
+        h('span', { className: 'dv-stats__name', text: row.name }),
+        row.values
+          ? h(
+              'dl',
+              { className: 'dv-stats__values' },
+              ...row.values.map((value, index) =>
+                h(
+                  'div',
+                  { className: 'dv-stats__value' },
+                  h('dt', { text: labels[index] ?? '' }),
+                  h('dd', { text: value }),
+                ),
+              ),
+            )
+          : null,
+        row.note ? h('span', { className: 'dv-stats__note', text: row.note }) : null,
       ),
     ),
   );
@@ -164,15 +175,34 @@ function legend(t: Translate): HTMLElement {
   );
 }
 
-function trend(t: Translate, view: GameView): HTMLElement {
+/** What the chart shows, in words: how many of the last days had practice, and how much. */
+function trendSummary(t: Translate, answers: readonly number[], name: string): string {
+  if (answers.length === 0) return t('parent.progress.trendNone', { name, span: TREND_DAYS });
+  const least = Math.min(...answers);
+  const most = Math.max(...answers);
+  return [
+    plural(t, answers.length, 'parent.progress.trendDays.one', 'parent.progress.trendDays.other', {
+      name,
+      span: TREND_DAYS,
+    }),
+    answers.length === 1
+      ? null
+      : least === most
+        ? plural(t, most, 'parent.progress.trendEach.one', 'parent.progress.trendEach.other')
+        : t('parent.progress.trendRange', { least, most }),
+  ]
+    .filter((sentence) => sentence !== null)
+    .join(' ');
+}
+
+function trend(t: Translate, view: GameView, today: string, name: string): HTMLElement {
   const days = view.parent.trend;
   if (days.length === 0) {
     return h('p', { className: 'dv-note', text: t('parent.progress.noDays') });
   }
-  const chart = trendChart(days, 600, 150);
-  const top = 12;
-  const bottom = 26;
-  const height = chart.height + top + bottom;
+  const chart = trendChart(days, today, 600, 150);
+  const top = 8;
+  const height = chart.height + top + 2;
   const picture = svgNode(
     'svg',
     {
@@ -204,35 +234,29 @@ function trend(t: Translate, view: GameView): HTMLElement {
         class: 'dv-trend__correct',
       }),
     ]),
-    svgNode(
-      'text',
-      { x: 0, y: height - 6, class: 'dv-trend__label' },
-      document.createTextNode(shortDay(days[0]!.day)),
-    ),
-    svgNode(
-      'text',
-      { x: chart.width, y: height - 6, class: 'dv-trend__label', 'text-anchor': 'end' },
-      document.createTextNode(shortDay(days[days.length - 1]!.day)),
-    ),
   );
-  const answers = days.map((day) => day.answers);
   return h(
     'div',
     { className: 'dv-trend', testId: 'progress-trend' },
     h(
       'figure',
-      {
-        className: 'dv-trend__figure',
-        attributes: {
-          role: 'img',
-          'aria-label': t('parent.progress.trendSummary', {
-            days: days.length,
-            least: Math.min(...answers),
-            most: Math.max(...answers),
-          }),
-        },
-      },
+      { className: 'dv-trend__figure' },
+      h('figcaption', {
+        testId: 'progress-trend-summary',
+        text: trendSummary(
+          t,
+          chart.bars.map((bar) => bar.answers),
+          name,
+        ),
+      }),
       picture,
+      // The dates follow the text size, so they stay readable however narrow the chart is.
+      h(
+        'div',
+        { className: 'dv-trend__days', attributes: { 'aria-hidden': 'true' } },
+        h('span', { text: shortDay(chart.first) }),
+        h('span', { text: shortDay(chart.last) }),
+      ),
     ),
     h(
       'p',
@@ -254,20 +278,11 @@ function trend(t: Translate, view: GameView): HTMLElement {
       h('summary', { text: t('parent.progress.trendTable') }),
       statList(
         t('parent.progress.trendHeading'),
-        [
-          t('parent.progress.day'),
-          t('parent.progress.answers'),
-          t('parent.progress.right'),
-          t('parent.progress.quick'),
-        ],
-        [...days]
-          .reverse()
-          .map((day) => [
-            shortDay(day.day),
-            String(day.answers),
-            String(day.correct),
-            String(day.fast),
-          ]),
+        [t('parent.progress.answers'), t('parent.progress.right'), t('parent.progress.quick')],
+        [...days].reverse().map((day) => ({
+          name: shortDay(day.day),
+          values: [String(day.answers), String(day.correct), String(day.fast)],
+        })),
         'progress-trend-table',
       ),
     ),
@@ -293,6 +308,7 @@ export function progressContent(
     ];
   }
   const skills = practisedSkills(parent.skills);
+  const unanswered = unansweredTables(view);
   const lit = paneCounts([...view.window.cells, ...view.window.division]);
   const crowned = view.dragons.filter((dragon) => dragon.stage === 'crowned').length;
   return [
@@ -325,18 +341,20 @@ export function progressContent(
     h('h3', { text: t('parent.progress.tablesHeading') }),
     statList(
       t('parent.progress.tablesHeading'),
-      [
-        t('parent.progress.table'),
-        t('parent.progress.mastered'),
-        t('parent.progress.right'),
-        t('parent.progress.quick'),
-      ],
-      parent.tables.map((row) => [
-        t('parent.progress.tableName', { table: row.table }),
-        t('parent.progress.of', { value: row.mastered, total: row.items }),
-        percent(t, row.accuracy),
-        percent(t, row.fastShare),
-      ]),
+      [t('parent.progress.mastered'), t('parent.progress.right'), t('parent.progress.quick')],
+      parent.tables.map((row) => {
+        const name = t('parent.progress.tableName', { table: row.table });
+        return unanswered.has(row.table)
+          ? { name, note: t('parent.progress.notPractised') }
+          : {
+              name,
+              values: [
+                t('parent.progress.of', { value: row.mastered, total: row.items }),
+                percent(t, row.accuracy),
+                percent(t, row.fastShare),
+              ],
+            };
+      }),
       'progress-tables',
     ),
     h('p', { className: 'dv-note', text: t('parent.progress.tablesNote') }),
@@ -362,7 +380,7 @@ export function progressContent(
           ),
         ),
     h('h3', { text: t('parent.progress.trendHeading') }),
-    trend(t, view),
+    trend(t, view, view.day, keeper.name),
     h('h3', { text: t('parent.progress.skillsHeading') }),
     skills.length === 0
       ? h('p', { className: 'dv-note', text: t('parent.progress.noSkills') })
@@ -372,12 +390,14 @@ export function progressContent(
           h('summary', { text: t('parent.progress.skillsShow', { count: skills.length }) }),
           statList(
             t('parent.progress.skillsHeading'),
-            [t('parent.progress.skill'), t('parent.progress.mastered'), t('parent.progress.right')],
-            skills.map((skill) => [
-              app.text.has(skill.titleKey) ? app.text(skill.titleKey) : skill.skill,
-              t('parent.progress.of', { value: skill.mastered, total: skill.items }),
-              percent(t, skill.accuracy),
-            ]),
+            [t('parent.progress.mastered'), t('parent.progress.right')],
+            skills.map((skill) => ({
+              name: app.text.has(skill.titleKey) ? app.text(skill.titleKey) : skill.skill,
+              values: [
+                t('parent.progress.of', { value: skill.mastered, total: skill.items }),
+                percent(t, skill.accuracy),
+              ],
+            })),
             'progress-skills',
           ),
         ),

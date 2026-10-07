@@ -9,12 +9,16 @@ import type { ContentData, GameView, WindowCell } from '../../../src/rules/contr
 import { createTranslator } from '../../../src/app/i18n/messages';
 import { factText } from '../../../src/app/math/facts';
 import {
+  daysBetween,
   divisionPanes,
+  HARDEST_LIMIT,
   itemLabel,
   multiplicationPanes,
   paneCounts,
   practisedSkills,
+  shiftDay,
   trendChart,
+  unansweredTables,
 } from '../../../src/app/parent/progress';
 import {
   earnedCertificates,
@@ -69,28 +73,80 @@ describe('the Magic Window as grids', () => {
   });
 });
 
-describe('the practised days as bars', () => {
+describe('the last 60 days as bars', () => {
   const trend = [
+    { day: '2026-07-01', answers: 90, correct: 90, fast: 90 },
     { day: '2026-10-05', answers: 40, correct: 30, fast: 10 },
     { day: '2026-10-06', answers: 20, correct: 20, fast: 20 },
   ];
 
-  it('scales the busiest day to the full height, one even slot per day', () => {
-    const chart = trendChart(trend, 600, 150);
-    expect(chart.most).toBe(40);
-    expect(chart.bars.map((bar) => bar.height)).toEqual([150, 75]);
-    expect(chart.bars[0]).toMatchObject({
-      correctHeight: 112.5,
-      fastHeight: 37.5,
-      x: 45,
-      width: 210,
-    });
-    expect(chart.bars[1]!.x).toBe(345);
+  it('counts calendar days across months and years', () => {
+    expect(daysBetween('2026-10-05', '2026-10-07')).toBe(2);
+    expect(daysBetween('2026-12-31', '2027-01-01')).toBe(1);
+    expect(daysBetween('2026-03-01', '2026-02-28')).toBe(-1);
+    expect(shiftDay('2026-10-07', -59)).toBe('2026-08-09');
+    expect(shiftDay('2028-02-28', 1), 'a leap day').toBe('2028-02-29');
   });
 
-  it('draws nothing tall for days without answers', () => {
-    const chart = trendChart([{ day: '2026-10-07', answers: 0, correct: 0, fast: 0 }], 600, 150);
-    expect(chart.bars[0]!.height).toBe(0);
+  it('gives every calendar day a slot, so a gap in practice shows', () => {
+    const chart = trendChart(trend, '2026-10-07', 600, 150);
+    expect(chart).toMatchObject({ first: '2026-08-09', last: '2026-10-07', most: 40 });
+    expect(
+      chart.bars.map((bar) => bar.day),
+      'a day before the window is left to the list',
+    ).toEqual(['2026-10-05', '2026-10-06']);
+    expect(chart.bars.map((bar) => bar.height)).toEqual([150, 75]);
+    expect(chart.bars[0]).toMatchObject({ correctHeight: 112.5, fastHeight: 37.5, width: 7 });
+    expect(chart.bars[0]!.x, 'two days before today: slot 57 of 0..59').toBe(571.5);
+    expect(chart.bars[1]!.x).toBe(581.5);
+  });
+
+  it('keeps one practised day narrow, and draws nothing tall for a day without answers', () => {
+    const one = trendChart(
+      [{ day: '2026-10-07', answers: 0, correct: 0, fast: 0 }],
+      '2026-10-07',
+      600,
+      150,
+    );
+    expect(one.bars).toHaveLength(1);
+    expect(one.bars[0]).toMatchObject({ x: 591.5, width: 7, height: 0 });
+  });
+});
+
+describe('times tables not practised yet', () => {
+  const row = (table: number, accuracy = 0, fastShare = 0, mastered = 0) => ({
+    table,
+    accuracy,
+    fastShare,
+    mastered,
+    items: 21,
+  });
+  const cells = [
+    cell('mul:7x3', 7, 3, 'dim'),
+    cell('mul:3x7', 3, 7, 'dim'),
+    cell('mul:2x2', 2, 2, 'gold'),
+  ];
+  const view = (hardest: GameView['parent']['hardest']): GameView =>
+    ({
+      window: { cells, division: [] },
+      parent: { tables: [row(2, 100, 80, 1), row(3), row(7)], hardest },
+    }) as unknown as GameView;
+
+  it('tells a table nobody answered from one answered only wrongly', () => {
+    const tables = unansweredTables(view([{ item: 'mul:3x7', accuracy: 0, box: 0 }]));
+    expect([...tables], 'mul:3x7 was missed: the 3 and 7 tables were answered').toEqual([]);
+    expect([...unansweredTables(view([{ item: 'mul:2x2', accuracy: 100, box: 3 }]))]).toEqual([
+      3, 7,
+    ]);
+  });
+
+  it('cannot tell when the hardest list is all 0 % facts, so it shows the numbers', () => {
+    const missed = Array.from({ length: HARDEST_LIMIT }, (_, index) => ({
+      item: `div:${index}:1`,
+      accuracy: 0,
+      box: 0,
+    }));
+    expect(unansweredTables(view(missed)).size).toBe(0);
   });
 });
 

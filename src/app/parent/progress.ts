@@ -1,12 +1,13 @@
 /**
  * The grown-ups' Progress tab, shaped from the game view (`parent`, `window`, `dragons`): no rule
  * lives here, only how the rules' numbers are laid out. The Magic Window becomes two plain grids
- * (multiplication 11 × 11, division 10 × 11) for S4's `renderMasteryGrid`; the 60-day trend
- * becomes bars; a practised item becomes words a grown-up can read ("7 · 8 = 56", "Division with
+ * (multiplication 11 × 11, division 10 × 11) for S4's `renderMasteryGrid`; the last 60 days
+ * become bars; a practised item becomes words a grown-up can read ("7 · 8 = 56", "Division with
  * remainder by 7").
  */
 import { MASTERY_LEVELS, TABLE_MAX, TABLE_MIN } from '../../rules/contract';
 import type {
+  GameView,
   MasteryLevel,
   Notation,
   ParentView,
@@ -70,6 +71,28 @@ export function paneCounts(cells: readonly WindowCell[]): PaneCounts {
   return { levels, polish, lit: cells.length - levels.dim, total: cells.length };
 }
 
+/** Calendar days in the practice chart, ending today. */
+export const TREND_DAYS = 60;
+
+/** The most entries the view's hardest list holds (docs/contract.md, `ParentView.hardest`). */
+export const HARDEST_LIMIT = 10;
+
+const DAY_MS = 86_400_000;
+
+function dayStart(day: string): number {
+  return Date.parse(`${day}T00:00:00Z`);
+}
+
+/** Whole calendar days from `from` to `to` (both `YYYY-MM-DD`). */
+export function daysBetween(from: string, to: string): number {
+  return Math.round((dayStart(to) - dayStart(from)) / DAY_MS);
+}
+
+/** The day `offset` calendar days after `day` (before it when negative). */
+export function shiftDay(day: string, offset: number): string {
+  return new Date(dayStart(day) + offset * DAY_MS).toISOString().slice(0, 10);
+}
+
 export interface TrendBar {
   readonly day: string;
   readonly answers: number;
@@ -84,32 +107,69 @@ export interface TrendBar {
 }
 
 export interface TrendChart {
+  /** The practised days in the window, oldest first. */
   readonly bars: readonly TrendBar[];
+  /** The window's first and last calendar days. */
+  readonly first: string;
+  readonly last: string;
   readonly most: number;
   readonly width: number;
   readonly height: number;
 }
 
 /**
- * Bars for the practised days (oldest first), scaled so the busiest day fills the height. Each
- * day gets the same slot; a bar takes 70 % of its slot.
+ * The `span` calendar days up to `today` as bars, so gaps in practice show: every day has the
+ * same slot, a practised day's bar takes 70 % of it, and the busiest day fills the height. Days
+ * before the window (the view keeps the last 60 practised days) are left to the list.
  */
-export function trendChart(trend: ParentView['trend'], width: number, height: number): TrendChart {
-  const most = Math.max(1, ...trend.map((day) => day.answers));
-  const slot = trend.length > 0 ? width / trend.length : width;
-  const scale = (value: number): number => Math.round((value / most) * height * 100) / 100;
-  const bars = trend.map((day, index) => ({
+export function trendChart(
+  trend: ParentView['trend'],
+  today: string,
+  width: number,
+  height: number,
+  span = TREND_DAYS,
+): TrendChart {
+  const shown = trend
+    .map((day) => ({ day, index: span - 1 - daysBetween(day.day, today) }))
+    .filter(({ index }) => index >= 0 && index < span);
+  const most = Math.max(1, ...shown.map(({ day }) => day.answers));
+  const slot = width / span;
+  const round = (value: number): number => Math.round(value * 100) / 100;
+  const scale = (value: number): number => round((value / most) * height);
+  const bars = shown.map(({ day, index }) => ({
     day: day.day,
     answers: day.answers,
     correct: day.correct,
     fast: day.fast,
-    x: Math.round((index * slot + slot * 0.15) * 100) / 100,
-    width: Math.round(slot * 0.7 * 100) / 100,
+    x: round(index * slot + slot * 0.15),
+    width: round(slot * 0.7),
     height: scale(day.answers),
     correctHeight: scale(day.correct),
     fastHeight: scale(day.fast),
   }));
-  return { bars, most, width, height };
+  return { bars, first: shiftDay(today, -(span - 1)), last: today, most, width, height };
+}
+
+/**
+ * Times tables with no answers yet. The view gives each table shares, not a count, and a table
+ * answered only wrongly shows the same zeros. But all of such a table's answered facts would be at
+ * 0 % right, and the hardest list puts 0 % facts first: unless that list is all 0 % (it may then
+ * leave some out), a table at zero with none of its facts on it has not been answered.
+ */
+export function unansweredTables(view: GameView): ReadonlySet<number> {
+  const missed = new Set(
+    view.parent.hardest.filter((entry) => entry.accuracy === 0).map((entry) => entry.item),
+  );
+  const tables = new Set<number>();
+  if (missed.size >= HARDEST_LIMIT) return tables;
+  for (const row of view.parent.tables) {
+    if (row.accuracy > 0 || row.fastShare > 0 || row.mastered > 0) continue;
+    const answered = view.window.cells.some(
+      (cell) => (cell.row === row.table || cell.column === row.table) && missed.has(cell.item),
+    );
+    if (!answered) tables.add(row.table);
+  }
+  return tables;
 }
 
 /** Grown-up names of the generators' skill buckets (docs/contract.md §5.4). */

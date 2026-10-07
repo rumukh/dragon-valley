@@ -2528,7 +2528,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Numbers as a list of rows: a name, then its labelled values, wrapping as needed. */
+/* Numbers as a list of rows: a name, then its labelled values, one to a line. */
 .dv-stats {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(22em, 100%), 1fr));
@@ -2540,6 +2540,7 @@
 
 .dv-stats__row {
   display: grid;
+  align-content: start;
   gap: 0.15em;
   padding: 0.4em 0.7em;
   border: 0.06em solid var(--dv-line);
@@ -2552,9 +2553,8 @@
 }
 
 .dv-stats__values {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.1em 1.2em;
+  display: grid;
+  gap: 0.1em;
   margin: 0;
   font-variant-numeric: tabular-nums;
 }
@@ -2578,7 +2578,11 @@
   font-weight: 700;
 }
 
-/* The practice days as bars: every answer (pale), the right ones (green, in front). */
+.dv-stats__note {
+  color: var(--dv-ink-soft);
+}
+
+/* The last 60 days as bars: every answer (pale), the right ones (green, in front). */
 .dv-trend {
   display: grid;
   gap: 0.6em;
@@ -2586,6 +2590,8 @@
 }
 
 .dv-trend__figure {
+  display: grid;
+  gap: 0.3em;
   margin: 0;
 }
 
@@ -2614,9 +2620,13 @@
   background: var(--dv-success);
 }
 
-.dv-trend__label {
-  font-size: 18px;
-  fill: var(--dv-ink-soft);
+.dv-trend__days {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 1em;
+  color: var(--dv-ink-soft);
+  font-size: 0.9rem;
 }
 
 .dv-trend__key {
