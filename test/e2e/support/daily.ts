@@ -70,7 +70,7 @@ async function leaves(page: Page, testId: string, what: string): Promise<void> {
 
 /** Results → Continue, and wait until the results have given way to what comes next. */
 async function continueFromResults(page: Page): Promise<void> {
-  await page.getByTestId('results-continue').click();
+  await page.getByTestId('results-continue').click({ timeout: 10_000 });
   await leaves(page, 'screen-results', 'the results give way to what comes next');
 }
 
