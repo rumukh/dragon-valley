@@ -1,8 +1,10 @@
 /**
  * The keeper's home in the valley: their dragons in the nest (the featured one big, with how
- * close it is to growing), the coin purse and save status, today's goal with the week's
- * practised days (a habit view, never a streak), and one big Daily Adventure button that does
- * what the game suggests next (docs/design.md §4.2). The valley map is one tap away.
+ * close it is to growing, and the others as a strip that opens the Dragon Den), the coin purse
+ * and save status, today's goal with the week's practised days (a habit view, never a streak),
+ * and one big Daily Adventure button that does what the game suggests next (docs/design.md §4.2).
+ * The valley map is one tap away. On a landscape screen the whole hub fits in the window, however
+ * many dragons there are.
  */
 import type { GameAction, GameView } from '../../rules/contract';
 import { taken } from '../controller/commands';
@@ -21,6 +23,9 @@ import { createSaveStatus, keeperBadge, toastStickers, topBar } from './common';
 import { hasDiary } from './goodbye';
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+
+/** Other dragons drawn in the hub's strip; the rest are counted ("+8") and live in the den. */
+export const HUB_FRIENDS = 5;
 
 const PLACES = {
   market: { label: 'hub.market', icon: 'bag' },
@@ -83,28 +88,49 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       );
     }
     const others = current.dragons.filter((dragon) => dragon.id !== featured.id);
-    if (others.length > 0) {
-      parts.push(
-        h(
-          'ul',
-          { className: 'dv-hub__others', attributes: { 'aria-label': t('hub.otherDragons') } },
-          ...others.map((dragon) =>
-            h(
-              'li',
-              { className: 'dv-hub__other', dataset: { dragon: dragon.id } },
-              viewDragonArt(dragon, {
-                className: 'dv-dragon-art dv-dragon-art--small',
-                animated: false,
-              }),
-              h('span', {
-                text: t(`stage.${dragon.stage}` as MessageKey, { name: text(dragon.nameKey) }),
-              }),
-            ),
-          ),
-        ),
-      );
-    }
+    if (others.length > 0) parts.push(friendsStrip(others));
     nest.replaceChildren(...parts);
+  };
+
+  /** The other dragons, small, in one strip that opens the den (their names for screen readers). */
+  const friendsStrip = (others: GameView['dragons']): HTMLElement => {
+    const shown = others.slice(0, HUB_FRIENDS);
+    const more = others.length - shown.length;
+    const strip = h(
+      'button',
+      {
+        className: 'dv-hub__friends',
+        testId: 'hub-dragons',
+        dataset: { count: String(others.length) },
+        attributes: { type: 'button' },
+      },
+      h(
+        'span',
+        { className: 'dv-hub__friends-art', attributes: { 'aria-hidden': 'true' } },
+        ...shown.map((dragon) =>
+          viewDragonArt(dragon, { className: 'dv-dragon-art dv-hub__friend', animated: false }),
+        ),
+      ),
+      h('span', { className: 'dv-hub__friends-label', text: t('hub.myDragons') }),
+      more > 0
+        ? h('span', {
+            className: 'dv-hub__friends-more',
+            text: t('hub.moreDragons', { count: more }),
+            attributes: { 'aria-hidden': 'true' },
+          })
+        : null,
+      h('span', {
+        className: 'dv-visually-hidden',
+        text: others
+          .map((dragon) => t(`stage.${dragon.stage}` as MessageKey, { name: text(dragon.nameKey) }))
+          .join(', '),
+      }),
+    );
+    strip.addEventListener('click', () => {
+      app.kit.cue('ui.tap');
+      void app.router.push(app.screens.den(keeperId)).catch(app.kit.onError);
+    });
+    return strip;
   };
 
   const adventureSlot = h('div', { className: 'dv-hub__adventure' });

@@ -432,8 +432,9 @@
 
 /* ---- Hub ------------------------------------------------------------------------------- */
 
-/* One column on phones (dragon, today's card, week, places); on a landscape tablet the dragon,
-   its week and the places stand beside today's card, so the whole hub fits on one screen. */
+/* One column on phones (dragon, today's card, week, places). On a landscape screen the dragon
+   and its week stand beside today's card with the places along the bottom, and from 1000 px wide
+   the places go down the right: the whole hub fits in the window at every landscape size. */
 .dv-hub__layout {
   display: grid;
   grid-template-areas: 'nest' 'today' 'week' 'places';
@@ -451,9 +452,88 @@
     grid-template-areas:
       'nest today'
       'week today'
-      'places today';
+      'places places';
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     grid-template-rows: auto auto auto;
+  }
+}
+
+/* Three columns need the dragon's name to fit a third of the window: not with text at 150 % or
+   more, which keeps two. */
+@media (min-width: 1000px) and (orientation: landscape) {
+  html:not([data-text-scale='1.5'], [data-text-scale='2']) .dv-hub__layout {
+    grid-template-areas:
+      'nest today places'
+      'week today places';
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr) auto;
+    grid-template-rows: auto auto;
+    width: min(100%, 76em);
+  }
+
+  html:not([data-text-scale='1.5'], [data-text-scale='2']) .dv-hub__layout > .dv-hub__places {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    align-self: center;
+  }
+}
+
+/* On a landscape window the dragon sits just above its week; on a short one today's card and the
+   places tighten up, so nothing runs past the bottom. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-hub__layout > .dv-hub__nest {
+    align-self: end;
+  }
+
+  .dv-hub__layout > .dv-hub__week {
+    align-self: start;
+  }
+
+  .dv-hub__places {
+    gap: 0.5em;
+  }
+
+  .dv-hub__places .dv-button {
+    padding-inline: 0.6em;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 860px) {
+  .dv-hub__adventure .dv-button--big {
+    font-size: min(1.5rem, 7vw, 4.4vh);
+  }
+
+  .dv-hub__today {
+    gap: 0.4em;
+    padding: 14px 18px;
+  }
+
+  .dv-hub__greeting {
+    font-size: min(1.5rem, 8vw);
+  }
+
+  .dv-hub__today .dv-hub__goal {
+    gap: 0.3em;
+  }
+
+  .dv-hub__goal .dv-note {
+    font-size: 0.8rem;
+  }
+
+  .dv-quests__title {
+    font-size: 0.85rem;
+  }
+}
+
+/* On the shortest windows the quests keep their list and lose only their visible title. */
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 700px) {
+  .dv-hub__today .dv-quests__title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 
@@ -497,11 +577,11 @@
 }
 
 .dv-hub__dragon svg {
-  width: min(15rem, 32vh, 72vw);
+  width: min(15rem, 28vh, 72vw);
 }
 
 .dv-hub__dragon[data-stage='egg'] svg {
-  width: min(9rem, 24vh, 46vw);
+  width: min(9rem, 20vh, 46vw);
 }
 
 .dv-hub__dragon-name {
@@ -520,24 +600,50 @@
   background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
 }
 
-.dv-hub__others {
-  display: flex;
+/* The other dragons: a few small ones in one strip (the rest counted) that opens the den. With
+   big text the words go under the dragons rather than out of the column. */
+.dv-hub__friends {
+  display: inline-flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
-  gap: 0.8em;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: 0.2em 0.6em;
+  min-height: var(--dv-target);
+  max-width: 100%;
+  padding: 0.15em 0.9em 0.15em 0.5em;
+  border: 0.08em solid var(--dv-line);
+  border-radius: 1.4em;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--dv-ink);
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+  box-shadow: 0 0.18em 0 var(--dv-line-strong);
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
-.dv-hub__other {
-  display: grid;
-  justify-items: center;
-  gap: 0.1em;
-  max-width: 6.5em;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-align: center;
+.dv-hub__friends:hover {
+  background: var(--dv-paper);
+}
+
+.dv-hub__friends-art {
+  display: inline-flex;
+  align-items: flex-end;
+  padding-inline-end: 0.4em;
+}
+
+/* Pictures, so they keep their size at any text size. */
+.dv-hub__friend {
+  width: 44px;
+  margin-inline-end: -0.4em;
+}
+
+.dv-hub__friends-more {
+  padding: 0.05em 0.45em;
+  border-radius: 1em;
+  color: var(--dv-on-accent);
+  background: var(--dv-accent-deep);
 }
 
 .dv-hub__today {
