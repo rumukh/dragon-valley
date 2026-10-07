@@ -86,8 +86,7 @@ promises, live feedback, focus with dialogs and reduced motion are covered. The 
 
 1. Buying a hat and dressing a dragon; the sticker album's pages; the Magic Window's states.
 2. The Daily Adventure end to end with the daily goal, the gift and snack time.
-3. Memory Match's variants, Number Trail, Fact Family, and the Egg Grid by touch.
-4. The grown-ups' daily limit, once it is kept across page loads (app.md §16).
-5. With S3's teach rendering (#27): a low-success day's pacing and the picture model shown before a
+3. The grown-ups' daily limit, once it is kept across page loads (app.md §16).
+4. With S3's teach rendering (#27): a low-success day's pacing and the picture model shown before a
    twice-missed item is asked again.
-6. Still to be built (app.md §16): the persisted daily limit and the credits after the finale.
+5. Still to be built (app.md §16): the persisted daily limit and the credits after the finale.
