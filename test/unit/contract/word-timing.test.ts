@@ -3,7 +3,8 @@
  * story's length in `words`, and the balance a `response.word` reading time. Both are optional,
  * so content without them (1.1.0) stays valid and keeps the plain response limits. A count must
  * be the story's length in the catalog (`storyWordCount`, checked by the content gate through
- * `checkStoryWords`). Negative cases start from the shipped pack and change one thing.
+ * `checkStoryWords`). Negative cases start from the shipped pack and change one thing; content
+ * 1.2.0 ships both fields, so "without them" is the shipped pack with both taken out.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -41,11 +42,29 @@ function counted(): Pack {
   return pack;
 }
 
+/** The pack with neither field: no story's word count, no reading time. */
+function bare(): Pack {
+  const pack = fresh();
+  for (const t of pack.data.wordTemplates) delete t.words;
+  delete pack.data.balance.response.word;
+  return pack;
+}
+
 describe('reading time in the content', () => {
-  it('is optional: the shipped pack has neither field and is valid', () => {
-    const pack = fresh();
+  it('is optional: a pack with neither field is valid', () => {
+    const pack = bare();
     expect(pack.data.wordTemplates.some((t) => t.words !== undefined)).toBe(false);
     expect(pack.data.balance.response.word).toBeUndefined();
+    expect(diagnostics(pack)).toEqual([]);
+  });
+
+  it('is shipped: every story counted, read at 1 s a word (design §6.2, F1b)', () => {
+    const pack = fresh();
+    expect(
+      pack.data.wordTemplates.filter((t) => t.words !== storyWordCount(catalog[t.textKey]!)),
+      'every template counts its story',
+    ).toEqual([]);
+    expect(pack.data.balance.response.word).toEqual(TIMING);
     expect(diagnostics(pack)).toEqual([]);
   });
 
@@ -87,7 +106,8 @@ describe('reading time in the content', () => {
   });
 
   it('checks every count against its story in the catalog', () => {
-    expect(checkStoryWords(fresh().data, catalog), 'no counts, nothing to check').toEqual([]);
+    expect(checkStoryWords(bare().data, catalog), 'no counts, nothing to check').toEqual([]);
+    expect(checkStoryWords(fresh().data, catalog), 'the shipped counts').toEqual([]);
     const pack = counted();
     expect(checkStoryWords(pack.data, catalog)).toEqual([]);
     const nests = pack.data.wordTemplates.find((t) => t.id === 'word.equal-groups.nests')!;
