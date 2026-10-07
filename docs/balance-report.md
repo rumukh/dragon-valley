@@ -2,7 +2,8 @@
 
 Four synthetic children play the whole v1 valley through the real rules for 12 weeks, and three
 of them for a school year. This report records what they measured with content 1.2.0, the balance
-it sets and why, and what the balance block cannot fix.
+it sets and why, and what the balance block cannot fix. §8 studies how the struggling child could
+see its dragons grow up, and §9 validates content 1.3.0, which follows from it.
 
 - **Code**: the learner model `test/sim/learners.ts`, the driver `test/sim/driver.ts` and the named
   checks `test/sim/report.ts`. [testing.md §4](testing.md#4-learner-simulation-bots) explains how
@@ -10,7 +11,8 @@ it sets and why, and what the balance block cannot fix.
 - **Content and rules**: content 1.2.0 (nine regions, 59 levels, 15 dragons) on the rules of S2b's
   PR C (#27, the struggling child's success), PR D (#31, rule facts and the valley's basket) and
   PR E (#32, the reading allowance), with the snack hotfix (#34). Content 1.1.0 is measured on the
-  same rules for comparison (§4.3).
+  same rules for comparison (§4.3). §9: content 1.3.0 on PR F (#40) and S2b's PR G (#50, the
+  effort path).
 - **Runs**: 84 days from Monday 2026-10-05 with seed `simulation`; the struggling and average
   children also with seeds `s2`-`s5` (§4.2); the average, slow and struggling children over 365
   days for the market (§4.4). A child takes time to read a story's English text (§2).
@@ -80,6 +82,13 @@ child grows no dragon to adult in a school year (§4.4). PR F (#40) has since fi
 Ember's facts (§5.8, §5.9). The growth study in §8 compares ways to let the struggling child see
 its dragons grow up.
 
+**Content 1.3.0** (§9) ships the study's effort path with adult at 80 %. It plays exactly like
+1.2.0 with PR F, and its dragons grow on the days the study predicted (336 of 336 stage days).
+Every check passes in every 84-day run. By day 84 the struggling child has 6-11 table younglings
+(none on 1.2.0), and 5-8 adults within a year (three seeds). The average child's 11th adult comes
+on day 39-70 over five seeds (median 56; 72 on 1.2.0). Over a year, weekly progress runs out for
+the slow child (21 of 53 weeks): a lit pane no longer goes dark after a miss to be lit again.
+
 ## 2. The children
 
 Each child knows every fact to some strength from 0 to 100.
@@ -137,6 +146,7 @@ The checks are named; each label states what it measured.
 | success band       | average: 75 % of sessions at 70-90 % success, median inside                          | testing.md §4             |
 | struggling success | struggling: median success per session at least 60 % (acceptance), 70-90 % (stretch) | testing.md §4, after §5.1 |
 | tables mastered    | average: every times-table dragon adult within 12 weeks                              | brief; a school trimester |
+| growing up         | struggling: the first table youngling by day 118; in a year, at least 3 table adults | coordinator (1.3.0)       |
 | rewarded           | every child earns coins every session                                                | testing.md §4             |
 | weekly progress    | average, struggling, slow: a level, hatch, growth, sticker or lit pane every week    | testing.md §4             |
 | gift               | the gift opens every session that reaches the daily goal                             | design §7.4               |
@@ -556,3 +566,117 @@ v1.1):
 forgets fast (`forget` 6) and never benefits from the picture model (§7), so a real struggling
 child may grow faster under any variant. The struggling child ran four seeds (three for the
 effort + 80 % variants), the others one to three.
+
+## 9. Content 1.3.0: the dragons grow up
+
+**The decision.** After §8 the coordinator chose `d-effort-2-4-adult80` for content 1.3.0:
+
+- **The effort path** (S2b's PR G, #50), in the content as
+  `balance.mastery.effort: { bronzeDays: 2, silverDays: 4, gapDays: 2 }`. A fact shows bronze
+  once it was answered right on 2 days, and silver on 4, each counted day at least 2 days after
+  the last counted one. Any right answer counts, at any speed, and so does a board's credit; a
+  twin's review does not. Everything that shows a fact's level (the dragons, the window,
+  stickers, Progress) takes the higher of the Leitner box's level and the effort's. Gold stays
+  fast answers (box 5 and 2 fast of the last 3), and the reviews still follow the box.
+- **Adult at 80 % silver**, was 90 %.
+- **Copy**: the four money stories write their amounts as "N Kč", which S3's speech aliases (#46)
+  read aloud as crowns; their questions say "How many crowns".
+
+**Exactness first.** Choosing a problem never reads a fact's level, and growth never feeds back
+into play (§8, Method). So a 1.3.0 run must play exactly like the study's run on 1.2.0 with PR F
+(same learner and seed), and its dragons must grow on the study's `d-effort-2-4-adult80` days.
+Eight runs share a learner and seed with a study run:
+
+- struggling: `simulation` over 365 days, s2 and s3 over 84;
+- slow: 365 days against the study's 182;
+- average: `simulation` over 365 days against the study's 84, s2 and s3 over 84;
+- perfect: 84 days.
+
+**336 of 336 stage days are equal** (hatchling 120, youngling 112, adult 87, crowned 17), and so
+are 1,051 of 1,051 days of play: sessions, answers, right and quick answers, time, coins by
+source, eggs, hatches, levels, bosses, purchases, gifts, quests, the goal, due facts and commits.
+Every 84-day run of 1.3.0 below also plays day for day like the PR F validation run on 1.2.0 with
+the same seed (12 of 12 runs). So the study's numbers are 1.3.0's, and everything except growth,
+the window, stickers and Progress is exactly 1.2.0 with PR F.
+
+**Validation.** Content 1.3.0 on PR G, reading on, 84 days from 5 October; seeds `simulation` and
+s2-s5 for the struggling and average children. **Every check passes in every 84-day run**:
+
+- struggling: 12 of 12 on five seeds, the new `growing-up` check included;
+- average: 15 of 15 on five seeds;
+- slow: 12 of 12;
+- perfect: 9 of 9.
+
+**The struggling child** (day 84; 1.2.0 with PR F → 1.3.0). Its success is unchanged (62, 63, 61,
+62 and 63 %), and the effort path is what lights its window: its steady 6.7 s answers seldom move
+a box (§8).
+
+| Seed       | Table younglings (the first) | Window dim / bronze / silver | Division dim / bronze / silver | Stickers |
+| ---------- | ---------------------------- | ---------------------------- | ------------------------------ | -------- |
+| simulation | 0 → 9 (day 21)               | 92 / 6 / 23 → 26 / 38 / 57   | 105 / 1 / 4 → 37 / 48 / 25     | 38 → 41  |
+| s2         | 0 → 8 (day 22)               | 91 / 7 / 23 → 32 / 36 / 53   | 103 / 2 / 5 → 43 / 38 / 29     | 41 → 43  |
+| s3         | 0 → 7 (day 8)                | 96 / 2 / 23 → 23 / 33 / 65   | 104 / 2 / 4 → 46 / 43 / 21     | 39 → 43  |
+| s4         | 0 → 6 (day 21)               | 92 / 6 / 23 → 20 / 41 / 60   | 103 / 1 / 6 → 43 / 37 / 30     | 40 → 41  |
+| s5         | 0 → 11 (day 18)              | 100 / 4 / 17 → 23 / 50 / 48  | 102 / 2 / 6 → 36 / 45 / 29     | 39 → 43  |
+
+No pane is gold: the struggling child never answers quickly. Its new stickers by day 84 are
+`first-youngling` (day 8-22; on 1.2.0 day 38-46 or not at all), `fair-sharer` (day 24-28) and an
+earlier `big-numbers`; on s2, s3 and s5 Clockwork, a special dragon, is adult by day 66-73 (with
+`first-adult` and `bracket-boss`).
+
+**The average child** (day 84). Its 11th adult comes 2-34 days earlier: **median day 56** (72 on
+1.2.0 with PR F), above the coordinator's 55, with one seed at day 39.
+
+| Seed       | Success median | 11th table adult (day) | Window silver / gold |
+| ---------- | -------------- | ---------------------- | -------------------- |
+| simulation | 79 %           | 57 → 46                | 34 / 87              |
+| s2         | 79 %           | 72 → 70                | 44 / 77              |
+| s3         | 79 %           | 78 → 67                | 35 / 86              |
+| s4         | 78 %           | 73 → 39                | 36 / 85              |
+| s5         | 78 %           | 63 → 56                | 33 / 88              |
+
+On s4 the last two adults on 1.2.0 were Puff (day 65) and Ember (73); with the effort path all 11
+are adult between day 28 and 39. Gold is unchanged on every seed (the effort path never gives
+gold), and crowning stays the long goal: 5 table dragons crowned in a year (`simulation`).
+
+**The slow child** (`simulation`): 9 table adults by day 84 (2 on 1.2.0), the first on day 23
+(63); the window 3 / 0 / 118 dim / bronze / silver (27 / 9 / 85), never gold. All 11 adults by day
+94 (179).
+
+**The perfect child**: the 11th adult on day 18 (20), all 11 crowned by day 36, the finale on day
+15, as before.
+
+**Over a school year** (365 days, `simulation`):
+
+| Child      | Table dragons                         | Window at the end (dim / bronze / silver / gold) | Market: save for until / wait median, longest |
+| ---------- | ------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| struggling | 10 younglings; 6 adults, days 266-343 | 12 / 2 / 107 / 0 (1.2.0: 59 / 3 / 59 / 0)        | the whole year / 10, 21 (target ≤ 12)         |
+| average    | 11 adults by day 46; 5 crowned        | 0 / 0 / 9 / 112                                  | session 122 (target ≥ 110) / 5, 9             |
+| slow       | 11 adults by day 94                   | 0 / 0 / 121 / 0                                  | session 177 / 9, 13 (target ≤ 8)              |
+
+The struggling child's adults are Bubbles (day 266), Puff (277), Rainbow (284), Clover (297),
+Crystal (301) and Starry (343): `growing-up` passes (the first youngling on day 21, 6 adults
+against at least 3). Its success holds at 63 % (median) over the year. The study's year runs on
+s2 and s3, which 1.3.0 reproduces exactly, give 8 adults from day 168 and 5 from day 218.
+
+**Two findings in the year runs** (outside the gate, for the coordinator):
+
+1. **Weekly progress runs out late in the year.** Weeks with progress (a level, a hatch, growth,
+   a sticker or a lit pane): struggling 51 of 53 (weeks 37 and 48 have none), average 52 of 53
+   (the run's last day, alone in week 53), slow 21 of 53. With 1.2.0's growth on the same play
+   (the runs play day for day like 1.3.0's): 53 of 53 for all three. On 1.2.0 most of that late
+   progress was a pane lighting again after a miss had sent its fact back to box 1. Over the year
+   the slow child lit 1,573 panes on 1.2.0 for its 231 facts, 491 on 1.3.0; after day 120, the
+   struggling child lit 389 against 100. A pane lit by effort never goes dark again, so late in
+   the year little is left to light. The slow child lights its last pane on day 191 and, never
+   answering quickly, cannot earn gold by design (the `fluency` check): after day 120 it sees
+   progress on 12 days. Options: (a) read weekly progress as a 12-week target, like the success
+   band, and report the year runs as measured; (b) something new to earn late in the year, such
+   as stickers for long practice or a full window (S2b's content); (c) count the market and the
+   gift as progress.
+2. **The slow child's market pace** is a median wait of 9 sessions for something new (target
+   ≤ 8; the longest 13). With 1.2.0's growth on the same play it is the same, so it comes from
+   PR F's play, not 1.3.0; 1.2.0 before PR F had 8 (§4.4).
+
+**Limits.** As §8: the model does not feel the motivation of a growing dragon, and its struggling
+child forgets fast. One seed for the year runs and for the slow and perfect children.
