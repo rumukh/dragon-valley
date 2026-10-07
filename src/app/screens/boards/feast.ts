@@ -107,8 +107,10 @@ export function sharingFeast(context: BoardContext): BoardPainter {
     icon: 'forward',
     variant: 'sun',
     testId: 'feast-deal',
-    onPress: async () => {
-      await context.move({ type: 'deal' });
+    // Not awaited: a second quick tap deals a second round once the first is saved, rather than
+    // being ignored while the button waits.
+    onPress: () => {
+      void context.move({ type: 'deal' }).catch(onError);
     },
     onError,
   });

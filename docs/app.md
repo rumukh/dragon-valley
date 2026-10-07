@@ -447,7 +447,10 @@ toast where they were earned.
   hint is a step of its own, so the round asks for a fresh command token after it.
 - **Minigames** (`minigames.ts`): Memory Match, Number Trail, Egg Grid and Fact Family Nest on
   the rules' typed boards (`MinigameRoundView.current`, faces through the contract's
-  `formatFace`), every move tagged with the board revision. A finished board cheers on
+  `formatFace`), every move tagged with the board revision it is sent against. A move made while
+  the one before is still being saved waits for it and then counts (`controller/moves.ts`); it is
+  dropped only if its board is gone, the round is over, a move could not be saved, or the rules no
+  longer allow it. A finished board cheers on
   `minigame.completed`. The Egg Grid is a field of `maxSide × maxSide` spots beside its
   controls: one tap builds the nest up to that spot (the steppers do the same from the
   keyboard), the nest is told in words ("5 rows of 7") and only Check tells its total ("Yes! 5
@@ -544,6 +547,7 @@ Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.t
   beat from a save the rules win in Node (`support/finale.ts`). `map.spec.ts`: with every
   region open, no two names on the map overlap, on the picture at 100 % and under it at 200 %.
   `hint.spec.ts`: the answer given right after Show me is taken, by keyboard and by tapping.
+  `moves.spec.ts`: quick taps on the Sharing Feast all count (two fruit, then two rounds).
   The screen tour (`support/tour.ts`, docs/qa/screens.md) also walks goodbye, the Progress and
   Print tabs, the print preview, Riddle Ruins and the finale. CI runs
   Chromium, WebKit and Firefox. Locally the default project is the installed
