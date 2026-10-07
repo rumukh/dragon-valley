@@ -161,8 +161,11 @@ of the same run waited 10 minutes. So the `.deb` files are cached per engine, ru
 Playwright version (`actions/cache`, key `debs-<engine>-<image>-playwright-<version>`). apt
 installs from the cache without downloading, and a new key starts from the newest cache of the same
 engine. After the install, `apt-get autoclean` drops the versions the mirror no longer has, and one
-job per engine (its walks) saves the set. The job limit is 30 minutes, room for a slow mirror on a
-cache miss; the test step has its own 15-minute limit, the guard against a hang.
+job per engine (its walks) saves the set: 31 MB for Chromium, 48 MB for Firefox, 121 MB for WebKit.
+With the cache, each engine's install takes 17–26 s (apt: "Need to get 0 B"), also on a newer runner
+image restored from the older image's cache, and the longest job 7.4 minutes. The job limit is 30
+minutes, room for a slow mirror on a cache miss; the test step has its own 15-minute limit, the
+guard against a hang.
 
 ```
 npm run test:e2e                                   # everything, system Edge
