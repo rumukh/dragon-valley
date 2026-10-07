@@ -10,18 +10,28 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import type { AnswerValue, ProblemRoundView } from '../../src/rules/contract';
 import { mistake, simulate } from './driver';
-import type { SimulationReport } from './driver';
+import type { AnswerRecord, SimulationReport } from './driver';
 
 const runs = new Map<string, Promise<SimulationReport>>();
+const answers = new Map<string, AnswerRecord[]>();
 const firstSession = (learner: 'perfect' | 'struggling') => {
   let report = runs.get(learner);
   if (!report) {
-    report = simulate(learner, 1, { seed: 'harness', answersPerDay: 24 });
+    const records: AnswerRecord[] = [];
+    answers.set(learner, records);
+    report = simulate(learner, 1, {
+      seed: 'harness',
+      answersPerDay: 24,
+      onAnswer: (record) => records.push(record),
+    });
     runs.set(learner, report);
   }
   return report;
 };
-afterAll(() => runs.clear());
+afterAll(() => {
+  runs.clear();
+  answers.clear();
+});
 
 describe('the learner simulation', () => {
   it('plays a perfect first session: every answer right and quick, coins, the first hatch', async () => {
@@ -49,6 +59,29 @@ describe('the learner simulation', () => {
     expect(day.correct, 'some answers wrong').toBeLessThan(day.answers);
     expect(day.fast, 'no quick answers').toBe(0);
     expect(day.coins, 'coins earned').toBeGreaterThan(0);
+  });
+
+  it('records every answer with the item, its tier and box before it, and the recall', async () => {
+    const day = (await firstSession('struggling')).days[0]!;
+    const records = answers.get('struggling')!;
+    const graded = records.filter((r) => r.step === 'answer');
+    expect(graded.length, 'a record per graded answer').toBe(day.answers);
+    expect(graded.filter((r) => r.right).length, 'right answers').toBe(day.correct);
+    const firsts = graded.filter((r, i) => graded.findIndex((o) => o.item === r.item) === i);
+    expect(
+      firsts.filter((r) => r.box !== null || r.tier !== 'learning').map((r) => r.item),
+      "an item's first answer: no box yet, a learning item",
+    ).toEqual([]);
+    const again = graded.filter((r, i) => graded.findIndex((o) => o.item === r.item) !== i);
+    expect(again.length, 'some items come back (re-asks, reviews)').toBeGreaterThan(0);
+    expect(
+      again.filter((r) => r.box === null).map((r) => r.item),
+      'an item answered before has a box',
+    ).toEqual([]);
+    expect(
+      records.filter((r) => r.day !== 0 || r.recall < 0 || r.recall > 100),
+      'day 0, recall 0-100',
+    ).toEqual([]);
   });
 });
 

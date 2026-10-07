@@ -26,9 +26,11 @@ import type {
   MasteryLevel,
   ProblemRoundView,
 } from '../../src/rules/contract';
+import { itemTier } from '../../src/rules/learning/selection';
+import type { ItemTier } from '../../src/rules/learning/selection';
 import { Player, loadPack, oracle } from '../traces/support';
 import type { Style } from '../traces/support';
-import { LEARNERS, Learner } from './learners';
+import { LEARNERS, Learner, knowledgeKey } from './learners';
 import type { LearnerName } from './learners';
 
 /** The simulation starts on a Monday. */
@@ -369,6 +371,30 @@ export interface SimulateOptions {
   answersPerDay?: number;
   /** Called after every simulated day (progress reporting in the script). */
   onDay?: (day: DayReport) => void;
+  /** Called for every problem the learner answers (analysis: `simulate.mjs --answers`). */
+  onAnswer?: (answer: AnswerRecord) => void;
+}
+
+/** One answer of the learner, with what the rules and the learner knew before it. */
+export interface AnswerRecord {
+  /** 0-based day of the simulation. */
+  day: number;
+  activity: ProblemRoundView['activity'];
+  /** The level of the round, and whether it had been completed before (a replay). */
+  level: string | null;
+  replay: boolean;
+  item: string;
+  /** `operation` for a story's first step (which operation?), else `answer`. */
+  step: 'answer' | 'operation';
+  /** The item's tier in the mix and its Leitner box before the answer (`null`: never answered). */
+  tier: ItemTier;
+  box: number | null;
+  reask: boolean;
+  input: 'choice' | 'keypad';
+  /** How well the learner recalled the fact (0-100), and the answer. */
+  recall: number;
+  right: boolean;
+  elapsedMs: number;
 }
 
 /** Simulate `days` days of a learner, from `FIRST_DAY`. */
@@ -381,12 +407,33 @@ export async function simulate(
   const profile = LEARNERS[learner];
   const child = new Learner(profile, seed);
   let decision: { n: number; right: boolean; elapsedMs: number } | null = null;
+  let today = 0;
   const style: Style = {
     right: (n: number, view: ProblemRoundView) => {
       const problem = view.problem!;
       const expected = oracle(problem.problem, problem.step);
       const digits = expected.kind === 'number' ? String(expected.value).length : 2;
+      const recall = child.recall(knowledgeKey(problem.item));
       decision = { n, ...child.respond(view, digits) };
+      if (options.onAnswer) {
+        const state = player.state();
+        const level = view.source.kind === 'level' ? view.source.level : null;
+        options.onAnswer({
+          day: today,
+          activity: view.activity,
+          level,
+          replay: level !== null && (state.levels[level]?.stars ?? 0) > 0,
+          item: problem.item,
+          step: problem.step,
+          tier: itemTier(state, problem.item, state.day ?? 0),
+          box: state.items[problem.item]?.box ?? null,
+          reask: problem.reask,
+          input: problem.input,
+          recall,
+          right: decision.right,
+          elapsedMs: decision.elapsedMs,
+        });
+      }
       return decision.right;
     },
     elapsedMs: (n: number) => (decision !== null && decision.n === n ? decision.elapsedMs : 4000),
@@ -426,6 +473,7 @@ export async function simulate(
   const first = dayNumber(FIRST_DAY)!;
   for (let index = 0; index < days; index++) {
     const day = first + index;
+    today = index;
     const entry = emptyDay(index, isoDay(day), profile.playsOn(index));
     report.days.push(entry);
     if (!entry.played) {

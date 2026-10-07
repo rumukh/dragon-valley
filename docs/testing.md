@@ -96,9 +96,11 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
 A simulated day costs about a hundred commits, so the long runs live outside the gate:
 `node scripts/simulate.mjs --days 84 --check` runs the four bots for 12 weeks in parallel
 processes, writes `out/simulation/report.md` and fails when a check fails (`--balance file.json`
-simulates a changed balance block). The gate runs only the bots' model tests, the checks against
-synthetic reports and a short first session (`test/sim/*.test.ts`). The measured results, the
-model's assumptions and the balance decisions are in [balance-report.md](balance-report.md).
+simulates a changed balance block; `--answers` also writes every answer with its item, its tier
+and Leitner box before the answer and the bot's recall, for analyses like balance-report.md §5).
+The gate runs only the bots' model tests, the checks against synthetic reports and a short first
+session (`test/sim/*.test.ts`). The measured results, the model's assumptions and the balance
+decisions are in [balance-report.md](balance-report.md).
 
 ## 5. Browser end-to-end (Playwright): the QA suite (S6)
 

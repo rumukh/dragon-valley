@@ -4,12 +4,16 @@
  *
  *   node scripts/simulate.mjs [--days 84] [--learners perfect,average,struggling,slow]
  *                             [--seed simulation] [--out out/simulation] [--check]
+ *                             [--balance partial-balance.json] [--answers] [--reuse]
  *
  * Deterministic synthetic learners (test/sim/learners.ts) play the real rules headlessly through
  * the runtime host, one simulated day after another (test/sim/driver.ts). Each learner runs in its
  * own process. The script writes `<out>/<learner>.json` (the full day-by-day report) and
  * `<out>/report.md` (summaries and the named balance checks of test/sim/report.ts), and prints the
- * markdown. With `--check` it exits 1 when a named check fails.
+ * markdown. With `--check` it exits 1 when a named check fails. `--balance` merges a partial
+ * balance block into the content first; `--answers` also writes every answer (item, tier, box,
+ * the learner's recall, right or wrong) to `<out>/<learner>.answers.json`; `--reuse` re-reads the
+ * reports of an earlier run instead of simulating.
  *
  * A simulated day costs about a hundred and fifty commits, so a long run takes minutes; the
  * Vitest gate runs only short simulations (test/sim/*.test.ts). docs/balance-report.md records the
@@ -79,10 +83,11 @@ export function merge(base, patch) {
 /**
  * Simulate one learner in this process and write its report. `balance` is a JSON file with a
  * partial balance block merged into the content's (an experiment; the pack is validated after).
+ * With `answers`, every answer is also written to `<learner>.answers.json` for analysis.
  * @param {string} learner @param {number} days @param {string} seed @param {string} out
- * @param {string} balance
+ * @param {string} balance @param {boolean} answers
  */
-async function runWorker(learner, days, seed, out, balance) {
+async function runWorker(learner, days, seed, out, balance, answers) {
   const sim = await loadSimulation(repositoryRoot);
   const started = process.hrtime.bigint();
   const file = join(repositoryRoot, 'content', 'dragon-valley.content.json');
@@ -96,6 +101,8 @@ async function runWorker(learner, days, seed, out, balance) {
       'dragon-valley.content.json',
     ),
   );
+  /** @type {unknown[]} */
+  const records = [];
   const report = await sim.simulate(learner, days, {
     seed,
     pack,
@@ -107,8 +114,13 @@ async function runWorker(learner, days, seed, out, balance) {
         `${learner} day ${day.index + 1}/${days}${day.played ? `: ${day.answers} answers, ${day.commits} commits` : ' (off)'} [${seconds}s]\n`,
       );
     },
+    ...(answers ? { onAnswer: (/** @type {unknown} */ record) => records.push(record) } : {}),
   });
   writeFileSync(join(out, `${learner}.json`), JSON.stringify(report, null, 2) + '\n');
+  if (answers) {
+    const lines = records.map((record) => JSON.stringify(record)).join(',\n');
+    writeFileSync(join(out, `${learner}.answers.json`), `[\n${lines}\n]\n`);
+  }
 }
 
 /** @param {string[]} args */
@@ -133,8 +145,9 @@ if (isMain(import.meta.url)) {
   const balance = option(args, 'balance', '');
   const balancePath = balance ? resolve(balance) : '';
   const worker = option(args, 'worker', '');
+  const answers = args.includes('--answers');
   if (worker) {
-    await runWorker(worker, days, seed, out, balancePath);
+    await runWorker(worker, days, seed, out, balancePath, answers);
     process.exit(0);
   }
   const learners = option(args, 'learners', LEARNER_NAMES.join(',')).split(',');
@@ -147,6 +160,7 @@ if (isMain(import.meta.url)) {
         spawnWorker([
           ...['--worker', learner, '--days', String(days), '--seed', seed, '--out', out],
           ...(balancePath ? ['--balance', balancePath] : []),
+          ...(answers ? ['--answers'] : []),
         ]),
       ),
     );
