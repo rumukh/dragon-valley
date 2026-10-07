@@ -470,8 +470,10 @@ one-shots). It contains:
   view (`minigame`, whose `revision` every `minigameMove` must carry) and the typed board
   `current` (§11.1).
 - `dragons`: owned dragons with stage, expression, mastery shares (percent, rounded down),
-  hunger, outfit and the next stage with its exact counts (`next.have` of `mastery.items` facts at
-  the stage's mastery level, `next.need` to reach it: the shell's "4 of 7 facts").
+  hunger, outfit and the next stage with its exact counts (`next.have` facts at the stage's mastery
+  level, `next.need` to reach it: the shell's "4 of 7 facts"). `mastery.items` is the size of the
+  mastery set; from bronze up the shares and counts leave out the rule facts of a dragon not of the
+  0 or 1 table, as growth does (docs/design.md §6.5).
 - `window`: the **11 × 11** Magic Window (`cells`: 121 multiplication facts, row = first factor,
   column = second factor) and the division panel (110 cells, row = divisor, column = quotient), each
   cell with `level` (`dim/bronze/silver/gold`) and `needsPolish`.
@@ -626,7 +628,8 @@ the success band likely successes first, smaller snacks, choice input for review
 the Daily Adventure's pacing; every skill of an activity is served when several produce the same
 item), partial credit for commuted facts, re-ask jobs and teaching a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
 finale, the placement check, snack time, the Lightning Arena, grading (with the Riddle Scrolls
-operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth, stickers, the
+operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth (rule facts counted
+from bronze up only for Puff and Mirror), stickers, the
 market, outfits, settings (with unlock-ahead), state validation and the complete view. Every
 generator of §6 is implemented with its distractors ([learning.md](learning.md)); comparisons and
 terms are answered by choice whatever the input mode (`keypadPossible`).

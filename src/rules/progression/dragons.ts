@@ -3,14 +3,16 @@
  *
  * A dragon's mastery set is the union of its skills' items. It grows through the stages of
  * `balance.growth` (hatchling, youngling, adult, crowned) when the share of its set at the rule's
- * mastery level reaches the rule's share, plus division and boss requirements. Stages never go
- * down. A dragon is hungry when at least `balance.hungry.minDue` of its known items are due:
+ * mastery level reaches the rule's share, plus division and boss requirements. From bronze up,
+ * growth counts rule facts (n · 0, n · 1, 0 : n, n : 1) only for the dragons of the 0 and 1
+ * tables (`growthItems`). Stages never go down. A dragon is hungry when at least `balance.hungry.minDue` of its known items are due:
  * feeding hungry dragons is the spaced review.
  */
 import type { DeepReadonly } from '@aegis/runtime';
 import { DRAGON_STAGES, EVENTS } from '../contract';
 import type { Dragon, DragonStage, GrowthRule } from '../contract';
 import { atLeast, isDue } from '../learning/items';
+import { growsWith } from '../learning/selection';
 import { percentOf } from './levels';
 import type { Ctx, Data, ReadState } from '../types';
 
@@ -34,6 +36,22 @@ export function shareAt(
   return percentOf(count, items.length);
 }
 
+/**
+ * The items of `skills` that growth at `mastery` counts. Rule facts (n · 0, n · 1, 0 : n, n : 1)
+ * count toward hatching (answered right once) for every dragon, but toward bronze and better only
+ * for the dragons of the 0 and 1 tables (`growsWith`): a round serves at most one of them, so they
+ * are reviewed too rarely to let any other dragon grow up.
+ */
+export function growthItems(
+  dragon: DeepReadonly<Dragon>,
+  skills: readonly string[],
+  index: ReadonlyMap<string, readonly string[]>,
+  mastery: GrowthRule['mastery'],
+): string[] {
+  const items = itemsOf(skills, index);
+  return mastery === 'seen' ? items : items.filter((item) => growsWith(dragon, item));
+}
+
 function ruleMet(
   state: ReadState,
   data: Data,
@@ -41,12 +59,11 @@ function ruleMet(
   rule: DeepReadonly<GrowthRule>,
   index: ReadonlyMap<string, readonly string[]>,
 ): boolean {
-  if (shareAt(state, data, itemsOf(dragon.skills, index), rule.mastery) < rule.share) return false;
-  if (
-    rule.division &&
-    shareAt(state, data, itemsOf(dragon.divisionSkills, index), rule.mastery) < rule.share
-  ) {
-    return false;
+  const items = growthItems(dragon, dragon.skills, index, rule.mastery);
+  if (shareAt(state, data, items, rule.mastery) < rule.share) return false;
+  if (rule.division) {
+    const division = growthItems(dragon, dragon.divisionSkills, index, rule.mastery);
+    if (shareAt(state, data, division, rule.mastery) < rule.share) return false;
   }
   return !rule.boss || dragon.boss === null || state.bosses[dragon.boss] !== undefined;
 }

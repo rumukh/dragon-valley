@@ -217,6 +217,15 @@ export function isRuleFact(item: string): boolean {
   return false;
 }
 
+/**
+ * Whether a dragon's growth from bronze up counts `item`: every fact of its set, except that rule
+ * facts count only for the dragons of the 0 and 1 tables (Puff and Mirror), whose facts they are.
+ * A round serves at most one rule fact, so for any other dragon they would hold growth back.
+ */
+export function growsWith(dragon: DeepReadonly<Dragon>, item: string): boolean {
+  return dragon.table === 0 || dragon.table === 1 || !isRuleFact(item);
+}
+
 /** The recently served items that may not be served again yet (none when `window` is 0). */
 export function blockedRecent(recent: readonly string[], window: number): string[] {
   return window <= 0 ? [] : recent.slice(-window);
@@ -351,8 +360,9 @@ export function pickMixed(options: {
 
 /**
  * Snack time: due items first (most overdue; with `likelyFirst`, while the child's success is
- * protected, the likeliest successes), then the weakest known items (lowest box) not served in
- * this snack yet, then anything in the dragons' sets.
+ * protected, the likeliest successes), then rule facts never answered right (other rounds serve at
+ * most one of them, so snack time is where Puff and Mirror meet the rest of their facts), then the
+ * weakest known items (lowest box) not served in this snack yet, then anything in the pool.
  */
 export function pickSnack(options: {
   state: ReadState;
@@ -369,6 +379,10 @@ export function pickSnack(options: {
   const due = candidates.filter((item) => isDue(state.items[item], day));
   const picked = options.likelyFirst ? pickLikely(state, due, random) : pickDue(state, due, random);
   if (picked !== null) return picked;
+  const rules = candidates.filter(
+    (item) => isRuleFact(item) && (state.items[item]?.correct ?? 0) === 0 && !served.includes(item),
+  );
+  if (rules.length > 0) return random.pick(rules);
   const known = prefer(
     candidates.filter((item) => (state.items[item]?.correct ?? 0) > 0),
     (item) => !served.includes(item),

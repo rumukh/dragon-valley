@@ -37,7 +37,14 @@ import { atLeast, isDue, masteryLevel } from './learning/items';
 import { lowToday } from './learning/selection';
 import { MINIGAMES, boardView } from './minigames/boards';
 import { arenaProblem } from './progression/arena';
-import { dragonFacts, dueItems, hungryDragons, itemsOf, shareAt } from './progression/dragons';
+import {
+  dragonFacts,
+  dueItems,
+  growthItems,
+  hungryDragons,
+  itemsOf,
+  shareAt,
+} from './progression/dragons';
 import {
   isComplete,
   levelStatus,
@@ -305,9 +312,13 @@ function dragonViews(
     .map((dragon) => {
       const owned = state.dragons[dragon.id]!;
       const items = itemsOf(dragon.skills, index);
+      // Each level's share over the facts growth at that level counts (`growthItems`).
+      const share = (level: 'seen' | 'bronze' | 'silver' | 'gold') =>
+        shareAt(state, data, growthItems(dragon, dragon.skills, index, level), level);
       const due = dueItems(state, dragonFacts(dragon, index));
       const stageIndex = DRAGON_STAGES.indexOf(owned.stage);
       const rule = data.balance.growth[stageIndex];
+      const counted = rule ? growthItems(dragon, dragon.skills, index, rule.mastery) : [];
       const hungry = owned.stage !== 'egg' && due >= data.balance.hungry.minDue;
       return {
         id: dragon.id,
@@ -319,10 +330,10 @@ function dragonViews(
         expression:
           owned.stage === 'egg' ? 'idle' : sleepy ? 'sleepy' : hungry ? 'curious' : 'happy',
         mastery: {
-          seen: shareAt(state, data, items, 'seen'),
-          bronze: shareAt(state, data, items, 'bronze'),
-          silver: shareAt(state, data, items, 'silver'),
-          gold: shareAt(state, data, items, 'gold'),
+          seen: share('seen'),
+          bronze: share('bronze'),
+          silver: share('silver'),
+          gold: share('gold'),
           items: items.length,
         },
         hungry,
@@ -333,11 +344,12 @@ function dragonViews(
               stage: rule.stage,
               share: rule.share,
               mastery: rule.mastery,
-              have: items.filter((item) => atLeast(state.items[item], rule.mastery, data.balance))
+              have: counted.filter((item) => atLeast(state.items[item], rule.mastery, data.balance))
                 .length,
               // The share rounded up: shareAt rounds down, so this many reach `share` percent.
               need:
-                (rule.share * items.length + 99 - ((rule.share * items.length + 99) % 100)) / 100,
+                (rule.share * counted.length + 99 - ((rule.share * counted.length + 99) % 100)) /
+                100,
             }
           : null,
       };

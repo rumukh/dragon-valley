@@ -533,6 +533,15 @@ table dragon, the 21 facts of its table in both orders).
 | adult     | 90 % at silver or better (division too) and its region's boss defeated |
 | crowned   | 100 % gold (division too)                                              |
 
+**Rule facts and growth** (after the learner simulations): from bronze up, a dragon counts the rule
+facts of its set (`n · 0`, `n · 1`, `0 : n`, `n : 1`) only if it is Puff (×0) or Mirror (×1), whose
+facts they are. A round not about 0 or 1 serves at most one of them (§6.3), so they come round too
+rarely to be reviewed to silver and gold, and they would hold every other dragon back from adult
+and crowned. Bubbles therefore grows on 17 of its 21 facts (and 10 of its 11 division facts). They
+still count toward hatching, which needs each fact answered right only once, and they still light
+their panes in the Magic Window. Snack time serves rule facts never answered right as soon as the
+due facts are fed, so Puff and Mirror meet all of theirs.
+
 **Kindness rules.** Dragons never shrink; mastery that fades only makes panes need polishing and
 dragons hungry. A dragon with at least one due fact is **hungry for snacks** _(`hungry.minDue`)_.
 A fact practised today is never due again the same day, so a dragon is not hungry on the day it

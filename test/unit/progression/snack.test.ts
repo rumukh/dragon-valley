@@ -4,6 +4,7 @@
  * practised today is not due again today.
  */
 import { describe, expect, it } from 'vitest';
+import { isDue } from '../../../src/rules/learning/items';
 import { snackTarget } from '../../../src/rules/progression/snack';
 import { PERFECT, Player } from '../../traces/support';
 
@@ -99,16 +100,20 @@ describe('snack time', () => {
     expect(round.progress.target).toBe(Math.min(10, Math.max(6, bubblesDue.size)));
     expect(round.source).toEqual({ kind: 'snack', dragon: 'bubbles' });
     const served: string[] = [];
+    // Whether each problem's fact was due when it was served (a right answer to 8 · 2 also
+    // reviews 2 · 8, so a twin may stop being due before its turn).
+    const wasDue: boolean[] = [];
     while (player.view().round?.status === 'active') {
       const now = player.view().round;
       if (now?.type !== 'problems' || !now.problem) break;
       served.push(now.problem.item);
+      wasDue.push(isDue(player.state().items[now.problem.item], day));
       await player.answer();
     }
-    const first = served.slice(0, Math.min(served.length, bubblesDue.size));
+    expect(wasDue[0], 'a due fact first').toBe(true);
     expect(
-      first.every((id) => bubblesDue.has(id)),
-      'due facts come first',
+      wasDue.slice(wasDue.indexOf(false)).every((d) => !d) || !wasDue.includes(false),
+      `due facts come first: ${served.join(' ')}`,
     ).toBe(true);
     expect(player.view().dragons.find((d) => d.id === 'bubbles')!.hungry).toBe(false);
     expect(player.view().hub.hungry).toEqual([]);
