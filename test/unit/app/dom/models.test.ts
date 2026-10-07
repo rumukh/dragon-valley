@@ -177,6 +177,44 @@ describe('split-mul and split-div', () => {
   });
 });
 
+describe('written steps', () => {
+  const parts = (node: HTMLElement, selector: string): string[][] =>
+    [...node.querySelectorAll(selector)].map((part) =>
+      [...part.children]
+        .filter((child) => child.classList.contains('dv-model__chunk'))
+        .map((chunk) => written(chunk)),
+    );
+
+  it('put one step on each line, and let a long step break only after + or −', () => {
+    expect(parts(figure(mul(38, 8)), '.dv-model__part')).toEqual([
+      ['38 · 8'],
+      ['= 30 · 8 +', '8 · 8'],
+      ['= 240 +', '64'],
+      ['= 304'],
+    ]);
+    expect(parts(figure(div(96, 8), 'international'), '.dv-model__part')).toEqual([
+      ['96 ÷ 8'],
+      ['= 80 ÷ 8 +', '16 ÷ 8'],
+      ['= 10 +', '2'],
+      ['= 12'],
+    ]);
+  });
+
+  it('never break inside brackets or the step that goes first', () => {
+    const rows = parts(
+      figure(eq(op('mul', group(op('add', num(1), num(2))), group(op('add', num(3), num(4)))))),
+      '.dv-model__step',
+    );
+    expect(rows[0]).toEqual(['( 1 + 2 ) · ( 3 + 4 )']);
+    const chain = parts(
+      figure(eq(op('sub', op('add', num(12), op('mul', num(4), num(6))), num(8)))),
+      '.dv-model__step',
+    );
+    expect(chain[0]).toEqual(['12 +', '4 · 6 −', '8']);
+    expect(chain[1]).toEqual(['= 12 + 24 −', '8']);
+  });
+});
+
 describe('order-steps', () => {
   const steps = (node: HTMLElement): string[] =>
     [...node.querySelectorAll('.dv-model__step')].map((row) => written(row));

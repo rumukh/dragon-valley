@@ -218,9 +218,12 @@ gets kind, specific help after a miss.
   Tens are violet rods and ones yellow dots, so shape and labels tell them apart. Each worked
   line is written in the child's notation and read as words to screen readers. It ends with the
   answer only after a miss (`showModel(problem, true)`). Before the answer it ends with an empty
-  box, so the picture shows the way and leaves the last step. The figures are about as big as
-  the groups picture and smaller in a boss round. `node scripts/art/models-gallery.mjs` draws
-  every kind for review.
+  box, so the picture shows the way and leaves the last step. A figure fills the slot's width, and
+  its drawing scales with it up to a fifth of the screen's height (a seventh in a boss round). Its
+  steps are written one per line in rem; a long step wraps after a + or − and never sideways.
+  `node scripts/art/models-gallery.mjs` draws every kind for review. It also checks each one in
+  the slot's budget at the five child viewports, in normal and boss rounds at 100 % and 200 %
+  text, and fails when a figure is too tall or reaches out of the column.
 
 - **Font**: "DV Reading", a Latin subset of **Andika 7.000** (SIL Open Font License 1.1), WOFF2,
   Regular and Bold, about 38 KB each, in `assets/fonts/dv-reading/` with `OFL.txt` (shipped)

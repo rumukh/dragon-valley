@@ -1,20 +1,27 @@
 /*
  * Strategy pictures beyond the small table (src/app/ui/models.ts): a place-value chart, ten-rods
  * in groups, area models of tens and ones, and an expression worked out step by step. They share
- * the `.dv-model` card in screens.css and stay about as big as the groups model, so the round
- * keeps fitting the screen. Tens are violet rods and ones yellow dots: shape and labels tell them
- * apart, not color alone. Nothing moves.
+ * the `.dv-model` card in screens.css. Tens are violet rods and ones yellow dots: shape and labels
+ * tell them apart, not color alone. Nothing moves.
+ *
+ * Size (S3's budget for the model slot under the dragon): the figure fills the slot's width,
+ * which is 244 to 445 px. The drawing scales with that width up to a fifth of the screen's
+ * height (a seventh in a boss round), and its steps are written under it, one per line, in rem so they follow the
+ * keeper's text size. Nothing may stick out sideways, even at 200 % text: a step wraps after a
+ * + or −, and as a last resort inside.
  */
 
 .dv-model--strategy {
-  max-width: 100%;
+  justify-self: stretch;
+  min-width: 0;
+  padding-block: 0.45em;
 }
 
 .dv-model__art {
   display: block;
-  width: auto;
-  max-width: 100%;
-  height: min(4.4em, 16vh);
+  width: 100%;
+  height: auto;
+  max-height: 20vh;
   overflow: visible;
 }
 
@@ -25,33 +32,51 @@
   fill: var(--dv-ink);
 }
 
-/* ---- The written line under a picture ---------------------------------------------------- */
+/* ---- The written steps under a picture ---------------------------------------------------- */
 
 .dv-model__caption {
   display: grid;
   justify-items: center;
-  max-width: 100%;
+  min-width: 0;
   text-align: center;
 }
 
-.dv-model__line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.1em 0.3em;
-  font-size: 0.85em;
-  line-height: 1.25;
+/* One step per line, as in an exercise book: the "=" of every line under the line before. */
+.dv-model__line,
+.dv-model__steps {
+  display: grid;
+  justify-items: start;
+  gap: 0.06em;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
+  text-align: start;
   color: var(--dv-ink);
 }
 
 .dv-model__part,
-.dv-model__step,
+.dv-model__step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.05em 0.22em;
+  min-width: 0;
+}
+
+.dv-model__chunk,
 .dv-model__first {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.22em;
+  gap: 0.05em 0.22em;
+  min-width: 0;
+}
+
+.dv-model__chunk > *,
+.dv-model__first > * {
   white-space: nowrap;
 }
 
@@ -75,7 +100,7 @@
 }
 
 .dv-model__rule-text {
-  font-size: 0.8em;
+  font-size: 0.8rem;
   line-height: 1.25;
   color: var(--dv-ink-soft);
 }
@@ -83,16 +108,9 @@
 /* ---- Order of operations: one row per step, the step that goes first marked ---------------- */
 
 .dv-model__steps {
-  display: grid;
-  justify-items: start;
-  gap: 0.18em;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 0.95em;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--dv-ink);
 }
 
 /* A marker and an underline, never color alone (like the asked number of a term question). */
@@ -110,7 +128,7 @@
 }
 
 .dv-model__art .dv-model__place {
-  font-size: 14px;
+  font-size: 15px;
   fill: var(--dv-ink-soft);
 }
 
@@ -232,24 +250,21 @@
   font-size: 17px;
 }
 
-/* A boss round stacks the dragon and the boss above the picture: a more compact picture. */
+/* A boss round shares the column with the boss as well: a shorter drawing, smaller steps. */
 .dv-round--boss .dv-model--strategy {
   gap: 0.25em;
   padding: 0.4em 0.6em;
 }
 
 .dv-round--boss .dv-model__art {
-  height: min(3.6em, 12vh);
+  max-height: 14vh;
 }
 
-.dv-round--boss .dv-model__line {
-  font-size: 0.78em;
-}
-
+.dv-round--boss .dv-model__line,
 .dv-round--boss .dv-model__steps {
-  font-size: 0.82em;
+  font-size: 0.8rem;
 }
 
 .dv-round--boss .dv-model__rule-text {
-  font-size: 0.7em;
+  font-size: 0.75rem;
 }

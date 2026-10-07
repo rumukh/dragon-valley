@@ -128,8 +128,49 @@ function tokenSpan(token: LineToken): HTMLElement {
     : h('span', { className: `dv-model__${token.kind}`, text: token.text });
 }
 
-/** `a = b = c`, each part on one line: a long line wraps only before an "=". */
-function lineElement(parts: readonly LinePart[]): HTMLElement {
+/** A piece of a written step: a token, or the marked operation that goes first (kept whole). */
+interface Atom {
+  readonly node: HTMLElement;
+  /** A narrow line may break after it: a + or − outside brackets. */
+  readonly breakAfter: boolean;
+}
+
+const equalsAtom = (): Atom => ({
+  node: h('span', { className: 'dv-model__sign', text: '=' }),
+  breakAfter: false,
+});
+
+/** Tokens as atoms, tracking brackets so a step breaks only between its added parts. */
+function tokenAtoms(tokens: readonly LineToken[], notation: Notation): Atom[] {
+  const { add, sub } = OPERATOR_SYMBOLS[notation];
+  let depth = 0;
+  return tokens.map((token) => {
+    if (token.kind === 'bracket') depth += token.text === '(' ? 1 : -1;
+    const plusMinus = token.kind === 'sign' && (token.text === add || token.text === sub);
+    return { node: tokenSpan(token), breakAfter: depth === 0 && plusMinus };
+  });
+}
+
+/**
+ * Atoms grouped into chunks that stay together: `= 30 · 8 +` and `8 · 8`. A step wraps between
+ * chunks first; a chunk wider than the whole line (very large text) wraps inside as a last resort.
+ */
+function chunked(atoms: readonly Atom[]): HTMLElement[] {
+  const out: HTMLElement[] = [];
+  let chunk: HTMLElement | null = null;
+  for (const atom of atoms) {
+    if (!chunk) {
+      chunk = h('span', { className: 'dv-model__chunk' });
+      out.push(chunk);
+    }
+    chunk.append(atom.node);
+    if (atom.breakAfter) chunk = null;
+  }
+  return out;
+}
+
+/** `a = b = c` written one step per line, as in an exercise book: `38 · 8` / `= 30 · 8 + 8 · 8`. */
+function lineElement(parts: readonly LinePart[], notation: Notation): HTMLElement {
   return h(
     'span',
     { className: 'dv-model__line', testId: 'model-line', attributes: { 'aria-hidden': 'true' } },
@@ -137,8 +178,7 @@ function lineElement(parts: readonly LinePart[]): HTMLElement {
       h(
         'span',
         { className: 'dv-model__part' },
-        index > 0 ? h('span', { className: 'dv-model__sign', text: '=' }) : null,
-        ...part.tokens.map(tokenSpan),
+        ...chunked([...(index > 0 ? [equalsAtom()] : []), ...tokenAtoms(part.tokens, notation)]),
       ),
     ),
   );
@@ -151,9 +191,9 @@ function spokenLine(parts: readonly LinePart[]): string {
 }
 
 /** A worked line as the figure's caption: drawn in the notation, read as words. */
-function lineCaption(parts: readonly LinePart[]): Node[] {
+function lineCaption(parts: readonly LinePart[], notation: Notation): Node[] {
   return [
-    lineElement(parts),
+    lineElement(parts, notation),
     h('span', { className: 'dv-visually-hidden', testId: 'model-spoken', text: spokenLine(parts) }),
   ];
 }
@@ -328,7 +368,7 @@ function placeShiftModel(
     solved,
     placeShiftArt(model, t, solved),
     solved
-      ? lineCaption([exprPart(problem, notation), exprPart(num(model.to), notation)])
+      ? lineCaption([exprPart(problem, notation), exprPart(num(model.to), notation)], notation)
       : [h('span', { className: 'dv-model__rule-text', text: rule })],
   );
 }
@@ -406,7 +446,7 @@ function tensGroupsModel(
     'tens-groups',
     solved,
     tensGroupsArt(model, notation),
-    lineCaption([product, tens(model.tens * model.times), exprPart(answer, notation)]),
+    lineCaption([product, tens(model.tens * model.times), exprPart(answer, notation)], notation),
   );
 }
 
@@ -536,30 +576,37 @@ function splitModel(
     model.kind,
     solved,
     art,
-    lineCaption((solved ? line : withoutAnswer(line)).map((part) => exprPart(part, notation))),
+    lineCaption(
+      (solved ? line : withoutAnswer(line)).map((part) => exprPart(part, notation)),
+      notation,
+    ),
   );
 }
 
 // ---- order-steps: an expression worked out one operation at a time --------------------------------
 
 /** The step's expression with the operation that goes first (and its brackets) marked. */
-function stepTokens(step: OrderStep, notation: Notation): HTMLElement[] {
+function stepAtoms(step: OrderStep, notation: Notation): Atom[] {
   // Inside brackets, the brackets go too once the operation is done: mark them with it.
   const marked = step.path.at(-1) === 'inner' ? step.path.slice(0, -1) : step.path;
-  const out: HTMLElement[] = [];
+  const { add, sub } = OPERATOR_SYMBOLS[notation];
+  const out: Atom[] = [];
   let first: HTMLElement | null = null;
+  let depth = 0;
   for (const token of pathTokens(step.expr, notation)) {
-    const span = tokenSpan(token);
-    if (!isWithin(token.path, marked)) {
-      first = null;
-      out.push(span);
+    if (isWithin(token.path, marked)) {
+      // The marked operation stays whole; its brackets are balanced inside it.
+      if (!first) {
+        first = h('span', { className: 'dv-model__first', testId: 'model-first' });
+        out.push({ node: first, breakAfter: false });
+      }
+      first.append(tokenSpan(token));
       continue;
     }
-    if (!first) {
-      first = h('span', { className: 'dv-model__first', testId: 'model-first' });
-      out.push(first);
-    }
-    first.append(span);
+    first = null;
+    if (token.kind === 'bracket') depth += token.text === '(' ? 1 : -1;
+    const plusMinus = token.kind === 'sign' && (token.text === add || token.text === sub);
+    out.push({ node: tokenSpan(token), breakAfter: depth === 0 && plusMinus });
   }
   return out;
 }
@@ -568,23 +615,26 @@ function orderStepsModel(
   model: Extract<ProblemModel, { kind: 'order-steps' }>,
   { t, notation, solved }: ModelOptions,
 ): HTMLElement {
-  const equals = (): HTMLElement => h('span', { className: 'dv-model__sign', text: '=' });
   const rows = model.steps.map((step, index) =>
     h(
       'li',
       { className: 'dv-model__step' },
-      index > 0 ? equals() : null,
-      ...stepTokens(step, notation),
+      ...chunked([...(index > 0 ? [equalsAtom()] : []), ...stepAtoms(step, notation)]),
     ),
   );
   rows.push(
     h(
       'li',
       { className: 'dv-model__step dv-model__step--result' },
-      equals(),
-      solved
-        ? h('span', { className: 'dv-model__number', text: String(model.result) })
-        : h('span', { className: 'dv-model__blank', text: '?' }),
+      ...chunked([
+        equalsAtom(),
+        {
+          node: solved
+            ? h('span', { className: 'dv-model__number', text: String(model.result) })
+            : h('span', { className: 'dv-model__blank', text: '?' }),
+          breakAfter: false,
+        },
+      ]),
     ),
   );
   const symbols = OPERATOR_SYMBOLS[notation];
