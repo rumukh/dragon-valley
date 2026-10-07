@@ -309,8 +309,10 @@ General rules for all activities:
   and "Almost! Let's look…" with the correct answer and its visual model. It never removes coins,
   stars or progress.
 - **Feedback never relies on colour alone:** shape (✓ / ?), motion, sound and text all change.
-- **Hints** (`hint`) show the visual model for the current problem (array, groups, strategy split,
-  number line). They are free and never reduce rewards.
+- **Hints** (`hint`) show the visual model for the current problem: an array or equal groups in
+  the small tables; beyond them a place-value shift, ten-rods in groups, the tens-and-ones split
+  of a product or a quotient, or an expression worked out step by step (docs/app.md). They are
+  free and never reduce rewards.
 - Every answer costs one logical turn; re-asks are scheduled in turns (§6.4).
 
 ### 5.1 Feeding Time (`feeding`): the core

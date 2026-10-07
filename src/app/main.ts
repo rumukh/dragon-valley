@@ -24,6 +24,7 @@ import { afterPaint, h } from './ui/dom';
 import './styles/base.css';
 import './styles/components.css';
 import './styles/screens.css';
+import './styles/models.css';
 import './art/dragon/animations.css';
 
 const basePath = schema.string({

@@ -108,6 +108,12 @@
     { "fg": "feedback.missDeep", "bg": "feedback.missSoft", "min": 4.5, "use": "Almost banner" },
     { "fg": "feedback.infoDeep", "bg": "surface.paper", "min": 4.5, "use": "Info text" },
     { "fg": "feedback.infoDeep", "bg": "feedback.infoSoft", "min": 4.5, "use": "Info banner" },
-    { "fg": "brand.sunDeep", "bg": "surface.paper", "min": 4.5, "use": "Coin counts and gold text" }
+    { "fg": "brand.sunDeep", "bg": "surface.paper", "min": 4.5, "use": "Coin counts and gold text" },
+    { "fg": "ink.inkSoft", "bg": "surface.paperDeep", "min": 4.5, "use": "Place-value column labels (H T O)" },
+    { "fg": "brand.primaryDeep", "bg": "surface.paper", "min": 4.5, "use": "Signs in a worked line under a picture" },
+    { "fg": "brand.primary", "bg": "surface.paper", "min": 3, "use": "Arrows of moving digits (graphics)" },
+    { "fg": "brand.primaryDeep", "bg": "surface.card", "min": 3, "use": "Edges of ten-rods and tens blocks (graphics)" },
+    { "fg": "brand.sunDeep", "bg": "surface.card", "min": 3, "use": "Edges of ones dots and ones blocks (graphics)" },
+    { "fg": "feedback.missDeep", "bg": "surface.paper", "min": 3, "use": "Strike through a dropped zero (graphics)" }
   ]
 }

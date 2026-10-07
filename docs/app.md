@@ -202,6 +202,26 @@ gets kind, specific help after a miss.
 - **Feedback never relies on colour alone**: correct is green + check + happy egg; a miss is
   warm orange + `?` + a curious egg + "Almost! Let's look…", with the visual model shown first.
   Term questions mark the asked-about number with a marker **and** an underline.
+- **The picture behind a problem** (`math/model.ts` chooses it, `ui/models.ts` draws it) shows
+  after a miss, before a re-ask, when a fact is taught and on Show me. The small tables keep
+  pictures to count: an array up to 10 × 10, and equal groups, with leftovers apart. Beyond them
+  the written strategy is drawn:
+  - `place-shift`: · 10, · 100, : 10 and : 100. The digits move in an H T O chart, and the new
+    zeros are marked.
+  - `tens-groups`: `30 · 3` as ten-rods in groups, "3 tens · 3 = 9 tens = 90". With many rods
+    it is one group and "· b".
+  - `split-mul`: `38 · 8` as an area model of tens and ones.
+  - `split-div`: `96 : 8` as the area model the other way round.
+  - `order-steps`: an expression of two or more operations, one row per step, in Golem Orders'
+    order. The step that goes first has a marker and an underline.
+
+  Tens are violet rods and ones yellow dots, so shape and labels tell them apart. Each worked
+  line is written in the child's notation and read as words to screen readers. It ends with the
+  answer only after a miss (`showModel(problem, true)`). Before the answer it ends with an empty
+  box, so the picture shows the way and leaves the last step. The figures are about as big as
+  the groups picture and smaller in a boss round. `node scripts/art/models-gallery.mjs` draws
+  every kind for review.
+
 - **Font**: "DV Reading", a Latin subset of **Andika 7.000** (SIL Open Font License 1.1), WOFF2,
   Regular and Bold, about 38 KB each, in `assets/fonts/dv-reading/` with `OFL.txt` (shipped)
   and `provenance.json` (source URL, version, SHA-256 of the archive, originals and subsets;
