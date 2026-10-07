@@ -238,6 +238,40 @@ export async function grownUpWalk(page: Page, visit: Visit): Promise<void> {
 }
 
 /**
+ * Riddle Ruins opened ahead by a grown-up: a Compare Stones problem on its stones, the same stones
+ * after an answer (values and the right sign), and a Riddle Scrolls story on its scroll.
+ */
+export async function riddlesWalk(page: Page, visit: Visit): Promise<void> {
+  await boot(page);
+  await createFirstKeeper(page, { name: 'Ada', avatar: 'keeper-6' });
+  await leaveHub(page);
+  await openGrownUps(page, 'settings');
+  await unlockAhead(page, 'riddle-ruins');
+  await closeGrownUps(page);
+  await page.getByTestId('keeper-profile-1').click();
+  await expectHub(page, 'Ada');
+  await startLevel(page, 'riddle-ruins', 'riddle-ruins.3');
+  await expect(page.locator('.dv-stone')).toHaveCount(2);
+  await visit({ name: '50-compare-stones', description: 'Compare Stones: two stones and a sign' });
+  await page.getByTestId('choice-eq').click();
+  await expect(page.getByTestId('problem')).toHaveAttribute('data-revealed', 'true');
+  await visit({
+    name: '51-compare-answered',
+    description: "Compare Stones answered: the stones' values and the sign",
+  });
+  await backToHub(page, 'Ada', async () => {
+    if (await page.getByTestId('feedback-next').isVisible()) {
+      await page.getByTestId('feedback-next').click();
+    }
+    await page.keyboard.press('Escape');
+    await page.getByTestId('pause-quit').click();
+  });
+  await startLevel(page, 'riddle-ruins', 'riddle-ruins.5');
+  await expect(page.getByTestId('round-scroll')).toBeVisible();
+  await visit({ name: '52-riddle-scroll', description: 'Riddle Scrolls: a story on its scroll' });
+}
+
+/**
  * The Seven-Headed Dragon and the finale. A grown-up opens Dragon Castle ahead and the child cures
  * the boss's first head; then a save the rules played to the finale beat is loaded
  * (support/finale.ts) for its first two lines: every head cured, then the Magic Window whole.

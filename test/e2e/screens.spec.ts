@@ -13,6 +13,7 @@ import {
   finaleWalk,
   grownUpWalk,
   placesWalk,
+  riddlesWalk,
   roundWalk,
   troubleWalk,
   welcomeWalk,
@@ -65,6 +66,15 @@ test("the keepers and the grown-ups' area", async ({ page }, testInfo) => {
     await checkStop(page, testInfo, stop, everything);
   });
   writeContactSheet(testInfo, 'keepers-and-grown-ups', stops);
+});
+
+test('Riddle Ruins: Compare Stones and Riddle Scrolls', async ({ page }, testInfo) => {
+  const stops: Stop[] = [];
+  await riddlesWalk(page, async (stop) => {
+    stops.push(stop);
+    await checkStop(page, testInfo, stop, everything);
+  });
+  writeContactSheet(testInfo, 'riddle-ruins', stops);
 });
 
 test('the finale: the Seven-Headed Dragon head by head, the Magic Window whole', async ({

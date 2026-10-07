@@ -49,7 +49,13 @@ import type { TilesView } from '../ui/tiles';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
 import { createSaveStatus, topBar } from './common';
-import { answerId, answerLabel, answerSpoken, problemElement } from './problem-view';
+import {
+  answerId,
+  answerLabel,
+  answerSpoken,
+  problemElement,
+  revealComparison,
+} from './problem-view';
 import { backdrop } from './scene';
 import { speakerButton } from './speech';
 
@@ -151,8 +157,11 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   });
   const headsLine = byHead ? h('p', { className: 'dv-heads', testId: 'boss-heads' }) : null;
   const story = h('p', { className: 'dv-round__story', testId: 'round-story' });
+  // A story is a scroll that unrolls (Riddle Scrolls), with the speaker on it.
+  const scroll = h('div', { className: 'dv-scroll', testId: 'round-scroll' }, story);
   const problemSlot = h('div', { className: 'dv-round__problem' });
   const speakerSlot = h('div', { className: 'dv-round__speaker' });
+  const tools = h('div', { className: 'dv-problem-card__tools' });
   const note = h('p', { className: 'dv-round__note', testId: 'round-note' });
   const modelSlot = h('div', { className: 'dv-round__model' });
   const hintSlot = h('div', { className: 'dv-round__hint' });
@@ -164,6 +173,8 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     dataset: { kind: 'none' },
     attributes: { role: 'status' },
   });
+
+  tools.append(speakerSlot, hintSlot);
 
   let tiles: TilesView | undefined;
   let keypad: KeypadView | undefined;
@@ -455,6 +466,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
         : []),
     );
     hintSlot.replaceChildren();
+    revealStones(asked.problem, result.given);
     if (chosenTile) tiles?.setState(chosenTile, 'correct');
     updateProgress(round);
     const gained = after.coins - before.coins;
@@ -502,10 +514,17 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     await advance();
   };
 
+  /** A comparison shows its stones' values and the right sign once answered. */
+  const revealStones = (problem: Problem, answer: AnswerValue): void => {
+    const line = problemSlot.querySelector<HTMLElement>('.dv-stones');
+    if (problem.kind === 'compare' && line) revealComparison(line, problem, answer, notation());
+  };
+
   const onMiss = (asked: ProblemView, result: Feedback, after: GameView): void => {
     const round = problemRound(after)!;
     updateProgress(round);
     hintSlot.replaceChildren();
+    revealStones(asked.problem, result.expected);
     if (chosenTile) {
       tiles?.setState(chosenTile, 'miss');
       tiles?.block(chosenTile);
@@ -576,8 +595,22 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     chosenTile = undefined;
     setFeedback('none');
     const words = storyText(problem.problem);
+    const newStory = words !== '' && words !== story.textContent;
     story.textContent = words;
     story.hidden = words === '';
+    scroll.hidden = words === '';
+    if (words === '') tools.prepend(speakerSlot);
+    else scroll.append(speakerSlot);
+    if (newStory) {
+      animate(
+        scroll,
+        [
+          { transform: 'scaleY(0.2)', opacity: 0 },
+          { transform: 'scaleY(1)', opacity: 1 },
+        ],
+        { duration: 450, easing: EASE_OUT },
+      );
+    }
     const spoken = spokenProblem(problem);
     problemSlot.replaceChildren(problemElement(problem.problem, notation(), spoken, problem.step));
     speakerSlot.replaceChildren(...speakerButton(app, active, () => spokenProblem(problem)));
@@ -825,14 +858,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       h(
         'div',
         { className: 'dv-round__board' },
-        h(
-          'div',
-          { className: 'dv-card dv-problem-card' },
-          story,
-          problemSlot,
-          note,
-          h('div', { className: 'dv-problem-card__tools' }, speakerSlot, hintSlot),
-        ),
+        h('div', { className: 'dv-card dv-problem-card' }, scroll, problemSlot, note, tools),
         feedback,
       ),
       h('div', { className: 'dv-round__input' }, prompt, answerSlot),

@@ -16,8 +16,9 @@ differ by operating system, so no test compares them.
 - **CI**: each run of the `CI` workflow uploads one artifact per engine from the job that runs
   the walks: `qa-screens-chromium-walks+rest`, `qa-screens-firefox-walks+rest` and
   `qa-screens-webkit-walks` (kept 30 days). Open `first-run-and-placement.html`,
-  `the-valley.html`, `keepers-and-grown-ups.html`, `the-finale.html`, `when-things-go-wrong.html`
-  or `text-200.html` in the artifact for a contact sheet: one row per stop, one column per size.
+  `the-valley.html`, `keepers-and-grown-ups.html`, `riddle-ruins.html`, `the-finale.html`,
+  `when-things-go-wrong.html` or `text-200.html` in the artifact for a contact sheet: one row
+  per stop, one column per size.
 - **Locally**: `npm run test:e2e -- screens.spec.ts reflow.spec.ts` writes the same files to
   `out/qa-screens/<project>/` (`chromium-msedge` with the default local browser).
 
@@ -90,6 +91,17 @@ goodbye and reads the day's Dragon Diary (`placesWalk`).
 | `30-confirm-remove`  | Confirming the removal of a keeper                    |
 | `31-editor-change`   | Changing a keeper, with Remove                        |
 | `32-keepers-full`    | Four keepers: the valley is full                      |
+
+## Riddle Ruins (`riddle-ruins`)
+
+A grown-up opens Riddle Ruins ahead; the child answers a Compare Stones problem and opens a Riddle
+Scrolls story (`riddlesWalk`).
+
+| Stop                  | What it shows                                        |
+| --------------------- | ---------------------------------------------------- |
+| `50-compare-stones`   | Compare Stones: two stones and a sign                |
+| `51-compare-answered` | Compare Stones answered: the stones' values and sign |
+| `52-riddle-scroll`    | Riddle Scrolls: a story on its scroll                |
 
 ## The finale (`the-finale`)
 
