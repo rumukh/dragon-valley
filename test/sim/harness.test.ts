@@ -96,6 +96,15 @@ describe('the learner simulation', () => {
       records.filter((r) => r.day !== 0 || r.recall < 0 || r.recall > 100),
       'day 0, recall 0-100',
     ).toEqual([]);
+    expect(
+      records.some((r) => r.protected),
+      'the mix protects the struggling child once its success drops',
+    ).toBe(true);
+    await firstSession('perfect');
+    expect(
+      answers.get('perfect')!.filter((r) => r.protected).length,
+      'a child who is always right is never protected',
+    ).toBe(0);
   });
 });
 

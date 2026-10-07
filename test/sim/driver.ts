@@ -26,7 +26,7 @@ import type {
   MasteryLevel,
   ProblemRoundView,
 } from '../../src/rules/contract';
-import { itemTier } from '../../src/rules/learning/selection';
+import { lowSuccess, mixTier } from '../../src/rules/learning/selection';
 import type { ItemTier } from '../../src/rules/learning/selection';
 import { Player, loadPack, oracle } from '../traces/support';
 import type { Style } from '../traces/support';
@@ -401,8 +401,14 @@ export interface AnswerRecord {
   item: string;
   /** `operation` for a story's first step (which operation?), else `answer`. */
   step: 'answer' | 'operation';
-  /** The item's tier in the mix and its Leitner box before the answer (`null`: never answered). */
+  /**
+   * The item's tier as the mix saw it (`mixTier`: a due fact missed last time is a learning item
+   * while the child is protected), whether the mix was protecting the child (recent success
+   * below the protection line), and the item's Leitner box before the answer (`null`: never
+   * answered).
+   */
   tier: ItemTier;
+  protected: boolean;
   box: number | null;
   reask: boolean;
   input: 'choice' | 'keypad';
@@ -534,6 +540,7 @@ export async function simulate(
       if (options.onAnswer) {
         const state = player.state();
         const level = view.source.kind === 'level' ? view.source.level : null;
+        const protecting = lowSuccess(state, pack.data);
         options.onAnswer({
           day: today,
           activity: view.activity,
@@ -541,7 +548,8 @@ export async function simulate(
           replay: level !== null && (state.levels[level]?.stars ?? 0) > 0,
           item: problem.item,
           step: problem.step,
-          tier: itemTier(state, problem.item, state.day ?? 0),
+          tier: mixTier(state, problem.item, state.day ?? 0, protecting),
+          protected: protecting,
           box: state.items[problem.item]?.box ?? null,
           reask: problem.reask,
           input: problem.input,
