@@ -26,9 +26,9 @@ pack; the validator names the template). `main` deploys to the live site, and a 
 the exact pack it was played with (ID, revision and content hash): the runtime restores it only
 with that pack. The shell loads `content/history/<revision>.json` for a save that pins an older
 revision, restores it with that pack and moves it to the current pack at the hub. The Region 1
-slice went live as `1.0.0` (main `373a5d2`), v1 as `1.1.0` (main `78c4943`), and the balance from
-the learner simulations as `1.2.0` (main `57855d3`); [content/history](../content/history/README.md)
-lists what is archived.
+slice went live as `1.0.0` (main `373a5d2`), v1 as `1.1.0` (main `78c4943`), the balance from the
+learner simulations as `1.2.0` (main `57855d3`) and the effort path as `1.3.0` (main `22cdedc`);
+[content/history](../content/history/README.md) lists what is archived.
 
 To change content:
 
