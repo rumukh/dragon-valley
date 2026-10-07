@@ -1043,9 +1043,18 @@
   text-align: center;
 }
 
+/* The prompt sits on a paper pill, like the round's meter, so the scene's birds never fly through
+   its words. */
 .dv-round__prompt {
+  padding: 0.1em 0.8em;
+  border-radius: 1em;
   font-weight: 700;
   text-align: center;
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+}
+
+.dv-round__prompt:empty {
+  display: none;
 }
 
 .dv-round__answer {
