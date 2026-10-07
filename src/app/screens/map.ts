@@ -4,11 +4,11 @@
  * The map is S4's `valley-map` picture with the regions as labelled buttons (the SDK's
  * `createHotspotList`, placed over the picture; a tap anywhere inside a region works too, through
  * `logicalPoint` and `hitHotspot`). When the map is too narrow for the names (a phone, or big
- * text), the same buttons line up under it and the picture keeps each region's emblem as a pin
- * (screens.css, "Valley map"). Places the content does not have yet sleep under a lock. A
- * region opens its stretch of road with one button per level (locked, open, the glowing next
- * one, or its stars) and the boss at the end. A level card lists the level's activities and
- * starts or continues it.
+ * text), the same buttons line up beside it on a wide window, else under it, and the picture keeps
+ * each region's emblem as a pin (screens.css, "Valley map"). Places the content does not have yet
+ * sleep under a lock. A region opens its stretch of road with one button per level (locked, open,
+ * the glowing next one, or its stars) and the boss at the end, and beside it the levels' names
+ * with their stars. A level card lists the level's activities and starts or continues it.
  */
 import { createHotspotList, hitHotspot, logicalPoint } from '@aegis/browser/ui';
 import type { Hotspot } from '@aegis/browser/ui';
@@ -50,6 +50,14 @@ const ACTIVITY_ICONS: Readonly<Record<string, string>> = {
  * also do when any two names on the picture would touch.
  */
 const COMPACT_MAP_EMS = 36;
+
+/**
+ * When the names leave the picture they stand beside it on a window this much wider than tall
+ * with room for them (this many text sizes), so the map and every name fit without scrolling;
+ * otherwise they line up under it.
+ */
+const BESIDE_ASPECT = 1.55;
+const BESIDE_EMS = 40;
 
 /** True when any two of the buttons overlap. */
 function crowded(list: HTMLElement): boolean {
@@ -100,6 +108,8 @@ function mapPicture(map: ValleyMap, camera: Camera, className: string): HTMLElem
   image.style.top = `${(-camera.y / camera.height) * 100}%`;
   const frame = h('div', { className }, image);
   frame.style.setProperty('--aspect', `${camera.width} / ${camera.height}`);
+  // The same, as one number: the picture's width for the height the window leaves it.
+  frame.style.setProperty('--ratio', String(camera.width / camera.height));
   return frame;
 }
 
@@ -163,25 +173,46 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
         });
       picture.append(...asleep, ...pins, list);
       const area = h('div', { className: 'dv-map-area', testId: 'map-area' }, picture);
-      // One set of buttons: over the picture while the names fit, under it when they do not.
+      // One set of buttons: over the picture while the names fit; beside it (a wide window) or
+      // under it when they do not.
       const fit = (): void => {
-        const width = picture.clientWidth;
-        if (width === 0) return;
-        const focused = list.contains(document.activeElement) ? document.activeElement : null;
+        const host = area.parentElement;
+        if (!host || area.clientWidth === 0) return;
         const size = parseFloat(getComputedStyle(picture).fontSize) || 16;
-        let compact = width < COMPACT_MAP_EMS * size;
-        if (!compact) {
-          // Try the names on the picture; if any two would touch, they go under it after all.
-          area.dataset['compact'] = 'false';
-          if (list.parentElement !== picture) picture.append(list);
-          compact = crowded(list);
-        }
+        // Try the names on a hidden stand-in of the picture at the size it has with the names on
+        // it, so the real buttons (and the focus) stay put while the browser measures: if it is
+        // too narrow, or any two names would touch, the names leave the picture. (A browser may
+        // not restyle the real picture until the next frame, so it cannot be measured here.)
+        const ghost = picture.cloneNode(false) as HTMLElement;
+        ghost.setAttribute('aria-hidden', 'true');
+        ghost.style.visibility = 'hidden';
+        const probe = list.cloneNode(true) as HTMLElement;
+        probe
+          .querySelectorAll('[data-testid]')
+          .forEach((node) => node.removeAttribute('data-testid'));
+        ghost.append(probe);
+        host.insertBefore(ghost, area);
+        const compact = ghost.clientWidth < COMPACT_MAP_EMS * size || crowded(probe);
+        ghost.remove();
+        const wide =
+          innerWidth >= BESIDE_ASPECT * innerHeight && area.clientWidth >= BESIDE_EMS * size;
         area.dataset['compact'] = String(compact);
-        if (compact && list.parentElement !== area) area.append(list);
-        if (focused instanceof HTMLElement && document.activeElement !== focused) focused.focus();
+        area.dataset['names'] = compact ? (wide ? 'beside' : 'under') : 'over';
+        const home = compact ? area : picture;
+        if (list.parentElement !== home) {
+          const focused = list.contains(document.activeElement) ? document.activeElement : null;
+          home.append(list);
+          if (focused instanceof HTMLElement && document.activeElement !== focused) focused.focus();
+        }
       };
-      const resizes = new ResizeObserver(fit);
-      resizes.observe(picture);
+      // The layout changes the picture's size, so it waits for the next frame rather than
+      // resizing what the observer is reporting on.
+      let pending = 0;
+      const resizes = new ResizeObserver(() => {
+        cancelAnimationFrame(pending);
+        pending = requestAnimationFrame(fit);
+      });
+      resizes.observe(area);
       picture.addEventListener('click', (event) => {
         if (event.target instanceof HTMLButtonElement) return;
         const image = picture.querySelector('img');
@@ -216,7 +247,9 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
         region: null,
         music: 'map',
         focusTarget: () => list.querySelector('button') ?? heading,
+        mounted: fit,
         dispose: () => {
+          cancelAnimationFrame(pending);
           resizes.disconnect();
           saveStatus.dispose();
         },
@@ -263,6 +296,11 @@ export function regionScreen(app: App, keeperId: string, regionId: string): Scre
       const saveStatus = createSaveStatus(app, active);
       const coins = createCoinCounter(app.kit, view.coins);
 
+      const openLevel = (level: LevelCard): void => {
+        app.kit.cue('ui.tap');
+        void app.router.push(app.screens.level(keeperId, level.id)).catch(app.kit.onError);
+      };
+
       const nodeButton = (
         level: LevelCard,
         point: MapPoint,
@@ -302,12 +340,45 @@ export function regionScreen(app: App, keeperId: string, regionId: string): Scre
             : h('span', { className: 'dv-road__number', text: String(number) }),
         );
         button.disabled = level.status === 'locked';
-        button.addEventListener('click', () => {
-          app.kit.cue('ui.tap');
-          void app.router.push(app.screens.level(keeperId, level.id)).catch(app.kit.onError);
-        });
+        button.addEventListener('click', () => openLevel(level));
         place(button, point, camera);
         return button;
+      };
+
+      // Beside the road, each level's name and stars, in the road's order. A tap on a name opens
+      // its level like its marker; the markers already carry the names for a screen reader and
+      // the keyboard, so the list is only for the eyes (and the fingers).
+      const row = (level: LevelCard, number: number | null): HTMLElement => {
+        const button = h(
+          'button',
+          {
+            className: 'dv-road__row',
+            testId: `level-row-${level.id}`,
+            dataset: { status: level.status, glowing: String(level.glowing) },
+            attributes: { type: 'button', tabindex: '-1' },
+          },
+          number === null && region.boss
+            ? bossArt(
+                region.boss.id,
+                region.boss.defeated ? 'won' : 'start',
+                'dv-road__face',
+                false,
+              )
+            : h('span', { className: 'dv-road__badge', text: String(number ?? '') }),
+          h('span', { className: 'dv-road__name', text: text(level.titleKey) }),
+          level.status === 'locked'
+            ? icon('lock', 'dv-icon dv-road__lock')
+            : h(
+                'span',
+                { className: 'dv-road__stars' },
+                ...[0, 1, 2].map((index) =>
+                  artIcon(index < level.stars ? 'star-filled' : 'star-empty'),
+                ),
+              ),
+        );
+        button.disabled = level.status === 'locked';
+        button.addEventListener('click', () => openLevel(level));
+        return h('li', {}, button);
       };
 
       const nodes = [
@@ -320,6 +391,12 @@ export function regionScreen(app: App, keeperId: string, regionId: string): Scre
         ...nodes,
       );
       picture.append(road);
+      const names = h(
+        'ol',
+        { className: 'dv-road__list', attributes: { 'aria-hidden': 'true' } },
+        ...lessons.map((level, index) => row(level, index + 1)),
+        ...bosses.map((level) => row(level, null)),
+      );
       const heading = h('h1', { className: 'dv-map__title', text: text(region.titleKey) });
       const element = h(
         'main',
@@ -334,7 +411,7 @@ export function regionScreen(app: App, keeperId: string, regionId: string): Scre
           tools: [coins.element, saveStatus.element],
           onError: app.kit.onError,
         }),
-        picture,
+        h('div', { className: 'dv-region__body' }, picture, names),
       );
       return {
         element,

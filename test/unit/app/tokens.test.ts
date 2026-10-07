@@ -27,6 +27,7 @@ const LOCAL = new Set([
   '--dot',
   '--size',
   '--aspect',
+  '--ratio',
   '--cols',
   '--wide-cols',
   '--cell',

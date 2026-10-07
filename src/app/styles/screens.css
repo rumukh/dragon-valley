@@ -2276,12 +2276,13 @@
 
 /* ---- Valley map, region road and level card ------------------------------------------ */
 
+/* A picture is as wide as the window's height leaves room for, at its own shape (`--ratio`). */
 .dv-map,
 .dv-road {
   position: relative;
   overflow: hidden;
   aspect-ratio: var(--aspect, 16 / 10);
-  width: min(100%, calc((100dvh - 9rem) * 1.6));
+  width: min(100%, calc((100dvh - 9rem) * var(--ratio, 1.6)));
   margin-inline: auto;
   border-radius: 1.4em;
   background: var(--dv-sky);
@@ -2334,6 +2335,44 @@
 
 .dv-map-area[data-compact='true'] .dv-map__pin {
   display: grid;
+}
+
+/* On a landscape window the names under the map leave it the room of three rows of names; on a
+   wide one they stand beside it instead, in columns of five (map.ts chooses). */
+@media (orientation: landscape) {
+  .dv-map-area[data-names='under'] .dv-map {
+    width: min(100%, calc((100dvh - 17rem) * var(--ratio, 1.6)));
+  }
+
+  .dv-map-area[data-compact='true'] .dv-map__places {
+    margin-top: 0.5em;
+  }
+
+  .dv-map-area[data-compact='true'] .dv-map__place .dv-map__emblem {
+    width: 1.7em;
+    height: 1.7em;
+  }
+
+  .dv-map-area[data-names='beside'] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 2vw, 28px);
+  }
+
+  .dv-map-area[data-names='beside'] .dv-map {
+    flex: 0 1 auto;
+    margin-inline: 0;
+  }
+
+  .dv-map-area[data-names='beside'] .dv-map__places {
+    display: grid;
+    flex: 0 0 auto;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(5, auto);
+    gap: 0.5em 0.6em;
+    margin-top: 0;
+  }
 }
 
 /* A place's name is anchored in proportion to where it stands (left at the left edge, centred in
@@ -2467,6 +2506,113 @@
   }
 }
 
+/* The region: its stretch of road and, beside it on a landscape window (else under it), the
+   levels' names with their stars. */
+.dv-region__body {
+  display: grid;
+  justify-items: center;
+  gap: clamp(12px, 2vw, 28px);
+}
+
+.dv-region__body > .dv-road {
+  width: min(100%, calc((100dvh - 7rem) * var(--ratio, 1.6)));
+}
+
+.dv-road__list {
+  display: grid;
+  align-content: center;
+  gap: 0.4em;
+  width: min(100%, 24em);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-region__body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dv-region__body > .dv-road {
+    flex: 0 1 auto;
+    margin-inline: 0;
+  }
+
+  .dv-road__list {
+    flex: 0 1 20em;
+    min-width: 12em;
+  }
+}
+
+.dv-road__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  width: 100%;
+  min-height: var(--dv-target);
+  padding: 0.15em 0.7em 0.15em 0.3em;
+  border: 0.1em solid var(--dv-line);
+  border-radius: 2em;
+  font: inherit;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: start;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow: 0 0.15em 0 var(--dv-line-strong);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.dv-road__row[data-glowing='true'] {
+  border-color: var(--dv-sun-deep);
+  background: color-mix(in srgb, var(--dv-sun) 30%, var(--dv-card));
+}
+
+.dv-road__row:disabled {
+  color: var(--dv-ink-muted);
+  background: var(--dv-paper);
+  box-shadow: none;
+  cursor: default;
+}
+
+.dv-road__badge {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  color: var(--dv-card);
+  background: var(--dv-ink);
+}
+
+.dv-road__face {
+  flex: none;
+  width: 2em;
+  height: 2em;
+}
+
+.dv-road__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.dv-road__stars {
+  display: inline-flex;
+  flex: none;
+  gap: 0.1em;
+}
+
+.dv-road__stars svg,
+.dv-road__lock {
+  width: 1.1em;
+  height: 1.1em;
+}
+
 .dv-level__card {
   display: grid;
   justify-items: center;
@@ -2474,6 +2620,26 @@
   width: min(100%, 34em);
   margin: auto;
   text-align: center;
+}
+
+/* On a landscape window a boss stands beside its card's words, and a short window draws the card
+   a little tighter, so Play is always in view. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-level__card:has(> .dv-level__boss) {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 1.5rem;
+    width: min(100%, 46em);
+  }
+
+  .dv-level__card > .dv-level__boss {
+    grid-row: 1 / span 6;
+    grid-column: 1;
+    align-self: center;
+  }
+
+  .dv-level__card:has(> .dv-level__boss) > :not(.dv-level__boss) {
+    grid-column: 2;
+  }
 }
 
 .dv-level__title {
@@ -2518,6 +2684,20 @@
 .dv-level__done {
   width: 1.2em;
   height: 1.2em;
+}
+
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 860px) {
+  .dv-level__card {
+    gap: 0.7rem;
+  }
+
+  .dv-level__title {
+    font-size: min(2rem, 9vw, 7vh);
+  }
+
+  .dv-level__activity {
+    padding-block: 0.3em;
+  }
 }
 
 /* ---- Collections: Market, Dragon Den, Sticker Album, Magic Window ---------------------- */
