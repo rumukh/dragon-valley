@@ -19,6 +19,12 @@ export const NAMED_PARTS = {
   // The v1 boards, the bosses, the finale and the map with every region awake, and saves from
   // before an update.
   valley: ['boards', 'bosses', 'upgrade', 'finale', 'map'],
+  // The activities beyond the boards: Memory Match, Number Trail, Fact Family, the Egg Grid.
+  activities: ['activities'],
+  // The day around the rounds: the Daily Adventure, its goal and gift, pacing, the collections.
+  days: ['daily', 'collections'],
+  // The grown-ups' remaining controls, and the pause when the page is hidden.
+  controls: ['grown-ups', 'visibility'],
 } as const satisfies Record<string, readonly string[]>;
 
 type NamedPart = keyof typeof NAMED_PARTS;

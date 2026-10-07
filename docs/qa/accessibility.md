@@ -6,7 +6,9 @@ and WebKit, against WCAG 2.2 levels A and AA and the plan's own promises (plan ย
 **In short:**
 
 - No serious or critical axe violation on any screen, in any engine, at any size.
-- Four minor defects stay open, all for S3: three show only in WebKit and one only under some
+- One major defect is open for S3: Memory Match's term cards neither show nor name the number
+  their example is about (DV-QA-17). Four minor ones stay open too, all for S3: three show only in
+  WebKit and one only under some
   timings.
 - Three moderate axe findings are easy fixes.
 - Some things only a person can check, above all screen readers on a real iPad and Windows forced
@@ -62,7 +64,7 @@ and WebKit, against WCAG 2.2 levels A and AA and the plan's own promises (plan ย
 
 ## Open defects
 
-All minor, all owned by S3; full write-ups with repro and suggested fixes in
+All owned by S3, all minor but DV-QA-17; full write-ups with repro and suggested fixes in
 [defects.md](defects.md).
 
 | ID       | Engines                    | Summary                                                                    |
@@ -71,6 +73,7 @@ All minor, all owned by S3; full write-ups with repro and suggested fixes in
 | DV-QA-13 | WebKit, sometimes Chromium | A keeper's hub at 200 % text appears at normal size first                  |
 | DV-QA-15 | WebKit                     | The keeper pictures lose their focus ring under the arrow keys             |
 | DV-QA-16 | all, sometimes             | Two announcements within 40 ms: only the second is heard                   |
+| DV-QA-17 | all                        | Major: the term cards' example neither shows nor names its marked number   |
 
 Twelve defects found by the suite have been fixed and stay pinned as regression checks: among them
 the 40 px Retry button, words broken at 200 % text, sideways scrolling at 200 % on a phone, map
@@ -88,15 +91,15 @@ hotspots cut off, focus targets that lost their ring, celebrations that a keyboa
 
 ## Beyond WCAG: the plan's promises (ยง2.11)
 
-| Promise                                                  | Result                                                                                     |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Touch-first, targets of at least 48 px                   | Pass at every size and at 200 % text; whole rounds and both boards played by touch         |
-| Text scales to 200 % with reflow                         | Pass (DV-QA-13, DV-QA-05 above)                                                            |
-| Digits, Enter, Backspace, arrows, Space and Esc          | Pass: keypad and keyboard give the same answer step by step; choice tiles wrap; Esc pauses |
-| Feedback in a live region, focus managed with dialogs    | Pass (DV-QA-16 above)                                                                      |
-| The game pauses when the page is hidden                  | Built (`problems.ts`), **not tested**: planned with the next e2e tranche                   |
-| Read-aloud with local voices only                        | Pass                                                                                       |
-| Reduced motion, from the device or the keeper's settings | Pass                                                                                       |
+| Promise                                                  | Result                                                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Touch-first, targets of at least 48 px                   | Pass at every size and at 200 % text; whole rounds and both boards played by touch                                 |
+| Text scales to 200 % with reflow                         | Pass (DV-QA-13, DV-QA-05 above)                                                                                    |
+| Digits, Enter, Backspace, arrows, Space and Esc          | Pass: keypad and keyboard give the same answer step by step; choice tiles wrap; Esc pauses                         |
+| Feedback in a live region, focus managed with dialogs    | Pass (DV-QA-16 above)                                                                                              |
+| The game pauses when the page is hidden                  | Pass: hidden time does not count against answers, the Arena's clock stops, read-aloud stops (`visibility.spec.ts`) |
+| Read-aloud with local voices only                        | Pass                                                                                                               |
+| Reduced motion, from the device or the keeper's settings | Pass                                                                                                               |
 
 ## Needs a person before release
 

@@ -21,6 +21,7 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 | DV-QA-13 | minor    | S3    | WebKit, sometimes Chromium: a keeper's hub at 200 % text appears at normal size first |
 | DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys                |
 | DV-QA-16 | minor    | S3    | Two announcements within 40 ms: only the second is heard (intermittent)               |
+| DV-QA-17 | major    | S3    | Memory Match's term cards do not show which number of the example is meant            |
 
 ### DV-QA-05 (minor, S3; WebKit): the grown-ups' Settings still scroll sideways on a phone
 
@@ -106,6 +107,30 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 - **Evidence**: `test/e2e/live.spec.ts` › "a round speaks its feedback…": the results headline must
   be announced politely. It depends on timing, so the defect is marked `intermittent`: a run where
   the line is heard is noted as "not seen this time", not as a fix.
+
+### DV-QA-17 (major, S3): Memory Match's term cards do not show which number of the example is meant
+
+- **Repro** (every engine): open Riddle Ruins early in the grown-ups' area, play Riddle Ruins 4's
+  Feeding Time, then its Memory Match of terms, and turn over an example card.
+- **Expected**: the example marks the number its term names, as a round's term problem marks its
+  asked number (`dv-problem__number--asked`; by a shape or line, not colour alone), and its name
+  says which number that is ("thirty divided by six equals five, six marked").
+- **Actual**: the card shows "30 : 6 = 5" as plain text and is read "thirty divided by six equals
+  five"; the term cards read "a factor", "the divisor", "the quotient", "the product". The rules
+  pair a term with an example whose number of that term is highlighted (`TERM_HIGHLIGHT` in
+  `src/rules/minigames/boards.ts`: a factor is the left number, the product the result, the
+  dividend the left, the divisor the right, the quotient the result, the remainder the remainder;
+  the contract's example: "which is 42 in 6 · 7 = 42?"). So "30 : 6 = 5" could be the dividend,
+  the divisor or the quotient, only one pairing is accepted, and a child can only guess: a miss
+  teaches nothing.
+- **Cause**: `formatFace` (`src/rules/contract/notation.ts`) writes a sentence face with
+  `highlight: 'result'` fixed and leaves highlighting to "the shell's styling", but the Memory
+  Match painter (`src/app/screens/minigames.ts`) puts the face in a plain span; `speakFace` passes
+  the card's highlight to `termSentence`, whose words do not name it.
+- **Likely fix**: draw the example's tokens with the highlighted number marked, as the round's
+  problem line does, and name it in the card's label.
+- **Evidence**: `test/e2e/activities.spec.ts` › "Memory Match term cards…": the first example
+  turned over must mark one number and say which.
 
 ## Fixed
 

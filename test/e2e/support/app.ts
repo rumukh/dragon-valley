@@ -75,13 +75,19 @@ export async function reload(page: Page): Promise<void> {
   await waitReady(page);
 }
 
-/** The router finished mounting `screen` (no navigation in flight). */
+/**
+ * The router finished mounting `screen` (no navigation in flight). A busy machine can take more
+ * than `expect`'s 10 s to mount a heavy screen such as the valley map, so the wait is longer.
+ */
 export async function expectScreen(page: Page, screen: ScreenName): Promise<void> {
   await expect(bootStatus(page), `the ${screen} screen is showing`).toHaveAttribute(
     'data-screen',
     screen,
+    { timeout: 30_000 },
   );
-  await expect(page.getByTestId('stage')).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.getByTestId('stage')).not.toHaveAttribute('aria-busy', 'true', {
+    timeout: 30_000,
+  });
 }
 
 export async function currentScreen(page: Page): Promise<string | null> {
@@ -538,7 +544,7 @@ export async function expectNextProblem(page: Page): Promise<void> {
  * Wait out a "Yes!" still on screen: its problem is answered and the next one is on its way (the
  * coins fly, then the round pauses). Reading the screen before then would read the old problem.
  */
-async function awaitOpenProblem(page: Page): Promise<void> {
+export async function awaitOpenProblem(page: Page): Promise<void> {
   await expect(
     results(page)
       .or(page.getByTestId('screen-story'))

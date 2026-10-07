@@ -33,24 +33,24 @@ The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest
 
 ## Plan §2.8: the first session
 
-| Step                                          | Evidence                                                                                                                                            | Status                      |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| Title, a new keeper, the story, the first egg | `first-run.spec.ts` (skippable story, the egg cannot be skipped)                                                                                    | Covered                     |
-| Placement check                               | `profiles.spec.ts`, `persistence.spec.ts`, `input.spec.ts`, `settings.spec.ts`                                                                      | Covered                     |
-| First Feeding Time and the first hatch        | The screen walks; `profiles.spec.ts` (the hatch celebrated before the results); `test/sim/` (the first session hatches the first egg for every bot) | Covered                     |
-| First sticker and coins                       | `live.spec.ts` (coins announced), `persistence.spec.ts` (coins kept); stickers in the finale's results                                              | Partly: stickers in general |
-| Buy a hat                                     | The market is photographed and checked by axe; no purchase is made                                                                                  | **Gap**: next e2e tranche   |
-| The map shows the next level                  | The map and road are visited and checked (`screens.spec.ts`, `reflow.spec.ts`)                                                                      | Covered, visually           |
+| Step                                          | Evidence                                                                                                                                            | Status            |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| Title, a new keeper, the story, the first egg | `first-run.spec.ts` (skippable story, the egg cannot be skipped)                                                                                    | Covered           |
+| Placement check                               | `profiles.spec.ts`, `persistence.spec.ts`, `input.spec.ts`, `settings.spec.ts`                                                                      | Covered           |
+| First Feeding Time and the first hatch        | The screen walks; `profiles.spec.ts` (the hatch celebrated before the results); `test/sim/` (the first session hatches the first egg for every bot) | Covered           |
+| First sticker and coins                       | `live.spec.ts` (coins announced), `persistence.spec.ts` (coins kept), `collections.spec.ts` (the placement check's sticker in the album)            | Covered           |
+| Buy a hat                                     | `collections.spec.ts`: a hat too dear first, then bought for its price and worn in the Dragon Den, still worn after a reload                        | Covered           |
+| The map shows the next level                  | The map and road are visited and checked (`screens.spec.ts`, `reflow.spec.ts`)                                                                      | Covered, visually |
 
 ## Plan §2.9: session flow and wellbeing
 
-| Promise                                                                          | Evidence                                                                                      | Status                                  |
-| -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Daily Adventure: reviews, the next level, a mini-game, the gift                  | `test/unit/progression/daily-adventure.test.ts`; the bots follow it daily; e2e starts it only | **Partly**: the path end to end is next |
-| Sleepy dragons after the daily goal; play can go on; goal and limit by grown-ups | The goal is set in `profiles.spec.ts`; the limit in `test/unit/app/preferences.test.ts`       | **Partly**: goal, gift and snack next   |
-| Goodbye with the Dragon Diary: what the day brought                              | `goodbye.spec.ts`, `test/unit/app/diary.test.ts`                                              | Covered                                 |
-| Days practised this week, not a streak                                           | `test/unit/app/game-view.test.ts` (the hub's week of practised days)                          | Covered headless; not in a browser      |
-| Timed play only in the optional Arena                                            | `test/unit/progression/arena.test.ts`                                                         | Covered headless; not in a browser      |
+| Promise                                                                          | Evidence                                                                                                                                                          | Status                      |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| Daily Adventure: reviews, the next level, a mini-game, the gift                  | `daily.spec.ts` (the goal, the gift once a day, the next day starting with snack time); `test/unit/progression/daily-adventure.test.ts`; the bots follow it daily | Covered                     |
+| Sleepy dragons after the daily goal; play can go on; goal and limit by grown-ups | `daily.spec.ts` (a lowered goal reached, the dragons sleepy, the Daily Adventure still on); the limit in `test/unit/app/preferences.test.ts`                      | Covered; the limit headless |
+| Goodbye with the Dragon Diary: what the day brought                              | `goodbye.spec.ts`, `test/unit/app/diary.test.ts`                                                                                                                  | Covered                     |
+| Days practised this week, not a streak                                           | `daily.spec.ts` (two days marked after the clock moves a day); `test/unit/app/game-view.test.ts`                                                                  | Covered                     |
+| Timed play only in the optional Arena                                            | `test/unit/progression/arena.test.ts`; the switch in `grown-ups.spec.ts`, its clock in `visibility.spec.ts`                                                       | Covered                     |
 
 ## Plan §2.10: presentation
 
@@ -66,31 +66,25 @@ The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest
 ## Plan §2.11: UX, input and accessibility
 
 See [accessibility.md](accessibility.md). Targets of 48 px, 200 % text with reflow, the keyboard
-promises, live feedback, focus with dialogs and reduced motion are covered. **Gap**: the pause when
-the page is hidden is built (`problems.ts`) and not tested.
+promises, live feedback, focus with dialogs and reduced motion are covered. The pause when the page is hidden is held by `visibility.spec.ts`.
 
 ## Plan §2.12: family profiles and the grown-ups' area
 
-| Promise                                                                                         | Evidence                                                                                                                                                      | Status                          |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Up to four keepers, each with their own dragons, progress and settings                          | `keepers.spec.ts`, `persistence.spec.ts`, `settings.spec.ts`                                                                                                  | Covered                         |
-| The grown-ups' gate: hold, then a two-digit × two-digit question                                | `gate.spec.ts`                                                                                                                                                | Covered                         |
-| Progress view: the window, accuracy and speed, the hardest facts, the trend, time played        | `progress.spec.ts` (the Magic Window grids with their counts, the times tables, the hardest facts, the practice days); `test/unit/app/progress-print.test.ts` | Covered                         |
-| Settings: notation, goal, voice and auto-read, volumes, text size, reduced motion, unlock ahead | `settings.spec.ts`, `profiles.spec.ts`, `read-aloud.spec.ts`, `reflow.spec.ts`, `motion.spec.ts`; unlock ahead drives the valley specs                        | Covered                         |
-| Settings: daily limit, Arena on or off, re-run placement                                        | The limit in `test/unit/app/preferences.test.ts` (it counts per page load until the persisted limit, [app.md](../app.md) §16)                                 | **Gap** in a browser            |
-| Data: backup export and import, install for offline use                                         | `test/unit/app/backup.test.ts`; exact-bytes export in `recovery.spec.ts`; import in `upgrade.spec.ts`; `offline.spec.ts`                                      | Covered                         |
-| Data: confirmed reset of a keeper's progress                                                    | Built (`parent.ts`), not tested; removing a keeper is tested (`keepers.spec.ts`)                                                                              | **Gap**                         |
-| Data: storage status                                                                            | Built (`persistence/storage.ts`: usage, and a request to keep the data); the Data tab is photographed, the request is never made by a test                    | **Partly**                      |
-| Printables: flashcards of the hardest facts, certificates                                       | `progress.spec.ts` (flashcards on A4 for the preview, the printer and a saved file); certificates in `test/unit/app/progress-print.test.ts`                   | Covered (certificates headless) |
+| Promise                                                                                         | Evidence                                                                                                                                                                                             | Status                          |
+| ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Up to four keepers, each with their own dragons, progress and settings                          | `keepers.spec.ts`, `persistence.spec.ts`, `settings.spec.ts`                                                                                                                                         | Covered                         |
+| The grown-ups' gate: hold, then a two-digit × two-digit question                                | `gate.spec.ts`                                                                                                                                                                                       | Covered                         |
+| Progress view: the window, accuracy and speed, the hardest facts, the trend, time played        | `progress.spec.ts` (the Magic Window grids with their counts, the times tables, the hardest facts, the practice days); `test/unit/app/progress-print.test.ts`                                        | Covered                         |
+| Settings: notation, goal, voice and auto-read, volumes, text size, reduced motion, unlock ahead | `settings.spec.ts`, `profiles.spec.ts`, `read-aloud.spec.ts`, `reflow.spec.ts`, `motion.spec.ts`; unlock ahead drives the valley specs                                                               | Covered                         |
+| Settings: daily limit, Arena on or off, re-run placement                                        | The Arena switch and the placement check again in `grown-ups.spec.ts`; the limit in `test/unit/app/preferences.test.ts` (it counts per page load until the persisted limit, [app.md](../app.md) §16) | Covered; the limit headless     |
+| Data: backup export and import, install for offline use                                         | `test/unit/app/backup.test.ts`; exact-bytes export in `recovery.spec.ts`; import in `upgrade.spec.ts`; `offline.spec.ts`                                                                             | Covered                         |
+| Data: confirmed reset of a keeper's progress                                                    | `grown-ups.spec.ts`: Cancel keeps everything; confirmed, the dragons and progress go and the settings stay                                                                                           | Covered                         |
+| Data: storage status                                                                            | `grown-ups.spec.ts`: the status, and the request made only on a grown-up's tap, granted or declined                                                                                                  | Covered                         |
+| Printables: flashcards of the hardest facts, certificates                                       | `progress.spec.ts` (flashcards on A4 for the preview, the printer and a saved file); certificates in `test/unit/app/progress-print.test.ts`                                                          | Covered (certificates headless) |
 
 ## Gaps, in the order they will be covered
 
-1. Buying a hat and dressing a dragon; the sticker album's pages; the Magic Window's states.
-2. The Daily Adventure end to end with the daily goal, the gift and snack time.
-3. Memory Match's variants, Number Trail, Fact Family, and the Egg Grid by touch.
-4. The pause when the page is hidden, the confirmed progress reset, the daily limit, the Arena
-   switch and re-running the placement check.
-5. With S3's teach rendering (#27): a low-success day's pacing and the picture model shown before a
-   twice-missed item is asked again.
-6. Still to be built (app.md §16): the persisted daily limit and the credits after the finale.
-7. The grown-ups' request to keep the data (storage persistence): built, never pressed by a test.
+1. The grown-ups' daily limit, once it is kept across page loads (app.md §16).
+2. With S3's teach rendering (#27): the picture model shown before a twice-missed item is asked
+   again.
+3. Still to be built (app.md §16): the persisted daily limit and the credits after the finale.
