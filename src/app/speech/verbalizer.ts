@@ -90,16 +90,21 @@ function termSentence(problem: TermProblem): string {
   );
 }
 
-/** "What do we call forty-two?", naming the position when the number appears twice. */
-function termQuestion(problem: TermProblem): string {
+/** The highlighted number in words: "forty-two", or "the first six" when it appears twice. */
+function highlightedWords(problem: TermProblem): string {
   const { sentence: parts, highlight } = problem;
   const order = ['left', 'right', 'result', 'remainder'] as const;
   const values = order.map((part) => (part === 'remainder' ? parts.remainder : parts[part]));
   const value = values[order.indexOf(highlight)]!;
   const same = order.filter((_, index) => values[index] === value);
   const words = numberToWords(value);
-  if (same.length < 2) return `what do we call ${words}`;
-  return `what do we call the ${same.indexOf(highlight) === 0 ? 'first' : 'second'} ${words}`;
+  if (same.length < 2) return words;
+  return `the ${same.indexOf(highlight) === 0 ? 'first' : 'second'} ${words}`;
+}
+
+/** "What do we call forty-two?", naming the position when the number appears twice. */
+function termQuestion(problem: TermProblem): string {
+  return `what do we call ${highlightedWords(problem)}`;
 }
 
 /** The question as a child reads it: "Seven times eight equals what?" */
@@ -200,18 +205,24 @@ export function speakSolved(problem: Problem, answer: AnswerValue): string {
   }
 }
 
-/** A minigame card or stone face ("seven times eight", "fifty-six", a whole sentence). */
+/**
+ * A minigame card or stone face ("seven times eight", "fifty-six", a whole sentence). An example
+ * sentence names the number its term is about: "thirty divided by six equals five, six marked".
+ */
 export function speakFace(face: CardFace): string {
   switch (face.kind) {
     case 'expr':
       return speakExpr(face.expr);
     case 'answer':
       return speakAnswer(face.answer);
-    case 'sentence':
-      return termSentence({
+    case 'sentence': {
+      const problem: TermProblem = {
         kind: 'term',
         sentence: face.sentence,
         highlight: face.highlight ?? 'result',
-      });
+      };
+      const said = termSentence(problem);
+      return face.highlight === null ? said : `${said}, ${highlightedWords(problem)} marked`;
+    }
   }
 }

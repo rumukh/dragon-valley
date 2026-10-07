@@ -1431,6 +1431,16 @@
   height: 1.5em;
 }
 
+/* An example sentence on a term card, its term's number marked like a term question's. */
+.dv-card-tile__face--sentence {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15em;
+  font-size: 0.85em;
+}
+
 .dv-minigame__actions {
   display: flex;
   justify-content: center;
