@@ -527,6 +527,8 @@
   "feast.putTen": "Put ten in basket {number}",
   "feast.ten": "+10",
   "feast.deal": "One for each basket",
+  "feast.shared": "Well done! Each basket gets {each}.",
+  "feast.sharedLeft": "Well done! Each basket gets {each}, and {left} are left over.",
   "golem.goal": "Tell the Golem what to do first.",
   "golem.how": "Which sign goes first? Tap it.",
   "golem.pickFirst": "Tap the sign that goes first.",

@@ -195,7 +195,10 @@ gets kind, specific help after a miss.
   `minmax(0, 1fr)` so nothing pushes the page sideways. The keeper's text size is set on `<html>`
   directly (its font size, plus `data-text-scale`) together with the SDK's `--aegis-text-scale`,
   because an engine can keep the root's old size after a custom property changes (DV-QA-13:
-  WebKit, once Chromium); the next screen's first frame is already at the keeper's size. On a
+  WebKit, once Chromium). Even so an engine may draw a newly mounted screen at the old size for a
+  few frames (WebKit about 150 ms, Chromium about 80), so after a change of text size the stage
+  stays transparent (`data-restyling`, never hidden, so focus and screen readers are not
+  disturbed) until the new screen is styled at the keeper's size, at most 400 ms. On a
   landscape screen (1024 × 768, 1180 × 820, 1280 × 800, 1366 × 657 and 1536 × 730) every
   child's screen fits at 100 % text without page scrolling, every control in view (bigger text
   may scroll). The frame's padding and gaps follow the window's height as well as its width, and
@@ -447,7 +450,10 @@ toast where they were earned.
   hint is a step of its own, so the round asks for a fresh command token after it.
 - **Minigames** (`minigames.ts`): Memory Match, Number Trail, Egg Grid and Fact Family Nest on
   the rules' typed boards (`MinigameRoundView.current`, faces through the contract's
-  `formatFace`), every move tagged with the board revision. A finished board cheers on
+  `formatFace`), every move tagged with the board revision it is sent against. A move made while
+  the one before is still being saved waits for it and then counts (`controller/moves.ts`); it is
+  dropped only if its board is gone, the round is over, a move could not be saved, or the rules no
+  longer allow it. A finished board cheers on
   `minigame.completed`. The Egg Grid is a field of `maxSide × maxSide` spots beside its
   controls: one tap builds the nest up to that spot (the steppers do the same from the
   keyboard), the nest is told in words ("5 rows of 7") and only Check tells its total ("Yes! 5
@@ -462,7 +468,11 @@ toast where they were earned.
     baskets show, `12 : 3 = ?` or `13 : 3 = ? r ?`, with the answer boxes in the division
     itself and the wide keypad under it; the rules' checks come back
     as kind lines (not fair yet, the bowl can still go round, count again). An answer bigger
-    than the whole feast is answered on the board, since the rules refuse that move.
+    than the whole feast is answered on the board, since the rules refuse that move. A right
+    answer finishes the board at any time (S2b's rule): the fruit is then dealt out to the fair
+    share, one closer in every basket a beat, within 1.2 s (at once when motion is reduced), and
+    the share stays on show for 0.7 s with "Well done! Each basket gets 4." before the next board
+    (`BoardPainter.finish`, which the minigame screen awaits before it paints the next board).
   - **Golem Orders** (`boards/golem.ts`): the expression as numbers and gears; a gear is the
     sign of its operation (`pathTokens` give every sign its operation's path), picking one marks
     its part of the line and the (wide) keypad asks its result. The steps are written the school way
@@ -544,6 +554,9 @@ Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.t
   beat from a save the rules win in Node (`support/finale.ts`). `map.spec.ts`: with every
   region open, no two names on the map overlap, on the picture at 100 % and under it at 200 %.
   `hint.spec.ts`: the answer given right after Show me is taken, by keyboard and by tapping.
+  `moves.spec.ts`: quick taps on the Sharing Feast all count (two fruit, then two rounds).
+  `feast.spec.ts`: a right answer with the fruit still in the bowl is dealt out to the fair share,
+  with and without motion, before the next board.
   The screen tour (`support/tour.ts`, docs/qa/screens.md) also walks goodbye, the Progress and
   Print tabs, the print preview, Riddle Ruins and the finale. CI runs
   Chromium, WebKit and Firefox. Locally the default project is the installed

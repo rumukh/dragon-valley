@@ -127,6 +127,11 @@ svg {
   flex-direction: column;
 }
 
+/* While a new screen is restyled at a new text size it stays transparent (shell/app.ts). */
+.dv-stage[data-restyling='true'] {
+  opacity: 0;
+}
+
 /* The frame's padding and gaps follow the window's height as well as its width, so a short
    landscape window (a laptop at 1366 × 657) keeps its room for the game. */
 .dv-screen {

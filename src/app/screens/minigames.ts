@@ -9,7 +9,13 @@
  * to be fixed. A board this build cannot draw shows a kind message and a way back.
  */
 import { formatExpr, num, op, OPERATOR_SYMBOLS } from '../../rules/contract';
-import type { BoardView, EggGridSplit, GameView, MinigameRoundView } from '../../rules/contract';
+import type {
+  BoardView,
+  EggGridSplit,
+  GameView,
+  MinigameMove,
+  MinigameRoundView,
+} from '../../rules/contract';
 import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { numberToWords } from '../speech/numbers';
@@ -22,6 +28,7 @@ import { createCoinCounter, createMeter } from '../ui/meters';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
 import { CommandRejectedError } from '../controller/commands';
+import { createMoveQueue } from '../controller/moves';
 import type { BoardContext, BoardOf, BoardPainter } from './boards/board';
 import { sharingFeast } from './boards/feast';
 import { golemOrders } from './boards/golem';
@@ -591,24 +598,29 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     testId: 'minigame-status',
     attributes: { role: 'status' },
   });
-  let busy = false;
   let disposed = false;
   /** A move the game took but could not save yet: the board shows it once Retry stores it. */
   let heldMove = false;
 
-  const context: BoardContext = {
-    app,
-    active,
-    board<K extends BoardView['kind']>(wanted: K): BoardOf<K> | null {
-      const current = minigameRound(active.game.view())?.current;
-      return current?.kind === wanted ? (current as BoardOf<K>) : null;
-    },
-    index: () => minigameRound(active.game.view())?.board ?? 0,
-    async move(move) {
-      if (busy) return false;
+  // A move made while the one before is still saving waits for it rather than being lost (a
+  // quick second tap on "One for each basket" deals twice). It is sent against the board as it
+  // is by then, and dropped only if that board is gone, the round is over, or a move could not
+  // be saved (the board then waits for Retry). A waiting move the rules no longer allow (a second
+  // tap on a card the first tap already turned) is dropped quietly too.
+  const moves = createMoveQueue(
+    async ({
+      move,
+      board,
+      waited,
+    }: {
+      move: MinigameMove;
+      board: number;
+      waited: boolean;
+    }): Promise<boolean> => {
       const round = minigameRound(active.game.view());
-      if (!round || round.status !== 'active') return false;
-      busy = true;
+      if (disposed || heldMove || !round || round.status !== 'active' || round.board !== board) {
+        return false;
+      }
       try {
         // The board redraws once the move is saved, or once it is taken if saving is slow.
         await active.commands.captureSend()({
@@ -622,11 +634,27 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
           heldMove = true;
           return false;
         }
+        if (waited && error instanceof CommandRejectedError) return false;
         throw error;
-      } finally {
-        busy = false;
       }
       return afterMove();
+    },
+  );
+
+  const context: BoardContext = {
+    app,
+    active,
+    board<K extends BoardView['kind']>(wanted: K): BoardOf<K> | null {
+      const current = minigameRound(active.game.view())?.current;
+      return current?.kind === wanted ? (current as BoardOf<K>) : null;
+    },
+    index: () => minigameRound(active.game.view())?.board ?? 0,
+    move(move) {
+      return moves.push({
+        move,
+        board: minigameRound(active.game.view())?.board ?? -1,
+        waited: moves.pending() > 0,
+      });
     },
     status(text) {
       status.textContent = text;
@@ -646,7 +674,9 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     return false;
   };
   const restTimer = setInterval(() => {
-    if (!busy && !disposed && active.timeIsUp()) void endForRest().catch(app.kit.onError);
+    if (moves.pending() === 0 && !disposed && active.timeIsUp()) {
+      void endForRest().catch(app.kit.onError);
+    }
   }, 5000);
 
   /** Redraw after a move: cheer a finished board, or leave once the round is over. */
@@ -657,6 +687,9 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     const round = minigameRound(view);
     coins.set(view.coins);
     const completed = active.events.take(['minigame.completed']);
+    // A board that ends its own way (the feast's fruit shared out) does so before the next board.
+    if (completed.length > 0) await painter?.finish?.();
+    if (disposed) return false;
     if (view.screen !== 'round' || !round || round.status !== 'active') {
       await app.continueGame(active.keeper.id);
       return false;
