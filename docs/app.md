@@ -224,7 +224,7 @@ gets kind, specific help after a miss.
   line is written in the child's notation and read as words to screen readers. It ends with the
   answer only after a miss (`showModel(problem, true)`). Before the answer it ends with an empty
   box, so the picture shows the way and leaves the last step. A figure fills the slot's width, and
-  its drawing scales with it up to a fifth of the screen's height (a seventh in a boss round). Its
+  its drawing scales with it up to a fifth of the screen's height (a sixth in a boss round). Its
   steps are written one per line in rem; a long step wraps after a + or − and never sideways.
   `node scripts/art/models-gallery.mjs` draws every kind for review. It also checks each one in
   the slot's budget at the five child viewports, in normal and boss rounds at 100 % and 200 %
