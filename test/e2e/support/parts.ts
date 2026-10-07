@@ -1,10 +1,11 @@
 /**
- * The suite in parts, so CI can spread its slowest engine (WebKit) over parallel jobs.
+ * The suite in parts, so CI can spread each engine over parallel jobs.
  *
- * `DV_E2E_PART` selects one part: a named part runs its own spec files, `rest` runs every other
- * spec file, and no part (the default; Chromium and Firefox in CI) runs the whole suite. A new
- * spec file belongs to `rest` until it is named here, so no file can fall between the parts.
- * The parts are balanced by WebKit's run times on a hosted runner (docs/testing.md §5).
+ * `DV_E2E_PART` selects one or more parts, comma-separated (`walks`, `regions,valley`): a named
+ * part runs its own spec files, `rest` runs every spec file no named part claims, and no part
+ * (the default, as locally) runs the whole suite. A new spec file belongs to `rest` until it is
+ * named here, so no file can fall between the parts. The parts are balanced by run times on a
+ * hosted runner (docs/testing.md §5).
  */
 import { basename } from 'node:path';
 
@@ -13,6 +14,10 @@ export const NAMED_PARTS = {
   walks: ['screens', 'reflow'],
   // Whole rounds with saves, reloads, failures and settings.
   rounds: ['input', 'persistence', 'recovery', 'settings'],
+  // One activity in each region of the valley.
+  regions: ['regions'],
+  // The v1 boards, the bosses and the finale, and saves from before an update.
+  valley: ['boards', 'bosses', 'upgrade'],
 } as const satisfies Record<string, readonly string[]>;
 
 type NamedPart = keyof typeof NAMED_PARTS;
@@ -27,15 +32,18 @@ export function partOf(file: string): Part {
   return NAMED.find((part) => (NAMED_PARTS[part] as readonly string[]).includes(name)) ?? 'rest';
 }
 
-/** The part `DV_E2E_PART` selects, or undefined for the whole suite. */
-export function selectedPart(
+/** The parts `DV_E2E_PART` selects, or undefined for the whole suite. */
+export function selectedParts(
   value: string | undefined = process.env['DV_E2E_PART'],
-): Part | undefined {
+): Part[] | undefined {
   if (!value) return undefined;
-  if (!(PARTS as readonly string[]).includes(value)) {
-    throw new Error(`DV_E2E_PART must be one of ${PARTS.join(', ')}; it is "${value}".`);
+  const parts = value.split(',').map((part) => part.trim());
+  for (const part of parts) {
+    if (!(PARTS as readonly string[]).includes(part)) {
+      throw new Error(`DV_E2E_PART takes ${PARTS.join(', ')} (comma-separated); it is "${value}".`);
+    }
   }
-  return value as Part;
+  return parts as Part[];
 }
 
 function specFiles(names: readonly string[]): RegExp {
@@ -43,14 +51,16 @@ function specFiles(names: readonly string[]): RegExp {
   return new RegExp(`[\\\\/](?:${escaped.join('|')})\\.spec\\.ts$`);
 }
 
-/** Playwright's testMatch and testIgnore for a part (matched against absolute file paths). */
-export function partFilter(part: Part | undefined): { testMatch: RegExp; testIgnore: RegExp[] } {
-  if (part === undefined) return { testMatch: /\.spec\.ts$/, testIgnore: [] };
-  if (part === 'rest') {
-    return {
-      testMatch: /\.spec\.ts$/,
-      testIgnore: [specFiles(NAMED.flatMap((p) => NAMED_PARTS[p]))],
-    };
+/** Playwright's testMatch and testIgnore for some parts (matched against absolute file paths). */
+export function partFilter(parts: readonly Part[] | undefined): {
+  testMatch: RegExp;
+  testIgnore: RegExp[];
+} {
+  if (parts === undefined) return { testMatch: /\.spec\.ts$/, testIgnore: [] };
+  const named = NAMED.filter((part) => parts.includes(part));
+  if (parts.includes('rest')) {
+    const others = NAMED.filter((part) => !parts.includes(part)).flatMap((p) => NAMED_PARTS[p]);
+    return { testMatch: /\.spec\.ts$/, testIgnore: others.length > 0 ? [specFiles(others)] : [] };
   }
-  return { testMatch: specFiles(NAMED_PARTS[part]), testIgnore: [] };
+  return { testMatch: specFiles(named.flatMap((part) => NAMED_PARTS[part])), testIgnore: [] };
 }

@@ -2,10 +2,11 @@
  * A Playwright reporter that turns one run into evidence a person can read without opening the
  * HTML report: totals, the known defects that still reproduce (or no longer do), and the
  * accessibility advice axe gave (moderate and minor findings, by rule). It writes
- * `test-results/qa-summary.md` and, on GitHub Actions, the job summary.
+ * `qa-summary.md` into the run's output folder (`test-results/` on the default port,
+ * test/e2e/support/site.ts) and, on GitHub Actions, the job summary.
  *
  * With `DV_E2E_AUDIT=1` (CI) it also audits the run, as scripts/verify.mjs does for Vitest:
- * every spec file on disk (of the selected part, test/e2e/support/parts.ts) must have run in
+ * every spec file on disk (of the selected parts, test/e2e/support/parts.ts) must have run in
  * every project, and a skipped test must say why. Otherwise the run fails.
  */
 import { appendFileSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
@@ -20,7 +21,8 @@ import type {
 } from '@playwright/test/reporter';
 import { DEFECTS } from './known-issues';
 import type { Defect } from './known-issues';
-import { partOf, selectedPart } from './parts';
+import { partOf, selectedParts } from './parts';
+import { outputFolder } from './site';
 
 interface Note {
   readonly type: string;
@@ -64,11 +66,11 @@ class QaSummary implements Reporter {
   private audit(config: FullConfig, projects: readonly string[]): string[] {
     const problems: string[] = [];
     const testDir = config.projects[0]?.testDir ?? config.rootDir;
-    const part = selectedPart();
+    const parts = selectedParts();
     const specs = readdirSync(testDir)
       .filter((name) => name.endsWith('.spec.ts'))
       .map((name) => join(testDir, name))
-      .filter((spec) => part === undefined || partOf(spec) === part);
+      .filter((spec) => parts === undefined || parts.includes(partOf(spec)));
     for (const project of projects) {
       for (const spec of specs) {
         const ran = this.results.some(
@@ -133,9 +135,9 @@ class QaSummary implements Reporter {
     }
 
     const where = (set: Set<string>): string => ` _(${[...set].sort().join(', ')})_`;
-    const part = selectedPart();
+    const parts = selectedParts();
     const lines = [
-      `## Dragon Valley end-to-end: ${projects.join(', ') || 'no project'}${part ? ` (part: ${part})` : ''}`,
+      `## Dragon Valley end-to-end: ${projects.join(', ') || 'no project'}${parts ? ` (part: ${parts.join(', ')})` : ''}`,
       '',
       `**${result.status}**: ${count('passed')} passed, ${count('failed', 'timedOut', 'interrupted')} failed, ${count('skipped')} skipped in ${Math.round(result.duration / 1000)} s.`,
       '',
@@ -152,7 +154,7 @@ class QaSummary implements Reporter {
     lines.push('', '### Defect markers that did not reproduce (fixed?)', '');
     if (fixed.size === 0) lines.push('None.');
     for (const [description, set] of [...fixed].sort()) lines.push(`- ${description}${where(set)}`);
-    if (!part) {
+    if (!parts) {
       // A layout or axe allowance says nothing when its problem is gone: list what no test met.
       const engines = new Set(this.results.map(({ test }) => engineOfProject(test)));
       const unmet = Object.entries(DEFECTS as Record<string, Defect>).filter(
@@ -169,7 +171,7 @@ class QaSummary implements Reporter {
     const markdown = lines.join('\n') + '\n';
 
     const root = config.configFile ? dirname(config.configFile) : process.cwd();
-    const output = join(root, 'test-results', 'qa-summary.md');
+    const output = join(root, outputFolder(), 'qa-summary.md');
     mkdirSync(dirname(output), { recursive: true });
     writeFileSync(output, markdown);
     const summary = process.env['GITHUB_STEP_SUMMARY'];

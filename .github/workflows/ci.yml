@@ -58,32 +58,33 @@ jobs:
         run: node scripts/verify.mjs --audit .verify-report.json
 
   e2e:
-    name: e2e (${{ matrix.engine }}${{ matrix.part && format(', {0}', matrix.part) || '' }})
+    name: e2e (${{ matrix.engine }}, ${{ matrix.label }})
     runs-on: ubuntu-latest
-    # One engine per job, in parallel. WebKit, the slowest engine on a hosted runner (about twice
-    # Chromium's time), runs in three parts of the suite (test/e2e/support/parts.ts), so the
-    # slowest job stays well under ten minutes.
+    # Each engine runs in parallel jobs, one or more parts of the suite each
+    # (test/e2e/support/parts.ts), so the slowest job stays under ten minutes: Chromium and
+    # Firefox in two (the core suite; the valley: regions, boards, bosses, the finale, upgrades),
+    # WebKit, about twice as slow on a hosted runner, in five.
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
-          - engine: chromium
-          - engine: firefox
-          - engine: webkit
-            part: walks
-          - engine: webkit
-            part: rounds
-          - engine: webkit
-            part: rest
+          - { engine: chromium, label: core, part: 'walks,rounds,rest' }
+          - { engine: chromium, label: valley, part: 'regions,valley' }
+          - { engine: firefox, label: core, part: 'walks,rounds,rest' }
+          - { engine: firefox, label: valley, part: 'regions,valley' }
+          - { engine: webkit, label: walks, part: walks }
+          - { engine: webkit, label: rounds, part: rounds }
+          - { engine: webkit, label: rest, part: rest }
+          - { engine: webkit, label: regions, part: regions }
+          - { engine: webkit, label: valley, part: valley }
     env:
       NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
-      # test/e2e/support/qa-reporter.ts: every spec (of the part) must run, no unexplained skips.
+      # test/e2e/support/qa-reporter.ts: every spec (of the parts) must run, no unexplained skips.
       DV_E2E_AUDIT: '1'
       DV_E2E_PART: ${{ matrix.part }}
       # Artifact names: one set per job.
-      DV_E2E_JOB: ${{ matrix.engine }}${{ matrix.part && format('-{0}', matrix.part) || '' }}
-
+      DV_E2E_JOB: ${{ matrix.engine }}-${{ matrix.label }}
     steps:
       - uses: actions/checkout@v4
 
@@ -107,14 +108,14 @@ jobs:
         run: npx playwright test --project=${{ matrix.engine }}
 
       # Screens for human review at tablet, desktop and phone sizes (docs/qa/screens.md); only the
-      # walks take them, so WebKit's are in qa-screens-webkit-walks.
+      # walks take them: qa-screens-chromium-core, -firefox-core and -webkit-walks.
       - name: Upload the screens for review
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: qa-screens-${{ env.DV_E2E_JOB }}
           path: out/qa-screens/
-          if-no-files-found: ${{ (matrix.part == 'rounds' || matrix.part == 'rest') && 'ignore' || 'warn' }}
+          if-no-files-found: ${{ contains(matrix.part, 'walks') && 'warn' || 'ignore' }}
           retention-days: 30
 
       # The HTML report carries every axe result and guard report as attachments.
