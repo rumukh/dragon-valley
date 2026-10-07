@@ -56,7 +56,8 @@ check ("Show the dragons what you know!") to its results (`test/e2e/support/tour
 ## The valley (`the-valley`)
 
 A keeper who has finished the placement check visits the map, a region road, a level card, a
-Feeding Time round with choice tiles, an Egg Grid board and the four collections (`placesWalk`).
+Feeding Time round with choice tiles, an Egg Grid board and the four collections, then says
+goodbye and reads the day's Dragon Diary (`placesWalk`).
 
 | Stop              | What it shows                              |
 | ----------------- | ------------------------------------------ |
@@ -69,6 +70,7 @@ Feeding Time round with choice tiles, an Egg Grid board and the four collections
 | `19-den`          | The Dragon Den                             |
 | `20-album`        | The Sticker Album                          |
 | `21-window`       | The Magic Window                           |
+| `33-goodbye`      | Goodbye, with the day's Dragon Diary       |
 
 ## Keepers and the grown-ups' area (`keepers-and-grown-ups`)
 
@@ -82,6 +84,9 @@ Feeding Time round with choice tiles, an Egg Grid board and the four collections
 | `27-parent-data`     | Grown-ups' area: backups and storage                  |
 | `28-parent-offline`  | Grown-ups' area: offline play                         |
 | `29-parent-about`    | Grown-ups' area: about and privacy                    |
+| `34-parent-progress` | Grown-ups' area: a keeper's progress                  |
+| `35-parent-print`    | Grown-ups' area: flashcards to print                  |
+| `36-print-preview`   | Flashcards on A4, front and back                      |
 | `30-confirm-remove`  | Confirming the removal of a keeper                    |
 | `31-editor-change`   | Changing a keeper, with Remove                        |
 | `32-keepers-full`    | Four keepers: the valley is full                      |
@@ -106,8 +111,9 @@ page shell, staged with the fault injection in `test/e2e/support/storage.ts` (`t
 ## Large text (`text-200`)
 
 A keeper whose grown-up chose Text size 200 % (`test/e2e/reflow.spec.ts`): the hub (`06-hub`),
-the placement check (stops `07` to `12`) and the valley (stops `13` to `21`), at all three sizes.
-The same walk checks reflow; every screen is also checked at 200 % browser zoom (no pictures).
+the placement check (stops `07` to `12`) and the valley (stops `13` to `21` and `33`), at all
+three sizes. The same walk checks reflow; every screen is also checked at 200 % browser zoom (no
+pictures).
 
 Not yet walked (they need whole levels played first; PR B covers them with the gameplay): Memory
 Match, Number Trail, Fact Family Nest, the Bridge Troll, hatching and growing, a gift, snack time,

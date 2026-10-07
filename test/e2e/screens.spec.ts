@@ -56,7 +56,8 @@ test('the valley: map, levels, a choice round, Egg Grid and the collections', as
 });
 
 test("the keepers and the grown-ups' area", async ({ page }, testInfo) => {
-  await welcomeWalk(page, async () => undefined);
+  // After the placement check, so the Progress and Print tabs have answers to show.
+  await familyAfterPlacement(page, 'Ada');
   const stops: Stop[] = [];
   await grownUpWalk(page, async (stop) => {
     stops.push(stop);

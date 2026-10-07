@@ -119,8 +119,9 @@ export async function roundWalk(page: Page, visit: Visit): Promise<void> {
 }
 
 /**
- * The valley map, a region road, a level card, a choice-tile round, an Egg Grid board and the
- * four collections. Starts on the hub of a keeper who has finished the placement check.
+ * The valley map, a region road, a level card, a choice-tile round, an Egg Grid board, the four
+ * collections and goodbye with the Dragon Diary. Starts on the hub of a keeper who has finished
+ * the placement check today (its stickers fill the diary) and ends back on that hub.
  */
 export async function placesWalk(page: Page, visit: Visit, name: string): Promise<void> {
   await page.getByTestId('hub-map').click();
@@ -163,9 +164,18 @@ export async function placesWalk(page: Page, visit: Visit, name: string): Promis
     await page.getByTestId('collection-back').click();
     await expectHub(page, name);
   }
+
+  await page.getByTestId('hub-back').click();
+  await expectScreen(page, 'goodbye');
+  await visit({ name: '33-goodbye', description: "Goodbye, with the day's Dragon Diary" });
+  await page.getByTestId('goodbye-back').click();
+  await expectHub(page, name);
 }
 
-/** Keepers, the gate and every tab of the grown-ups' area. Starts on a hub, ends on keepers. */
+/**
+ * Keepers, the gate, every tab of the grown-ups' area and a print preview. Starts on a hub, ends
+ * on keepers.
+ */
 export async function grownUpWalk(page: Page, visit: Visit): Promise<void> {
   await leaveHub(page);
   await visit({ name: '22-keepers', description: 'Who is playing? One keeper and New keeper' });
@@ -190,6 +200,17 @@ export async function grownUpWalk(page: Page, visit: Visit): Promise<void> {
   await visit({ name: '28-parent-offline', description: "Grown-ups' area: offline play" });
   await openTab(page, 'about');
   await visit({ name: '29-parent-about', description: "Grown-ups' area: about and privacy" });
+  await openTab(page, 'progress');
+  await expect(page.getByTestId('progress-summary')).toBeVisible();
+  await visit({ name: '34-parent-progress', description: "Grown-ups' area: a keeper's progress" });
+  await openTab(page, 'print');
+  await visit({ name: '35-parent-print', description: "Grown-ups' area: flashcards to print" });
+  await page.getByTestId('print-table').click();
+  await expectScreen(page, 'print');
+  await expect(page.getByTestId('print-sheet').first()).toBeVisible();
+  await visit({ name: '36-print-preview', description: 'Flashcards on A4, front and back' });
+  await page.getByTestId('print-back').click();
+  await expectScreen(page, 'parent');
   await openTab(page, 'keepers');
   await page.getByTestId('parent-remove-profile-1').click();
   await expect(page.getByTestId('confirm-dialog')).toBeVisible();
