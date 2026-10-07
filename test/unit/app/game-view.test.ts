@@ -14,6 +14,7 @@ import type {
   GameAction,
   GameView,
   MinigameRoundView,
+  Problem,
   ProblemRoundView,
   ProblemView,
 } from '../../../src/rules/contract';
@@ -32,6 +33,7 @@ import {
   resultsNext,
   stepChoices,
   weekdayIndex,
+  zeroRule,
 } from '../../../src/app/game/view';
 
 const pack = requireValue(
@@ -345,18 +347,52 @@ describe('boss poses', () => {
 });
 
 describe('teach, then ask', () => {
+  const mul = (left: number, right: number): Problem => ({
+    kind: 'equation',
+    left: op('mul', num(left), num(right)),
+    right: BLANK,
+  });
+  const div = (left: number, right: number): Problem => ({
+    kind: 'equation',
+    left: op('div', num(left), num(right)),
+    right: BLANK,
+  });
+  const sevenEights = mul(7, 8);
+
   it('teaches a fact missed twice in a row with its picture first, like a re-ask', () => {
-    const plain = { reask: false, hinted: false };
-    expect(problemNote(plain)).toBeNull();
+    const plain = { reask: false, hinted: false, problem: sevenEights };
+    expect(problemNote(plain, true)).toBeNull();
     expect(pictureFirst(plain)).toBe(false);
-    expect(problemNote({ ...plain, reask: true })).toBe('round.reask');
-    expect(problemNote({ ...plain, teach: true })).toBe('round.teach');
-    expect(problemNote({ reask: true, teach: true }), 'taught says more than again').toBe(
-      'round.teach',
-    );
+    expect(problemNote({ ...plain, reask: true }, true)).toBe('round.reask');
+    expect(problemNote({ ...plain, teach: true }, true)).toBe('round.teach');
+    expect(
+      problemNote({ ...plain, reask: true, teach: true }, true),
+      'taught says more than again',
+    ).toBe('round.teach');
     expect(pictureFirst({ ...plain, teach: true })).toBe(true);
     expect(pictureFirst({ ...plain, reask: true })).toBe(true);
     expect(pictureFirst({ ...plain, hinted: true })).toBe(true);
+  });
+
+  it('never sends the child to look when there is no picture: zero facts say their rule', () => {
+    const fourZeros = mul(4, 0);
+    expect(problemNote({ reask: true, problem: fourZeros }, false)).toBe('round.rule.timesZero');
+    expect(problemNote({ reask: false, teach: true, problem: mul(0, 7) }, false)).toBe(
+      'round.rule.timesZero',
+    );
+    const missing: Problem = {
+      kind: 'equation',
+      left: op('mul', BLANK, num(5)),
+      right: num(0),
+    };
+    expect(zeroRule(missing)).toBe('round.rule.timesZero');
+    expect(zeroRule(div(0, 6))).toBe('round.rule.zeroDivided');
+    expect(zeroRule(sevenEights)).toBeNull();
+    // A fact with no picture and no rule: again, without "look".
+    expect(problemNote({ reask: true, problem: sevenEights }, false)).toBe('round.reaskPlain');
+    expect(problemNote({ reask: false, teach: true, problem: sevenEights }, false)).toBe(
+      'round.teachPlain',
+    );
   });
 });
 

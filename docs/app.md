@@ -421,8 +421,9 @@ toast where they were earned.
   throws a fruit along an arc into the dragon's mouth (S4's anchors; an egg glows instead) or a
   sparkle onto the boss, whose pose follows its mood meter; a miss shows the right fact and its
   picture until the child goes on; re-asks show the picture first, and so does a fact missed
-  twice in a row (`teach`: "Look at the picture first. Then answer!"); the hint shows it on
-  request. Response time excludes paused and hidden time. Placement answers with
+  twice in a row (`teach`: "Look at the picture first. Then answer!"); a fact with no picture
+  (× 0, 0 :) never says "look" but its rule ("Remember: any number times 0 is 0.", DV-QA-18);
+  the hint shows it on request. Response time excludes paused and hidden time. Placement answers with
   `placementAnswer` and shows its ladder steps; the Arena runs the shell's one-minute race and
   ends with `endRound{ reason: 'time-up' }`. A Riddle Scrolls story first asks for its sign: the
   sum is drawn with an empty sign slot (`5 ○ 4 = ?`; a leftover story asks only `23 ○ 5 = ?`),
