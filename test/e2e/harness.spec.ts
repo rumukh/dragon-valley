@@ -308,9 +308,23 @@ base('the CI matrix runs every part of the suite once on every engine', () => {
     join(dirname(fileURLToPath(import.meta.url)), '..', '..', '.github', 'workflows', 'ci.yml'),
     'utf8',
   );
-  const jobs = [
-    ...workflow.matchAll(/^\s*- \{ engine: (\w+), label: ([^,]+), part: '?([a-z,]+)'? \}/gm),
-  ].map(([, engine, label, part]) => ({ engine, label, parts: (part ?? '').split(',') }));
+  // Matrix entries are YAML flow mappings, `- { engine: …, label: …, part: '…' }`, on one line or
+  // wrapped by Prettier over several.
+  const entries = [...workflow.matchAll(/-\s*\{([^}]*)\}/g)].map(
+    ([, body]) =>
+      Object.fromEntries(
+        [...(body ?? '').matchAll(/(\w+):\s*(?:'([^']*)'|([^,\s}]+))/g)].map(
+          ([, key, quoted, plain]) => [key, quoted ?? plain],
+        ),
+      ) as Record<string, string | undefined>,
+  );
+  const jobs = entries
+    .filter((entry) => entry['engine'] !== undefined)
+    .map((entry) => ({
+      engine: entry['engine'],
+      label: entry['label'],
+      parts: (entry['part'] ?? '').split(','),
+    }));
   expect(jobs.length, 'the e2e matrix in ci.yml').toBeGreaterThan(0);
   const engines = ['chromium', 'firefox', 'webkit'];
   expect([...new Set(jobs.map((job) => job.engine))].sort()).toEqual(engines);
