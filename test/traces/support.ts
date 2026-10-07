@@ -22,6 +22,7 @@ import type {
   GameView,
   MinigameMove,
   MinigameRoundView,
+  Operator,
   Problem,
   ProblemRoundView,
   ProfileState,
@@ -126,7 +127,12 @@ export function wrongAnswer(view: ProblemRoundView): AnswerValue {
   const other = problem.choices?.find((choice) => JSON.stringify(choice) !== JSON.stringify(right));
   if (other) return other;
   if (right.kind === 'number') return { kind: 'number', value: right.value + 1 };
-  throw new Error('no wrong answer');
+  // Typed on the keypad: a division with leftovers one too many, or another relation or term.
+  if (right.kind === 'remainder') return { ...right, quotient: right.quotient + 1 };
+  if (right.kind === 'relation') {
+    return { kind: 'relation', relation: right.relation === 'lt' ? 'gt' : 'lt' };
+  }
+  return { kind: 'term', term: right.term === 'factor' ? 'product' : 'factor' };
 }
 
 /**
@@ -159,34 +165,99 @@ export function pairKey(face: CardFace): string {
   return `term:${{ left: 'dividend', right: 'divisor', result: 'quotient' }[highlight]}`;
 }
 
-/** The operation a child does first: inside brackets, then · and :, then + and −, leftmost. */
-export function firstOperation(expr: Expr): ExprPath {
-  const plain = (node: Expr): boolean =>
-    node.kind === 'num' || (node.kind === 'group' && plain(node.inner));
-  const found: { path: ExprPath; rank: number }[] = [];
-  const visit = (node: Expr, path: ExprPath, inside: boolean): void => {
-    if (node.kind === 'group') return visit(node.inner, [...path, 'inner'], true);
-    if (node.kind !== 'op') return;
-    visit(node.left, [...path, 'left'], inside);
-    if (plain(node.left) && plain(node.right)) {
-      found.push({
-        path,
-        rank: (inside ? 0 : 2) + (node.op === 'mul' || node.op === 'div' ? 0 : 1),
-      });
-    }
-    visit(node.right, [...path, 'right'], inside);
+/** A written expression as a child reads it, left to right: numbers, operators (each with the
+ * tree path of the operation it stands for) and the brackets that are written (`group` nodes). */
+export type Written =
+  | { kind: 'num'; value: number }
+  | { kind: 'op'; op: Operator; path: ExprPath }
+  | { kind: 'open' }
+  | { kind: 'close' };
+
+export function written(expr: Expr): Written[] {
+  const out: Written[] = [];
+  const visit = (node: Expr, path: ExprPath): void => {
+    if (node.kind === 'num') out.push({ kind: 'num', value: node.value });
+    else if (node.kind === 'group') {
+      out.push({ kind: 'open' });
+      visit(node.inner, [...path, 'inner']);
+      out.push({ kind: 'close' });
+    } else if (node.kind === 'op') {
+      visit(node.left, [...path, 'left']);
+      out.push({ kind: 'op', op: node.op, path });
+      visit(node.right, [...path, 'right']);
+    } else throw new Error('a blank in a written expression');
   };
-  visit(expr, [], false);
-  const best = Math.min(...found.map((f) => f.rank));
-  return found.find((f) => f.rank === best)!.path;
+  visit(expr, []);
+  return out;
 }
 
-function at(expr: Expr, path: ExprPath): Expr {
-  return path.reduce<Expr>((node, step) => {
-    if (step === 'inner' && node.kind === 'group') return node.inner;
-    if (step !== 'inner' && node.kind === 'op') return node[step];
-    throw new Error('no such node');
-  }, expr);
+const SIGNS: Record<Operator, string> = { add: '+', sub: '−', mul: '·', div: ':' };
+
+/** The written expression as text, for messages: `60 + 6 + 45 : 5`. */
+export function writtenText(expr: Expr): string {
+  return written(expr)
+    .map((t) =>
+      t.kind === 'num'
+        ? `${t.value}`
+        : t.kind === 'op'
+          ? ` ${SIGNS[t.op]} `
+          : t.kind === 'open'
+            ? '('
+            : ')',
+    )
+    .join('');
+}
+
+export interface TextbookStep {
+  /** The path of the operation the operator stands for. */
+  path: ExprPath;
+  /** The two numbers written beside the operator, worked out. */
+  value: number;
+}
+
+/**
+ * The steps a textbook allows next in a written expression, worked out from the writing alone,
+ * never from the tree: inside brackets first (the innermost pairs that still hold an operation,
+ * each pair on its own); within a pair, or once none is left, the first · or : of each run of
+ * them, or if there is none, the first + or −. Brackets around a lone number read as the number.
+ */
+export function textbookSteps(expr: Expr): TextbookStep[] {
+  let tokens = written(expr);
+  for (let i = 0; i + 2 < tokens.length; i++) {
+    const [a, b, c] = [tokens[i]!, tokens[i + 1]!, tokens[i + 2]!];
+    if (a.kind === 'open' && b.kind === 'num' && c.kind === 'close') {
+      tokens = [...tokens.slice(0, i), b, ...tokens.slice(i + 3)];
+      i = -1;
+    }
+  }
+  const segments: Written[][] = [];
+  for (let i = 0; i < tokens.length; i++) {
+    if (tokens[i]!.kind !== 'open') continue;
+    let j = i + 1;
+    while (j < tokens.length && tokens[j]!.kind !== 'open' && tokens[j]!.kind !== 'close') j++;
+    if (tokens[j]?.kind === 'close') segments.push(tokens.slice(i + 1, j));
+  }
+  if (segments.length === 0) segments.push(tokens);
+  return segments.flatMap((segment) => {
+    const ops = segment.flatMap((t, i) => (t.kind === 'op' ? [{ op: t, i }] : []));
+    const strong = (o: Operator) => o === 'mul' || o === 'div';
+    const chosen = ops.some(({ op }) => strong(op.op))
+      ? ops.filter(({ op }, k) => strong(op.op) && (k === 0 || !strong(ops[k - 1]!.op.op)))
+      : ops.slice(0, 1);
+    return chosen.map(({ op, i }) => {
+      const [a, b] = [segment[i - 1], segment[i + 1]];
+      if (a?.kind !== 'num' || b?.kind !== 'num') throw new Error('an operator without numbers');
+      const value =
+        op.op === 'add'
+          ? a.value + b.value
+          : op.op === 'sub'
+            ? a.value - b.value
+            : op.op === 'mul'
+              ? a.value * b.value
+              : a.value / b.value;
+      return { path: op.path, value };
+    });
+  });
 }
 
 export interface Recorded {
@@ -411,11 +482,16 @@ export class Player {
       for (let guard = 0; guard < 32 && still(); guard++) {
         const now = (this.view().round as MinigameRoundView).current;
         if (now.kind !== 'golem-orders') break;
-        const path = firstOperation(now.expr);
-        const value = evaluate(at(now.expr, path));
+        // The first step a textbook takes in the written expression, with its written numbers.
+        const { path, value } = textbookSteps(now.expr)[0]!;
         await this.move({ type: 'pick', path });
         if (this.style.clumsy && guard === 0) await this.move({ type: 'answer', value: value + 1 });
         await this.move({ type: 'answer', value });
+        const after = (this.view().round as MinigameRoundView | null)?.current;
+        if (after?.kind === 'golem-orders' && after.last !== null && after.last !== 'right') {
+          this.failures.push(`golem-orders: ${after.last} in ${writtenText(now.expr)}`);
+          break;
+        }
       }
     }
   }

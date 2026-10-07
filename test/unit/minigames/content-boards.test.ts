@@ -7,17 +7,18 @@
  */
 import { describe, expect, it } from 'vitest';
 import { createPrng } from '@aegis/core';
-import { createMinigame } from '@aegis/narrative';
+import { createMinigame, projectMinigame, reduceMinigame } from '@aegis/narrative';
+import type { MinigameDefinition } from '@aegis/narrative';
 import {
   ACTIVITY_OPTION_DEFAULTS,
   initialProfileState,
   isMinigameKind,
   skillItemIndex,
 } from '../../../src/rules/contract';
-import type { MinigameActivityKind } from '../../../src/rules/contract';
+import type { Expr, GolemOrdersBoard, MinigameActivityKind } from '../../../src/rules/contract';
 import { canGenerate } from '../../../src/rules/learning/generate';
 import { MINIGAMES, boardView, canMakeBoard, makeBoard } from '../../../src/rules/minigames/boards';
-import { loadPack } from '../../traces/support';
+import { loadPack, textbookSteps, writtenText } from '../../traces/support';
 
 const data = loadPack().data;
 const index = skillItemIndex(data);
@@ -69,5 +70,65 @@ describe('the v1 minigame activities', () => {
         expect(boardView(def, state, null as never).kind, where).toBe(kind);
       }
     }
+  });
+
+  it('deal Golem Orders boards a child works out the textbook way, in the bucket asked for', () => {
+    const hasBrackets = (expr: Expr): boolean =>
+      expr.kind === 'group' ||
+      (expr.kind === 'op' && (hasBrackets(expr.left) || hasBrackets(expr.right)));
+    let boards = 0;
+    for (const { level, i, activity } of activities.filter(
+      (a) => a.activity.kind === 'golem-orders',
+    )) {
+      const skills = data.skills.filter((s) => activity.skills.includes(s.id));
+      const options = { ...ACTIVITY_OPTION_DEFAULTS['golem-orders'], ...activity.options };
+      for (const item of ['order:no-brackets', 'order:brackets']) {
+        if (!canMakeBoard('golem-orders', [item], skills, options)) continue;
+        for (let seed = 0; seed < 24; seed++) {
+          const where = `${level} activity ${i}, ${item}, seed ${seed}`;
+          const def: MinigameDefinition = makeBoard({
+            activity: 'golem-orders',
+            id: `r1.b${seed + 1}`,
+            pool: [item],
+            focus: null,
+            skills,
+            options,
+            previous: null,
+            state: initialProfileState({ dailyGoal: 30, arena: true }),
+            random: createPrng(`${where}`),
+          });
+          const start = (def.config as unknown as { expr: Expr }).expr;
+          expect(hasBrackets(start), `${where}: ${writtenText(start)}`).toBe(
+            item === 'order:brackets',
+          );
+          let state = createMinigame(def, def.id, MINIGAMES);
+          const move = (value: unknown) => {
+            state = reduceMinigame(
+              def,
+              state,
+              { type: 'move', revision: state.revision, value: value as never },
+              MINIGAMES,
+            );
+            return projectMinigame(def, state, MINIGAMES).view as unknown as GolemOrdersBoard;
+          };
+          for (let guard = 0; guard < 8 && state.status !== 'completed'; guard++) {
+            const now = (projectMinigame(def, state, MINIGAMES).view as unknown as GolemOrdersBoard)
+              .expr;
+            const step = textbookSteps(now)[0]!;
+            expect(
+              move({ type: 'pick', path: step.path }).last,
+              `${where}: ${writtenText(now)}`,
+            ).toBe(null);
+            expect(
+              move({ type: 'answer', value: step.value }).last,
+              `${where}: ${writtenText(now)}`,
+            ).toBe('right');
+          }
+          expect(state.status, where).toBe('completed');
+          boards += 1;
+        }
+      }
+    }
+    expect(boards, 'Golem boards played (Riddle Ruins 1 and 2)').toBeGreaterThanOrEqual(2 * 24);
   });
 });

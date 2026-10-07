@@ -530,8 +530,13 @@ The Egg Grid's config is `{ product, maxSide, split, find }` and the board is co
 `found` has `find` rectangles; the rules set `find` to every rectangle up to 10 × 10 (both
 orders of each factor pair, at most four). A Sharing Feast is complete when the baskets are
 equal, the bowl cannot go round once more and `submit` says how many each basket has and how many
-are left; Golem Orders when one number is left (operations inside brackets go first, then · and :,
-then + and −; independent operations of the same rank in either order).
+are left; Golem Orders when one number is left. A Golem expression is always worked out the way
+it reads (brackets only where they are written, · and : before + and −, each rank from left to
+right: `60 + 6 + 45 : 5` is the tree `(60 + 6) + 45 : 5`); the adapter refuses any other tree, and
+the rules redraw a generated expression whose tree reads differently. The operation that may go
+first follows the textbook: inside brackets first (the innermost pair that still holds an
+operation; separate pairs in either order), then · and :, then + and −, from left to right;
+independent operations of the same rank (`2 · 3 + 4 · 5`) in either order.
 
 A finished step earns `balance.coins.correct` (a matched pair, a new rectangle, an equation, a
 trail stone, a basket, a Golem step) and credits facts to the Leitner boxes: a matched pair its

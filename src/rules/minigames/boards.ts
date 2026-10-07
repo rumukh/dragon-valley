@@ -32,6 +32,7 @@ import type {
   BoardView,
   EggGridBoard,
   EggGridSplit,
+  Expr,
   FactFamilyBoard,
   GolemOrdersBoard,
   MinigameActivityKind,
@@ -46,7 +47,7 @@ import { EGG_GRID_KIND, eggGridAdapter, rectangles } from './egg-grid';
 import type { EggGridConfig, EggGridState } from './egg-grid';
 import { FACT_FAMILY_KIND, factFamilyAdapter } from './fact-family';
 import type { FactFamilyConfig, FactFamilyState } from './fact-family';
-import { GOLEM_ORDERS_KIND, golemOrdersAdapter } from './golem-orders';
+import { GOLEM_ORDERS_KIND, bracketed, golemOrdersAdapter, readsAsComputed } from './golem-orders';
 import type { GolemOrdersConfig, GolemOrdersState } from './golem-orders';
 import { SHARING_FEAST_KIND, sharingFeastAdapter } from './sharing-feast';
 import type { SharingFeastConfig, SharingFeastState } from './sharing-feast';
@@ -535,13 +536,32 @@ function feastConfig(request: BoardRequest): SharingFeastConfig {
   return { total: deal.total, baskets: deal.baskets, remainder: leftovers };
 }
 
+/** Draws for an expression that reads the way the Golem works it out, before brackets are
+ * written in instead (85-93 % of the order generator's draws for the v1 skills read that way, so
+ * sixteen draws practically never all fail). */
+const GOLEM_DRAWS = 16;
+
+function orderExpr(skill: OrderSkill, item: string, random: RandomStream): Expr {
+  const problem = orderProblem(skill.params, item, random);
+  if (problem.kind !== 'equation') throw new Error('An order skill gives an equation.');
+  return problem.left.kind === 'blank' ? problem.right : problem.left;
+}
+
+/**
+ * The Golem checks each step against the expression's tree, so the tree must be the expression
+ * as a child reads it (`60 + 6 + 45 : 5` worked out as `(60 + 6) + 45 : 5`). The order generator
+ * may build a tree with the same value that reads differently (`60 + (6 + 45 : 5)`): such draws
+ * are drawn again, and if none of `GOLEM_DRAWS` reads right, the last one is written with the
+ * brackets its tree needs.
+ */
 function golemConfig(request: BoardRequest): GolemOrdersConfig {
   const skill = request.random.pick(golemSkills(request.pool, request.skills));
   const item = request.random.pick(orderItems(request.pool, skill));
-  const problem = orderProblem(skill.params, item, request.random);
-  if (problem.kind !== 'equation') throw new Error('An order skill gives an equation.');
-  const expr = problem.left.kind === 'blank' ? problem.right : problem.left;
-  return { expr };
+  let expr = orderExpr(skill, item, request.random);
+  for (let draw = 1; draw < GOLEM_DRAWS && !readsAsComputed(expr); draw++) {
+    expr = orderExpr(skill, item, request.random);
+  }
+  return { expr: readsAsComputed(expr) ? expr : bracketed(expr) };
 }
 
 /** Generate the next board of a round as a narrative minigame definition. */

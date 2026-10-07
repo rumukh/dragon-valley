@@ -1,17 +1,24 @@
 /**
  * Golem Orders (`dv.golem-orders`): the Golem only moves when told what to do first. An
- * expression is shown as a row of gears; the child picks the operation that goes first (inside
- * brackets first, then · and :, then + and −, left to right), says its result, and the expression
- * shrinks, until one number is left.
+ * expression is shown as a row of gears; the child picks the operation that goes first, says its
+ * result, and the expression shrinks, until one number is left.
  *
  * Config `{ expr }` (no blanks, every step a whole number); moves `{ type: 'pick', path }` (a path
  * of `left`, `right` and `inner` steps from the root to an operation) and `{ type: 'answer',
- * value }` for the picked operation. Independent operations of the same rank may go in either
- * order (`2 · 3 + 4 · 5`); a chain like `8 − 3 + 2` is a tree, so only its left step is ready. A
- * pick that is not first yet answers `not-first`; a wrong value `wrong-value`. Nothing is lost.
+ * value }` for the picked operation. A pick that is not first yet answers `not-first`; a wrong
+ * value `wrong-value`. Nothing is lost.
+ *
+ * The expression is always worked out the way it reads (`readsAsComputed`): brackets only where
+ * they are written, · and : before + and −, operations of one rank from left to right. So
+ * `60 + 6 + 45 : 5` is the tree `(60 + 6) + 45 : 5`, never `60 + (6 + 45 : 5)`, and the
+ * operations that may go next (`readyOperations`) follow the textbook order: inside brackets first
+ * (the innermost pair that still holds an operation; separate pairs in either order), then, within
+ * a pair or once none is left, · and : before + and −, from left to right. Independent operations
+ * of the same rank may go in either order (`2 · 3 + 4 · 5`); in a chain like `8 − 3 + 2` only the
+ * left step is ready.
  */
 import type { MinigameAdapter } from '@aegis/narrative';
-import { countBlanks, evaluate, exprSchema, num } from '../contract';
+import { countBlanks, evaluate, exprSchema, num, precedence } from '../contract';
 import type { Expr, ExprPath, GolemOrdersBoard, GolemOrdersMove } from '../contract';
 import { array, integer, invalid, literal, object } from './decode';
 
@@ -53,26 +60,66 @@ function isNumber(node: Expr): boolean {
 }
 
 /**
- * The operations that may go next: operations of two plain numbers, of the best rank (inside
- * brackets before outside, · and : before + and −). Each is a path from the root.
+ * Whether the tree is the expression as it reads: no operand is an unbracketed operation that
+ * binds more loosely than its parent, and no right operand an unbracketed one of the same rank
+ * (a reader works `60 + 6 + 9` from the left, so the tree `60 + (6 + 9)` would refuse the step a
+ * child rightly takes first).
+ */
+export function readsAsComputed(expr: Expr): boolean {
+  if (expr.kind === 'group') return readsAsComputed(expr.inner);
+  if (expr.kind !== 'op') return true;
+  const rank = precedence(expr.op);
+  const { left, right } = expr;
+  if (left.kind === 'op' && precedence(left.op) < rank) return false;
+  if (right.kind === 'op' && precedence(right.op) <= rank) return false;
+  return readsAsComputed(left) && readsAsComputed(right);
+}
+
+/** The same tree with brackets written wherever it would otherwise read differently. */
+export function bracketed(expr: Expr): Expr {
+  if (expr.kind === 'group') return { kind: 'group', inner: bracketed(expr.inner) };
+  if (expr.kind !== 'op') return expr;
+  const rank = precedence(expr.op);
+  const left = bracketed(expr.left);
+  const right = bracketed(expr.right);
+  return {
+    ...expr,
+    left: left.kind === 'op' && precedence(left.op) < rank ? { kind: 'group', inner: left } : left,
+    right:
+      right.kind === 'op' && precedence(right.op) <= rank ? { kind: 'group', inner: right } : right,
+  };
+}
+
+/**
+ * The operations that may go next, each as a path from the root: inside brackets first (the
+ * innermost pairs that still hold an operation, each pair on its own), then, within a pair or
+ * once none is left, · and : before + and −. An operation is ready when both its numbers are
+ * there; in an expression that reads as computed, the tree then also keeps each rank from left to
+ * right.
  */
 export function readyOperations(expr: Expr): ExprPath[] {
-  const found: { path: ExprPath; rank: number }[] = [];
-  const visit = (node: Expr, path: ExprPath, inGroup: boolean) => {
-    if (node.kind === 'group') visit(node.inner, [...path, 'inner'], true);
-    else if (node.kind === 'op') {
+  return nextInScope(expr, []);
+}
+
+/** The next operations within one pair of brackets (or the whole expression). */
+function nextInScope(scope: Expr, at: ExprPath): ExprPath[] {
+  const pairs: { inner: Expr; path: ExprPath }[] = [];
+  const ready: { path: ExprPath; strong: boolean }[] = [];
+  const visit = (node: Expr, path: ExprPath): void => {
+    if (node.kind === 'group') {
+      if (!isNumber(node.inner)) pairs.push({ inner: node.inner, path: [...path, 'inner'] });
+    } else if (node.kind === 'op') {
       if (isNumber(node.left) && isNumber(node.right)) {
-        const rank = (inGroup ? 0 : 2) + (node.op === 'mul' || node.op === 'div' ? 0 : 1);
-        found.push({ path, rank });
+        ready.push({ path, strong: node.op === 'mul' || node.op === 'div' });
       }
-      visit(node.left, [...path, 'left'], inGroup);
-      visit(node.right, [...path, 'right'], inGroup);
+      visit(node.left, [...path, 'left']);
+      visit(node.right, [...path, 'right']);
     }
   };
-  visit(expr, [], false);
-  let best = 4;
-  for (const entry of found) best = Math.min(best, entry.rank);
-  return found.filter((f) => f.rank === best).map((f) => f.path);
+  visit(scope, at);
+  if (pairs.length > 0) return pairs.flatMap((pair) => nextInScope(pair.inner, pair.path));
+  const strong = ready.filter((r) => r.strong);
+  return (strong.length > 0 ? strong : ready).map((r) => r.path);
 }
 
 const samePath = (a: ExprPath, b: ExprPath) =>
@@ -101,6 +148,9 @@ function decodeExpr(value: unknown, path: string): Expr {
   if (!parsed.ok) invalid(path, 'Expected an expression.');
   if (countBlanks(parsed.value) > 0 || evaluate(parsed.value) === null) {
     invalid(path, 'The expression must work out to a whole number.');
+  }
+  if (!readsAsComputed(parsed.value)) {
+    invalid(path, 'The expression must be worked out the way it reads.');
   }
   return parsed.value;
 }

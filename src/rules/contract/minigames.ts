@@ -320,10 +320,13 @@ export type ExprPath = ('left' | 'right' | 'inner')[];
 
 /**
  * Golem Orders (`golem-orders`, custom `dv.golem-orders`): an expression shown as gears. The
- * child picks the operation that goes first (inside brackets first, then · and :, then + and −,
- * left to right) and says its result; the expression shrinks until one number is left.
- * Independent operations of the same rank may go in either order. The narrative projection is
- * this object without `kind`.
+ * child picks the operation that goes first and says its result; the expression shrinks until
+ * one number is left. The tree is always the expression as it reads (brackets only where written,
+ * · and : before + and −, each rank from left to right), and the operations that may go first
+ * follow the textbook: inside brackets first (the innermost pair holding an operation; separate
+ * pairs in either order), then · and :, then + and −, from left to right. Independent operations
+ * of the same rank (`2 · 3 + 4 · 5`) may go in either order. The narrative projection is this
+ * object without `kind`.
  */
 export interface GolemOrdersBoard {
   kind: 'golem-orders';
