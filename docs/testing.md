@@ -91,7 +91,11 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
 - every bot earns coins every session and, except the perfect one, sees progress every week;
 - no known fact (bronze and up: Leitner box 2+) waits more than a week past its review day; facts
   in box 0-1 are still being learned and are served as learning items;
-- no dead ends: every level is completed and every boss won over;
+- no dead ends: the perfect, average and slow bots complete every level and win over every boss in
+  12 weeks; the struggling bot keeps a steady path instead (its success matters more than its
+  speed, and the rules' protection slows it by design): while levels remain, every week with play
+  completes a new level, the boss of every region whose lessons it finished is won over, and at
+  least ¾ of the levels (45 of 59) are done in 12 weeks;
 - reward pacing stays inside targets (coins per session, a gift every day the goal is met, every
   egg hatched within five sessions);
 - Glimmer's Market keeps something new coming (the 1.2.0 economy): the average bot still has

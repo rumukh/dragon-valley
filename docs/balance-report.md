@@ -102,7 +102,8 @@ The checks are named; each label states what it measured.
 | weekly progress    | average, struggling, slow: a level, hatch, growth, sticker or lit pane every week    | testing.md §4             |
 | gift               | the gift opens every session that reaches the daily goal                             | design §7.4               |
 | hatch pace         | every egg hatches within 5 sessions of arriving                                      | design §4.1, §6.5         |
-| no dead end        | every level completed, every boss won over                                           | testing.md §4             |
+| no dead end        | perfect, average, slow: every level completed, every boss won over                   | testing.md §4             |
+| steady path        | struggling: a new level every week with play; finished regions' bosses won; ≥ 45/59  | coordinator (1.2.0)       |
 | no starving        | no known fact (bronze and up, box 2+) waits more than 7 days past its review day     | testing.md §4             |
 | coins              | median 50-80 coins per session                                                       | design §7.1               |
 | market lasts       | average, 365 days: something on sale it cannot afford yet after 110 sessions         | coordinator (1.2.0)       |
@@ -116,6 +117,19 @@ keeps succeeding: the game must never leave it wrong more often than right. So t
 child is accepted at a session median of at least 60 % success, and the average child's band is
 its stretch goal. It was first held to the band itself; the rules changes of §5.1 are measured
 against the new target.
+
+**And a steady path instead of the whole valley.** The coordinator's decision for 1.2.0: "The
+plan's intent was 'no dead-end unlocks; the struggling bot still progresses', not 'finishes the
+curriculum in 12 weeks'. For a struggling child, success matters more than speed, and more
+protection means slower progress by design." So the struggling child is not held to every level
+and boss in 12 weeks (the perfect, average and slow children still are). It must keep moving:
+
+- no stall: while levels remain, every week with play completes at least one new level;
+- the boss of every region whose lessons it finished is won over (lessons finished in the run's
+  last week may still have the boss ahead);
+- a regression floor: at least 45 of the 59 levels (¾) within the 84 days.
+
+Its full completion is reported as measured.
 
 ## 4. Results
 

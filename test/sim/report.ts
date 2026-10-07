@@ -188,6 +188,18 @@ export const TARGETS = {
   /** An egg hatches within this many sessions of the child receiving it. */
   hatchSessions: 5,
   /**
+   * The struggling child's steady path (the coordinator's decision for 1.2.0, replacing "every
+   * level and boss within the run" for this child only). For a struggling child success matters
+   * more than speed, and the rules' protection slows its progress by design, so it must keep
+   * moving rather than finish the valley in 12 weeks:
+   * - no stall: while levels remain, every week with play completes at least one new level;
+   * - every boss of a region whose lessons it finished is won over (lessons finished in the last
+   *   `bossGraceDays` days of the run may still have the boss ahead);
+   * - a regression floor: at least `floorShare` % of the levels within `floorDays` days (45 of
+   *   59; scaled down for a shorter run).
+   */
+  steadyPath: { floorShare: 75, floorDays: 84, bossGraceDays: 7 },
+  /**
    * Glimmer's Market (the coordinator's O5 for the 1.2.0 economy): a new cosmetic about every 5
    * sessions (about weekly) matters more to an 8-year-old than a market that lasts all year, and
    * it is kinder to slower children; the valley's own rewards (stickers, hatching, growth, the
@@ -223,6 +235,16 @@ interface Check {
 /** Sessions played from day `from` to day `to` (inclusive). */
 function sessionsBetween(report: SimulationReport, from: number, to: number): number {
   return report.days.filter((d) => d.played && d.index >= from && d.index <= to).length;
+}
+
+/**
+ * The day a level was first completed: its completion event, or day 0 for a level the placement
+ * check completed (one star, no event); `null` when it was never completed.
+ */
+export function completionDay(report: SimulationReport, level: string): number | null {
+  const day = report.levelDays[level];
+  if (day !== undefined) return day;
+  return (report.stars[level] ?? 0) >= 1 ? 0 : null;
 }
 
 /** Success (whole percent) of every session with answers. */
@@ -375,7 +397,7 @@ export const CHECKS: readonly Check[] = [
   },
   {
     id: 'no-dead-end',
-    learners: ALL,
+    learners: ['perfect', 'average', 'slow'],
     evaluate: (r) => {
       // A level placed out by the placement check counts as completed (one star, no event).
       const done = r.content.levels.filter((level) => (r.stars[level] ?? 0) >= 1);
@@ -388,13 +410,53 @@ export const CHECKS: readonly Check[] = [
   },
   {
     id: 'bosses',
-    learners: ALL,
+    learners: ['perfect', 'average', 'slow'],
     evaluate: (r) => {
       const won = r.content.bosses.filter((boss) => r.bossDays[boss] !== undefined);
       const last = Math.max(0, ...Object.values(r.bossDays));
       return {
         ok: won.length === r.content.bosses.length,
         name: `won over ${won.length} of ${r.content.bosses.length} bosses within ${r.daysSimulated} days (the last on day ${last})`,
+      };
+    },
+  },
+  {
+    id: 'steady-path',
+    learners: ['struggling'],
+    evaluate: (r) => {
+      const { floorShare, floorDays, bossGraceDays } = TARGETS.steadyPath;
+      const total = r.content.levels.length;
+      const day = (level: string) => completionDay(r, level);
+      const doneBefore = (end: number) =>
+        r.content.levels.filter((level) => {
+          const at = day(level);
+          return at !== null && at < end;
+        }).length;
+      const weeks: { start: number; newLevel: boolean }[] = [];
+      for (let start = 0; start < r.daysSimulated; start += 7) {
+        const days = r.days.slice(start, start + 7);
+        if (!days.some((d) => d.played) || doneBefore(start) >= total) continue;
+        weeks.push({ start, newLevel: days.some((d) => d.levels.length > 0) });
+      }
+      const stalled = weeks.filter((w) => !w.newLevel).map((w) => w.start);
+      const lastDay = r.daysSimulated - 1;
+      const finished = r.content.regions.filter(
+        (region) =>
+          region.boss !== null &&
+          region.lessons.every((level) => {
+            const at = day(level);
+            return at !== null && at <= lastDay - bossGraceDays;
+          }),
+      );
+      const won = finished.filter((region) => r.bossDays[region.boss!] !== undefined);
+      const cutoff = Math.min(floorDays, r.daysSimulated);
+      const needed = Math.ceil((total * floorShare * cutoff) / (100 * floorDays));
+      const byCutoff = doneBefore(cutoff);
+      const all = doneBefore(r.daysSimulated);
+      const last = Math.max(0, ...r.content.levels.map((level) => day(level) ?? 0));
+      return {
+        ok: stalled.length === 0 && won.length === finished.length && byCutoff >= needed,
+        name: `kept moving: a new level in ${weeks.length - stalled.length} of ${weeks.length} weeks with play while levels remained${stalled.length > 0 ? ` (none in the weeks from day ${stalled.join(', ')})` : ''}; won over the bosses of ${won.length} of ${finished.length} finished regions; ${byCutoff} of ${total} levels within ${cutoff} days (at least ${needed}); every level: ${all} of ${total} (the last on day ${last})`,
       };
     },
   },

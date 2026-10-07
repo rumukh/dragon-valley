@@ -92,6 +92,8 @@ export interface SimulationReport {
     revision: string;
     levels: string[];
     bosses: string[];
+    /** Each region's lesson levels and its boss (for the struggling child's steady path). */
+    regions: { id: string; lessons: string[]; boss: string | null }[];
     tableDragons: string[];
     cosmetics: number;
   };
@@ -563,6 +565,14 @@ export async function simulate(
       revision: pack.revision,
       levels: pack.data.levels.map((level) => level.id),
       bosses: pack.data.bosses.map((boss) => boss.id),
+      regions: pack.data.regions.map((region) => {
+        const levels = pack.data.levels.filter((level) => level.region === region.id);
+        return {
+          id: region.id,
+          lessons: levels.filter((level) => level.boss === null).map((level) => level.id),
+          boss: levels.find((level) => level.boss !== null)?.boss ?? null,
+        };
+      }),
       tableDragons: pack.data.dragons.filter((d) => d.kind === 'table').map((d) => d.id),
       cosmetics: pack.data.cosmetics.length,
     },

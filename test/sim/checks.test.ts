@@ -23,7 +23,7 @@ function day(index: number, patch: Partial<DayReport> = {}): DayReport {
     eggs: [],
     hatched: index === 0 ? ['bubbles'] : [],
     grew: [],
-    levels: [],
+    levels: index === 0 ? ['a.1'] : index === 3 ? ['a.boss'] : [],
     bosses: [],
     panes: 3,
     bought: index % 4 === 0 ? [`cosmetic-${index}`] : [],
@@ -54,6 +54,7 @@ function report(learner: LearnerName, patch: Partial<SimulationReport> = {}): Si
       revision: '1.0.0',
       levels: ['a.1', 'a.boss'],
       bosses: ['troll'],
+      regions: [{ id: 'a', lessons: ['a.1'], boss: 'troll' }],
       tableDragons: ['bubbles', 'sunny'],
       cosmetics: 6,
     },
@@ -347,6 +348,106 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     }
   });
 
+  /**
+   * A struggling child's report over `days` days with `total` levels, level i first completed on
+   * `doneOn(i)` (null: never), one region holding the first five lessons and boss b1.
+   */
+  const pathReport = (
+    total: number,
+    days: number,
+    doneOn: (i: number) => number | null,
+    bossDay: number | null = 7,
+  ) => {
+    const levels = Array.from({ length: total }, (_, i) => `l.${i}`);
+    const levelDays: Record<string, number> = {};
+    levels.forEach((level, i) => {
+      const at = doneOn(i);
+      if (at !== null) levelDays[level] = at;
+    });
+    return report('struggling', {
+      daysSimulated: days,
+      days: Array.from({ length: days }, (_, i) =>
+        day(i, { levels: levels.filter((level) => levelDays[level] === i) }),
+      ),
+      content: {
+        revision: '1.0.0',
+        levels,
+        bosses: ['b1'],
+        regions: [{ id: 'r', lessons: levels.slice(0, 5), boss: 'b1' }],
+        tableDragons: ['bubbles', 'sunny'],
+        cosmetics: 6,
+      },
+      levelDays,
+      stars: {},
+      bossDays: bossDay === null ? {} : { b1: bossDay },
+    });
+  };
+
+  it("a struggling child that stalls, leaves a finished region's boss, or falls below ¾", () => {
+    const steady = check(
+      pathReport(59, 84, (i) => Math.floor((i * 81) / 58)),
+      'steady-path',
+    );
+    expect(steady.ok, steady.name).toBe(true);
+    expect(steady.name).toContain(
+      'a new level in 12 of 12 weeks with play while levels remained; won over the bosses of 1 of 1 finished regions; 59 of 59 levels within 84 days (at least 45); every level: 59 of 59 (the last on day 81)',
+    );
+    const stall = check(
+      pathReport(59, 84, (i) => (i < 10 ? i : i + 11)),
+      'steady-path',
+    );
+    expect(stall.ok).toBe(false);
+    expect(stall.name).toContain('(none in the weeks from day 14)');
+    const holiday = pathReport(59, 84, (i) => (i < 10 ? i : i + 11));
+    holiday.days = holiday.days.map((d) =>
+      d.index >= 14 && d.index < 21 ? { ...d, played: false } : d,
+    );
+    expect(check(holiday, 'steady-path').ok, 'a week without play is not a stall').toBe(true);
+    const early = check(
+      pathReport(59, 84, (i) => Math.floor((i * 50) / 58)),
+      'steady-path',
+    );
+    expect(early.ok, 'nothing left to do is not a stall').toBe(true);
+    expect(early.name).toContain('a new level in 8 of 8 weeks with play while levels remained');
+    const bossLeft = check(
+      pathReport(59, 84, (i) => Math.floor((i * 81) / 58), null),
+      'steady-path',
+    );
+    expect(bossLeft.ok).toBe(false);
+    expect(bossLeft.name).toContain('won over the bosses of 0 of 1 finished regions');
+    const lateLessons = check(
+      pathReport(59, 84, (i) => (i < 5 ? 77 + i : Math.floor((i * 76) / 58)), null),
+      'steady-path',
+    );
+    expect(lateLessons.name).toContain('won over the bosses of 0 of 0 finished regions');
+    expect(lateLessons.ok, 'lessons finished in the last week: the boss may still be ahead').toBe(
+      true,
+    );
+    const below = check(
+      pathReport(59, 84, (i) => (i < 44 ? Math.floor((i * 83) / 43) : null)),
+      'steady-path',
+    );
+    expect(below.ok).toBe(false);
+    expect(below.name).toContain('44 of 59 levels within 84 days (at least 45); every level: 44');
+    const floor = check(
+      pathReport(59, 84, (i) => (i < 45 ? Math.floor((i * 83) / 44) : null)),
+      'steady-path',
+    );
+    expect(floor.ok, 'exactly 45 of 59 levels').toBe(true);
+    const half = check(
+      pathReport(59, 42, (i) => (i < 23 ? Math.floor((i * 41) / 22) : null)),
+      'steady-path',
+    );
+    expect(half.name, 'a 42-day run needs half the floor').toContain('(at least 23)');
+    expect(half.ok).toBe(true);
+    const ids = runChecks([report('struggling')]).map((c) => c.id);
+    expect(ids).toContain('steady-path');
+    expect(ids, 'the struggling child is not held to the whole valley').not.toContain(
+      'no-dead-end',
+    );
+    expect(ids).not.toContain('bosses');
+    expect(runChecks([report('average')]).map((c) => c.id)).toContain('no-dead-end');
+  });
   it('a slow child with gold panes or a crowned dragon', () => {
     const gold = report('slow', { window: { dim: 0, bronze: 0, silver: 100, gold: 21 } });
     expect(check(gold, 'fluency').ok).toBe(false);
