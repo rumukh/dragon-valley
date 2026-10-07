@@ -12,7 +12,8 @@
  *   third of its size).
  *
  * Every measurement is recorded in the job summary ("Performance"), so a budget can be revisited
- * with numbers in hand.
+ * with numbers in hand. Timings are held to their budgets only when the browser has the machine
+ * nearly to itself (at most two workers, as in CI); a more crowded run records them, marked so.
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -76,6 +77,20 @@ const ANSWERS = 7;
 const FEEDBACK_BUDGET_MS = 500;
 const THROTTLING_ONLY_IN_CHROMIUM =
   'Network and processor throttling use the Chrome DevTools Protocol, which only Chromium has.';
+/**
+ * A timing means something only when the browser has the machine nearly to itself, as in CI (two
+ * workers per job). A run with more workers, like a full local run on a busy machine, records the
+ * timings without holding them to their budgets.
+ */
+const JUDGED_UP_TO_WORKERS = 2;
+
+/** Whether this run's timings are held to their budgets; otherwise says why not. */
+function judgeTimings(testInfo: TestInfo): { judged: boolean; note: string } {
+  const workers = testInfo.config.workers;
+  return workers <= JUDGED_UP_TO_WORKERS
+    ? { judged: true, note: '' }
+    : { judged: false, note: ` (not judged: ${workers} workers share the machine)` };
+}
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -191,21 +206,24 @@ for (const profile of PROFILES) {
       visits.push((await handle.jsonValue()) as FirstScreen);
     }
     const best = visits.reduce((a, b) => (b.readyMs < a.readyMs ? b : a));
+    const { judged, note } = judgeTimings(testInfo);
     record(
       testInfo,
-      `first visit on ${profile.name}, processor ×${CPU_SLOWDOWN}: ${best.screen} ready in ${Math.round(best.readyMs)} ms (budget ${profile.readyMs}), first paint ${Math.round(best.paintMs)} ms (budget ${profile.paintMs}), ${kb(best.bytes)} downloaded (budget ${kb(SIZE_BUDGETS.firstScreen)}); visits ${visits.map((v) => Math.round(v.readyMs)).join(', ')} ms`,
+      `first visit on ${profile.name}, processor ×${CPU_SLOWDOWN}: ${best.screen} ready in ${Math.round(best.readyMs)} ms (budget ${profile.readyMs}), first paint ${Math.round(best.paintMs)} ms (budget ${profile.paintMs}), ${kb(best.bytes)} downloaded (budget ${kb(SIZE_BUDGETS.firstScreen)}); visits ${visits.map((v) => Math.round(v.readyMs)).join(', ')} ms${note}`,
     );
     expect(best.screen, 'a first visit opens on the title').toBe('title');
-    expect(best.readyMs, `the title is ready within ${profile.readyMs} ms`).toBeLessThanOrEqual(
-      profile.readyMs,
-    );
     expect(best.paintMs, 'something is painted early').toBeGreaterThan(0);
-    expect(best.paintMs, `first paint within ${profile.paintMs} ms`).toBeLessThanOrEqual(
-      profile.paintMs,
-    );
     expect(best.bytes, 'what a first visit downloads before its first screen').toBeLessThanOrEqual(
       SIZE_BUDGETS.firstScreen,
     );
+    if (judged) {
+      expect(best.readyMs, `the title is ready within ${profile.readyMs} ms`).toBeLessThanOrEqual(
+        profile.readyMs,
+      );
+      expect(best.paintMs, `first paint within ${profile.paintMs} ms`).toBeLessThanOrEqual(
+        profile.paintMs,
+      );
+    }
   });
 }
 
@@ -264,11 +282,14 @@ test(`feedback follows an answer within ${FEEDBACK_BUDGET_MS} ms with a slower p
   expect(Math.min(...delays), 'every answer was timed to its feedback').toBeGreaterThanOrEqual(0);
   const sorted = [...delays].sort((a, b) => a - b);
   const median = sorted[Math.floor(sorted.length / 2)]!;
+  const { judged, note } = judgeTimings(testInfo);
   record(
     testInfo,
-    `feedback after an answer, processor ×${CPU_SLOWDOWN}: median ${Math.round(median)} ms (budget ${FEEDBACK_BUDGET_MS}), slowest ${Math.round(sorted.at(-1)!)} ms; answers ${delays.map(Math.round).join(', ')} ms`,
+    `feedback after an answer, processor ×${CPU_SLOWDOWN}: median ${Math.round(median)} ms (budget ${FEEDBACK_BUDGET_MS}), slowest ${Math.round(sorted.at(-1)!)} ms; answers ${delays.map(Math.round).join(', ')} ms${note}`,
   );
-  expect(median, `feedback within ${FEEDBACK_BUDGET_MS} ms of the answer`).toBeLessThanOrEqual(
-    FEEDBACK_BUDGET_MS,
-  );
+  if (judged) {
+    expect(median, `feedback within ${FEEDBACK_BUDGET_MS} ms of the answer`).toBeLessThanOrEqual(
+      FEEDBACK_BUDGET_MS,
+    );
+  }
 });
