@@ -15,14 +15,13 @@ import { expect, test } from './support/fixtures';
 import {
   boot,
   bootStatus,
-  closeGrownUps,
   createFirstKeeper,
   expectCoins,
   expectHub,
   expectScreen,
   keeperCard,
   leaveHub,
-  openGrownUps,
+  loadBackup,
   playFromTitle,
   reload,
 } from './support/app';
@@ -59,19 +58,6 @@ function sliceBackup(testInfo: TestInfo): { readonly text: string; readonly coin
     text: JSON.stringify(backup),
     coins: snapshot.world.resources['aegis.runtime.state'].coins,
   };
-}
-
-/** Load a backup file into keeper 1 through the grown-ups' area. */
-async function loadBackup(page: Page, text: string, name: string): Promise<void> {
-  await openGrownUps(page, 'data');
-  const chooser = page.waitForEvent('filechooser');
-  await page.getByTestId('backup-import-profile-1').click();
-  await (
-    await chooser
-  ).setFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(text) });
-  await page.getByTestId('confirm-ok').click();
-  await expect(page.getByTestId('toast').last()).toHaveText(`Backup loaded for ${name}.`);
-  await closeGrownUps(page);
 }
 
 /** The content revision keeper 1's stored save pins. */

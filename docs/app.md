@@ -6,10 +6,9 @@ installation and the grown-ups' area, on the packed Aegis SDK's **public exports
 `src/app/art/**` belong to S4. The game rules run behind `RuntimeAdapter<S, A, V, C>`; the
 shell never decides an outcome.
 
-Status: phase 2 (PR B): the Region 1 vertical slice on the real adapter (`src/rules/adapter.ts`)
-and the Region 1 rules: story, hub, map, every Region 1 activity, results, collections and the
-grown-ups' game settings. Phase 3 adds the remaining activities, the Dragon Diary, the progress
-dashboard and printables (§16).
+Status: phase 3 (PR C): the whole valley on the real adapter (`src/rules/adapter.ts`): story,
+hub, map, every activity, results, collections, goodbye with the Dragon Diary, the finale, and
+the grown-ups' area with progress, printables and the game settings. What is left is in §16.
 
 ## 1. Layout
 
@@ -22,13 +21,14 @@ dashboard and printables (§16).
 | `persistence/`          | Family, preferences, game sessions, save status, recovery, backups (§4)        |
 | `controller/`           | The command controller (§5)                                                    |
 | `content/`              | Loading and validating the content pack and its strings                        |
-| `game/`                 | Game definition, view readings, timers, the map layout, rule refusal codes     |
+| `game/`                 | Game definition, view readings, timers, the map layout, the Dragon Diary, …    |
 | `design/`, `styles/`    | Tokens from S4's palette, the reading font, CSS (§7)                           |
 | `ui/`                   | DOM kit: buttons, keypad, choice tiles, dialogs, toasts, meters, confetti, …   |
-| `math/notation.ts`      | Problems as styled tokens in Czech or international notation (§9)              |
+| `math/`                 | Problems as tokens in Czech or international notation (§9), facts, pictures    |
 | `speech/`               | Read-aloud: local voices, number words, the verbalizer (§11)                   |
 | `audio/`                | Game audio over `createNarration`, S5's manifest, event-to-sound mapping (§10) |
-| `parent/`               | The grown-ups' gate (§6) and offline installation (§12)                        |
+| `parent/`               | The grown-ups' gate (§6), offline installation (§12), the Progress tab (§14)   |
+| `print/`                | Printables: what to print, the toolkit's print documents, the sheets (§14)     |
 | `i18n/messages.ts`      | Typed access to `content/catalogs/en.ui.json` (§13)                            |
 | `sw.ts`                 | The offline worker (`createOfflineWorker`), built by `scripts/build.mjs`       |
 
@@ -46,7 +46,7 @@ invalid content pack).
 The hidden `boot-status` element is the readiness signal for tests and tools:
 `data-state="ready"` only after the first screen is mounted and painted, `data-screen` names the
 current screen (`title`, `keepers`, `editor`, `play`, `map`, `region`, `level`, `market`, `den`,
-`album`, `window`, `parent`, `recovery`, `error`) and
+`album`, `window`, `goodbye`, `parent`, `print`, `recovery`, `error`) and
 `data-content-revision` the validated pack's revision. Nothing is put on `window`; nothing is
 written to the console. Uncaught errors and rejections are routed to the error boundary.
 
@@ -80,12 +80,13 @@ copy). Identifiers come from `src/rules/contract/ids.ts` and `persistence.ts`.
 | Family                    | `dragon-valley-family`      | `family`           | `{ profiles: [{ id, name, avatar }] }`    |
 | Game save (one per child) | `dragon-valley`             | `profile-1` … `-4` | The runtime snapshot (strict checkpoints) |
 | Preferences (per child)   | `dragon-valley-preferences` | `profile-1` … `-4` | Presentation and shell preferences        |
+| Day (per child)           | `dragon-valley-day`         | `profile-1` … `-4` | How today began, for the Dragon Diary     |
 
 - **Family** (`family.ts`): up to four keepers in the fixed slots `profile-1` … `profile-4`; a new
   keeper takes the first free slot. Names are NFC-normalised, single-spaced, 1-16 characters
   (Czech letters welcome; letters, digits, spaces, `'`, `’`, `.`, `-`), unique ignoring case.
   Avatars are `keeper-1` … `keeper-8`. Removing a keeper (grown-ups only) erases that slot's
-  game and preferences records **before** the family list drops them; the storage service's
+  game, preferences and day records **before** the family list drops them; the storage service's
   revision tombstones stop a stale window from writing into a reused slot. Names and avatars
   never enter game state.
 - **Preferences** (`preferences.ts`): `presentation` (the SDK's `PresentationPreferences`: locale,
@@ -101,7 +102,17 @@ copy). Identifiers come from `src/rules/contract/ids.ts` and `persistence.ts`.
   their pack until `activateLatestContent()` moves them at a safe boundary (the play screen,
   before today's session starts; never mid-round), which the real adapter refuses while a round
   or story beat is open. `session.content()` is the pack the game is on now; screens read
-  content from it, never from the build's newest pack.
+  content from it, never from the build's newest pack. A session has **one** commit listener on
+  its host: it keeps the latest committed view (`session.view()`, never a copy per redraw, since
+  the host's `getView()` clones the whole view) and fans each commit or restore out to the
+  shell and the screens (`session.subscribe`); a failing screen listener cannot keep the others
+  from hearing it.
+- **Day** (`day.ts`): when a keeper's day starts, the shell notes which facts already shine and
+  how far each dragon has grown, on the game's own day (`gameDay`: the rules never go back a
+  day). The Dragon Diary is the difference from the view (§14). The record holds nothing the
+  game save does not and is never part of a backup, so an unreadable one is replaced and a
+  failed write leaves the diary to this page; removing, resetting or importing a keeper erases
+  it.
 - **Content upgrades** (`content/history.ts`): every shipped pack is archived in
   `content/history/<revision>.json` and shipped with the site (and the offline install). A save
   that pins a revision the build does not hold fetches just that file
@@ -132,7 +143,7 @@ copy). Identifiers come from `src/rules/contract/ids.ts` and `persistence.ts`.
 
 `controller/commands.ts` (after `poc/lab-shared/commands.ts`) is the only way screens dispatch.
 `capture()` binds a dispatcher to the committed revision **and** a view generation when a screen
-renders; any newer view (a commit or a restore, even with the same numeric revision) makes older
+renders (the controller watches the game session's listener rather than adding its own); any newer view (a commit or a restore, even with the same numeric revision) makes older
 dispatchers refuse with `StaleCommandError`, and the runtime refuses a mismatched
 `expectedRevision` before any rule runs. `capture()`'s dispatcher resolves once the action is
 durably saved. For actions the child waits on (an answer, a board move, the next story line,
@@ -316,7 +327,11 @@ toast where they were earned.
   Glimmer's face follows the line (curious, sleepy, happy, proud; `lineExpression` in
   `scene.ts` keeps them for the version-1 lines until the story data carries a mood). The
   first-egg beat offers its choices as three eggs. A beat's last line ends it in the rules, so it
-  arrives as `story.advanced` and is shown from the content graph before moving on.
+  arrives as `story.advanced` and is shown from the content graph before moving on. The
+  **finale** beat shows the Seven-Headed Dragon with every head cured; from its second line the
+  Magic Window is whole again, every pane gold, in the castle hall's niche (hall and window are
+  one SVG in the hall's units, `hallBackdrop`, so the window stays in the niche at every size),
+  and its last line ends in confetti.
 - **Hub** (`hub.ts`): the featured dragon (the first egg's) with the facts it still needs for its
   next stage (the rules' exact `next.have` of `next.need`), the other dragons, the week's played
   days (a habit view, never a streak), today's
@@ -325,16 +340,26 @@ toast where they were earned.
   progress, once a day a replay of one game of a finished level ("Play again: Memory Match",
   `startLevel` with its `activity`), the gift, or free play on the map). Places: the valley map,
   Market, Dragon Den, Sticker Album, Magic Window and, once open, the Lightning Arena. When the
-  grown-ups' time limit is used up, it offers a goodbye instead.
+  grown-ups' time limit is used up, it offers a goodbye instead. Back from the hub says goodbye
+  when the day brought something, else it goes straight to the keepers.
+- **Goodbye and the Dragon Diary** (`goodbye.ts`, `game/diary.ts`): the featured dragon waves
+  and the diary tells what today brought, made from data rather than written: facts that began
+  to shine today (bronze or better, compared with the day's baseline, §4), dragons that hatched
+  or grew, and stickers earned today. It can be read aloud (facts in words, in the keeper's
+  notation) and leads back to the valley or on to the keepers.
 - **Map, region road and level card** (`map.ts`): S4's `valley-map` with the content's regions
-  as the SDK's `createHotspotList` buttons placed over the picture (a tap anywhere inside a
+  as the SDK's `createHotspotList` buttons, in the valley's order (a tap anywhere inside a
   region works through `logicalPoint` and `hitHotspot`; places the content does not have yet
-  sleep under a lock). A region zooms the same picture to its stretch of road with one button
-  per level (locked, open, the glowing next one, or its stars) and the boss. Buttons are placed
+  sleep under a lock). While the names fit, the buttons stand on the picture, each exactly one
+  target high; when the map is narrower than 36 text sizes (a phone, or 200 % text) or any two
+  names would touch, the same buttons line up under the picture across the whole width and the
+  picture keeps each place's emblem as a pin (a `ResizeObserver` decides; one set of buttons
+  either way). A region zooms the same picture to its stretch of road with one button per
+  level (locked, open, the glowing next one, or its stars) and the boss. Buttons are placed
   from percentages (`--x`, `--y`) so they never leave the frame: a place's name is anchored in
   proportion to where it stands, and pins and markers stay half their size from the edges;
-  markers follow the road's size, not the text size. The level card lists
-  the activities and starts, continues or replays the level.
+  pins and markers follow the picture's size, not the text size. The level card lists the
+  activities and starts, continues or replays the level.
 - **Problem rounds** (`problems.ts`): Feeding Time, the Boss Challenge, snack time, the placement
   check and the Lightning Arena on `ProblemRoundView`. Choice tiles or the keypad as the view
   resolves each problem (remainders, signs, operations and terms included); a right answer
@@ -347,7 +372,13 @@ toast where they were earned.
   sum is drawn with an empty sign slot (`5 ○ 4 = ?`; a leftover story asks only `23 ○ 5 = ?`),
   read as "Five, which sign, four, equals what?", and answered with the four sign tiles
   (`stepChoices`: whatever the input mode); a right sign is a chirp, then the number is asked.
-  Sign tiles draw their sign half as big again.
+  Sign tiles draw their sign half as big again. A story sits on a parchment **scroll** with
+  wooden rods and the speaker on it, and a new one unrolls from the top. **Compare Stones** lay
+  each side of a comparison on a pebble with the sign's place between them; once answered, each
+  stone with an expression shows its value and the place the right sign. **The Seven-Headed
+  Dragon** is won over head by head: three right answers cure a head (`curedHeads`: the meter
+  shared evenly), cured heads smile from the left, pips and words say how many, and a cured head
+  hops with confetti and "A head is cured!".
 - **Minigames** (`minigames.ts`): Memory Match, Number Trail, Egg Grid and Fact Family Nest on
   the rules' typed boards (`MinigameRoundView.current`, faces through the contract's
   `formatFace`), every move tagged with the board revision. A finished board cheers on
@@ -383,6 +414,22 @@ toast where they were earned.
   region's), the Market one shelf per slot (each tab shows one of its things; it opens at the
   shelf looked at last, else the first with something to buy now). Sticker and item pictures
   keep a picture's size at 200 % text.
+- **The grown-ups' Progress tab** (`parent-progress.ts`, shaped by `parent/progress.ts` from the
+  view): a summary (days, answers, panes that shine, dragons), the Magic Window as two plain
+  grids with their axes (S4's `renderMasteryGrid`, multiplication 11 × 11 and division 10 × 11)
+  and a legend, the times tables (facts mastered, right and quick answers; a table nobody has
+  answered says so, inferred from the hardest list since the view gives shares, not counts),
+  the hardest facts in the keeper's notation, the last 60 calendar days as bars (gaps show) with
+  the practised days as a list, and every skill begun. Numbers are lists that reflow, never
+  tables.
+- **Printables** (`parent-print.ts`, `print.ts`, `print/`): the Print tab offers flashcards of
+  the ten hardest facts or of one times table (`k · n` and `k · n : n`), and certificates for
+  each crowned dragon, each region boss won over and the finale. Documents are laid out by the
+  narrative toolkit's `layoutPrint` on A4: flashcards 2 × 5 per sheet, printed on both sides
+  flipping on the long edge (fronts and backs mirrored), certificates one per page. The preview
+  screen draws the sheets in the app (Andika, the art) and prints them with `window.print()` and
+  print CSS (`@page` A4, nothing but the sheets); "Save as a file" downloads
+  `renderPrintHtml`'s standalone page. A layout that would not fit is reported, never clipped.
 - **The grown-ups' settings** add the time limit for one sitting (a preference; the shell counts
   play time per keeper and page and ends a round gently with `endRound{ reason: 'time-limit' }`)
   and the settings the rules own, sent as actions: the daily goal, the Arena, opening regions
@@ -402,26 +449,34 @@ Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.t
   audio manifest, sound mapping and game audio; and for the game screens: view readings checked
   against the real rules, response time and the play clock, problem pictures, answer labels,
   card faces, the map layout, the content strings, the v1 boards (`boards.test.ts`) and the
-  collections' pages and shelves (`collections.test.ts`).
-- **DOM** (`test/unit/app/dom/`, happy-dom): keypad, choice tiles and the router.
+  collections' pages and shelves (`collections.test.ts`); the session's one listener (no view
+  copies, a failing listener isolated, restores delivered), the Progress tab's shaping and what
+  there is to print, laid out by the narrative toolkit (`progress-print.test.ts`), the Dragon
+  Diary and its day record (`diary.test.ts`), the game day and the heads of the finale boss.
+- **DOM** (`test/unit/app/dom/`, happy-dom): keypad, choice tiles, the router and Compare Stones.
 - **Browser** (`test/e2e/profiles.spec.ts`, Playwright): a new keeper's prologue, first egg and
   hub, kept after a reload; the placement check by keyboard with a kind miss, results and saved
   coins after a reload; the grown-ups' gate; notation, a rule setting, a rename and the pause
   dialog; a tablet screen (1180 × 820, 1024 × 768) holding the hub, the Egg Grid (built by
   tapping, totals told by Check) and the results without page scrolling. `upgrade.spec.ts`: the
   slice's save loaded as a backup opens on the newest pack with its coins, and while the archived
-  pack is out of reach it waits on the recovery screen until "Try opening again". CI runs
+  pack is out of reach it waits on the recovery screen until "Try opening again".
+  `progress.spec.ts`: answers show up in the Progress tab, and a times table prints as
+  flashcards (preview, print, file) and Back keeps the tab. `goodbye.spec.ts`: a day with
+  stickers ends with goodbye and the diary, kept over a reload. `finale.spec.ts`: the
+  Seven-Headed Dragon's first head cured after Dragon Castle is opened ahead, and the finale
+  beat from a save the rules win in Node (`support/finale.ts`). `map.spec.ts`: with every
+  region open, no two names on the map overlap, on the picture at 100 % and under it at 200 %.
+  The screen tour (`support/tour.ts`, docs/qa/screens.md) also walks goodbye, the Progress and
+  Print tabs, the print preview, Riddle Ruins and the finale. CI runs
   Chromium, WebKit and Firefox. Locally the default project is the installed
   Edge; `$env:DV_E2E_ALL_ENGINES = '1'; npm run test:e2e` runs all three (set `DV_E2E_PORT` to a
   free port when another checkout already serves 4321).
 
 ## 16. Phase 3 and later
 
-The remaining activity visuals (Compare Stones and Riddle Scrolls), the Dragon Diary, the
-grown-ups' progress dashboard (window, tables, hardest facts, trend), printables (flashcards and
-certificates through `@aegis/narrative` `layoutPrint` / `renderPrintHtml`), the Seven-Headed
-Dragon's heads and the finale celebration, `fx.*` cues for the remaining moments, and a
-persisted per-day time limit (today it counts per page load).
+Still to come: a persisted per-day time limit (today it counts per page load), `fx.*` cues for
+the remaining moments, and credits after the finale.
 
 ## 17. SDK notes
 
@@ -437,3 +492,7 @@ Gaps found while building the shell (filed upstream by the coordinator, never pa
 - No way to ask whether the audio context is running other than tracking `unlock()`.
 - No helper to rebind a save envelope to another profile ID (backups do it by hand).
 - No preloading of effects: the first play of each sound waits for its download and decode.
+- `RuntimeHost.getView()` clones the whole view on every call, and every view or commit listener
+  gets its own copy: with the whole v1 pack that is the main cost of a redraw. The shell keeps
+  one commit listener per keeper and reads the view it was handed (§4); a read-only, shared view
+  accessor would make that unnecessary.

@@ -12,7 +12,8 @@ import { BrowserServiceError, exportSave, importSave } from '@aegis/browser/save
 import type { SaveHistory, SavePolicy, SaveStorage } from '@aegis/browser/save';
 import { RuntimeFault } from '@aegis/runtime';
 
-export type RecordKind = 'family' | 'game' | 'preferences';
+/** `day` (the Dragon Diary's day record) never asks for recovery: it is replaced instead. */
+export type RecordKind = 'family' | 'game' | 'preferences' | 'day';
 
 export interface RecoveryActions {
   /** False when the storage itself could not be read; only "try again" remains. */

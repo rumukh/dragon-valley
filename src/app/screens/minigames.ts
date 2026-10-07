@@ -557,15 +557,14 @@ const PAINTERS: {
 
 export function minigameScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
-  const host = active.game.host;
   const data = active.game.content().data;
-  const first = minigameRound(host.getView())!;
+  const first = minigameRound(active.game.view())!;
   const kind = first.current?.kind;
   const levelId = first.source.kind === 'level' ? first.source.level : null;
   const level = levelId ? data.levels.find((candidate) => candidate.id === levelId) : undefined;
   const region = data.regions.find((candidate) => candidate.id === level?.region);
   const saveStatus = createSaveStatus(app, active);
-  const coins = createCoinCounter(app.kit, host.getView().coins);
+  const coins = createCoinCounter(app.kit, active.game.view().coins);
   const heading = h('h1', {
     className: 'dv-round__title',
     text: t(`activity.${first.activity}` as MessageKey),
@@ -593,13 +592,13 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     app,
     active,
     board<K extends BoardView['kind']>(wanted: K): BoardOf<K> | null {
-      const current = minigameRound(host.getView())?.current;
+      const current = minigameRound(active.game.view())?.current;
       return current?.kind === wanted ? (current as BoardOf<K>) : null;
     },
-    index: () => minigameRound(host.getView())?.board ?? 0,
+    index: () => minigameRound(active.game.view())?.board ?? 0,
     async move(move) {
       if (busy) return false;
-      const round = minigameRound(host.getView());
+      const round = minigameRound(active.game.view());
       if (!round || round.status !== 'active') return false;
       busy = true;
       try {
@@ -632,7 +631,7 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
   /** The grown-ups' time limit ends the round gently, between moves. */
   const endForRest = async (): Promise<boolean> => {
     clearInterval(restTimer);
-    if (minigameRound(host.getView())?.status === 'active') {
+    if (minigameRound(active.game.view())?.status === 'active') {
       await active.commands.capture()({ type: 'endRound', reason: 'time-limit' });
     }
     await app.continueGame(active.keeper.id);
@@ -646,7 +645,7 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
   const afterMove = async (): Promise<boolean> => {
     if (disposed) return false;
     if (active.timeIsUp()) return endForRest();
-    const view = host.getView();
+    const view = active.game.view();
     const round = minigameRound(view);
     coins.set(view.coins);
     const completed = active.events.take(['minigame.completed']);

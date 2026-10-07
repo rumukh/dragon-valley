@@ -341,6 +341,21 @@
   width: min(18rem, 38vh, 70vw);
 }
 
+/* The finale: the Magic Window comes back whole into the castle hall's niche. */
+.dv-hall__window[data-reveal='true'] {
+  animation: dv-window-whole 1.8s ease-out both;
+}
+
+@keyframes dv-window-whole {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .dv-story__card {
   display: grid;
   gap: 1em;
@@ -742,6 +757,51 @@
   width: min(14rem, 32vh, 36vw);
 }
 
+/* The boss, and for the Seven-Headed Dragon the heads cured so far (pips and words). */
+.dv-round__boss-figure {
+  display: grid;
+  justify-items: center;
+  gap: 0.3em;
+  min-width: 0;
+}
+
+.dv-heads {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em 0.6em;
+  padding: 0.25em 0.8em;
+  border-radius: 1em;
+  font-weight: 700;
+  text-align: center;
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+}
+
+.dv-heads__pips {
+  display: inline-flex;
+  gap: 0.2em;
+}
+
+.dv-heads__pip {
+  width: 0.8em;
+  height: 0.8em;
+  border: 0.12em solid var(--dv-line-strong);
+  border-radius: 50%;
+  background: var(--dv-paper-deep);
+}
+
+.dv-heads__pip[data-cured='true'] {
+  border-color: var(--dv-sun-deep);
+  background: var(--dv-sun);
+}
+
+/* A head just cured hops from its own middle. */
+.dv-round__boss .dv-seven-head {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
 .dv-round__board,
 .dv-round__input {
   display: grid;
@@ -809,6 +869,15 @@
   font-size: 1.3rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+/* "A head is cured!" gets a line of its own under the praise. */
+.dv-feedback:has(.dv-feedback__extra) {
+  flex-wrap: wrap;
+}
+
+.dv-feedback__extra {
+  flex-basis: 100%;
 }
 
 /* Things that fly from an answer to a dragon or a boss (on the fixed effects layer). */
@@ -886,6 +955,102 @@
   border-radius: 0.25em;
   color: var(--dv-ink-muted);
   background: var(--dv-paper);
+}
+
+/* Compare Stones: two pebbles carry the sides, the sign's place between them; once answered
+   each stone shows its value underneath and the place its sign. */
+.dv-stones {
+  align-items: flex-start;
+  gap: 0.35em;
+}
+
+.dv-stone {
+  display: inline-grid;
+  justify-items: center;
+  gap: 0.05em;
+  padding: 0.22em 0.55em 0.3em;
+  border: 0.05em solid var(--dv-line-strong);
+  border-radius: 48% 52% 44% 56% / 58% 50% 50% 42%;
+  background: color-mix(in srgb, var(--dv-ink-soft) 14%, var(--dv-paper));
+  box-shadow: inset 0 -0.12em 0 color-mix(in srgb, var(--dv-ink-soft) 28%, transparent);
+}
+
+.dv-stones__sign {
+  align-self: flex-start;
+  margin-top: 0.27em;
+}
+
+.dv-stone__value {
+  font-size: 0.55em;
+  color: var(--dv-ink-soft);
+}
+
+.dv-stone__value:empty {
+  display: none;
+}
+
+.dv-stones[data-revealed='true'] .dv-stone__value {
+  animation: dv-value-rise 0.4s ease-out both;
+}
+
+.dv-problem__blank[data-filled='true'] {
+  border-style: solid;
+  color: var(--dv-primary-deep);
+}
+
+@keyframes dv-value-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.3em);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Riddle Scrolls: the story on a parchment scroll with wooden rods, its speaker on it. It
+   unrolls from the top (scripted, so reduced motion keeps it still). */
+.dv-scroll {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+  width: min(100%, 32em);
+  margin-block: 0.45em;
+  padding: 0.7em 0.9em;
+  border-inline: 0.12em solid var(--dv-line-strong);
+  background: var(--dv-paper-deep);
+  transform-origin: top center;
+}
+
+.dv-scroll[hidden] {
+  display: none;
+}
+
+.dv-scroll::before,
+.dv-scroll::after {
+  content: '';
+  position: absolute;
+  inset-inline: -0.45em;
+  height: 0.55em;
+  border-radius: 0.3em;
+  background: var(--dv-sun-deep);
+}
+
+.dv-scroll::before {
+  top: -0.3em;
+}
+
+.dv-scroll::after {
+  bottom: -0.3em;
+}
+
+.dv-scroll .dv-round__story {
+  flex: 1;
+  max-width: none;
+  text-align: start;
 }
 
 /* The empty place of the sign a story asks for: a round, dashed hole the sign tiles fill. */
@@ -1670,6 +1835,112 @@
   width: min(4rem, 10vh);
 }
 
+/* ---- Goodbye and the Dragon Diary ------------------------------------------------------ */
+
+/* The dragon waves beside the diary on a tablet, above it on a phone. */
+.dv-goodbye__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: 1rem;
+  width: min(100%, 52em);
+  margin-inline: auto;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-goodbye__layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+
+.dv-goodbye__dragon {
+  width: min(16rem, 60vw, 32vh);
+}
+
+.dv-goodbye__dragon svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dv-goodbye__actions {
+  display: flex;
+  justify-content: center;
+  padding-block: 1rem;
+}
+
+.dv-diary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6em;
+  width: 100%;
+}
+
+.dv-diary__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3em 0.8em;
+}
+
+.dv-diary__heading {
+  font-size: 1.4rem;
+}
+
+.dv-diary__day {
+  flex: 1 1 auto;
+  max-width: none;
+  color: var(--dv-ink-soft);
+  font-weight: 700;
+}
+
+.dv-diary__lead,
+.dv-diary__more {
+  max-width: none;
+  font-weight: 700;
+}
+
+.dv-diary__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-diary__facts li {
+  padding: 0.25em 0.7em;
+  border-radius: 1em;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-success-deep);
+  background: var(--dv-success-soft);
+}
+
+.dv-diary__list {
+  display: grid;
+  gap: 0.4em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-diary__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  font-weight: 700;
+}
+
+.dv-diary__art {
+  flex: none;
+  width: clamp(48px, 2.6em, 80px);
+  height: auto;
+}
+
 /* ---- Hatch celebration ----------------------------------------------------------------- */
 
 /* The egg fills the screen: the caption above, the hatchling's name card and "Hooray!" below,
@@ -1776,6 +2047,39 @@
   inset: 0;
 }
 
+/* The map and its places. The places' buttons sit over the picture while their names fit, and
+   line up under it when the map is narrow for its text (a phone, or big text: map.ts moves
+   them); the picture then keeps each place's emblem as a pin. One set of buttons either way, in
+   the valley's order. Pins follow the picture's size (`cqw`). */
+.dv-map {
+  container-type: inline-size;
+}
+
+.dv-map-area[data-compact='true'] .dv-map__places {
+  position: static;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em;
+  margin-top: 0.8em;
+}
+
+.dv-map-area[data-compact='true'] .dv-map__place {
+  position: static;
+  translate: none;
+  max-width: 100%;
+  padding: 0.3em 0.9em 0.3em 0.35em;
+}
+
+.dv-map-area[data-compact='true'] .dv-map__place .dv-map__emblem {
+  width: 2em;
+  height: 2em;
+}
+
+.dv-map-area[data-compact='true'] .dv-map__pin {
+  display: grid;
+}
+
 /* A place's name is anchored in proportion to where it stands (left at the left edge, centred in
    the middle, right at the right edge), so a long name or big text never leaves the frame. */
 .dv-map__place {
@@ -1786,9 +2090,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
+  width: max-content;
   min-height: var(--dv-target);
   max-width: 92%;
-  padding: 0.3em 0.9em 0.3em 0.35em;
+  padding: 0.15em 0.8em 0.15em 0.2em;
   border: 0.1em solid var(--dv-line);
   border-radius: 2em;
   font: inherit;
@@ -1801,14 +2106,18 @@
   cursor: pointer;
 }
 
+/* On the picture a place is exactly one target high, so neighbouring names keep apart. */
 .dv-map__emblem {
-  width: 2em;
-  height: 2em;
+  flex: none;
+  width: 1.4em;
+  height: 1.4em;
 }
 
-/* Pins and level markers stand centred on their point, kept half their size from the edges. */
-.dv-map__asleep {
-  --size: 2.4em;
+/* Pins and level markers stand centred on their point, kept half their size from the edges.
+   Pins are pictures: they follow the map's size, not the text size. */
+.dv-map__asleep,
+.dv-map__pin {
+  --size: clamp(24px, 6cqw, 52px);
   position: absolute;
   left: clamp(calc(var(--size) / 2), var(--x, 50%), calc(100% - var(--size) / 2));
   top: clamp(calc(var(--size) / 2), var(--y, 50%), calc(100% - var(--size) / 2));
@@ -1823,8 +2132,20 @@
 }
 
 .dv-map__asleep svg {
-  width: 1.3em;
-  height: 1.3em;
+  width: 55%;
+  height: 55%;
+}
+
+.dv-map__pin {
+  --size: clamp(30px, 8cqw, 64px);
+  display: none;
+  background: var(--dv-card);
+  box-shadow: 0 0.1em 0 var(--dv-line-strong);
+}
+
+.dv-map__pin .dv-map__emblem {
+  width: 84%;
+  height: 84%;
 }
 
 /* Level markers are pictures: they follow the road's size, not the text size, so big text on
@@ -2307,6 +2628,388 @@
 .dv-offline-status[data-state='failed'],
 .dv-offline-status[data-state='unavailable'] {
   color: var(--dv-miss-deep);
+}
+
+/* The Progress tab: the window's two grids side by side when there is room for both. */
+.dv-progress,
+.dv-print-tab {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8em;
+  min-width: 0;
+}
+
+.dv-progress h3,
+.dv-print-tab h3 {
+  margin-top: 0.4em;
+  font-size: 1.1rem;
+}
+
+/* Notes in the grown-ups' reports read as plain paragraphs, not as centred captions. */
+.dv-progress .dv-note,
+.dv-print-tab .dv-note {
+  justify-self: start;
+  max-width: none;
+  padding-inline: 0;
+  text-align: start;
+}
+
+.dv-progress-grid__figure .dv-note {
+  justify-self: center;
+}
+
+.dv-print-tab__group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8em;
+  min-width: 0;
+}
+
+.dv-print-tab__group > .dv-button {
+  justify-self: start;
+}
+
+.dv-progress__grids {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16em, 100%), 1fr));
+  gap: 1.2em;
+}
+
+.dv-progress-grid__figure {
+  display: grid;
+  gap: 0.4em;
+  min-width: 0;
+  margin: 0;
+}
+
+.dv-progress-grid__figure figcaption {
+  font-weight: 700;
+}
+
+/* A plain grid with its numbers along the top and down the side. The numbers belong to the
+   picture: they follow its width, not the text size, so eleven always fit in a row. */
+.dv-progress-grid {
+  display: grid;
+  grid-template-columns: 1.7em minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  width: 100%;
+  max-width: 28rem;
+  font-size: min(0.7rem, 3.2vw);
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-progress-grid__top {
+  display: grid;
+  grid-row: 1;
+  grid-column: 2;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  text-align: center;
+}
+
+.dv-progress-grid__side {
+  display: grid;
+  grid-row: 2;
+  grid-column: 1;
+  grid-template-rows: repeat(var(--rows, 11), minmax(0, 1fr));
+  align-items: center;
+  padding-inline-end: 0.3em;
+  text-align: end;
+}
+
+.dv-progress-grid__art {
+  display: block;
+  grid-row: 2;
+  grid-column: 2;
+  width: 100%;
+  height: auto;
+}
+
+.dv-progress__hardest {
+  display: grid;
+  gap: 0.4em;
+  margin: 0;
+  padding-inline-start: 1.6em;
+}
+
+.dv-progress__hardest li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2em 0.8em;
+}
+
+.dv-progress__fact {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Numbers as a list of rows: a name, then its labelled values, one to a line. */
+.dv-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(22em, 100%), 1fr));
+  gap: 0.4em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-stats__row {
+  display: grid;
+  align-content: start;
+  gap: 0.15em;
+  padding: 0.4em 0.7em;
+  border: 0.06em solid var(--dv-line);
+  border-radius: 0.7em;
+  background: var(--dv-card);
+}
+
+.dv-stats__name {
+  font-weight: 700;
+}
+
+.dv-stats__values {
+  display: grid;
+  gap: 0.1em;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-stats__value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.35em;
+}
+
+.dv-stats__value dt {
+  color: var(--dv-ink-soft);
+}
+
+.dv-stats__value dt::after {
+  content: ':';
+}
+
+.dv-stats__value dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.dv-stats__note {
+  color: var(--dv-ink-soft);
+}
+
+/* The last 60 days as bars: every answer (pale), the right ones (green, in front). */
+.dv-trend {
+  display: grid;
+  gap: 0.6em;
+  min-width: 0;
+}
+
+.dv-trend__figure {
+  display: grid;
+  gap: 0.3em;
+  margin: 0;
+}
+
+.dv-trend__art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dv-trend__axis {
+  stroke: var(--dv-line-strong);
+  stroke-width: 2;
+}
+
+.dv-trend__answers,
+.dv-trend__key--answers {
+  fill: var(--dv-paper-deep);
+  stroke: var(--dv-line-strong);
+  stroke-width: 1;
+  background: var(--dv-paper-deep);
+}
+
+.dv-trend__correct,
+.dv-trend__key--correct {
+  fill: var(--dv-success);
+  background: var(--dv-success);
+}
+
+.dv-trend__days {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 1em;
+  color: var(--dv-ink-soft);
+  font-size: 0.9rem;
+}
+
+.dv-trend__key {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-inline: 0.2em 0.35em;
+  border: 0.08em solid var(--dv-line-strong);
+  border-radius: 0.2em;
+  vertical-align: -0.1em;
+}
+
+.dv-trend__key--correct {
+  margin-inline-start: 1.2em;
+}
+
+.dv-details summary {
+  min-height: var(--dv-target);
+  padding-block: 0.6em;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---- Printables -------------------------------------------------------------------------- */
+
+.dv-print {
+  width: 100%;
+  max-width: 60em;
+  margin-inline: auto;
+}
+
+.dv-print__title {
+  font-size: min(1.6rem, 7vw);
+}
+
+.dv-print__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8em;
+}
+
+/* Each page is an A4 box; cells are placed in percent of it and their text is sized in page
+   widths (cqw), so the preview is the printed page, smaller. */
+.dv-sheets {
+  display: grid;
+  justify-items: center;
+  gap: 1.5rem;
+  padding-block: 1rem;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.dv-sheet {
+  position: relative;
+  width: min(100%, 34rem);
+  aspect-ratio: var(--paper-ratio);
+  overflow: hidden;
+  border-radius: 0.3rem;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow: 0 0.3rem 1rem var(--dv-shadow);
+  container-type: inline-size;
+}
+
+.dv-sheet__cell {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1cqw;
+  width: var(--w);
+  height: var(--h);
+  padding: 1.4cqw;
+  overflow: hidden;
+  border: 0.25cqw dashed var(--dv-line-strong);
+  border-radius: 1.5cqw;
+  font-size: calc(var(--font-pt) / var(--paper-pt) * 100cqw);
+  line-height: 1.25;
+  text-align: center;
+}
+
+.dv-sheet__line {
+  max-width: 100%;
+  margin: 0;
+}
+
+.dv-sheets--flashcards .dv-sheet__cell[data-side='front'] .dv-sheet__line,
+.dv-sheets--flashcards .dv-sheet__cell[data-side='back'] .dv-sheet__line:first-of-type {
+  font-size: 1.5em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-sheets--flashcards .dv-sheet__cell[data-side='back'] .dv-sheet__line + .dv-sheet__line {
+  font-size: 0.8em;
+  color: var(--dv-ink-soft);
+}
+
+/* A certificate: a frame round the page, the picture and heading above, the words below. */
+.dv-sheets--certificate .dv-sheet {
+  border: 2cqw double var(--dv-sun-deep);
+}
+
+.dv-sheets--certificate .dv-sheet__cell {
+  border: 0;
+}
+
+.dv-sheet__art svg {
+  display: block;
+  width: 42cqw;
+  height: auto;
+}
+
+.dv-sheets--certificate .dv-sheet__cell[data-item='heading'] .dv-sheet__line {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: var(--dv-primary-deep);
+}
+
+.dv-sheets--certificate .dv-sheet__cell[data-item='body'] .dv-sheet__line:first-of-type {
+  font-size: 1.4em;
+  font-weight: 700;
+}
+
+.dv-sheets--certificate .dv-sheet__cell[data-item='body'] .dv-sheet__line:last-of-type {
+  margin-top: 2cqw;
+  font-size: 0.8em;
+  color: var(--dv-ink-soft);
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html[data-printing] body * {
+    visibility: hidden !important;
+  }
+
+  html[data-printing] .dv-sheets,
+  html[data-printing] .dv-sheets * {
+    visibility: visible !important;
+  }
+
+  html[data-printing] .dv-sheets {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    padding: 0;
+  }
+
+  html[data-printing] .dv-sheet {
+    width: var(--paper-width);
+    max-width: none;
+    height: var(--paper-height);
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    break-after: page;
+  }
+
+  html[data-printing] .dv-sheet:last-child {
+    break-after: auto;
+  }
 }
 
 /* ---- Recovery and errors --------------------------------------------------------------- */

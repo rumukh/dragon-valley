@@ -32,6 +32,13 @@ const LOCAL = new Set([
   '--side',
   '--x',
   '--y',
+  '--w',
+  '--h',
+  '--paper-width',
+  '--paper-height',
+  '--paper-ratio',
+  '--paper-pt',
+  '--font-pt',
 ]);
 
 function files(directory: string, extension: string): string[] {

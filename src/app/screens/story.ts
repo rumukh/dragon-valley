@@ -3,16 +3,38 @@
  * request or automatically, with big buttons to go on. The first-egg beat offers its choices as
  * three eggs. Skippable beats can be skipped whole. The last line of a beat ends the beat in the
  * rules, so it arrives as an event; the screen shows it before moving on.
+ *
+ * The finale shows the Seven-Headed Dragon with every head cured; from the beat's second line
+ * the Magic Window is whole again in the castle hall's niche, and the last line ends in confetti.
  */
+import { FINALE_DRAGON_ID } from '../../rules/contract';
 import type { DragonExpression, GameEvent } from '../../rules/contract';
 import { taken } from '../controller/commands';
 import { candyButton } from '../ui/button';
-import { bossArt, dragonArt } from '../ui/art';
+import { bossArt, dragonArt, SEVEN_HEADS, sevenHeadedArt, wholeWindowArt } from '../ui/art';
+import { confetti } from '../ui/confetti';
 import { h } from '../ui/dom';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
-import { backdrop, beatFigure, lineExpression, nodeText, sceneBackground } from './scene';
+import {
+  backdrop,
+  beatFigure,
+  hallBackdrop,
+  lineExpression,
+  nodeText,
+  sceneBackground,
+} from './scene';
 import { speakerButton } from './speech';
+
+/** The finale's backdrop: the castle hall with the Magic Window whole in its niche. */
+function wholeWindowHall(reveal: boolean): HTMLElement {
+  const window = wholeWindowArt('dv-hall__window');
+  // The art's own root class would size it like the collection's window card.
+  window.classList.remove('dv-window');
+  window.setAttribute('data-testid', 'hall-window');
+  if (reveal) window.dataset['reveal'] = 'true';
+  return hallBackdrop(window);
+}
 
 type StoryAdvanced = Extract<GameEvent, { type: 'story.advanced' }>;
 
@@ -20,10 +42,14 @@ export function storyScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
   const text = app.text;
   const data = active.game.content().data;
-  const view = active.game.host.getView();
+  const view = active.game.view();
   const story = view.story!;
   const beat = data.story.beats.find((candidate) => candidate.id === story.beat);
   const figure = beatFigure(data, beat);
+  const nodeIndex = beat?.graph.nodes.findIndex((node) => node.id === story.node) ?? -1;
+  const scene = sceneBackground(story.scene);
+  // The finale's first line belongs to the cured dragon; the window is whole from the second.
+  const wholeWindow = figure.kind === 'finale' && scene === 'castle-hall' && nodeIndex >= 1;
   const dragons = new Map(data.dragons.map((dragon) => [dragon.id, dragon]));
   const eggChoices = story.choices.length > 1 && story.choices.every((c) => dragons.has(c.id));
 
@@ -39,10 +65,18 @@ export function storyScreen(app: App, active: ActiveKeeper): Screen {
   portrait.append(
     figure.kind === 'boss'
       ? bossArt(figure.id, figure.pose)
-      : glimmer(lineExpression(story.text, story.finished)),
+      : figure.kind === 'finale'
+        ? sevenHeadedArt(SEVEN_HEADS)
+        : glimmer(lineExpression(story.text, story.finished)),
   );
+  portrait.dataset['figure'] =
+    figure.kind === 'boss' ? figure.id : figure.kind === 'finale' ? FINALE_DRAGON_ID : 'glimmer';
   portrait.dataset['expression'] =
-    figure.kind === 'boss' ? figure.pose : lineExpression(story.text, story.finished);
+    figure.kind === 'boss'
+      ? figure.pose
+      : figure.kind === 'finale'
+        ? 'happy'
+        : lineExpression(story.text, story.finished);
 
   let spoken = '';
   const say = (key: string): void => {
@@ -96,6 +130,9 @@ export function storyScreen(app: App, active: ActiveKeeper): Screen {
       const expression = lineExpression(key, true);
       portrait.replaceChildren(glimmer(expression));
       portrait.dataset['expression'] = expression;
+    } else if (figure.kind === 'finale') {
+      app.kit.cue('fx.dragon-happy');
+      void confetti(app.kit.fx);
     }
     say(key);
     autoRead();
@@ -168,7 +205,7 @@ export function storyScreen(app: App, active: ActiveKeeper): Screen {
   const element = h(
     'main',
     { className: 'dv-story', testId: 'screen-story', dataset: { beat: story.beat } },
-    backdrop(sceneBackground(story.scene)),
+    wholeWindow ? wholeWindowHall(nodeIndex === 1) : backdrop(scene),
     heading,
     h(
       'section',

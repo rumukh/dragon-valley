@@ -18,6 +18,7 @@ import { createCoinCounter, createMeter } from '../ui/meters';
 import type { Screen } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
 import { createSaveStatus, keeperBadge, toastStickers, topBar } from './common';
+import { hasDiary } from './goodbye';
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
@@ -31,9 +32,8 @@ const PLACES = {
 export function hubScreen(app: App, active: ActiveKeeper): Screen {
   const t = app.kit.t;
   const text = app.text;
-  const host = active.game.host;
   const keeperId = active.keeper.id;
-  const view = host.getView();
+  const view = active.game.view();
   const saveStatus = createSaveStatus(app, active);
   const coins = createCoinCounter(app.kit, view.coins);
 
@@ -237,7 +237,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
           icon: 'home',
           variant: 'sun',
           testId: 'hub-goodbye',
-          onPress: () => app.router.reset(app.screens.keepers()),
+          onPress: () => app.router.reset(app.screens.goodbye(keeperId)),
           onError: app.kit.onError,
         }),
       );
@@ -352,13 +352,13 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
   };
 
   const paint = (): void => {
-    const current = host.getView();
+    const current = active.game.view();
     coins.set(current.coins);
     paintNest(current);
     paintAdventure(current);
   };
   paint();
-  const unsubscribe = host.subscribe(() => paint());
+  const unsubscribe = active.game.subscribe(() => paint());
 
   const places = h(
     'nav',
@@ -411,7 +411,11 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       back: {
         label: t('hub.back'),
         testId: 'hub-back',
-        onPress: () => app.router.reset(app.screens.keepers()),
+        // A day that brought something ends with goodbye and the Dragon Diary.
+        onPress: () =>
+          hasDiary(active)
+            ? app.router.push(app.screens.goodbye(keeperId))
+            : app.router.reset(app.screens.keepers()),
       },
       title: keeperBadge(active.keeper),
       tools: [coins.element, saveStatus.element],

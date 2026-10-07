@@ -16,8 +16,9 @@ differ by operating system, so no test compares them.
 - **CI**: each run of the `CI` workflow uploads one artifact per engine from the job that runs
   the walks: `qa-screens-chromium-walks+rest`, `qa-screens-firefox-walks+rest` and
   `qa-screens-webkit-walks` (kept 30 days). Open `first-run-and-placement.html`,
-  `the-valley.html`, `keepers-and-grown-ups.html`, `when-things-go-wrong.html` or `text-200.html`
-  in the artifact for a contact sheet: one row per stop, one column per size.
+  `the-valley.html`, `keepers-and-grown-ups.html`, `riddle-ruins.html`, `the-finale.html`,
+  `when-things-go-wrong.html` or `text-200.html` in the artifact for a contact sheet: one row
+  per stop, one column per size.
 - **Locally**: `npm run test:e2e -- screens.spec.ts reflow.spec.ts` writes the same files to
   `out/qa-screens/<project>/` (`chromium-msedge` with the default local browser).
 
@@ -56,7 +57,8 @@ check ("Show the dragons what you know!") to its results (`test/e2e/support/tour
 ## The valley (`the-valley`)
 
 A keeper who has finished the placement check visits the map, a region road, a level card, a
-Feeding Time round with choice tiles, an Egg Grid board and the four collections (`placesWalk`).
+Feeding Time round with choice tiles, an Egg Grid board and the four collections, then says
+goodbye and reads the day's Dragon Diary (`placesWalk`).
 
 | Stop              | What it shows                              |
 | ----------------- | ------------------------------------------ |
@@ -69,6 +71,7 @@ Feeding Time round with choice tiles, an Egg Grid board and the four collections
 | `19-den`          | The Dragon Den                             |
 | `20-album`        | The Sticker Album                          |
 | `21-window`       | The Magic Window                           |
+| `33-goodbye`      | Goodbye, with the day's Dragon Diary       |
 
 ## Keepers and the grown-ups' area (`keepers-and-grown-ups`)
 
@@ -82,9 +85,35 @@ Feeding Time round with choice tiles, an Egg Grid board and the four collections
 | `27-parent-data`     | Grown-ups' area: backups and storage                  |
 | `28-parent-offline`  | Grown-ups' area: offline play                         |
 | `29-parent-about`    | Grown-ups' area: about and privacy                    |
+| `34-parent-progress` | Grown-ups' area: a keeper's progress                  |
+| `35-parent-print`    | Grown-ups' area: flashcards to print                  |
+| `36-print-preview`   | Flashcards on A4, front and back                      |
 | `30-confirm-remove`  | Confirming the removal of a keeper                    |
 | `31-editor-change`   | Changing a keeper, with Remove                        |
 | `32-keepers-full`    | Four keepers: the valley is full                      |
+
+## Riddle Ruins (`riddle-ruins`)
+
+A grown-up opens Riddle Ruins ahead; the child answers a Compare Stones problem and opens a Riddle
+Scrolls story (`riddlesWalk`).
+
+| Stop                  | What it shows                                        |
+| --------------------- | ---------------------------------------------------- |
+| `50-compare-stones`   | Compare Stones: two stones and a sign                |
+| `51-compare-answered` | Compare Stones answered: the stones' values and sign |
+| `52-riddle-scroll`    | Riddle Scrolls: a story on its scroll                |
+
+## The finale (`the-finale`)
+
+A grown-up opens Dragon Castle ahead and the child cures the Seven-Headed Dragon's first head;
+then a save the rules played to the finale beat (`test/e2e/support/finale.ts`) shows its first two
+lines (`finaleWalk`).
+
+| Stop               | What it shows                            |
+| ------------------ | ---------------------------------------- |
+| `37-boss-heads`    | The Seven-Headed Dragon: one head cured  |
+| `38-finale`        | The finale: all seven heads smile        |
+| `39-finale-window` | The finale: the Magic Window whole again |
 
 ## When things go wrong (`when-things-go-wrong`)
 
@@ -106,8 +135,9 @@ page shell, staged with the fault injection in `test/e2e/support/storage.ts` (`t
 ## Large text (`text-200`)
 
 A keeper whose grown-up chose Text size 200 % (`test/e2e/reflow.spec.ts`): the hub (`06-hub`),
-the placement check (stops `07` to `12`) and the valley (stops `13` to `21`), at all three sizes.
-The same walk checks reflow; every screen is also checked at 200 % browser zoom (no pictures).
+the placement check (stops `07` to `12`) and the valley (stops `13` to `21` and `33`), at all
+three sizes. The same walk checks reflow; every screen is also checked at 200 % browser zoom (no
+pictures).
 
 Not yet walked (they need whole levels played first; PR B covers them with the gameplay): Memory
 Match, Number Trail, Fact Family Nest, the Bridge Troll, hatching and growing, a gift, snack time,

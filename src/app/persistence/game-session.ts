@@ -15,12 +15,22 @@
  *   `activateLatestContent()` moves them to the newest pack at a safe boundary (the hub, never
  *   mid-round) through the adapter's own `activateContent` migration. A pinned pack that cannot
  *   be fetched, or does not match the save, leaves the save untouched for recovery.
+ * - The host hands every listener its own copy of what it delivers, and `getView()` copies too
+ *   (with its checks), so the session keeps **one** commit listener and passes each commit's
+ *   view and events on to the shell's own listeners (`subscribe`); screens read the latest view
+ *   with `view()` instead of asking the host for a new copy at every redraw.
  */
 import { createSaveCheckpoint } from '@aegis/browser/checkpoint';
 import { exportSave, importSave, SaveService } from '@aegis/browser/save';
 import type { SavePolicy, SaveStorage } from '@aegis/browser/save';
 import { createRuntimeHost, isRuntimeSnapshot, requireValue, RuntimeFault } from '@aegis/runtime';
-import type { ContentPack, RuntimeAdapter, RuntimeHost, RuntimeSnapshot } from '@aegis/runtime';
+import type {
+  ContentPack,
+  RuntimeAdapter,
+  RuntimeEvent,
+  RuntimeHost,
+  RuntimeSnapshot,
+} from '@aegis/runtime';
 import { deriveSaveIndicator } from './save-status';
 import type { SaveIndicator } from './save-status';
 import { ContentUnavailable, recoveryFor } from './recovery';
@@ -52,11 +62,26 @@ export interface GameProfile {
   readonly seed: string;
 }
 
+/** A new view: after a commit (with the commit's transient events) or after a restore. */
+export interface ViewChange<V> {
+  readonly view: V;
+  readonly reason: 'commit' | 'restore';
+  /** The commit's events, never replayed: none for a restore. */
+  readonly events: readonly RuntimeEvent[];
+}
+
 export interface GameSession<S, A, V, C> {
   readonly profileId: string;
   readonly host: RuntimeHost<S, A, V, C>;
   readonly saves: SaveService<RuntimeSnapshot, null>;
   readonly policy: SavePolicy<RuntimeSnapshot, null>;
+  /**
+   * The latest view, as the session's one commit listener received it: the same object until
+   * the next commit or restore replaces it. Read it, never change it.
+   */
+  view(): V;
+  /** Every new view, in order; one host listener feeds them all. */
+  subscribe(listener: (change: ViewChange<V>) => void): () => void;
   indicator(): SaveIndicator;
   subscribeIndicator(listener: (indicator: SaveIndicator) => void): () => void;
   /** The content pack the game is on now: an older save's own pack until it is upgraded. */
@@ -201,11 +226,40 @@ export async function openGameSession<S, A, V, C>(
   const unsubscribeHost = host.subscribeStatus(publish);
   const unsubscribeSaves = saves.subscribe(publish);
 
+  // The one commit listener: its copy of each commit's view is the session's latest view.
+  let latest = host.getView();
+  let revision = start.revision;
+  const viewListeners = new Set<(change: ViewChange<V>) => void>();
+  const deliver = (change: ViewChange<V>): void => {
+    // Each listener runs even if another fails; the first failure then reaches the host, which
+    // reports it as a listener failure, as it would for listeners of its own.
+    let failure: { readonly error: unknown } | null = null;
+    for (const listener of [...viewListeners]) {
+      if (!viewListeners.has(listener)) continue;
+      try {
+        listener(change);
+      } catch (error) {
+        failure ??= { error };
+      }
+    }
+    if (failure) throw failure.error;
+  };
+  const unsubscribeCommits = host.subscribeCommits((commit) => {
+    latest = commit.view;
+    revision = commit.snapshot.content.revision;
+    deliver({ view: latest, reason: 'commit', events: commit.events });
+  });
+
   return {
     profileId: profile.id,
     host,
     saves,
     policy,
+    view: () => latest,
+    subscribe(listener) {
+      viewListeners.add(listener);
+      return () => viewListeners.delete(listener);
+    },
     indicator,
     subscribeIndicator(listener) {
       listeners.add(listener);
@@ -213,7 +267,7 @@ export async function openGameSession<S, A, V, C>(
       return () => listeners.delete(listener);
     },
     content() {
-      return installed.get(host.inspect().content.revision) ?? game.content;
+      return installed.get(revision) ?? game.content;
     },
     async storedText() {
       const status = host.getStatus();
@@ -226,12 +280,15 @@ export async function openGameSession<S, A, V, C>(
     },
     async importEnvelope(text) {
       const candidate = importSave(text, policy);
-      install(await validateSnapshot(game, candidate.state));
+      const pack = install(await validateSnapshot(game, candidate.state));
       requireValue(await host.restore(candidate.state));
+      latest = host.getView();
+      revision = pack.revision;
       requireValue(await host.retryCheckpoint());
+      deliver({ view: latest, reason: 'restore', events: [] });
     },
     async activateLatestContent() {
-      if (host.inspect().content.revision === game.content.revision) return false;
+      if (revision === game.content.revision) return false;
       const status = host.getStatus();
       if (status.pendingAction !== null || status.checkpoint !== 'idle') return false;
       const result = await host.activateContent(install(game.content), 'boundary');
@@ -246,7 +303,9 @@ export async function openGameSession<S, A, V, C>(
       closed = true;
       unsubscribeHost();
       unsubscribeSaves();
+      unsubscribeCommits();
       listeners.clear();
+      viewListeners.clear();
       await host.dispose();
     },
   };

@@ -10,8 +10,10 @@ import { checkStop, writeContactSheet } from './support/screens';
 import { installSpeech, TYPICAL_VOICES } from './support/speech';
 import {
   familyAfterPlacement,
+  finaleWalk,
   grownUpWalk,
   placesWalk,
+  riddlesWalk,
   roundWalk,
   troubleWalk,
   welcomeWalk,
@@ -56,13 +58,34 @@ test('the valley: map, levels, a choice round, Egg Grid and the collections', as
 });
 
 test("the keepers and the grown-ups' area", async ({ page }, testInfo) => {
-  await welcomeWalk(page, async () => undefined);
+  // After the placement check, so the Progress and Print tabs have answers to show.
+  await familyAfterPlacement(page, 'Ada');
   const stops: Stop[] = [];
   await grownUpWalk(page, async (stop) => {
     stops.push(stop);
     await checkStop(page, testInfo, stop, everything);
   });
   writeContactSheet(testInfo, 'keepers-and-grown-ups', stops);
+});
+
+test('Riddle Ruins: Compare Stones and Riddle Scrolls', async ({ page }, testInfo) => {
+  const stops: Stop[] = [];
+  await riddlesWalk(page, async (stop) => {
+    stops.push(stop);
+    await checkStop(page, testInfo, stop, everything);
+  });
+  writeContactSheet(testInfo, 'riddle-ruins', stops);
+});
+
+test('the finale: the Seven-Headed Dragon head by head, the Magic Window whole', async ({
+  page,
+}, testInfo) => {
+  const stops: Stop[] = [];
+  await finaleWalk(page, async (stop) => {
+    stops.push(stop);
+    await checkStop(page, testInfo, stop, everything);
+  });
+  writeContactSheet(testInfo, 'the-finale', stops);
 });
 
 test('when things go wrong: failed saves, recovery, errors', async ({ page }, testInfo) => {

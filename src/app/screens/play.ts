@@ -9,6 +9,7 @@
  * is still in progress (the rules refuse then, and the next visit tries again). Entering it starts
  * the day's session when the local date has changed (time reaches the rules only as this date).
  */
+import { gameDay } from '../game/view';
 import type { ScreenEntry } from '../router/router';
 import { playKey } from '../shell/app';
 import type { ActiveKeeper, App } from '../shell/app';
@@ -21,7 +22,7 @@ import { storyScreen } from './story';
 
 /** Start (or resume) today's session unless the game is already on today's date. */
 export async function startToday(active: ActiveKeeper, today = localDay()): Promise<void> {
-  if (active.game.host.getView().day === today) return;
+  if (active.game.view().day === today) return;
   await active.commands.capture()({ type: 'startSession', day: today });
 }
 
@@ -31,8 +32,11 @@ export function playScreen(app: App, keeperId: string): ScreenEntry {
     async build() {
       const active = await app.openKeeper(keeperId);
       await active.game.activateLatestContent();
-      await startToday(active);
-      const view = active.game.host.getView();
+      // The Dragon Diary tells what today brought: note how the day begins.
+      const today = localDay();
+      await active.day.begin(gameDay(active.game.view(), today), active.game.view());
+      await startToday(active, today);
+      const view = active.game.view();
       switch (view.screen) {
         case 'story':
           if (view.story) return storyScreen(app, active);

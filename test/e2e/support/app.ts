@@ -22,6 +22,8 @@ export const SCREENS = [
   'album',
   'window',
   'parent',
+  'print',
+  'goodbye',
   'recovery',
   'error',
 ] as const;
@@ -41,7 +43,8 @@ export const AVATARS = [
 ] as const;
 export type Avatar = (typeof AVATARS)[number];
 
-export type ParentTab = 'keepers' | 'settings' | 'data' | 'offline' | 'about';
+export type ParentTab =
+  'keepers' | 'progress' | 'print' | 'settings' | 'data' | 'offline' | 'about';
 export type Via = 'keyboard' | 'pointer';
 
 export interface KeeperSpec {
@@ -133,9 +136,18 @@ export async function addKeeper(page: Page, keeper: KeeperSpec, egg?: Egg): Prom
   await meetFirstEgg(page, egg);
   await expectHub(page, keeper.name);
 }
-/** From the hub, back to "Who is playing?". */
+/**
+ * From the hub, back to "Who is playing?". After a day that brought something (a fact that began
+ * to shine, a dragon that grew, a sticker), leaving goes through goodbye and the Dragon Diary.
+ */
 export async function leaveHub(page: Page): Promise<void> {
   await page.getByTestId('hub-back').click();
+  await expect(
+    page.getByTestId('screen-keepers').or(page.getByTestId('screen-goodbye')),
+  ).toBeVisible();
+  if (await page.getByTestId('screen-goodbye').isVisible()) {
+    await page.getByTestId('goodbye-done').click();
+  }
   await expectScreen(page, 'keepers');
 }
 
@@ -326,6 +338,19 @@ export async function setVolume(page: Page, testId: string, percent: number): Pr
   await changeOnPanel(page, () => page.getByTestId(testId).fill(String(percent)));
   await expectSettingsSaved(page);
   await expect(page.getByTestId(testId)).toHaveValue(String(percent));
+}
+
+/** Load a backup file into keeper 1 through the grown-ups' area; ends on "Who is playing?". */
+export async function loadBackup(page: Page, text: string, name: string): Promise<void> {
+  await openGrownUps(page, 'data');
+  const chooser = page.waitForEvent('filechooser');
+  await page.getByTestId('backup-import-profile-1').click();
+  await (
+    await chooser
+  ).setFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(text) });
+  await page.getByTestId('confirm-ok').click();
+  await expect(page.getByTestId('toast').last()).toHaveText(`Backup loaded for ${name}.`);
+  await closeGrownUps(page);
 }
 
 /** With two or more keepers, the settings tab asks whose settings to show. */

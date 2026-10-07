@@ -13,6 +13,8 @@ import { expect } from './fixtures';
 export const DATABASE = 'dragon-valley';
 export const FAMILY_KEY: RecordKey = ['dragon-valley-family', 'family'];
 export const PREFERENCES_GAME_ID = 'dragon-valley-preferences';
+/** The Dragon Diary's day record (docs/app.md §4): how the keeper's day began. */
+export const DAY_GAME_ID = 'dragon-valley-day';
 
 export type RecordKey = readonly [gameId: string, profileId: string];
 
@@ -84,7 +86,10 @@ export async function gameKey(page: Page, profileId: string): Promise<RecordKey>
   const keys = await recordKeys(page);
   const found = keys.find(
     ([gameId, profile]) =>
-      profile === profileId && gameId !== PREFERENCES_GAME_ID && gameId !== FAMILY_KEY[0],
+      profile === profileId &&
+      gameId !== PREFERENCES_GAME_ID &&
+      gameId !== DAY_GAME_ID &&
+      gameId !== FAMILY_KEY[0],
   );
   expect(found, `a stored game save for ${profileId} among ${JSON.stringify(keys)}`).toBeTruthy();
   return found!;
