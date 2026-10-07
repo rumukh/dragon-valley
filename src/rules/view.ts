@@ -38,6 +38,8 @@ import { lowToday } from './learning/selection';
 import { MINIGAMES, boardView } from './minigames/boards';
 import { arenaProblem } from './progression/arena';
 import {
+  anyStarving,
+  basketItems,
   dragonFacts,
   dueItems,
   growthItems,
@@ -67,17 +69,19 @@ function screenOf(state: ReadState): Screen {
 
 /**
  * The Daily Adventure's next step (docs/design.md §4.2): a pending story beat, the placement
- * check while it is pending, snack time for hungry dragons at the start of the day, the next
- * glowing level until one is done today, then once a minigame replay if the day had none, the gift
- * once the goal is reached, and more new levels unless today's success is below 70 % (`lowToday`;
- * a level already under way is always continued). Below it the Daily Adventure reviews instead:
- * snack time for hungry dragons, else a replay of a finished level's activity. Then free play.
- * Pacing only chooses the suggestion: every open level stays playable from the map.
+ * check while it is pending, snack time at the start of the day when there is something to snack
+ * on (`snack`: a hungry dragon, or due facts in the valley's basket), the next glowing level until
+ * one is done today, then once a minigame replay if the day had none, the gift once the goal is
+ * reached, snack time again while a known fact is starving (the review guarantee), and more new
+ * levels unless today's success is below 70 % (`lowToday`; a level already under way is always
+ * continued). Below it the Daily Adventure reviews instead: snack time when there is something to
+ * snack on, else a replay of a finished level's activity. Then free play. Pacing only chooses the
+ * suggestion: every open level stays playable from the map.
  */
 function nextStep(
   state: ReadState,
   data: Data,
-  hungry: readonly string[],
+  snack: boolean,
   index: ReadonlyMap<string, readonly string[]>,
 ): NextStep {
   if (state.story.pending !== null) return { kind: 'story', beat: state.story.pending };
@@ -85,7 +89,7 @@ function nextStep(
     return { kind: 'placement' };
   }
   const daily = state.daily !== null && state.daily.day === state.day ? state.daily : null;
-  if (hungry.length > 0 && daily !== null && daily.answers === 0) {
+  if (snack && daily !== null && daily.answers === 0) {
     return { kind: 'snack', dragon: null };
   }
   const levelsToday = daily?.levels ?? 0;
@@ -96,9 +100,12 @@ function nextStep(
     if (replay !== null) return { kind: 'minigame', ...replay };
   }
   if (daily?.gift === 'ready') return { kind: 'gift' };
+  const underway = level !== null && state.run?.level === level;
+  // The review guarantee: known facts three days past their review are fed before anything new.
+  if (!underway && anyStarving(state, data, index)) return { kind: 'snack', dragon: null };
   if (level === null) return { kind: 'free-play' };
-  if (state.run?.level === level || !lowToday(state)) return { kind: 'level', level };
-  if (hungry.length > 0) return { kind: 'snack', dragon: null };
+  if (underway || !lowToday(state)) return { kind: 'level', level };
+  if (snack) return { kind: 'snack', dragon: null };
   const review = reviewReplay(state, data, index) ?? minigameReplay(state, data, index);
   return review !== null ? { kind: 'minigame', ...review } : { kind: 'free-play' };
 }
@@ -178,7 +185,12 @@ function hubView(
             })),
         };
       }),
-    next: nextStep(state, data, hungry, index),
+    next: nextStep(
+      state,
+      data,
+      hungry.length > 0 || basketItems(state, data, index).length > 0,
+      index,
+    ),
     hungry,
     arena: {
       available: arenaProblem(state, data, index) === null,

@@ -35,17 +35,16 @@ import {
   lowSuccess,
   missedTwice,
   pickArena,
-  pickDue,
-  pickLikely,
   pickMixed,
   pickPlacement,
+  pickReview,
   pickSnack,
   roundFocus,
   roundTables,
 } from '../learning/selection';
 import { recordAnswer } from '../economy/daily';
 import { earnCoins } from '../economy/rewards';
-import { itemsOf } from './dragons';
+import { basketItems, itemsOf } from './dragons';
 import { advanceLadder, ladderDone } from './ladder';
 import type { Ctx, Data, ReadState } from '../types';
 
@@ -197,6 +196,11 @@ function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomS
   // Below the success band, snacks and reviews serve the likeliest successes first.
   const protect = lowSuccess(state, data);
   if (round.activity === 'snack') {
+    if (round.source.kind === 'snack' && round.source.dragon === null) {
+      // Feeding every dragon empties the valley's basket too: due facts no hatched dragon eats.
+      const basket = basketItems(state, data, index).filter((item) => !pool.includes(item));
+      pool = [...pool, ...basket];
+    }
     return pickSnack({ state, pool, blocked, served, random, likelyFirst: protect });
   }
   if (round.activity === 'arena') return pickArena({ state, pool, blocked, served, random });
@@ -232,8 +236,7 @@ function chooseItem(ctx: Ctx, round: ProblemRound, index: Index, random: RandomS
         return record.due <= day && record.lastDay < day;
       });
       const picked =
-        (protect ? pickLikely(state, due, random) : pickDue(state, due, random)) ??
-        (review.length > 0 ? random.pick(review) : null);
+        pickReview(state, due, random, protect) ?? (review.length > 0 ? random.pick(review) : null);
       if (picked !== null) return picked;
     }
   }

@@ -1,13 +1,14 @@
 /**
  * Snack time (docs/design.md §5.12): feed hungry dragons, one or all of them. A dragon is hungry
- * when at least `balance.hungry.minDue` of its facts are due; the snack serves those due facts
- * first (most overdue first, or while recent success is below target the likeliest successes),
- * then the dragon's weakest known facts, 6 to 10 problems with auto input; 4 to 6 while recent
- * success is low, so a session is not dominated by reviews the child cannot do yet. Feeding
- * hungry dragons is the spaced review.
+ * when at least `balance.hungry.minDue` of its facts are due. Feeding every dragon (`dragon:
+ * null`) also empties the valley's basket: due facts no hatched dragon eats (`basketItems`).
+ * The snack serves due facts first (`pickReview`: starving facts, then the most overdue or, while
+ * recent success is low, the likeliest successes), then the dragons' weakest known facts. It has
+ * 6 to 10 problems with auto input; 4 to 6 while recent success is low, so a session is not
+ * dominated by reviews the child cannot do yet. Feeding hungry dragons is the spaced review.
  */
 import { clamp, lowSuccess } from '../learning/selection';
-import { dueItems, hungryDragons, itemsOf } from './dragons';
+import { basketItems, dueItems, hungryDragons, itemsOf } from './dragons';
 import { playableSkills, startProblemRound } from './problems';
 import type { Index } from './problems';
 import type { Ctx, Data, ReadState } from '../types';
@@ -47,7 +48,8 @@ export function snackProblem(
     return { code: 'unknown-dragon', message: 'No such dragon.' };
   }
   const dragons = fed(state, data, index, dragon);
-  if (dragons.length === 0 || snackSkills(data, dragons, index).length === 0) {
+  const basket = dragon === null ? basketItems(state, data, index).length : 0;
+  if (basket === 0 && (dragons.length === 0 || snackSkills(data, dragons, index).length === 0)) {
     return { code: 'not-hungry', message: 'No dragon is hungry right now.' };
   }
   return null;
@@ -57,7 +59,8 @@ export function startSnack(ctx: Ctx, index: Index, dragon: string | null): void 
   const data = ctx.content.data;
   const dragons = fed(ctx.state, data, index, dragon);
   const skills = snackSkills(data, dragons, index);
-  const due = dueItems(ctx.state, itemsOf(skills, index));
+  const basket = dragon === null ? basketItems(ctx.state, data, index).length : 0;
+  const due = dueItems(ctx.state, itemsOf(skills, index)) + basket;
   startProblemRound(ctx, index, {
     activity: 'snack',
     source: { kind: 'snack', dragon },

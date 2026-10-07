@@ -5,14 +5,17 @@
  * `balance.growth` (hatchling, youngling, adult, crowned) when the share of its set at the rule's
  * mastery level reaches the rule's share, plus division and boss requirements. From bronze up,
  * growth counts rule facts (n · 0, n · 1, 0 : n, n : 1) only for the dragons of the 0 and 1
- * tables (`growthItems`). Stages never go down. A dragon is hungry when at least `balance.hungry.minDue` of its known items are due:
- * feeding hungry dragons is the spaced review.
+ * tables (`growthItems`). Stages never go down. A dragon is hungry when at least
+ * `balance.hungry.minDue` of its known items are due: feeding hungry dragons is the spaced review.
+ * Due facts no hatched dragon eats wait in the valley's basket (`basketItems`), which snack time
+ * serves too.
  */
 import type { DeepReadonly } from '@aegis/runtime';
 import { DRAGON_STAGES, EVENTS } from '../contract';
 import type { Dragon, DragonStage, GrowthRule } from '../contract';
+import { canGenerate } from '../learning/generate';
 import { atLeast, isDue } from '../learning/items';
-import { growsWith } from '../learning/selection';
+import { growsWith, starving } from '../learning/selection';
 import { percentOf } from './levels';
 import type { Ctx, Data, ReadState } from '../types';
 
@@ -112,6 +115,62 @@ export function dragonFacts(
   index: ReadonlyMap<string, readonly string[]>,
 ): string[] {
   return itemsOf([...dragon.skills, ...dragon.divisionSkills], index);
+}
+
+/** The items some playable skill can serve, per skill index (the index is cached per pack). */
+const servableCache = new WeakMap<ReadonlyMap<string, readonly string[]>, ReadonlySet<string>>();
+
+function servableItems(data: Data, index: ReadonlyMap<string, readonly string[]>) {
+  let servable = servableCache.get(index);
+  if (servable === undefined) {
+    servable = new Set(
+      data.skills
+        .filter((skill) => canGenerate(skill))
+        .flatMap((skill) => index.get(skill.id) ?? []),
+    );
+    servableCache.set(index, servable);
+  }
+  return servable;
+}
+
+/**
+ * The valley's basket: due facts that no hatched dragon eats and that a skill can serve, sorted.
+ * They are comparisons, terms and word problems before the Seven-Headed Dragon hatches, and the
+ * facts of eggs not hatched yet. Snack time for every hungry dragon serves them too, so they are
+ * reviewed like any other fact (docs/design.md §5.12).
+ */
+export function basketItems(
+  state: ReadState,
+  data: Data,
+  index: ReadonlyMap<string, readonly string[]>,
+): string[] {
+  const day = state.day ?? 0;
+  const eaten = new Set<string>();
+  for (const dragon of data.dragons) {
+    const owned = state.dragons[dragon.id];
+    if (owned === undefined || owned.stage === 'egg') continue;
+    for (const item of dragonFacts(dragon, index)) eaten.add(item);
+  }
+  const servable = servableItems(data, index);
+  return Object.keys(state.items)
+    .filter((item) => !eaten.has(item) && servable.has(item) && isDue(state.items[item], day))
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
+/**
+ * Whether a known fact snack time can serve is starving (`starving`: three days past its review):
+ * the review guarantee then puts snack time before anything new (docs/design.md §6.3).
+ */
+export function anyStarving(
+  state: ReadState,
+  data: Data,
+  index: ReadonlyMap<string, readonly string[]>,
+): boolean {
+  const day = state.day ?? 0;
+  const servable = servableItems(data, index);
+  return Object.keys(state.items).some(
+    (item) => starving(state.items[item], day) && servable.has(item),
+  );
 }
 
 /** Owned, hatched dragons with enough due facts (multiplication or division). */

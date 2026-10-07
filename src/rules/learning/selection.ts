@@ -21,6 +21,10 @@
  * learning draws and snacks serve the likeliest successes first (`likely`: answered right last
  * time, the most recently practised first; then new items; then items missed last time).
  *
+ * The review guarantee comes before both orders: a known fact (box 2+) that has waited
+ * `STARVING_DAYS` past its review day is `starving` and is the next review wherever reviews are
+ * served (`pickReview`), so no known fact waits more than about a week.
+ *
  * Learning draws prefer the **focus egg**: the chosen first egg while it is an egg, else the
  * oldest owned egg, whose facts the round can serve and that were never answered right. Practice
  * warms the egg, so the first Feeding Time hatches the first egg whichever table it is
@@ -36,6 +40,16 @@ export type ItemTier = 'due' | 'known' | 'learning';
 
 /** Answers before success starts to guide the mix. */
 const MIN_SAMPLE = 5;
+
+/** Known facts are at bronze or better: Leitner box 2 and up. */
+export const KNOWN_BOX = 2;
+
+/**
+ * Days past its review day after which a known fact is starving and is reviewed before anything
+ * else. Children play on weekdays, so a starving fact is served within a few days: well inside
+ * the week a known fact may wait (docs/testing.md §4).
+ */
+export const STARVING_DAYS = 4;
 
 /**
  * The lower edge of the success band (70-90 %, docs/testing.md §4). Below it the game protects
@@ -116,7 +130,7 @@ export function missedTwice(record: DeepReadonly<ItemState> | undefined): boolea
 export function itemTier(state: ReadState, item: string, day: number): ItemTier {
   const record = state.items[item];
   if (isDue(record, day)) return 'due';
-  return record !== undefined && record.box >= 2 ? 'known' : 'learning';
+  return record !== undefined && record.box >= KNOWN_BOX ? 'known' : 'learning';
 }
 
 /**
@@ -286,6 +300,33 @@ export function pickLikely(
   return items.length === 0 ? null : random.pick(likely(state, items));
 }
 
+/** Whether a known fact (box `KNOWN_BOX`+) has waited `STARVING_DAYS` or more past its review. */
+export function starving(record: DeepReadonly<ItemState> | undefined, day: number): boolean {
+  return (
+    record !== undefined &&
+    record.box >= KNOWN_BOX &&
+    isDue(record, day) &&
+    day - record.due >= STARVING_DAYS
+  );
+}
+
+/**
+ * The next of the `due` items to review: a starving fact first (the most overdue), whatever the
+ * child's success; else the most overdue, or with `likelyFirst` (success protected) the likeliest
+ * success. `null` when nothing is due.
+ */
+export function pickReview(
+  state: ReadState,
+  due: readonly string[],
+  random: RandomStream,
+  likelyFirst: boolean,
+): string | null {
+  const day = state.day ?? 0;
+  const starved = due.filter((item) => starving(state.items[item], day));
+  if (starved.length > 0) return pickDue(state, starved, random);
+  return likelyFirst ? pickLikely(state, due, random) : pickDue(state, due, random);
+}
+
 /**
  * A learning item: the focus egg's first, items not served in this round before others, then
  * new and weak items in equal measure; with `likelyFirst` (recent success below target), the
@@ -351,7 +392,7 @@ export function pickMixed(options: {
     if (item !== null) return item;
   }
   return (
-    (protect ? pickLikely(state, tiers.due, random) : pickDue(state, tiers.due, random)) ??
+    pickReview(state, tiers.due, random, protect) ??
     pickKnown(state, tiers.known, random, served) ??
     pickLearning(state, tiers.learning, options.focus, random, served, protect) ??
     random.pick(prefer(candidates, (item) => !served.includes(item)))
@@ -359,10 +400,11 @@ export function pickMixed(options: {
 }
 
 /**
- * Snack time: due items first (most overdue; with `likelyFirst`, while the child's success is
- * protected, the likeliest successes), then rule facts never answered right (other rounds serve at
- * most one of them, so snack time is where Puff and Mirror meet the rest of their facts), then the
- * weakest known items (lowest box) not served in this snack yet, then anything in the pool.
+ * Snack time: due items first (`pickReview`: starving facts, then the most overdue or, with
+ * `likelyFirst` while the child's success is protected, the likeliest successes), then rule facts
+ * never answered right (other rounds serve at most one of them, so snack time is where Puff and
+ * Mirror meet the rest of their facts), then the weakest known items (lowest box) not served in
+ * this snack yet, then anything in the pool.
  */
 export function pickSnack(options: {
   state: ReadState;
@@ -377,7 +419,7 @@ export function pickSnack(options: {
   const day = state.day ?? 0;
   const candidates = withoutRecent(options.pool, options.blocked);
   const due = candidates.filter((item) => isDue(state.items[item], day));
-  const picked = options.likelyFirst ? pickLikely(state, due, random) : pickDue(state, due, random);
+  const picked = pickReview(state, due, random, options.likelyFirst ?? false);
   if (picked !== null) return picked;
   const rules = candidates.filter(
     (item) => isRuleFact(item) && (state.items[item]?.correct ?? 0) === 0 && !served.includes(item),
