@@ -489,8 +489,12 @@ is, in order: a pending beat (`story`); the placement check while `onboarding.pl
 `pending`; `snack` time when a dragon is hungry and nothing was answered yet today; the next
 glowing `level` until a level was finished today; then, once a day that had no minigame yet,
 `minigame { level, activity }` (a minigame of the furthest finished level, replayed with
-`startLevel { level, activity }`); the `gift` once the goal is reached; the next `level`;
-`free-play`.
+`startLevel { level, activity }`); the `gift` once the goal is reached; the next `level` while
+today's success is at least 70 % (`LOW_SUCCESS`; a level already under way always continues);
+below it a review: `snack` time when a dragon is hungry, else `minigame { level, activity }` naming
+a problem activity (not the boss) of the furthest finished level (the step replays any one
+activity of a finished level); `free-play`. Pacing only chooses `next`: level availability never
+depends on it.
 
 While recent success (the last `mix.window` answers, across days) is below `LOW_SUCCESS`, the rules
 protect the child's success: likely successes first in the mix and in snacks, a due item missed
@@ -618,7 +622,8 @@ and finale beats, level runs of problem rounds and all six minigame boards (Memo
 value, family and term modes, Number Trail, Egg Grid, Fact Family Nest, Sharing Feast, Golem
 Orders), replaying one activity of a finished level, the adaptive mix (due reviews, known and
 learning items, the learning share following recent success, the focus egg, no repeats, and below
-the success band likely successes first, smaller snacks and choice input for reviews and re-asks; every skill of an activity is served when several produce the same
+the success band likely successes first, smaller snacks, choice input for reviews and re-asks and
+the Daily Adventure's pacing; every skill of an activity is served when several produce the same
 item), partial credit for commuted facts, re-ask jobs and teaching a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
 finale, the placement check, snack time, the Lightning Arena, grading (with the Riddle Scrolls
 operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth, stickers, the

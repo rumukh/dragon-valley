@@ -271,8 +271,17 @@ order:
    level, replayed on its own (`startLevel { level, activity }`, which never completes the level
    again);
 6. the **gift chest**, once the daily goal is reached;
-7. the next glowing level again;
+7. the next glowing level again, **while today's success is at least 70 %** (pacing, below); a
+   level already under way is always continued;
 8. free play (any open level, the Arena, the Market, the Album).
+
+**Pacing** (decided after the learner simulations): the game keeps a struggling child mostly
+succeeding, even if the valley takes longer. After the day's first level, a further _new_ level is
+offered only while today's success is at least 70 % (the lower edge of the success band). Below
+it the Daily Adventure reviews instead: snack time for hungry dragons, else a replay of one
+activity of the furthest finished level (the same `minigame` step as above, for any activity).
+Pacing only chooses the suggestion: every open level, including those a parent unlocked ahead,
+stays playable from the map. The day's first level is always offered.
 
 After the daily goal the dragons get **sleepy** (an expression, never a lock). Play can continue.
 The parent sets the goal and an optional time limit; when the limit is reached the shell ends the
@@ -466,7 +475,7 @@ Response buckets come from `elapsedMs` measured by the shell (paused time exclud
   likeliest successes first (facts answered right last time, the most recently practised first;
   then new facts; then facts missed last time) instead of the most overdue; snacks are smaller
   (§5.12); reviews and re-asks are asked by choice, never on the keypad (except in the Arena and
-  the placement check). Inside the band
+  the placement check); and the Daily Adventure holds further new levels (§4.2). Inside the band
   the spaced order (most overdue first) is unchanged: switching at the 82 % target instead slowed
   an average child's mastery in the simulations.
 - No immediate repeats: an item is not served again within 2 problems _(`noRepeatWithin`)_, re-asks

@@ -14,6 +14,7 @@ import {
   learningShare,
   likely,
   lowSuccess,
+  lowToday,
   missedTwice,
   mixTier,
   pickLearning,
@@ -115,6 +116,15 @@ describe('recent success', () => {
     expect(LOW_SUCCESS).toBe(70);
     expect([lowSuccess(at(14), data), lowSuccess(at(13), data)]).toEqual([false, true]);
     expect(lowSuccess(state({ history: history([4, 0]) }), data), 'too few answers').toBe(false);
+  });
+
+  it("paces new levels on today's success alone, from five answers", () => {
+    const at = (answers: number, correct: number) =>
+      state({ history: history([20, 0], [answers, correct]) });
+    expect([lowToday(at(20, 14)), lowToday(at(20, 13))]).toEqual([false, true]);
+    expect(lowToday(at(4, 0)), 'too few answers today').toBe(false);
+    expect(lowToday(state({ history: history([20, 0], [0, 0]) })), 'a poor yesterday').toBe(false);
+    expect(todaySuccess(at(20, 13))).toBe(65);
   });
 });
 

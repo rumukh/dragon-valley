@@ -40,7 +40,8 @@ const MIN_SAMPLE = 5;
 /**
  * The lower edge of the success band (70-90 %, docs/testing.md §4). Below it the game protects
  * the child's success: the mix serves likely successes first, snacks are smaller, reviews and
- * re-asks are asked by choice.
+ * re-asks are asked by choice; and while today's success is below it the Daily Adventure holds
+ * new levels after the day's first.
  */
 export const LOW_SUCCESS = 70;
 
@@ -82,6 +83,12 @@ export function todaySuccess(state: ReadState): number | null {
   const daily = state.daily;
   if (daily === null || daily.day !== state.day || daily.answers < MIN_SAMPLE) return null;
   return quotient(daily.correct * 100, daily.answers);
+}
+
+/** Whether today's success is below `LOW_SUCCESS`: the Daily Adventure then holds new levels. */
+export function lowToday(state: ReadState): boolean {
+  const today = todaySuccess(state);
+  return today !== null && today < LOW_SUCCESS;
 }
 
 /** Whether recent success is below `LOW_SUCCESS`: the game then protects the child's success. */
