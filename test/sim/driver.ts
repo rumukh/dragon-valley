@@ -62,6 +62,15 @@ export interface DayReport {
   /** Cosmetics bought in the market, and cosmetics owned at the end of the day. */
   bought: string[];
   cosmeticsOwned: number;
+  /** Cosmetics the daily gift gave. */
+  gifted: string[];
+  /**
+   * The market at the end of the session, after shopping: coins left, items on sale (unlocked,
+   * not owned) and those the child cannot afford yet (something to save for).
+   */
+  coinsAtEnd: number;
+  forSale: number;
+  toSaveFor: number;
   quests: number;
   goalReached: boolean;
   giftOpened: boolean;
@@ -326,7 +335,7 @@ async function playSession(player: Player, budget: number): Promise<void> {
   await shop(player);
 }
 
-function emptyDay(index: number, day: string, played: boolean): DayReport {
+export function emptyDay(index: number, day: string, played: boolean): DayReport {
   return {
     index,
     day,
@@ -346,6 +355,10 @@ function emptyDay(index: number, day: string, played: boolean): DayReport {
     panes: 0,
     bought: [],
     cosmeticsOwned: 0,
+    gifted: [],
+    coinsAtEnd: 0,
+    forSale: 0,
+    toSaveFor: 0,
     quests: 0,
     goalReached: false,
     giftOpened: false,
@@ -427,6 +440,77 @@ export function dueAtSessionStart(
   };
 }
 
+/** What a day report records about the market when the session ends (after shopping). */
+export function marketAtEnd(
+  view: Pick<GameView, 'coins' | 'market'>,
+): Pick<DayReport, 'coinsAtEnd' | 'forSale' | 'toSaveFor'> {
+  const forSale = view.market.items.filter((item) => item.available && !item.owned);
+  return {
+    coinsAtEnd: view.coins,
+    forSale: forSale.length,
+    toSaveFor: forSale.filter((item) => item.price > view.coins).length,
+  };
+}
+
+/**
+ * Add a day's events to its report: answers, coins by reason, stickers, eggs, hatches and growth,
+ * lit panes, purchases and gifts, levels and bosses, quests, the goal and the gift.
+ */
+export function tallyEvents(
+  report: SimulationReport,
+  entry: DayReport,
+  events: readonly { type: string; data: unknown }[],
+): void {
+  const index = entry.index;
+  for (const e of events) {
+    if (e.type === 'answer.incorrect') entry.answers += 1;
+    else if (e.type === 'answer.correct') {
+      entry.answers += 1;
+      entry.correct += 1;
+      if (event<{ bucket: string }>(e.data).bucket === 'fast') entry.fast += 1;
+    } else if (e.type === 'coins.earned') {
+      const { amount, reason } = event<{ amount: number; reason: string }>(e.data);
+      entry.coins += amount;
+      entry.coinsBy[reason] = (entry.coinsBy[reason] ?? 0) + amount;
+    } else if (e.type === 'sticker.earned') {
+      entry.stickers.push(event<{ sticker: string }>(e.data).sticker);
+    } else if (e.type === 'egg.received') {
+      const dragon = event<{ dragon: string }>(e.data).dragon;
+      entry.eggs.push(dragon);
+      report.eggDays[dragon] ??= index;
+    } else if (e.type === 'pane.lit') {
+      entry.panes += 1;
+    } else if (e.type === 'item.purchased') {
+      entry.bought.push(event<{ item: string }>(e.data).item);
+    } else if (e.type === 'dragon.hatched') {
+      const dragon = event<{ dragon: string }>(e.data).dragon;
+      entry.hatched.push(dragon);
+      (report.stages[dragon] ??= {})['hatchling'] ??= index;
+    } else if (e.type === 'dragon.grew' || e.type === 'dragon.crowned') {
+      const { dragon, stage } = event<{ dragon: string; stage?: string }>(e.data);
+      const reached = stage ?? 'crowned';
+      entry.grew.push(`${dragon}:${reached}`);
+      (report.stages[dragon] ??= {})[reached] ??= index;
+    } else if (e.type === 'level.completed') {
+      const { level, firstTime } = event<{ level: string; firstTime: boolean }>(e.data);
+      if (firstTime) {
+        entry.levels.push(level);
+        report.levelDays[level] ??= index;
+      }
+    } else if (e.type === 'boss.defeated') {
+      const boss = event<{ boss: string }>(e.data).boss;
+      entry.bosses.push(boss);
+      report.bossDays[boss] ??= index;
+    } else if (e.type === 'finale.completed') report.finaleDay ??= index;
+    else if (e.type === 'quest.claimed') entry.quests += 1;
+    else if (e.type === 'daily.goal-reached') entry.goalReached = true;
+    else if (e.type === 'gift.opened') {
+      entry.giftOpened = true;
+      const { grant } = event<{ grant: { kind: string; item?: string } }>(e.data);
+      if (grant.kind === 'cosmetic' && grant.item !== undefined) entry.gifted.push(grant.item);
+    }
+  }
+}
 /** Simulate `days` days of a learner, from `FIRST_DAY`. */
 export async function simulate(
   learner: LearnerName,
@@ -519,51 +603,9 @@ export async function simulate(
     await playSession(player, options.answersPerDay ?? profile.answersPerDay);
     entry.answerMs = child.elapsedMs - elapsedBefore;
     entry.cosmeticsOwned = player.state().cosmetics.owned.length;
+    Object.assign(entry, marketAtEnd(player.view()));
     entry.commits = player.hashes.length - fromCommit;
-    for (const e of player.events.slice(fromEvent)) {
-      if (e.type === 'answer.incorrect') entry.answers += 1;
-      else if (e.type === 'answer.correct') {
-        entry.answers += 1;
-        entry.correct += 1;
-        if (event<{ bucket: string }>(e.data).bucket === 'fast') entry.fast += 1;
-      } else if (e.type === 'coins.earned') {
-        const { amount, reason } = event<{ amount: number; reason: string }>(e.data);
-        entry.coins += amount;
-        entry.coinsBy[reason] = (entry.coinsBy[reason] ?? 0) + amount;
-      } else if (e.type === 'sticker.earned') {
-        entry.stickers.push(event<{ sticker: string }>(e.data).sticker);
-      } else if (e.type === 'egg.received') {
-        const dragon = event<{ dragon: string }>(e.data).dragon;
-        entry.eggs.push(dragon);
-        report.eggDays[dragon] ??= index;
-      } else if (e.type === 'pane.lit') {
-        entry.panes += 1;
-      } else if (e.type === 'item.purchased') {
-        entry.bought.push(event<{ item: string }>(e.data).item);
-      } else if (e.type === 'dragon.hatched') {
-        const dragon = event<{ dragon: string }>(e.data).dragon;
-        entry.hatched.push(dragon);
-        (report.stages[dragon] ??= {})['hatchling'] ??= index;
-      } else if (e.type === 'dragon.grew' || e.type === 'dragon.crowned') {
-        const { dragon, stage } = event<{ dragon: string; stage?: string }>(e.data);
-        const reached = stage ?? 'crowned';
-        entry.grew.push(`${dragon}:${reached}`);
-        (report.stages[dragon] ??= {})[reached] ??= index;
-      } else if (e.type === 'level.completed') {
-        const { level, firstTime } = event<{ level: string; firstTime: boolean }>(e.data);
-        if (firstTime) {
-          entry.levels.push(level);
-          report.levelDays[level] ??= index;
-        }
-      } else if (e.type === 'boss.defeated') {
-        const boss = event<{ boss: string }>(e.data).boss;
-        entry.bosses.push(boss);
-        report.bossDays[boss] ??= index;
-      } else if (e.type === 'finale.completed') report.finaleDay ??= index;
-      else if (e.type === 'quest.claimed') entry.quests += 1;
-      else if (e.type === 'daily.goal-reached') entry.goalReached = true;
-      else if (e.type === 'gift.opened') entry.giftOpened = true;
-    }
+    tallyEvents(report, entry, player.events.slice(fromEvent));
     options.onDay?.(entry);
   }
   const view: GameView = player.view();

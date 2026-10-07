@@ -8,8 +8,17 @@
  * `node scripts/simulate.mjs --check` (docs/balance-report.md).
  */
 import { afterAll, describe, expect, it } from 'vitest';
-import type { AnswerValue, ProblemRoundView } from '../../src/rules/contract';
-import { KNOWN_BOX, dueAtSessionStart, mistake, overdueKnown, simulate } from './driver';
+import type { AnswerValue, GameView, ProblemRoundView } from '../../src/rules/contract';
+import {
+  KNOWN_BOX,
+  dueAtSessionStart,
+  emptyDay,
+  marketAtEnd,
+  mistake,
+  overdueKnown,
+  simulate,
+  tallyEvents,
+} from './driver';
 import type { AnswerRecord, SimulationReport } from './driver';
 
 const runs = new Map<string, Promise<SimulationReport>>();
@@ -87,6 +96,54 @@ describe('the learner simulation', () => {
       records.filter((r) => r.day !== 0 || r.recall < 0 || r.recall > 100),
       'day 0, recall 0-100',
     ).toEqual([]);
+  });
+});
+
+describe('the market a day report records', () => {
+  it('tallies purchases, gifted cosmetics and gift coins from the day events', () => {
+    const entry = emptyDay(3, '2026-10-08', true);
+    const report = {
+      eggDays: {},
+      stages: {},
+      levelDays: {},
+      bossDays: {},
+    } as unknown as SimulationReport;
+    tallyEvents(report, entry, [
+      { type: 'item.purchased', data: { item: 'bow-tie', price: 20 } },
+      { type: 'gift.opened', data: { grant: { kind: 'cosmetic', item: 'hat-party' } } },
+      { type: 'gift.opened', data: { grant: { kind: 'coins', amount: 9 } } },
+      { type: 'coins.earned', data: { amount: 9, reason: 'gift' } },
+    ]);
+    expect(entry).toMatchObject({
+      bought: ['bow-tie'],
+      gifted: ['hat-party'],
+      giftOpened: true,
+      coins: 9,
+      coinsBy: { gift: 9 },
+    });
+  });
+
+  it('counts unlocked, unowned items, and those dearer than the coins left', () => {
+    const item = (id: string, price: number, available: boolean, owned: boolean) =>
+      ({
+        id,
+        price,
+        available,
+        owned,
+        affordable: price <= 40,
+      }) as GameView['market']['items'][number];
+    const view = {
+      coins: 40,
+      market: {
+        items: [
+          item('owned', 15, true, true),
+          item('exactly-affordable', 40, true, false),
+          item('dear', 41, true, false),
+          item('locked-dear', 300, false, false),
+        ],
+      },
+    };
+    expect(marketAtEnd(view)).toEqual({ coinsAtEnd: 40, forSale: 2, toSaveFor: 1 });
   });
 });
 

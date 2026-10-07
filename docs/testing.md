@@ -92,8 +92,13 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
 - no known fact (bronze and up: Leitner box 2+) waits more than a week past its review day; facts
   in box 0-1 are still being learned and are served as learning items;
 - no dead ends: every level is completed and every boss won over;
-- reward pacing stays inside targets (coins per session, a gift every day the goal is met, the
-  market not emptied in the first three weeks, every egg hatched within five sessions);
+- reward pacing stays inside targets (coins per session, a gift every day the goal is met, every
+  egg hatched within five sessions);
+- Glimmer's Market keeps something new coming (the 1.2.0 economy): the average bot still has
+  something on sale it cannot afford yet after 110 sessions (a 365-day run) and gets something new
+  with a median wait of at most 6 sessions and never more than 10; the slow bot waits at most 8
+  sessions (median), the struggling bot at most 12; every bot buys its first cosmetic in its first
+  week;
 - the first session hatches the first egg for every bot; the slow bot earns silver but never gold.
 
 A simulated day costs about a hundred commits, so the long runs live outside the gate:
