@@ -84,7 +84,9 @@ records what a parent would see.
 
 The named checks (`test/sim/report.ts`, each label carries what it measured):
 
-- success per session stays in the 70-90 % band for the average and struggling bots;
+- success per session stays in the 70-90 % band for the average bot; the struggling bot's session
+  median is at least 60 %, with the band as its stretch goal (it progresses more slowly but keeps
+  succeeding: never wrong more often than right);
 - the average bot grows every times-table dragon to adult within 12 weeks;
 - every bot earns coins every session and, except the perfect one, sees progress every week;
 - no known fact waits more than a week past its review day;

@@ -40,8 +40,8 @@ needs quick answers. Its due facts fall from 132 to 28.
 
 **What balance cannot fix** (§5, for S2b and the design):
 
-- the struggling child's success (median 37 % per session): a selection defect S2b is fixing,
-  and the pace of new material;
+- the struggling child's success (median 37 % per session, at least 60 % needed): a selection
+  defect and the pace of new material, which S2b's rules change addresses (§5.1);
 - facts no dragon owns, which are never reviewed;
 - rule facts (n · 0, n · 1, 0 : n, n : 1), which block dragons from adult and crowned;
 - coins earned during the valley: two to four times the design's 50-80 per session;
@@ -93,20 +93,27 @@ buys the cheapest affordable cosmetic.
 
 The checks are named; each label states what it measured.
 
-| Check           | Target                                                                            | Source                    |
-| --------------- | --------------------------------------------------------------------------------- | ------------------------- |
-| success band    | average and struggling: 75 % of sessions at 70-90 % success, median inside        | testing.md §4             |
-| tables mastered | average: every times-table dragon adult within 12 weeks                           | brief; a school trimester |
-| rewarded        | every child earns coins every session                                             | testing.md §4             |
-| weekly progress | average, struggling, slow: a level, hatch, growth, sticker or lit pane every week | testing.md §4             |
-| gift            | the gift opens every session that reaches the daily goal                          | design §7.4               |
-| hatch pace      | every egg hatches within 5 sessions of arriving                                   | design §4.1, §6.5         |
-| no dead end     | every level completed, every boss won over                                        | testing.md §4             |
-| no starving     | no known fact waits more than 7 days past its review day                          | testing.md §4             |
-| coins           | median 50-80 coins per session                                                    | design §7.1               |
-| market          | the cosmetics are not all owned in the first 3 weeks                              | design §7.2               |
-| fluency         | the slow child earns silver but never gold                                        | design §6.5               |
-| perfect pace    | the perfect child reaches the finale within 4 weeks                               | design §3                 |
+| Check              | Target                                                                               | Source                    |
+| ------------------ | ------------------------------------------------------------------------------------ | ------------------------- |
+| success band       | average: 75 % of sessions at 70-90 % success, median inside                          | testing.md §4             |
+| struggling success | struggling: median success per session at least 60 % (acceptance), 70-90 % (stretch) | testing.md §4, after §5.1 |
+| tables mastered    | average: every times-table dragon adult within 12 weeks                              | brief; a school trimester |
+| rewarded           | every child earns coins every session                                                | testing.md §4             |
+| weekly progress    | average, struggling, slow: a level, hatch, growth, sticker or lit pane every week    | testing.md §4             |
+| gift               | the gift opens every session that reaches the daily goal                             | design §7.4               |
+| hatch pace         | every egg hatches within 5 sessions of arriving                                      | design §4.1, §6.5         |
+| no dead end        | every level completed, every boss won over                                           | testing.md §4             |
+| no starving        | no known fact waits more than 7 days past its review day                             | testing.md §4             |
+| coins              | median 50-80 coins per session                                                       | design §7.1               |
+| market             | the cosmetics are not all owned in the first 3 weeks                                 | design §7.2               |
+| fluency            | the slow child earns silver but never gold                                           | design §6.5               |
+| perfect pace       | the perfect child reaches the finale within 4 weeks                                  | design §3                 |
+
+**The struggling child has a target of its own.** A struggling child progresses more slowly but
+keeps succeeding: the game must never leave it wrong more often than right. So the struggling
+child is accepted at a session median of at least 60 % success, and the average child's band is
+its stretch goal. It was first held to the band itself; the rules changes of §5.1 are measured
+against the new target.
 
 ## 4. Results
 
@@ -132,8 +139,8 @@ day had come when a session began, over the last 10 sessions.
 Failing checks:
 
 - average: tables mastered (3 of 11 adult), no starving (68 days) and coins (median 105);
-- struggling: success band (median 37 %, 2 of 48 sessions in the band), weekly progress (6 of
-  12 weeks), no starving (60 days) and coins (median 26);
+- struggling: success (median 37 %, at least 60 % needed; 2 of 48 sessions at 70-90 %), weekly
+  progress (6 of 12 weeks), no starving (60 days) and coins (median 26);
 - slow: no starving (58 days).
 
 ### 4.2 Proposed balance (§6)
@@ -159,7 +166,7 @@ Changes in the checks:
   - struggling: weekly progress (12 of 12 weeks; panes light up).
 - **Still failing.**
   - average: no starving (40 days) and coins (median 105; after the valley the median is 86);
-  - struggling: success band, no starving (55 days) and coins;
+  - struggling: success (median 37 %), no starving (55 days) and coins;
   - slow: no starving (59 days).
 - **Changed with the run's path.** The struggling child's Mirror egg hatches after 8 sessions
   (3 before), which fails hatch pace. Mirror's facts are all rule facts (§5.2), so it depends on
@@ -187,7 +194,7 @@ These go to S2b (rules and content) and to the design.
    - The cause in the rules (found by S2b from these numbers): the mix counts every due fact as a
      likely success, even one missed last time. When success is low the learning share shrinks
      to 10 %, so about 90 % of draws go to the most overdue misses. Snacks have no success control
-     at all. S2b is fixing it; the balance PR re-measures after the fix.
+     at all.
    - Two prototypes, measured but not merged (proposed balance; median success per session):
      - Due facts in box 0-1 drawn as learning items, in mixed rounds and snacks: struggling 37 %
        (over all its answers 39 → 43 %); slow 77 → 80 %. It also slowed the perfect child's dragons
@@ -195,8 +202,16 @@ These go to S2b (rules and content) and to the design.
      - The same, plus pacing (after the day's first level, another new level only while today's
        success is at least 70 %): struggling 46 %, valley done on day 81 instead of 38. The average
        and slow children stay inside their targets.
-   - Neither reaches the 70-90 % band: at 140 answers a week this model cannot hold the year's
-     ~230 facts. Slower new material for such a child is a design decision.
+   - Neither reaches 60 %: at 140 answers a week this model cannot hold the year's ~230 facts at
+     the valley's pace.
+   - **Decided** (the coordinator, for S2b's rules change):
+     - the mix fix keyed on "the last answer was a miss", not the box;
+     - pacing: a further new level today only while today's success is at least 70 %;
+     - choice input and the picture model first for a fact missed again and again, while
+       success is low;
+     - smaller snack rounds and fewer new facts while success is under target.
+   - **Acceptance**: the struggling child's session median at least 60 % (stretch 70-90 %, §3),
+     every other child inside its targets. The balance PR re-measures on the changed rules.
 2. **Rule facts block growth.**
    - n · 0, n · 1, 0 : n and n : 1 are served at most once per round outside the 0 and 1 levels.
      Yet they are 4 of the 21 facts of every table dragon and most of Mirror's set.
