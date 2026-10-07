@@ -33,24 +33,24 @@ The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest
 
 ## Plan §2.8: the first session
 
-| Step                                          | Evidence                                                                                                                                            | Status                      |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| Title, a new keeper, the story, the first egg | `first-run.spec.ts` (skippable story, the egg cannot be skipped)                                                                                    | Covered                     |
-| Placement check                               | `profiles.spec.ts`, `persistence.spec.ts`, `input.spec.ts`, `settings.spec.ts`                                                                      | Covered                     |
-| First Feeding Time and the first hatch        | The screen walks; `profiles.spec.ts` (the hatch celebrated before the results); `test/sim/` (the first session hatches the first egg for every bot) | Covered                     |
-| First sticker and coins                       | `live.spec.ts` (coins announced), `persistence.spec.ts` (coins kept); stickers in the finale's results                                              | Partly: stickers in general |
-| Buy a hat                                     | The market is photographed and checked by axe; no purchase is made                                                                                  | **Gap**: next e2e tranche   |
-| The map shows the next level                  | The map and road are visited and checked (`screens.spec.ts`, `reflow.spec.ts`)                                                                      | Covered, visually           |
+| Step                                          | Evidence                                                                                                                                            | Status            |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| Title, a new keeper, the story, the first egg | `first-run.spec.ts` (skippable story, the egg cannot be skipped)                                                                                    | Covered           |
+| Placement check                               | `profiles.spec.ts`, `persistence.spec.ts`, `input.spec.ts`, `settings.spec.ts`                                                                      | Covered           |
+| First Feeding Time and the first hatch        | The screen walks; `profiles.spec.ts` (the hatch celebrated before the results); `test/sim/` (the first session hatches the first egg for every bot) | Covered           |
+| First sticker and coins                       | `live.spec.ts` (coins announced), `persistence.spec.ts` (coins kept), `collections.spec.ts` (the placement check's sticker in the album)            | Covered           |
+| Buy a hat                                     | `collections.spec.ts`: a hat too dear first, then bought for its price and worn in the Dragon Den, still worn after a reload                        | Covered           |
+| The map shows the next level                  | The map and road are visited and checked (`screens.spec.ts`, `reflow.spec.ts`)                                                                      | Covered, visually |
 
 ## Plan §2.9: session flow and wellbeing
 
-| Promise                                                                          | Evidence                                                                                                    | Status                                  |
-| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Daily Adventure: reviews, the next level, a mini-game, the gift                  | `test/unit/progression/daily-adventure.test.ts`; the bots follow it daily; e2e starts it only               | **Partly**: the path end to end is next |
-| Sleepy dragons after the daily goal; play can go on; goal and limit by grown-ups | The goal is set in `profiles.spec.ts`; the limit in `test/unit/app/preferences.test.ts`                     | **Partly**: goal, gift and snack next   |
-| Goodbye with the Dragon Diary: what the day brought                              | `goodbye.spec.ts`, `test/unit/app/diary.test.ts`                                                            | Covered                                 |
-| Days practised this week, not a streak                                           | `test/unit/app/game-view.test.ts` (the hub's week of practised days)                                        | Covered headless; not in a browser      |
-| Timed play only in the optional Arena                                            | `test/unit/progression/arena.test.ts`; the switch in `grown-ups.spec.ts`, its clock in `visibility.spec.ts` | Covered                                 |
+| Promise                                                                          | Evidence                                                                                                                                                          | Status                      |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| Daily Adventure: reviews, the next level, a mini-game, the gift                  | `daily.spec.ts` (the goal, the gift once a day, the next day starting with snack time); `test/unit/progression/daily-adventure.test.ts`; the bots follow it daily | Covered                     |
+| Sleepy dragons after the daily goal; play can go on; goal and limit by grown-ups | `daily.spec.ts` (a lowered goal reached, the dragons sleepy, the Daily Adventure still on); the limit in `test/unit/app/preferences.test.ts`                      | Covered; the limit headless |
+| Goodbye with the Dragon Diary: what the day brought                              | `goodbye.spec.ts`, `test/unit/app/diary.test.ts`                                                                                                                  | Covered                     |
+| Days practised this week, not a streak                                           | `daily.spec.ts` (two days marked after the clock moves a day); `test/unit/app/game-view.test.ts`                                                                  | Covered                     |
+| Timed play only in the optional Arena                                            | `test/unit/progression/arena.test.ts`; the switch in `grown-ups.spec.ts`, its clock in `visibility.spec.ts`                                                       | Covered                     |
 
 ## Plan §2.10: presentation
 
@@ -84,9 +84,7 @@ promises, live feedback, focus with dialogs and reduced motion are covered. The 
 
 ## Gaps, in the order they will be covered
 
-1. Buying a hat and dressing a dragon; the sticker album's pages; the Magic Window's states.
-2. The Daily Adventure end to end with the daily goal, the gift and snack time.
-3. The grown-ups' daily limit, once it is kept across page loads (app.md §16).
-4. With S3's teach rendering (#27): a low-success day's pacing and the picture model shown before a
-   twice-missed item is asked again.
-5. Still to be built (app.md §16): the persisted daily limit and the credits after the finale.
+1. The grown-ups' daily limit, once it is kept across page loads (app.md §16).
+2. With S3's teach rendering (#27): the picture model shown before a twice-missed item is asked
+   again.
+3. Still to be built (app.md §16): the persisted daily limit and the credits after the finale.
