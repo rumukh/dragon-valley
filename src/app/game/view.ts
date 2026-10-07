@@ -104,15 +104,68 @@ export function bossPose(
   return 'start';
 }
 
+/** What a problem says above itself when it is taught or asked again. */
+export type ProblemNote =
+  | 'round.teach'
+  | 'round.reask'
+  | 'round.teachPlain'
+  | 'round.reaskPlain'
+  | 'round.rule.timesZero'
+  | 'round.rule.zeroDivided';
+
+type ExprNode = Extract<Problem, { kind: 'equation' }>['left'];
+
+function isZero(expr: ExprNode): boolean {
+  return expr.kind === 'num' && expr.value === 0;
+}
+
+/** Every operation node of an expression. */
+function operations(expr: ExprNode): Extract<ExprNode, { kind: 'op' }>[] {
+  if (expr.kind === 'op') return [expr, ...operations(expr.left), ...operations(expr.right)];
+  if (expr.kind === 'group') return operations(expr.inner);
+  return [];
+}
+
 /**
- * The note above a problem: a fact missed twice in a row is taught (`teach`), a missed one is
- * asked again (`reask`).
+ * The rule that answers a fact about zero, which has no picture to count: "any number times 0
+ * is 0" (`4 · 0`, `0 · 7`, `? · 5 = 0`) or "0 divided by any number is 0" (`0 : 6`, `? : 6 = 0`).
+ */
+export function zeroRule(
+  problem: Problem,
+): 'round.rule.timesZero' | 'round.rule.zeroDivided' | null {
+  if (problem.kind === 'word') return zeroRule(problem.model);
+  if (problem.kind !== 'equation') return null;
+  const sides = [problem.left, problem.right];
+  for (const [index, side] of sides.entries()) {
+    for (const node of operations(side)) {
+      if (
+        node.op === 'mul' &&
+        (isZero(node.left) || isZero(node.right) || isZero(sides[1 - index]!))
+      ) {
+        return 'round.rule.timesZero';
+      }
+      if (node.op === 'div' && (isZero(node.left) || isZero(sides[1 - index]!))) {
+        return 'round.rule.zeroDivided';
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * The note above a problem: a fact taught after two misses in a row (`teach`, docs/app.md §14)
+ * or asked again (`reask`) sends the child to look at its picture first. A fact with no picture
+ * never says "look" (DV-QA-18): a fact about zero says its rule instead, any other one only that
+ * it comes again.
  */
 export function problemNote(
-  problem: Pick<ProblemView, 'reask' | 'teach'>,
-): 'round.teach' | 'round.reask' | null {
-  if (problem.teach === true) return 'round.teach';
-  return problem.reask ? 'round.reask' : null;
+  problem: Pick<ProblemView, 'reask' | 'teach' | 'problem'>,
+  hasPicture: boolean,
+): ProblemNote | null {
+  const taught = problem.teach === true;
+  if (!taught && !problem.reask) return null;
+  if (hasPicture) return taught ? 'round.teach' : 'round.reask';
+  return zeroRule(problem.problem) ?? (taught ? 'round.teachPlain' : 'round.reaskPlain');
 }
 
 /** Whether a problem shows its picture before the answer: re-asked, taught, or a hint asked. */

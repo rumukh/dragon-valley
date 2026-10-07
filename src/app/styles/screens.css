@@ -1043,9 +1043,18 @@
   text-align: center;
 }
 
+/* The prompt sits on a paper pill, like the round's meter, so the scene's birds never fly through
+   its words. */
 .dv-round__prompt {
+  padding: 0.1em 0.8em;
+  border-radius: 1em;
   font-weight: 700;
   text-align: center;
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+}
+
+.dv-round__prompt:empty {
+  display: none;
 }
 
 .dv-round__answer {
@@ -1360,6 +1369,16 @@
   right: -0.45em;
   width: 1.5em;
   height: 1.5em;
+}
+
+/* An example sentence on a term card, its term's number marked like a term question's. */
+.dv-card-tile__face--sentence {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15em;
+  font-size: 0.85em;
 }
 
 .dv-minigame__actions {

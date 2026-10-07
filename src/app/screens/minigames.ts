@@ -8,7 +8,7 @@
  * never punish: a mismatch, a wrong rectangle or a wrong order stays on the board, gently marked,
  * to be fixed. A board this build cannot draw shows a kind message and a way back.
  */
-import { formatExpr, formatFace, num, op, OPERATOR_SYMBOLS } from '../../rules/contract';
+import { formatExpr, num, op, OPERATOR_SYMBOLS } from '../../rules/contract';
 import type { BoardView, EggGridSplit, GameView, MinigameRoundView } from '../../rules/contract';
 import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
@@ -26,6 +26,7 @@ import type { BoardContext, BoardOf, BoardPainter } from './boards/board';
 import { sharingFeast } from './boards/feast';
 import { golemOrders } from './boards/golem';
 import { createSaveStatus, topBar } from './common';
+import { faceElement } from './problem-view';
 import { backdrop } from './scene';
 
 export function minigameRound(view: GameView): MinigameRoundView | null {
@@ -34,12 +35,12 @@ export function minigameRound(view: GameView): MinigameRoundView | null {
 
 // ---- Memory Match ---------------------------------------------------------------------------
 
-/** Columns for a deck: full rows where possible (12 cards are 4 × 3, 10 are 5 × 2). */
 /** Columns of memory cards on a landscape window: the cards in two rows (one row up to four). */
 export function matchColumnsWide(cards: number): number {
   return cards <= 4 ? Math.max(1, cards) : Math.ceil(cards / 2);
 }
 
+/** Columns for a deck: full rows where possible (12 cards are 4 × 3, 10 are 5 × 2). */
 export function matchColumns(cards: number): number {
   if (cards <= 4) return Math.max(1, cards);
   if (cards === 6 || cards === 9) return 3;
@@ -78,7 +79,6 @@ function memoryMatch(context: BoardContext): BoardPainter {
               ? 'miss'
               : 'open'
             : 'hidden';
-        const text = card.face ? formatFace(card.face, context.notation()) : '';
         const spoken = card.face ? speakFace(card.face) : t('match.hidden');
         const button = h(
           'button',
@@ -95,7 +95,9 @@ function memoryMatch(context: BoardContext): BoardPainter {
             ? artIcon('badge-correct', { className: 'dv-card-tile__badge' })
             : null,
           state === 'miss' ? artIcon('badge-almost', { className: 'dv-card-tile__badge' }) : null,
-          h('span', { className: 'dv-card-tile__face', text }),
+          card.face
+            ? faceElement(card.face, context.notation())
+            : h('span', { className: 'dv-card-tile__face' }),
         );
         button.disabled = card.faceUp || card.matched || board.clearAvailable;
         button.addEventListener('click', () => {
@@ -292,7 +294,7 @@ function eggGrid(context: BoardContext): BoardPainter {
       { className: 'dv-stepper', attributes: { role: 'group', 'aria-label': label } },
       h('span', { className: 'dv-stepper__label', text: label }),
       candyButton({
-        label: t('egg.less', { what: label }),
+        label: t(which === 'rows' ? 'egg.rows.less' : 'egg.columns.less'),
         icon: 'minus',
         iconOnly: true,
         variant: 'paper',
@@ -303,7 +305,7 @@ function eggGrid(context: BoardContext): BoardPainter {
       }),
       values[which],
       candyButton({
-        label: t('egg.more', { what: label }),
+        label: t(which === 'rows' ? 'egg.rows.more' : 'egg.columns.more'),
         icon: 'plus',
         iconOnly: true,
         variant: 'paper',

@@ -10,6 +10,7 @@
  */
 import { assertChildSafeView, replaceProjection } from '@aegis/browser/ui';
 import { applyRegion } from '../design/tokens';
+import { h } from '../ui/dom';
 import type { UiKit } from '../ui/kit';
 import { createScreenStack } from './stack';
 import type { ScreenStack } from './stack';
@@ -216,7 +217,10 @@ export function createRouter(options: RouterOptions): Router {
       mount(screen);
     } catch {
       stage.removeAttribute('aria-busy');
-      stage.textContent = kit.t('startup.failed');
+      stage.replaceChildren(
+        h('h1', { text: kit.t('startup.heading') }),
+        h('p', { text: kit.t('startup.failed') }),
+      );
     }
   };
 

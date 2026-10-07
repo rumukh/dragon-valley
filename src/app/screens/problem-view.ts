@@ -3,8 +3,8 @@
  * of "=" kept on one line, the asked-about number of a term question marked, a comparison as two
  * stones), and the words and labels of answer choices.
  */
-import { evaluate } from '../../rules/contract';
-import type { AnswerValue, Problem, ProblemStep } from '../../rules/contract';
+import { evaluate, formatFace } from '../../rules/contract';
+import type { AnswerValue, CardFace, Problem, ProblemStep } from '../../rules/contract';
 import { formatAnswer, problemTokens } from '../math/notation';
 import type { Notation, Token } from '../math/notation';
 import type { MessageKey, Translate } from '../i18n/messages';
@@ -25,6 +25,29 @@ function tokenElement(token: Token): HTMLElement {
       : `dv-problem__${token.kind}`,
     text: token.text,
   });
+}
+
+/**
+ * A minigame card's face. An example sentence marks the number its term names, as a term
+ * question marks its asked number: by a marker and an underline, not colour alone (DV-QA-17).
+ */
+export function faceElement(face: CardFace, notation: Notation): HTMLElement {
+  if (face.kind !== 'sentence') {
+    return h('span', { className: 'dv-card-tile__face', text: formatFace(face, notation) });
+  }
+  const tokens = problemTokens(
+    { kind: 'term', sentence: face.sentence, highlight: face.highlight ?? 'result' },
+    notation,
+  ).map((token): Token =>
+    face.highlight === null && token.kind === 'number'
+      ? { kind: 'number', text: token.text }
+      : token,
+  );
+  return h(
+    'span',
+    { className: 'dv-card-tile__face dv-card-tile__face--sentence' },
+    ...tokens.map(tokenElement),
+  );
 }
 
 /** Long problems get a smaller size, so they fit a phone. */

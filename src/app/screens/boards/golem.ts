@@ -113,6 +113,7 @@ export function golemOrders(context: BoardContext): BoardPainter {
         expr: node ? formatExpr(node, notation) : '',
         mul: symbols.mul,
         div: symbols.div,
+        plus: symbols.add,
         minus: symbols.sub,
       }),
     );

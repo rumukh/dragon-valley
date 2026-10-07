@@ -167,7 +167,9 @@ as `error.<code>` keys in `en.ui.json` and never shows diagnostic text to a chil
 Press and hold for two seconds (the button fills up; letting go early empties it), then answer a
 two-digit × two-digit multiplication on the keypad. Factors are never multiples of ten, never
 repeated digits, never equal, and never the previous question. A wrong answer asks a new
-question: no lockout, no penalty. The question is made by the shell, not the rules.
+question: no lockout, no penalty. The question is made by the shell, not the rules. It is always
+written with ×, whatever a keeper's notation (the coordinator's decision): the gate is for
+grown-ups, and no keeper is chosen yet.
 
 ## 7. Design system
 
@@ -323,7 +325,16 @@ both notations: "Fifty-six divided by seven equals what?", "four remainder three
 "open bracket … close bracket", comparisons as "Which sign goes between … and …?", term
 questions as the sentence then "What do we call forty-two?" (naming "the second four" when a
 number appears twice). Word problems read their catalog story first (phase 2), then the
-arithmetic. Numbers are British English (`speech/numbers.ts`, up to 999 999).
+arithmetic. Numbers are British English (`speech/numbers.ts`, up to 999 999). A Memory Match
+example card names the number its term is about: "thirty divided by six equals five, six
+marked".
+
+Words the voices say wrongly have **aliases** (`speech/aliases.ts`), applied to the text just
+before it is spoken, so the screen keeps the original. They are flat `speech.alias.*` keys in the
+UI catalog: `speech.alias.Krakonoš` = "Krakonosh" always; `speech.alias.Kč.one` = "crown" and
+`.other` = "crowns" follow the number before the word ("1 Kč" is said "1 crown", "25 Kč" "25
+crowns"). Only whole words match, so a possessive keeps its ending. A unit test checks that every
+alias is for a word some catalog string uses ("Kč" waits for S2a's money stories).
 
 ## 12. Offline installation
 
@@ -418,8 +429,9 @@ toast where they were earned.
   throws a fruit along an arc into the dragon's mouth (S4's anchors; an egg glows instead) or a
   sparkle onto the boss, whose pose follows its mood meter; a miss shows the right fact and its
   picture until the child goes on; re-asks show the picture first, and so does a fact missed
-  twice in a row (`teach`: "Look at the picture first. Then answer!"); the hint shows it on
-  request. Response time excludes paused and hidden time. Placement answers with
+  twice in a row (`teach`: "Look at the picture first. Then answer!"); a fact with no picture
+  (× 0, 0 :) never says "look" but its rule ("Remember: any number times 0 is 0.", DV-QA-18);
+  the hint shows it on request. Response time excludes paused and hidden time. Placement answers with
   `placementAnswer` and shows its ladder steps; the Arena runs the shell's one-minute race and
   ends with `endRound{ reason: 'time-up' }`. A Riddle Scrolls story first asks for its sign: the
   sum is drawn with an empty sign slot (`5 ○ 4 = ?`; a leftover story asks only `23 ○ 5 = ?`),

@@ -121,6 +121,21 @@ describe('minigame cards', () => {
   it('read faces aloud and fill whole rows', () => {
     expect(speakFace({ kind: 'expr', expr: op('mul', num(7), num(8)) })).toBe('seven times eight');
     expect(speakFace({ kind: 'answer', answer: { kind: 'number', value: 56 } })).toBe('fifty-six');
+    // An example sentence names the number its term is about (DV-QA-17).
+    const sentence = { op: 'div' as const, left: 30, right: 6, result: 5, remainder: null };
+    expect(speakFace({ kind: 'sentence', sentence, highlight: 'right' })).toBe(
+      'thirty divided by six equals five, six marked',
+    );
+    expect(
+      speakFace({
+        kind: 'sentence',
+        sentence: { op: 'mul', left: 6, right: 6, result: 36, remainder: null },
+        highlight: 'right',
+      }),
+    ).toBe('six times six equals thirty-six, the second six marked');
+    expect(speakFace({ kind: 'sentence', sentence, highlight: null })).toBe(
+      'thirty divided by six equals five',
+    );
     expect(matchColumns(12)).toBe(4);
     expect(matchColumns(10)).toBe(5);
     expect(matchColumns(6)).toBe(3);

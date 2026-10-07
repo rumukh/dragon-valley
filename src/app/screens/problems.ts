@@ -616,7 +616,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     const spoken = spokenProblem(problem);
     problemSlot.replaceChildren(problemElement(problem.problem, notation(), spoken, problem.step));
     speakerSlot.replaceChildren(...speakerButton(app, active, () => spokenProblem(problem)));
-    const said = problemNote(problem);
+    const said = problemNote(problem, modelFor(problem.problem) !== null);
     note.textContent = said ? t(said) : '';
     if (pictureFirst(problem)) showModel(problem.problem);
     else modelSlot.replaceChildren();

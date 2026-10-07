@@ -40,6 +40,7 @@ const DYNAMIC_PREFIXES = [
   'day.',
   'slot.',
   'window.',
+  'speech.alias.',
   ...RULE_ERROR_CODES.map((code) => `error.${code}`),
 ];
 

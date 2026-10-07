@@ -68,6 +68,7 @@ export function parentScreen(
       let disposed = false;
       const panel = h('section', { className: 'dv-parent__panel', testId: 'parent-panel' });
 
+      /** A row of toggle buttons; `spoken` names a button for screen readers when its text is signs. */
       const segmented = <T extends string>(
         label: string,
         values: readonly T[],
@@ -75,6 +76,7 @@ export function parentScreen(
         text: (value: T) => string,
         testId: (value: T) => string,
         choose: (value: T) => void | Promise<void>,
+        spoken?: (value: T) => string,
       ): HTMLElement => {
         const group = h('div', {
           className: 'dv-segmented',
@@ -85,7 +87,11 @@ export function parentScreen(
             className: 'dv-segment',
             text: text(value),
             testId: testId(value),
-            attributes: { type: 'button', 'aria-pressed': String(value === current) },
+            attributes: {
+              type: 'button',
+              'aria-pressed': String(value === current),
+              ...(spoken ? { 'aria-label': spoken(value) } : {}),
+            },
           });
           button.addEventListener('click', () => {
             void Promise.resolve(choose(value)).catch(app.kit.onError);
@@ -442,6 +448,7 @@ export function parentScreen(
                 change((draft) => {
                   draft.notation = value;
                 }),
+              (value) => t(`parent.settings.notation.${value}.spoken` as MessageKey),
             ),
           ),
           switchRow(
