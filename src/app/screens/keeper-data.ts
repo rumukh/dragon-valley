@@ -5,11 +5,13 @@
  */
 import { importSave } from '@aegis/browser/save';
 import { profileSeed } from '../../rules/contract';
+import type { GameView, Notation } from '../../rules/contract';
+import type { DvPack } from '../game/definition';
 import { createBackup, readBackup, rebind } from '../persistence/backup';
 import type { BackupFile } from '../persistence/backup';
 import type { Keeper } from '../persistence/family';
 import { gamePolicy, openGameSession } from '../persistence/game-session';
-import { preferencesRecord } from '../persistence/preferences';
+import { DEFAULT_PREFERENCES, preferencesRecord } from '../persistence/preferences';
 import { recordPolicy } from '../persistence/records';
 import { eraseRecord, RecoveryRequired } from '../persistence/recovery';
 import { PreferencesStore } from '../persistence/stores';
@@ -20,6 +22,42 @@ function policies(app: App, keeperId: string) {
     game: gamePolicy(app.game, keeperId),
     preferences: recordPolicy(preferencesRecord(keeperId)),
   };
+}
+
+export interface KeeperGame {
+  readonly view: GameView;
+  readonly content: DvPack;
+  readonly notation: Notation;
+}
+
+/**
+ * A keeper's game as stored, for the grown-ups' Progress and Print tabs: the playing keeper's
+ * live view, or a session opened just to read it (and closed again), so no keeper's screen,
+ * sounds or text size come along. Throws `RecoveryRequired` when the save cannot be opened.
+ */
+export async function readKeeperGame(app: App, keeperId: Keeper['id']): Promise<KeeperGame> {
+  const active = app.active();
+  if (active?.keeper.id === keeperId) {
+    return {
+      view: active.game.view(),
+      content: active.game.content(),
+      notation: active.preferences.current().notation,
+    };
+  }
+  const preferences = new PreferencesStore(app.storage, keeperId);
+  const notation = await preferences.open().then(
+    (value) => value.notation,
+    () => DEFAULT_PREFERENCES.notation,
+  );
+  const session = await openGameSession(app.storage, app.game, {
+    id: keeperId,
+    seed: profileSeed(keeperId),
+  });
+  try {
+    return { view: session.view(), content: session.content(), notation };
+  } finally {
+    await session.close();
+  }
 }
 
 /** The acknowledged stored records of a keeper, as one backup file. */

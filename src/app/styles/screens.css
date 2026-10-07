@@ -2309,6 +2309,378 @@
   color: var(--dv-miss-deep);
 }
 
+/* The Progress tab: the window's two grids side by side when there is room for both. */
+.dv-progress,
+.dv-print-tab {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8em;
+  min-width: 0;
+}
+
+.dv-progress h3,
+.dv-print-tab h3 {
+  margin-top: 0.4em;
+  font-size: 1.1rem;
+}
+
+/* Notes in the grown-ups' reports read as plain paragraphs, not as centred captions. */
+.dv-progress .dv-note,
+.dv-print-tab .dv-note {
+  justify-self: start;
+  max-width: none;
+  padding-inline: 0;
+  text-align: start;
+}
+
+.dv-progress-grid__figure .dv-note {
+  justify-self: center;
+}
+
+.dv-print-tab__group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8em;
+  min-width: 0;
+}
+
+.dv-print-tab__group > .dv-button {
+  justify-self: start;
+}
+
+.dv-progress__grids {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16em, 100%), 1fr));
+  gap: 1.2em;
+}
+
+.dv-progress-grid__figure {
+  display: grid;
+  gap: 0.4em;
+  min-width: 0;
+  margin: 0;
+}
+
+.dv-progress-grid__figure figcaption {
+  font-weight: 700;
+}
+
+/* A plain grid with its numbers along the top and down the side. The numbers belong to the
+   picture: they follow its width, not the text size, so eleven always fit in a row. */
+.dv-progress-grid {
+  display: grid;
+  grid-template-columns: 1.7em minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  width: 100%;
+  max-width: 28rem;
+  font-size: min(0.7rem, 3.2vw);
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-progress-grid__top {
+  display: grid;
+  grid-row: 1;
+  grid-column: 2;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  text-align: center;
+}
+
+.dv-progress-grid__side {
+  display: grid;
+  grid-row: 2;
+  grid-column: 1;
+  grid-template-rows: repeat(var(--rows, 11), minmax(0, 1fr));
+  align-items: center;
+  padding-inline-end: 0.3em;
+  text-align: end;
+}
+
+.dv-progress-grid__art {
+  display: block;
+  grid-row: 2;
+  grid-column: 2;
+  width: 100%;
+  height: auto;
+}
+
+.dv-progress__hardest {
+  display: grid;
+  gap: 0.4em;
+  margin: 0;
+  padding-inline-start: 1.6em;
+}
+
+.dv-progress__hardest li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2em 0.8em;
+}
+
+.dv-progress__fact {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Numbers as a list of rows: a name, then its labelled values, wrapping as needed. */
+.dv-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(22em, 100%), 1fr));
+  gap: 0.4em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-stats__row {
+  display: grid;
+  gap: 0.15em;
+  padding: 0.4em 0.7em;
+  border: 0.06em solid var(--dv-line);
+  border-radius: 0.7em;
+  background: var(--dv-card);
+}
+
+.dv-stats__name {
+  font-weight: 700;
+}
+
+.dv-stats__values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.1em 1.2em;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-stats__value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.35em;
+}
+
+.dv-stats__value dt {
+  color: var(--dv-ink-soft);
+}
+
+.dv-stats__value dt::after {
+  content: ':';
+}
+
+.dv-stats__value dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+/* The practice days as bars: every answer (pale), the right ones (green, in front). */
+.dv-trend {
+  display: grid;
+  gap: 0.6em;
+  min-width: 0;
+}
+
+.dv-trend__figure {
+  margin: 0;
+}
+
+.dv-trend__art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dv-trend__axis {
+  stroke: var(--dv-line-strong);
+  stroke-width: 2;
+}
+
+.dv-trend__answers,
+.dv-trend__key--answers {
+  fill: var(--dv-paper-deep);
+  stroke: var(--dv-line-strong);
+  stroke-width: 1;
+  background: var(--dv-paper-deep);
+}
+
+.dv-trend__correct,
+.dv-trend__key--correct {
+  fill: var(--dv-success);
+  background: var(--dv-success);
+}
+
+.dv-trend__label {
+  font-size: 18px;
+  fill: var(--dv-ink-soft);
+}
+
+.dv-trend__key {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  margin-inline: 0.2em 0.35em;
+  border: 0.08em solid var(--dv-line-strong);
+  border-radius: 0.2em;
+  vertical-align: -0.1em;
+}
+
+.dv-trend__key--correct {
+  margin-inline-start: 1.2em;
+}
+
+.dv-details summary {
+  min-height: var(--dv-target);
+  padding-block: 0.6em;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---- Printables -------------------------------------------------------------------------- */
+
+.dv-print {
+  width: 100%;
+  max-width: 60em;
+  margin-inline: auto;
+}
+
+.dv-print__title {
+  font-size: min(1.6rem, 7vw);
+}
+
+.dv-print__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.8em;
+}
+
+/* Each page is an A4 box; cells are placed in percent of it and their text is sized in page
+   widths (cqw), so the preview is the printed page, smaller. */
+.dv-sheets {
+  display: grid;
+  justify-items: center;
+  gap: 1.5rem;
+  padding-block: 1rem;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.dv-sheet {
+  position: relative;
+  width: min(100%, 34rem);
+  aspect-ratio: var(--paper-ratio);
+  overflow: hidden;
+  border-radius: 0.3rem;
+  color: var(--dv-ink);
+  background: var(--dv-card);
+  box-shadow: 0 0.3rem 1rem var(--dv-shadow);
+  container-type: inline-size;
+}
+
+.dv-sheet__cell {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 1cqw;
+  width: var(--w);
+  height: var(--h);
+  padding: 1.4cqw;
+  overflow: hidden;
+  border: 0.25cqw dashed var(--dv-line-strong);
+  border-radius: 1.5cqw;
+  font-size: calc(var(--font-pt) / var(--paper-pt) * 100cqw);
+  line-height: 1.25;
+  text-align: center;
+}
+
+.dv-sheet__line {
+  max-width: 100%;
+  margin: 0;
+}
+
+.dv-sheets--flashcards .dv-sheet__cell[data-side='front'] .dv-sheet__line,
+.dv-sheets--flashcards .dv-sheet__cell[data-side='back'] .dv-sheet__line:first-of-type {
+  font-size: 1.5em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dv-sheets--flashcards .dv-sheet__cell[data-side='back'] .dv-sheet__line + .dv-sheet__line {
+  font-size: 0.8em;
+  color: var(--dv-ink-soft);
+}
+
+/* A certificate: a frame round the page, the picture and heading above, the words below. */
+.dv-sheets--certificate .dv-sheet {
+  border: 2cqw double var(--dv-sun-deep);
+}
+
+.dv-sheets--certificate .dv-sheet__cell {
+  border: 0;
+}
+
+.dv-sheet__art svg {
+  display: block;
+  width: 42cqw;
+  height: auto;
+}
+
+.dv-sheets--certificate .dv-sheet__cell[data-item='heading'] .dv-sheet__line {
+  font-size: 1.5em;
+  font-weight: 700;
+  color: var(--dv-primary-deep);
+}
+
+.dv-sheets--certificate .dv-sheet__cell[data-item='body'] .dv-sheet__line:first-of-type {
+  font-size: 1.4em;
+  font-weight: 700;
+}
+
+.dv-sheets--certificate .dv-sheet__cell[data-item='body'] .dv-sheet__line:last-of-type {
+  margin-top: 2cqw;
+  font-size: 0.8em;
+  color: var(--dv-ink-soft);
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html[data-printing] body * {
+    visibility: hidden !important;
+  }
+
+  html[data-printing] .dv-sheets,
+  html[data-printing] .dv-sheets * {
+    visibility: visible !important;
+  }
+
+  html[data-printing] .dv-sheets {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    padding: 0;
+  }
+
+  html[data-printing] .dv-sheet {
+    width: var(--paper-width);
+    max-width: none;
+    height: var(--paper-height);
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    break-after: page;
+  }
+
+  html[data-printing] .dv-sheet:last-child {
+    break-after: auto;
+  }
+}
+
 /* ---- Recovery and errors --------------------------------------------------------------- */
 
 .dv-recovery {

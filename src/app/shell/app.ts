@@ -43,6 +43,7 @@ import { RecoveryRequired } from '../persistence/recovery';
 import { FamilyStore, PreferencesStore } from '../persistence/stores';
 import { createRouter } from '../router/router';
 import type { Router, ScreenEntry } from '../router/router';
+import type { PrintRequest } from '../screens/print';
 import { createReadAloud } from '../speech/read-aloud';
 import type { ReadAloud } from '../speech/read-aloud';
 import { createAnnouncer } from '../ui/announcer';
@@ -94,7 +95,8 @@ export interface ActiveKeeper {
   timeIsUp(): boolean;
 }
 
-export type ParentTab = 'keepers' | 'settings' | 'data' | 'offline' | 'about';
+export type ParentTab =
+  'keepers' | 'progress' | 'print' | 'settings' | 'data' | 'offline' | 'about';
 
 export interface Screens {
   title(): ScreenEntry;
@@ -110,6 +112,8 @@ export interface Screens {
   album(keeperId: string): ScreenEntry;
   window(keeperId: string): ScreenEntry;
   parent(tab?: ParentTab, keeperId?: string): ScreenEntry;
+  /** The print preview of a printable from the grown-ups' area. */
+  print(request: PrintRequest): ScreenEntry;
   recovery(problem: RecoveryRequired): ScreenEntry;
   error(error: unknown): ScreenEntry;
 }

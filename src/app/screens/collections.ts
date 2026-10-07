@@ -7,15 +7,8 @@
  * grows many screens tall at 200 % text.
  */
 import { COSMETIC_SLOTS } from '../../rules/contract';
-import type {
-  CosmeticSlot,
-  DragonView,
-  GameView,
-  MarketItem,
-  WindowCell,
-} from '../../rules/contract';
+import type { CosmeticSlot, DragonView, GameView, MarketItem } from '../../rules/contract';
 import { renderMagicWindow } from '../art/window';
-import type { PaneState } from '../art/window';
 import type { StickerFrame } from '../art/stickers';
 import { REGION_EMBLEM_IDS } from '../art/icons/emblems';
 import { plural } from '../i18n/messages';
@@ -26,6 +19,7 @@ import { h } from '../ui/dom';
 import { icon } from '../ui/icons';
 import { createCoinCounter } from '../ui/meters';
 import { createTabs } from '../ui/tabs';
+import { divisionPanes, multiplicationPanes } from '../parent/progress';
 import type { Screen, ScreenEntry } from '../router/router';
 import type { ActiveKeeper, App } from '../shell/app';
 import { createSaveStatus, toastStickers, topBar } from './common';
@@ -479,24 +473,6 @@ export function albumScreen(app: App, keeperId: string): ScreenEntry {
 
 // ---- Magic Window ---------------------------------------------------------------------------
 
-function panes(
-  cells: readonly WindowCell[],
-  rows: number,
-  columns: number,
-  rowOffset: number,
-): PaneState[][] {
-  const grid: PaneState[][] = Array.from({ length: rows }, () =>
-    Array.from({ length: columns }, () => 'dim' as PaneState),
-  );
-  for (const cell of cells) {
-    const row = grid[cell.row - rowOffset];
-    if (row && cell.column >= 0 && cell.column < columns) {
-      row[cell.column] = cell.needsPolish ? { level: cell.level, needsPolish: true } : cell.level;
-    }
-  }
-  return grid;
-}
-
 export function windowScreen(app: App, keeperId: string): ScreenEntry {
   return {
     key: `window:${keeperId}`,
@@ -508,8 +484,8 @@ export function windowScreen(app: App, keeperId: string): ScreenEntry {
       const lit = counts.bronze + counts.silver + counts.gold;
       const art = svgElement(
         renderMagicWindow({
-          multiplication: panes(view.window.cells, 11, 11, 0),
-          division: panes(view.window.division, 10, 11, 1),
+          multiplication: multiplicationPanes(view.window),
+          division: divisionPanes(view.window),
           idPrefix: `dv-window-${keeperId}`,
           title: t('window.art', { lit, total: view.window.cells.length }),
         }),

@@ -22,6 +22,8 @@ export const SCREENS = [
   'album',
   'window',
   'parent',
+  'print',
+  'goodbye',
   'recovery',
   'error',
 ] as const;
@@ -41,7 +43,8 @@ export const AVATARS = [
 ] as const;
 export type Avatar = (typeof AVATARS)[number];
 
-export type ParentTab = 'keepers' | 'settings' | 'data' | 'offline' | 'about';
+export type ParentTab =
+  'keepers' | 'progress' | 'print' | 'settings' | 'data' | 'offline' | 'about';
 export type Via = 'keyboard' | 'pointer';
 
 export interface KeeperSpec {

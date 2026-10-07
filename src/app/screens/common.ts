@@ -160,8 +160,8 @@ export function localDay(now: Date = new Date()): string {
 }
 
 /** Offer `text` as a file download without putting a link into the page. */
-export function downloadText(fileName: string, text: string): void {
-  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+export function downloadText(fileName: string, text: string, type = 'application/json'): void {
+  const url = URL.createObjectURL(new Blob([text], { type }));
   const link = document.createElement('a');
   link.href = url;
   link.download = fileName;

@@ -31,22 +31,39 @@ import {
   exportKeeper,
   importKeeper,
   parseKeeperBackup,
+  readKeeperGame,
 } from './keeper-data';
+import type { KeeperGame } from './keeper-data';
+import { printContent } from './parent-print';
+import { progressContent } from './parent-progress';
 
-const TABS: readonly ParentTab[] = ['keepers', 'settings', 'data', 'offline', 'about'];
+const TABS: readonly ParentTab[] = [
+  'keepers',
+  'progress',
+  'print',
+  'settings',
+  'data',
+  'offline',
+  'about',
+];
 
 export function parentScreen(
   app: App,
   initialTab: ParentTab = 'keepers',
   keeperId?: string,
 ): ScreenEntry {
+  // Kept by the entry, so coming back from the print preview finds the same tab and keeper.
+  let tab: ParentTab = initialTab;
+  let selected: string | undefined = keeperId;
+  let printTable = 2;
   return {
     key: 'parent',
     async build(context) {
       await app.closeKeeper();
       const t = app.kit.t;
-      let tab: ParentTab = initialTab;
-      let selected: string | undefined = keeperId ?? app.family.state().profiles[0]?.id;
+      if (!selected || !findKeeper(app.family.state(), selected)) {
+        selected = app.family.state().profiles[0]?.id;
+      }
       let disposed = false;
       const panel = h('section', { className: 'dv-parent__panel', testId: 'parent-panel' });
 
@@ -106,15 +123,18 @@ export function parentScreen(
           ...children,
         );
 
-      const keeperPicker = (onPick: () => Promise<void>): HTMLElement | null => {
+      const keeperPicker = (
+        onPick: () => Promise<void>,
+        labelKey: MessageKey = 'parent.settings.for',
+      ): HTMLElement | null => {
         const keepers = app.family.state().profiles;
         if (keepers.length < 2) return null;
         return h(
           'div',
           { className: 'dv-field' },
-          h('span', { className: 'dv-field__label', text: t('parent.settings.for') }),
+          h('span', { className: 'dv-field__label', text: t(labelKey) }),
           segmented(
-            t('parent.settings.for'),
+            t(labelKey),
             keepers.map((keeper) => keeper.id),
             selected ?? '',
             (id) => findKeeper(app.family.state(), id)?.name ?? id,
@@ -202,6 +222,63 @@ export function parentScreen(
       };
 
       // ---- Settings -----------------------------------------------------------------------
+      /**
+       * The selected keeper's game for the Progress and Print tabs, or a short note when there
+       * is no keeper or their saved game cannot be opened (the game itself asks for recovery).
+       */
+      const keeperGame = async (
+        tabKey: MessageKey,
+        forKey: MessageKey,
+      ): Promise<
+        | { keeper: Keeper; game: KeeperGame; frame: (...children: Node[]) => HTMLElement }
+        | HTMLElement
+      > => {
+        const keeper = selected ? findKeeper(app.family.state(), selected) : undefined;
+        if (!keeper) return section(tabKey, h('p', { text: t('parent.progress.none') }));
+        const frame = (...children: Node[]): HTMLElement =>
+          section(tabKey, keeperPicker(render, forKey), ...children);
+        try {
+          return { keeper, game: await readKeeperGame(app, keeper.id), frame };
+        } catch (error) {
+          if (!(error instanceof RecoveryRequired)) throw error;
+          return frame(
+            h('p', {
+              className: 'dv-note',
+              testId: 'parent-unreadable',
+              text: t('parent.progress.unreadable', { name: keeper.name }),
+            }),
+          );
+        }
+      };
+
+      const progressPanel = async (): Promise<HTMLElement> => {
+        const read = await keeperGame('parent.tab.progress', 'parent.progress.for');
+        if (read instanceof HTMLElement) return read;
+        return read.frame(
+          h(
+            'div',
+            { className: 'dv-progress', testId: 'parent-progress' },
+            ...progressContent(app, read.keeper, read.game.view, read.game.notation),
+          ),
+        );
+      };
+
+      // ---- Print ----------------------------------------------------------------------------
+      const printPanel = async (): Promise<HTMLElement> => {
+        const read = await keeperGame('parent.tab.print', 'parent.print.for');
+        if (read instanceof HTMLElement) return read;
+        return read.frame(
+          ...printContent(app, read.keeper, read.game, {
+            table: printTable,
+            chooseTable: async (table) => {
+              printTable = table;
+              await render();
+            },
+            segmented,
+          }),
+        );
+      };
+
       const settingsPanel = async (): Promise<HTMLElement> => {
         const keeper = selected ? findKeeper(app.family.state(), selected) : undefined;
         if (!keeper)
@@ -770,13 +847,17 @@ export function parentScreen(
           content =
             tab === 'keepers'
               ? keepersPanel()
-              : tab === 'settings'
-                ? await settingsPanel()
-                : tab === 'data'
-                  ? await dataPanel()
-                  : tab === 'offline'
-                    ? await offlinePanel()
-                    : aboutPanel();
+              : tab === 'progress'
+                ? await progressPanel()
+                : tab === 'print'
+                  ? await printPanel()
+                  : tab === 'settings'
+                    ? await settingsPanel()
+                    : tab === 'data'
+                      ? await dataPanel()
+                      : tab === 'offline'
+                        ? await offlinePanel()
+                        : aboutPanel();
         } catch (error) {
           if (!(error instanceof RecoveryRequired)) app.kit.onError(error);
           return;

@@ -374,6 +374,8 @@ test('the keepers screen and the grown-ups area are in reading order', async ({ 
   expect(ids(backward)).toEqual(['parent-close']);
   expect(ids(forward), 'from the heading: the tabs, then the panel').toEqual([
     'parent-tab-keepers',
+    'parent-tab-progress',
+    'parent-tab-print',
     'parent-tab-settings',
     'parent-tab-data',
     'parent-tab-offline',
