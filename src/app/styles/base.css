@@ -127,16 +127,18 @@ svg {
   flex-direction: column;
 }
 
+/* The frame's padding and gaps follow the window's height as well as its width, so a short
+   landscape window (a laptop at 1366 × 657) keeps its room for the game. */
 .dv-screen {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: clamp(12px, 2.5vw, 32px);
-  padding-top: max(clamp(12px, 2.5vw, 32px), env(safe-area-inset-top));
-  padding-bottom: max(clamp(12px, 2.5vw, 32px), env(safe-area-inset-bottom));
-  gap: clamp(12px, 2.2vw, 28px);
+  padding: clamp(12px, min(2.5vw, 3vh), 32px);
+  padding-top: max(clamp(12px, min(2.5vw, 3vh), 32px), env(safe-area-inset-top));
+  padding-bottom: max(clamp(12px, min(2.5vw, 3vh), 32px), env(safe-area-inset-bottom));
+  gap: clamp(12px, min(2.2vw, 2.6vh), 28px);
 }
 
 .dv-screen:focus {

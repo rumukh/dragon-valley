@@ -1,6 +1,7 @@
 /**
  * The keeper's collections, opened from the hub: Glimmer's Market (cosmetics for coins, one
- * shelf per slot), the Dragon Den (dress each dragon, one item per slot), the Sticker Album (one
+ * shelf per slot), the Dragon Den (dress each dragon, one item per slot, one slot at a time), the
+ * Sticker Album (one
  * page per region, turned with tabs) and the Magic Window (every fact as a pane of stained
  * glass). They render the view and send the two actions they need (`buy`, `equip`); everything
  * else is the rules' business. Long collections show one shelf or page at a time, so no screen
@@ -133,7 +134,7 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
         body: [
           h(
             'section',
-            { className: 'dv-card dv-collection__card' },
+            { className: 'dv-card dv-collection__card dv-market' },
             note,
             tabs?.element ?? null,
             shelfTitle,
@@ -175,7 +176,11 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
           'li',
           {
             className: 'dv-shelf__item',
-            dataset: { owned: String(entry.owned), slot: entry.slot },
+            dataset: {
+              owned: String(entry.owned),
+              affordable: String(entry.affordable),
+              slot: entry.slot,
+            },
           },
           cosmeticIconArt(entry.assetId, 'dv-cosmetic-art dv-shelf__art'),
           h('span', { className: 'dv-shelf__name', text: name }),
@@ -207,6 +212,21 @@ export function marketScreen(app: App, keeperId: string): ScreenEntry {
 
 // ---- Dragon Den -----------------------------------------------------------------------------
 
+/** The Den slot each keeper last dressed, while the app is open. */
+const denSlots = new Map<string, CosmeticSlot>();
+
+/** The slot to open the Den at: the one dressed last, else the first with something owned. */
+export function denStartSlot(
+  items: readonly Pick<MarketItem, 'slot' | 'owned'>[],
+  remembered?: CosmeticSlot,
+): CosmeticSlot {
+  if (remembered !== undefined) return remembered;
+  return (
+    COSMETIC_SLOTS.find((slot) => items.some((item) => item.owned && item.slot === slot)) ??
+    COSMETIC_SLOTS[0]!
+  );
+}
+
 export function denScreen(app: App, keeperId: string): ScreenEntry {
   return {
     key: `den:${keeperId}`,
@@ -221,6 +241,19 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
       });
       const preview = h('div', { className: 'dv-den__preview', testId: 'den-preview' });
       const slots = h('div', { className: 'dv-den__slots' });
+      // One slot at a time, like the Market's shelves: every slot at once outgrows the window.
+      let shown = denStartSlot(active.game.view().market.items, denSlots.get(keeperId));
+      const tabs = createTabs(app.kit, {
+        label: t('den.slots'),
+        tabs: COSMETIC_SLOTS.map((slot) => ({ id: slot, name: t(`slot.${slot}` as MessageKey) })),
+        current: shown,
+        testIdPrefix: 'den',
+        onChange: (slot) => {
+          shown = slot;
+          denSlots.set(keeperId, slot);
+          paint();
+        },
+      });
       const frame = collection(app, active, {
         title: t('den.heading'),
         testId: 'screen-den',
@@ -230,7 +263,12 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
             'section',
             { className: 'dv-card dv-den' },
             picker,
-            h('div', { className: 'dv-den__stage' }, preview, slots),
+            h(
+              'div',
+              { className: 'dv-den__stage' },
+              preview,
+              h('div', { className: 'dv-den__wardrobe' }, tabs.element, slots),
+            ),
           ),
         ],
       });
@@ -271,6 +309,7 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
         );
         if (!dragon) {
           preview.replaceChildren(h('p', { text: t('hub.noDragons') }));
+          tabs.element.hidden = true;
           slots.replaceChildren();
           return;
         }
@@ -279,7 +318,9 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
           h('p', { className: 'dv-den__name', text: text(dragon.nameKey) }),
         );
         // Eggs can only sit in a decorated nest; every slot fits every hatched dragon.
-        const usable = dragon.stage === 'egg' ? (['nest'] as const) : COSMETIC_SLOTS;
+        const egg = dragon.stage === 'egg';
+        tabs.element.hidden = egg;
+        const usable: readonly CosmeticSlot[] = egg ? ['nest'] : [shown];
         slots.replaceChildren(
           ...usable.map((slot) => {
             const items = owned(view, slot);
@@ -312,8 +353,12 @@ export function denScreen(app: App, keeperId: string): ScreenEntry {
             };
             return h(
               'fieldset',
-              { className: 'dv-den__slot' },
-              h('legend', { text: t(`slot.${slot}` as MessageKey) }),
+              { className: 'dv-den__slot', testId: `den-slot-${slot}` },
+              // Under the tabs the selected tab already names the slot.
+              h('legend', {
+                ...(egg ? {} : { className: 'dv-visually-hidden' }),
+                text: t(`slot.${slot}` as MessageKey),
+              }),
               choice(null, t('den.none'), null),
               ...items.map((entry) =>
                 choice(

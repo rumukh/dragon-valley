@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
 /**
  * The keypad in the DOM: the physical keyboard and the on-screen keys drive the same state,
- * the remainder mode shows the notation's sign, and text fields keep their own typing.
+ * the remainder mode shows the notation's sign, text fields keep their own typing, and the wide
+ * layout beside a board orders its keys in three rows of four.
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createKeypad } from '../../../../src/app/ui/keypad';
@@ -104,6 +105,51 @@ describe('keypad', () => {
     expect(event.defaultPrevented).toBe(false);
     expect(onSubmit).not.toHaveBeenCalled();
     keypad.dispose();
+  });
+
+  it('lays its keys out phone-style by default, or four wide beside a board', () => {
+    kit = testKit();
+    const keys = (element: HTMLElement): string[] =>
+      [...element.querySelectorAll('.dv-keypad button')].map(
+        (key) => key.getAttribute('data-testid')?.replace('keypad-', '') ?? '',
+      );
+    const phone = createKeypad(kit, { mode: 'number', onSubmit: vi.fn() });
+    expect(keys(phone.element)).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      'backspace',
+      '0',
+      'ok',
+    ]);
+    expect(phone.pad.classList.contains('dv-keypad--wide')).toBe(false);
+    phone.dispose();
+    const wide = createKeypad(kit, { mode: 'number', layout: 'wide', onSubmit: vi.fn() });
+    expect(keys(wide.element)).toEqual([
+      '1',
+      '2',
+      '3',
+      'backspace',
+      '4',
+      '5',
+      '6',
+      '0',
+      '7',
+      '8',
+      '9',
+      'ok',
+    ]);
+    expect(wide.pad.classList.contains('dv-keypad--wide')).toBe(true);
+    // A board can take the answer fields into its own sentence; the keys stay with the pad.
+    expect(wide.element.contains(wide.display)).toBe(true);
+    expect(wide.element.contains(wide.pad)).toBe(true);
+    wide.dispose();
   });
 
   it('does not take focus when a key is clicked, so Enter on the keyboard still submits', () => {

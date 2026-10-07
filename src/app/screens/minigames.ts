@@ -35,6 +35,11 @@ export function minigameRound(view: GameView): MinigameRoundView | null {
 // ---- Memory Match ---------------------------------------------------------------------------
 
 /** Columns for a deck: full rows where possible (12 cards are 4 × 3, 10 are 5 × 2). */
+/** Columns of memory cards on a landscape window: the cards in two rows (one row up to four). */
+export function matchColumnsWide(cards: number): number {
+  return cards <= 4 ? Math.max(1, cards) : Math.ceil(cards / 2);
+}
+
 export function matchColumns(cards: number): number {
   if (cards <= 4) return Math.max(1, cards);
   if (cards === 6 || cards === 9) return 3;
@@ -63,6 +68,7 @@ function memoryMatch(context: BoardContext): BoardPainter {
     matchedBefore = board.matched;
     grid.dataset['count'] = String(board.cards.length);
     grid.style.setProperty('--cols', String(matchColumns(board.cards.length)));
+    grid.style.setProperty('--wide-cols', String(matchColumnsWide(board.cards.length)));
     grid.replaceChildren(
       ...board.cards.map((card, index) => {
         const state = card.matched

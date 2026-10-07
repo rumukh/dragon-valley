@@ -27,6 +27,8 @@ import {
   findLevel,
   gameDay,
   growthOf,
+  pictureFirst,
+  problemNote,
   resultsNext,
   stepChoices,
   weekdayIndex,
@@ -339,6 +341,22 @@ describe('boss poses', () => {
     expect(curedHeads(meter(21), 7)).toBe(7);
     expect(curedHeads(meter(25), 7), 'never more heads than it has').toBe(7);
     expect(curedHeads({ value: 4, target: 0 }, 7), 'no meter, no heads').toBe(0);
+  });
+});
+
+describe('teach, then ask', () => {
+  it('teaches a fact missed twice in a row with its picture first, like a re-ask', () => {
+    const plain = { reask: false, hinted: false };
+    expect(problemNote(plain)).toBeNull();
+    expect(pictureFirst(plain)).toBe(false);
+    expect(problemNote({ ...plain, reask: true })).toBe('round.reask');
+    expect(problemNote({ ...plain, teach: true })).toBe('round.teach');
+    expect(problemNote({ reask: true, teach: true }), 'taught says more than again').toBe(
+      'round.teach',
+    );
+    expect(pictureFirst({ ...plain, teach: true })).toBe(true);
+    expect(pictureFirst({ ...plain, reask: true })).toBe(true);
+    expect(pictureFirst({ ...plain, hinted: true })).toBe(true);
   });
 });
 

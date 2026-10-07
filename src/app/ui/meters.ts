@@ -179,6 +179,8 @@ export function createCoinCounter(kit: UiKit, initial: number): CoinCounterView 
     async gain(amount, from) {
       if (amount <= 0) return;
       const target = current + amount;
+      // Said when earned, not when the last coin lands: by then the round may have moved on.
+      kit.announcer.announce(plural(kit.t, amount, 'coins.earned.one', 'coins.earned.other'));
       if (from && !prefersReducedMotion()) {
         await Promise.all(
           Array.from({ length: Math.min(amount, 5) }, (_, index) => fly(from, index)),
@@ -194,7 +196,6 @@ export function createCoinCounter(kit: UiKit, initial: number): CoinCounterView 
         ],
         { duration: 380, easing: EASE_OUT },
       );
-      kit.announcer.announce(plural(kit.t, amount, 'coins.earned.one', 'coins.earned.other'));
     },
   };
 }

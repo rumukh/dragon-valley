@@ -105,6 +105,22 @@ export function bossPose(
 }
 
 /**
+ * The note above a problem: a fact missed twice in a row is taught (`teach`), a missed one is
+ * asked again (`reask`).
+ */
+export function problemNote(
+  problem: Pick<ProblemView, 'reask' | 'teach'>,
+): 'round.teach' | 'round.reask' | null {
+  if (problem.teach === true) return 'round.teach';
+  return problem.reask ? 'round.reask' : null;
+}
+
+/** Whether a problem shows its picture before the answer: re-asked, taught, or a hint asked. */
+export function pictureFirst(problem: Pick<ProblemView, 'reask' | 'teach' | 'hinted'>): boolean {
+  return problem.reask || problem.teach === true || problem.hinted;
+}
+
+/**
  * The day the game is on once today's session has started (`today` is the local date): the rules
  * never go back a day, so a save from a device whose clock ran ahead keeps its own day.
  */

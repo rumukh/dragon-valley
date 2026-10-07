@@ -70,6 +70,7 @@ export function golemOrders(context: BoardContext): BoardPainter {
     mode: 'number',
     maxDigits: 5,
     claimFocus: true,
+    layout: 'wide',
     testIdPrefix: 'golem-keypad',
     onSubmit: async (typed) => {
       if (typed.kind !== 'number') return;

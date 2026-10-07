@@ -1,6 +1,8 @@
 /**
  * The big on-screen keypad (phone layout: 1-2-3 on top) with physical keyboard parity, and a
- * remainder mode with two answer fields shown as `4 r 3` or `4 R 3`.
+ * remainder mode with two answer fields shown as `4 r 3` or `4 R 3`. Beside a board's picture it
+ * can be four keys wide and three rows tall (`1 2 3 ⌫ / 4 5 6 0 / 7 8 9 OK`), and a board may
+ * place its answer fields in its own sentence (`display`).
  */
 import { h } from './dom';
 import { icon } from './icons';
@@ -19,19 +21,28 @@ export interface KeypadOptions {
    * pressing the button that had focus (boards with their own buttons beside the keypad).
    */
   claimFocus?: boolean;
+  /** `phone` (three keys wide, the default) or `wide` (four keys wide, three rows tall). */
+  layout?: 'phone' | 'wide';
   onSubmit(answer: KeypadAnswer): void | Promise<void>;
   testIdPrefix?: string;
 }
 
 export interface KeypadView {
   readonly element: HTMLElement;
+  /** The answer fields (`4 r 3`); inside `element` unless a board moves them into its sentence. */
+  readonly display: HTMLElement;
+  /** The keys. */
+  readonly pad: HTMLElement;
   state(): KeypadState;
   reset(): void;
   setDisabled(disabled: boolean): void;
   dispose(): void;
 }
 
-const LAYOUT = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'backspace', '0', 'ok'] as const;
+const LAYOUTS = {
+  phone: ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'backspace', '0', 'ok'],
+  wide: ['1', '2', '3', 'backspace', '4', '5', '6', '0', '7', '8', '9', 'ok'],
+} as const;
 
 export function createKeypad(kit: UiKit, options: KeypadOptions): KeypadView {
   const prefix = options.testIdPrefix ?? 'keypad';
@@ -77,11 +88,12 @@ export function createKeypad(kit: UiKit, options: KeypadOptions): KeypadView {
   }
 
   const keys = new Map<string, HTMLButtonElement>();
+  const layout = options.layout ?? 'phone';
   const pad = h('div', {
-    className: 'dv-keypad',
+    className: layout === 'wide' ? 'dv-keypad dv-keypad--wide' : 'dv-keypad',
     attributes: { role: 'group', 'aria-label': t('keypad.label') },
   });
-  for (const key of LAYOUT) {
+  for (const key of LAYOUTS[layout]) {
     const button = h('button', {
       className: 'dv-key' + (key === 'ok' ? ' dv-key--ok' : ''),
       testId: `${prefix}-${key}`,
@@ -195,6 +207,8 @@ export function createKeypad(kit: UiKit, options: KeypadOptions): KeypadView {
   render();
   return {
     element,
+    display,
+    pad,
     state: () => state,
     reset() {
       state = createKeypadState(options.mode, options.maxDigits);

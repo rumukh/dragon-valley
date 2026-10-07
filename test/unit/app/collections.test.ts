@@ -1,9 +1,13 @@
 /**
- * Long collections, one part at a time: where the Sticker Album opens, which Market shelf shows
- * first, and how the tabs turn around the ends.
+ * Long collections, one part at a time: where the Sticker Album opens, which Market shelf and
+ * which Dragon Den slot show first, and how the tabs turn around the ends.
  */
 import { describe, expect, it } from 'vitest';
-import { albumStartPage, marketStartShelf } from '../../../src/app/screens/collections';
+import {
+  albumStartPage,
+  denStartSlot,
+  marketStartShelf,
+} from '../../../src/app/screens/collections';
 import { stepTab } from '../../../src/app/ui/tabs';
 
 describe('the Sticker Album', () => {
@@ -58,6 +62,24 @@ describe("Glimmer's Market", () => {
     const items = [item('nest', false, true), item('head', true, true)];
     expect(marketStartShelf(items, 'head')).toBe('head');
     expect(marketStartShelf(items, 'wings')).toBe('nest');
+  });
+});
+
+describe('the Dragon Den', () => {
+  it('opens at the first slot with something owned, in slot order, else the first slot', () => {
+    expect(
+      denStartSlot([
+        { slot: 'nest', owned: true },
+        { slot: 'head', owned: false },
+        { slot: 'eyes', owned: true },
+      ]),
+    ).toBe('eyes');
+    expect(denStartSlot([{ slot: 'head', owned: false }])).toBe('head');
+    expect(denStartSlot([])).toBe('head');
+  });
+
+  it('opens again at the slot dressed last', () => {
+    expect(denStartSlot([{ slot: 'eyes', owned: true }], 'wings')).toBe('wings');
   });
 });
 

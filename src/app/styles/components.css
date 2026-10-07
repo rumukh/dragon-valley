@@ -277,6 +277,12 @@
   min-width: 0;
 }
 
+/* A collection's title keeps its words whole: with big text the tools move to the next line
+   before "Glimmer's" would break in two. */
+.dv-topbar__title:has(> .dv-collection__title) {
+  min-width: min-content;
+}
+
 .dv-topbar__tools {
   display: flex;
   flex-wrap: wrap;
@@ -528,6 +534,12 @@
   gap: clamp(8px, 1.4vw, 14px);
   width: min(100%, 13em);
   margin-inline: auto;
+}
+
+/* Four keys wide and three rows tall, beside a board's picture: 1 2 3 ⌫ / 4 5 6 0 / 7 8 9 OK. */
+.dv-keypad--wide {
+  grid-template-columns: repeat(4, minmax(var(--dv-target), 1fr));
+  width: min(100%, 16em);
 }
 
 .dv-key {
@@ -806,6 +818,9 @@
   border: 0.1em solid var(--dv-line-strong);
   border-radius: 0.6em;
   background: var(--dv-card);
+  /* WebKit counts the longest option's text in the page's width (DV-QA-05); paint containment
+     keeps it inside the list's own box. */
+  contain: paint;
 }
 
 /* ---- Meter ------------------------------------------------------------------------------ */

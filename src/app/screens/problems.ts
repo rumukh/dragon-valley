@@ -6,10 +6,10 @@
  * remainder mode), as the view resolves. A right answer throws a fruit into the dragon's mouth
  * (an egg glows warmer instead); on a boss level a sparkle tickles the boss and its mood meter
  * fills, and the Seven-Headed Dragon is won over head by head. A miss is never punished: orange
- * "?", "Almost! Let's look…", the right fact and its picture, and the child goes on when ready. A
- * re-asked fact shows its picture first; a hint shows it on request. Response time excludes
- * pauses. Every answer goes through the command controller (stale-view guard, strict save);
- * Escape or Pause pauses the game.
+ * "?", "Almost! Let's look…", the right fact and its picture, and the child goes on when ready.
+ * A re-asked fact, or one missed twice in a row (`teach`), shows its picture first; a hint shows
+ * it on request. Response time excludes pauses. Every answer goes through the command controller
+ * (stale-view guard, strict save); Escape or Pause pauses the game.
  */
 import { FINALE_DRAGON_ID } from '../../rules/contract';
 import type {
@@ -23,7 +23,15 @@ import type {
 import { getDragonAnchors } from '../art/dragon';
 import { CommandRejectedError, taken } from '../controller/commands';
 import { createResponseTimer } from '../game/timer';
-import { answerKindOf, bossPose, curedHeads, featuredDragon, stepChoices } from '../game/view';
+import {
+  answerKindOf,
+  bossPose,
+  curedHeads,
+  featuredDragon,
+  pictureFirst,
+  problemNote,
+  stepChoices,
+} from '../game/view';
 import type { BossPose } from '../game/view';
 import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
@@ -328,7 +336,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   };
 
   const hintButton = (problem: ProblemView): HTMLElement[] => {
-    if (problem.hinted || problem.reask || !modelFor(problem.problem)) return [];
+    if (pictureFirst(problem) || !modelFor(problem.problem)) return [];
     return [
       candyButton({
         label: t('round.hint'),
@@ -339,6 +347,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
         testId: 'round-hint',
         onPress: async () => {
           await taken(active.commands.captureSend()({ type: 'hint' }));
+          // The hint is a commit of its own: the answer must be sent against the view after it,
+          // or the stale-view guard refuses it ("Let's try that again.").
+          send = active.commands.captureSend();
           hintSlot.replaceChildren();
           showModel(problem.problem);
           app.kit.announcer.announce(t('round.hintShown'));
@@ -605,8 +616,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     const spoken = spokenProblem(problem);
     problemSlot.replaceChildren(problemElement(problem.problem, notation(), spoken, problem.step));
     speakerSlot.replaceChildren(...speakerButton(app, active, () => spokenProblem(problem)));
-    note.textContent = problem.reask ? t('round.reask') : '';
-    if (problem.reask || problem.hinted) showModel(problem.problem);
+    const said = problemNote(problem);
+    note.textContent = said ? t(said) : '';
+    if (pictureFirst(problem)) showModel(problem.problem);
     else modelSlot.replaceChildren();
     hintSlot.replaceChildren(...hintButton(problem));
 

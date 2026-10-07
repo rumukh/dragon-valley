@@ -158,7 +158,9 @@ describe('practised items in words', () => {
 
   it('names skill buckets for grown-ups', () => {
     expect(itemLabel('rem:d7', 'czech', t)).toBe('Division with remainder by 7');
-    expect(itemLabel('tens:d4', 'czech', t)).toBe('Dividing tens by 4');
+    expect(itemLabel('tens:d4', 'czech', t), 'mul.tens: tens times 4').toBe(
+      'Multiplying tens by 4',
+    );
     expect(itemLabel('pow10:x100', 'czech', t)).toBe('Multiplying by 100');
     expect(itemLabel('order:no-brackets', 'czech', t)).toBe('Order of operations without brackets');
     expect(itemLabel('word:times-as-many', 'czech', t)).toBe('Word problems: times as many');
