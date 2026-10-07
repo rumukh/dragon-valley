@@ -16,7 +16,7 @@ import {
   parseContentCatalog,
 } from '../../../src/app/content/text';
 import { answerId, answerLabel, answerSpoken } from '../../../src/app/screens/problem-view';
-import { matchColumns } from '../../../src/app/screens/minigames';
+import { matchColumns, matchColumnsWide } from '../../../src/app/screens/minigames';
 import { speakFace } from '../../../src/app/speech/verbalizer';
 import { createTranslator } from '../../../src/app/i18n/messages';
 
@@ -123,6 +123,12 @@ describe('minigame cards', () => {
     expect(matchColumns(12)).toBe(4);
     expect(matchColumns(10)).toBe(5);
     expect(matchColumns(6)).toBe(3);
+    // On a landscape window: two rows (one row up to four cards).
+    expect(matchColumnsWide(12)).toBe(6);
+    expect(matchColumnsWide(10)).toBe(5);
+    expect(matchColumnsWide(6)).toBe(3);
+    expect(matchColumnsWide(4)).toBe(4);
+    expect(matchColumnsWide(16)).toBe(8);
   });
 });
 

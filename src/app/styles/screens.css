@@ -1281,6 +1281,14 @@
   width: min(100%, calc(var(--cols, 4) * 9em));
 }
 
+/* On a landscape window the cards lie in two rows. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-match-grid {
+    grid-template-columns: repeat(var(--wide-cols, var(--cols, 4)), minmax(0, 1fr));
+    width: min(100%, calc(var(--wide-cols, var(--cols, 4)) * 9em));
+  }
+}
+
 /* Memory cards: face down, open, matched (check) or not a pair ("?"). */
 .dv-card-tile {
   position: relative;
@@ -1596,6 +1604,14 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* On a landscape window the four sentences stand in two columns: × beside ×, : beside :. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-family__equations {
+    grid-template-columns: repeat(2, auto);
+    gap: 0.5em 1.6em;
+  }
 }
 
 .dv-family__equation {
