@@ -1,6 +1,6 @@
 # Test coverage: the plan and its evidence
 
-Where each promise of the plan is held by a test, at commit `568ee65` (main after #41). Plan §4 is the verification
+Where each promise of the plan is held by a test, at commit `5d98ee3` (main after #46 and #47). Plan §4 is the verification
 strategy; §2.8-2.12 are the promises a child and a grown-up would notice. "Covered" means a test
 fails if the promise breaks; "partly" names what is missing; a gap says when it will be covered.
 The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest in `test/`

@@ -17,6 +17,15 @@ reviewed too. Every quoted "Current" text below was checked against the catalogs
 
 ## Summary
 
+**Status (main after #46):** every finding is resolved. S3 applied its 18 minor and 6 polish items
+in #46, keeping two wordings on purpose (the sign step's "Which sign do we need?", which the
+coordinator's playtest pins in `playtest.spec.ts`, and the feast's "{total} fruit", which the
+board helper reads). S2b settled its 26 rows in #38, #40 and #43, keeping three on purpose (the money
+story's crowns, "Word Wizard", "Polka-Dot Wings"). The coordinator's decisions: the "times fewer"
+stories name the larger owner; money in stories is Czech crowns; the gate always asks with "×"
+(docs/app.md §6); `Krakonoš` and "Kč" have read-aloud aliases (#46). The findings below are the
+review as written at `8d3236a`.
+
 One major finding: the new grown-ups' Progress label `parent.item.tens` said division for a
 multiplication skill; #41 fixed it ("Multiplying tens by {n}"). No child-facing task is misleading, and every problem the game renders
 follows the keeper's notation (`src/app/math/notation.ts`). The copy is short, warm and consistent
@@ -218,6 +227,9 @@ Excluded: test ids, CSS classes, thrown developer errors, console/debug text, an
 renderer's symbols.
 
 ## Needs a human decision
+
+All four were decided (see the status above): the "times fewer" stories name the larger owner;
+`Krakonoš` has a read-aloud alias; money in stories is Czech crowns; the gate always uses "×".
 
 - Approve the inverse "times as many" wording for the curriculum's "times fewer" objective, or give
   S2b/S3 a preferred wording for both the child stories and the grown-ups' Progress label.

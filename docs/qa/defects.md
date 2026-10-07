@@ -19,7 +19,6 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 | -------- | -------- | ----- | ------------------------------------------------------------------------------------- |
 | DV-QA-13 | minor    | S3    | WebKit, sometimes Chromium: a keeper's hub at 200 % text appears at normal size first |
 | DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys                |
-| DV-QA-17 | major    | S3    | Memory Match's term cards do not show which number of the example is meant            |
 
 ### DV-QA-13 (minor, S3; WebKit, sometimes Chromium): a keeper's hub at 200 % text first appears at normal size
 
@@ -71,30 +70,6 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
   are one named radio group…" (the ring by pixels after the arrows; strict in Chromium and
   Firefox).
 
-### DV-QA-17 (major, S3): Memory Match's term cards do not show which number of the example is meant
-
-- **Repro** (every engine): open Riddle Ruins early in the grown-ups' area, play Riddle Ruins 4's
-  Feeding Time, then its Memory Match of terms, and turn over an example card.
-- **Expected**: the example marks the number its term names, as a round's term problem marks its
-  asked number (`dv-problem__number--asked`; by a shape or line, not colour alone), and its name
-  says which number that is ("thirty divided by six equals five, six marked").
-- **Actual**: the card shows "30 : 6 = 5" as plain text and is read "thirty divided by six equals
-  five"; the term cards read "a factor", "the divisor", "the quotient", "the product". The rules
-  pair a term with an example whose number of that term is highlighted (`TERM_HIGHLIGHT` in
-  `src/rules/minigames/boards.ts`: a factor is the left number, the product the result, the
-  dividend the left, the divisor the right, the quotient the result, the remainder the remainder;
-  the contract's example: "which is 42 in 6 · 7 = 42?"). So "30 : 6 = 5" could be the dividend,
-  the divisor or the quotient, only one pairing is accepted, and a child can only guess: a miss
-  teaches nothing.
-- **Cause**: `formatFace` (`src/rules/contract/notation.ts`) writes a sentence face with
-  `highlight: 'result'` fixed and leaves highlighting to "the shell's styling", but the Memory
-  Match painter (`src/app/screens/minigames.ts`) puts the face in a plain span; `speakFace` passes
-  the card's highlight to `termSentence`, whose words do not name it.
-- **Likely fix**: draw the example's tokens with the highlighted number marked, as the round's
-  problem line does, and name it in the card's label.
-- **Evidence**: `test/e2e/activities.spec.ts` › "Memory Match term cards…": the first example
-  turned over must mark one number and say which.
-
 ## Fixed
 
 Each was verified fixed by the suite in Chromium (Edge), Firefox and WebKit, and its assertion now
@@ -118,6 +93,7 @@ write-ups (repro, cause, suggested fix) are in this file's history:
 | DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                           | #17      | `persistence.spec.ts` › "a finished round is kept…"                                                        |
 | DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)          | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                                        |
 | DV-QA-16 | Two announcements within 40 ms: only the second was heard (the results' headline lost)       | #41      | `live.spec.ts` › "a round speaks its feedback…" (the headline heard; S3's announcer unit test queues them) |
+| DV-QA-17 | Memory Match's term cards did not show which number of the example was meant                 | #46      | `activities.spec.ts` › "Memory Match term cards…": the example marks its number and says which             |
 | DV-QA-18 | A missed × 0 fact was sent to "Look first!" and "Look at the picture first", with no picture | #45      | `teach.spec.ts` › "a × 0 fact asked again…" and "…taught…": the rule drawn as plates, first                |
 
 ### The coordinator's Region 1 playtest (the deployed `5848964`)
