@@ -16,6 +16,7 @@ import {
   loadCatalog,
   marketAtEnd,
   mistake,
+  noteMet,
   overdueKnown,
   simulate,
   storyWords,
@@ -113,6 +114,33 @@ describe('the learner simulation', () => {
       "each graded answer carries the rules' bucket",
     ).toEqual([]);
     expect(graded.filter((r) => r.bucket === 'fast').length, 'quick answers').toBe(day.fast);
+  });
+
+  it('records the day each fact was first met, a board credit included', async () => {
+    const report = await firstSession('perfect');
+    const answered = new Set(answers.get('perfect')!.map((r) => r.item));
+    const met = Object.keys(report.metDays);
+    expect(
+      met.filter((item) => report.metDays[item] !== 0),
+      'everything met in the first session is met on day 0',
+    ).toEqual([]);
+    expect(
+      [...answered].filter((item) => report.metDays[item] === undefined),
+      'every fact answered was met',
+    ).toEqual([]);
+    expect(
+      met.filter((item) => !answered.has(item)).length,
+      'some facts were met on a board only (the Egg Grid credits facts it never asks)',
+    ).toBeGreaterThan(0);
+  });
+});
+
+describe('the day a fact is first met', () => {
+  it('keeps the first day and adds new facts on the day they are met', () => {
+    const metDays: Record<string, number> = { 'mul:2x3': 0 };
+    noteMet(metDays, ['mul:2x3', 'mul:2x4'], 3);
+    noteMet(metDays, ['mul:2x3', 'mul:2x4', 'div:8:2'], 5);
+    expect(metDays).toEqual({ 'mul:2x3': 0, 'mul:2x4': 3, 'div:8:2': 5 });
   });
 });
 

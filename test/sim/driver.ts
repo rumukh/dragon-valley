@@ -130,6 +130,12 @@ export interface SimulationReport {
   bossDays: Record<string, number>;
   /** Day index each level was first completed. */
   levelDays: Record<string, number>;
+  /**
+   * Day index each fact or bucket was first met: the end of the first session after which it has a
+   * record, from an answer or a board's credit (Memory Match, the Egg Grid). Coverage is measured
+   * from it: a fact a level taught that is met late, or never.
+   */
+  metDays: Record<string, number>;
   finaleDay: number | null;
   coins: number;
   cosmetics: number;
@@ -495,6 +501,15 @@ export function storyWords(textKey: string, catalog: Readonly<Record<string, unk
     .filter((word) => word.length > 0).length;
 }
 
+/** Note the facts first met on day `index`: each keeps the first day it had a record. */
+export function noteMet(
+  metDays: Record<string, number>,
+  items: Iterable<string>,
+  index: number,
+): void {
+  for (const item of items) metDays[item] ??= index;
+}
+
 /** A day report's market fields when the session ends (after shopping). */
 export function marketAtEnd(
   view: Pick<GameView, 'coins' | 'market'>,
@@ -652,6 +667,7 @@ export async function simulate(
     eggDays: {},
     bossDays: {},
     levelDays: {},
+    metDays: {},
     finaleDay: null,
     coins: 0,
     cosmetics: 0,
@@ -677,6 +693,7 @@ export async function simulate(
     await playSession(player, options.answersPerDay ?? profile.answersPerDay);
     entry.answerMs = child.elapsedMs - elapsedBefore;
     entry.cosmeticsOwned = player.state().cosmetics.owned.length;
+    noteMet(report.metDays, Object.keys(player.state().items), index);
     Object.assign(entry, marketAtEnd(player.view()));
     entry.commits = player.hashes.length - fromCommit;
     tallyEvents(report, entry, player.events.slice(fromEvent));
