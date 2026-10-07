@@ -489,7 +489,8 @@ machine. Time enters only as data (`startSession.day`, `answer.elapsedMs`).
 
 A correct answer moves its fact up a box: spaced retrieval is what the boxes reward. Only an answer
 slower than "ok" (below) stays where it is. Fluency is tracked separately, by gold (§6.5), crowned
-dragons and three stars, which all need fast answers.
+dragons and three stars, which all need fast answers. Steady right answers on separate days still
+count toward bronze and silver, through the effort path (§6.5).
 
 | Response                         | Box move                 |
 | -------------------------------- | ------------------------ |
@@ -542,7 +543,7 @@ limits.
   the placement check); and the Daily Adventure holds further new levels (§4.2). Inside the band
   the spaced order (most overdue first) is unchanged: switching at the 82 % target instead slowed
   an average child's mastery in the simulations.
-- **The review guarantee** (added with the basket): a known fact (bronze or better, box 2+) that
+- **The review guarantee** (added with the basket): a known fact (Leitner box 2+) that
   has waited **4 days** past its review day is _starving_. Wherever reviews are served (the mix's
   due draws, snacks, the boss's spaced review), a starving fact comes first, the most overdue
   first, whatever the child's success; and while one is starving the Daily Adventure offers snack
@@ -592,12 +593,33 @@ A taught problem's answer counts like a re-ask's.
 
 ### 6.5 Mastery, the Magic Window and dragon growth
 
-| Level  | Rule                                                             |
-| ------ | ---------------------------------------------------------------- |
-| dim    | box 0-1                                                          |
-| bronze | box 2                                                            |
-| silver | box 3-4 (or box 5 without the fast answers)                      |
-| gold   | box 5 and at least 2 fast answers among the last 3 _(`mastery`)_ |
+A fact's mastery level is the better of two paths: **knowing it on separate days** grows a dragon,
+**knowing it by heart** crowns it. The Leitner box gives every level, gold included; the effort
+path gives bronze and silver for right answers at any speed on enough well-spaced days. Gold is
+fluency alone.
+
+| Level  | By the Leitner box                                               | Or by effort _(`mastery.effort`)_       |
+| ------ | ---------------------------------------------------------------- | --------------------------------------- |
+| dim    | box 0-1                                                          | fewer than `bronzeDays` counted days    |
+| bronze | box 2                                                            | right on `bronzeDays` counted days      |
+| silver | box 3-4 (or box 5 without the fast answers)                      | right on `silverDays` counted days      |
+| gold   | box 5 and at least 2 fast answers among the last 3 _(`mastery`)_ | never: gold is the box and fluency only |
+
+**The effort path** (decided after the growth study, docs/balance-report.md §8). A struggling
+child's steady answers took 6.7 s, slower than "ok" (6 s by choice): right, but they never moved a
+box, so after a year of diligent play no dragon had grown past hatchling. Now a day counts for a
+fact when the fact is answered right that day, at any speed (a board's credit too, but not a
+commuted twin's review), and it is the fact's first counted day or at least `gapDays` after the
+last counted one: right on days 0, 1, 2, 5 and 6 with a gap of 2 counts days 0, 2 and 5. Content
+1.3.0 sets bronze after 2 counted days and silver after 4, 2 days apart. Without the block,
+mastery is the box alone, as before.
+
+One definition of bronze and silver everywhere the child or a grown-up sees mastery: the panes,
+dragon growth and its `next` stage (have and need), stickers and the grown-ups' Progress. Scheduling
+never reads the level, only the box (due days, the mix's tiers, `known` = box 2+, the review
+guarantee, the input), so the effort path changes what the child sees, never what it is asked.
+Counted days never go away, so a level reached by effort stays, like a dragon's stage, and its
+pane still needs polishing when the fact is due.
 
 **The Magic Window** is an **11 × 11** stained-glass mosaic of all 121 multiplication facts (row =
 first factor 0-10, column = second factor 0-10) plus a separate **division panel** of the 110

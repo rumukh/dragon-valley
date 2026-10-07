@@ -89,7 +89,7 @@ The named checks (`test/sim/report.ts`, each label carries what it measured):
   succeeding: never wrong more often than right);
 - the average bot grows every times-table dragon to adult within 12 weeks;
 - every bot earns coins every session and, except the perfect one, sees progress every week;
-- no known fact (bronze and up: Leitner box 2+) waits more than a week past its review day; facts
+- no known fact (Leitner box 2+) waits more than a week past its review day; facts
   in box 0-1 are still being learned and are served as learning items;
 - no dead ends: the perfect, average and slow bots complete every level and win over every boss in
   12 weeks; the struggling bot keeps a steady path instead (its success matters more than its

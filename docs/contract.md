@@ -157,6 +157,17 @@ Presentation is not part of the item: `? · 6 = 42` practises `div:42:6`; a word
 `word:<family>`; choice versus keypad is a property of the problem on screen. `mul:7x8` and `mul:8x7`
 are distinct items that share partial credit (`commutedId`).
 
+An item's record keeps two notions apart (`learning/items.ts`). Its **Leitner box** schedules: due
+days, the mix's tiers, `known` (box 2+), the review guarantee and the input read the box and nothing
+else. Its **mastery level** (`masteryLevel`: `dim/bronze/silver/gold`) is what the view shows and
+what dragons grow by: the better of the box's level (`boxLevel`) and the effort path's
+(`effortLevel`, at most silver; dim without `balance.mastery.effort { bronzeDays, silverDays,
+gapDays }`). The effort path counts `rightDays`: a right answer at any speed (a board's credit too,
+never a commuted twin's review) counts its day when it is the item's first counted day or at least
+`gapDays` after `lastCountedDay` (docs/design.md §6.5). Both fields are optional, both or neither;
+`adapter.validate` refuses counts that cannot be: one field without the other, 0 days, more counted
+days than right answers, or a counted day after `lastDay`.
+
 ## 6. Skills and generators (`skills.ts`)
 
 A skill is `{ id, titleKey, generator, params }`. The generator decides the problem family; its
@@ -267,7 +278,7 @@ level (`--strict-coverage`). The v1 pack passes both strict checks and `npm run 
 | `reask`             | delay 3 turns, at most 2 per round                                                                             | re-asking missed items            |
 | `coins`             | 1 per correct, +1 every 5 in a row, boss 15, placement 10                                                      | coin sources                      |
 | `stars`             | 2★ at 80 %, 3★ at 95 % with 60 % fast                                                                          | level stars                       |
-| `mastery`           | gold = box 5 and 2 fast of the last 3                                                                          | gold rule                         |
+| `mastery`           | gold = box 5 and 2 fast of the last 3; optional `effort` (none until 1.3.0, §5.4)                              | gold rule, effort path            |
 | `growth`            | hatchling 30 % seen; youngling 60 % bronze + division; adult 90 % silver + division + boss; crowned 100 % gold | dragon stages                     |
 | `daily`             | goal 30 (10-100), 3 quests, 60 days of history                                                                 | daily goal and history            |
 | `gift`              | 2-6 coins (cosmetic weight 0, coins weight 1)                                                                  | the daily gift chest              |
@@ -331,7 +342,7 @@ compose). Sound IDs are not in content: the shell maps events to sounds from S5'
   restoring against its own revision.
 - **State compatibility.** New state fields are optional (`objectWithOptional`) with a default
   that old saves get by omission, so every save keeps restoring under newer rules without bumping
-  `STATE_VERSION` (the day counters `daily.levels` and `daily.minigames` were the first such fields; `round.current.teach` followed).
+  `STATE_VERSION` (the day counters `daily.levels` and `daily.minigames` were the first such fields; `round.current.teach` followed, then the effort path's `items.*.rightDays` and `lastCountedDay`, which an old save gets as 0 and nothing back-fills: `test/migration/effort-save.test.ts` moves a real 1.2.0 save onto the path).
 
 ## 8. Per-profile state (`state.ts`)
 
@@ -345,7 +356,7 @@ unchanged.
 | `day`, `firstDay`                      | current and first session day (day numbers: days since 1970-01-01, local)                                                      |
 | `sessions`, `daysPracticed`            | counters                                                                                                                       |
 | `onboarding`                           | `firstEgg`, `placement: pending/done/skipped`                                                                                  |
-| `items`                                | per item: `box` 0-5, `due` day, `seen`, `correct`, `recent` (last 3 buckets), `lastDay`                                        |
+| `items`                                | per item: `box` 0-5, `due` day, `seen`, `correct`, `recent` (last 3 buckets), `lastDay`, effort counts (§5.4)                  |
 | `levels`                               | per level: best `stars`, `bestAccuracy`, `plays`, `placed`, `paidStars`                                                        |
 | `bosses`                               | defeated bosses and the day                                                                                                    |
 | `dragons`                              | owned dragons: `stage`, `obtainedDay`, `stageDay`, `outfit` (one item or null per slot)                                        |
@@ -376,7 +387,7 @@ bucket, given and expected answers, coins). A **minigame round** keeps the gener
   goes back is clamped to the last session day).
 - Every record refers to existing content (checked by `adapter.validate` on every commit and
   restore), outfits use owned items of the right slot, story states restore against their beat
-  graphs.
+  graphs, and an item's effort counts are consistent (§5.4).
 - Presentation preferences (notation, volumes, text size, reduced motion, read-aloud voice,
   time limit) are **not** state: the shell stores them per profile in its preferences record, so
   changing them never touches a game hash or a durable checkpoint.
@@ -477,7 +488,8 @@ one-shots). It contains:
   0 or 1 table, as growth does (docs/design.md §6.5).
 - `window`: the **11 × 11** Magic Window (`cells`: 121 multiplication facts, row = first factor,
   column = second factor) and the division panel (110 cells, row = divisor, column = quotient), each
-  cell with `level` (`dim/bronze/silver/gold`) and `needsPolish`.
+  cell with `level` (`dim/bronze/silver/gold`, the mastery level of §5.4: the box or the effort
+  path) and `needsPolish`.
 - `market`, `album`, `daily` (goal, quests, gift, the week's practised days, sleepy), `parent`
   (per-table and per-skill accuracy, hardest facts, 60-day trend).
 
