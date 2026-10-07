@@ -12,8 +12,8 @@ import { basename } from 'node:path';
 export const NAMED_PARTS = {
   // The screen walks and the large-text reflow walks: long tests with many screenshots.
   walks: ['screens', 'reflow'],
-  // Whole rounds with saves, reloads, failures and settings.
-  rounds: ['input', 'persistence', 'recovery', 'settings'],
+  // Whole rounds with saves, reloads, failures and settings, and a missed fact taught.
+  rounds: ['input', 'persistence', 'recovery', 'settings', 'teach'],
   // One activity in each region of the valley.
   regions: ['regions'],
   // The v1 boards, the bosses, the finale and the map with every region awake, and saves from

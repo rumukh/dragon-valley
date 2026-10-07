@@ -1,6 +1,6 @@
 # Test coverage: the plan and its evidence
 
-Where each promise of the plan is held by a test, at commit `8d3236a` (main after #29). Plan §4 is the verification
+Where each promise of the plan is held by a test, at commit `568ee65` (main after #41). Plan §4 is the verification
 strategy; §2.8-2.12 are the promises a child and a grown-up would notice. "Covered" means a test
 fails if the promise breaks; "partly" names what is missing; a gap says when it will be covered.
 The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest in `test/`
@@ -31,6 +31,15 @@ The browser specs are in `test/e2e/` ([testing.md](../testing.md) §5), the rest
 | 200 % text and reduced motion                    | `reflow.spec.ts`, `motion.spec.ts`                                                                                               | Covered (DV-QA-13 open) |
 | Screenshots at tablet, desktop and phone sizes   | `screens.spec.ts`, indexed in [screens.md](screens.md)                                                                           | Covered                 |
 | A tablet screen without page scrolling           | `playtest.spec.ts` (the hub, the Egg Grid, a round, each hatch and the results at 1180 × 820 and 1024 × 768), `profiles.spec.ts` | Covered                 |
+
+## Plan §2.6: the adaptive learning engine, in the browser
+
+| Promise                                                             | Evidence                                                                                                                                                                                       | Status                               |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| A miss is asked again about three problems later, its picture first | `teach.spec.ts` (missed in the browser; "Let's try this one again. Look first!", the picture, no Show me); the scheduling in `test/traces/` and `test/unit/progression/`                       | Covered                              |
+| A fact missed twice in a row is taught before it is asked           | `teach.spec.ts` (a game the rules played to the moment: "Look at the picture first. Then answer!", the picture drawn unsolved); a × 0 fact has no picture but is still told to look (DV-QA-18) | Covered; DV-QA-18 open for × 0 facts |
+| Show me shows the picture, and the answer after it counts           | `hint.spec.ts` (S3)                                                                                                                                                                            | Covered                              |
+| Leitner boxes, mix control, distractors, time only as data          | `test/unit/learning/`, `test/unit/progression/`, `test/traces/`, `test/sim/` (headless; the browser sends `elapsedMs` and the day, `visibility.spec.ts` and `daily.spec.ts`)                   | Covered                              |
 
 ## Plan §2.8: the first session
 
@@ -87,6 +96,5 @@ promises, live feedback, focus with dialogs and reduced motion are covered. The 
 ## Gaps, in the order they will be covered
 
 1. The grown-ups' daily limit, once it is kept across page loads (app.md §16).
-2. With S3's teach rendering (#27): the picture model shown before a twice-missed item is asked
-   again.
-3. Still to be built (app.md §16): the persisted daily limit and the credits after the finale.
+
+2. Still to be built (app.md §16): the persisted daily limit and the credits after the finale.

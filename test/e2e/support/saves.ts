@@ -4,6 +4,7 @@
  * loads one through the grown-ups' area (`loadBackup`), as support/finale.ts does for the finale.
  */
 import { PERFECT, Player } from '../../traces/support';
+import type { Style } from '../../traces/support';
 import { expect } from './fixtures';
 
 const MEADOW_LEVELS = [
@@ -45,8 +46,8 @@ function backupOf(player: Player, profileId: string): string {
 }
 
 /** A new keeper of today who has heard the prologue and chosen Bubbles' egg. */
-async function newMeadowPlayer(profileId: string): Promise<Player> {
-  const player = new Player(PERFECT, profileId);
+async function newMeadowPlayer(profileId: string, style: Style = PERFECT): Promise<Player> {
+  const player = new Player(style, profileId);
   try {
     await player.act({ type: 'startSession', day: localDay() });
     await player.choose(null);
@@ -99,4 +100,111 @@ export async function meadowWonBackup(): Promise<string> {
   } finally {
     await player.dispose();
   }
+}
+
+/** Which missed fact a backup is built around: one with a picture, or a × 0 fact (none). */
+export type MissedFact = 'with a picture' | 'times zero';
+/** Where the game is stopped: the fact asked again after one miss, or taught after two. */
+export type MissedStop = 'reask' | 'teach';
+
+/** A keeper's game stopped on a missed fact that has come back. */
+export interface MissedFactBackup {
+  readonly text: string;
+  /** The numbers of the problem it is stopped on, smallest first (to find it on the screen). */
+  readonly numbers: readonly number[];
+}
+
+/** Every number written in a problem's structure (its blanks hold none). */
+function numbersIn(node: unknown): number[] {
+  if (node === null || typeof node !== 'object') return [];
+  const record = node as Record<string, unknown>;
+  if (record['kind'] === 'num' && typeof record['value'] === 'number') return [record['value']];
+  return Object.values(record).flatMap(numbersIn);
+}
+
+/**
+ * One try at a missed-fact game (see `missedFactBackup`) with the rules' random draws seeded by
+ * `profileId`: the backup, or null when the fact did not come back in Sunny Meadow.
+ */
+async function tryMissedFact(
+  fact: MissedFact,
+  stop: MissedStop,
+  profileId: string,
+): Promise<MissedFactBackup | null> {
+  const wanted = (problem: unknown): boolean => {
+    const numbers = numbersIn(problem);
+    return fact === 'times zero' ? numbers.includes(0) : numbers.every((n) => n >= 1);
+  };
+  let target: string | null = null;
+  let misses = 0;
+  const style: Style = {
+    right: (_n, view) => {
+      const served = view.problem;
+      if (view.activity !== 'feeding' || !served) return true;
+      if (target === null && wanted(served.problem)) target = served.item;
+      if (served.item !== target || misses >= 2) return true;
+      misses += 1;
+      return false;
+    },
+    elapsedMs: () => 1500,
+    clumsy: false,
+  };
+  const player = await newMeadowPlayer(profileId, style);
+  try {
+    for (const level of MEADOW_LEVELS) {
+      expect(await player.act({ type: 'startLevel', level }), `${level} starts`).toBe(true);
+      await player.settleStory();
+      for (let activity = 0; activity < 5; activity++) {
+        for (let turn = 0; turn < 80; turn++) {
+          const round = player.view().round;
+          if (round === null || round.status !== 'active') break;
+          if (round.type !== 'problems') {
+            await player.playBoard();
+            continue;
+          }
+          const problem = round.problem;
+          const back = problem !== null && problem.item === target;
+          if (back && (stop === 'reask' ? problem.reask && misses === 1 : problem.teach === true)) {
+            expect(player.failures, 'the rules took every step').toEqual([]);
+            const numbers = numbersIn(problem.problem).sort((a, b) => a - b);
+            return { text: backupOf(player, profileId), numbers };
+          }
+          if (!(await player.answer())) break;
+        }
+        if (player.view().round === null) break;
+        await player.act({ type: 'endRound', reason: 'done' });
+        const run = player.view().run;
+        if (run === null || run.result !== null) {
+          await player.settleStory();
+          break;
+        }
+        await player.act({ type: 'startActivity', activity: { kind: 'level', index: run.next } });
+      }
+    }
+    return null;
+  } finally {
+    await player.dispose();
+  }
+}
+
+/**
+ * A keeper whose game waits on a missed fact that has come back (the rules' "teach, then ask",
+ * plan §2.3). In Sunny Meadow's Feeding Times the first fact of the kind asked for is missed, and
+ * missed again when it comes back (its re-ask, three problems later). The game is stopped on that
+ * re-ask (`reask`), or played on until the fact comes back a third time, taught first (`teach`),
+ * mid-round as a reload would find it. Every other answer is right.
+ *
+ * A fact missed twice is due again the next day, so on the same day it comes back only if a later
+ * lesson draws it; the draws follow the seed, so a few seeds are tried in turn.
+ */
+export async function missedFactBackup(
+  fact: MissedFact,
+  stop: MissedStop,
+): Promise<MissedFactBackup> {
+  for (let attempt = 1; attempt <= 12; attempt++) {
+    const profileId = `missed-${fact.replace(/\W+/g, '-')}-${stop}-${attempt}`;
+    const backup = await tryMissedFact(fact, stop, profileId);
+    if (backup) return backup;
+  }
+  throw new Error(`No ${fact} fact missed twice in Sunny Meadow came back (${stop}) in 12 seeds.`);
 }

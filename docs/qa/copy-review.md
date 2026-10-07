@@ -17,8 +17,8 @@ reviewed too. Every quoted "Current" text below was checked against the catalogs
 
 ## Summary
 
-One major finding: the new grown-ups' Progress label `parent.item.tens` says division for a
-multiplication skill. No child-facing task is misleading, and every problem the game renders
+One major finding: the new grown-ups' Progress label `parent.item.tens` said division for a
+multiplication skill; #41 fixed it ("Multiplying tens by {n}"). No child-facing task is misleading, and every problem the game renders
 follows the keeper's notation (`src/app/math/notation.ts`). The copy is short, warm and consistent
 on the whole; what remains is clarity in a few places, two terms that collide, and decisions only a
 person can make.
@@ -31,8 +31,8 @@ person can make.
 
 Most important changes:
 
-1. Fix `parent.item.tens`: it labels multiplication-by-tens practice as division in the grown-ups'
-   Progress tab (S3).
+1. Done in #41: `parent.item.tens` labelled multiplication-by-tens practice as division in the
+   grown-ups' Progress tab; it now says "Multiplying tens by {n}" (S3).
 2. Decide the "times fewer" wording (plan §6) and, either way, name the larger owner instead of
    "That is…" in the four `word.times-fewer.*` stories (S2b).
 3. Make the remainder prompts say which number goes where: `round.typeRemainder` and
@@ -116,7 +116,7 @@ that omit their objects are the main copy risks above.
 
 | Key                           | Current                                                                                                                                                                   | Issue                                                                                                                                                                 | Suggested                                                                                                                                                                             | Severity | Owner |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----- |
-| `parent.item.tens`            | "Dividing tens by {n}"                                                                                                                                                    | Verified in `src/rules/contract/skills.ts` and `src/rules/learning/generators/beyond.ts`: `tens:dN` is the `mul.tens` bucket, so this label says the wrong operation. | "Tens times {n}" or "Multiplying tens by {n}".                                                                                                                                        | Major    | S3    |
+| `parent.item.tens`            | "Dividing tens by {n}"                                                                                                                                                    | Verified in `src/rules/contract/skills.ts` and `src/rules/learning/generators/beyond.ts`: `tens:dN` is the `mul.tens` bucket, so this label says the wrong operation. | "Tens times {n}" or "Multiplying tens by {n}". Fixed in #41: "Multiplying tens by {n}".                                                                                               | Major    | S3    |
 | `parent.family.times-fewer`   | "times fewer (N-krát méně)"                                                                                                                                               | The Progress tab now exposes the exact risky phrase that the child templates avoided; plan §6 still needs editorial sign-off.                                         | "inverse times-as-many problems (N-krát méně)" for now, or the human-approved wording from the decision below.                                                                        | Minor    | S3    |
 | `parent.progress.divCaption`  | "Division: the column number is the result of dividing by the row number"                                                                                                 | Verified in `divisionPanes()`: rows are divisors and columns are quotients, but the caption does not say what is being divided, so it reads incomplete.               | "Division: rows are divisors; columns are quotients."                                                                                                                                 | Minor    | S3    |
 | `parent.progress.windowIntro` | "Every fact is a pane of glass. It turns bronze, then silver, then gold as the fact becomes sure and quick. A sparkle marks a known fact that is due for practice again." | "The fact becomes sure and quick" is awkward; grown-ups need to know it means the child answers that fact correctly and quickly.                                      | "Every fact is a pane of glass. It turns bronze, then silver, then gold as your child answers it correctly and quickly. A sparkle marks a known fact that is due for practice again." | Minor    | S3    |

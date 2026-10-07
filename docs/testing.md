@@ -127,12 +127,11 @@ drives the system Microsoft Edge (`DV_BROWSER_CHANNEL=chrome` for Chrome) and ne
 browsers; `$env:DV_E2E_ALL_ENGINES = '1'` runs Chromium, WebKit and Firefox where Playwright's own
 builds are installed. CI runs each engine in parallel jobs with `DV_E2E_AUDIT=1`, one or more parts
 of the suite each (`DV_E2E_PART`, comma-separated; `support/parts.ts`): `walks` (`screens`,
-`reflow`), `rounds` (`input`, `persistence`, `recovery`, `settings`), `regions` (`regions`),
+`reflow`), `rounds` (`input`, `persistence`, `recovery`, `settings`, `teach`), `regions` (`regions`),
 `valley` (`boards`, `bosses`, `upgrade`, `finale`, `map`), `activities` (`activities`), `days`
 (`daily`, `collections`), `controls` (`grown-ups`, `visibility`), `playtest` (`playtest`) and
 `rest` (every other spec, including any new one). Chromium and Firefox run three jobs each with two
-workers: Chromium `walks+rest`, `rounds+controls+playtest` and `regions+valley+activities+days`,
-Firefox `walks+rest`, `rounds+controls` and `regions+valley+activities+days+playtest`; WebKit,
+workers, `walks+rest`, `rounds+controls+playtest` and `regions+valley+activities+days`; WebKit,
 about twice as slow per test on a hosted runner, runs one job per part with three workers
 (`activities+playtest` share one; its tests mostly wait on the engine, so the third worker shortens
 a job on the four-processor runner). The split follows measured run
@@ -196,6 +195,7 @@ and proves the guard, the axe audit, the layout checks and the answer oracle all
 | `daily.spec.ts`       | The Daily Adventure with a lowered goal: the goal reached, the dragons sleepy, the gift once; the next day (the page's clock moved): both days practised, snack time first, the gift again. Pacing: after today's level and the day's mini-game, a day under 70 % suggests snack time or a review, never a new level; a good day the next level                                                                                                                                  |
 | `grown-ups.spec.ts`   | Starting a keeper over (a confirmation, the dragons and progress erased, the settings kept), asking the browser to keep progress (only on a grown-up's tap; granted or declined), running the placement check again, the Lightning Arena switch (a keeper past the Bridge Troll, from a backup the rules played to: `support/saves.ts`)                                                                                                                                          |
 | `playtest.spec.ts`    | The coordinator's Region 1 playtest findings (fixed by #14 and #17) as regression checks: Sunny Meadow 6's stories ask their sign on sign tiles and both right answers are praised; at 1180 × 820 and 1024 × 768 the hub, the Egg Grid, a round, each hatch and the results need no page scrolling; the hatched dragon is at least 200 px each way with no word on it; no change of screen is blank for more than 300 ms (`support/blank.ts`; Chromium at a 4× slower processor) |
+| `teach.spec.ts`       | Teach, then ask: a fact missed in the browser comes back a few problems later with its picture first ("Let's try this one again. Look first!", no Show me); a fact missed twice in a row, in a game the rules played to the moment (`missedFactBackup`), is taught with its picture first, drawn unsolved, and "Look at the picture first. Then answer!"; a × 0 fact, which has no picture, must not be sent to look at one (DV-QA-18)                                           |
 
 ### How the tests drive the game
 

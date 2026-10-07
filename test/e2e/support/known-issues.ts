@@ -51,13 +51,6 @@ export interface Defect {
  * them stay in the specs as plain regression checks.
  */
 export const DEFECTS = {
-  'DV-QA-05': {
-    owner: 'S3',
-    severity: 'minor',
-    engines: ['webkit'],
-    title:
-      "In WebKit the grown-ups' Settings still scroll sideways on a phone (511 px of page in 390 px, blank sky to the right): the voice list's box fits, but WebKit counts its longest option's text (\"Device default (English (United Kingdom))\") in the page width. contain: paint on .dv-select stops it.",
-  },
   'DV-QA-13': {
     owner: 'S3',
     severity: 'minor',
@@ -73,18 +66,17 @@ export const DEFECTS = {
     title:
       "In WebKit (Safari) the keeper pictures lose their focus ring once an arrow key moves the choice: WebKit does not match :focus-visible on a radio focused by an arrow key (a plain page does the same), and the ring is drawn only for :focus-visible. The moving 'chosen' ring still marks the picture.",
   },
-  'DV-QA-16': {
-    owner: 'S3',
-    severity: 'minor',
-    intermittent: true,
-    title:
-      "Two announcements within 40 ms: only the second is heard (the announcer drops a pending message). Seen on CI WebKit as a round ended: the last answer's coin line ('You got 11 coins!'), announced only after its coins finish flying, came as the results appeared and replaced their headline.",
-  },
   'DV-QA-17': {
     owner: 'S3',
     severity: 'major',
     title:
       "Memory Match's term cards do not show which number of the example is meant. The rules pair a term with an example whose number of that term is highlighted ('which is 42 in 6 · 7 = 42?'), but the card shows the example as plain text ('30 : 6 = 5') and reads it without the highlight, so a child can only guess whether it pairs with the dividend, the divisor or the quotient (Riddle Ruins 4).",
+  },
+  'DV-QA-18': {
+    owner: 'S3',
+    severity: 'major',
+    title:
+      'A missed fact that has no picture (a × 0 fact such as 2 · 0) comes back with "Let\'s try this one again. Look first!" and, missed again, is taught with "Look at the picture first. Then answer!", but no picture is shown: the shell draws none for zero groups (modelFor), and the note does not depend on it. The child who needs help is sent to look at nothing (Sunny Meadow serves × 0 facts from its first level).',
   },
 } as const satisfies Record<string, Defect>;
 
@@ -98,13 +90,7 @@ export interface KnownLayout {
   readonly problem: RegExp;
 }
 
-export const KNOWN_LAYOUT: readonly KnownLayout[] = [
-  {
-    defect: 'DV-QA-05',
-    where: /^(26-parent-settings|44-settings-saved) \(phone portrait\)$/,
-    problem: /^the page scrolls sideways: \d+px of content in 390px/,
-  },
-];
+export const KNOWN_LAYOUT: readonly KnownLayout[] = [];
 
 /** The engine a test runs on: its project's browser (Edge and Chrome channels are Chromium). */
 export function engineOf(testInfo: TestInfo): string {
