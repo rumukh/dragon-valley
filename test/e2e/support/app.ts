@@ -136,9 +136,18 @@ export async function addKeeper(page: Page, keeper: KeeperSpec, egg?: Egg): Prom
   await meetFirstEgg(page, egg);
   await expectHub(page, keeper.name);
 }
-/** From the hub, back to "Who is playing?". */
+/**
+ * From the hub, back to "Who is playing?". After a day that brought something (a fact that began
+ * to shine, a dragon that grew, a sticker), leaving goes through goodbye and the Dragon Diary.
+ */
 export async function leaveHub(page: Page): Promise<void> {
   await page.getByTestId('hub-back').click();
+  await expect(
+    page.getByTestId('screen-keepers').or(page.getByTestId('screen-goodbye')),
+  ).toBeVisible();
+  if (await page.getByTestId('screen-goodbye').isVisible()) {
+    await page.getByTestId('goodbye-done').click();
+  }
   await expectScreen(page, 'keepers');
 }
 

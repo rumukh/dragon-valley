@@ -11,6 +11,7 @@ import { createBackup, readBackup, rebind } from '../persistence/backup';
 import type { BackupFile } from '../persistence/backup';
 import type { Keeper } from '../persistence/family';
 import { gamePolicy, openGameSession } from '../persistence/game-session';
+import { dayRecord } from '../persistence/day';
 import { DEFAULT_PREFERENCES, preferencesRecord } from '../persistence/preferences';
 import { recordPolicy } from '../persistence/records';
 import { eraseRecord, RecoveryRequired } from '../persistence/recovery';
@@ -21,6 +22,7 @@ function policies(app: App, keeperId: string) {
   return {
     game: gamePolicy(app.game, keeperId),
     preferences: recordPolicy(preferencesRecord(keeperId)),
+    day: recordPolicy(dayRecord(keeperId)),
   };
 }
 
@@ -82,6 +84,7 @@ export function parseKeeperBackup(text: string): BackupFile {
 export async function importKeeper(app: App, keeper: Keeper, backup: BackupFile): Promise<void> {
   if (app.active()?.keeper.id === keeper.id) await app.closeKeeper();
   if (backup.game !== null) {
+    await eraseDay(app, policies(app, keeper.id).day);
     const text = rebind(backup.game, keeper.id);
     try {
       const session = await openGameSession(app.storage, app.game, {
@@ -116,13 +119,24 @@ export async function importKeeper(app: App, keeper: Keeper, backup: BackupFile)
 /** Erase a keeper's game progress (settings stay). */
 export async function eraseProgress(app: App, keeperId: string): Promise<void> {
   if (app.active()?.keeper.id === keeperId) await app.closeKeeper();
-  await eraseRecord(app.storage, policies(app, keeperId).game);
+  const { game, day } = policies(app, keeperId);
+  await eraseRecord(app.storage, game);
+  await eraseDay(app, day);
 }
 
-/** Erase everything stored for a keeper: game and preferences. */
+/** Erase everything stored for a keeper: game, preferences and the diary's day. */
 export async function eraseKeeperData(app: App, keeperId: string): Promise<void> {
   if (app.active()?.keeper.id === keeperId) await app.closeKeeper();
-  const { game, preferences } = policies(app, keeperId);
+  const { game, preferences, day } = policies(app, keeperId);
   await eraseRecord(app.storage, game);
   await eraseRecord(app.storage, preferences);
+  await eraseDay(app, day);
+}
+
+/**
+ * The diary's day describes the game it was taken from: a new or replaced game starts its own.
+ * It holds nothing the game save does not, so it is erased even when it cannot be read.
+ */
+async function eraseDay(app: App, policy: ReturnType<typeof policies>['day']): Promise<void> {
+  await eraseRecord(app.storage, policy).catch(() => undefined);
 }

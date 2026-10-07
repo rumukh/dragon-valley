@@ -4,6 +4,7 @@
 import type { App, Screens } from '../shell/app';
 import { albumScreen, denScreen, marketScreen, windowScreen } from './collections';
 import { editorScreen } from './editor';
+import { goodbyeScreen } from './goodbye';
 import { keepersScreen } from './keepers';
 import { levelScreen, mapScreen, regionScreen } from './map';
 import { parentScreen } from './parent';
@@ -26,6 +27,7 @@ export function createScreens(app: App): Screens {
     album: (keeperId) => albumScreen(app, keeperId),
     window: (keeperId) => windowScreen(app, keeperId),
     parent: (tab, keeperId) => parentScreen(app, tab, keeperId),
+    goodbye: (keeperId) => goodbyeScreen(app, keeperId),
     print: (request) => printScreen(app, request),
     recovery: (problem) => recoveryScreen(app, problem),
     error: (error) => errorScreen(app, error),

@@ -1670,6 +1670,112 @@
   width: min(4rem, 10vh);
 }
 
+/* ---- Goodbye and the Dragon Diary ------------------------------------------------------ */
+
+/* The dragon waves beside the diary on a tablet, above it on a phone. */
+.dv-goodbye__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: 1rem;
+  width: min(100%, 52em);
+  margin-inline: auto;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-goodbye__layout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+
+.dv-goodbye__dragon {
+  width: min(16rem, 60vw, 32vh);
+}
+
+.dv-goodbye__dragon svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dv-goodbye__actions {
+  display: flex;
+  justify-content: center;
+  padding-block: 1rem;
+}
+
+.dv-diary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6em;
+  width: 100%;
+}
+
+.dv-diary__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3em 0.8em;
+}
+
+.dv-diary__heading {
+  font-size: 1.4rem;
+}
+
+.dv-diary__day {
+  flex: 1 1 auto;
+  max-width: none;
+  color: var(--dv-ink-soft);
+  font-weight: 700;
+}
+
+.dv-diary__lead,
+.dv-diary__more {
+  max-width: none;
+  font-weight: 700;
+}
+
+.dv-diary__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-diary__facts li {
+  padding: 0.25em 0.7em;
+  border-radius: 1em;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-success-deep);
+  background: var(--dv-success-soft);
+}
+
+.dv-diary__list {
+  display: grid;
+  gap: 0.4em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dv-diary__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  font-weight: 700;
+}
+
+.dv-diary__art {
+  flex: none;
+  width: clamp(48px, 2.6em, 80px);
+  height: auto;
+}
+
 /* ---- Hatch celebration ----------------------------------------------------------------- */
 
 /* The egg fills the screen: the caption above, the hatchling's name card and "Hooray!" below,

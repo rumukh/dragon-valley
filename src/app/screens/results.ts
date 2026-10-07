@@ -247,8 +247,8 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
         await dispatch({ type: 'endRound', reason: 'done' });
       }
       if (timeUp) {
-        // Time for a rest: back to the keepers, the game saved and closed.
-        await app.router.reset(app.screens.keepers());
+        // Time for a rest: goodbye with the day's diary, the game saved.
+        await app.router.reset(app.screens.goodbye(keeperId));
         return;
       }
       await app.continueGame(keeperId);

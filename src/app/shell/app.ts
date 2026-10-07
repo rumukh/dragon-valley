@@ -40,6 +40,7 @@ import { openGameSession } from '../persistence/game-session';
 import { DEFAULT_PREFERENCES } from '../persistence/preferences';
 import type { ChildPreferences } from '../persistence/preferences';
 import { RecoveryRequired } from '../persistence/recovery';
+import { DayStore } from '../persistence/day';
 import { FamilyStore, PreferencesStore } from '../persistence/stores';
 import { createRouter } from '../router/router';
 import type { Router, ScreenEntry } from '../router/router';
@@ -88,6 +89,8 @@ export interface ActiveKeeper {
   readonly game: DvSession;
   readonly commands: CommandController<GameAction>;
   readonly preferences: PreferencesStore;
+  /** How the keeper's day began, for the Dragon Diary. */
+  readonly day: DayStore;
   readonly events: EventInbox;
   /** Time played in this page (hidden time excluded), for the grown-ups' time limit. */
   readonly clock: PlayClock;
@@ -112,6 +115,8 @@ export interface Screens {
   album(keeperId: string): ScreenEntry;
   window(keeperId: string): ScreenEntry;
   parent(tab?: ParentTab, keeperId?: string): ScreenEntry;
+  /** Goodbye, with the Dragon Diary of the keeper's day. */
+  goodbye(keeperId: string): ScreenEntry;
   /** The print preview of a printable from the grown-ups' area. */
   print(request: PrintRequest): ScreenEntry;
   recovery(problem: RecoveryRequired): ScreenEntry;
@@ -262,6 +267,8 @@ export function createApp(options: AppOptions): App {
     const task = (async (): Promise<OpenKeeper> => {
       const preferences = new PreferencesStore(storage, keeper.id);
       await preferences.open();
+      const day = new DayStore(storage, keeper.id);
+      await day.open();
       const game = await openGameSession(storage, requireContent().game, {
         id: keeper.id,
         seed: profileSeed(keeper.id),
@@ -326,6 +333,7 @@ export function createApp(options: AppOptions): App {
         game,
         commands,
         preferences,
+        day,
         events,
         clock,
         timeIsUp() {

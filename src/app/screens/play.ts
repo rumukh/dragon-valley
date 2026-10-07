@@ -31,7 +31,10 @@ export function playScreen(app: App, keeperId: string): ScreenEntry {
     async build() {
       const active = await app.openKeeper(keeperId);
       await active.game.activateLatestContent();
-      await startToday(active);
+      // The Dragon Diary tells what today brought: note how the day begins.
+      const today = localDay();
+      await active.day.begin(today, active.game.view());
+      await startToday(active, today);
       const view = active.game.view();
       switch (view.screen) {
         case 'story':
