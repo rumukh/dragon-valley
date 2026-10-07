@@ -25,6 +25,8 @@ export interface BoardPainter {
   readonly element: HTMLElement;
   paint(): void;
   focus(): HTMLElement | null;
+  /** A finished board's own ending, played before the next board (or the results) appears. */
+  finish?(): Promise<void>;
   /** Release what outlives the element, such as a keypad's keyboard handler. */
   dispose?(): void;
 }

@@ -465,7 +465,11 @@ toast where they were earned.
     baskets show, `12 : 3 = ?` or `13 : 3 = ? r ?`, with the answer boxes in the division
     itself and the wide keypad under it; the rules' checks come back
     as kind lines (not fair yet, the bowl can still go round, count again). An answer bigger
-    than the whole feast is answered on the board, since the rules refuse that move.
+    than the whole feast is answered on the board, since the rules refuse that move. A right
+    answer finishes the board at any time (S2b's rule): the fruit is then dealt out to the fair
+    share, one closer in every basket a beat, within 1.2 s (at once when motion is reduced), and
+    the share stays on show for 0.7 s with "Well done! Each basket gets 4." before the next board
+    (`BoardPainter.finish`, which the minigame screen awaits before it paints the next board).
   - **Golem Orders** (`boards/golem.ts`): the expression as numbers and gears; a gear is the
     sign of its operation (`pathTokens` give every sign its operation's path), picking one marks
     its part of the line and the (wide) keypad asks its result. The steps are written the school way
@@ -548,6 +552,8 @@ Rule refusals show a child-friendly line by code (`error.<code>`, `game/errors.t
   region open, no two names on the map overlap, on the picture at 100 % and under it at 200 %.
   `hint.spec.ts`: the answer given right after Show me is taken, by keyboard and by tapping.
   `moves.spec.ts`: quick taps on the Sharing Feast all count (two fruit, then two rounds).
+  `feast.spec.ts`: a right answer with the fruit still in the bowl is dealt out to the fair share,
+  with and without motion, before the next board.
   The screen tour (`support/tour.ts`, docs/qa/screens.md) also walks goodbye, the Progress and
   Print tabs, the print preview, Riddle Ruins and the finale. CI runs
   Chromium, WebKit and Firefox. Locally the default project is the installed

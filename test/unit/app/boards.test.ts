@@ -14,6 +14,8 @@ import {
   samePath,
 } from '../../../src/app/math/notation';
 import {
+  DEAL_MS,
+  dealBeats,
   feastMessage,
   feastProblem,
   fruitPile,
@@ -50,6 +52,25 @@ describe('Sharing Feast', () => {
     expect(t(feastMessage({ last: 'more', remainder: true }))).toMatch(/one more/);
     expect(feastMessage({ last: 'count', remainder: false })).toBe('feast.count');
     expect(feastMessage({ last: 'count', remainder: true })).toBe('feast.countLeft');
+  });
+
+  it('deals a right early answer out to the fair share, a beat at a time, within 1.2 s', () => {
+    // 23 : 5 answered with one basket started and one overfull: every beat moves each basket
+    // one closer, from the bowl or back to it.
+    expect(dealBeats([1, 0, 6, 0, 0], 4)).toEqual([
+      [2, 1, 5, 1, 1],
+      [3, 2, 4, 2, 2],
+      [4, 3, 4, 3, 3],
+      [4, 4, 4, 4, 4],
+    ]);
+    expect(dealBeats([4, 4, 4], 4), 'already shared out: no deal').toEqual([]);
+    // The biggest feast: nothing dealt, nine each; every beat is short enough for 1.2 s.
+    const beats = dealBeats(
+      Array.from({ length: 10 }, () => 0),
+      9,
+    );
+    expect(beats).toHaveLength(9);
+    expect(Math.min(160, DEAL_MS / beats.length) * beats.length).toBeLessThanOrEqual(DEAL_MS);
   });
 });
 

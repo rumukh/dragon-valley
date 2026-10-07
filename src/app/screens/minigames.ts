@@ -687,6 +687,9 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     const round = minigameRound(view);
     coins.set(view.coins);
     const completed = active.events.take(['minigame.completed']);
+    // A board that ends its own way (the feast's fruit shared out) does so before the next board.
+    if (completed.length > 0) await painter?.finish?.();
+    if (disposed) return false;
     if (view.screen !== 'round' || !round || round.status !== 'active') {
       await app.continueGame(active.keeper.id);
       return false;
