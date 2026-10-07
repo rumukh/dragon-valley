@@ -282,7 +282,10 @@ order:
 succeeding, even if the valley takes longer. After the day's first level, a further _new_ level is
 offered only while today's success is at least 70 % (the lower edge of the success band). Below
 it the Daily Adventure reviews instead: snack time when something is due (§5.12), else a replay of
-one activity of the furthest finished level (the same `minigame` step as above, for any activity). Pacing only chooses the suggestion: every open level, including those a
+one activity (the same `minigame` step as above, for any activity) of the last three finished
+levels: their problem activities, or their minigames too while there are fewer than two. The
+review rotates with every round played, so a review that did not lift the day is not offered
+again straight away. Pacing only chooses the suggestion: every open level, including those a
 parent unlocked ahead, stays playable from the map. The day's first level is always offered.
 
 After the daily goal the dragons get **sleepy** (an expression, never a lock). Play can continue.

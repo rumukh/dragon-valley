@@ -75,8 +75,8 @@ function screenOf(state: ReadState): Screen {
  * reached, snack time again while a known fact is starving (the review guarantee), and more new
  * levels unless today's success is below 70 % (`lowToday`; a level already under way is always
  * continued). Below it the Daily Adventure reviews instead: snack time when there is something to
- * snack on, else a replay of a finished level's activity. Then free play. Pacing only chooses the
- * suggestion: every open level stays playable from the map.
+ * snack on, else a replay of an activity of the last finished levels. Then free play. Pacing only
+ * chooses the suggestion: every open level stays playable from the map.
  */
 function nextStep(
   state: ReadState,
@@ -110,20 +110,39 @@ function nextStep(
   return review !== null ? { kind: 'minigame', ...review } : { kind: 'free-play' };
 }
 
-/** A problem activity (not the boss) of the furthest completed level, to replay as review. */
-function reviewReplay(
+/** The finished levels, the furthest first, whose activities a low day's review rotates through. */
+export const REVIEW_LEVELS = 3;
+
+/**
+ * A low day's review (pacing): one activity of the last `REVIEW_LEVELS` finished levels, never
+ * the boss. Their problem activities, or their minigames too while there are fewer than two. The
+ * choice rotates with the rounds started (`roundCounter`), so a review that did not lift today's
+ * success is followed by a different one, not the same activity again.
+ */
+export function reviewReplay(
   state: ReadState,
   data: Data,
   index: ReadonlyMap<string, readonly string[]>,
 ): { level: string; activity: number } | null {
-  const completed = levelsInMapOrder(data).filter((level) => isComplete(state, level.id));
-  for (const level of completed.reverse()) {
-    const activity = level.activities.findIndex(
-      (a, i) => !isMinigameKind(a.kind) && a.kind !== 'boss' && canPlay(data, level, i, index),
+  const levels = levelsInMapOrder(data)
+    .filter((level) => isComplete(state, level.id))
+    .reverse()
+    .slice(0, REVIEW_LEVELS);
+  const activities = (minigames: boolean) =>
+    levels.flatMap((level) =>
+      level.activities
+        .map((activity, i) => ({ activity, i }))
+        .filter(
+          ({ activity, i }) =>
+            activity.kind !== 'boss' &&
+            isMinigameKind(activity.kind) === minigames &&
+            canPlay(data, level, i, index),
+        )
+        .map(({ i }) => ({ level: level.id, activity: i })),
     );
-    if (activity !== -1) return { level: level.id, activity };
-  }
-  return null;
+  let candidates = activities(false);
+  if (candidates.length < 2) candidates = [...candidates, ...activities(true)];
+  return candidates.length === 0 ? null : candidates[state.roundCounter % candidates.length]!;
 }
 
 /** A minigame activity of the furthest completed level, to replay for variety. */

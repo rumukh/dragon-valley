@@ -3,10 +3,14 @@
  * of a finished level (`startLevel { level, activity }`): the step that brings a minigame into a
  * day that had none, without completing the level again. Pacing: after the day's first level, a
  * further new level only while today's success is at least 70 %; below it the Daily Adventure
- * reviews (snacks for hungry dragons, else a replay of a finished level's activity).
+ * reviews (snacks for hungry dragons, else a replay of an activity of the last finished levels,
+ * a different one each time).
  */
 import { describe, expect, it } from 'vitest';
-import { PERFECT, Player } from '../../traces/support';
+import { initialProfileState } from '../../../src/rules/contract';
+import { itemIndex } from '../../../src/rules/learning/index-cache';
+import { REVIEW_LEVELS, reviewReplay } from '../../../src/rules/view';
+import { PERFECT, Player, loadPack } from '../../traces/support';
 import type { Style } from '../../traces/support';
 
 /** Every other answer right: well below the 70 % pacing line. */
@@ -110,7 +114,9 @@ describe('the Daily Adventure', () => {
     await player.playRound();
     await player.act({ type: 'endRound', reason: 'done' });
     expect(today(player)).toBeLessThan(70);
-    expect(player.view().hub.next, 'still reviewing').toEqual(review);
+    // Still reviewing, but not the same activity again: Sunny Meadow 1 has one problem activity,
+    // so its Egg Grid takes turns with it.
+    expect(player.view().hub.next, 'another review').toEqual({ ...review, activity: 0 });
 
     // The next day opens with snacks, then the day's first level whatever yesterday was like.
     await player.act({ type: 'startSession', day: '2026-10-07' });
@@ -149,5 +155,54 @@ describe('the Daily Adventure', () => {
     expect(player.view().hub.next).toEqual({ kind: 'level', level: 'sunny-meadow.2' });
     expect(player.failures).toEqual([]);
     await player.dispose();
+  });
+
+  it('rotates the review over the problem activities of the last three finished levels', async () => {
+    const player = await child();
+    for (const id of ['sunny-meadow.1', 'sunny-meadow.2', 'sunny-meadow.3', 'sunny-meadow.4']) {
+      await player.playLevel(id);
+    }
+    const data = loadPack().data;
+    const state = player.state();
+    const at = (roundCounter: number) =>
+      reviewReplay({ ...state, roundCounter }, data, itemIndex(data));
+    expect(REVIEW_LEVELS).toBe(3);
+    // Sunny Meadow 4's Feeding Time (its third activity), then 3's and 2's (their first);
+    // Sunny Meadow 1 is four levels back. Minigames and the boss are not reviews.
+    const reviews = [
+      { level: 'sunny-meadow.4', activity: 2 },
+      { level: 'sunny-meadow.3', activity: 0 },
+      { level: 'sunny-meadow.2', activity: 0 },
+    ];
+    expect([0, 1, 2, 3, 4, 5].map(at)).toEqual([...reviews, ...reviews]);
+    for (let n = 6; n < 12; n++) {
+      expect(at(n + 1), 'two successive reviews differ').not.toEqual(at(n));
+    }
+    await player.dispose();
+  });
+
+  it('never reviews with the boss, and adds minigames while problem activities are few', () => {
+    const data = loadPack().data;
+    const done = { stars: 1, bestAccuracy: 80, plays: 1, placed: false, paidStars: 1 };
+    const base = initialProfileState({ dailyGoal: 30, arena: true });
+    const at = (levels: string[], roundCounter: number) =>
+      reviewReplay(
+        { ...base, roundCounter, levels: Object.fromEntries(levels.map((id) => [id, done])) },
+        data,
+        itemIndex(data),
+      );
+    // The boss level, Sunny Meadow 6 (Riddle Scrolls) and 5 (Feeding Time, then Memory Match).
+    const last = ['sunny-meadow.5', 'sunny-meadow.6', 'sunny-meadow.boss'];
+    expect([0, 1, 2].map((n) => at(last, n))).toEqual([
+      { level: 'sunny-meadow.6', activity: 0 },
+      { level: 'sunny-meadow.5', activity: 0 },
+      { level: 'sunny-meadow.6', activity: 0 },
+    ]);
+    // Only Sunny Meadow 1: its Feeding Time, then its Egg Grid.
+    expect([0, 1].map((n) => at(['sunny-meadow.1'], n))).toEqual([
+      { level: 'sunny-meadow.1', activity: 1 },
+      { level: 'sunny-meadow.1', activity: 0 },
+    ]);
+    expect(at([], 0), 'nothing finished yet').toBeNull();
   });
 });

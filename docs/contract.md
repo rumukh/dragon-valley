@@ -495,9 +495,10 @@ glowing `level` until a level was finished today; then, once a day that had no m
 `startLevel { level, activity }`); the `gift` once the goal is reached; `snack` time again while a
 known fact is starving (the review guarantee) and no level is under way; the next `level` while
 today's success is at least 70 % (`LOW_SUCCESS`; a level already under way always continues);
-below it a review: `snack` time as above, else `minigame { level, activity }` naming a problem
-activity (not the boss) of the furthest finished level (the step replays any one activity of a
-finished level); `free-play`. Pacing only chooses `next`: level availability never
+below it a review: `snack` time as above, else `minigame { level, activity }` naming an activity
+of the last three finished levels (problem activities, or minigames too while there are fewer than
+two; never the boss), rotating with `roundCounter` so successive reviews differ (the step
+replays any one activity of a finished level); `free-play`. Pacing only chooses `next`: level availability never
 depends on it.
 
 While recent success (the last `mix.window` answers, across days) is below `LOW_SUCCESS`, the rules
@@ -633,7 +634,7 @@ value, family and term modes, Number Trail, Egg Grid, Fact Family Nest, Sharing 
 Orders), replaying one activity of a finished level, the adaptive mix (due reviews, known and
 learning items, the learning share following recent success, the focus egg, no repeats, and below
 the success band likely successes first, smaller snacks, choice input for reviews and re-asks and
-the Daily Adventure's pacing; the review guarantee and the valley's basket; every skill of an activity is served when several produce the same
+the Daily Adventure's pacing with rotating reviews; the review guarantee and the valley's basket; every skill of an activity is served when several produce the same
 item), partial credit for commuted facts, re-ask jobs and teaching a fact missed twice in a row, the boss meter with its kindness cap, spaced review and many heads, the
 finale, the placement check, snack time, the Lightning Arena, grading (with the Riddle Scrolls
 operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth (rule facts counted
