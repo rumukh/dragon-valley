@@ -136,6 +136,8 @@ export interface ProblemView {
   step: ProblemStep;
   reask: boolean;
   hinted: boolean;
+  /** Present when the item was missed twice in a row: show the picture model before asking. */
+  teach?: boolean;
 }
 
 export interface ProblemRoundView {
