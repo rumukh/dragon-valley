@@ -65,7 +65,7 @@ export interface DayReport {
   quests: number;
   goalReached: boolean;
   giftOpened: boolean;
-  /** Known facts whose review day had come when the session began. */
+  /** Known facts (box 2 and up, `KNOWN_BOX`) whose review day had come when the session began. */
   dueAtStart: number;
   /** Days the most overdue known fact had waited past its review day. */
   maxOverdueAtStart: number;
@@ -121,7 +121,7 @@ export interface SimulationReport {
   coins: number;
   cosmetics: number;
   stickers: number;
-  /** Known facts past their review day at the end, most overdue first. */
+  /** Known facts (box 2 and up) past their review day at the end, most overdue first. */
   overdue: { item: string; days: number }[];
 }
 
@@ -397,6 +397,36 @@ export interface AnswerRecord {
   elapsedMs: number;
 }
 
+/**
+ * A fact is known at bronze or better: Leitner box 2 and up. The no-starving guarantee covers
+ * known facts; facts in box 0-1 are still being learned (docs/testing.md §4).
+ */
+export const KNOWN_BOX = 2;
+
+/** The known facts whose review day `day` has reached, most overdue first. */
+export function overdueKnown(
+  items: Readonly<Record<string, { readonly box: number; readonly due: number }>>,
+  day: number,
+): { item: string; days: number }[] {
+  return Object.entries(items)
+    .filter(([, record]) => record.box >= KNOWN_BOX && record.due <= day)
+    .map(([item, record]) => ({ item, days: day - record.due }))
+    .sort((a, b) => b.days - a.days || (a.item < b.item ? -1 : 1));
+}
+
+/** What a day report records about due known facts when a session begins on `day`. */
+export function dueAtSessionStart(
+  items: Readonly<Record<string, { readonly box: number; readonly due: number }>>,
+  day: number,
+): Pick<DayReport, 'dueAtStart' | 'maxOverdueAtStart' | 'mostOverdue'> {
+  const due = overdueKnown(items, day);
+  return {
+    dueAtStart: due.length,
+    maxOverdueAtStart: due[0]?.days ?? 0,
+    mostOverdue: due[0]?.item ?? null,
+  };
+}
+
 /** Simulate `days` days of a learner, from `FIRST_DAY`. */
 export async function simulate(
   learner: LearnerName,
@@ -484,15 +514,7 @@ export async function simulate(
     const fromEvent = player.events.length;
     const fromCommit = player.hashes.length;
     await player.act({ type: 'startSession', day: entry.day });
-    for (const [id, item] of Object.entries(player.state().items)) {
-      if (item.correct > 0 && item.due <= day) {
-        entry.dueAtStart += 1;
-        if (entry.mostOverdue === null || day - item.due > entry.maxOverdueAtStart) {
-          entry.maxOverdueAtStart = day - item.due;
-          entry.mostOverdue = id;
-        }
-      }
-    }
+    Object.assign(entry, dueAtSessionStart(player.state().items, day));
     const elapsedBefore = child.elapsedMs;
     await playSession(player, options.answersPerDay ?? profile.answersPerDay);
     entry.answerMs = child.elapsedMs - elapsedBefore;
@@ -563,10 +585,7 @@ export async function simulate(
   report.coins = view.coins;
   report.cosmetics = state.cosmetics.owned.length;
   report.stickers = Object.keys(state.stickers).length;
-  report.overdue = Object.entries(state.items)
-    .filter(([, item]) => item.correct > 0 && item.due <= lastDay)
-    .map(([item, record]) => ({ item, days: lastDay - record.due }))
-    .sort((a, b) => b.days - a.days || (a.item < b.item ? -1 : 1));
+  report.overdue = overdueKnown(state.items, lastDay);
   await player.dispose();
   return report;
 }
