@@ -114,10 +114,14 @@ builds are installed. CI runs each engine in parallel jobs with `DV_E2E_AUDIT=1`
 of the suite each (`DV_E2E_PART`, comma-separated; `support/parts.ts`): `walks` (`screens`,
 `reflow`), `rounds` (`input`, `persistence`, `recovery`, `settings`), `regions` (`regions`),
 `valley` (`boards`, `bosses`, `upgrade`) and `rest` (every other spec, including any new one).
-Chromium and Firefox run two jobs each, `core` (`walks,rounds,rest`) and `valley`
-(`regions,valley`); WebKit, about twice as slow on a hosted runner, runs one job per part. Each
-job has two workers and stays under ten minutes, installation included (a slow Ubuntu mirror once
-stretched WebKit's system packages, `install --with-deps`, from one minute to ten).
+Chromium and Firefox run two jobs each, `walks+rest` and `rounds+regions+valley`; WebKit, about
+twice as slow on a hosted runner, runs one job per part. The split follows measured run times, so
+each job, with two workers, takes about seven minutes, installation included; `harness.spec.ts`
+checks that the matrix runs every part once per engine. Setup is under a minute: `setup-node`
+restores npm's cache, and Playwright's browsers are downloaded, not cached, because the download
+is 4–9 s of the install step and the rest is the system packages (apt: about 15 s for Chromium
+and Firefox, 45 s for WebKit), which a browser cache would not skip. A slow Ubuntu mirror once
+stretched WebKit's packages from one minute to ten; the 20-minute job limit leaves room for that.
 
 ```
 npm run test:e2e                                   # everything, system Edge
@@ -217,10 +221,10 @@ part) did not run in a project or a test was skipped without a reason.
 
 ### Artifacts
 
-Each CI job uploads `qa-screens-<job>` (screenshots and contact sheets, 30 days: `chromium`,
-`firefox` and `webkit-walks`, the part that takes them) and `playwright-report-<job>` (the HTML
-report with every axe result and guard report attached, `qa-summary.md`, `results.json`), plus
-`playwright-traces-<job>` when something failed.
+Each CI job uploads `qa-screens-<job>` (screenshots and contact sheets, 30 days:
+`chromium-walks+rest`, `firefox-walks+rest` and `webkit-walks`, the jobs that run the walks) and
+`playwright-report-<job>` (the HTML report with every axe result and guard report attached,
+`qa-summary.md`, `results.json`), plus `playwright-traces-<job>` when something failed.
 
 ### Adding a test
 

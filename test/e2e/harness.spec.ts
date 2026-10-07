@@ -3,8 +3,11 @@
  * accessibility audit, the layout checks, the focus check and the answer oracle is shown a
  * planted fault and must report it. A check that cannot see a console message, a foreign
  * request, a nameless button, a cut-off control or a ring nobody can see would let every other
- * spec pass vacuously.
+ * spec pass vacuously. The CI matrix is checked too: every part of the suite on every engine.
  */
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import { expect, test } from './support/fixtures';
@@ -12,6 +15,7 @@ import type { FindingKind, Guard } from './support/guard';
 import { boot, newFamily, startPlacement } from './support/app';
 import { audit, focusPixels, focusStop, SEEN_PIXELS } from './support/a11y';
 import { layoutProblems } from './support/layout';
+import { PARTS } from './support/parts';
 import { evaluate, notationOf, solve, storyOperation, toToken, written } from './support/problem';
 import type { Token } from './support/problem';
 
@@ -295,4 +299,25 @@ base.describe('the answer oracle works the written problem out by itself', () =>
       'No word-problem template',
     );
   });
+});
+
+// Each CI job audits only its own parts, so a part left out of every job of an engine would go
+// unnoticed: the matrix itself must run each part exactly once per engine.
+base('the CI matrix runs every part of the suite once on every engine', () => {
+  const workflow = readFileSync(
+    join(dirname(fileURLToPath(import.meta.url)), '..', '..', '.github', 'workflows', 'ci.yml'),
+    'utf8',
+  );
+  const jobs = [
+    ...workflow.matchAll(/^\s*- \{ engine: (\w+), label: ([^,]+), part: '?([a-z,]+)'? \}/gm),
+  ].map(([, engine, label, part]) => ({ engine, label, parts: (part ?? '').split(',') }));
+  expect(jobs.length, 'the e2e matrix in ci.yml').toBeGreaterThan(0);
+  const engines = ['chromium', 'firefox', 'webkit'];
+  expect([...new Set(jobs.map((job) => job.engine))].sort()).toEqual(engines);
+  for (const engine of engines) {
+    const parts = jobs.filter((job) => job.engine === engine).flatMap((job) => job.parts);
+    expect(parts.sort(), `the parts ${engine} runs`).toEqual([...PARTS].sort());
+  }
+  const names = jobs.map((job) => `${job.engine}-${job.label}`);
+  expect(new Set(names).size, 'every job names its artifacts uniquely').toBe(names.length);
 });
