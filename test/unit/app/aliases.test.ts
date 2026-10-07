@@ -19,10 +19,10 @@ const ALIASES = speechAliases({
 });
 
 /**
- * Aliases ready before the first text that needs them, with who adds that text: the money
- * stories' "Kč" (S2a's word problems).
+ * Aliases ready before the first text that needs them, with who adds that text. None now: the
+ * money stories (S2a's word problems) write amounts in "Kč" since content 1.3.0.
  */
-const AWAITING_FIRST_USE = new Set(['Kč']);
+const AWAITING_FIRST_USE = new Set<string>();
 
 describe('read-aloud aliases', () => {
   it('reads the catalog: plain aliases and singular/plural forms, nothing else', () => {
