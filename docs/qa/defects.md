@@ -139,8 +139,9 @@ history: `git log -p -- docs/qa/defects.md`.
   `min(3rem, 11vw)`, `min(2rem, 7.5vw)` for long problems), so on a phone it is smaller than the
   prompt and buttons around it.
 - Feedback no longer waits on a slow save (#19: the praise comes when the answer is saved, or 250 ms
-  after it is committed if saving takes longer); the performance budgets in PR C will measure the
-  time from an answer to its feedback on a throttled device.
+  after it is committed if saving takes longer). Measured since ([performance.md](performance.md)):
+  with the processor four times slower the save takes 130-160 ms and the feedback follows at
+  150-190 ms, inside the patience; `perf.spec.ts` holds the median to 500 ms.
 - axe reports only moderate findings: `region` (toasts, the announcer and the
   boot status sit outside landmarks) and `page-has-heading-one` on the startup failure screen.
 - Remainder mode (`4 r 3` / `4 R 3`) is played both ways since v1: typed in the leftover Sharing

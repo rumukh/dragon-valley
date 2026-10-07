@@ -21,6 +21,7 @@ import { gzipSync } from 'node:zlib';
 import type { TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import { expect, test } from './support/fixtures';
+import { answerCorrectly, newFamily, startPlacement } from './support/app';
 import { siteFolder } from './support/site';
 
 const KB = 1_000;
@@ -70,6 +71,11 @@ const PROFILES: readonly Profile[] = [
 const CPU_SLOWDOWN = 4;
 /** Cold visits per profile; the best one is held to the budget (noise only slows a visit down). */
 const VISITS = 3;
+/** Feedback after an answer, on the same slower processor: the median of these answers. */
+const ANSWERS = 7;
+const FEEDBACK_BUDGET_MS = 500;
+const THROTTLING_ONLY_IN_CHROMIUM =
+  'Network and processor throttling use the Chrome DevTools Protocol, which only Chromium has.';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -160,10 +166,7 @@ for (const profile of PROFILES) {
     page,
     browserName,
   }, testInfo) => {
-    test.skip(
-      browserName !== 'chromium',
-      'Network and processor throttling use the Chrome DevTools Protocol, which only Chromium has.',
-    );
+    test.skip(browserName !== 'chromium', THROTTLING_ONLY_IN_CHROMIUM);
     test.slow();
     await page.addInitScript(firstScreenProbe);
     const cdp = await page.context().newCDPSession(page);
@@ -205,3 +208,67 @@ for (const profile of PROFILES) {
     );
   });
 }
+
+/**
+ * Runs in the page before an answer: resolves with the time from the answer's Enter key to the
+ * feedback being shown (or -1 if none came within 20 s).
+ */
+function armFeedbackTimer(): void {
+  const node = document.querySelector('[data-testid="feedback"]');
+  const scope = window as unknown as { __dvQaFeedbackDelay?: Promise<number> };
+  scope.__dvQaFeedbackDelay = new Promise<number>((resolve) => {
+    if (!node) {
+      resolve(-1);
+      return;
+    }
+    let sent = -1;
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === 'Enter' && sent < 0) sent = performance.now();
+    };
+    const done = (delay: number): void => {
+      observer.disconnect();
+      window.removeEventListener('keydown', onKey, true);
+      clearTimeout(timer);
+      resolve(delay);
+    };
+    const observer = new MutationObserver(() => {
+      const kind = node.getAttribute('data-kind');
+      if (sent >= 0 && kind && kind !== 'none') done(performance.now() - sent);
+    });
+    const timer = setTimeout(() => done(-1), 20_000);
+    window.addEventListener('keydown', onKey, true);
+    observer.observe(node, { attributes: true, attributeFilter: ['data-kind'] });
+  });
+}
+
+test(`feedback follows an answer within ${FEEDBACK_BUDGET_MS} ms with a slower processor`, async ({
+  page,
+  browserName,
+}, testInfo) => {
+  test.skip(browserName !== 'chromium', THROTTLING_ONLY_IN_CHROMIUM);
+  test.slow();
+  await newFamily(page, { name: 'Ada' });
+  await startPlacement(page);
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: CPU_SLOWDOWN });
+  const delays: number[] = [];
+  for (let answer = 0; answer < ANSWERS; answer++) {
+    await page.evaluate(armFeedbackTimer);
+    await answerCorrectly(page, 'keyboard');
+    delays.push(
+      await page.evaluate(
+        () => (window as unknown as { __dvQaFeedbackDelay: Promise<number> }).__dvQaFeedbackDelay,
+      ),
+    );
+  }
+  expect(Math.min(...delays), 'every answer was timed to its feedback').toBeGreaterThanOrEqual(0);
+  const sorted = [...delays].sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)]!;
+  record(
+    testInfo,
+    `feedback after an answer, processor ×${CPU_SLOWDOWN}: median ${Math.round(median)} ms (budget ${FEEDBACK_BUDGET_MS}), slowest ${Math.round(sorted.at(-1)!)} ms; answers ${delays.map(Math.round).join(', ')} ms`,
+  );
+  expect(median, `feedback within ${FEEDBACK_BUDGET_MS} ms of the answer`).toBeLessThanOrEqual(
+    FEEDBACK_BUDGET_MS,
+  );
+});

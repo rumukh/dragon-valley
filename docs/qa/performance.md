@@ -15,6 +15,7 @@ measurements to the job summary ("Performance"), so a budget is revisited with n
 | First visit: downloaded before the title (uncompressed) | 1.3 MB       | 1.09 MB      | 325 KB gzipped, as GitHub Pages sends it        |
 | First visit, fast 4G, processor ×4: title ready         | 4 s          | 1.7 s        | first paint 0.36 s (budget 1.5 s)               |
 | First visit, slow 4G, processor ×4: title ready         | 10 s         | 6.6 s        | first paint 1.13 s (budget 3 s)                 |
+| Feedback after an answer, processor ×4 (median of 7)    | 500 ms       | 170-340 ms   | the save is most of it (below)                  |
 
 "Now" is commit `f850d39` on the development machine (Edge); CI's numbers are in each job summary.
 Sizes are in decimal units (1 KB = 1 000 bytes). The audio has its own budget, 8 MB, held by S5's
@@ -38,6 +39,21 @@ A first visit downloads eight files before the title is ready:
 
 Nothing else loads until the child does something: sounds load when they first play, and the
 offline pack only when a grown-up installs it (8.75 MB, in the background, with progress shown).
+
+## Feedback after an answer
+
+Praise or kind help must follow an answer at once, also on a slow tablet. The game shows the
+feedback when the answer is saved, or 250 ms after it is taken if saving is slower
+([app.md](../app.md) §5), so on a slow processor the save is most of the wait. Timed in the page
+from the answer's Enter to the feedback, in the placement check:
+
+| Processor         | Feedback   | Saved      |
+| ----------------- | ---------- | ---------- |
+| as is (Edge)      | 23-31 ms   | 18-24 ms   |
+| four times slower | 153-185 ms | 128-159 ms |
+
+Under load (other tests running beside it) the median rose to about 340 ms; the budget is 500 ms
+for the median of seven answers.
 
 ## How it is measured
 
