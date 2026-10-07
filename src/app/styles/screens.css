@@ -882,6 +882,57 @@
   width: min(14rem, 32vh, 36vw);
 }
 
+.dv-round--boss .dv-round__dragon[data-stage='egg'] svg {
+  width: min(7.5rem, 20vh, 30vw);
+}
+
+/* On a landscape window the dragon and the boss stand side by side, the picture behind a problem
+   under both; while a picture shows, both step back a little so the round still fits. */
+@media (min-width: 900px) and (orientation: landscape) {
+  .dv-round--boss .dv-round__cast {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+    grid-template-areas:
+      'dragon boss'
+      'model model';
+    align-items: end;
+    justify-items: center;
+    gap: 0.5em;
+  }
+
+  .dv-round--boss .dv-round__dragon {
+    grid-area: dragon;
+  }
+
+  .dv-round--boss .dv-round__boss-figure {
+    grid-area: boss;
+  }
+
+  .dv-round--boss .dv-round__cast > .dv-round__model {
+    grid-area: model;
+  }
+
+  .dv-round--boss .dv-round__dragon svg,
+  .dv-round__boss svg {
+    max-width: 100%;
+  }
+
+  .dv-round--boss .dv-round__cast:has(> .dv-round__model:not(:empty)) .dv-round__dragon svg {
+    width: min(9rem, 18vh);
+  }
+
+  .dv-round--boss
+    .dv-round__cast:has(> .dv-round__model:not(:empty))
+    .dv-round__dragon[data-stage='egg']
+    svg {
+    width: min(6rem, 14vh);
+  }
+
+  .dv-round--boss .dv-round__cast:has(> .dv-round__model:not(:empty)) .dv-round__boss svg {
+    width: min(10rem, 20vh);
+  }
+}
+
 /* The boss, and for the Seven-Headed Dragon the heads cured so far (pips and words). */
 .dv-round__boss-figure {
   display: grid;
