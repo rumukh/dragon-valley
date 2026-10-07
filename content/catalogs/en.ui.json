@@ -212,7 +212,7 @@
   "parent.progress.noSkills": "No skills practised yet.",
   "parent.progress.skillsShow": "Show the {count} skills practised so far",
   "parent.item.rem": "Division with remainder by {n}",
-  "parent.item.tens": "Dividing tens by {n}",
+  "parent.item.tens": "Multiplying tens by {n}",
   "parent.item.pow10.x10": "Multiplying by 10",
   "parent.item.pow10.x100": "Multiplying by 100",
   "parent.item.mul2d1d.carry": "Two-digit times one-digit, with carrying",
