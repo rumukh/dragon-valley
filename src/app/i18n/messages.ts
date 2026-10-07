@@ -50,3 +50,11 @@ export function plural(
 ): string {
   return t(count === 1 ? one : other, { ...values, count });
 }
+
+/**
+ * A name's possessive, for messages that take it as `{owner}`: a name ending in "s" takes only
+ * the apostrophe ("Bubbles' egg", "Jonas' dragons"), any other name "'s" ("Sunny's egg").
+ */
+export function possessive(name: string): string {
+  return /s$/iu.test(name) ? `${name}'` : `${name}'s`;
+}

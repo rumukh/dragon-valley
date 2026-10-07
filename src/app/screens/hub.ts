@@ -10,7 +10,7 @@ import type { GameAction, GameView } from '../../rules/contract';
 import { taken } from '../controller/commands';
 import { adventureFor, featuredDragon, findLevel, growthOf, weekdayIndex } from '../game/view';
 import type { Adventure } from '../game/view';
-import { plural } from '../i18n/messages';
+import { plural, possessive } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { openModal } from '../ui/dialog';
 import { candyButton } from '../ui/button';
@@ -56,6 +56,10 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       return;
     }
     const name = text(featured.nameKey);
+    const stageName = t(`stage.${featured.stage}` as MessageKey, {
+      name,
+      owner: possessive(name),
+    });
     const parts: Node[] = [
       h(
         'div',
@@ -65,14 +69,14 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
           dataset: { dragon: featured.id, stage: featured.stage },
           attributes: {
             role: 'img',
-            'aria-label': t(`stage.${featured.stage}` as MessageKey, { name }),
+            'aria-label': stageName,
           },
         },
         viewDragonArt(featured, { framing: featured.stage === 'egg' ? 'fit' : 'stage' }),
       ),
       h('p', {
         className: 'dv-hub__dragon-name',
-        text: t(`stage.${featured.stage}` as MessageKey, { name }),
+        text: stageName,
       }),
     ];
     const growth = growthOf(featured);
@@ -122,7 +126,10 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       h('span', {
         className: 'dv-visually-hidden',
         text: others
-          .map((dragon) => t(`stage.${dragon.stage}` as MessageKey, { name: text(dragon.nameKey) }))
+          .map((dragon) => {
+            const name = text(dragon.nameKey);
+            return t(`stage.${dragon.stage}` as MessageKey, { name, owner: possessive(name) });
+          })
           .join(', '),
       }),
     );

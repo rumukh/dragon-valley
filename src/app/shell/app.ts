@@ -230,6 +230,9 @@ export function createApp(options: AppOptions): App {
     onLeave() {
       stopSpeech();
       fx.replaceChildren();
+      // Called just before the next screen is inserted: at a new text size the stage is already
+      // transparent, with its style flushed, when that screen's first frame is drawn (DV-QA-13).
+      if (rescaled !== null) hideStage();
     },
     onMount(screen, moved) {
       bootStatus.dataset['screen'] = (router.currentKey() ?? '').split(':')[0] ?? '';
@@ -245,10 +248,29 @@ export function createApp(options: AppOptions): App {
   let rescaled: number | null = null;
   let revealing = 0;
   /**
+   * WebKit can apply the `data-restyling` rule a frame late, the very frame a new screen is drawn
+   * at the old size, so the stage is also made transparent inline and its style read back at once.
+   * A stage nothing reveals within a moment is shown again whatever happens.
+   */
+  const hideStage = (): void => {
+    const own = ++revealing;
+    stage.dataset['restyling'] = 'true';
+    stage.style.opacity = '0';
+    void getComputedStyle(stage).opacity;
+    setTimeout(() => {
+      if (own === revealing) showStage();
+    }, 600);
+  };
+  const showStage = (): void => {
+    delete stage.dataset['restyling'];
+    stage.style.removeProperty('opacity');
+  };
+  /**
    * After a change of text size the next screen stays transparent until it is styled at the new
    * size: an engine can draw a newly mounted screen against the root's old size for a few frames
    * (WebKit, sometimes Chromium), so a 200 % reader would see small text flash. The stage is
-   * transparent, not hidden, so focus and screen readers are not disturbed; at most 400 ms.
+   * transparent, not hidden, so focus and screen readers are not disturbed; at most 400 ms. A
+   * screen already at its size when it is mounted is shown at once.
    */
   const revealAtScale = (element: HTMLElement, scale: number): void => {
     const own = ++revealing;
@@ -256,12 +278,16 @@ export function createApp(options: AppOptions): App {
     const started = performance.now();
     const ready = (): boolean =>
       Math.abs(parseFloat(getComputedStyle(element).fontSize) - expected) < 0.5;
-    if (ready()) return;
+    if (ready()) {
+      showStage();
+      return;
+    }
     stage.dataset['restyling'] = 'true';
+    stage.style.opacity = '0';
     const check = (): void => {
       if (own !== revealing) return;
       if (!element.isConnected || ready() || performance.now() - started > 400) {
-        delete stage.dataset['restyling'];
+        showStage();
         return;
       }
       requestAnimationFrame(check);
@@ -272,7 +298,9 @@ export function createApp(options: AppOptions): App {
   const applyPresentation = (preferences: ChildPreferences | null): void => {
     const chosen = preferences ?? DEFAULT_PREFERENCES;
     const root = document.documentElement;
-    if (root.dataset['textScale'] !== String(chosen.presentation.textScale)) {
+    // The page starts at the default size, so opening a keeper at that size changes nothing.
+    const drawn = root.dataset['textScale'] ?? String(DEFAULT_PREFERENCES.presentation.textScale);
+    if (drawn !== String(chosen.presentation.textScale)) {
       rescaled = chosen.presentation.textScale;
     }
     applyPresentationPreferences(root, chosen.presentation);

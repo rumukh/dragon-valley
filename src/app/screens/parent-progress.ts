@@ -387,7 +387,14 @@ export function progressContent(
       : h(
           'details',
           { className: 'dv-details' },
-          h('summary', { text: t('parent.progress.skillsShow', { count: skills.length }) }),
+          h('summary', {
+            text: plural(
+              t,
+              skills.length,
+              'parent.progress.skillsShow.one',
+              'parent.progress.skillsShow.other',
+            ),
+          }),
           statList(
             t('parent.progress.skillsHeading'),
             [t('parent.progress.mastered'), t('parent.progress.right')],

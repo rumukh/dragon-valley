@@ -15,109 +15,36 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 
 ## Open
 
-| ID       | Severity | Owner | Summary                                                                            |
-| -------- | -------- | ----- | ---------------------------------------------------------------------------------- |
-| DV-QA-13 | minor    | S3    | WebKit, intermittent: a keeper's hub at 200 % text comes into sight at normal size |
-| DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys             |
-| DV-QA-19 | minor    | S3    | The hub says "Bubbles's egg"; the copy brief writes "Bubbles' egg"                 |
-
-### DV-QA-13 (minor, S3; WebKit, intermittent): a keeper's hub at 200 % text first comes into sight at normal size
-
-- **Repro** (Playwright's WebKit 26.6): give a keeper Text size **200%** in the grown-ups' area,
-  then open that keeper from "Who is playing?".
-- **Expected**: the hub comes into sight at 200 %. After #49 Chromium does (6 of 6 openings:
-  the stage stays transparent for 7 frames, until the hub is restyled), and Firefox always has.
-- **Actual** (at `44ab948`, after #49): in WebKit, 6 of 8 openings still show the hub at 100 %
-  first. Frame by frame: the hub is mounted and the stage gets `data-restyling="true"` in the same
-  task, yet at the first animation frame the stage's computed opacity is still 1 and the greeting
-  computes at 43.2 px, not 86.4 px. At the next frame the stage is transparent and the greeting
-  86.4 px; the stage turns opaque again once the hub's own size is 48 px. WebKit applies the
-  attribute rule (`.dv-stage[data-restyling='true'] { opacity: 0 }`) a frame late: exactly the
-  frame drawn at the old size. In 2 of 8 the stage was transparent from the first frame. The page
-  cannot tell what was painted; this is the same computed-style evidence the defect was found by.
-- **Before #49** (at `0827c3a`): 6 of 6 WebKit openings drew the greeting at 43.2 px for
-  140-435 ms, and Chromium on CI sometimes did too (2 of 4 runs).
-- **Likely fix**: make the stage transparent, and flush its style, before the new screen is
-  inserted: set `data-restyling` when `applyPresentation` sees the scale change (or just before
-  `replaceProjection`), then read `getComputedStyle(stage).opacity` so WebKit applies the rule
-  before the screen's first frame. Minor: the setting is never lost, but a 200 % reader can see
-  small text for a frame or so whenever their keeper opens.
-- **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…" watches every animation
-  frame from the tap on the keeper and keeps the sizes at the first frame the greeting is in sight
-  (it and its ancestors at least half opaque), against the same hub at 100 %; the job summary
-  records them (`DV-QA-13 evidence`, with the frames it was kept out of sight). Chromium and
-  Firefox check it strictly; in WebKit it is marked intermittent (a run without it is noted, not
-  taken for a fix).
-
-### DV-QA-15 (minor, S3; WebKit): the keeper pictures lose their focus ring under the arrow keys
-
-- **Repro** (Safari, or Playwright's WebKit 26.6): in the keeper editor, Tab to the pictures (the
-  focused picture shows its dark ring), then press an arrow key.
-- **Expected**: the picture the arrow moved to shows the focus ring, as in Chromium and Firefox.
-- **Actual**: no focus ring; only the violet "chosen" ring and dot, which move with the choice.
-  WebKit does not match `:focus-visible` on a radio that an arrow key focused, and the pictures
-  draw their ring only for it (`.dv-avatar-choice:has(input:focus-visible)`, `screens.css`). It is
-  WebKit's own behaviour: a plain page with three radios does the same (focus-visible true after
-  Tab, false after each arrow that moves, true again after a key press that does not move). The
-  choice is still visible and the next Tab or Shift+Tab brings the ring back, hence minor.
-- **Likely fix**: show the ring while the keyboard is in use, not only for `:focus-visible`: for
-  example mark the picker on an arrow keydown and unmark it on pointerdown, and style
-  `.dv-avatar-picker[data-keys] .dv-avatar-choice:has(input:focus)`. (The pictures are the only
-  native radio group in the game; the grown-ups' choices are buttons.)
-- **Evidence**: `test/e2e/keyboard.spec.ts` › "the keeper editor by keyboard alone › the pictures
-  are one named radio group…" (the ring by pixels after the arrows; strict in Chromium and
-  Firefox).
-
-### DV-QA-19 (minor, S3): the hub says "Bubbles's egg"
-
-- **Repro** (any engine, main at `22cdedc`): make a new keeper and choose Bubbles, the first of
-  the three eggs.
-- **Expected**: the nest's caption and its picture's name say "Bubbles' egg". This is the copy
-  brief's own example (the coordinator's PR C request): a name ending in "s" takes only the
-  apostrophe.
-- **Actual**: "Bubbles's egg", both under the egg and as the picture's accessible name. The same
-  rule gives the hatching art's label "Bubbles's egg wobbles and cracks." (`hatch.hatching`, while
-  the egg cracks) and the screen-reader list of other dragons on the hub's "My dragons" button
-  (`stage.egg` again, while Bubbles is still an egg and another dragon is featured). The cause is
-  `content/catalogs/en.ui.json`, `stage.egg` ("{name}'s egg") and `hatch.hatching` ("{name}'s egg
-  wobbles and cracks."), which add "'s" to every name. Bubbles is the only dragon whose name ends
-  in "s". No word-problem name does, so S2b's `word.grouping.holiday` ("{name}'s holiday") reads well.
-- **Likely fix**: form possessives in one place, for example a `possessive(name)` helper (add "'"
-  after a final "s", otherwise "'s"). Pass its result as an `{owner}` parameter (`"{owner} egg"`)
-  to `stage.egg` and `hatch.hatching`. The grown-ups' texts that name a keeper
-  (`parent.keepers.removeBody`, `parent.data.*`, `parent.progress.unreadable`,
-  `parent.print.hardestTitle`, `recovery.game`, `recovery.preferences`) would then read
-  "Jonas' dragons" for a keeper called Jonas, the same as the children's screens. Minor: the
-  meaning is clear, but it is the first dragon most children meet, and the form contradicts the brief.
-- **Evidence**: `test/e2e/first-run.spec.ts` › "the nest says whose egg it is…" (the picture's
-  accessible name and the hub's text). "Sunny's egg" and "Goldie's egg" are checked strictly in the
-  same file. Details: [copy-review.md](copy-review.md), "Possessives".
+None. The last three (DV-QA-13, DV-QA-15 and DV-QA-19, all minor) were fixed by #57.
 
 ## Fixed
 
 Each was verified fixed by the suite in Chromium (Edge), Firefox and WebKit, and its assertion now
-runs as a regression check. (DV-QA-13 is fixed in Chromium by #49 and stays open for WebKit.) The full
+runs as a regression check. The full
 write-ups (repro, cause, suggested fix) are in this file's history:
 `git log -p -- docs/qa/defects.md`.
 
-| ID       | Was                                                                                          | Fixed by | Regression check                                                                                           |
-| -------- | -------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| DV-QA-01 | After a failed save and Retry, the stored answer was never praised; the round stood still    | #19      | `recovery.spec.ts` › a failed save says "Not saved"…                                                       |
-| DV-QA-02 | "You got 1 coins!", "1 coins": no singular                                                   | #19      | `live.spec.ts` › "a round speaks its feedback…" ("You got 1 coin!")                                        |
-| DV-QA-03 | Enter was ignored when a round opened on a keypad problem (phase-1 shell)                    | #13      | `input.spec.ts` › "a round that opens on a keypad problem takes Enter from the keyboard"                   |
-| DV-QA-04 | Retry in the "Not saved" pill was 40 px tall                                                 | #19      | layout checks at `screens.spec.ts` stop `41-save-failed`                                                   |
-| DV-QA-05 | The grown-ups' Settings scrolled sideways on a phone (last in WebKit: the voice list)        | #19, #41 | layout checks at `screens.spec.ts` stops `26-parent-settings`, `44-settings-saved` (phone)                 |
-| DV-QA-06 | Words and numbers broke inside narrow boxes (200 % tiles "1" over "8"; phone egg labels)     | #19      | layout checks in `reflow.spec.ts` (`text-200`) and at stop `05-story-eggs` (phone)                         |
-| DV-QA-07 | A missed tile's badge pushed the round sideways at 200 % (phase-1 shell)                     | #13      | layout checks in `reflow.spec.ts` (`text-200`, `16-round-choice`)                                          |
-| DV-QA-08 | Screens' focus targets dropped out of the Tab order and lost their ring                      | #19      | `keyboard.spec.ts`: the editor (by pixels) and the error screen                                            |
-| DV-QA-09 | Enter after a click on Read aloud re-read the problem instead of sending the answer          | #19      | `input.spec.ts` › "Enter still sends the answer after the child used Read aloud"                           |
-| DV-QA-10 | At 200 % text on a phone the hub and the Egg Grid scrolled sideways                          | #19      | layout checks in `reflow.spec.ts` (`text-200`, phone)                                                      |
-| DV-QA-11 | Map and road hotspots were cut off by the picture's frame                                    | #19      | layout checks at stops `13-map` and `14-region`, and in `reflow.spec.ts`                                   |
-| DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                           | #17      | `persistence.spec.ts` › "a finished round is kept…"                                                        |
-| DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)          | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                                        |
-| DV-QA-16 | Two announcements within 40 ms: only the second was heard (the results' headline lost)       | #41      | `live.spec.ts` › "a round speaks its feedback…" (the headline heard; S3's announcer unit test queues them) |
-| DV-QA-17 | Memory Match's term cards did not show which number of the example was meant                 | #46      | `activities.spec.ts` › "Memory Match term cards…": the example marks its number and says which             |
-| DV-QA-18 | A missed × 0 fact was sent to "Look first!" and "Look at the picture first", with no picture | #45      | `teach.spec.ts` › "a × 0 fact asked again…" and "…taught…": the rule drawn as plates, first                |
+| ID       | Was                                                                                                  | Fixed by | Regression check                                                                                           |
+| -------- | ---------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| DV-QA-01 | After a failed save and Retry, the stored answer was never praised; the round stood still            | #19      | `recovery.spec.ts` › a failed save says "Not saved"…                                                       |
+| DV-QA-02 | "You got 1 coins!", "1 coins": no singular                                                           | #19      | `live.spec.ts` › "a round speaks its feedback…" ("You got 1 coin!")                                        |
+| DV-QA-03 | Enter was ignored when a round opened on a keypad problem (phase-1 shell)                            | #13      | `input.spec.ts` › "a round that opens on a keypad problem takes Enter from the keyboard"                   |
+| DV-QA-04 | Retry in the "Not saved" pill was 40 px tall                                                         | #19      | layout checks at `screens.spec.ts` stop `41-save-failed`                                                   |
+| DV-QA-05 | The grown-ups' Settings scrolled sideways on a phone (last in WebKit: the voice list)                | #19, #41 | layout checks at `screens.spec.ts` stops `26-parent-settings`, `44-settings-saved` (phone)                 |
+| DV-QA-06 | Words and numbers broke inside narrow boxes (200 % tiles "1" over "8"; phone egg labels)             | #19      | layout checks in `reflow.spec.ts` (`text-200`) and at stop `05-story-eggs` (phone)                         |
+| DV-QA-07 | A missed tile's badge pushed the round sideways at 200 % (phase-1 shell)                             | #13      | layout checks in `reflow.spec.ts` (`text-200`, `16-round-choice`)                                          |
+| DV-QA-08 | Screens' focus targets dropped out of the Tab order and lost their ring                              | #19      | `keyboard.spec.ts`: the editor (by pixels) and the error screen                                            |
+| DV-QA-09 | Enter after a click on Read aloud re-read the problem instead of sending the answer                  | #19      | `input.spec.ts` › "Enter still sends the answer after the child used Read aloud"                           |
+| DV-QA-10 | At 200 % text on a phone the hub and the Egg Grid scrolled sideways                                  | #19      | layout checks in `reflow.spec.ts` (`text-200`, phone)                                                      |
+| DV-QA-11 | Map and road hotspots were cut off by the picture's frame                                            | #19      | layout checks at stops `13-map` and `14-region`, and in `reflow.spec.ts`                                   |
+| DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                                   | #17      | `persistence.spec.ts` › "a finished round is kept…"                                                        |
+| DV-QA-13 | A keeper's hub at 200 % text came into sight at normal size for a frame (WebKit; Chromium until #49) | #49, #57 | `reflow.spec.ts` › "a keeper's text at 200 %…": the sizes at the first frame the hub is in sight           |
+| DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)                  | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                                        |
+| DV-QA-15 | The keeper pictures lost their focus ring under the arrow keys (WebKit)                              | #57      | `keyboard.spec.ts` › "the pictures are one named radio group…" (the ring by pixels after the arrows)       |
+| DV-QA-16 | Two announcements within 40 ms: only the second was heard (the results' headline lost)               | #41      | `live.spec.ts` › "a round speaks its feedback…" (the headline heard; S3's announcer unit test queues them) |
+| DV-QA-17 | Memory Match's term cards did not show which number of the example was meant                         | #46      | `activities.spec.ts` › "Memory Match term cards…": the example marks its number and says which             |
+| DV-QA-18 | A missed × 0 fact was sent to "Look first!" and "Look at the picture first", with no picture         | #45      | `teach.spec.ts` › "a × 0 fact asked again…" and "…taught…": the rule drawn as plates, first                |
+| DV-QA-19 | The hub said "Bubbles's egg"; the copy brief writes "Bubbles' egg"                                   | #57      | `first-run.spec.ts` › "the nest says whose egg it is…"                                                     |
 
 ### The coordinator's Region 1 playtest (the deployed `5848964`)
 
@@ -130,6 +57,13 @@ every engine (measured on Edge, Chromium, Firefox and WebKit before it was merge
 | The hub, the results and the Egg Grid needed page scrolling at 1180 × 820 and 1024 × 768                                         | #17      | "on a tablet …": the hub, the Egg Grid, a round, each hatch and the results at both sizes (with `profiles.spec.ts`, which plays at 1024 × 768)                                            |
 | The hatched dragon was small among the results' words                                                                            | #17      | "on a tablet …": at least 200 px each way, wholly on screen, no word on it (Bubbles measured 365 × 400 px at 1180 × 820, 318 × 348 px at 1024 × 768)                                      |
 | A change of screen showed an empty sky for a moment (the new screen faded in from nothing)                                       | #17      | "a change of screen …": a journey of 24 steps through every kind of screen, never blank for more than 300 ms (none blank at all), Chromium with a 4× slower processor; also a whole level |
+
+### The coordinator's last playtest (the live content 1.3.0, 1366 × 657)
+
+| Finding                                                                                                                                | Fixed by | Regression check                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| PT5-01: the feast's early answer said "and 1 are left over" (`feast.sharedLeft` had no singular; nor had `parent.progress.skillsShow`) | #57      | `feast.spec.ts` › "a right answer with the fruit still in the bowl…" ("1 is left over")           |
+| PT5-02: after a big first day the goodbye page was 1062 px tall in a 657 px window, with "See you soon!" below the fold                | #57      | `goodbye.spec.ts` › "a big first day still fits a laptop window…" (the diary scrolls in its card) |
 
 ## Observations for design review (not defects)
 

@@ -28,7 +28,7 @@ async function answerAtOnce(page: Page): Promise<void> {
 
   await expect(minigameStatus(page), 'the right answer is praised with the share').toHaveText(
     problem.asksRemainder
-      ? `Well done! Each basket gets ${problem.quotient}, and ${problem.remainder} are left over.`
+      ? `Well done! Each basket gets ${problem.quotient}, and ${problem.remainder} ${problem.remainder === 1 ? 'is' : 'are'} left over.`
       : `Well done! Each basket gets ${problem.quotient}.`,
   );
   for (const index of [0, problem.baskets - 1]) {
