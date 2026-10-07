@@ -1,0 +1,255 @@
+/*
+ * Strategy pictures beyond the small table (src/app/ui/models.ts): a place-value chart, ten-rods
+ * in groups, area models of tens and ones, and an expression worked out step by step. They share
+ * the `.dv-model` card in screens.css and stay about as big as the groups model, so the round
+ * keeps fitting the screen. Tens are violet rods and ones yellow dots: shape and labels tell them
+ * apart, not color alone. Nothing moves.
+ */
+
+.dv-model--strategy {
+  max-width: 100%;
+}
+
+.dv-model__art {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: min(4.4em, 16vh);
+  overflow: visible;
+}
+
+.dv-model__art text {
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: var(--dv-ink);
+}
+
+/* ---- The written line under a picture ---------------------------------------------------- */
+
+.dv-model__caption {
+  display: grid;
+  justify-items: center;
+  max-width: 100%;
+  text-align: center;
+}
+
+.dv-model__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1em 0.3em;
+  font-size: 0.85em;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-ink);
+}
+
+.dv-model__part,
+.dv-model__step,
+.dv-model__first {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22em;
+  white-space: nowrap;
+}
+
+.dv-model__sign {
+  color: var(--dv-primary-deep);
+}
+
+.dv-model__bracket {
+  color: var(--dv-ink-soft);
+}
+
+.dv-model__blank {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.3em;
+  padding: 0 0.15em;
+  border: 0.07em dashed var(--dv-line-strong);
+  border-radius: 0.25em;
+  color: var(--dv-ink-muted);
+  background: var(--dv-paper);
+}
+
+.dv-model__rule-text {
+  font-size: 0.8em;
+  line-height: 1.25;
+  color: var(--dv-ink-soft);
+}
+
+/* ---- Order of operations: one row per step, the step that goes first marked ---------------- */
+
+.dv-model__steps {
+  display: grid;
+  justify-items: start;
+  gap: 0.18em;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.95em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dv-ink);
+}
+
+/* A marker and an underline, never color alone (like the asked number of a term question). */
+.dv-model__first {
+  padding: 0 0.16em;
+  border-radius: 0.22em;
+  background: var(--dv-sun);
+  box-shadow: inset 0 -0.13em var(--dv-sun-deep);
+}
+
+/* ---- Place-value chart -------------------------------------------------------------------- */
+
+.dv-model__head {
+  fill: var(--dv-paper-deep);
+}
+
+.dv-model__art .dv-model__place {
+  font-size: 14px;
+  fill: var(--dv-ink-soft);
+}
+
+.dv-model__rule {
+  stroke: var(--dv-line);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+}
+
+.dv-model__cell {
+  fill: var(--dv-card);
+  stroke: var(--dv-line-strong);
+  stroke-width: 2;
+}
+
+/* A zero that fills an empty place: highlighted and dashed. */
+.dv-model__cell--added {
+  fill: var(--dv-sun);
+  stroke: var(--dv-sun-deep);
+  stroke-dasharray: 4 3;
+}
+
+/* A place to fill in before the child answers. */
+.dv-model__cell--empty {
+  fill: var(--dv-paper);
+  stroke-dasharray: 4 3;
+}
+
+.dv-model__art .dv-model__digit {
+  font-size: 24px;
+}
+
+.dv-model__cell--dropped {
+  fill: var(--dv-paper);
+}
+
+.dv-model__strike {
+  stroke: var(--dv-miss-deep);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.dv-model__arrow-line {
+  stroke: var(--dv-primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.dv-model__arrow-head {
+  fill: var(--dv-primary);
+}
+
+/* ---- Ten-rods and area models --------------------------------------------------------------- */
+
+.dv-model__bundle {
+  fill: var(--dv-card);
+  stroke: var(--dv-line-strong);
+  stroke-width: 2;
+}
+
+.dv-model__rod {
+  fill: var(--dv-primary-soft);
+  stroke: var(--dv-primary-deep);
+  stroke-width: 1.5;
+}
+
+.dv-model__rod-line {
+  stroke: var(--dv-primary);
+  stroke-width: 1;
+}
+
+/* Where one ten ends and the next begins, in a row of an area model. */
+.dv-model__rod-end {
+  stroke: var(--dv-primary-deep);
+  stroke-width: 1.5;
+}
+
+.dv-model__unit {
+  fill: var(--dv-sun);
+  stroke: var(--dv-sun-deep);
+  stroke-width: 1.2;
+}
+
+.dv-model__art .dv-model__mark {
+  font-size: 22px;
+  fill: var(--dv-primary-deep);
+}
+
+.dv-model__block {
+  fill: var(--dv-card);
+  stroke-width: 2.5;
+}
+
+.dv-model__block--tens {
+  stroke: var(--dv-primary-deep);
+}
+
+.dv-model__block--ones {
+  stroke: var(--dv-sun-deep);
+}
+
+.dv-model__dimension {
+  stroke: var(--dv-ink-muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.dv-model__art .dv-model__side {
+  font-size: 16px;
+}
+
+.dv-model__pill {
+  fill: var(--dv-card);
+  stroke: var(--dv-line-strong);
+  stroke-width: 1.5;
+}
+
+.dv-model__art .dv-model__area {
+  font-size: 17px;
+}
+
+/* A boss round stacks the dragon and the boss above the picture: a more compact picture. */
+.dv-round--boss .dv-model--strategy {
+  gap: 0.25em;
+  padding: 0.4em 0.6em;
+}
+
+.dv-round--boss .dv-model__art {
+  height: min(3.6em, 12vh);
+}
+
+.dv-round--boss .dv-model__line {
+  font-size: 0.78em;
+}
+
+.dv-round--boss .dv-model__steps {
+  font-size: 0.82em;
+}
+
+.dv-round--boss .dv-model__rule-text {
+  font-size: 0.7em;
+}

@@ -88,12 +88,13 @@ describe('problem pictures', () => {
     });
   });
 
-  it('offer no picture where counting would not help', () => {
+  it('offer no picture where neither counting nor a strategy picture would help', () => {
     expect(
       modelFor({ kind: 'equation', left: op('mul', num(0), num(4)), right: BLANK }),
     ).toBeNull();
+    // Two two-digit factors are beyond the 3rd grade; round tens like 30 · 4 have their picture.
     expect(
-      modelFor({ kind: 'equation', left: op('mul', num(30), num(4)), right: BLANK }),
+      modelFor({ kind: 'equation', left: op('mul', num(23), num(15)), right: BLANK }),
     ).toBeNull();
     expect(modelFor({ kind: 'compare', left: num(3), right: num(4) })).toBeNull();
   });

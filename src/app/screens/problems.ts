@@ -42,7 +42,7 @@ import { createKeypad } from '../ui/keypad';
 import type { KeypadView } from '../ui/keypad';
 import { createCoinCounter, createMeter } from '../ui/meters';
 import type { MeterView } from '../ui/meters';
-import { arrayModel, groupsModel } from '../ui/models';
+import { modelFigure } from '../ui/models';
 import { animate, EASE_OUT, prefersReducedMotion, wait } from '../ui/motion';
 import { createTiles } from '../ui/tiles';
 import type { TilesView } from '../ui/tiles';
@@ -294,20 +294,10 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     return svgPointToPage(art as SVGSVGElement, anchors.mouth.x, anchors.mouth.y) ?? centerOf(art);
   };
 
-  const showModel = (problem: Problem): void => {
+  const showModel = (problem: Problem, solved = false): void => {
     const model = modelFor(problem);
-    if (!model) {
-      modelSlot.replaceChildren();
-      return;
-    }
     modelSlot.replaceChildren(
-      model.kind === 'array'
-        ? arrayModel(
-            model.rows,
-            model.columns,
-            t('model.array', { rows: model.rows, columns: model.columns }),
-          )
-        : groupsModel(model.total, model.size, t('model.groups', { size: model.size })),
+      ...(model ? [modelFigure(model, { t, notation: notation(), solved })] : []),
     );
   };
 
@@ -559,7 +549,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
         problemElement(asked.problem, notation(), speakProblem(asked.problem, 'answer'), 'answer'),
       );
     }
-    showModel(asked.problem);
+    showModel(asked.problem, true);
     if (arena) {
       next.hidden = true;
       setTimeout(() => {
