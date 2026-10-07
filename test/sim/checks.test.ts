@@ -132,7 +132,7 @@ describe('the balance checks fail, by name, a report that misses a target', () =
   });
 
   it('success outside 70-90 % in too many sessions, or a median outside the band', () => {
-    const low = report('struggling');
+    const low = report('average');
     low.days = low.days.map((d, i) => (i < 4 ? d : day(i, { correct: 24 })));
     const lowCheck = check(low, 'success-band');
     expect(lowCheck.ok).toBe(false);
@@ -141,6 +141,26 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     high.days = high.days.map((d, i) => day(i, { correct: 38 }));
     expect(check(high, 'success-band').name).toContain('median 95 %');
     expect(check(high, 'success-band').ok).toBe(false);
+  });
+
+  it('a struggling child under 60 % success; at 60 % it passes, short of the 70-90 % stretch', () => {
+    const ids = runChecks([report('struggling')]).map((c) => c.id);
+    expect(ids, "the struggling child's own target, not the band").toContain('success-floor');
+    expect(ids).not.toContain('success-band');
+    const under = report('struggling');
+    under.days = under.days.map((d, i) => day(i, { correct: 23 }));
+    const c = check(under, 'success-floor');
+    expect(c.ok).toBe(false);
+    expect(c.name).toContain(
+      'median success per session 57 %, at least 60 % (stretch 70-90 %: not reached; 0 of 14 sessions in it)',
+    );
+    const floor = report('struggling');
+    floor.days = floor.days.map((d, i) => day(i, { correct: 24 }));
+    expect(check(floor, 'success-floor').ok, 'a median of exactly 60 % passes').toBe(true);
+    expect(check(floor, 'success-floor').name).toContain('stretch 70-90 %: not reached');
+    expect(check(report('struggling'), 'success-floor').name).toContain(
+      'median success per session 80 %, at least 60 % (stretch 70-90 %: reached; 14 of 14 sessions in it)',
+    );
   });
 
   it('a session without coins', () => {
