@@ -269,9 +269,8 @@ export function createApp(options: AppOptions): App {
    * After a change of text size the next screen stays transparent until it is styled at the new
    * size: an engine can draw a newly mounted screen against the root's old size for a few frames
    * (WebKit, sometimes Chromium), so a 200 % reader would see small text flash. The stage is
-   * transparent, not hidden, so focus and screen readers are not disturbed; at most 400 ms. It is
-   * shown at an animation frame once the screen's size is right there, never in the task that
-   * mounted it.
+   * transparent, not hidden, so focus and screen readers are not disturbed; at most 400 ms. A
+   * screen already at its size when it is mounted is shown at once.
    */
   const revealAtScale = (element: HTMLElement, scale: number): void => {
     const own = ++revealing;
@@ -279,11 +278,12 @@ export function createApp(options: AppOptions): App {
     const started = performance.now();
     const ready = (): boolean =>
       Math.abs(parseFloat(getComputedStyle(element).fontSize) - expected) < 0.5;
-    if (stage.style.opacity !== '0') {
-      if (ready()) return;
-      stage.dataset['restyling'] = 'true';
-      stage.style.opacity = '0';
+    if (ready()) {
+      showStage();
+      return;
     }
+    stage.dataset['restyling'] = 'true';
+    stage.style.opacity = '0';
     const check = (): void => {
       if (own !== revealing) return;
       if (!element.isConnected || ready() || performance.now() - started > 400) {
@@ -298,7 +298,9 @@ export function createApp(options: AppOptions): App {
   const applyPresentation = (preferences: ChildPreferences | null): void => {
     const chosen = preferences ?? DEFAULT_PREFERENCES;
     const root = document.documentElement;
-    if (root.dataset['textScale'] !== String(chosen.presentation.textScale)) {
+    // The page starts at the default size, so opening a keeper at that size changes nothing.
+    const drawn = root.dataset['textScale'] ?? String(DEFAULT_PREFERENCES.presentation.textScale);
+    if (drawn !== String(chosen.presentation.textScale)) {
       rescaled = chosen.presentation.textScale;
     }
     applyPresentationPreferences(root, chosen.presentation);
