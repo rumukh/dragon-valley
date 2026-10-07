@@ -65,6 +65,13 @@ export interface ItemState {
   /** The last (at most 3) response buckets, oldest first. */
   recent: ResponseBucket[];
   lastDay: DayNumber;
+  /**
+   * The effort path (`balance.mastery.effort`): days with a right answer, each at least `gapDays`
+   * after the last counted one. Counted only while the content has the path; absent (0) before.
+   */
+  rightDays?: number;
+  /** The last day counted in `rightDays`; present exactly when `rightDays` is. */
+  lastCountedDay?: DayNumber;
 }
 
 export interface LevelProgress {
@@ -410,14 +417,17 @@ export const profileStateSchema: Schema<ProfileState> = schema.object({
     placement: oneOf(['pending', 'done', 'skipped'] as const),
   }),
   items: schema.record(
-    schema.object({
-      box: int(0, 5),
-      due: day,
-      seen: counter,
-      correct: counter,
-      recent: schema.array(bucket, { max: 3 }),
-      lastDay: day,
-    }),
+    objectWithOptional(
+      {
+        box: int(0, 5),
+        due: day,
+        seen: counter,
+        correct: counter,
+        recent: schema.array(bucket, { max: 3 }),
+        lastDay: day,
+      },
+      { rightDays: counter, lastCountedDay: day },
+    ),
   ),
   levels: idRecord(
     schema.object({

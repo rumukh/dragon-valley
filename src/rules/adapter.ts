@@ -286,7 +286,19 @@ function validateState(read: Read): Outcome<void> {
   const problems: string[] = [];
   const known = (list: readonly { id: string }[], id: string) =>
     list.some((entry) => entry.id === id);
-  for (const item of Object.keys(state.items)) if (!isItemId(item)) problems.push(`item ${item}`);
+  for (const [item, record] of Object.entries(state.items)) {
+    if (!isItemId(item)) problems.push(`item ${item}`);
+    // The effort path's count: both fields or neither, one counted day per right answer at most.
+    const days = record.rightDays;
+    const counted = record.lastCountedDay;
+    if (
+      (days === undefined) !== (counted === undefined) ||
+      (days !== undefined && (days < 1 || days > record.correct)) ||
+      (counted !== undefined && counted > record.lastDay)
+    ) {
+      problems.push(`item ${item} right days`);
+    }
+  }
   for (const level of Object.keys(state.levels))
     if (!known(data.levels, level)) problems.push(`level ${level}`);
   for (const boss of Object.keys(state.bosses))
