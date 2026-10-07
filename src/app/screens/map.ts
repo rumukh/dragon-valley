@@ -3,7 +3,9 @@
  *
  * The map is S4's `valley-map` picture with the regions as labelled buttons (the SDK's
  * `createHotspotList`, placed over the picture; a tap anywhere inside a region works too, through
- * `logicalPoint` and `hitHotspot`). Places the content does not have yet sleep under a lock. A
+ * `logicalPoint` and `hitHotspot`). When the map is too narrow for the names (a phone, or big
+ * text), the same buttons line up under it and the picture keeps each region's emblem as a pin
+ * (screens.css, "Valley map"). Places the content does not have yet sleep under a lock. A
  * region opens its stretch of road with one button per level (locked, open, the glowing next
  * one, or its stars) and the boss at the end. A level card lists the level's activities and
  * starts or continues it.
@@ -41,6 +43,29 @@ const ACTIVITY_ICONS: Readonly<Record<string, string>> = {
   'riddle-scrolls': 'chest-open',
   'golem-orders': 'coin',
 };
+
+/**
+ * Below this many text sizes of width the map is too narrow for its places' names (a phone, or
+ * big text): the buttons then line up under the picture, which keeps the emblems as pins. They
+ * also do when any two names on the picture would touch.
+ */
+const COMPACT_MAP_EMS = 36;
+
+/** True when any two of the buttons overlap. */
+function crowded(list: HTMLElement): boolean {
+  const boxes = [...list.querySelectorAll('button')].map((button) =>
+    button.getBoundingClientRect(),
+  );
+  return boxes.some((a, index) =>
+    boxes
+      .slice(index + 1)
+      .some(
+        (b) =>
+          Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 &&
+          Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1,
+      ),
+  );
+}
 
 interface Camera {
   readonly x: number;
@@ -92,8 +117,10 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
       const picture = mapPicture(map, camera, 'dv-map');
       const regions = new Map(view.hub.regions.map((region) => [region.id, region]));
       const open = (region: RegionView | undefined): boolean => region?.unlocked === true;
+      // In the valley's order, which is also the reading order of the buttons.
       const playable: Hotspot[] = map.hotspots
         .filter((spot) => open(regions.get(spot.id)))
+        .sort((a, b) => regions.get(a.id)!.order - regions.get(b.id)!.order)
         .map((spot) => ({ ...spot, labelKey: regions.get(spot.id)!.titleKey }));
       const activate = (id: string): Promise<void> =>
         app.router.push(app.screens.region(keeperId, id));
@@ -113,6 +140,16 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
         button.prepend(artIcon(`emblem-${spot.id}`, { className: 'dv-map__emblem' }));
         place(button, { x: spot.x + spot.width / 2, y: spot.y + spot.height / 2 }, camera);
       });
+      // Shown only while the names line up under the map; a tap on a pin is a tap in its region.
+      const pins = playable.map((spot) => {
+        const pin = h(
+          'span',
+          { className: 'dv-map__pin', attributes: { 'aria-hidden': 'true' } },
+          artIcon(`emblem-${spot.id}`, { className: 'dv-map__emblem' }),
+        );
+        place(pin, { x: spot.x + spot.width / 2, y: spot.y + spot.height / 2 }, camera);
+        return pin;
+      });
       const asleep = map.hotspots
         .filter((spot) => !open(regions.get(spot.id)))
         .map((spot) => {
@@ -124,7 +161,27 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
           place(pin, { x: spot.x + spot.width / 2, y: spot.y + spot.height / 2 }, camera);
           return pin;
         });
-      picture.append(...asleep, list);
+      picture.append(...asleep, ...pins, list);
+      const area = h('div', { className: 'dv-map-area', testId: 'map-area' }, picture);
+      // One set of buttons: over the picture while the names fit, under it when they do not.
+      const fit = (): void => {
+        const width = picture.clientWidth;
+        if (width === 0) return;
+        const focused = list.contains(document.activeElement) ? document.activeElement : null;
+        const size = parseFloat(getComputedStyle(picture).fontSize) || 16;
+        let compact = width < COMPACT_MAP_EMS * size;
+        if (!compact) {
+          // Try the names on the picture; if any two would touch, they go under it after all.
+          area.dataset['compact'] = 'false';
+          if (list.parentElement !== picture) picture.append(list);
+          compact = crowded(list);
+        }
+        area.dataset['compact'] = String(compact);
+        if (compact && list.parentElement !== area) area.append(list);
+        if (focused instanceof HTMLElement && document.activeElement !== focused) focused.focus();
+      };
+      const resizes = new ResizeObserver(fit);
+      resizes.observe(picture);
       picture.addEventListener('click', (event) => {
         if (event.target instanceof HTMLButtonElement) return;
         const image = picture.querySelector('img');
@@ -149,7 +206,7 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
           tools: [coins.element, saveStatus.element],
           onError: app.kit.onError,
         }),
-        picture,
+        area,
         h('p', { className: 'dv-note', text: t('map.asleep') }),
       );
       return {
@@ -159,7 +216,10 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
         region: null,
         music: 'map',
         focusTarget: () => list.querySelector('button') ?? heading,
-        dispose: () => saveStatus.dispose(),
+        dispose: () => {
+          resizes.disconnect();
+          saveStatus.dispose();
+        },
       };
     },
   };

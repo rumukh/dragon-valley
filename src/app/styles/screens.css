@@ -2047,6 +2047,39 @@
   inset: 0;
 }
 
+/* The map and its places. The places' buttons sit over the picture while their names fit, and
+   line up under it when the map is narrow for its text (a phone, or big text: map.ts moves
+   them); the picture then keeps each place's emblem as a pin. One set of buttons either way, in
+   the valley's order. Pins follow the picture's size (`cqw`). */
+.dv-map {
+  container-type: inline-size;
+}
+
+.dv-map-area[data-compact='true'] .dv-map__places {
+  position: static;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em;
+  margin-top: 0.8em;
+}
+
+.dv-map-area[data-compact='true'] .dv-map__place {
+  position: static;
+  translate: none;
+  max-width: 100%;
+  padding: 0.3em 0.9em 0.3em 0.35em;
+}
+
+.dv-map-area[data-compact='true'] .dv-map__place .dv-map__emblem {
+  width: 2em;
+  height: 2em;
+}
+
+.dv-map-area[data-compact='true'] .dv-map__pin {
+  display: grid;
+}
+
 /* A place's name is anchored in proportion to where it stands (left at the left edge, centred in
    the middle, right at the right edge), so a long name or big text never leaves the frame. */
 .dv-map__place {
@@ -2057,9 +2090,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4em;
+  width: max-content;
   min-height: var(--dv-target);
   max-width: 92%;
-  padding: 0.3em 0.9em 0.3em 0.35em;
+  padding: 0.15em 0.8em 0.15em 0.2em;
   border: 0.1em solid var(--dv-line);
   border-radius: 2em;
   font: inherit;
@@ -2072,14 +2106,18 @@
   cursor: pointer;
 }
 
+/* On the picture a place is exactly one target high, so neighbouring names keep apart. */
 .dv-map__emblem {
-  width: 2em;
-  height: 2em;
+  flex: none;
+  width: 1.4em;
+  height: 1.4em;
 }
 
-/* Pins and level markers stand centred on their point, kept half their size from the edges. */
-.dv-map__asleep {
-  --size: 2.4em;
+/* Pins and level markers stand centred on their point, kept half their size from the edges.
+   Pins are pictures: they follow the map's size, not the text size. */
+.dv-map__asleep,
+.dv-map__pin {
+  --size: clamp(24px, 6cqw, 52px);
   position: absolute;
   left: clamp(calc(var(--size) / 2), var(--x, 50%), calc(100% - var(--size) / 2));
   top: clamp(calc(var(--size) / 2), var(--y, 50%), calc(100% - var(--size) / 2));
@@ -2094,8 +2132,20 @@
 }
 
 .dv-map__asleep svg {
-  width: 1.3em;
-  height: 1.3em;
+  width: 55%;
+  height: 55%;
+}
+
+.dv-map__pin {
+  --size: clamp(30px, 8cqw, 64px);
+  display: none;
+  background: var(--dv-card);
+  box-shadow: 0 0.1em 0 var(--dv-line-strong);
+}
+
+.dv-map__pin .dv-map__emblem {
+  width: 84%;
+  height: 84%;
 }
 
 /* Level markers are pictures: they follow the road's size, not the text size, so big text on
