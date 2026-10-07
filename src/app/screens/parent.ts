@@ -548,7 +548,10 @@ export function parentScreen(
         arena.addEventListener('change', () => {
           void set({ key: 'arena', value: arena.checked }).catch(app.kit.onError);
         });
-        const locked = view.hub.regions.filter((region) => !region.unlocked);
+        // Regions still locked, and those opened ahead (so they can be closed again).
+        const locked = view.hub.regions.filter(
+          (region) => !region.unlocked || view.settings.unlockAhead.includes(region.id),
+        );
         return h(
           'div',
           { className: 'dv-parent__rules', testId: 'parent-rules' },
