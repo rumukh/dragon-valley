@@ -492,3 +492,7 @@ Gaps found while building the shell (filed upstream by the coordinator, never pa
 - No way to ask whether the audio context is running other than tracking `unlock()`.
 - No helper to rebind a save envelope to another profile ID (backups do it by hand).
 - No preloading of effects: the first play of each sound waits for its download and decode.
+- `RuntimeHost.getView()` clones the whole view on every call, and every view or commit listener
+  gets its own copy: with the whole v1 pack that is the main cost of a redraw. The shell keeps
+  one commit listener per keeper and reads the view it was handed (§4); a read-only, shared view
+  accessor would make that unnecessary.
