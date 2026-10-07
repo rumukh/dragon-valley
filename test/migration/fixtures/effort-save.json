@@ -1,0 +1,764 @@
+{
+  "format": "aegis-runtime/1",
+  "adapter": "dragon-valley",
+  "stateVersion": 1,
+  "content": {
+    "id": "dragon-valley",
+    "revision": "1.2.0",
+    "schemaVersion": 1,
+    "hash": "69494a787c9bab06"
+  },
+  "seed": "effort-save",
+  "revision": 267,
+  "turn": 81,
+  "world": {
+    "version": 1,
+    "tick": 0,
+    "entities": [],
+    "resources": {
+      "aegis.runtime.state": {
+        "day": 20736,
+        "firstDay": 20732,
+        "sessions": 3,
+        "daysPracticed": 3,
+        "onboarding": {
+          "firstEgg": "bubbles",
+          "placement": "skipped"
+        },
+        "items": {
+          "mul:2x7": {
+            "box": 1,
+            "due": 20737,
+            "seen": 3,
+            "correct": 3,
+            "recent": ["ok", "slow", "slow"],
+            "lastDay": 20736
+          },
+          "mul:7x2": {
+            "box": 2,
+            "due": 20738,
+            "seen": 3,
+            "correct": 3,
+            "recent": ["ok", "slow", "ok"],
+            "lastDay": 20736
+          },
+          "mul:2x8": {
+            "box": 1,
+            "due": 20737,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "slow"],
+            "lastDay": 20736
+          },
+          "mul:8x2": {
+            "box": 1,
+            "due": 20737,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "slow"],
+            "lastDay": 20736
+          },
+          "mul:2x10": {
+            "box": 1,
+            "due": 20735,
+            "seen": 5,
+            "correct": 4,
+            "recent": ["ok", "miss", "slow"],
+            "lastDay": 20734
+          },
+          "mul:4x5": {
+            "box": 1,
+            "due": 20735,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "slow"],
+            "lastDay": 20734
+          },
+          "mul:5x4": {
+            "box": 1,
+            "due": 20735,
+            "seen": 3,
+            "correct": 3,
+            "recent": ["ok", "slow", "slow"],
+            "lastDay": 20734
+          },
+          "mul:10x2": {
+            "box": 1,
+            "due": 20735,
+            "seen": 3,
+            "correct": 3,
+            "recent": ["ok", "slow", "slow"],
+            "lastDay": 20734
+          },
+          "mul:2x6": {
+            "box": 0,
+            "due": 20736,
+            "seen": 3,
+            "correct": 3,
+            "recent": ["slow", "slow", "slow"],
+            "lastDay": 20736
+          },
+          "mul:6x2": {
+            "box": 1,
+            "due": 20737,
+            "seen": 2,
+            "correct": 1,
+            "recent": ["miss", "slow"],
+            "lastDay": 20736
+          },
+          "mul:6x5": {
+            "box": 1,
+            "due": 20737,
+            "seen": 4,
+            "correct": 2,
+            "recent": ["miss", "slow", "slow"],
+            "lastDay": 20736
+          },
+          "mul:5x5": {
+            "box": 0,
+            "due": 20736,
+            "seen": 3,
+            "correct": 3,
+            "recent": ["slow", "slow", "slow"],
+            "lastDay": 20736
+          },
+          "mul:0x2": {
+            "box": 0,
+            "due": 20736,
+            "seen": 3,
+            "correct": 3,
+            "recent": ["slow", "slow", "slow"],
+            "lastDay": 20736
+          },
+          "mul:5x9": {
+            "box": 0,
+            "due": 20736,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["slow"],
+            "lastDay": 20736
+          },
+          "mul:2x4": {
+            "box": 1,
+            "due": 20733,
+            "seen": 1,
+            "correct": 0,
+            "recent": ["miss"],
+            "lastDay": 20732
+          },
+          "mul:9x5": {
+            "box": 1,
+            "due": 20737,
+            "seen": 4,
+            "correct": 3,
+            "recent": ["slow", "miss", "slow"],
+            "lastDay": 20736
+          },
+          "mul:1x2": {
+            "box": 1,
+            "due": 20735,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "slow"],
+            "lastDay": 20734
+          },
+          "mul:2x5": {
+            "box": 1,
+            "due": 20735,
+            "seen": 2,
+            "correct": 1,
+            "recent": ["ok", "miss"],
+            "lastDay": 20734
+          },
+          "mul:2x3": {
+            "box": 2,
+            "due": 20736,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "ok"],
+            "lastDay": 20734
+          },
+          "mul:8x5": {
+            "box": 1,
+            "due": 20737,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "slow"],
+            "lastDay": 20736
+          },
+          "mul:0x10": {
+            "box": 0,
+            "due": 20736,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["slow", "slow"],
+            "lastDay": 20736
+          },
+          "mul:10x0": {
+            "box": 1,
+            "due": 20737,
+            "seen": 2,
+            "correct": 1,
+            "recent": ["miss", "slow"],
+            "lastDay": 20736
+          },
+          "mul:10x1": {
+            "box": 0,
+            "due": 20736,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["slow", "slow"],
+            "lastDay": 20736
+          },
+          "mul:6x10": {
+            "box": 0,
+            "due": 20734,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["slow"],
+            "lastDay": 20734
+          },
+          "mul:7x10": {
+            "box": 1,
+            "due": 20737,
+            "seen": 3,
+            "correct": 2,
+            "recent": ["slow", "miss", "slow"],
+            "lastDay": 20736
+          },
+          "mul:1x10": {
+            "box": 0,
+            "due": 20736,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["slow"],
+            "lastDay": 20736
+          },
+          "mul:9x0": {
+            "box": 0,
+            "due": 20734,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["slow"],
+            "lastDay": 20734
+          },
+          "mul:0x4": {
+            "box": 1,
+            "due": 20735,
+            "seen": 1,
+            "correct": 0,
+            "recent": ["miss"],
+            "lastDay": 20734
+          },
+          "mul:0x6": {
+            "box": 0,
+            "due": 20734,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["slow"],
+            "lastDay": 20734
+          },
+          "mul:3x10": {
+            "box": 1,
+            "due": 20735,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20734
+          },
+          "mul:5x10": {
+            "box": 2,
+            "due": 20736,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "ok"],
+            "lastDay": 20734
+          },
+          "mul:8x10": {
+            "box": 1,
+            "due": 20735,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20734
+          },
+          "mul:3x2": {
+            "box": 1,
+            "due": 20735,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20734
+          },
+          "mul:10x5": {
+            "box": 1,
+            "due": 20735,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20734
+          },
+          "div:20:5": {
+            "box": 1,
+            "due": 20735,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "slow"],
+            "lastDay": 20734
+          },
+          "div:12:2": {
+            "box": 1,
+            "due": 20735,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "slow"],
+            "lastDay": 20734
+          },
+          "div:8:2": {
+            "box": 1,
+            "due": 20735,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "slow"],
+            "lastDay": 20734
+          },
+          "div:10:2": {
+            "box": 0,
+            "due": 20736,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["slow", "slow"],
+            "lastDay": 20736
+          },
+          "div:30:5": {
+            "box": 0,
+            "due": 20736,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["slow", "slow"],
+            "lastDay": 20736
+          },
+          "div:25:5": {
+            "box": 1,
+            "due": 20735,
+            "seen": 2,
+            "correct": 1,
+            "recent": ["miss", "slow"],
+            "lastDay": 20734
+          },
+          "div:50:10": {
+            "box": 1,
+            "due": 20737,
+            "seen": 2,
+            "correct": 1,
+            "recent": ["slow", "miss"],
+            "lastDay": 20736
+          },
+          "div:60:10": {
+            "box": 1,
+            "due": 20735,
+            "seen": 1,
+            "correct": 0,
+            "recent": ["miss"],
+            "lastDay": 20734
+          },
+          "div:0:2": {
+            "box": 0,
+            "due": 20736,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["slow", "slow"],
+            "lastDay": 20736
+          },
+          "mul:0x0": {
+            "box": 0,
+            "due": 20736,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["slow"],
+            "lastDay": 20736
+          },
+          "mul:0x1": {
+            "box": 1,
+            "due": 20737,
+            "seen": 2,
+            "correct": 1,
+            "recent": ["miss", "slow"],
+            "lastDay": 20736
+          },
+          "mul:0x3": {
+            "box": 0,
+            "due": 20736,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["slow"],
+            "lastDay": 20736
+          },
+          "mul:1x8": {
+            "box": 0,
+            "due": 20736,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["slow"],
+            "lastDay": 20736
+          },
+          "div:10:10": {
+            "box": 1,
+            "due": 20737,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20736
+          },
+          "div:80:10": {
+            "box": 1,
+            "due": 20737,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20736
+          },
+          "div:35:5": {
+            "box": 1,
+            "due": 20737,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20736
+          },
+          "div:100:10": {
+            "box": 1,
+            "due": 20737,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20736
+          },
+          "div:0:10": {
+            "box": 1,
+            "due": 20737,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20736
+          },
+          "div:90:10": {
+            "box": 1,
+            "due": 20737,
+            "seen": 1,
+            "correct": 1,
+            "recent": ["ok"],
+            "lastDay": 20736
+          },
+          "word:equal-groups": {
+            "box": 2,
+            "due": 20738,
+            "seen": 2,
+            "correct": 1,
+            "recent": ["miss", "ok"],
+            "lastDay": 20736
+          },
+          "word:sharing": {
+            "box": 2,
+            "due": 20738,
+            "seen": 2,
+            "correct": 2,
+            "recent": ["ok", "ok"],
+            "lastDay": 20736
+          },
+          "word:more-than": {
+            "box": 2,
+            "due": 20738,
+            "seen": 2,
+            "correct": 1,
+            "recent": ["miss", "ok"],
+            "lastDay": 20736
+          }
+        },
+        "levels": {
+          "sunny-meadow.1": {
+            "stars": 1,
+            "bestAccuracy": 75,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 1
+          },
+          "sunny-meadow.2": {
+            "stars": 2,
+            "bestAccuracy": 80,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 2
+          },
+          "sunny-meadow.3": {
+            "stars": 2,
+            "bestAccuracy": 80,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 2
+          },
+          "sunny-meadow.4": {
+            "stars": 2,
+            "bestAccuracy": 80,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 2
+          },
+          "sunny-meadow.5": {
+            "stars": 2,
+            "bestAccuracy": 83,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 2
+          },
+          "sunny-meadow.6": {
+            "stars": 1,
+            "bestAccuracy": 66,
+            "plays": 1,
+            "placed": false,
+            "paidStars": 1
+          }
+        },
+        "bosses": {},
+        "dragons": {
+          "bubbles": {
+            "stage": "hatchling",
+            "obtainedDay": 20732,
+            "stageDay": 20732,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "sunny": {
+            "stage": "hatchling",
+            "obtainedDay": 20732,
+            "stageDay": 20732,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "goldie": {
+            "stage": "hatchling",
+            "obtainedDay": 20732,
+            "stageDay": 20734,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "mirror": {
+            "stage": "egg",
+            "obtainedDay": 20734,
+            "stageDay": 20734,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          },
+          "puff": {
+            "stage": "hatchling",
+            "obtainedDay": 20734,
+            "stageDay": 20736,
+            "outfit": {
+              "head": null,
+              "neck": null,
+              "eyes": null,
+              "wings": null,
+              "nest": null
+            }
+          }
+        },
+        "coins": 141,
+        "coinsEarned": 141,
+        "cosmetics": {
+          "schema": 1,
+          "owned": ["scarf-striped"],
+          "claims": [
+            {
+              "id": "level:sunny-meadow.4:scarf-striped",
+              "item": "scarf-striped"
+            }
+          ],
+          "equipped": []
+        },
+        "stickers": {
+          "first-hatch": {
+            "day": 20732
+          },
+          "meadow-first-steps": {
+            "day": 20732
+          },
+          "three-days": {
+            "day": 20736
+          }
+        },
+        "daily": {
+          "day": 20736,
+          "answers": 28,
+          "correct": 22,
+          "fast": 0,
+          "levels": 2,
+          "minigames": 1,
+          "goal": 30,
+          "quests": [
+            {
+              "id": "minigame-1@20736",
+              "template": "minigame-1",
+              "progress": 1,
+              "claimed": false
+            },
+            {
+              "id": "correct-20@20736",
+              "template": "correct-20",
+              "progress": 20,
+              "claimed": false
+            },
+            {
+              "id": "fast-10@20736",
+              "template": "fast-10",
+              "progress": 0,
+              "claimed": false
+            }
+          ],
+          "gift": "locked"
+        },
+        "history": [
+          {
+            "day": 20732,
+            "answers": 18,
+            "correct": 14,
+            "fast": 0
+          },
+          {
+            "day": 20734,
+            "answers": 30,
+            "correct": 24,
+            "fast": 0
+          },
+          {
+            "day": 20736,
+            "answers": 28,
+            "correct": 22,
+            "fast": 0
+          }
+        ],
+        "arena": {
+          "best": 0,
+          "plays": 0
+        },
+        "questsClaimed": 4,
+        "bestStreak": 4,
+        "story": {
+          "beats": {},
+          "pending": null,
+          "queue": [],
+          "done": ["beat.prologue", "beat.first-egg", "beat.meadow-welcome", "beat.meadow-new-eggs"]
+        },
+        "run": null,
+        "round": null,
+        "roundCounter": 14,
+        "settings": {
+          "dailyGoal": 30,
+          "arena": true,
+          "unlockAhead": []
+        },
+        "finale": {
+          "day": null
+        }
+      }
+    },
+    "prng": {
+      "s": [2494112851, 1105571641, 3812140544, 467784057]
+    },
+    "allocator": {
+      "slots": [],
+      "free": []
+    }
+  },
+  "streams": {
+    "distractors": {
+      "s": [323502618, 1805692520, 1970635457, 3717514161]
+    },
+    "problems": {
+      "s": [2825292377, 725356609, 4201351762, 1420877462]
+    },
+    "rewards": {
+      "s": [2947280062, 1086840777, 1556283117, 834396712]
+    },
+    "words": {
+      "s": [47332290, 4088295547, 353350278, 1190052539]
+    }
+  },
+  "pending": null,
+  "jobs": [],
+  "claims": [
+    "story:beat.first-egg:first-egg.bubbles",
+    "story:beat.meadow-new-eggs:egg.mirror",
+    "story:beat.meadow-new-eggs:egg.puff"
+  ],
+  "consumedJobs": [
+    {
+      "id": "reask:r2:1",
+      "token": 1
+    },
+    {
+      "id": "reask:r3:1",
+      "token": 3
+    },
+    {
+      "id": "reask:r5:1",
+      "token": 5
+    },
+    {
+      "id": "reask:r6:1",
+      "token": 7
+    },
+    {
+      "id": "reask:r10:1",
+      "token": 9
+    },
+    {
+      "id": "reask:r11:1",
+      "token": 11
+    },
+    {
+      "id": "reask:r12:1",
+      "token": 13
+    },
+    {
+      "id": "reask:r12:2",
+      "token": 14
+    },
+    {
+      "id": "reask:r14:1",
+      "token": 15
+    },
+    {
+      "id": "reask:r14:2",
+      "token": 16
+    }
+  ],
+  "phase": {
+    "id": "hub",
+    "instance": 28,
+    "enteredTurn": 81,
+    "allowance": 0
+  },
+  "nextAction": 268,
+  "nextJob": 17,
+  "nextPhase": 29
+}

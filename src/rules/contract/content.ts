@@ -370,6 +370,19 @@ export interface GrowthRule {
   boss: boolean;
 }
 
+/**
+ * The effort path to bronze and silver (design §6.5): a fact also counts as bronze once it was
+ * answered right on `bronzeDays` different days, and as silver on `silverDays`, each counted day
+ * at least `gapDays` after the last counted one. Any right answer counts, at any speed: knowing a
+ * fact on separate days grows a dragon; knowing it by heart (fast answers) crowns it, so gold
+ * stays the Leitner box and speed alone.
+ */
+export interface EffortPath {
+  bronzeDays: number;
+  silverDays: number;
+  gapDays: number;
+}
+
 /** Every tunable number. Percentages and durations are integers; nothing is a fraction. */
 export interface Balance {
   leitner: {
@@ -404,7 +417,13 @@ export interface Balance {
     placementDone: number;
   };
   stars: StarRule;
-  mastery: { goldBox: number; goldFast: number; goldOfLast: number };
+  mastery: {
+    goldBox: number;
+    goldFast: number;
+    goldOfLast: number;
+    /** Without it, bronze and silver come from the Leitner box alone. */
+    effort?: EffortPath;
+  };
   growth: GrowthRule[];
   daily: {
     goalAnswers: number;
@@ -664,7 +683,16 @@ const balanceSchema: Schema<Balance> = schema.object({
     placementDone: int(0, 1000),
   }),
   stars: starRuleSchema,
-  mastery: schema.object({ goldBox: int(0, 5), goldFast: int(0, 10), goldOfLast: int(1, 10) }),
+  mastery: objectWithOptional(
+    { goldBox: int(0, 5), goldFast: int(0, 10), goldOfLast: int(1, 10) },
+    {
+      effort: schema.object({
+        bronzeDays: int(1, 365),
+        silverDays: int(1, 365),
+        gapDays: int(1, 365),
+      }),
+    },
+  ),
   growth: schema.array(
     schema.object({
       stage: oneOf(['hatchling', 'youngling', 'adult', 'crowned'] as const),
@@ -1214,6 +1242,10 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
   const intervals = data.balance.leitner.intervals;
   if (intervals.some((value, i) => i > 0 && value < intervals[i - 1]!)) {
     problem('balance', 'leitner.intervals', 'Leitner intervals must not decrease.');
+  }
+  const effort = data.balance.mastery.effort;
+  if (effort !== undefined && effort.bronzeDays > effort.silverDays) {
+    problem('balance', 'mastery.effort', 'bronzeDays must not exceed silverDays.');
   }
   const { daily, gift, mix, response } = data.balance;
   if (!(daily.goalMin <= daily.goalAnswers && daily.goalAnswers <= daily.goalMax)) {
