@@ -28,6 +28,7 @@ import {
   openRegionEarly,
   openDailyGift,
   setDailyGoal,
+  startAdventure,
 } from './support/daily';
 
 test.use({ reducedMotion: 'reduce' });
@@ -85,7 +86,7 @@ async function afterTheDaysMiniGame(page: Page, keeper: string): Promise<string>
   await expect(adventure, "after today's level comes the day's mini-game").toHaveText(
     /^Play again: /,
   );
-  await adventure.click();
+  await startAdventure(page);
   await finishVisibleActivity(page, keeper);
   await expectHub(page, keeper);
   return (await adventure.textContent()) ?? '';
