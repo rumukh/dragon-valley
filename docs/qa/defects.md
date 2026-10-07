@@ -152,9 +152,10 @@ history: `git log -p -- docs/qa/defects.md`.
   comparisons, stories) asked only × and : facts in 14 problems, eight of them the 2-table of their
   first egg. Fine for a child who arrives there by play; worth a look for children whose grown-ups
   open regions early (S2b).
-- The finale ends like any boss level: "Level complete! The Seven-Headed Dragon, 21 of 21 right",
-  a new egg (the Seven-Headed Dragon) and the sticker "Seven Heads Cured"; the finale's own
-  celebration is phase 3 (docs/app.md §16).
+- The finale's level ends like any boss level: "Level complete! The Seven-Headed Dragon, 21 of 21
+  right", a new egg (the Seven-Headed Dragon) and the sticker "Seven Heads Cured"; since #29 the
+  finale beat also shows every head cured and the Magic Window whole again (S3's
+  `finale.spec.ts`).
 - The keeper pictures are a sound radio group for keyboards and screen readers: the group is named
   "Pick your keeper", each radio by its description ("A short bob and a star pin"), the checked
   state is exposed, Tab enters at the chosen picture, arrows and Space choose, and the choice is
@@ -165,3 +166,13 @@ history: `git log -p -- docs/qa/defects.md`.
   nameless `LabelText`; only the exact centre finds the radio. A double tap on the label still
   checks it, but VoiceOver and TalkBack were not tried; stretching the transparent input over the
   whole picture (inset 0, above the art) would make every touch land on the radio itself.
+- In a keypad round at tablet size the prompt "Type the answer." stands on the painted sky with no
+  backdrop, where the scene's birds fly: one crosses its "T", so it reads like a strikethrough
+  (screens `07-round-keypad` and `10-round-miss`, tablet). The choice round's prompt sits lower and
+  stays clear. A backdrop like the other text panels, or birds outside the space the UI uses,
+  would fix it (S3, or S4 for the art).
+- A board move sent while the previous one is still being saved is dropped without a sign
+  (`src/app/screens/minigames.ts`, `context.move`: `if (busy) return false`). The window is a few
+  milliseconds on a healthy save but up to 250 ms on a slow device, so a quick second tap on Deal
+  can be lost. Queueing the move, or showing the board as busy, would fix it (S3). The test
+  helpers wait for each move to be taken (`support/boards.ts`).
