@@ -1655,14 +1655,29 @@
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     align-items: center;
   }
+
+  .dv-split-board.dv-feast {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  }
 }
 
-/* Sharing Feast: a bowl of fruit over a row of baskets. Ten fruit can be a bag marked "10". */
+/* Sharing Feast: a bowl of fruit (with "One for each basket" beside it) over the baskets. Ten
+   fruit can be a bag marked "10". */
+.dv-feast__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em 1em;
+  width: 100%;
+}
+
 .dv-feast__bowl {
   display: grid;
+  flex: 1 1 12em;
   justify-items: center;
   gap: 0.3em;
-  width: min(100%, 22em);
+  max-width: 22em;
   padding: 0.6em 1em 0.9em;
   border: 0.14em solid var(--dv-line-strong);
   border-radius: 1em 1em 50% 50% / 1em 1em 45% 45%;
@@ -1705,9 +1720,10 @@
   background: var(--dv-sun);
 }
 
+/* As many baskets to a row as fit with their buttons side by side (minus, and +10 on a big feast). */
 .dv-feast__baskets {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 3.6rem);
   justify-content: center;
   gap: 0.6em;
   width: 100%;
@@ -1716,10 +1732,13 @@
   list-style: none;
 }
 
+.dv-feast__baskets[data-tens='true'] {
+  grid-template-columns: repeat(auto-fit, 4.8rem);
+}
+
 .dv-feast__slot {
   display: grid;
-  flex: 0 1 5em;
-  justify-items: center;
+  justify-items: stretch;
   gap: 0.3em;
   min-width: 0;
 }
@@ -1755,9 +1774,32 @@
 
 .dv-feast__tools {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   gap: 0.3em;
+}
+
+/* The division with the answer fields in place of its blanks: 49 : 5 = [9] r [4]. The written
+   blanks stay in the line for screen readers' and tests' sake but are not drawn. */
+.dv-feast__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  max-width: 100%;
+  font-size: min(2rem, 5.5vh);
+}
+
+.dv-feast__line .dv-problem {
+  font-size: inherit;
+}
+
+.dv-feast__line .dv-problem__part + .dv-problem__part > :not(:first-child) {
+  display: none;
+}
+
+.dv-feast__line .dv-answer {
+  font-size: inherit;
 }
 
 .dv-feast__question {
@@ -1765,6 +1807,64 @@
   font-size: 1.15rem;
   font-weight: 700;
   text-align: center;
+}
+
+/* A short landscape window: the board's words get smaller, never its buttons. */
+@media (min-width: 900px) and (orientation: landscape) and (max-height: 860px) {
+  .dv-minigame__status {
+    font-size: 1rem;
+  }
+
+  .dv-split-board .dv-nest__goal,
+  .dv-feast__question {
+    font-size: 0.95rem;
+  }
+
+  /* Baskets as low as a button; their fruit smaller, two rows of it at most for ten. */
+  .dv-feast__basket {
+    min-height: max(var(--dv-target), 7vh);
+    padding-block: 0.25em 0.2em;
+  }
+
+  .dv-feast__basket .dv-feast__fruit {
+    width: 0.7em;
+    height: 0.7em;
+  }
+
+  .dv-feast__basket .dv-feast__pile:empty {
+    display: none;
+  }
+
+  .dv-feast__tool {
+    padding-inline: 0.45em;
+  }
+
+  .dv-feast__count {
+    font-size: 1.2rem;
+  }
+
+  .dv-feast__bowl {
+    padding: 0.4em 0.8em 0.6em;
+  }
+
+  .dv-minigame__card {
+    gap: 0.6rem;
+    padding-block: 12px;
+  }
+
+  .dv-split-board__panel {
+    gap: 8px;
+  }
+
+  /* Keys and answer boxes beside a board are exactly one target high. */
+  .dv-keypad--wide .dv-key,
+  .dv-feast__line .dv-answer__field {
+    min-height: var(--dv-target);
+  }
+
+  .dv-keypad--wide {
+    gap: 8px;
+  }
 }
 
 /* Golem Orders: numbers and gears; the picked operation's part of the line is marked. */

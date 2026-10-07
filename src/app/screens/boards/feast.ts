@@ -7,6 +7,9 @@
  * as bags, so 48 fruit are 4 bags and 8 fruit). The rules check the answer: baskets that are not
  * fair yet, a bowl that could still go round, or numbers that do not match the baskets are said
  * kindly, and the fruit stays where the child put it.
+ *
+ * The answer is typed into the division itself (`49 : 5 = [9] r [4]`) on a keypad four keys wide,
+ * so the bowl, the baskets and the keypad fit a landscape window side by side.
  */
 import { BLANK, num, op, REMAINDER_SYMBOLS } from '../../../rules/contract';
 import type { Problem, SharingFeastBoard } from '../../../rules/contract';
@@ -85,6 +88,8 @@ export function sharingFeast(context: BoardContext): BoardPainter {
   const goal = h('p', { className: 'dv-nest__goal', testId: 'feast-goal' });
   const question = h('p', { className: 'dv-feast__question', testId: 'feast-question' });
   const sentence = h('div', { className: 'dv-feast__sentence' });
+  // The division with the keypad's answer fields in place of its blanks.
+  const line = h('div', { className: 'dv-feast__line' }, sentence);
   const answer = h('div', { className: 'dv-feast__answer' });
   const bowlLabel = h('span', { className: 'dv-feast__bowl-label', testId: 'feast-bowl-count' });
   const bowlPile = h('span', {
@@ -179,6 +184,7 @@ export function sharingFeast(context: BoardContext): BoardPainter {
     baskets = Array.from({ length: board.baskets }, (_, index) => basket(index, tens));
     list.replaceChildren(...baskets.map((b) => b.element));
     list.dataset['count'] = String(board.baskets);
+    list.dataset['tens'] = String(tens);
     goal.textContent = t('feast.goal', { total: board.total, baskets: board.baskets });
     question.textContent = t(board.remainder ? 'feast.askLeft' : 'feast.ask');
     const problem = feastProblem(board);
@@ -189,6 +195,7 @@ export function sharingFeast(context: BoardContext): BoardPainter {
       maxDigits: String(board.total).length,
       remainderSymbol: REMAINDER_SYMBOLS[context.notation()],
       claimFocus: true,
+      layout: 'wide',
       testIdPrefix: 'feast-keypad',
       onSubmit: async (typed) => {
         const each = typed.kind === 'remainder' ? typed.quotient : typed.value;
@@ -201,6 +208,7 @@ export function sharingFeast(context: BoardContext): BoardPainter {
         await context.move({ type: 'submit', each, left });
       },
     });
+    line.replaceChildren(sentence, keypad.display);
     answer.replaceChildren(keypad.element);
   };
 
@@ -235,13 +243,18 @@ export function sharingFeast(context: BoardContext): BoardPainter {
     element: h(
       'div',
       { className: 'dv-minigame__board dv-split-board dv-feast', testId: 'feast' },
-      h('div', { className: 'dv-split-board__field dv-feast__field' }, bowl, list, deal),
+      h(
+        'div',
+        { className: 'dv-split-board__field dv-feast__field' },
+        h('div', { className: 'dv-feast__top' }, bowl, deal),
+        list,
+      ),
       h(
         'div',
         { className: 'dv-split-board__panel dv-feast__panel' },
         goal,
         question,
-        sentence,
+        line,
         answer,
       ),
     ),
