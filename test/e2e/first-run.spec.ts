@@ -17,6 +17,7 @@ import {
   meetFirstEgg,
   newFamily,
 } from './support/app';
+import { unlessKnown } from './support/known-issues';
 
 test('a new family goes from the title through the prologue to their first egg and hub', async ({
   page,
@@ -74,6 +75,8 @@ test('a new family goes from the title through the prologue to their first egg a
     'data-dragon',
     'sunny',
   );
+  await expect(page.getByTestId('hub-dragon')).toHaveAccessibleName("Sunny's egg");
+  await expect(page.getByTestId('screen-hub')).toContainText("Sunny's egg");
   await expectCoins(page, 0);
   await expect(
     page.getByTestId('hub-adventure'),
@@ -120,6 +123,20 @@ test('names are checked kindly: too long, odd signs, and a name already taken', 
   await meetFirstEgg(page, 'goldie');
   await expectHub(page, "Zoë O'Neil-Brown");
   await expect(page.getByTestId('hub-dragon')).toHaveAttribute('data-dragon', 'goldie');
+  await expect(page.getByTestId('hub-dragon')).toHaveAccessibleName("Goldie's egg");
+});
+
+test("the nest says whose egg it is: a name ending in s takes only the apostrophe (Bubbles' egg)", async ({
+  page,
+}, testInfo) => {
+  await newFamily(page, { name: 'Ema' });
+  const nest = page.getByTestId('hub-dragon');
+  await expect(nest, 'Bubbles is the first egg').toHaveAttribute('data-dragon', 'bubbles');
+  // The copy brief's own example (docs/qa/copy-review.md, "Possessives").
+  await unlessKnown(testInfo, 'DV-QA-19', async () => {
+    await expect(nest).toHaveAccessibleName("Bubbles' egg", { timeout: 1000 });
+    await expect(page.getByTestId('screen-hub')).toContainText("Bubbles' egg", { timeout: 1000 });
+  });
 });
 
 test('Back on the editor returns to the title without making a keeper', async ({ page }) => {

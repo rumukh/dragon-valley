@@ -26,6 +26,11 @@ stories name the larger owner; money in stories is Czech crowns; the gate always
 (docs/app.md §6); `Krakonoš` and "Kč" have read-aloud aliases (#46). The findings below are the
 review as written at `8d3236a`.
 
+**Addendum (main after #52, content 1.3.0):** I checked possessives against the brief's example
+"Bubbles' egg" (section [Possessives](#possessives)). One new minor finding for S3: the hub says
+"Bubbles's egg". It is registered as DV-QA-19 ([defects.md](defects.md)), with a check in
+`first-run.spec.ts`. Content (S2b) and the word templates (S2a) have nothing to change.
+
 One major finding: the new grown-ups' Progress label `parent.item.tens` said division for a
 multiplication skill; #41 fixed it ("Multiplying tens by {n}"). No child-facing task is misleading, and every problem the game renders
 follows the keeper's notation (`src/app/math/notation.ts`). The copy is short, warm and consistent
@@ -209,6 +214,18 @@ for an 8-year-old English learner because the referent "That" points backward to
 already marks this as a risk needing editorial sign-off. Suggested pattern: repeat the owner of the
 larger amount instead of "That", e.g. "Rainbow has 6 times as many scales as Ember. How many scales
 does Ember have?"
+
+## Possessives
+
+Reviewed at `22cdedc` (main after #52), against the brief's example "Bubbles' egg": a name ending
+in "s" takes only the apostrophe. Every possessive in the catalogs comes from a `{name}'s`
+placeholder; no fixed text has the possessive of a word ending in "s" or "š".
+
+| Key(s)                                                                                                                                                                                                                                         | Names it takes                                                                                             | Finding                                                                                                                                                                   | Suggested                                                                                                   | Severity | Owner |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | -------- | ----- |
+| `stage.egg` ("{name}'s egg"), `hatch.hatching` ("{name}'s egg wobbles and cracks.")                                                                                                                                                            | Dragon names. Only "Bubbles" ends in "s", and it is the first of the three eggs a new keeper chooses from. | **DV-QA-19**: the hub shows "Bubbles's egg", under the egg and as the picture's accessible name. The hatching art's label and the hub's list of other dragons say it too. | Form the possessive in one place (add "'" after a final "s", otherwise "'s") and pass it in: "{owner} egg". | Minor    | S3    |
+| `parent.keepers.removeBody`, `parent.data.exportFailed`, `parent.data.importConfirmBody`, `parent.data.resetBody`, `parent.data.resetDone`, `parent.progress.unreadable`, `parent.print.hardestTitle`, `recovery.game`, `recovery.preferences` | Keeper names, which the family types: "Jonas", "Klaus", "Agnes".                                           | "Jonas's dragons". This is correct English, but it does not match the brief's "Bubbles'" style.                                                                           | Use the same helper, so the grown-ups' texts and the children's screens agree.                              | Polish   | S3    |
+| `word.grouping.holiday` ("{name}'s holiday is {days} days long…")                                                                                                                                                                              | The word problems' children: Adam, Anna, Ela, Eva, Filip, Klara, Kuba, Leo, Maya, Nela, Ondra, Tom.        | Correct: none ends in "s".                                                                                                                                                | None. If a name ending in "s" joins the list, it needs the same helper.                                     | n/a      | S2b   |
 
 ## Copy outside the catalogs
 
