@@ -17,28 +17,10 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 
 | ID       | Severity | Owner | Summary                                                                               |
 | -------- | -------- | ----- | ------------------------------------------------------------------------------------- |
-| DV-QA-05 | minor    | S3    | WebKit: the grown-ups' Settings still scroll sideways on a phone (voice list)         |
 | DV-QA-13 | minor    | S3    | WebKit, sometimes Chromium: a keeper's hub at 200 % text appears at normal size first |
 | DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys                |
-| DV-QA-16 | minor    | S3    | Two announcements within 40 ms: only the second is heard (intermittent)               |
 | DV-QA-17 | major    | S3    | Memory Match's term cards do not show which number of the example is meant            |
 | DV-QA-18 | major    | S3    | A missed × 0 fact is re-asked and taught with "Look first!" but has no picture        |
-
-### DV-QA-05 (minor, S3; WebKit): the grown-ups' Settings still scroll sideways on a phone
-
-- **Repro** (Safari, or Playwright's WebKit 26.6; 390 × 844 with local English voices): the
-  grown-ups' area, Settings.
-- **Expected**: no sideways scrolling (WCAG 1.4.10).
-- **Actual**: #19 fixed this in Chromium and Firefox (single-column grids, a voice list that can
-  shrink), and in WebKit the panel now fits too, but the page is still 511 px wide, with blank sky
-  to the right of the panel. The voice list's box is 335 px and fits; WebKit counts the text of
-  its longest option, "Device default (English (United Kingdom))" (about 483 px from the list's
-  left edge), in the page's scrollable width. Hiding the list, or shortening that option, brings
-  the page back to 390 px. Nothing is cut off any more, hence minor (it was major).
-- **Likely fix** (tried in WebKit): `.dv-select { contain: paint; }`, or `overflow: clip` on the
-  row around it; `overflow: hidden` on the select itself has no effect in WebKit.
-- **Evidence**: `test/e2e/screens.spec.ts` stops `26-parent-settings` and `44-settings-saved`
-  (phone, WebKit: "the page scrolls sideways: 511px of content in 390px").
 
 ### DV-QA-13 (minor, S3; WebKit, sometimes Chromium): a keeper's hub at 200 % text first appears at normal size
 
@@ -89,25 +71,6 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 - **Evidence**: `test/e2e/keyboard.spec.ts` › "the keeper editor by keyboard alone › the pictures
   are one named radio group…" (the ring by pixels after the arrows; strict in Chromium and
   Firefox).
-
-### DV-QA-16 (minor, S3; intermittent): two announcements within 40 ms, only the second is heard
-
-- **Seen** on CI (WebKit, run 37551404338) at the end of the placement check: the results
-  appeared with their heading focused, but the polite announcer said "You got 11 coins!" (the
-  last answer's coins) instead of "The dragons saw what you know!".
-- **Cause**: `ui/announcer.ts` empties the region and writes a message 40 ms later; a second
-  `announce()` inside those 40 ms cancels the first (`clearTimeout`), so only the last of two
-  close messages is ever written. And the coin counter (`ui/meters.ts`, `gain`) announces only
-  after its coins have flown (up to about 1 s for five coins), which the round does not wait for
-  before moving on: on a slow device the last answer's coin line lands as the results appear.
-- **Expected**: each message is heard, in order (plan §2.11).
-- **Likely fix**: queue messages (write the next one after the previous has been written), or
-  join messages that arrive together; and announce the coins when they are earned, not when the
-  last coin lands (or drop the line once its screen is gone). Minor: the results' heading takes
-  focus, so a screen reader still reads it there; it is the live line that is lost.
-- **Evidence**: `test/e2e/live.spec.ts` › "a round speaks its feedback…": the results headline must
-  be announced politely. It depends on timing, so the defect is marked `intermittent`: a run where
-  the line is heard is noted as "not seen this time", not as a fix.
 
 ### DV-QA-17 (major, S3): Memory Match's term cards do not show which number of the example is meant
 
@@ -161,25 +124,26 @@ picture: none`, `0 · 2 = ? taught: "Look at the picture first. Then answer!"; a
 ## Fixed
 
 Each was verified fixed by the suite in Chromium (Edge), Firefox and WebKit, and its assertion now
-runs as a regression check. (DV-QA-05 is fixed in Chromium and Firefox and stays open for WebKit;
-DV-QA-13 stays open for WebKit and, sometimes, Chromium.) The full write-ups (repro, cause,
-suggested fix) are in this file's
-history: `git log -p -- docs/qa/defects.md`.
+runs as a regression check. (DV-QA-13 stays open for WebKit and, sometimes, Chromium.) The full
+write-ups (repro, cause, suggested fix) are in this file's history:
+`git log -p -- docs/qa/defects.md`.
 
-| ID       | Was                                                                                       | Fixed by | Regression check                                                                         |
-| -------- | ----------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| DV-QA-01 | After a failed save and Retry, the stored answer was never praised; the round stood still | #19      | `recovery.spec.ts` › a failed save says "Not saved"…                                     |
-| DV-QA-02 | "You got 1 coins!", "1 coins": no singular                                                | #19      | `live.spec.ts` › "a round speaks its feedback…" ("You got 1 coin!")                      |
-| DV-QA-03 | Enter was ignored when a round opened on a keypad problem (phase-1 shell)                 | #13      | `input.spec.ts` › "a round that opens on a keypad problem takes Enter from the keyboard" |
-| DV-QA-04 | Retry in the "Not saved" pill was 40 px tall                                              | #19      | layout checks at `screens.spec.ts` stop `41-save-failed`                                 |
-| DV-QA-06 | Words and numbers broke inside narrow boxes (200 % tiles "1" over "8"; phone egg labels)  | #19      | layout checks in `reflow.spec.ts` (`text-200`) and at stop `05-story-eggs` (phone)       |
-| DV-QA-07 | A missed tile's badge pushed the round sideways at 200 % (phase-1 shell)                  | #13      | layout checks in `reflow.spec.ts` (`text-200`, `16-round-choice`)                        |
-| DV-QA-08 | Screens' focus targets dropped out of the Tab order and lost their ring                   | #19      | `keyboard.spec.ts`: the editor (by pixels) and the error screen                          |
-| DV-QA-09 | Enter after a click on Read aloud re-read the problem instead of sending the answer       | #19      | `input.spec.ts` › "Enter still sends the answer after the child used Read aloud"         |
-| DV-QA-10 | At 200 % text on a phone the hub and the Egg Grid scrolled sideways                       | #19      | layout checks in `reflow.spec.ts` (`text-200`, phone)                                    |
-| DV-QA-11 | Map and road hotspots were cut off by the picture's frame                                 | #19      | layout checks at stops `13-map` and `14-region`, and in `reflow.spec.ts`                 |
-| DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                        | #17      | `persistence.spec.ts` › "a finished round is kept…"                                      |
-| DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)       | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                      |
+| ID       | Was                                                                                       | Fixed by | Regression check                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| DV-QA-01 | After a failed save and Retry, the stored answer was never praised; the round stood still | #19      | `recovery.spec.ts` › a failed save says "Not saved"…                                                       |
+| DV-QA-02 | "You got 1 coins!", "1 coins": no singular                                                | #19      | `live.spec.ts` › "a round speaks its feedback…" ("You got 1 coin!")                                        |
+| DV-QA-03 | Enter was ignored when a round opened on a keypad problem (phase-1 shell)                 | #13      | `input.spec.ts` › "a round that opens on a keypad problem takes Enter from the keyboard"                   |
+| DV-QA-04 | Retry in the "Not saved" pill was 40 px tall                                              | #19      | layout checks at `screens.spec.ts` stop `41-save-failed`                                                   |
+| DV-QA-05 | The grown-ups' Settings scrolled sideways on a phone (last in WebKit: the voice list)     | #19, #41 | layout checks at `screens.spec.ts` stops `26-parent-settings`, `44-settings-saved` (phone)                 |
+| DV-QA-06 | Words and numbers broke inside narrow boxes (200 % tiles "1" over "8"; phone egg labels)  | #19      | layout checks in `reflow.spec.ts` (`text-200`) and at stop `05-story-eggs` (phone)                         |
+| DV-QA-07 | A missed tile's badge pushed the round sideways at 200 % (phase-1 shell)                  | #13      | layout checks in `reflow.spec.ts` (`text-200`, `16-round-choice`)                                          |
+| DV-QA-08 | Screens' focus targets dropped out of the Tab order and lost their ring                   | #19      | `keyboard.spec.ts`: the editor (by pixels) and the error screen                                            |
+| DV-QA-09 | Enter after a click on Read aloud re-read the problem instead of sending the answer       | #19      | `input.spec.ts` › "Enter still sends the answer after the child used Read aloud"                           |
+| DV-QA-10 | At 200 % text on a phone the hub and the Egg Grid scrolled sideways                       | #19      | layout checks in `reflow.spec.ts` (`text-200`, phone)                                                      |
+| DV-QA-11 | Map and road hotspots were cut off by the picture's frame                                 | #19      | layout checks at stops `13-map` and `14-region`, and in `reflow.spec.ts`                                   |
+| DV-QA-12 | The placement results celebrated the prologue's egg as "A new egg"                        | #17      | `persistence.spec.ts` › "a finished round is kept…"                                                        |
+| DV-QA-14 | The results' scrolling celebrations could not be reached by keyboard (axe, serious)       | #19      | axe at `screens.spec.ts` stop `11-round-results` (tablet and phone)                                        |
+| DV-QA-16 | Two announcements within 40 ms: only the second was heard (the results' headline lost)    | #41      | `live.spec.ts` › "a round speaks its feedback…" (the headline heard; S3's announcer unit test queues them) |
 
 ### The coordinator's Region 1 playtest (the deployed `5848964`)
 

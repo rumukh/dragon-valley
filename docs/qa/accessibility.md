@@ -1,15 +1,15 @@
 # Accessibility report
 
-Dragon Valley v1 at commit `8d3236a` (main after #29), as the QA suite checks it on every CI run in Chromium, Firefox
+Dragon Valley v1 at commit `568ee65` (main after #41), as the QA suite checks it on every CI run in Chromium, Firefox
 and WebKit, against WCAG 2.2 levels A and AA and the plan's own promises (plan §2.10-2.12).
 
 **In short:**
 
 - No serious or critical axe violation on any screen, in any engine, at any size.
-- One major defect is open for S3: Memory Match's term cards neither show nor name the number
-  their example is about (DV-QA-17). Four minor ones stay open too, all for S3: three show only in
-  WebKit and one only under some
-  timings.
+- Two major defects are open for S3: Memory Match's term cards neither show nor name the number
+  their example is about (DV-QA-17), and a missed × 0 fact is told to "look at the picture" when
+  it has none (DV-QA-18). Two minor ones stay open too, both for S3 and both in WebKit (one also
+  sometimes in Chromium).
 - Three moderate axe findings are easy fixes.
 - Some things only a person can check, above all screen readers on a real iPad and Windows forced
   colours (below).
@@ -37,7 +37,7 @@ and WebKit, against WCAG 2.2 levels A and AA and the plan's own promises (plan �
 | 1.4.1 Use of Color               | A     | Pass: feedback is words, a symbol and a sound as well as a colour ("Almost! Let's look…" is checked as text)                                                        |
 | 1.4.3 Contrast (Minimum)         | AA    | Pass (axe, every stop, three engines)                                                                                                                               |
 | 1.4.4 Resize Text                | AA    | Pass, with **DV-QA-13**: a keeper's hub at 200 % text first shows at normal size for up to half a second (WebKit always, Chromium sometimes). Pinch zoom is allowed |
-| 1.4.10 Reflow                    | AA    | Pass, with **DV-QA-05**: in WebKit the grown-ups' Settings scroll sideways on a phone (511 px of page in 390 px)                                                    |
+| 1.4.10 Reflow                    | AA    | Pass at every size, at 200 % text and at 200 % zoom, in all three engines (DV-QA-05, the last sideways scroll in WebKit, fixed by #41)                              |
 | 1.4.11 Non-text Contrast         | AA    | Not measured: rings are proven present, not their contrast. Manual check                                                                                            |
 | 1.4.12 Text Spacing              | AA    | Not tested. Manual check                                                                                                                                            |
 | 1.4.13 Content on Hover or Focus | AA    | Not tested                                                                                                                                                          |
@@ -60,25 +60,23 @@ and WebKit, against WCAG 2.2 levels A and AA and the plan's own promises (plan �
 | 3.3.2 Labels or Instructions     | A     | Pass (axe; every field and control is named)                                                                                                                        |
 | 3.3.8 Accessible Authentication  | AA    | Not applicable: the grown-ups' gate (hold, then a two-digit × two-digit question) is a child lock, not a sign-in                                                    |
 | 4.1.2 Name, Role, Value          | A     | Pass (axe; meters report their value, choices their pressed state, the pictures their checked state)                                                                |
-| 4.1.3 Status Messages            | AA    | Pass, with **DV-QA-16**: two messages within 40 ms, only the second is heard (seen once on CI WebKit as a round ended)                                              |
+| 4.1.3 Status Messages            | AA    | Pass: misses, praise, coins, results and toasts are announced; messages that come together are queued, none lost (DV-QA-16, fixed by #41)                           |
 
 ## Open defects
 
-All owned by S3, all minor but DV-QA-17; full write-ups with repro and suggested fixes in
-[defects.md](defects.md).
+All owned by S3; full write-ups with repro and suggested fixes in [defects.md](defects.md).
 
-| ID       | Engines                    | Summary                                                                    |
-| -------- | -------------------------- | -------------------------------------------------------------------------- |
-| DV-QA-05 | WebKit                     | The grown-ups' Settings scroll sideways on a phone (the voice list's text) |
-| DV-QA-13 | WebKit, sometimes Chromium | A keeper's hub at 200 % text appears at normal size first                  |
-| DV-QA-15 | WebKit                     | The keeper pictures lose their focus ring under the arrow keys             |
-| DV-QA-16 | all, sometimes             | Two announcements within 40 ms: only the second is heard                   |
-| DV-QA-17 | all                        | Major: the term cards' example neither shows nor names its marked number   |
+| ID       | Engines                    | Summary                                                                  |
+| -------- | -------------------------- | ------------------------------------------------------------------------ |
+| DV-QA-13 | WebKit, sometimes Chromium | A keeper's hub at 200 % text appears at normal size first                |
+| DV-QA-15 | WebKit                     | The keeper pictures lose their focus ring under the arrow keys           |
+| DV-QA-17 | all                        | Major: the term cards' example neither shows nor names its marked number |
+| DV-QA-18 | all                        | Major: a missed × 0 fact is told to look at a picture it does not have   |
 
-Twelve defects found by the suite have been fixed and stay pinned as regression checks: among them
+Fourteen defects found by the suite have been fixed and stay pinned as regression checks: among them
 the 40 px Retry button, words broken at 200 % text, sideways scrolling at 200 % on a phone, map
 hotspots cut off, focus targets that lost their ring, celebrations that a keyboard could not reach
-(axe, serious), and Enter re-reading the problem after Read aloud ([defects.md](defects.md),
+(axe, serious), Enter re-reading the problem after Read aloud, the last sideways scroll in WebKit and a lost announcement ([defects.md](defects.md),
 "Fixed").
 
 ## Advice: moderate axe findings
@@ -94,9 +92,9 @@ hotspots cut off, focus targets that lost their ring, celebrations that a keyboa
 | Promise                                                  | Result                                                                                                             |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Touch-first, targets of at least 48 px                   | Pass at every size and at 200 % text; whole rounds and both boards played by touch                                 |
-| Text scales to 200 % with reflow                         | Pass (DV-QA-13, DV-QA-05 above)                                                                                    |
+| Text scales to 200 % with reflow                         | Pass (DV-QA-13 above)                                                                                              |
 | Digits, Enter, Backspace, arrows, Space and Esc          | Pass: keypad and keyboard give the same answer step by step; choice tiles wrap; Esc pauses                         |
-| Feedback in a live region, focus managed with dialogs    | Pass (DV-QA-16 above)                                                                                              |
+| Feedback in a live region, focus managed with dialogs    | Pass                                                                                                               |
 | The game pauses when the page is hidden                  | Pass: hidden time does not count against answers, the Arena's clock stops, read-aloud stops (`visibility.spec.ts`) |
 | Read-aloud with local voices only                        | Pass                                                                                                               |
 | Reduced motion, from the device or the keeper's settings | Pass                                                                                                               |
