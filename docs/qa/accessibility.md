@@ -88,15 +88,15 @@ hotspots cut off, focus targets that lost their ring, celebrations that a keyboa
 
 ## Beyond WCAG: the plan's promises (§2.11)
 
-| Promise                                                  | Result                                                                                     |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Touch-first, targets of at least 48 px                   | Pass at every size and at 200 % text; whole rounds and both boards played by touch         |
-| Text scales to 200 % with reflow                         | Pass (DV-QA-13, DV-QA-05 above)                                                            |
-| Digits, Enter, Backspace, arrows, Space and Esc          | Pass: keypad and keyboard give the same answer step by step; choice tiles wrap; Esc pauses |
-| Feedback in a live region, focus managed with dialogs    | Pass (DV-QA-16 above)                                                                      |
-| The game pauses when the page is hidden                  | Built (`problems.ts`), **not tested**: planned with the next e2e tranche                   |
-| Read-aloud with local voices only                        | Pass                                                                                       |
-| Reduced motion, from the device or the keeper's settings | Pass                                                                                       |
+| Promise                                                  | Result                                                                                                             |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Touch-first, targets of at least 48 px                   | Pass at every size and at 200 % text; whole rounds and both boards played by touch                                 |
+| Text scales to 200 % with reflow                         | Pass (DV-QA-13, DV-QA-05 above)                                                                                    |
+| Digits, Enter, Backspace, arrows, Space and Esc          | Pass: keypad and keyboard give the same answer step by step; choice tiles wrap; Esc pauses                         |
+| Feedback in a live region, focus managed with dialogs    | Pass (DV-QA-16 above)                                                                                              |
+| The game pauses when the page is hidden                  | Pass: hidden time does not count against answers, the Arena's clock stops, read-aloud stops (`visibility.spec.ts`) |
+| Read-aloud with local voices only                        | Pass                                                                                                               |
+| Reduced motion, from the device or the keeper's settings | Pass                                                                                                               |
 
 ## Needs a person before release
 

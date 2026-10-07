@@ -538,7 +538,7 @@ export async function expectNextProblem(page: Page): Promise<void> {
  * Wait out a "Yes!" still on screen: its problem is answered and the next one is on its way (the
  * coins fly, then the round pauses). Reading the screen before then would read the old problem.
  */
-async function awaitOpenProblem(page: Page): Promise<void> {
+export async function awaitOpenProblem(page: Page): Promise<void> {
   await expect(
     results(page)
       .or(page.getByTestId('screen-story'))
