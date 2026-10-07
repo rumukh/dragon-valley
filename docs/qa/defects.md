@@ -20,6 +20,7 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 | DV-QA-05 | minor    | S3    | WebKit: the grown-ups' Settings still scroll sideways on a phone (voice list) |
 | DV-QA-13 | minor    | S3    | WebKit: a keeper's hub at 200 % text first appears at normal size             |
 | DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys        |
+| DV-QA-16 | minor    | S3    | Two announcements within 40 ms: only the second is heard (intermittent)       |
 
 ### DV-QA-05 (minor, S3; WebKit): the grown-ups' Settings still scroll sideways on a phone
 
@@ -79,6 +80,25 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 - **Evidence**: `test/e2e/keyboard.spec.ts` › "the keeper editor by keyboard alone › the pictures
   are one named radio group…" (the ring by pixels after the arrows; strict in Chromium and
   Firefox).
+
+### DV-QA-16 (minor, S3; intermittent): two announcements within 40 ms, only the second is heard
+
+- **Seen** on CI (WebKit, run 37551404338) at the end of the placement check: the results
+  appeared with their heading focused, but the polite announcer said "You got 11 coins!" (the
+  last answer's coins) instead of "The dragons saw what you know!".
+- **Cause**: `ui/announcer.ts` empties the region and writes a message 40 ms later; a second
+  `announce()` inside those 40 ms cancels the first (`clearTimeout`), so only the last of two
+  close messages is ever written. And the coin counter (`ui/meters.ts`, `gain`) announces only
+  after its coins have flown (up to about 1 s for five coins), which the round does not wait for
+  before moving on: on a slow device the last answer's coin line lands as the results appear.
+- **Expected**: each message is heard, in order (plan §2.11).
+- **Likely fix**: queue messages (write the next one after the previous has been written), or
+  join messages that arrive together; and announce the coins when they are earned, not when the
+  last coin lands (or drop the line once its screen is gone). Minor: the results' heading takes
+  focus, so a screen reader still reads it there; it is the live line that is lost.
+- **Evidence**: `test/e2e/live.spec.ts` › "a round speaks its feedback…": the results headline must
+  be announced politely. It depends on timing, so the defect is marked `intermittent`: a run where
+  the line is heard is noted as "not seen this time", not as a fix.
 
 ## Fixed
 

@@ -192,7 +192,9 @@ A defect found by the suite is written up in [qa/defects.md](qa/defects.md) and 
 behaviour the game should have and wraps that one assertion in `unlessKnown(...)`: while the defect
 reproduces the test records it and carries on; when the fix lands the assertion passes and the
 summary lists the marker as "fixed?" so it can be removed. A defect seen on one engine only lists
-it (`engines`), and stays a failure everywhere else. Nothing unlisted is tolerated.
+it (`engines`), and stays a failure everywhere else. One that shows only under some timings is
+marked `intermittent`: a passing run is noted ("not seen this time"), not taken for a fix. Nothing
+unlisted is tolerated.
 
 `support/qa-reporter.ts` writes `test-results/qa-summary.md` and the GitHub job summary: totals,
 known defects still reproducing (with the evidence a test recorded for them), markers that no

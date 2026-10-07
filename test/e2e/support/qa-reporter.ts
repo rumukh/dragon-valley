@@ -104,7 +104,11 @@ class QaSummary implements Reporter {
       const project = projectOf(test);
       for (const note of notes(test, run)) {
         const description = note.description ?? '';
-        if (note.type === 'known defect' || note.type === 'defect fixed?') {
+        if (
+          note.type === 'known defect' ||
+          note.type === 'defect fixed?' ||
+          note.type === 'defect not seen this time'
+        ) {
           const id = /^DV-QA-\d+/.exec(description)?.[0];
           if (id) met.add(id);
         }

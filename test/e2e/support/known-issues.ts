@@ -38,6 +38,8 @@ export interface Defect {
   readonly title: string;
   /** Only these engines show it; on the others its assertions stay strict. */
   readonly engines?: readonly Engine[];
+  /** It shows only under some timings, so a passing check is not taken for a fix. */
+  readonly intermittent?: boolean;
 }
 
 /**
@@ -66,6 +68,13 @@ export const DEFECTS = {
     engines: ['webkit'],
     title:
       "In WebKit (Safari) the keeper pictures lose their focus ring once an arrow key moves the choice: WebKit does not match :focus-visible on a radio focused by an arrow key (a plain page does the same), and the ring is drawn only for :focus-visible. The moving 'chosen' ring still marks the picture.",
+  },
+  'DV-QA-16': {
+    owner: 'S3',
+    severity: 'minor',
+    intermittent: true,
+    title:
+      "Two announcements within 40 ms: only the second is heard (the announcer drops a pending message). Seen on CI WebKit as a round ended: the last answer's coin line ('You got 11 coins!'), announced only after its coins finish flying, came as the results appeared and replaced their headline.",
   },
 } as const satisfies Record<string, Defect>;
 
@@ -144,10 +153,17 @@ export async function unlessKnown(
   }
   try {
     await assertion();
-    testInfo.annotations.push({
-      type: 'defect fixed?',
-      description: `${id} did not reproduce; remove its marker if it is fixed: ${defect.title}`,
-    });
+    testInfo.annotations.push(
+      defect.intermittent
+        ? {
+            type: 'defect not seen this time',
+            description: `${id} did not show in this run (it shows only under some timings): ${defect.title}`,
+          }
+        : {
+            type: 'defect fixed?',
+            description: `${id} did not reproduce; remove its marker if it is fixed: ${defect.title}`,
+          },
+    );
   } catch {
     testInfo.annotations.push({
       type: 'known defect',
