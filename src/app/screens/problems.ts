@@ -549,7 +549,8 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
         problemElement(asked.problem, notation(), speakProblem(asked.problem, 'answer'), 'answer'),
       );
     }
-    showModel(asked.problem, true);
+    // A story missed at its sign step goes on to its number: keep that answer back.
+    showModel(asked.problem, asked.step === 'answer');
     if (arena) {
       next.hidden = true;
       setTimeout(() => {
