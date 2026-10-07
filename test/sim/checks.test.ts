@@ -154,6 +154,39 @@ describe('the balance checks fail, by name, a report that misses a target', () =
     expect(check(high, 'success-band').ok).toBe(false);
   });
 
+  it('the band over the first 12 weeks; a longer run reports the whole run as measured', () => {
+    /** A session every day for `weeks` weeks: 80 % right, or 50 % in the weeks `low` picks. */
+    const run = (weeks: number, low: (week: number) => boolean) =>
+      report('average', {
+        days: Array.from({ length: weeks * 7 }, (_, i) =>
+          day(i, low(Math.floor(i / 7)) ? { correct: 20 } : {}),
+        ),
+      });
+    const late = check(
+      run(20, (week) => week >= 12),
+      'success-band',
+    );
+    expect(late.ok, 'weeks 13-20 below the band').toBe(true);
+    expect(late.name).toContain(
+      'in 84 of 84 sessions of the first 12 weeks (100 %, target 75 %), median 80 % (the whole run, as measured: 84 of 140 sessions, 60 %, median 80 %)',
+    );
+    const early = check(
+      run(14, (week) => week >= 8 && week < 12),
+      'success-band',
+    );
+    expect(early.ok, 'weeks 9-12 below the band').toBe(false);
+    expect(early.name).toContain(
+      'in 56 of 84 sessions of the first 12 weeks (66 %, target 75 %), median 80 % (the whole run, as measured: 70 of 98 sessions, 71 %, median 80 %)',
+    );
+    expect(
+      check(
+        run(12, () => false),
+        'success-band',
+      ).name,
+      'a 12-week run',
+    ).toMatch(/in 84 of 84 sessions \(100 %, target 75 %\), median 80 %$/);
+  });
+
   it('a struggling child under 60 % success; at 60 % it passes, short of the 70-90 % stretch', () => {
     const ids = runChecks([report('struggling')]).map((c) => c.id);
     expect(ids, "the struggling child's own target, not the band").toContain('success-floor');
