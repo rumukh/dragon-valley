@@ -9,7 +9,7 @@
  */
 import { afterAll, describe, expect, it } from 'vitest';
 import type { AnswerValue, ProblemRoundView } from '../../src/rules/contract';
-import { mistake, simulate } from './driver';
+import { KNOWN_BOX, dueAtSessionStart, mistake, overdueKnown, simulate } from './driver';
 import type { AnswerRecord, SimulationReport } from './driver';
 
 const runs = new Map<string, Promise<SimulationReport>>();
@@ -82,6 +82,38 @@ describe('the learner simulation', () => {
       records.filter((r) => r.day !== 0 || r.recall < 0 || r.recall > 100),
       'day 0, recall 0-100',
     ).toEqual([]);
+  });
+});
+
+describe('the known facts the no-starving check watches', () => {
+  it('counts facts at bronze and up (box 2+) past their review day, most overdue first', () => {
+    expect(KNOWN_BOX, 'bronze is box 2').toBe(2);
+    const items = {
+      'mul:7x8': { box: 1, due: 80 },
+      'div:56:7': { box: 2, due: 91 },
+      'mul:6x7': { box: 5, due: 95 },
+      'word:sharing': { box: 3, due: 91 },
+      'mul:3x4': { box: 4, due: 101 },
+    };
+    expect(
+      overdueKnown(items, 100),
+      'box 1 is still being learned; not due yet is not overdue',
+    ).toEqual([
+      { item: 'div:56:7', days: 9 },
+      { item: 'word:sharing', days: 9 },
+      { item: 'mul:6x7', days: 5 },
+    ]);
+    expect(overdueKnown(items, 101)).toContainEqual({ item: 'mul:3x4', days: 0 });
+    expect(dueAtSessionStart(items, 100), 'what a session start records').toEqual({
+      dueAtStart: 3,
+      maxOverdueAtStart: 9,
+      mostOverdue: 'div:56:7',
+    });
+    expect(dueAtSessionStart({ 'mul:7x8': { box: 1, due: 80 } }, 100)).toEqual({
+      dueAtStart: 0,
+      maxOverdueAtStart: 0,
+      mostOverdue: null,
+    });
   });
 });
 

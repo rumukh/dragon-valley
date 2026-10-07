@@ -57,9 +57,9 @@ export interface Summary {
   finalStages: Record<string, string>;
   window: SimulationReport['window'];
   division: SimulationReport['division'];
-  /** Days the most overdue known fact had waited when a session began, over all sessions. */
+  /** Days the most overdue known fact (box 2+) had waited when a session began, over all sessions. */
   maxOverdue: number;
-  /** Known facts due when a session began, over the last 10 sessions. */
+  /** Known facts (box 2+) due when a session began, over the last 10 sessions. */
   dueLate: Spread;
   overdueAtEnd: { item: string; days: number }[];
   /** Times-table dragons adult and crowned at the end, and the day the last one became adult. */
@@ -162,7 +162,10 @@ export const TARGETS = {
   strugglingSuccess: { floor: 60 },
   /** Coins per session, median (design §7.1: a 15-minute session earns roughly 50-80 coins). */
   coins: { low: 50, high: 80 },
-  /** Days a known fact may wait past its review day (testing.md §4: interval plus a grace). */
+  /**
+   * Days a known fact (bronze and up: box 2+, driver.ts `KNOWN_BOX`) may wait past its review
+   * day (testing.md §4: interval plus a grace). Facts in box 0-1 are still being learned.
+   */
   graceDays: 7,
   /**
    * The average child grows every times-table dragon to adult (90 % of its multiplication and
@@ -351,7 +354,7 @@ export const CHECKS: readonly Check[] = [
       );
       return {
         ok: worst.days <= TARGETS.graceDays,
-        name: `no known fact waited more than ${TARGETS.graceDays} days past its review day (the longest: ${worst.days} days${worst.item ? `, ${worst.item} on day ${worst.day}` : ''})`,
+        name: `no known fact (bronze and up) waited more than ${TARGETS.graceDays} days past its review day (the longest: ${worst.days} days${worst.item ? `, ${worst.item} on day ${worst.day}` : ''})`,
       };
     },
   },

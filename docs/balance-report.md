@@ -103,7 +103,7 @@ The checks are named; each label states what it measured.
 | gift               | the gift opens every session that reaches the daily goal                             | design §7.4               |
 | hatch pace         | every egg hatches within 5 sessions of arriving                                      | design §4.1, §6.5         |
 | no dead end        | every level completed, every boss won over                                           | testing.md §4             |
-| no starving        | no known fact waits more than 7 days past its review day                             | testing.md §4             |
+| no starving        | no known fact (bronze and up, box 2+) waits more than 7 days past its review day     | testing.md §4             |
 | coins              | median 50-80 coins per session                                                       | design §7.1               |
 | market             | the cosmetics are not all owned in the first 3 weeks                                 | design §7.2               |
 | fluency            | the slow child earns silver but never gold                                           | design §6.5               |
@@ -119,6 +119,11 @@ against the new target.
 
 Spreads are min / median / max over the sessions played. "Due" counts known facts whose review
 day had come when a session began, over the last 10 sessions.
+
+**Scope note.** The runs below counted every fact answered right at least once as known. The
+checks now count only facts at bronze and up (Leitner box 2+): facts in box 0-1 are still being
+learned and are served as learning items (the coordinator's decision on the no-starving scope).
+The 1.2.0 balance PR refreshes these tables with that scope.
 
 ### 4.1 Current balance (content 1.1.0)
 
