@@ -7,7 +7,8 @@
  * 1. content/dragon-valley.content.json against the contract's registration (schema, references,
  *    unlock reachability, skill pools, activity options, balance sanity).
  * 2. Every catalog key the pack uses exists in content/catalogs/en.content.json; every catalog is
- *    a flat string map; word-problem placeholders match their template variables.
+ *    a flat string map; word-problem placeholders match their template variables; a template's
+ *    `words` count (its reading time) is the length of its story (`storyWordCount`).
  * 3. Story lines and word-problem sentences keep to the child profile's sentence length
  *    (@aegis/narrative CHILD_PROFILE), word problems counted with their longest names and things.
  * 4. Every shipped pack in content/history/ is valid under the current schema and named by its
@@ -175,6 +176,7 @@ export async function validateContentTree(options = {}) {
         errors.push(`${template.textKey}: placeholder {${name}} is not a template variable`);
     }
   }
+  for (const d of contract.checkStoryWords(data, english)) errors.push(d.message);
   for (const beat of data.story.beats) {
     for (const key of beat.graph.catalogs.text) {
       const text = english[key];
