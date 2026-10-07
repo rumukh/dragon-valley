@@ -216,8 +216,8 @@ behaviour the game should have and wraps that one assertion in `unlessKnown(...)
 reproduces the test records it and carries on; when the fix lands the assertion passes and the
 summary lists the marker as "fixed?" so it can be removed. A defect seen on one engine only lists
 it (`engines`), and stays a failure everywhere else. One that shows only under some timings is
-marked `intermittent`: a passing run is noted ("not seen this time"), not taken for a fix. Nothing
-unlisted is tolerated.
+marked `intermittent` (everywhere, or on the engines it names): a passing run there is noted ("not
+seen this time"), not taken for a fix. Nothing unlisted is tolerated.
 
 `support/qa-reporter.ts` writes `qa-summary.md` into the run's output folder (`test-results/` on
 the default port) and the GitHub job summary: totals, known defects still reproducing (with the

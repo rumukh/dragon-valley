@@ -15,12 +15,12 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 
 ## Open
 
-| ID       | Severity | Owner | Summary                                                                       |
-| -------- | -------- | ----- | ----------------------------------------------------------------------------- |
-| DV-QA-05 | minor    | S3    | WebKit: the grown-ups' Settings still scroll sideways on a phone (voice list) |
-| DV-QA-13 | minor    | S3    | WebKit: a keeper's hub at 200 % text first appears at normal size             |
-| DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys        |
-| DV-QA-16 | minor    | S3    | Two announcements within 40 ms: only the second is heard (intermittent)       |
+| ID       | Severity | Owner | Summary                                                                               |
+| -------- | -------- | ----- | ------------------------------------------------------------------------------------- |
+| DV-QA-05 | minor    | S3    | WebKit: the grown-ups' Settings still scroll sideways on a phone (voice list)         |
+| DV-QA-13 | minor    | S3    | WebKit, sometimes Chromium: a keeper's hub at 200 % text appears at normal size first |
+| DV-QA-15 | minor    | S3    | WebKit: the keeper pictures lose their focus ring under the arrow keys                |
+| DV-QA-16 | minor    | S3    | Two announcements within 40 ms: only the second is heard (intermittent)               |
 
 ### DV-QA-05 (minor, S3; WebKit): the grown-ups' Settings still scroll sideways on a phone
 
@@ -38,7 +38,7 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 - **Evidence**: `test/e2e/screens.spec.ts` stops `26-parent-settings` and `44-settings-saved`
   (phone, WebKit: "the page scrolls sideways: 511px of content in 390px").
 
-### DV-QA-13 (minor, S3; WebKit): a keeper's hub at 200 % text first appears at normal size
+### DV-QA-13 (minor, S3; WebKit, sometimes Chromium): a keeper's hub at 200 % text first appears at normal size
 
 - **Repro** (Playwright's WebKit 26.6, on Windows, and on the Ubuntu runner before #19): give a
   keeper Text size **200%** in the grown-ups' area, then open that keeper from "Who is playing?".
@@ -53,13 +53,20 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
   changed nothing; forcing a style and layout flush right after it made the root right in 6 of 6,
   but the hub's text still lagged 145-185 ms. WebKit keeps the newly mounted screen's text styled
   against the old root size until its next rendering update.
+- **Also in Chromium, sometimes**: on CI the root was still 24 px as the hub
+  appeared in 2 of the last 4 Chromium runs of the test (runs 37562539633, main after #26, and
+  37564290512, #28), while Chromium is right at once on every other run and locally. So the cause
+  is not WebKit's alone: the hub is shown before the keeper's text size has taken effect, and a
+  slower engine or a busy machine lets a frame through. The registry marks it as always open in
+  WebKit and intermittent in Chromium (a run without it is noted, not taken for a fix); Firefox
+  has always been right at once and stays strict.
 - **Ideas** (untested): keep the new screen hidden until the next animation frame after a text
   size change (e.g. `visibility: hidden` on the stage until `requestAnimationFrame`), so no child
   sees it at the wrong size; or apply the keeper's presentation earlier, before "Who is playing?"
   starts the change of screen. Minor: the setting is never lost, but a 200 % reader sees small
   text flash for up to half a second whenever their keeper opens.
 - **Evidence**: `test/e2e/reflow.spec.ts` › "a keeper's text at 200 %…" compares the root and the
-  greeting as the hub appears with the same hub at 100 %; in WebKit it records how long until
+  greeting as the hub appears with the same hub at 100 %; where it shows, it records how long until
   200 % (`DV-QA-13 evidence` in the job summary).
 
 ### DV-QA-15 (minor, S3; WebKit): the keeper pictures lose their focus ring under the arrow keys
@@ -103,7 +110,9 @@ devices; **minor** is a rough edge. Engines: all three unless stated.
 ## Fixed
 
 Each was verified fixed by the suite in Chromium (Edge), Firefox and WebKit, and its assertion now
-runs as a regression check. (DV-QA-05 and DV-QA-13 are fixed in Chromium and Firefox and stay open for WebKit.) The full write-ups (repro, cause, suggested fix) are in this file's
+runs as a regression check. (DV-QA-05 is fixed in Chromium and Firefox and stays open for WebKit;
+DV-QA-13 stays open for WebKit and, sometimes, Chromium.) The full write-ups (repro, cause,
+suggested fix) are in this file's
 history: `git log -p -- docs/qa/defects.md`.
 
 | ID       | Was                                                                                       | Fixed by | Regression check                                                                         |
