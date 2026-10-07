@@ -67,8 +67,9 @@ jobs:
     # jobs of one or two parts with three workers each (its tests mostly wait on the engine, so a
     # third worker on the 4-vCPU runner shortens a job; docs/testing.md §5).
     # Every part runs once per engine (test/e2e/harness.spec.ts checks this matrix).
-    # The limit is a guard against a hang: room for a slow package mirror, not a budget.
-    timeout-minutes: 20
+    # The limit is room for a slow package mirror on a cache miss (docs/testing.md §5); the
+    # test step has its own limit, the guard against a hang.
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -118,16 +119,55 @@ jobs:
         run: npm ci
 
       # Hosted runners download Playwright's own engines; the development machine uses the system
-      # Edge/Chrome channel instead (see playwright.config.ts). Not cached: the browser download
-      # is 4-9 s of this step and the rest is the system packages (apt, 15-45 s), which a cache of
-      # ~/.cache/ms-playwright would not skip (measured, docs/testing.md §5).
+      # Edge/Chrome channel instead (see playwright.config.ts). The engine download is 4-9 s; the
+      # rest of the install is the system packages (fonts, codecs, GTK) from Ubuntu's mirror,
+      # usually 15-60 s but at times far slower: 49 MB took 13 minutes at 63 kB/s
+      # (docs/testing.md §5). So the .deb files are cached, per engine, runner image and
+      # Playwright version, and apt installs them without downloading. A new key starts from
+      # the newest cache of the same engine; `apt-get autoclean` drops versions the mirror no
+      # longer has before one job per engine (the walks) saves the new set.
+      - name: Key for ${{ matrix.engine }}'s system packages
+        id: debs-key
+        run: |
+          playwright=$(node -p "require('playwright-core/package.json').version")
+          echo "key=debs-${{ matrix.engine }}-${ImageOS}-${ImageVersion}-playwright-${playwright}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore ${{ matrix.engine }}'s system packages
+        id: debs
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.cache/dv-debs
+          key: ${{ steps.debs-key.outputs.key }}
+          restore-keys: debs-${{ matrix.engine }}-
+
       - name: Install ${{ matrix.engine }}
-        run: npx playwright install --with-deps ${{ matrix.engine }}
+        run: |
+          echo 'APT::Keep-Downloaded-Packages "true";' |
+            sudo tee /etc/apt/apt.conf.d/99dv-keep-debs > /dev/null
+          if compgen -G "$HOME/.cache/dv-debs/*.deb" > /dev/null; then
+            sudo cp "$HOME"/.cache/dv-debs/*.deb /var/cache/apt/archives/
+          fi
+          npx playwright install --with-deps ${{ matrix.engine }}
+          sudo apt-get autoclean -qq
+          rm -rf "$HOME/.cache/dv-debs" && mkdir -p "$HOME/.cache/dv-debs"
+          if compgen -G "/var/cache/apt/archives/*.deb" > /dev/null; then
+            cp /var/cache/apt/archives/*.deb "$HOME/.cache/dv-debs/"
+          fi
+          echo "System packages kept for the cache: $(ls "$HOME/.cache/dv-debs" | wc -l) files," \
+            "$(du -sh "$HOME/.cache/dv-debs" | cut -f1)"
+
+      - name: Save ${{ matrix.engine }}'s system packages
+        if: steps.debs.outputs.cache-hit != 'true' && contains(matrix.part, 'walks')
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/dv-debs
+          key: ${{ steps.debs-key.outputs.key }}
 
       # Every test runs under the global guards (no console output, no failed or foreign
       # requests, no outbound links), and the job summary lists known defects and axe advice
-      # (docs/testing.md §5).
+      # (docs/testing.md §5). A job's tests take 3-7 minutes; the limit is a guard against a hang.
       - name: End-to-end and accessibility on ${{ matrix.engine }}
+        timeout-minutes: 15
         run: npx playwright test --project=${{ matrix.engine }} --workers=${{ matrix.workers }}
 
       # Screens for human review at tablet, desktop and phone sizes (docs/qa/screens.md); only the
