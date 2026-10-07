@@ -1,6 +1,6 @@
 {
   "id": "dragon-valley",
-  "revision": "1.3.0",
+  "revision": "1.2.0",
   "schemaVersion": 1,
   "data": {
     "objectives": [
@@ -9972,12 +9972,7 @@
       "mastery": {
         "goldBox": 5,
         "goldFast": 2,
-        "goldOfLast": 3,
-        "effort": {
-          "bronzeDays": 2,
-          "silverDays": 4,
-          "gapDays": 2
-        }
+        "goldOfLast": 3
       },
       "growth": [
         {
@@ -9996,7 +9991,7 @@
         },
         {
           "stage": "adult",
-          "share": 80,
+          "share": 90,
           "mastery": "silver",
           "division": true,
           "boss": true

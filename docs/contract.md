@@ -278,8 +278,8 @@ level (`--strict-coverage`). The v1 pack passes both strict checks and `npm run 
 | `reask`             | delay 3 turns, at most 2 per round                                                                             | re-asking missed items            |
 | `coins`             | 1 per correct, +1 every 5 in a row, boss 15, placement 10                                                      | coin sources                      |
 | `stars`             | 2★ at 80 %, 3★ at 95 % with 60 % fast                                                                          | level stars                       |
-| `mastery`           | gold = box 5 and 2 fast of the last 3; optional `effort` (none until 1.3.0, §5.4)                              | gold rule, effort path            |
-| `growth`            | hatchling 30 % seen; youngling 60 % bronze + division; adult 90 % silver + division + boss; crowned 100 % gold | dragon stages                     |
+| `mastery`           | gold = box 5 and 2 fast of the last 3; effort: bronze on 2 right days, silver on 4, 2+ days apart (§5.4)       | gold rule, effort path            |
+| `growth`            | hatchling 30 % seen; youngling 60 % bronze + division; adult 80 % silver + division + boss; crowned 100 % gold | dragon stages                     |
 | `daily`             | goal 30 (10-100), 3 quests, 60 days of history                                                                 | daily goal and history            |
 | `gift`              | 2-6 coins (cosmetic weight 0, coins weight 1)                                                                  | the daily gift chest              |
 | `arena`             | unlocked after `sunny-meadow.boss`, ≤ 60 problems                                                              | Lightning Arena                   |

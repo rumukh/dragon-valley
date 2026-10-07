@@ -29,8 +29,8 @@ vi.setConfig({ testTimeout: 300_000 });
  * pinned as literals. Re-pin only for a deliberate rules or content change, with the reason and
  * the old and new values in the commit message (docs/testing.md, "When a golden moves").
  */
-const GOLDEN_HASH = '143f372c937992c5';
-const GOLDEN_TRAJECTORY = 'fd9b0693628d90a4';
+const GOLDEN_HASH = '7208053069a39a30';
+const GOLDEN_TRAJECTORY = 'a0cb66b49ce61bf1';
 
 const SEED = 'golden-first-session';
 const PLACEMENT_MISS = 6;
