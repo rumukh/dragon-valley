@@ -23,6 +23,22 @@ import {
   tallyEvents,
 } from './driver';
 import type { AnswerRecord, SimulationReport } from './driver';
+import type { GrowthGate, GrowthVariant } from './growth';
+import { loadPack } from '../traces/support';
+
+/** The shipped growth rules, and a youngling gate so lenient that day one already passes it. */
+const SHIPPED_GATES = loadPack().data.balance.growth as GrowthGate[];
+const VARIANTS: GrowthVariant[] = [
+  { id: 'shipped', gates: SHIPPED_GATES },
+  {
+    id: 'lenient',
+    gates: SHIPPED_GATES.map((gate) =>
+      gate.stage === 'youngling'
+        ? { stage: 'youngling', share: 10, mastery: 'seen', division: false, boss: false }
+        : gate,
+    ),
+  },
+];
 
 const runs = new Map<string, Promise<SimulationReport>>();
 const answers = new Map<string, AnswerRecord[]>();
@@ -35,6 +51,7 @@ const firstSession = (learner: 'perfect' | 'struggling') => {
       seed: 'harness',
       answersPerDay: 24,
       onAnswer: (record) => records.push(record),
+      growthVariants: VARIANTS,
     });
     runs.set(learner, report);
   }
@@ -131,6 +148,20 @@ describe('the learner simulation', () => {
     expect(
       met.filter((item) => !answered.has(item)).length,
       'some facts were met on a board only (the Egg Grid credits facts it never asks)',
+    ).toBeGreaterThan(0);
+  });
+
+  it('follows other growth rules in the same run, the shipped ones exactly as the game', async () => {
+    const report = await firstSession('perfect');
+    const shipped = report.growthVariants!['shipped']!;
+    expect(Object.keys(report.stages).length, 'dragons hatched on day one').toBeGreaterThan(0);
+    expect(shipped, 'the shipped rules as a variant: the game’s own stage days').toEqual(
+      report.stages,
+    );
+    const lenient = report.growthVariants!['lenient']!;
+    expect(
+      Object.values(lenient).filter((stages) => stages.youngling === 0).length,
+      'a lenient youngling gate already grows dragons on day one',
     ).toBeGreaterThan(0);
   });
 });

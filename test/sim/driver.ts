@@ -23,6 +23,7 @@ import { dayNumber, isoDay } from '../../src/rules/contract';
 import type {
   AnswerValue,
   ContentData,
+  DragonStage,
   GameAction,
   GameView,
   MasteryLevel,
@@ -30,10 +31,25 @@ import type {
 } from '../../src/rules/contract';
 import { lowSuccess, mixTier } from '../../src/rules/learning/selection';
 import type { ItemTier } from '../../src/rules/learning/selection';
+import { itemIndex } from '../../src/rules/learning/index-cache';
 import { Player, loadPack, oracle, root } from '../traces/support';
 import type { Style } from '../traces/support';
+import { GrowthProbes } from './growth';
+import type { GrowthState, GrowthVariant } from './growth';
 import { LEARNERS, Learner, knowledgeKey } from './learners';
 import type { LearnerName } from './learners';
+
+/** Where a runtime snapshot keeps the profile state. */
+const STATE_RESOURCE = 'aegis.runtime.state';
+/** The steps that can credit a fact or win over a boss (and so move a dragon's stage). */
+const GROWTH_STEPS: ReadonlySet<GameAction['type']> = new Set([
+  'answer',
+  'placementAnswer',
+  'minigameMove',
+  'startLevel',
+  'startActivity',
+  'endRound',
+]);
 
 /** The simulation starts on a Monday. */
 export const FIRST_DAY = '2026-10-05';
@@ -142,6 +158,11 @@ export interface SimulationReport {
   stickers: number;
   /** Known facts (box 2 and up) past their review day at the end, most overdue first. */
   overdue: { item: string; days: number }[];
+  /**
+   * With `growthVariants`: per variant, the day index each dragon first reached each stage under
+   * it (the same run: growth past hatching never feeds back into play).
+   */
+  growthVariants?: Record<string, Record<string, Partial<Record<DragonStage, number>>>>;
 }
 
 /** The trace harness with plain dispatch steps and a mistake for every kind of answer. */
@@ -149,6 +170,8 @@ class SimPlayer extends Player {
   private simSteps = 0;
   /** Called after each graded answer with the bucket the rules gave it (null: a step on the way). */
   onGraded?: (bucket: string | null) => void;
+  /** Called after every accepted step (growth variants follow the state with it). */
+  afterCommit?: (action: GameAction) => void;
 
   override async act(action: GameAction): Promise<boolean> {
     // A simulated month is long: let the test runner's messages through now and then.
@@ -159,6 +182,7 @@ class SimPlayer extends Player {
       return false;
     }
     if (action.type === 'answer' || action.type === 'placementAnswer') this.turn += 1;
+    this.afterCommit?.(action);
     return true;
   }
 
@@ -418,6 +442,11 @@ export interface SimulateOptions {
   reading?: boolean;
   /** The English catalog the stories come from (default: content/catalogs/en.content.json). */
   catalog?: Readonly<Record<string, unknown>>;
+  /**
+   * Other growth rules to follow alongside the shipped ones (growth.ts): the report's
+   * `growthVariants` gives the day each dragon would reach each stage under each of them.
+   */
+  growthVariants?: readonly GrowthVariant[];
 }
 
 /** One answer of the learner, with what the rules and the learner knew before it. */
@@ -636,6 +665,18 @@ export async function simulate(
     if (pending !== null) options.onAnswer?.({ ...pending, bucket });
     pending = null;
   };
+  const probes =
+    options.growthVariants && options.growthVariants.length > 0
+      ? new GrowthProbes(pack.data, itemIndex(pack.data), options.growthVariants)
+      : null;
+  if (probes !== null) {
+    player.afterCommit = (action) => {
+      // Only these steps credit facts or win over a boss; the snapshot is a cheap copy.
+      if (!GROWTH_STEPS.has(action.type)) return;
+      const resources = player.host.snapshot().world.resources as Record<string, unknown>;
+      probes.update(resources[STATE_RESOURCE] as GrowthState, today);
+    };
+  }
   const report: SimulationReport = {
     learner,
     seed,
@@ -719,6 +760,7 @@ export async function simulate(
   report.cosmetics = state.cosmetics.owned.length;
   report.stickers = Object.keys(state.stickers).length;
   report.overdue = overdueKnown(state.items, lastDay);
+  if (probes !== null) report.growthVariants = probes.days;
   await player.dispose();
   return report;
 }

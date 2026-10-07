@@ -5,6 +5,7 @@
  *   node scripts/simulate.mjs [--days 84] [--learners perfect,average,struggling,slow]
  *                             [--seed simulation] [--out out/simulation] [--check]
  *                             [--balance partial-balance.json] [--answers] [--no-reading] [--reuse]
+ *                             [--growth growth-variants.json]
  *
  * Deterministic synthetic learners (test/sim/learners.ts) play the real rules headlessly through
  * the runtime host, one simulated day after another (test/sim/driver.ts). Each learner runs in its
@@ -14,8 +15,9 @@
  * balance block into the content first; `--answers` also writes every answer (item, tier, box,
  * the learner's recall, right or wrong, the rules' bucket) to `<out>/<learner>.answers.json`;
  * the time a child takes to read a story is modelled unless `--no-reading` (which reproduces runs
- * from before 1.2.0); `--reuse` re-reads the
- * reports of an earlier run instead of simulating.
+ * from before 1.2.0); `--growth` follows other growth rules alongside the shipped ones (a JSON
+ * array of test/sim/growth.ts variants; the report's `growthVariants` gives each dragon's stage
+ * days under each); `--reuse` re-reads the reports of an earlier run instead of simulating.
  *
  * A simulated day costs about a hundred and fifty commits, so a long run takes minutes; the
  * Vitest gate runs only short simulations (test/sim/*.test.ts). docs/balance-report.md records the
@@ -85,11 +87,12 @@ export function merge(base, patch) {
 /**
  * Simulate one learner in this process and write its report. `balance` is a JSON file with a
  * partial balance block merged into the content's (an experiment; the pack is validated after).
- * With `answers`, every answer is also written to `<learner>.answers.json` for analysis.
+ * With `answers`, every answer is also written to `<learner>.answers.json` for analysis. `growth`
+ * is a JSON file of growth variants to follow alongside the shipped rules.
  * @param {string} learner @param {number} days @param {string} seed @param {string} out
- * @param {string} balance @param {boolean} answers @param {boolean} reading
+ * @param {string} balance @param {boolean} answers @param {boolean} reading @param {string} growth
  */
-async function runWorker(learner, days, seed, out, balance, answers, reading) {
+async function runWorker(learner, days, seed, out, balance, answers, reading, growth) {
   const sim = await loadSimulation(repositoryRoot);
   const started = process.hrtime.bigint();
   const file = join(repositoryRoot, 'content', 'dragon-valley.content.json');
@@ -114,6 +117,7 @@ async function runWorker(learner, days, seed, out, balance, answers, reading) {
     seed,
     pack,
     ...(reading ? { reading: true, catalog } : {}),
+    ...(growth ? { growthVariants: JSON.parse(readFileSync(growth, 'utf8')) } : {}),
     onDay: (
       /** @type {{ index: number; played: boolean; answers: number; commits: number }} */ day,
     ) => {
@@ -152,12 +156,14 @@ if (isMain(import.meta.url)) {
   mkdirSync(out, { recursive: true });
   const balance = option(args, 'balance', '');
   const balancePath = balance ? resolve(balance) : '';
+  const growth = option(args, 'growth', '');
+  const growthPath = growth ? resolve(growth) : '';
   const worker = option(args, 'worker', '');
   const answers = args.includes('--answers');
   // Reading a story is modelled by default since 1.2.0; --no-reading reproduces earlier runs.
   const reading = !args.includes('--no-reading');
   if (worker) {
-    await runWorker(worker, days, seed, out, balancePath, answers, reading);
+    await runWorker(worker, days, seed, out, balancePath, answers, reading, growthPath);
     process.exit(0);
   }
   const learners = option(args, 'learners', LEARNER_NAMES.join(',')).split(',');
@@ -170,6 +176,7 @@ if (isMain(import.meta.url)) {
         spawnWorker([
           ...['--worker', learner, '--days', String(days), '--seed', seed, '--out', out],
           ...(balancePath ? ['--balance', balancePath] : []),
+          ...(growthPath ? ['--growth', growthPath] : []),
           ...(answers ? ['--answers'] : []),
           ...(reading ? [] : ['--no-reading']),
         ]),
