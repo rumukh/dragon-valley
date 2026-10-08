@@ -3,14 +3,23 @@
 Everything below holds on the commit to be tagged. Items marked _(person)_ cannot be checked by a
 test; the rest are read from CI and the live site. The coordinator ticks the list and tags.
 
+**v1.0.0 was tagged on 2026-10-08, on `db077bc`, the commit of v1.0.0-rc.1.** The owner approved
+the art and the audio and playtested the game with their child. By the owner's decision, the
+checks on real devices and with VoiceOver (the last item of §3, and §4) follow the release, and
+whatever they find ships as v1.0.x.
+
 ## 1. The build
 
-- [ ] `main` is green on the release commit: CI (verify on Ubuntu and Windows, and the 16 e2e jobs:
-      4 on Chromium, 4 on Firefox, 8 on WebKit) and the Pages deployment from that commit.
-- [ ] Each e2e job summary lists only the known defects below, and its "Performance" section shows
-      every budget met ([performance.md](performance.md)).
-- [ ] The live site is that commit. The build is reproducible, so building the commit again and
-      comparing the offline revision proves the deployed files are its files:
+- [x] `main` is green on the release commit: CI (verify on Ubuntu and Windows, and the 16 e2e jobs:
+      4 on Chromium, 4 on Firefox, 8 on WebKit) and the Pages deployment from that commit. On
+      `db077bc`, both green (2026-10-07).
+- [x] Each e2e job summary lists only the known defects below, and its "Performance" section shows
+      every budget met ([performance.md](performance.md)). On `db077bc` every job passed: no
+      defect is registered, so any defect fails its test, and with CI's two workers per job
+      `perf.spec.ts` holds the timings to their budgets.
+- [x] The live site is that commit. The build is reproducible, so building the commit again and
+      comparing the offline revision proves the deployed files are its files. On `db077bc`, both
+      read `3a912049948605e5f3efd496`:
 
   ```powershell
   node scripts/build.mjs --base /dragon-valley/ --out out/release-check
@@ -19,7 +28,7 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
     Select-String -Pattern 'dv-offline-revision' | ForEach-Object { $_.Matches.Value }
   ```
 
-- [ ] The content pack's revision is final for v1 (today `1.3.0`; `1.0.0`, `1.1.0` and `1.2.0` are
+- [x] The content pack's revision is final for v1 (`1.3.0`; `1.0.0`, `1.1.0` and `1.2.0` are
       archived). Every later content change runs `npm run content:bump`, which archives `1.3.0` in
       `content/history/` so v1 saves upgrade ([contract.md](../contract.md),
       [content.md](../content.md) §1).
@@ -41,15 +50,23 @@ test; the rest are read from CI and the live site. The coordinator ticks the lis
 
 ## 3. Human checkpoints (plan §4.6)
 
-- [ ] _(person)_ Dragon designs and painted backgrounds approved (the screens for review:
-      [screens.md](screens.md)).
-- [ ] _(person)_ Audio auditioned: every effect and the four music loops.
-- [ ] _(person)_ Copy reviewed (above).
-- [ ] _(person)_ Playtest with the child, and its findings triaged.
+- [x] _(person)_ Dragon designs and backgrounds approved (the screens for review:
+      [screens.md](screens.md); every drawing: `npm run art:gallery`). Approved by the owner on
+      2026-10-08. v1 keeps the SVG backgrounds; painted ones need an image-generation service and
+      can come in a later release.
+- [x] _(person)_ Audio auditioned: every effect and the four music loops (`npm run audio:audition`).
+      Approved by the owner on 2026-10-08.
+- [x] _(person)_ Copy reviewed (above): S6's review and the decisions in §2; the playtest raised no
+      copy finding.
+- [x] _(person)_ Playtest with the child, and its findings triaged: on 2026-10-08, with no findings.
 - [ ] _(person)_ The manual accessibility checks ([accessibility.md](accessibility.md), "Needs a
-      person"), at least VoiceOver with Safari on an iPad.
+      person"), at least VoiceOver with Safari on an iPad. After v1.0.0, by the owner's decision.
 
 ## 4. On real devices, on the live site
+
+After v1.0.0, by the owner's decision (2026-10-08); a finding ships as v1.0.x. Meanwhile the e2e
+suite's guard fails any test, in all three engines, whose page requests another origin
+(`test/e2e/support/guard.ts`).
 
 - [ ] _(person)_ iPad, Safari: a new keeper through the story and the placement check to the first
       hatch; the grown-ups install it for offline play; in airplane mode the game reopens and keeps
@@ -92,6 +109,8 @@ gh release create v1.0.0 --repo rumukh/dragon-valley --verify-tag --title "Drago
 
 The tag marks a commit; it does not deploy. Pages publishes `main` on every push, so the live
 site follows `main` after the release too.
+
+Done on 2026-10-08: `v1.0.0` on `db077bc` (v1.0.0-rc.1's commit), published as the latest release.
 
 ### Release notes outline
 
