@@ -2437,8 +2437,8 @@
             "options": {}
           },
           {
-            "kind": "fact-family",
-            "skills": ["add-10"],
+            "kind": "memory-match",
+            "skills": ["add-5"],
             "count": 1,
             "input": "auto",
             "options": {}
@@ -2469,6 +2469,13 @@
             "skills": ["add-10", "sub-5"],
             "count": 8,
             "input": "keypad",
+            "options": {}
+          },
+          {
+            "kind": "ten-frame",
+            "skills": ["add-10"],
+            "count": 2,
+            "input": "auto",
             "options": {}
           },
           {

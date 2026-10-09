@@ -50,7 +50,7 @@ const REVISIONS: Readonly<Record<string, string>> = {
   '1.1.0': 'e2acbc7228348abd', // v1: the nine regions
   '1.2.0': '69494a787c9bab06', // the balance from the learner simulation (docs/balance-report.md)
   '1.3.0': 'f41ae03a85710bac', // growing up: the effort path and adult at 80 % (balance-report §9)
-  '1.4.0': '685878727d35e7f9', // grades 1-3: grade starts, filters and Pebble Brook for grade 1
+  '1.4.0': '9f81dad0a12a7159', // grades 1-3: grade starts, filters and Pebble Brook for grade 1
 };
 
 function diagnostics(pack: Pack): readonly RuntimeDiagnostic[] {

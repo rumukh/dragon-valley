@@ -40,6 +40,7 @@ describe('the v1 minigame activities', () => {
         'fact-family',
         'sharing-feast',
         'golem-orders',
+        'ten-frame',
       ]),
     );
   });

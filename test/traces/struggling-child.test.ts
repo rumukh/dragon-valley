@@ -25,8 +25,8 @@ import type { Adapter, Style } from './support';
 vi.setConfig({ testTimeout: 300_000 });
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '3d7337a6e61d39d1';
-const GOLDEN_TRAJECTORY = '87ed2a180c11e7e9';
+const GOLDEN_HASH = '6ccc7c00a9a6a496';
+const GOLDEN_TRAJECTORY = '9134f86e57446768';
 
 const SEED = 'golden-struggling-child';
 const STRUGGLING: Style = {

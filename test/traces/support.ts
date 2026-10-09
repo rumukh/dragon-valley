@@ -478,6 +478,30 @@ export class Player {
         await this.move({ type: 'put', basket, count: each });
       }
       await this.move({ type: 'submit', each, left });
+    } else if (board.kind === 'ten-frame') {
+      if (this.style.clumsy) await this.move({ type: 'submit' });
+      const b = board.b ?? 0;
+      const want =
+        board.task === 'show'
+          ? [Math.min(board.target, 10), Math.max(0, board.target - 10)]
+          : board.task === 'make-ten'
+            ? [10, 0]
+            : [10, b - (10 - board.a)];
+      for (const frame of [0, 1]) {
+        const now = (this.view().round as MinigameRoundView).current;
+        if (now.kind !== 'ten-frame') break;
+        const diff = want[frame]! - now.frames[frame]!;
+        const count = Math.abs(diff);
+        if (diff > 0) await this.move({ type: 'add', frame, count });
+        if (diff < 0) await this.move({ type: 'remove', frame, count });
+      }
+      const value =
+        board.task === 'make-ten'
+          ? 10 - board.a
+          : board.task === 'cross'
+            ? board.target
+            : undefined;
+      await this.move(value === undefined ? { type: 'submit' } : { type: 'submit', value });
     } else if (board.kind === 'golem-orders') {
       for (let guard = 0; guard < 32 && still(); guard++) {
         const now = (this.view().round as MinigameRoundView).current;
