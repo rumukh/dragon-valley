@@ -37,7 +37,8 @@ test('a new family goes from the title through the prologue to their first egg a
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('A new keeper!');
   await expect(page.getByTestId('keeper-name'), 'typing can start at once').toBeFocused();
   await expect(page.getByLabel('Your name')).toBeVisible();
-  await expect(page.getByRole('radio')).toHaveCount(8);
+  // Eight pictures and three classes.
+  await expect(page.getByRole('radio')).toHaveCount(11);
 
   // Guided, never judged: first the picture, then the name.
   await page.getByTestId('keeper-save').click();

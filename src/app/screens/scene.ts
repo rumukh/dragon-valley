@@ -26,6 +26,9 @@ export const BACKGROUND_IDS = [
   'giants-peaks',
   'riddle-ruins',
   'dragon-castle',
+  // Grades 1-2 (G5 art): the Lower Valley map sheet and its first region.
+  'lower-valley-map',
+  'pebble-brook',
 ] as const;
 
 /** Story scene names in the content pack that are not background ids themselves. */

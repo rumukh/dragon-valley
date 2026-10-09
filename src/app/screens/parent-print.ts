@@ -5,10 +5,19 @@
  * here instead of printing clipped cards.
  */
 import { OPERATOR_SYMBOLS, TABLE_MAX, TABLE_MIN } from '../../rules/contract';
-import type { Notation } from '../../rules/contract';
+import type { Grade, Notation } from '../../rules/contract';
+import type { MessageKey } from '../i18n/messages';
 import { possessive } from '../i18n/messages';
 import type { Keeper } from '../persistence/family';
-import { earnedCertificates, hardestFacts, longDay, tableFacts } from '../print/content';
+import { gradeOf, isYoungGrade } from '../game/grade';
+import {
+  addTableFacts,
+  earnedCertificates,
+  gradeLastBoss,
+  hardestFacts,
+  longDay,
+  tableFacts,
+} from '../print/content';
 import type { Certificate } from '../print/content';
 import { certificateJob, flashcardJob } from '../print/documents';
 import type { CertificateText } from '../print/documents';
@@ -35,6 +44,12 @@ export interface PrintTabOptions {
   chooseTable(table: number): Promise<void>;
   readonly segmented: Segmented;
 }
+
+const GRADE_CERTIFICATE: Readonly<Record<Grade, { heading: MessageKey; body: MessageKey }>> = {
+  1: { heading: 'print.certificate.grade1Heading', body: 'print.certificate.grade1' },
+  2: { heading: 'print.certificate.grade2Heading', body: 'print.certificate.grade2' },
+  3: { heading: 'print.certificate.finaleHeading', body: 'print.certificate.finale' },
+};
 
 const TABLES = Array.from({ length: TABLE_MAX - TABLE_MIN + 1 }, (_, index) => TABLE_MIN + index);
 
@@ -71,6 +86,33 @@ export function printContent(
 
   const cardsGuidance = t('parent.print.cardsGuidance');
   const hardest = hardestFacts(view, notation);
+  const young = isYoungGrade(gradeOf(view));
+  const addTableButton = young
+    ? candyButton({
+        label: t('parent.print.addTableButton', { table: options.table }),
+        icon: 'print',
+        variant: 'sun',
+        testId: 'print-add-table',
+        onPress: () =>
+          open(() => {
+            const title = t('parent.print.addTableTitle', {
+              table: options.table,
+              add: signs.add,
+              sub: signs.sub,
+            });
+            return {
+              job: flashcardJob(
+                title,
+                addTableFacts(options.table, notation),
+                `${slug}-adding-${options.table}`,
+              ),
+              title,
+              guidance: cardsGuidance,
+            };
+          }),
+        onError: app.kit.onError,
+      })
+    : null;
   const flashcards = h(
     'div',
     { className: 'dv-print-tab__group' },
@@ -98,9 +140,12 @@ export function printContent(
     h(
       'div',
       { className: 'dv-field' },
-      h('span', { className: 'dv-field__label', text: t('parent.print.table') }),
+      h('span', {
+        className: 'dv-field__label',
+        text: t(young ? 'parent.print.number' : 'parent.print.table'),
+      }),
       options.segmented(
-        t('parent.print.table'),
+        t(young ? 'parent.print.number' : 'parent.print.table'),
         TABLES.map(String),
         String(options.table),
         (value) => value,
@@ -108,6 +153,7 @@ export function printContent(
         (value) => options.chooseTable(Number(value)),
       ),
     ),
+    ...(addTableButton ? [addTableButton] : []),
     candyButton({
       label: t('parent.print.tableButton', { table: options.table }),
       icon: 'print',
@@ -180,6 +226,15 @@ export function printContent(
           ],
         };
       }
+      case 'grade': {
+        const keys = GRADE_CERTIFICATE[certificate.grade];
+        return {
+          id: certificate.id,
+          name: t(keys.heading),
+          heading: t(keys.heading),
+          body: [keeper.name, t(keys.body), date],
+        };
+      }
       case 'finale':
         return {
           id: certificate.id,
@@ -207,6 +262,13 @@ export function printContent(
       }
       case 'region':
         return bossArt(certificate.boss, 'won', 'dv-boss-art', false);
+      case 'grade': {
+        // The grade's last boss, smiling: G5 may later give grades their own emblem.
+        const boss = gradeLastBoss(data, certificate.grade);
+        return boss
+          ? bossArt(boss, 'won', 'dv-boss-art', false)
+          : sevenHeadedArt(SEVEN_HEADS, { animated: false });
+      }
       case 'finale':
         return sevenHeadedArt(SEVEN_HEADS, { animated: false });
     }

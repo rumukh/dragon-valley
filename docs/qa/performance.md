@@ -7,16 +7,16 @@ is revisited with numbers in hand.
 
 ## Budgets
 
-| What                                                    | Budget       | Now (CI)     | Notes                                           |
-| ------------------------------------------------------- | ------------ | ------------ | ----------------------------------------------- |
-| `app.js` as built / gzipped                             | 750 / 250 KB | 672 / 216 KB | the whole game: rules, SDK, screens, inline art |
-| `app.css` as built / gzipped                            | 100 / 20 KB  | 74 / 14 KB   |                                                 |
-| Offline pack without its audio                          | 2.5 MB       | 1.85 MB      | 44 files: data, images, script, style, fonts    |
-| Whole offline pack (`resource-graph.json`)              | 10.5 MB      | 8.81 MB      | 77 files; the audio is 6.96 MB of it            |
-| First visit: downloaded before the title (uncompressed) | 1.3 MB       | 1.14 MB      | 341 KB gzipped, as GitHub Pages sends it        |
-| First visit, fast 4G, processor ×4: title ready         | 4 s          | 1.47 s       | first paint 0.29 s (budget 1.5 s)               |
-| First visit, slow 4G, processor ×4: title ready         | 10 s         | 6.66 s       | first paint 1.16 s (budget 3 s)                 |
-| Feedback after an answer, processor ×4 (median of 7)    | 500 ms       | 107 ms       | slowest of the seven 154 ms                     |
+| What                                                    | Budget       | Now (CI)     | Notes                                                                                    |
+| ------------------------------------------------------- | ------------ | ------------ | ---------------------------------------------------------------------------------------- |
+| `app.js` as built / gzipped                             | 800 / 260 KB | 765 / 245 KB | the whole game: rules, SDK, screens, inline art; raised from 750 / 250 KB for grades 1-3 |
+| `app.css` as built / gzipped                            | 100 / 20 KB  | 74 / 14 KB   |                                                                                          |
+| Offline pack without its audio                          | 3 MB         | 2.64 MB      | 52 files: data, images, script, style, fonts; raised from 2.5 MB for grades 1-3          |
+| Whole offline pack (`resource-graph.json`)              | 10.5 MB      | 9.60 MB      | 85 files; the audio is 6.96 MB of it                                                     |
+| First visit: downloaded before the title (uncompressed) | 1.3 MB       | 1.14 MB      | 341 KB gzipped, as GitHub Pages sends it                                                 |
+| First visit, fast 4G, processor ×4: title ready         | 4 s          | 1.47 s       | first paint 0.29 s (budget 1.5 s)                                                        |
+| First visit, slow 4G, processor ×4: title ready         | 10 s         | 6.66 s       | first paint 1.16 s (budget 3 s)                                                          |
+| Feedback after an answer, processor ×4 (median of 7)    | 500 ms       | 107 ms       | slowest of the seven 154 ms                                                              |
 
 "Now" is main `8d3236a` (after #29) as measured on CI's Chromium (run 37571226099); Edge on the
 development machine measures 1.8 s, 6.9 s and 206 ms. Sizes are in decimal units (1 KB = 1 000
@@ -40,7 +40,7 @@ A first visit downloads eight files before the title is ready:
 | **Total**                              | 1 141 KB |  341 KB |
 
 Nothing else loads until the child does something: sounds load when they first play, and the
-offline pack only when a grown-up installs it (8.81 MB, in the background, with progress shown).
+offline pack only when a grown-up installs it (9.60 MB, in the background, with progress shown).
 
 ## Feedback after an answer
 

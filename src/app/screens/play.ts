@@ -19,6 +19,7 @@ import { minigameScreen } from './minigames';
 import { problemRoundScreen } from './problems';
 import { resultsScreen } from './results';
 import { storyScreen } from './story';
+import { applyPendingGrade } from '../game/grade';
 
 /** Start (or resume) today's session unless the game is already on today's date. */
 export async function startToday(active: ActiveKeeper, today = localDay()): Promise<void> {
@@ -35,6 +36,7 @@ export function playScreen(app: App, keeperId: string): ScreenEntry {
       // The Dragon Diary tells what today brought: note how the day begins.
       const today = localDay();
       await active.day.begin(gameDay(active.game.view(), today), active.game.view());
+      await applyPendingGrade(app, active);
       await startToday(active, today);
       const view = active.game.view();
       switch (view.screen) {

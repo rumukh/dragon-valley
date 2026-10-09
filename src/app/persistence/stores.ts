@@ -6,12 +6,20 @@
  * the SDK service's retained failure is cleared by that explicit load).
  */
 import type { SaveStorage } from '@aegis/browser/save';
-import { addKeeper, EMPTY_FAMILY, FAMILY_RECORD, removeKeeper, updateKeeper } from './family';
+import {
+  addKeeper,
+  EMPTY_FAMILY,
+  FAMILY_RECORD,
+  removeKeeper,
+  setPendingGrade,
+  updateKeeper,
+} from './family';
 import type { FamilyResult, FamilyState, Keeper } from './family';
 import { DEFAULT_PREFERENCES, preferencesRecord, withPreferences } from './preferences';
 import type { ChildPreferences } from './preferences';
 import { RecordStore } from './records';
 import type { KeeperAvatar } from '../../rules/contract/ids';
+import type { Grade } from '../../rules/contract/kinds';
 
 class LiveRecord<T> {
   private value: T;
@@ -81,7 +89,11 @@ export class FamilyStore {
   }
 
   /** Validation problems come back as values; storage failures throw. */
-  async add(input: { name: string; avatar: KeeperAvatar }): Promise<FamilyResult<Keeper>> {
+  async add(input: {
+    name: string;
+    avatar: KeeperAvatar;
+    grade?: Grade;
+  }): Promise<FamilyResult<Keeper>> {
     const result = addKeeper(this.state(), input);
     if (!result.ok) return result;
     await this.live.write(result.value.state);
@@ -93,6 +105,14 @@ export class FamilyStore {
     input: { name: string; avatar: KeeperAvatar },
   ): Promise<FamilyResult<Keeper>> {
     const result = updateKeeper(this.state(), id, input);
+    if (!result.ok) return result;
+    await this.live.write(result.value.state);
+    return { ok: true, value: result.value.keeper };
+  }
+
+  /** Set or drop (`null`) the grade a keeper carries until their game save has it. */
+  async setPendingGrade(id: string, grade: Grade | null): Promise<FamilyResult<Keeper>> {
+    const result = setPendingGrade(this.state(), id, grade);
     if (!result.ok) return result;
     await this.live.write(result.value.state);
     return { ok: true, value: result.value.keeper };

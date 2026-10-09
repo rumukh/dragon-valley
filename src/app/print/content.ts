@@ -4,7 +4,16 @@
  * crowned dragon, each region whose boss was won over, and the finale. Text comes from the
  * catalogs in the grown-ups' Print tab; this module only decides what exists.
  */
-import { TABLE_MAX, TABLE_MIN, divFactId, mulFactId } from '../../rules/contract';
+import {
+  TABLE_MAX,
+  TABLE_MIN,
+  addFactId,
+  divFactId,
+  mulFactId,
+  regionGrade,
+  subFactId,
+} from '../../rules/contract';
+import type { Grade } from '../../rules/contract';
 import type { ContentData, GameView, Notation } from '../../rules/contract';
 import { factText } from '../math/facts';
 import type { FactText } from '../math/facts';
@@ -35,17 +44,60 @@ export function tableFacts(table: number, notation: Notation): FactText[] {
   return facts;
 }
 
+/**
+ * Adding one number as cards, the 1st and 2nd graders' "times table": `n + 0` … `n + 10`, then
+ * the subtractions that undo them, `n − n` … `(n + 10) − n`.
+ */
+export function addTableFacts(addend: number, notation: Notation): FactText[] {
+  if (!Number.isInteger(addend) || addend < TABLE_MIN || addend > TABLE_MAX) {
+    throw new RangeError('An addition table is 0 to 10.');
+  }
+  const facts: FactText[] = [];
+  for (let k = TABLE_MIN; k <= TABLE_MAX; k++)
+    facts.push(factText(addFactId(addend, k), notation)!);
+  for (let k = TABLE_MIN; k <= TABLE_MAX; k++) {
+    facts.push(factText(subFactId(addend + k, addend), notation)!);
+  }
+  return facts;
+}
+
 export type Certificate =
   | { readonly id: string; readonly kind: 'dragon'; readonly dragon: string }
   | { readonly id: string; readonly kind: 'region'; readonly region: string; readonly boss: string }
+  | { readonly id: string; readonly kind: 'grade'; readonly grade: Grade }
   | { readonly id: string; readonly kind: 'finale'; readonly boss: string };
 
 /**
+ * The grades below 3rd a keeper has finished, as the rules award them (`hub.certificates`: every
+ * boss of the grade won over). 3rd grade ends with the finale's own certificate.
+ */
+export function finishedGrades(view: GameView): Grade[] {
+  return [...view.hub.certificates];
+}
+
+/** The boss of a grade's last region with one, for the grade's certificate art. */
+export function gradeLastBoss(data: ContentData, grade: Grade): string | null {
+  return (
+    [...data.regions]
+      .filter((region) => regionGrade(region) === grade && region.boss !== null)
+      .sort((a, b) => b.order - a.order)[0]?.boss ?? null
+  );
+}
+
+/**
  * Certificates the keeper has earned, in the order they were likely earned: crowned dragons in
- * the valley's order, regions whose boss was won over (map order), and the finale last.
+ * the valley's order, regions whose boss was won over (map order) with each finished grade right
+ * after its last region, and the finale last.
  */
 export function earnedCertificates(view: GameView, data: ContentData): Certificate[] {
   const out: Certificate[] = [];
+  const lastOfGrade = new Map<string, Grade>();
+  for (const grade of finishedGrades(view)) {
+    const last = data.regions
+      .filter((region) => regionGrade(region) === grade && region.boss !== null)
+      .sort((a, b) => b.order - a.order)[0];
+    if (last) lastOfGrade.set(last.id, grade);
+  }
   const finaleBoss = data.bosses.find((boss) => boss.finale === true)?.id ?? null;
   for (const dragon of view.dragons) {
     if (dragon.stage === 'crowned') {
@@ -65,6 +117,8 @@ export function earnedCertificates(view: GameView, data: ContentData): Certifica
         boss: boss.id,
       });
     }
+    const grade = lastOfGrade.get(region.id);
+    if (grade !== undefined) out.push({ id: `certificate:grade:${grade}`, kind: 'grade', grade });
   }
   return out;
 }
