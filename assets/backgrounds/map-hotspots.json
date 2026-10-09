@@ -3064,5 +3064,10 @@
         ]
       ]
     }
+  },
+  "previous": "lower-valley-map",
+  "entry": {
+    "x": 96,
+    "y": 942
   }
 }

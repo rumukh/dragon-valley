@@ -8,11 +8,17 @@ import {
 } from '../../../src/rules/contract/ids';
 import {
   BACKGROUND_IDS,
+  BOSS_IDS,
   BOSS_STATES,
   COSMETICS,
   HALL_WINDOW,
+  LOWER_VALLEY_HOTSPOTS,
+  LOWER_VALLEY_LEVELS,
+  LOWER_VALLEY_REGION_IDS,
   MAP_HOTSPOTS,
   MAP_LEVELS,
+  MAP_SHEETS,
+  lowerValleyNodePositions,
   STICKER_COLORS,
   STICKER_FRAMES,
   magicWindowLayout,
@@ -30,7 +36,8 @@ import { checkChildSafe } from './svg-check';
 
 describe('bosses', () => {
   it('draws every boss in every state as child-safe SVG', () => {
-    for (const id of CANONICAL_BOSS_IDS) {
+    expect(BOSS_IDS).toEqual(['will-o-wisps', ...CANONICAL_BOSS_IDS]);
+    for (const id of BOSS_IDS) {
       const states = new Set<string>();
       for (const state of BOSS_STATES) {
         const svg = renderBoss(id, state, { idPrefix: `b-${state}` });
@@ -126,7 +133,13 @@ describe('backgrounds', () => {
 
   it('covers the map, every region and the castle hall within budget and child safe', () => {
     expect([...BACKGROUND_IDS].sort()).toEqual(
-      ['castle-hall', 'valley-map', ...CANONICAL_REGION_IDS].sort(),
+      [
+        'castle-hall',
+        'lower-valley-map',
+        'valley-map',
+        'pebble-brook',
+        ...CANONICAL_REGION_IDS,
+      ].sort(),
     );
     for (const id of BACKGROUND_IDS) {
       const svg = rendered[id]!;
@@ -183,6 +196,40 @@ describe('backgrounds', () => {
         expect(dx * dx + dy * dy, `nodes ${i} and ${j}`).toBeGreaterThan(44 * 44);
       }
     }
+  });
+
+  it('ships the Lower Valley sheet the same way, linked to the valley map', () => {
+    const file = JSON.parse(readFileSync('assets/backgrounds/lower-valley-hotspots.json', 'utf8'));
+    expect(file).toEqual(JSON.parse(JSON.stringify(LOWER_VALLEY_HOTSPOTS)));
+    const sheet = LOWER_VALLEY_HOTSPOTS;
+    expect(sheet.background).toBe('lower-valley-map');
+    expect(() => validateHotspots(sheet.hotspots, sheet.logical)).not.toThrow();
+    expect(sheet.hotspots.map((s) => s.id)).toEqual([...LOWER_VALLEY_REGION_IDS]);
+    for (const id of LOWER_VALLEY_REGION_IDS) {
+      const region = sheet.regions[id]!;
+      expect(region.nodes, id).toHaveLength(LOWER_VALLEY_LEVELS[id]!);
+      for (const p of [...region.nodes, region.boss, ...lowerValleyNodePositions(id, 9)])
+        expect(hitHotspot(p, sheet.hotspots), `${id} node ${p.x},${p.y}`).toBe(id);
+    }
+    const all = LOWER_VALLEY_REGION_IDS.flatMap((id) => [
+      ...sheet.regions[id]!.nodes,
+      sheet.regions[id]!.boss,
+    ]);
+    for (let i = 0; i < all.length; i++)
+      for (let j = i + 1; j < all.length; j++) {
+        const dx = all[i]!.x - all[j]!.x;
+        const dy = all[i]!.y - all[j]!.y;
+        expect(dx * dx + dy * dy, `nodes ${i} and ${j}`).toBeGreaterThan(44 * 44);
+      }
+    // the sheets are travelled in order and link up at the sheet edges
+    expect(MAP_SHEETS.map((m) => m.id)).toEqual(['lower-valley-map', 'valley-map']);
+    expect(MAP_SHEETS.map((m) => m.hotspots.background)).toEqual(MAP_SHEETS.map((m) => m.id));
+    expect(sheet.next).toBe('valley-map');
+    expect(MAP_HOTSPOTS.previous).toBe('lower-valley-map');
+    const [ex, ey] = [sheet.exit!.x, sheet.exit!.y];
+    expect(Math.min(ex, ey, 1600 - ex, 1000 - ey)).toBeLessThan(20);
+    expect(sheet.path.at(-1)).toEqual([ex, ey]);
+    expect(MAP_HOTSPOTS.path[0]).toEqual([MAP_HOTSPOTS.entry!.x, MAP_HOTSPOTS.entry!.y]);
   });
 
   it('places the Magic Window inside the hall scene', () => {
