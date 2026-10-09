@@ -20,6 +20,10 @@ import {
   crownAura,
   hasFeature,
   joySparkles,
+  berryRow,
+  buckTeeth,
+  groundPropLeft,
+  numberLine,
   pearlPile,
   proudGlow,
   shawl,
@@ -160,6 +164,7 @@ function dragonLayers(ctx: Ctx): {
     eyes(ctx) +
     (hasFeature(ctx, 'bushy-brows') ? bushyBrows(ctx) : brows(ctx)) +
     mouth(ctx) +
+    (hasFeature(ctx, 'buck-teeth') ? buckTeeth(ctx) : '') +
     (hasFeature(ctx, 'beard') ? beard(ctx) : '') +
     (hasFeature(ctx, 'spectacles') ? spectacles(ctx) : '') +
     crestTop +
@@ -213,7 +218,10 @@ function dragonLayers(ctx: Ctx): {
   if (hasFeature(ctx, 'shine')) front += shineSparkles(ctx);
   if (ctx.expression === 'sleepy') front += zzz(ctx);
   if (ctx.expression === 'happy') front += joySparkles(ctx);
-  const ground = hasFeature(ctx, 'pearl-pile') ? pearlPile(ctx) : '';
+  const ground =
+    (hasFeature(ctx, 'pearl-pile') ? pearlPile(ctx) : '') +
+    (hasFeature(ctx, 'number-line') ? numberLine(ctx) : '') +
+    (hasFeature(ctx, 'berry-row') ? berryRow(ctx) : '');
 
   return {
     back,
@@ -407,6 +415,8 @@ function designBounds(ctx: Ctx, stage: DragonStage): [number, number, number, nu
     maxX = Math.max(maxX, hd.cx + hd.rx + 64);
   }
   if (hasFeature(ctx, 'pearl-pile')) minX = Math.min(minX, CX - sk.body.w * 0.62 - 90);
+  if (hasFeature(ctx, 'number-line') || hasFeature(ctx, 'berry-row'))
+    minX = Math.min(minX, groundPropLeft(ctx));
   if (ctx.outfit.nest) {
     minX = Math.min(minX, CX - sk.body.w * 1.25);
     maxX = Math.max(maxX, CX + sk.body.w * 0.9);

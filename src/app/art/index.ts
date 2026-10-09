@@ -24,11 +24,14 @@ export {
   type IconOptions,
 } from './icons';
 export { REGION_EMBLEM_IDS } from './icons/emblems';
+export { LOWER_VALLEY_ICON_IDS } from './icons/lower-valley';
+export { ART_REGION_IDS, LOWER_VALLEY_REGION_IDS, type LowerValleyRegionId } from './regions';
 export { renderAvatar, KEEPER_AVATARS, type AvatarOptions } from './characters/avatars';
 export { buildCatalog, catalogIds, CATALOG_SCHEMA_VERSION } from './catalog';
 export {
   renderBoss,
   BOSS_IDS,
+  LOWER_VALLEY_BOSS_IDS,
   BOSS_STATES,
   BOSS_OUTCOME,
   BOSS_MOOD,

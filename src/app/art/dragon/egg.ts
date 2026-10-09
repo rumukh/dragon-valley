@@ -1,7 +1,7 @@
 import { lerp, polar } from '../svg/num';
 import { M, L, Q, eggD, polyD, roundStarD } from '../svg/path';
 import { h } from '../svg/xml';
-import { clover, flame, flower, gearD, pearl, snowflake, sparkleD } from '../glyphs';
+import { berry, clover, flame, flower, gearD, pearl, snowflake, sparkleD } from '../glyphs';
 import { glowGradient, type Ctx } from './ctx';
 import { cloudUnion, pivot } from './shapes';
 import { CX, GROUND } from './skeleton';
@@ -332,6 +332,77 @@ function eggPattern(ctx: Ctx): string {
           'stroke-width': W,
         })
       );
+    case 'polka': {
+      // Dot: neat rows of round dots in two colours, easy to count.
+      let out = '';
+      const second = ctx.paint.accent2;
+      for (let row = 0; row < 7; row++) {
+        const y = top + 44 + row * 34;
+        const off = row % 2 ? 17 : 0;
+        for (let x = cx - w / 2 - 20 + off; x < cx + w / 2 + 20; x += 34)
+          out += h('circle', {
+            cx: x,
+            cy: y,
+            r: 8,
+            fill: (row + Math.round(x / 34)) % 3 === 0 ? second : accent,
+            stroke: line,
+            'stroke-width': 1.6,
+            opacity: 0.9,
+          });
+      }
+      return out;
+    }
+    case 'hops': {
+      // Hop: a little number line round the waist with dotted hop arcs over it.
+      const y = cy + 26;
+      const x0 = cx - w / 2 - 10;
+      const step = 40;
+      let ticks = '';
+      for (let x = x0 + 18; x < cx + w / 2 + 10; x += step) ticks += M(x, y - 9) + L(x, y + 9);
+      let arcs = '';
+      for (let x = x0 + 18; x + step < cx + w / 2; x += step)
+        arcs += M(x + 3, y - 12) + Q(x + step / 2, y - 52, x + step - 3, y - 12);
+      return (
+        h('path', {
+          d: M(x0, y) + L(cx + w / 2 + 10, y) + ticks,
+          fill: 'none',
+          stroke: line,
+          'stroke-width': 4,
+          'stroke-linecap': 'round',
+        }) +
+        h('path', {
+          d: arcs,
+          fill: 'none',
+          stroke: accent,
+          'stroke-width': 4,
+          'stroke-linecap': 'round',
+          'stroke-dasharray': '1 8',
+        }) +
+        h('path', {
+          d: M(cx - 70, cy + 90) + Q(cx - 40, cy + 70, cx - 10, cy + 92),
+          fill: 'none',
+          stroke: lighten(line, 0.25),
+          'stroke-width': 3,
+          'stroke-linecap': 'round',
+          opacity: 0.6,
+        }) +
+        h('path', { d: sparkleD(cx + 40, cy - 70, 12), fill: '#ffffff', opacity: 0.8 })
+      );
+    }
+    case 'berries': {
+      // Nibble: a scatter of round berries with leafy caps.
+      let out = '';
+      for (const [x, y, r] of [
+        [-48, -70, 13],
+        [34, -92, 10],
+        [52, -22, 15],
+        [-24, 6, 12],
+        [-62, 58, 11],
+        [22, 70, 14],
+      ])
+        out += berry(cx + x!, cy + y!, r!, accent, line, 2);
+      return out;
+    }
     default: {
       let out = '';
       for (const [x, y, r] of [

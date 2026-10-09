@@ -17,6 +17,20 @@
       }
     },
     {
+      "id": "pebble-brook",
+      "file": "assets/backgrounds/pebble-brook.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (G5)",
+      "generator": "src/app/art/backgrounds (scenes-c.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/pebble-brook.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
       "id": "sunny-meadow",
       "file": "assets/backgrounds/sunny-meadow.svg",
       "kind": "svg-original",

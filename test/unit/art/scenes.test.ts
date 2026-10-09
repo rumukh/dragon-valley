@@ -8,6 +8,7 @@ import {
 } from '../../../src/rules/contract/ids';
 import {
   BACKGROUND_IDS,
+  BOSS_IDS,
   BOSS_STATES,
   COSMETICS,
   HALL_WINDOW,
@@ -30,7 +31,8 @@ import { checkChildSafe } from './svg-check';
 
 describe('bosses', () => {
   it('draws every boss in every state as child-safe SVG', () => {
-    for (const id of CANONICAL_BOSS_IDS) {
+    expect(BOSS_IDS).toEqual(['will-o-wisps', ...CANONICAL_BOSS_IDS]);
+    for (const id of BOSS_IDS) {
       const states = new Set<string>();
       for (const state of BOSS_STATES) {
         const svg = renderBoss(id, state, { idPrefix: `b-${state}` });
@@ -126,7 +128,7 @@ describe('backgrounds', () => {
 
   it('covers the map, every region and the castle hall within budget and child safe', () => {
     expect([...BACKGROUND_IDS].sort()).toEqual(
-      ['castle-hall', 'valley-map', ...CANONICAL_REGION_IDS].sort(),
+      ['castle-hall', 'valley-map', 'pebble-brook', ...CANONICAL_REGION_IDS].sort(),
     );
     for (const id of BACKGROUND_IDS) {
       const svg = rendered[id]!;

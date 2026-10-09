@@ -16,11 +16,13 @@ import {
   leftoverLagoon,
   riddleRuins,
 } from './scenes-b';
+import { pebbleBrook } from './scenes-c';
 
 export { MAP_HOTSPOTS, MAP_LEVELS, mapNodePositions, HALL_WINDOW, type MapHotspots };
 
 const SCENES: Record<string, (defs: Defs) => string> = {
   'valley-map': valleyMap,
+  'pebble-brook': pebbleBrook,
   'sunny-meadow': sunnyMeadow,
   'whispering-woods': whisperingWoods,
   'fire-mountain': fireMountain,

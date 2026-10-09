@@ -1,11 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import {
-  CANONICAL_DRAGON_IDS,
-  CANONICAL_REGION_IDS,
-  GUIDE_ID,
-} from '../../../src/rules/contract/ids';
-import { PALETTE, paletteColor } from '../../../src/app/art';
+import { CANONICAL_DRAGON_IDS, GUIDE_ID } from '../../../src/rules/contract/ids';
+import { ART_REGION_IDS, PALETTE, paletteColor } from '../../../src/app/art';
 import { contrast, isHex } from '../../../src/app/art/svg/color';
 
 describe('master palette', () => {
@@ -26,7 +22,7 @@ describe('master palette', () => {
       string,
       { accent: string; deep: string; soft: string; onAccent: string }
     >;
-    expect(Object.keys(regions)).toEqual([...CANONICAL_REGION_IDS]);
+    expect(Object.keys(regions)).toEqual([...ART_REGION_IDS]);
     const paper = PALETTE.surface.paper;
     const ink = PALETTE.ink.ink;
     for (const [id, r] of Object.entries(regions)) {
@@ -43,7 +39,8 @@ describe('master palette', () => {
 
   it('has a signature color for every dragon and seven rainbow colors', () => {
     const sig = PALETTE.dragonSignature as Record<string, string>;
-    for (const id of [...CANONICAL_DRAGON_IDS, GUIDE_ID]) expect(isHex(sig[id]), id).toBe(true);
+    for (const id of [...CANONICAL_DRAGON_IDS, 'dot', 'hop', 'nibble', GUIDE_ID])
+      expect(isHex(sig[id]), id).toBe(true);
     expect(PALETTE.rainbow).toHaveLength(7);
   });
 
