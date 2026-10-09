@@ -66,9 +66,8 @@ const YOUNG_MAX_WORDS = 6;
  * grades 1-2 or points at a grade 1-2 region's level or boss, and a template used by a skill that
  * a grade 1-2 region's level practises.
  * @param {any} data
- * @param {unknown} _contract
  */
-export function youngText(data, _contract) {
+export function youngText(data) {
   const youngRegions = new Set(
     data.regions.filter((/** @type {any} */ r) => r.grade !== undefined && r.grade <= 2),
   );
@@ -223,7 +222,7 @@ export async function validateContentTree(options = {}) {
     }
   }
   for (const d of contract.checkStoryWords(data, english)) errors.push(d.message);
-  const young = youngText(data, contract);
+  const young = youngText(data);
   /** @param {boolean} isYoung */
   const maxWords = (isYoung) =>
     isYoung ? YOUNG_MAX_WORDS : contract.CHILD_PROFILE.maxWordsPerSentence;

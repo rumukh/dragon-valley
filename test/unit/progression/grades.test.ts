@@ -112,9 +112,18 @@ describe('the suggested next level', () => {
     }
   });
 
-  it('is unchanged for the shipped 3rd-grade pack', async () => {
+  it('in the shipped pack still starts a 3rd grader at Sunny Meadow, Pebble Brook free practice', async () => {
     const player = await child(3, loadPack());
-    expect(unlocked(player)).toEqual(['sunny-meadow']);
+    expect(unlocked(player)).toEqual(['pebble-brook', 'sunny-meadow']);
+    await player.settleStory();
+    await player.choose('bubbles');
+    await player.settleStory();
+    const glowing = player
+      .view()
+      .hub.regions.flatMap((r) => r.levels)
+      .filter((l) => l.glowing)
+      .map((l) => l.id);
+    expect(glowing).toEqual(['sunny-meadow.1']);
     await player.dispose();
   });
 });

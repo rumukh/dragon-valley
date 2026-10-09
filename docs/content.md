@@ -143,9 +143,16 @@ grade starts in ([design §12.1](design.md#121-one-valley-a-grade-per-child)):
   regions are open to older children as free practice (the rules decide that, not the data).
 - The grades 1-2 generators (`num.count`, `num.compare`, `num.place`, `add.fact`, `sub.fact`,
   `add.missing`, `addsub.2d`; bounds in [curriculum.md §7.3](curriculum.md#73-generator-bounds))
-  have schemas but no rules yet; until they do, an activity using one is skipped in a level run.
-  The minigame kinds `ten-frame` and `bundle-sticks` are reserved and cannot be listed until their
+  serve the 1st- and 2nd-grade regions. The minigame kinds `ten-frame` and `bundle-sticks` are reserved and cannot be listed until their
   boards exist.
+- Story text for grades 1-2 keeps to **at most 6 words a sentence**: the beats of a grade 1-2
+  region (or with `grades` of 1-2 only) and the word templates its skills use. The validator names
+  the sentence ([design §12.5](design.md#125-making-it-work-for-6--and-7-year-olds)).
+- `balance.grades: [{ grade, choice?, keypad?, choices? }]` overrides the answer times and the
+  number of choices for a grade; 1.4.0 gives the 1st grade 3 choices and slower "fast" and "ok".
+- Pebble Brook (1.4.0) is the first region: `grade: 1`, no `unlock.after`. Sunny Meadow unlocks
+  after `pebble-brook.boss` until the 2nd-grade regions slot in before it (then it names the last
+  2nd-grade boss level); as the 3rd grade's start it stays open for 3rd graders.
 
 ## 3. Skills
 

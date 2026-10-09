@@ -181,7 +181,7 @@
         "order": 6,
         "titleKey": "region.sunny-meadow.name",
         "unlock": {
-          "after": []
+          "after": ["pebble-brook.boss"]
         },
         "boss": "bridge-troll",
         "background": "sunny-meadow"
@@ -272,7 +272,7 @@
         "grade": 1,
         "titleKey": "region.pebble-brook.name",
         "unlock": {
-          "after": ["dragon-castle.boss"]
+          "after": []
         },
         "boss": "will-o-wisps",
         "background": "pebble-brook"
@@ -2334,7 +2334,7 @@
           {
             "kind": "feeding",
             "skills": ["add-5", "sub-5"],
-            "count": 12,
+            "count": 8,
             "input": "choice",
             "options": {}
           }
@@ -2432,13 +2432,13 @@
           {
             "kind": "feeding",
             "skills": ["add-10"],
-            "count": 10,
+            "count": 8,
             "input": "choice",
             "options": {}
           },
           {
-            "kind": "memory-match",
-            "skills": ["add-5"],
+            "kind": "fact-family",
+            "skills": ["add-10"],
             "count": 1,
             "input": "auto",
             "options": {}
@@ -2467,7 +2467,7 @@
           {
             "kind": "feeding",
             "skills": ["add-10", "sub-5"],
-            "count": 12,
+            "count": 8,
             "input": "keypad",
             "options": {}
           },
@@ -10988,7 +10988,22 @@
       },
       "hungry": {
         "minDue": 1
-      }
+      },
+      "grades": [
+        {
+          "grade": 1,
+          "choice": {
+            "fastMs": 4000,
+            "okMs": 9000
+          },
+          "keypad": {
+            "fastMs": 5000,
+            "okMs": 12000,
+            "perExtraDigitMs": 1000
+          },
+          "choices": 3
+        }
+      ]
     }
   }
 }
