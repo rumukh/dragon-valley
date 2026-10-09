@@ -62,7 +62,7 @@ test('the editor asks for the class; a class without lessons yet leaves the game
   await expect(field).toContainText('every earlier region stays open for practice');
   await expect(page.getByTestId('setting-grade-3')).toHaveAttribute('aria-pressed', 'true');
   await page.getByTestId('setting-grade-2').click();
-  await expect(page.getByText('no lessons for that class yet')).toBeVisible();
+  await expect(page.getByTestId('toast')).toContainText('no lessons for that class yet');
   await expect(page.getByTestId('setting-grade-3')).toHaveAttribute('aria-pressed', 'true');
 
   await page.getByTestId('setting-grade-1').click();
@@ -72,9 +72,13 @@ test('the editor asks for the class; a class without lessons yet leaves the game
 
 /** Next through a story beat until its choices of egg are offered. */
 async function untilEggs(page: Page): Promise<void> {
+  const hop = page.getByTestId('story-choice-hop');
+  const next = page.getByTestId('story-next').and(page.locator(':enabled'));
   for (let line = 0; line < 10; line++) {
-    if (await page.getByTestId('story-choice-hop').isVisible()) return;
-    await page.getByTestId('story-next').click();
+    // Wait for the line to settle: either the eggs are offered or Next can be pressed.
+    await expect(hop.or(next).first()).toBeVisible();
+    if (await hop.isVisible()) return;
+    await next.click();
     await expect(page.getByTestId('stage')).not.toHaveAttribute('aria-busy', 'true');
   }
   await expect(page.getByTestId('story-choice-hop'), 'the brook offers its eggs').toBeVisible();
