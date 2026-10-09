@@ -1,0 +1,65 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "nibble",
+  "name": "Nibble",
+  "kind": "special",
+  "mnemonic": "A mouse-eared dragon who nibbles berries one by one. Every nibble takes one away: minus means fewer are left.",
+  "colors": {
+    "body": "#c4875a",
+    "shade": "#94603a",
+    "belly": "#fbeedd",
+    "wing": "#f2c9a6",
+    "horn": "#fff4e2",
+    "accent": "#8a4fc8",
+    "accent2": "#f6dcb2",
+    "iris": "#4a2a14",
+    "cheek": "#ff9fb0"
+  },
+  "build": {
+    "chub": 0.85,
+    "head": 1.1,
+    "snout": 0.85,
+    "body": 0.9
+  },
+  "horns": {
+    "style": "none",
+    "count": 0,
+    "length": 0.5
+  },
+  "ears": {
+    "style": "round",
+    "size": 1.2
+  },
+  "wings": {
+    "style": "feather",
+    "count": 2,
+    "size": 0.85
+  },
+  "tail": {
+    "count": 1,
+    "tip": "tuft",
+    "length": 1,
+    "curl": 1
+  },
+  "spikes": {
+    "style": "none",
+    "where": "none",
+    "count": 0
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "minus-belly"
+  ],
+  "features": [
+    "berry-row",
+    "buck-teeth"
+  ],
+  "egg": {
+    "base": "#f6e6d4",
+    "accent": "#8a4fc8",
+    "pattern": "berries"
+  }
+}

@@ -180,6 +180,33 @@
       "signature": "#8a63e8",
       "mnemonic": "The Seven-Headed Dragon from Czech folk tales. Each of its 7 heads has its own personality.",
       "recipe": "assets/art/dragons/seven-headed.json"
+    },
+    {
+      "id": "dot",
+      "name": "Dot",
+      "kind": "special",
+      "homeRegion": "pebble-brook",
+      "signature": "#20b2a4",
+      "mnemonic": "A round little dragon who counts everything she sees. Her belly is a ten-frame: five dots on top and five below make ten.",
+      "recipe": "assets/art/dragons/dot.json"
+    },
+    {
+      "id": "hop",
+      "name": "Hop",
+      "kind": "special",
+      "homeRegion": "pebble-brook",
+      "signature": "#8ccf3f",
+      "mnemonic": "A springy dragon who hops forward along the number line. Every hop forward adds: plus means jump on.",
+      "recipe": "assets/art/dragons/hop.json"
+    },
+    {
+      "id": "nibble",
+      "name": "Nibble",
+      "kind": "special",
+      "homeRegion": "mushroom-hollow",
+      "signature": "#c4875a",
+      "mnemonic": "A mouse-eared dragon who nibbles berries one by one. Every nibble takes one away: minus means fewer are left.",
+      "recipe": "assets/art/dragons/nibble.json"
     }
   ],
   "characters": [
@@ -192,6 +219,17 @@
     }
   ],
   "bosses": [
+    {
+      "id": "will-o-wisps",
+      "region": "pebble-brook",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "dance",
+      "mood": "happy"
+    },
     {
       "id": "bridge-troll",
       "region": "sunny-meadow",
@@ -539,7 +577,11 @@
       "chest-open",
       "egg",
       "badge-correct",
-      "badge-almost"
+      "badge-almost",
+      "pebbles",
+      "wisp",
+      "ten-frame",
+      "stepping-stones"
     ],
     "fruits": [
       "apple",
@@ -584,6 +626,11 @@
       "shield"
     ],
     "emblems": [
+      "emblem-pebble-brook",
+      "emblem-mushroom-hollow",
+      "emblem-rainbow-ford",
+      "emblem-hundred-hills",
+      "emblem-market-square",
       "emblem-sunny-meadow",
       "emblem-whispering-woods",
       "emblem-fire-mountain",
@@ -623,6 +670,11 @@
       }
     ],
     "colors": [
+      "pebble-brook",
+      "mushroom-hollow",
+      "rainbow-ford",
+      "hundred-hills",
+      "market-square",
       "sunny-meadow",
       "whispering-woods",
       "fire-mountain",
@@ -674,6 +726,15 @@
   },
   "backgrounds": [
     {
+      "id": "lower-valley-map",
+      "file": "assets/backgrounds/lower-valley-map.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "map",
+      "hotspots": "assets/backgrounds/lower-valley-hotspots.json",
+      "prompt": "assets/backgrounds/prompts/lower-valley-map.prompt.txt"
+    },
+    {
       "id": "valley-map",
       "file": "assets/backgrounds/valley-map.svg",
       "width": 1600,
@@ -681,6 +742,35 @@
       "kind": "map",
       "hotspots": "assets/backgrounds/map-hotspots.json",
       "prompt": "assets/backgrounds/prompts/valley-map.prompt.txt"
+    },
+    {
+      "id": "pebble-brook",
+      "file": "assets/backgrounds/pebble-brook.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "pebble-brook",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/pebble-brook.prompt.txt"
     },
     {
       "id": "sunny-meadow",
@@ -959,6 +1049,51 @@
     }
   ],
   "regions": [
+    {
+      "id": "pebble-brook",
+      "accentName": "Brook",
+      "accent": "#3cb4e6",
+      "deep": "#146a92",
+      "soft": "#dcf2fb",
+      "onAccent": "ink",
+      "emblem": "emblem-pebble-brook"
+    },
+    {
+      "id": "mushroom-hollow",
+      "accentName": "Toadstool",
+      "accent": "#c98a5b",
+      "deep": "#7f4a22",
+      "soft": "#f6e6d8",
+      "onAccent": "ink",
+      "emblem": "emblem-mushroom-hollow"
+    },
+    {
+      "id": "rainbow-ford",
+      "accentName": "Iris",
+      "accent": "#6a74e8",
+      "deep": "#3d43b8",
+      "soft": "#e3e5fd",
+      "onAccent": "white",
+      "emblem": "emblem-rainbow-ford"
+    },
+    {
+      "id": "hundred-hills",
+      "accentName": "Lime",
+      "accent": "#7cc242",
+      "deep": "#3f7a14",
+      "soft": "#e8f5d8",
+      "onAccent": "ink",
+      "emblem": "emblem-hundred-hills"
+    },
+    {
+      "id": "market-square",
+      "accentName": "Terracotta",
+      "accent": "#f08a6c",
+      "deep": "#a8432a",
+      "soft": "#fde6df",
+      "onAccent": "ink",
+      "emblem": "emblem-market-square"
+    },
     {
       "id": "sunny-meadow",
       "accentName": "Buttercup",

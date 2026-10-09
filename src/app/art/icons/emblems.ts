@@ -5,6 +5,11 @@ import { flower, sparkleD } from '../glyphs';
 import paletteJson from '../../../../assets/art/palette.json';
 
 export const REGION_EMBLEM_IDS = [
+  'emblem-pebble-brook',
+  'emblem-mushroom-hollow',
+  'emblem-rainbow-ford',
+  'emblem-hundred-hills',
+  'emblem-market-square',
   'emblem-sunny-meadow',
   'emblem-whispering-woods',
   'emblem-fire-mountain',
@@ -36,6 +41,138 @@ export function emblemArt(id: string, p: (n: string) => string): string {
   const clip = p('emc');
   let pic = '';
   switch (region) {
+    case 'pebble-brook':
+      // Stepping stones across a brook: count the stones to cross.
+      pic =
+        h('path', {
+          d:
+            M(2, 30) +
+            Q(18, 22, 32, 30) +
+            Q(46, 38, 62, 30) +
+            L(62, 52) +
+            Q(46, 60, 32, 52) +
+            Q(18, 44, 2, 52) +
+            'Z',
+          fill: lighten(accent, 0.45),
+          stroke: 'none',
+        }) +
+        h('path', {
+          d: M(6, 40) + Q(14, 36, 22, 40) + M(40, 44) + Q(48, 40, 56, 44),
+          fill: 'none',
+          stroke: cream,
+          'stroke-width': 2.6,
+          'stroke-linecap': 'round',
+        }) +
+        [
+          [14, 48, 7],
+          [26, 38, 6],
+          [38, 46, 6.5],
+          [50, 36, 6],
+        ]
+          .map(([x, y, r], i) =>
+            h('ellipse', {
+              cx: x!,
+              cy: y!,
+              rx: r!,
+              ry: r! * 0.66,
+              ...st(['#d9d2c6', '#c9d6de', '#e3d4bb', '#d6cde2'][i]!),
+            }),
+          )
+          .join('') +
+        h('path', { d: sparkleD(46, 16, 6) + sparkleD(18, 20, 4), fill: '#fff6b8' });
+      break;
+    case 'mushroom-hollow':
+      pic =
+        h('path', {
+          d: M(26, 34) + L(24, 54) + Q(32, 58, 40, 54) + L(38, 34) + 'Z',
+          ...st(cream),
+        }) +
+        h('path', {
+          d: M(8, 36) + C(8, 14, 56, 14, 56, 36) + Q(32, 42, 8, 36) + 'Z',
+          ...st('#e2554a'),
+        }) +
+        h('circle', { cx: 22, cy: 26, r: 3.6, fill: cream }) +
+        h('circle', { cx: 36, cy: 21, r: 3, fill: cream }) +
+        h('circle', { cx: 46, cy: 30, r: 3.2, fill: cream }) +
+        h('path', {
+          d: M(4, 58) + Q(32, 50, 60, 58),
+          fill: 'none',
+          stroke: '#5c9a3a',
+          'stroke-width': 4,
+          'stroke-linecap': 'round',
+        });
+      break;
+    case 'rainbow-ford': {
+      const cols = ['#ff5a5f', '#ffd93d', '#5ccc6b', '#4aa8ff'];
+      pic =
+        cols
+          .map((c, i) =>
+            h('path', {
+              d: M(10 + i * 4, 44) + Q(32, 4 + i * 8, 54 - i * 4, 44),
+              fill: 'none',
+              stroke: c,
+              'stroke-width': 4,
+              'stroke-linecap': 'round',
+            }),
+          )
+          .join('') +
+        h('path', {
+          d: M(2, 50) + Q(16, 44, 32, 50) + Q(48, 56, 62, 50),
+          fill: 'none',
+          stroke: cream,
+          'stroke-width': 4,
+          'stroke-linecap': 'round',
+        });
+      break;
+    }
+    case 'hundred-hills':
+      pic =
+        h('path', {
+          d: M(0, 50) + Q(14, 30, 28, 46) + Q(40, 26, 64, 44) + L(64, 64) + L(0, 64) + 'Z',
+          ...st('#9ad35f'),
+        }) +
+        h('path', {
+          d: M(0, 58) + Q(20, 44, 40, 56) + Q(52, 48, 64, 54) + L(64, 64) + L(0, 64) + 'Z',
+          ...st('#6fb43c'),
+        }) +
+        h('path', {
+          d: M(14, 34) + L(14, 22) + M(42, 30) + L(42, 16),
+          stroke: line,
+          'stroke-width': 2.2,
+          'stroke-linecap': 'round',
+        }) +
+        h('path', {
+          d: polyD([
+            { x: 14, y: 22 },
+            { x: 24, y: 25 },
+            { x: 14, y: 28 },
+          ]),
+          ...st('#ffd23f', 1.8),
+        }) +
+        h('path', {
+          d: polyD([
+            { x: 42, y: 16 },
+            { x: 52, y: 19 },
+            { x: 42, y: 22 },
+          ]),
+          ...st(cream, 1.8),
+        });
+      break;
+    case 'market-square':
+      pic =
+        h('path', { d: M(12, 34) + L(52, 34) + L(52, 56) + L(12, 56) + 'Z', ...st('#e9c79a') }) +
+        h('path', {
+          d: M(8, 34) + L(14, 16) + L(50, 16) + L(56, 34) + 'Z',
+          ...st(cream),
+        }) +
+        h('path', {
+          d: M(20, 16) + L(18, 34) + M(32, 16) + L(32, 34) + M(44, 16) + L(46, 34),
+          stroke: '#e2554a',
+          'stroke-width': 5,
+        }) +
+        h('circle', { cx: 24, cy: 44, r: 5, ...st('#ff7a59', 1.8) }) +
+        h('circle', { cx: 40, cy: 44, r: 5, ...st('#ffd23f', 1.8) });
+      break;
     case 'sunny-meadow':
       pic =
         h('circle', { cx: 40, cy: 24, r: 8, ...st('#fff3a6') }) +
