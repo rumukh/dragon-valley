@@ -582,6 +582,7 @@ export function projectView(read: Read, index: ReadonlyMap<string, readonly stri
       dailyGoal: state.settings.dailyGoal,
       arena: state.settings.arena,
       unlockAhead: [...state.settings.unlockAhead],
+      grade: state.settings.grade,
     },
     onboarding: { ...state.onboarding },
     story: storyView(state, data),

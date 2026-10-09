@@ -3,7 +3,7 @@
  * progress, and removing everything when the keeper is removed. These operate on storage
  * directly, so they work for any keeper, not only the one playing.
  */
-import { importSave } from '@aegis/browser/save';
+import { importSave, migrateSave } from '@aegis/browser/save';
 import { profileSeed } from '../../rules/contract';
 import type { GameView, Notation } from '../../rules/contract';
 import type { DvPack } from '../game/definition';
@@ -68,7 +68,7 @@ export async function exportKeeper(app: App, keeper: Keeper): Promise<string> {
   const gameRecord = (await app.storage.read(game)).current?.payload;
   const preferencesRecordText = (await app.storage.read(preferences)).current?.payload;
   // Both payloads are re-validated, so a backup never carries a record we could not load.
-  if (gameRecord !== undefined) importSave(gameRecord, game);
+  if (gameRecord !== undefined) migrateSave(gameRecord, game, app.game.migrations ?? []);
   if (preferencesRecordText !== undefined) importSave(preferencesRecordText, preferences);
   return createBackup(keeper, gameRecord, preferencesRecordText);
 }

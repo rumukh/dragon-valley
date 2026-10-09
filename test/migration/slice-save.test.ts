@@ -15,6 +15,7 @@ import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { dataHash } from '@aegis/runtime';
 import type { ContentPack, RuntimeSnapshot } from '@aegis/runtime';
+import { migrateSnapshot } from '../../src/rules/contract';
 import type { ContentData } from '../../src/rules/contract';
 import { PERFECT, Player, loadPack, root } from '../traces/support';
 
@@ -23,9 +24,11 @@ import { PERFECT, Player, loadPack, root } from '../traces/support';
 vi.setConfig({ testTimeout: 300_000 });
 
 const slice = loadPack(join('content', 'history', '1.0.0.json'));
-const save = JSON.parse(
-  readFileSync(join(root, 'test', 'migration', 'fixtures', 'slice-save.json'), 'utf8'),
-) as RuntimeSnapshot;
+const save = migrateSnapshot(
+  JSON.parse(
+    readFileSync(join(root, 'test', 'migration', 'fixtures', 'slice-save.json'), 'utf8'),
+  ) as RuntimeSnapshot,
+);
 const current = loadPack();
 
 /** A player whose host restored the slice save as the shell does: its own pack, current staged. */

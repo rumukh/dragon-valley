@@ -21,6 +21,8 @@ export interface FactText {
 export function factText(item: string, notation: Notation): FactText | null {
   const parsed = parseItemId(item);
   if (parsed === null || parsed.kind === 'bucket') return null;
+  // Addition and subtraction facts get their text with the grade 1-2 screens (G4).
+  if (parsed.kind === 'add' || parsed.kind === 'sub') return null;
   const signs = OPERATOR_SYMBOLS[notation];
   const question =
     parsed.kind === 'mul'

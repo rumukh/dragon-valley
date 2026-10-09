@@ -119,6 +119,34 @@ activity's _k_-th skill (list at least one skill per head, in order). The `final
 defeat completes the game: the finale beat plays and the `finale` dragon, whose egg is that boss
 level's reward, hatches at once. At most one boss is the finale.
 
+### 2.3 Regions and grades
+
+A region is `{ id, order, titleKey, unlock, boss, background }` with an optional `grade` (1, 2 or
+3; absent means 3). The pack's optional top-level `grades: [{ grade, start }]` names the region each
+grade starts in ([design §12.1](design.md#121-one-valley-a-grade-per-child)):
+
+```json
+"grades": [
+  { "grade": 1, "start": "pebble-brook" },
+  { "grade": 2, "start": "hundred-hills" },
+  { "grade": 3, "start": "sunny-meadow" }
+]
+```
+
+- A grade is listed once; its `start` must be a region of that grade. List every grade the pack
+  serves: `setSetting { key: 'grade' }` refuses a grade without a start.
+- Region grades never go down along map `order`: 1st-grade regions first, then 2nd, then 3rd.
+- A pack without `grades` (every pack up to 1.3.0) serves grade 3 only, starting at its first
+  region, and all its regions must be grade 3.
+- A grade's start region is open without its region `unlock.after`, so Sunny Meadow can name the
+  last 2nd-grade boss level in `unlock.after` and still be where a 3rd grader starts. Earlier-grade
+  regions are open to older children as free practice (the rules decide that, not the data).
+- The grades 1-2 generators (`num.count`, `num.compare`, `num.place`, `add.fact`, `sub.fact`,
+  `add.missing`, `addsub.2d`; bounds in [curriculum.md §7.3](curriculum.md#73-generator-bounds))
+  have schemas but no rules yet; until they do, an activity using one is skipped in a level run.
+  The minigame kinds `ten-frame` and `bundle-sticks` are reserved and cannot be listed until their
+  boards exist.
+
 ## 3. Skills
 
 A skill is a generator with parameters (`{ id, titleKey, generator, params }`); its items are
@@ -174,6 +202,10 @@ a step, `stopAfterMisses` misses in a row or `maxProblems` answers end it. Rules
 Levels of a later region can be placed before the region opens; they wait, completed, until the
 previous boss is won over.
 
+A step may carry `grades` (for example `[3]`): the check of a child in another grade skips it.
+A step without `grades` belongs to every grade's ladder. The plan: no ladder for grade 1, a short
+one for grade 2 (numbers to 100, +/− without crossing), today's for grade 3.
+
 ## 6. Market, stickers and quests
 
 - **Cosmetics** `{ id, slot, assetId, nameKey, price, unlock }`: `assetId` must be an ID in
@@ -200,7 +232,10 @@ A beat is `{ id, trigger, skippable, graph }`; the graph is an `@aegis/narrative
 (`castle-hall`, `valley-map`, or the region's ID; checked against the art catalog like every
 other art reference). Lines keep to the child profile: at most 10 words per
 sentence (the validator counts). Every line is read aloud, so write for the ear. Triggers:
-`first-session`, `after-beat`, `level-start`, `level-complete`, `boss-defeated`, `finale`.
+`first-session`, `after-beat`, `level-start`, `level-complete`, `boss-defeated`, `finale`. Any
+trigger may add `grades` (for example `{ "kind": "after-beat", "beat": "beat.prologue",
+"grades": [1] }`): the beat then fires only for a child in one of those grades, which is how each
+grade gets its own first-egg choice. Each listed grade must be one the pack serves.
 Story rewards (`story.rewards`) map a graph's reward claims to grants (eggs, coins, cosmetics);
 each is granted once. Put a claim that must not be missed (a region's egg) in the first node's
 `entryEffects`: starting the beat applies it, so skipping the beat still grants it.

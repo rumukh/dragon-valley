@@ -31,6 +31,7 @@ import {
   contentRegistration,
   dayNumber,
   gameActionSchema,
+  gradeStart,
   initialProfileState,
   isItemId,
   isoDay,
@@ -210,6 +211,11 @@ function legality(action: GameAction, read: Read): Reject | null {
         return setting.value.every((id) => data.regions.some((r) => r.id === id))
           ? null
           : reject('invalid-setting', 'Unknown region.');
+      }
+      if (setting.key === 'grade') {
+        return gradeStart(data, setting.value) !== null
+          ? null
+          : reject('invalid-setting', 'The content has no regions for this grade.');
       }
       return null;
     }
@@ -517,6 +523,7 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
             if (ctx.state.daily) ctx.state.daily.goal = setting.value;
             checkDailyGoal(ctx);
           } else if (setting.key === 'arena') ctx.state.settings.arena = setting.value;
+          else if (setting.key === 'grade') ctx.state.settings.grade = setting.value;
           else ctx.state.settings.unlockAhead = [...setting.value];
         },
       }),

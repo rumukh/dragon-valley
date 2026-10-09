@@ -13,7 +13,12 @@ import { describe, expect, it, vi } from 'vitest';
 import { createPrng } from '@aegis/core';
 import { success } from '@aegis/runtime';
 import type { RuntimeSnapshot } from '@aegis/runtime';
-import { ACTION_TURNS, initialProfileState, isMinigameKind } from '../../../src/rules/contract';
+import {
+  ACTION_TURNS,
+  initialProfileState,
+  isMinigameKind,
+  migrateSnapshot,
+} from '../../../src/rules/contract';
 import type { GameAction, ItemState, ProfileState } from '../../../src/rules/contract';
 import { dragonValleyAdapter } from '../../../src/rules/adapter';
 import { itemIndex } from '../../../src/rules/learning/index-cache';
@@ -239,9 +244,11 @@ describe('a problem round with nothing left to serve', () => {
 });
 
 describe('rounds from random states (property)', () => {
-  const save = JSON.parse(
-    readFileSync(join(root, 'test', 'migration', 'fixtures', 'stuck-snack-save.json'), 'utf8'),
-  ) as RuntimeSnapshot;
+  const save = migrateSnapshot(
+    JSON.parse(
+      readFileSync(join(root, 'test', 'migration', 'fixtures', 'stuck-snack-save.json'), 'utf8'),
+    ) as RuntimeSnapshot,
+  );
   /** The 68-day child of the stuck save: every dragon, level and kind of fact. */
   const veteran = (save.world.resources as Record<string, unknown>)[STATE] as ProfileState;
   const KINDS = ['basket', 'snack', 'level', 'arena', 'placement'] as const;

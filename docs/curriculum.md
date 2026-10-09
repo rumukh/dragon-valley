@@ -3,7 +3,7 @@
 Dragon Valley covers the whole multiplicative program of the 3rd grade of Czech primary school
 (_3. ročník ZŠ_), in English. This document lists every learning objective with a **stable objective
 ID**, the levels and boss that teach it, the bounds the generators must respect, the notation
-conventions, and an English-Czech glossary for parents.
+conventions, and an English-Czech glossary for parents. §7 extends it down to the 1st and 2nd grade.
 
 The objective IDs are data: `content/dragon-valley.content.json` declares them under `objectives`,
 levels list the objectives they teach, and `scripts/validate-content.mjs --strict-coverage` (part of
@@ -173,3 +173,92 @@ apples. Tom has 3 times as many as Eva. How many apples does Eva have?" (_N-krá
 with the additive "3 more" and "3 fewer" (_o N více / o N méně_). This glossary maps the English to
 the Czech terms for parents. The word families keep their IDs (`times-as-many`, `times-fewer`); see
 [learning.md](learning.md) for the templates.
+
+## 7. Grades 1 and 2
+
+Dragon Valley is being extended down to the 1st and 2nd grade (docs/grades-plan.md): new regions
+before Sunny Meadow for counting, numbers to 20 and to 100, and addition and subtraction. This
+section is the curriculum for that work. Its objectives are not yet in the content pack; when G3
+adds them (content 1.4.0) they move into the tables of §2 and §3, which a test keeps in step with
+the pack. Until then they are listed here.
+
+### 7.1 Sources
+
+**RVP ZV**, _Matematika a její aplikace_, 1st period: **M-3-1-01** uses natural numbers to model
+real situations, counts objects in a given set and forms sets of a given number of elements;
+**M-3-1-02** reads, writes and compares natural numbers; **M-3-1-03** uses the number line;
+**M-3-1-04** performs simple calculations mentally; **M-3-1-05** solves and creates word problems.
+Mapped to typical 1st- and 2nd-grade textbooks (Hejný, Fraus, Prodos):
+
+- **1st grade** (_1. ročník_): counting and numbers 0-20, comparing, addition and subtraction within
+  10, then within 20 (first without, then with crossing ten), simple word problems.
+- **2nd grade** (_2. ročník_): numbers to 100, place value, addition and subtraction within 100,
+  simple two-step word problems, and the meaning of multiplication with the tables of 2-5 and 10.
+  The multiplication part is already taught by **Sunny Meadow** and **Whispering Woods** on their
+  existing objectives (`obj.mul.meaning`, `obj.mul.commutative`, `obj.mul.rules-0-1`,
+  `obj.mul.table-2-5-10`, `obj.mul.table-3-4`): those regions serve the 2nd and the 3rd grade, so a
+  2nd grader flows from the new regions straight into them.
+
+### 7.2 Objectives
+
+| ID                       | Grade | Objective (English)                                                     | Czech program wording                                   | RVP ZV             |
+| ------------------------ | ----- | ----------------------------------------------------------------------- | ------------------------------------------------------- | ------------------ |
+| `obj.num.count-10`       | 1     | Count objects to 10; read and write numbers 0-10                        | počítání předmětů do 10, čtení a psaní čísel            | M-3-1-01, M-3-1-02 |
+| `obj.num.compare-10`     | 1     | Compare and order numbers 0-10 (`<`, `>`, `=`), number line             | porovnávání čísel do 10, číselná osa                    | M-3-1-02, M-3-1-03 |
+| `obj.add.within-10`      | 1     | Addition within 10                                                      | sčítání v oboru do 10                                   | M-3-1-04           |
+| `obj.sub.within-10`      | 1     | Subtraction within 10                                                   | odčítání v oboru do 10                                  | M-3-1-04           |
+| `obj.add.bonds-10`       | 1     | Number bonds of 10 and missing addends (`7 + ? = 10`)                   | rozklad čísla 10, doplňování do 10                      | M-3-1-04           |
+| `obj.num.to-20`          | 1     | Numbers 11-20: tens and ones, compare, number line                      | čísla do 20, desítky a jednotky, číselná osa            | M-3-1-02, M-3-1-03 |
+| `obj.addsub.20-no-cross` | 1     | +/− within 20 without crossing ten (`13 + 4`, `17 − 3`)                 | sčítání a odčítání do 20 bez přechodu přes desítku      | M-3-1-04           |
+| `obj.addsub.20-cross`    | 1     | +/− within 20 crossing ten (`8 + 5`, `13 − 6`)                          | sčítání a odčítání do 20 s přechodem přes desítku       | M-3-1-04           |
+| `obj.word.add-sub`       | 1, 2  | Word problems: adding to, taking away, "N more / N fewer"               | slovní úlohy na sčítání a odčítání, o N více / o N méně | M-3-1-05           |
+| `obj.num.to-100`         | 2     | Numbers to 100: tens and ones, place value, compare, order, number line | čísla do 100, desítky a jednotky, porovnávání           | M-3-1-02, M-3-1-03 |
+| `obj.addsub.tens`        | 2     | Whole tens ± whole tens (`40 + 30`, `90 − 50`)                          | sčítání a odčítání celých desítek                       | M-3-1-04           |
+| `obj.addsub.2d1d`        | 2     | 2-digit ± 1-digit, without and with crossing ten (`34 + 5`, `34 + 8`)   | dvojciferné ± jednociferné, bez přechodu i s přechodem  | M-3-1-04           |
+| `obj.addsub.2d2d`        | 2     | 2-digit ± 2-digit, without and with crossing ten (`34 + 25`, `52 − 27`) | dvojciferné ± dvojciferné, bez přechodu i s přechodem   | M-3-1-04           |
+| `obj.word.two-step-add`  | 2     | Simple two-step additive word problems                                  | jednoduché složené slovní úlohy (sčítání, odčítání)     | M-3-1-05           |
+
+Strands: `numbers` (`obj.num.*`), `addition-subtraction` (`obj.add.*`, `obj.sub.*`,
+`obj.addsub.*`) and `word` (`obj.word.*`). The planned regions teach them in this order (the exact
+level mapping joins §3 with the content): **Pebble Brook** (grade 1) counting, comparing and
+addition within 10; **Mushroom Hollow** (1) subtraction within 10, bonds of 10, missing addends and
+the first stories; **Rainbow Ford** (1) numbers to 20 and +/− within 20 without, then with crossing
+ten; **Hundred Hills** (2) numbers to 100, place value, tens ± tens and 2-digit ± 1-digit; **Market
+Square** (2) 2-digit ± 1-digit and ± 2-digit with crossing and two-step stories.
+
+### 7.3 Generator bounds
+
+| Skill family           | Generator     | Core bounds                                                                                                                                                                                                                                        |
+| ---------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Counting               | `num.count`   | 0-20 objects (dots in two ten-frames), read the number; buckets `count:0-5`, `count:6-10`, `count:11-20`                                                                                                                                           |
+| Comparing numbers      | `num.compare` | two numbers 0-20 (grade 1) or 0-100 (grade 2), `equalShare` about 20 %; buckets `ncompare:0-10`, `ncompare:0-20`, `ncompare:0-100`; Compare Stones' `number-number` sides                                                                          |
+| Place value            | `num.place`   | 2-digit numbers 10-99: the tens digit, the ones digit, or the number (`4 tens 7 ones = ?`); buckets `place:tens`, `place:ones`, `place:compose`                                                                                                    |
+| Addition facts         | `add.fact`    | addends 0-10 (`add:A+B`, the 121-fact table to 10 + 10); `sumMax` 10 for "within 10", then 20; `crossing: 'forbidden'` first (`7 + 3`, `4 + 5`), then `'required'` (`8 + 5`); `13 + 4` and `17 − 3` are `addsub.2d` work with `twoDigit: [10, 19]` |
+| Subtraction facts      | `sub.fact`    | subtrahend 0-10 and difference 0-10 (`sub:M-S`, 121 facts), minuend ≤ 20; `crossing: 'forbidden'` first, then `'required'` (`13 − 6`)                                                                                                              |
+| Missing addend         | `add.missing` | known addend 0-10, missing addend 0-10, sum ≤ 20 (`7 + ? = 10`, `? + 4 = 9`); never ambiguous; practises the matching `sub:` fact                                                                                                                  |
+| 2-digit + and −        | `addsub.2d`   | shapes `tens` (`40 + 30`), `2d1d` (`34 + 5`), `2d2d` (`34 + 25`); every number 0-100, differences never negative; `crossing: 'forbidden'` first, then `'required'`; buckets `add2d:<shape>-carry/nocarry`, `sub2d:<shape>-borrow/noborrow`         |
+| Additive word problems | `word`        | families `add-to`, `take-from`, `more-than`, `fewer-than`, `two-step`; numbers inside the region's skills; additive models only for grades 1-2, so Riddle Scrolls offers only + and −                                                              |
+
+Crossing ten means the ones carry or borrow: `8 + 5` and `13 − 6` cross, `13 + 4` and `17 − 3` do
+not. Within 20 a sum crosses when both addends are below 10 and the sum is above 10. Each `add:`
+fact shares partial credit with its commuted twin (`add:3+5` ↔ `add:5+3`). Distractors use additive
+error patterns: off by one (a counting slip), the other operation, a forgotten carry or borrow
+(`34 + 8 = 32`), digit-wise subtraction (`52 − 27 = 35`) and reversed digits.
+
+### 7.4 Notation and glossary
+
+The notation of §5 applies: `+` and the minus sign `−` (U+2212) with a space on each side, the
+unknown as an empty box. Read-aloud says "plus", "minus" ("eight plus five is thirteen"), and reads
+place value as "four tens and seven ones".
+
+| English                         | Czech                      | Example                       |
+| ------------------------------- | -------------------------- | ----------------------------- |
+| addition, plus                  | sčítání, plus              | `8 + 5` "eight plus five"     |
+| addend                          | sčítanec                   | 8 and 5 in `8 + 5 = 13`       |
+| sum                             | součet                     | 13 in `8 + 5 = 13`            |
+| subtraction, minus              | odčítání, mínus            | `13 − 6` "thirteen minus six" |
+| minuend, subtrahend, difference | menšenec, menšitel, rozdíl | 13, 6 and 7 in `13 − 6 = 7`   |
+| crossing ten                    | přechod přes desítku       | `8 + 5`, `13 − 6`             |
+| tens, ones                      | desítky, jednotky          | 4 tens 7 ones = 47            |
+| number line                     | číselná osa                |                               |
+| number bonds of 10              | rozklad čísla 10           | `7 + 3 = 10`                  |

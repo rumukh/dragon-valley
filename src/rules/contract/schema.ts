@@ -56,6 +56,9 @@ export const counter: Schema<number> = int(0, Number.MAX_SAFE_INTEGER);
 /** An integer percentage, 0..100. Content and state never store fractions. */
 export const percent: Schema<number> = int(0, 100);
 
+/** A school grade, 1..3 (`GRADES`). */
+export const gradeSchema = int(1, 3) as Schema<1 | 2 | 3>;
+
 /** One of a closed list of string literals. */
 export function oneOf<const T extends readonly string[]>(values: T): Schema<T[number]> {
   const allowed = new Set<string>(values);

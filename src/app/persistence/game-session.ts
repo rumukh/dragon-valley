@@ -21,8 +21,8 @@
  *   with `view()` instead of asking the host for a new copy at every redraw.
  */
 import { createSaveCheckpoint } from '@aegis/browser/checkpoint';
-import { exportSave, importSave, SaveService } from '@aegis/browser/save';
-import type { SavePolicy, SaveStorage } from '@aegis/browser/save';
+import { exportSave, migrateSave, SaveService } from '@aegis/browser/save';
+import type { SaveMigration, SavePolicy, SaveStorage } from '@aegis/browser/save';
 import { createRuntimeHost, isRuntimeSnapshot, requireValue, RuntimeFault } from '@aegis/runtime';
 import type {
   ContentPack,
@@ -55,6 +55,8 @@ export interface GameDefinition<S, A, V, C> {
    * when the build has no such pack. Without it, only `content` and `history` can restore.
    */
   readonly loadHistory?: (revision: string) => Promise<ContentPack<C>>;
+  /** Sequential steps that upgrade a save of an older `adapter.stateVersion` before restoring it. */
+  readonly migrations?: readonly SaveMigration[];
 }
 
 export interface GameProfile {
@@ -116,7 +118,8 @@ export function gamePolicy<S, A, V, C>(
       known.has(revision) || (fetchable && SHIPPED_REVISION.test(revision)),
     validateState: (value) => isRuntimeSnapshot(value),
     validateResume: (value): value is null => value === null,
-    isCurrentState: isRuntimeSnapshot,
+    isCurrentState: (value): value is RuntimeSnapshot =>
+      isRuntimeSnapshot(value) && value.stateVersion === game.adapter.stateVersion,
   };
 }
 
@@ -170,13 +173,14 @@ export async function openGameSession<S, A, V, C>(
   const validate = async (snapshot: RuntimeSnapshot): Promise<void> => {
     await validateSnapshot(game, snapshot);
   };
+  const migrations = game.migrations ?? [];
   let saved;
   let start = game.content;
   try {
-    saved = await saves.load();
+    saved = await saves.load(migrations);
     if (saved) start = await validateSnapshot(game, saved.state);
   } catch (cause) {
-    throw await recoveryFor('game', storage, policy, cause, validate);
+    throw await recoveryFor('game', storage, policy, cause, validate, migrations);
   }
   const checkpoint = createSaveCheckpoint<null>(saves, ({ snapshot }) => ({
     format: 'aegis.save',
@@ -208,7 +212,14 @@ export async function openGameSession<S, A, V, C>(
     const restored = await host.restore(saved.state, { durableRevision: saved.state.revision });
     if (!restored.ok) {
       await host.dispose();
-      throw await recoveryFor('game', storage, policy, new RuntimeFault(restored.error), validate);
+      throw await recoveryFor(
+        'game',
+        storage,
+        policy,
+        new RuntimeFault(restored.error),
+        validate,
+        migrations,
+      );
     }
   }
 
@@ -275,11 +286,11 @@ export async function openGameSession<S, A, V, C>(
       requireValue(await host.flush());
       const record = await storage.read(policy);
       return record.current
-        ? exportSave(importSave(record.current.payload, policy), policy)
+        ? exportSave(migrateSave(record.current.payload, policy, migrations), policy)
         : undefined;
     },
     async importEnvelope(text) {
-      const candidate = importSave(text, policy);
+      const candidate = migrateSave(text, policy, migrations);
       const pack = install(await validateSnapshot(game, candidate.state));
       requireValue(await host.restore(candidate.state));
       latest = host.getView();

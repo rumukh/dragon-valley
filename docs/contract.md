@@ -77,6 +77,12 @@ needs the coordinator's agreement first.
   `crowned`; expressions `idle`, `happy`, `curious`, `eating`, `sleepy`, `proud`; cosmetic slots
   `head`, `neck`, `eyes`, `wings`, `nest`; avatars `keeper-1` … `keeper-8`; mastery `dim`, `bronze`,
   `silver`, `gold`.
+- **Grades** (`kinds.ts`): `GRADES = [1, 2, 3]`, `DEFAULT_GRADE = 3` (a save or region that names
+  no grade is 3rd grade). Strands `numbers` and `addition-subtraction` and word families `add-to`
+  and `take-from` serve grades 1-2. The minigame activities `ten-frame` (`dv.ten-frame`) and
+  `bundle-sticks` (`dv.place-value`) are **reserved** (`RESERVED_MINIGAME_KIND_BY_ACTIVITY`): their
+  IDs are fixed, but a level cannot list them until the rules implement their boards (G2 moves
+  them into `MINIGAME_KIND_BY_ACTIVITY`).
 - **Stable forever.** Once shipped, an ID is never renamed or reused. Saves, the art catalog and the
   audio manifest refer to it. Retiring one needs a migration (§7.6).
 - **Catalog keys** (`catalogKey`, e.g. `level.sunny-meadow.3`) name strings in
@@ -142,16 +148,26 @@ Generators must only emit valid problems; their exhaustive tests use this functi
 Items are the unit of spaced retrieval and mastery: what is retrieved, independent of how it is
 shown.
 
-| Pattern             | Meaning                                                  | Count     |
-| ------------------- | -------------------------------------------------------- | --------- |
-| `mul:AxB`           | the fact `A · B` as presented, A and B in 0-10           | 121       |
-| `div:P:D`           | the fact `P : D = Q`, D in 1-10, Q in 0-10               | 110       |
-| `<family>:<bucket>` | an open-ended skill bucket (family never `mul` or `div`) | per skill |
+| Pattern             | Meaning                                                                | Count     |
+| ------------------- | ---------------------------------------------------------------------- | --------- |
+| `mul:AxB`           | the fact `A · B` as presented, A and B in 0-10                         | 121       |
+| `div:P:D`           | the fact `P : D = Q`, D in 1-10, Q in 0-10                             | 110       |
+| `add:A+B`           | the fact `A + B` as presented, A and B in 0-10                         | 121       |
+| `sub:M-S`           | the fact `M − S = D`, S in 0-10, D in 0-10                             | 121       |
+| `<family>:<bucket>` | an open-ended skill bucket (family never `mul`, `div`, `add` or `sub`) | per skill |
 
 Buckets used by the generators: `rem:d2` … `rem:d10`, `pow10:x10`, `pow10:x100`, `tens:d2` …
 `tens:d9`, `mul2d1d:carry`, `mul2d1d:nocarry`, `div2d1d:regroup`, `div2d1d:noregroup`,
 `order:brackets`, `order:no-brackets`, `compare:fact-number`, `compare:fact-fact`,
-`compare:expression`, `word:<family>`, `terms:<term>`.
+`compare:expression`, `word:<family>`, `terms:<term>`, and for grades 1-2 `count:0-5`,
+`count:6-10`, `count:11-20`, `ncompare:0-10`, `ncompare:0-20`, `ncompare:0-100`, `place:tens`,
+`place:ones`, `place:compose`, `add2d:<shape>-carry`, `add2d:<shape>-nocarry`,
+`sub2d:<shape>-borrow`, `sub2d:<shape>-noborrow` (shape `tens`, `2d1d` or `2d2d`).
+
+`parseItemId` returns `{ kind: 'add', a, b, sum }` and `{ kind: 'sub', minuend, subtrahend,
+difference }` for the additive facts (`addFactId`, `subFactId`, `allAddFactIds`, `allSubFactIds`
+build them); `add:3+5` and `add:5+3` share partial credit like `mul:` facts (`commutedId`).
+`7 + ? = 10` practises `sub:10-7`, as a missing factor practises a `div:` fact.
 
 Presentation is not part of the item: `? · 6 = 42` practises `div:42:6`; a word problem practises
 `word:<family>`; choice versus keypad is a property of the problem on screen. `mul:7x8` and `mul:8x7`
@@ -174,22 +190,36 @@ A skill is `{ id, titleKey, generator, params }`. The generator decides the prob
 parameters are validated by `SKILL_PARAM_SCHEMAS[generator]`. `skillItems(skill)` enumerates the
 skill's item universe; content validation rejects skills whose universe is empty.
 
-| Generator       | Parameters                                                                             | Items                           |
-| --------------- | -------------------------------------------------------------------------------------- | ------------------------------- |
-| `mul.fact`      | `tables`, `factors: [lo, hi]`, `order: 'table-first'                                   | 'table-second'                  | 'both'`                   | `mul:AxB` |
-| `div.fact`      | `divisors`, `quotients`                                                                | `div:P:D`                       |
-| `mul.missing`   | `tables` (1-10), `factors`, `position: 'first'                                         | 'second'                        | 'both'`                   | `div:P:D` |
-| `div.remainder` | `divisors` (2-10), `quotients`, `dividendMax`, `remainder: required/allowed/forbidden` | `rem:dD`                        |
-| `mul.power10`   | `powers: (10                                                                           | 100)[]`, `factors`, `resultMax` | `pow10:x10`, `pow10:x100` |
-| `mul.tens`      | `tens: [lo, hi]` (tens digits), `digits`, `resultMax`                                  | `tens:dD`                       |
-| `mul.2d1d`      | `twoDigit`, `oneDigit`, `carry: required/allowed/forbidden`, `resultMax`               | `mul2d1d:carry/nocarry`         |
-| `div.2d1d`      | `divisors`, `quotients`, `dividendMax`, `regroup`, `remainder`                         | `div2d1d:regroup/noregroup`     |
-| `order.ops`     | `operators`, `brackets`, `operations: [lo, hi]`, `operands`, `resultMax`               | `order:brackets/no-brackets`    |
-| `compare`       | `sides: fact-number/fact-fact/expression`, `tables`, `equalShare`                      | `compare:<sides>`               |
-| `word`          | `templates` (word template IDs)                                                        | `word:<family>`                 |
-| `terms`         | `terms`, `tables`                                                                      | `terms:<term>`                  |
+| Generator       | Parameters                                                                                          | Items                           |
+| --------------- | --------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `mul.fact`      | `tables`, `factors: [lo, hi]`, `order: 'table-first'                                                | 'table-second'                  | 'both'`                   | `mul:AxB` |
+| `div.fact`      | `divisors`, `quotients`                                                                             | `div:P:D`                       |
+| `mul.missing`   | `tables` (1-10), `factors`, `position: 'first'                                                      | 'second'                        | 'both'`                   | `div:P:D` |
+| `div.remainder` | `divisors` (2-10), `quotients`, `dividendMax`, `remainder: required/allowed/forbidden`              | `rem:dD`                        |
+| `mul.power10`   | `powers: (10                                                                                        | 100)[]`, `factors`, `resultMax` | `pow10:x10`, `pow10:x100` |
+| `mul.tens`      | `tens: [lo, hi]` (tens digits), `digits`, `resultMax`                                               | `tens:dD`                       |
+| `mul.2d1d`      | `twoDigit`, `oneDigit`, `carry: required/allowed/forbidden`, `resultMax`                            | `mul2d1d:carry/nocarry`         |
+| `div.2d1d`      | `divisors`, `quotients`, `dividendMax`, `regroup`, `remainder`                                      | `div2d1d:regroup/noregroup`     |
+| `order.ops`     | `operators`, `brackets`, `operations: [lo, hi]`, `operands`, `resultMax`                            | `order:brackets/no-brackets`    |
+| `compare`       | `sides: fact-number/fact-fact/expression`, `tables`, `equalShare`                                   | `compare:<sides>`               |
+| `word`          | `templates` (word template IDs)                                                                     | `word:<family>`                 |
+| `terms`         | `terms`, `tables`                                                                                   | `terms:<term>`                  |
+| `num.count`     | `numbers: [lo, hi]` (0-20)                                                                          | `count:<band>`                  |
+| `num.compare`   | `numbers: [lo, hi]` (0-100), `equalShare`                                                           | `ncompare:<band>`               |
+| `num.place`     | `numbers: [lo, hi]` (10-99), `asks: tens/ones/compose`                                              | `place:<ask>`                   |
+| `add.fact`      | `addends: [lo, hi]` (0-10), `sumMax` (≤ 20), `crossing: required/allowed/forbidden`                 | `add:A+B`                       |
+| `sub.fact`      | `subtrahends`, `differences` (0-10), `minuendMax` (≤ 20), `crossing`                                | `sub:M-S`                       |
+| `add.missing`   | `known`, `missing` (0-10), `sumMax` (≤ 20), `position: first/second/both`                           | `sub:M-S`                       |
+| `addsub.2d`     | `operators: add/sub`, `shapes: tens/2d1d/2d2d`, `twoDigit` (10-99), `crossing`, `resultMax` (≤ 100) | `add2d:…`, `sub2d:…`            |
 
-The core 3rd-grade bounds for each are in [curriculum.md §4](curriculum.md#4-generator-bounds).
+The seven grades 1-2 generators (`num.*`, `add.*`, `sub.fact`, `addsub.2d`) are contract only so
+far: their schemas and item universes exist, `learning/generate.ts` lists them as
+`PENDING_GENERATORS` and throws `not implemented (G2)`, and an activity using one is skipped
+(content.md §2.1) until the rules implement it. Crossing ten is `addCrossesTen(a, b)` and
+`subCrossesTen(m, s)`.
+
+The core 3rd-grade bounds for each are in [curriculum.md §4](curriculum.md#4-generator-bounds),
+the grades 1-2 bounds in [curriculum.md §7.3](curriculum.md#73-generator-bounds).
 A new generator is code plus a contract change; a new skill using an existing generator is data.
 
 ## 7. The content pack (`content.ts`)
@@ -203,7 +233,7 @@ by `contentRegistration` (`parseContentJson(text, contentRegistration, file)`).
 | Collection      | Record fields                                                                                                                                                                                                                                                                                                                                                                       |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `objectives`    | `id`, `strand`, `titleKey` (docs/curriculum.md)                                                                                                                                                                                                                                                                                                                                     |
-| `regions`       | `id`, `order` (map order), `titleKey`, `unlock: { after: levelId[] }`, `boss`, `background` (art ID)                                                                                                                                                                                                                                                                                |
+| `regions`       | `id`, `order` (map order), `titleKey`, `unlock: { after: levelId[] }`, `boss`, `background` (art ID); optional `grade` (1-3, default 3)                                                                                                                                                                                                                                             |
 | `levels`        | `id`, `region`, `order`, `titleKey`, `kind: lesson/boss`, `unlock`, `activities`, `stars` (null = balance), `rewards: { coins: [1★, 2★, 3★], eggs, cosmetics }`, `boss`, `storyBeat`, `objectives`                                                                                                                                                                                  |
 | `activities`    | `kind`, `skills`, `count` (problems or boards), `input: auto/choice/keypad`, `options` (per kind, `ACTIVITY_OPTION_SCHEMAS`: Feeding Time `draw` (`mix`, or `weakest`: due and weakest facts first), Riddle Scrolls `pickOperation`, Memory Match `pairs` and `match` (`value`, `family`: × ↔ ÷ sentences, `term`: term ↔ example), Number Trail `length`/`gaps`, Egg Grid `split`) |
 | `skills`        | §6                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -214,7 +244,7 @@ by `contentRegistration` (`parseContentJson(text, contentRegistration, file)`).
 | `quests`        | `id`, `titleKey`, `goal`, `target`, `coins`, `weight`, `unlock`                                                                                                                                                                                                                                                                                                                     |
 | `wordLists`     | `id`, `kind: name/thing`, `entries` (catalog keys; things have `.one` / `.other` plural forms)                                                                                                                                                                                                                                                                                      |
 | `wordTemplates` | `id`, `family`, `textKey` (with `{placeholders}`), `vars` (`int` / `word` / `calc` / `form`), `model` (`value` or `divrem` over template expressions), `operation`, optional `words` (the story's length, `storyWordCount` of its text: its reading time with `balance.response.word`)                                                                                              |
-| `placement`     | `steps: { skill, problems, passAccuracy, levels }[]`, `minProblems`, `maxProblems`, `stopAfterMisses`                                                                                                                                                                                                                                                                               |
+| `placement`     | `steps: { skill, problems, passAccuracy, levels, grades? }[]`, `minProblems`, `maxProblems`, `stopAfterMisses`                                                                                                                                                                                                                                                                      |
 | `story`         | `beats: { id, trigger, skippable, graph }[]` (each graph a `@aegis/narrative` `NarrativeGraph`, validated by `validateNarrative`) and `rewards: { reward, grant }[]`                                                                                                                                                                                                                |
 | `balance`       | every tunable number (§7.3)                                                                                                                                                                                                                                                                                                                                                         |
 
@@ -228,8 +258,17 @@ items), `streak {count}`, `days-practiced`, `week-days`, `coins-earned`, `cosmet
 and level rewards never earn it), `arena-best`, `quests-claimed`, `placement-done`, `finale`.
 
 **Beat triggers**: `first-session`, `after-beat {beat}`, `level-start {level}`,
-`level-complete {level}`, `boss-defeated {boss}`, `finale`. **Grants**: `egg {dragon}`,
+`level-complete {level}`, `boss-defeated {boss}`, `finale`; every trigger takes an optional
+`grades: Grade[]` (the beat fires only for a child in one of those grades; absent means every
+grade), so the first-egg beat can differ per grade. **Grants**: `egg {dragon}`,
 `coins {amount}`, `cosmetic {item}`.
+
+**Grades** (optional, docs/grades-plan.md §1): `data.grades: { grade, start }[]` names the region
+each grade starts in (`start`: a region ID), and `region.grade` the grade a region belongs to. A
+pack without `grades` (every pack to 1.3.0) serves only grade 3, which starts at the region with
+the lowest `order`; `gradeStart(data, grade)` returns the start region or `null` when the pack does
+not serve that grade, and `regionGrade(region)` the region's grade (3 when absent). A placement
+step's optional `grades` limits it to those grades' checks (absent: every grade's).
 
 **Word-template variables**: `int {min, max}` (a whole number drawn from `problems`),
 `word {list}` (an entry drawn from `words`: a name's catalog key, or a thing's plural form
@@ -254,6 +293,13 @@ Beyond the strict schemas (unknown fields are rejected), a pack is valid only if
 - a boss with several `heads` has a meter that shares evenly between them and a boss activity
   with at least one skill per head; at most one boss is the `finale`;
 - the unlock graph is acyclic and every level is reachable from a start level (`unreachable`);
+  a grade's start region is open without its region `unlock.after`, so its levels are start levels
+  too;
+- grades (records `grade-<n>`): each grade is listed once, its `start` region exists
+  (`missing-reference`) and belongs to that grade; region grades never decrease along map order
+  (the valley runs from 1st grade to 3rd); a pack without `grades` has only grade-3 regions; beat
+  trigger and placement step (`step-<n>`) `grades` name only grades the pack serves
+  (`missing-reference`);
 - growth rules list hatchling, youngling, adult, crowned in order; Leitner intervals never decrease;
   goal, gift, mix and response ranges are consistent;
 - beat graphs are valid narrative graphs with distinct IDs, and every story reward is claimed by a
@@ -343,11 +389,21 @@ compose). Sound IDs are not in content: the shell maps events to sounds from S5'
 - **State compatibility.** New state fields are optional (`objectWithOptional`) with a default
   that old saves get by omission, so every save keeps restoring under newer rules without bumping
   `STATE_VERSION` (the day counters `daily.levels` and `daily.minigames` were the first such fields; `round.current.teach` followed, then the effort path's `items.*.rightDays` and `lastCountedDay`, which an old save gets as 0 and nothing back-fills: `test/migration/effort-save.test.ts` moves a real 1.2.0 save onto the path).
+- **State migrations.** A change an old snapshot cannot continue under bumps `STATE_VERSION` and
+  adds a step to `STATE_MIGRATIONS` (`state.ts`): `migrateProfileState(state, from, to?)` and
+  `migrateSnapshot(snapshot, to?)` (which rewrites the runtime snapshot's state resource,
+  `RUNTIME_STATE_RESOURCE`, and its `stateVersion`) run the steps in order. The shell registers one
+  `SaveMigration` per step (`SAVE_MIGRATIONS` in `src/app/game/definition.ts`), so stored saves,
+  imports, keeper exports and recovery copies are migrated before they restore. **Version 2**
+  (grades 1-3) adds `settings.grade`: a version-1 save reads as grade 3, everything else unchanged
+  (`test/unit/contract/grades.test.ts`; the v1 save fixtures are migrated the same way). The
+  setting is not optional because the rules, the shell and the hash must agree on one value for
+  every save; old fixtures and traces were re-pinned once for it.
 
 ## 8. Per-profile state (`state.ts`)
 
 `ProfileState` is everything authoritative about one child's game. It lives in the runtime snapshot
-and is saved after every commit. `STATE_VERSION` (the adapter's `stateVersion`, now 1) must be
+and is saved after every commit. `STATE_VERSION` (the adapter's `stateVersion`, now 2) must be
 bumped, with an explicit save migration, whenever a change means an old snapshot cannot continue
 unchanged.
 
@@ -370,7 +426,7 @@ unchanged.
 | `run`                                  | the level being played: `level`, `next` activity, `results`                                                                    |
 | `round`                                | the active or finished round (problem round or minigame round)                                                                 |
 | `roundCounter`                         | for round IDs `r1`, `r2`, …                                                                                                    |
-| `settings`                             | rule settings: `dailyGoal`, `arena`, `unlockAhead`                                                                             |
+| `settings`                             | rule settings: `dailyGoal`, `arena`, `unlockAhead`, `grade` (1-3: where the child starts and what is suggested; §7.6)          |
 | `finale`                               | the day the finale was completed                                                                                               |
 
 A **problem round** keeps the activity, source, skills, input, target or boss meter, counters
@@ -413,7 +469,7 @@ logical turn (`ACTION_TURNS`); re-ask jobs count turns.
 | `claimQuest { quest }`                                 | 0     | quest done and unclaimed                                                                                       | pay the quest coins                                                                                                                                                                        |
 | `openGift`                                             | 0     | daily gift ready                                                                                               | weighted grant from `rewards`                                                                                                                                                              |
 | `storyChoice { beat, node, revision, choice \| null }` | 0     | the pending beat, current node and revision                                                                    | advance (or skip a skippable beat); grant rewards                                                                                                                                          |
-| `setSetting { setting }`                               | 0     | values in range                                                                                                | `dailyGoal`, `arena`, `unlockAhead`                                                                                                                                                        |
+| `setSetting { setting }`                               | 0     | values in range; `grade` only one the content serves (`gradeStart`)                                            | `dailyGoal`, `arena`, `unlockAhead`, `grade` (`{ key: 'grade', value: 1 \| 2 \| 3 }`; progress, dragons and coins stay)                                                                    |
 
 - **Rejections** are `RuntimeError`s with stable `code`s: `no-session`, `invalid-day`,
   `story-pending`, `round-active`, `unknown-level`, `locked-level`, `no-level`, `locked-activity`,
@@ -434,7 +490,7 @@ logical turn (`ACTION_TURNS`); re-ask jobs count turns.
 | Registration         | Value                                                                                           |
 | -------------------- | ----------------------------------------------------------------------------------------------- |
 | `id`                 | `dragon-valley` (`ADAPTER_ID`)                                                                  |
-| `stateVersion`       | `STATE_VERSION` (1)                                                                             |
+| `stateVersion`       | `STATE_VERSION` (2; saves of version 1 migrate, §7.6)                                           |
 | `state` / `action`   | `profileStateSchema` / `gameActionSchema`                                                       |
 | `content`            | `contentRegistration` (schema version 1)                                                        |
 | `randomStreams`      | `problems`, `distractors`, `rewards`, `words`                                                   |
@@ -667,8 +723,15 @@ finale, the placement check, snack time, the Lightning Arena, grading (with the 
 operation step), Leitner moves, coins and streak bonuses, stars, eggs, growth (rule facts counted
 from bronze up only for Puff and Mirror), stickers, the
 market, outfits, settings (with unlock-ahead), state validation and the complete view. Every
-generator of §6 is implemented with its distractors ([learning.md](learning.md)); comparisons and
+3rd-grade generator of §6 is implemented with its distractors ([learning.md](learning.md)); comparisons and
 terms are answered by choice whatever the input mode (`keypadPossible`).
+
+**Grades 1-3, contract only so far** (docs/grades-plan.md §7, G1): the `grade` setting is stored,
+migrated, validated against the content and shown in the view's settings, and a grade's start region
+counts as reachable for content validation. Not yet in the rules (G2): unlocking by grade (start
+region, earlier-grade regions open as free practice), suggestions from the start region, grade
+filters of beat triggers and placement steps, the seven grades 1-2 generators (§6) with additive
+distractors, the Sun Window, the Ten Frame and Bundle Sticks boards and per-grade balance.
 
 The command traces in `test/traces/` (`first-session`, `region-one`, `struggling-child`) pin the
 rules with named checks, literal golden hashes and trajectories, and mutation checks. When the

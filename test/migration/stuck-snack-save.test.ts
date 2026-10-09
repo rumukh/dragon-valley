@@ -19,7 +19,7 @@ import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { dataHash, parseContentJson, requireValue } from '@aegis/runtime';
 import type { ContentPack, RuntimeSnapshot } from '@aegis/runtime';
-import { contentRegistration, isoDay } from '../../src/rules/contract';
+import { contentRegistration, isoDay, migrateSnapshot } from '../../src/rules/contract';
 import type { ContentData, GameView } from '../../src/rules/contract';
 import { itemIndex } from '../../src/rules/learning/index-cache';
 import { basketItems, firstTastes, hungryDragons } from '../../src/rules/progression/dragons';
@@ -46,9 +46,11 @@ function savedPack(): ContentPack<ContentData> {
 
 const pack = savedPack();
 const index = itemIndex(pack.data);
-const save = JSON.parse(
-  readFileSync(join(root, 'test', 'migration', 'fixtures', 'stuck-snack-save.json'), 'utf8'),
-) as RuntimeSnapshot;
+const save = migrateSnapshot(
+  JSON.parse(
+    readFileSync(join(root, 'test', 'migration', 'fixtures', 'stuck-snack-save.json'), 'utf8'),
+  ) as RuntimeSnapshot,
+);
 
 async function restored(): Promise<Player> {
   const player = new Player(PERFECT, 'stuck-snack', undefined, pack);

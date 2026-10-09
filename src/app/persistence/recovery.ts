@@ -8,8 +8,8 @@
  * exactly this record - and every replacement is a compare-and-swap that keeps the old record
  * as the "previous" copy. Ported from the Aegis reference shell (poc/lab-shared/recovery.ts).
  */
-import { BrowserServiceError, exportSave, importSave } from '@aegis/browser/save';
-import type { SaveHistory, SavePolicy, SaveStorage } from '@aegis/browser/save';
+import { BrowserServiceError, exportSave, migrateSave } from '@aegis/browser/save';
+import type { SaveHistory, SaveMigration, SavePolicy, SaveStorage } from '@aegis/browser/save';
 import { RuntimeFault } from '@aegis/runtime';
 
 /** `day` (the Dragon Diary's day record) never asks for recovery: it is replaced instead. */
@@ -72,6 +72,7 @@ export async function recoveryFor<State, Resume>(
   policy: SavePolicy<State, Resume>,
   cause: unknown,
   validate: (state: State) => Promise<void>,
+  migrations: readonly SaveMigration[] = [],
 ): Promise<RecoveryRequired> {
   let history: SaveHistory;
   try {
@@ -99,7 +100,7 @@ export async function recoveryFor<State, Resume>(
       ...(history.current ? { original: history.current.payload } : {}),
       ...(history.previous ? { previous: history.previous.payload } : {}),
       async replace(text) {
-        const candidate = importSave(text, policy);
+        const candidate = migrateSave(text, policy, migrations);
         await validate(candidate.state);
         const next = revision + 1;
         await storage.compareAndSwap(policy, revision, {

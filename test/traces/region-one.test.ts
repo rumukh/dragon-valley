@@ -21,8 +21,8 @@ import type { Adapter } from './support';
 vi.setConfig({ testTimeout: 300_000 });
 
 /** Golden values: see first-session.test.ts for their provenance rules. */
-const GOLDEN_HASH = '626313c65e9aa77e';
-const GOLDEN_TRAJECTORY = 'cef1defffef13398';
+const GOLDEN_HASH = '4cfc9b3a53b59705';
+const GOLDEN_TRAJECTORY = 'fc318adf529b1c0d';
 
 const SEED = 'golden-region-one';
 const LEVELS = [

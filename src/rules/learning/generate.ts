@@ -25,8 +25,22 @@ export { choicesFor, keypadPossible } from './distractors';
 export { NUMBER_RANGE, shuffle } from './generators/shared';
 export type { GeneratorSources } from './generators/shared';
 
-/** Every generator of the contract is implemented. */
-export const IMPLEMENTED_GENERATORS: readonly GeneratorId[] = GENERATOR_IDS;
+/**
+ * The grades 1-2 generators are contract-only until G2 implements them (docs/grades-plan.md §7):
+ * `problemFor` throws for them and `canGenerate` is false. Every other generator is implemented.
+ */
+export const PENDING_GENERATORS: readonly GeneratorId[] = [
+  'num.count',
+  'num.compare',
+  'num.place',
+  'add.fact',
+  'sub.fact',
+  'add.missing',
+  'addsub.2d',
+];
+export const IMPLEMENTED_GENERATORS: readonly GeneratorId[] = GENERATOR_IDS.filter(
+  (id) => !PENDING_GENERATORS.includes(id),
+);
 
 export function canGenerate(skill: DeepReadonly<Skill>): boolean {
   return IMPLEMENTED_GENERATORS.includes(skill.generator);
@@ -67,5 +81,14 @@ export function problemFor(
       return wordProblem(skill.params, item, sources);
     case 'terms':
       return termProblem(skill.params, item, problems);
+    // Contract-only until G2 (docs/grades-plan.md §7): not implemented yet.
+    case 'num.count':
+    case 'num.compare':
+    case 'num.place':
+    case 'add.fact':
+    case 'sub.fact':
+    case 'add.missing':
+    case 'addsub.2d':
+      throw new Error(`${skill.generator}: not implemented (G2)`);
   }
 }
