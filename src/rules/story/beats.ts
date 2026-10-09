@@ -67,7 +67,15 @@ function finishBeat(ctx: Ctx, id: string): void {
   startNext(ctx);
 }
 
-/** Queue every not-yet-seen beat whose trigger matches, in content order, and start one. */
+/** Whether a trigger's `grades` filter admits `grade` (no filter admits every grade). */
+export function triggerServesGrade(trigger: DeepReadonly<BeatTrigger>, grade: number): boolean {
+  return trigger.grades === undefined || (trigger.grades as readonly number[]).includes(grade);
+}
+
+/**
+ * Queue every not-yet-seen beat whose trigger matches and whose `grades` filter admits the
+ * child's grade, in content order, and start one.
+ */
 export function triggerBeats(
   ctx: Ctx,
   matches: (trigger: DeepReadonly<BeatTrigger>) => boolean,
@@ -75,6 +83,7 @@ export function triggerBeats(
   const story = ctx.state.story;
   for (const beat of ctx.content.data.story.beats) {
     if (!matches(beat.trigger)) continue;
+    if (!triggerServesGrade(beat.trigger, ctx.state.settings.grade)) continue;
     if (story.done.includes(beat.id) || story.pending === beat.id || story.queue.includes(beat.id))
       continue;
     if (story.beats[beat.id]) continue;

@@ -465,6 +465,21 @@ export interface Balance {
   gift: { coinsMin: number; coinsMax: number; cosmeticWeight: number; coinsWeight: number };
   arena: { unlockAfter: string; maxProblems: number };
   hungry: { minDue: number };
+  /**
+   * Per-grade overrides of the response limits and the number of answer choices (optional;
+   * absent, or a grade without an entry, uses the values above). Younger children read and type
+   * more slowly, so their fast and ok limits are usually longer (`gradeBalance`).
+   */
+  grades?: GradeBalance[];
+}
+
+/** A grade's overrides of `Balance` (`Balance.grades`). */
+export interface GradeBalance {
+  grade: Grade;
+  choice?: { fastMs: number; okMs: number };
+  keypad?: { fastMs: number; okMs: number; perExtraDigitMs: number };
+  /** Answer choices offered with choice input (`input.choices`). */
+  choices?: number;
 }
 
 export interface ContentData {
@@ -515,6 +530,8 @@ export const ACTIVITY_OPTION_SCHEMAS: Readonly<
   'fact-family': {},
   'sharing-feast': {},
   'golem-orders': {},
+  'ten-frame': { task: oneOf(['mix', 'show', 'make-ten', 'cross'] as const) },
+  'bundle-sticks': { task: oneOf(['mix', 'build', 'add', 'sub'] as const) },
 };
 export const ACTIVITY_OPTION_DEFAULTS: Readonly<
   Record<LevelActivityKind, Readonly<Record<string, number | boolean | string>>>
@@ -529,6 +546,8 @@ export const ACTIVITY_OPTION_DEFAULTS: Readonly<
   'fact-family': {},
   'sharing-feast': {},
   'golem-orders': {},
+  'ten-frame': { task: 'mix' },
+  'bundle-sticks': { task: 'mix' },
 };
 
 const activitySchema: Schema<Activity> = schema.object({
@@ -680,79 +699,99 @@ const grantSchema: Schema<Grant> = schema.union(
   schema.object({ kind: schema.literal('cosmetic'), item: contentId }),
 );
 
-const balanceSchema: Schema<Balance> = schema.object({
-  leitner: schema.object({ intervals: schema.array(int(0, 365), { min: 6, max: 6 }) }),
-  response: objectWithOptional(
-    {
-      choice: schema.object({ fastMs: int(500, 60_000), okMs: int(500, 120_000) }),
-      keypad: schema.object({
-        fastMs: int(500, 60_000),
-        okMs: int(500, 120_000),
-        perExtraDigitMs: int(0, 10_000),
-      }),
-    },
-    {
-      word: schema.object({
-        perWordMs: int(0, 10_000),
-        wholeStoryMs: int(0, 120_000),
-        rereadPercent: percent,
-      }),
-    },
-  ),
-  input: schema.object({ keypadFromBox: int(0, 6), choices: int(2, 6) }),
-  mix: schema.object({
-    successTarget: percent,
-    knownShare: percent,
-    minLearningShare: percent,
-    maxLearningShare: percent,
-    window: int(1, 200),
-    noRepeatWithin: int(0, 10),
-  }),
-  reask: schema.object({ delay: int(1, 20), maxPerRound: int(0, 10) }),
-  coins: schema.object({
-    correct: int(0, 100),
-    streakEvery: int(1, 100),
-    streakBonus: int(0, 100),
-    bossDefeated: int(0, 1000),
-    placementDone: int(0, 1000),
-  }),
-  stars: starRuleSchema,
-  mastery: objectWithOptional(
-    { goldBox: int(0, 5), goldFast: int(0, 10), goldOfLast: int(1, 10) },
-    {
-      effort: schema.object({
-        bronzeDays: int(1, 365),
-        silverDays: int(1, 365),
-        gapDays: int(1, 365),
-      }),
-    },
-  ),
-  growth: schema.array(
-    schema.object({
-      stage: oneOf(['hatchling', 'youngling', 'adult', 'crowned'] as const),
-      share: percent,
-      mastery: oneOf(['seen', 'bronze', 'silver', 'gold'] as const),
-      division: schema.boolean,
-      boss: schema.boolean,
+const timingSchema = schema.object({ fastMs: int(500, 60_000), okMs: int(500, 120_000) });
+
+const gradeBalanceSchema: Schema<GradeBalance> = objectWithOptional(
+  { grade: gradeSchema },
+  {
+    choice: timingSchema,
+    keypad: schema.object({
+      fastMs: int(500, 60_000),
+      okMs: int(500, 120_000),
+      perExtraDigitMs: int(0, 10_000),
     }),
-    { min: 4, max: 4 },
-  ),
-  daily: schema.object({
-    goalAnswers: int(1, 1000),
-    goalMin: int(1, 1000),
-    goalMax: int(1, 1000),
-    quests: int(0, 5),
-    historyDays: int(7, 365),
-  }),
-  gift: schema.object({
-    coinsMin: int(0, 1000),
-    coinsMax: int(0, 1000),
-    cosmeticWeight: int(0, 100),
-    coinsWeight: int(0, 100),
-  }),
-  arena: schema.object({ unlockAfter: contentId, maxProblems: int(1, 200) }),
-  hungry: schema.object({ minDue: int(1, 100) }),
-});
+    choices: int(2, 6),
+  },
+) as Schema<GradeBalance>;
+
+const balanceSchema: Schema<Balance> = objectWithOptional(
+  {
+    leitner: schema.object({ intervals: schema.array(int(0, 365), { min: 6, max: 6 }) }),
+    response: objectWithOptional(
+      {
+        choice: schema.object({ fastMs: int(500, 60_000), okMs: int(500, 120_000) }),
+        keypad: schema.object({
+          fastMs: int(500, 60_000),
+          okMs: int(500, 120_000),
+          perExtraDigitMs: int(0, 10_000),
+        }),
+      },
+      {
+        word: schema.object({
+          perWordMs: int(0, 10_000),
+          wholeStoryMs: int(0, 120_000),
+          rereadPercent: percent,
+        }),
+      },
+    ),
+    input: schema.object({ keypadFromBox: int(0, 6), choices: int(2, 6) }),
+    mix: schema.object({
+      successTarget: percent,
+      knownShare: percent,
+      minLearningShare: percent,
+      maxLearningShare: percent,
+      window: int(1, 200),
+      noRepeatWithin: int(0, 10),
+    }),
+    reask: schema.object({ delay: int(1, 20), maxPerRound: int(0, 10) }),
+    coins: schema.object({
+      correct: int(0, 100),
+      streakEvery: int(1, 100),
+      streakBonus: int(0, 100),
+      bossDefeated: int(0, 1000),
+      placementDone: int(0, 1000),
+    }),
+    stars: starRuleSchema,
+    mastery: objectWithOptional(
+      { goldBox: int(0, 5), goldFast: int(0, 10), goldOfLast: int(1, 10) },
+      {
+        effort: schema.object({
+          bronzeDays: int(1, 365),
+          silverDays: int(1, 365),
+          gapDays: int(1, 365),
+        }),
+      },
+    ),
+    growth: schema.array(
+      schema.object({
+        stage: oneOf(['hatchling', 'youngling', 'adult', 'crowned'] as const),
+        share: percent,
+        mastery: oneOf(['seen', 'bronze', 'silver', 'gold'] as const),
+        division: schema.boolean,
+        boss: schema.boolean,
+      }),
+      { min: 4, max: 4 },
+    ),
+    daily: schema.object({
+      goalAnswers: int(1, 1000),
+      goalMin: int(1, 1000),
+      goalMax: int(1, 1000),
+      quests: int(0, 5),
+      historyDays: int(7, 365),
+    }),
+    gift: schema.object({
+      coinsMin: int(0, 1000),
+      coinsMax: int(0, 1000),
+      cosmeticWeight: int(0, 100),
+      coinsWeight: int(0, 100),
+    }),
+    arena: schema.object({ unlockAfter: contentId, maxProblems: int(1, 200) }),
+    hungry: schema.object({ minDue: int(1, 100) }),
+  },
+  {
+    grades: schema.array(gradeBalanceSchema, { min: 1, max: 3 }),
+  },
+) as Schema<Balance>;
 
 export const contentDataSchema: Schema<ContentData> = objectWithOptional(
   {
@@ -1258,6 +1297,13 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
       problem(`step-${index}`, 'grades', 'The content serves no such grade.', 'missing-reference');
     }
   });
+  const balanceGrades = (data.balance.grades ?? []).map((g) => g.grade);
+  if (new Set(balanceGrades).size !== balanceGrades.length) {
+    problem('balance', 'grades', 'A grade has more than one balance entry.');
+  }
+  if (unserved(balanceGrades)) {
+    problem('balance', 'grades', 'The content serves no such grade.', 'missing-reference');
+  }
 
   // Multi-head bosses share the meter evenly and need a skill per head; one finale at most.
   for (const boss of data.bosses) {
@@ -1373,6 +1419,24 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
 /** The school grade a region teaches (absent = 3). */
 export function regionGrade(region: Read<Region>): Grade {
   return region.grade ?? DEFAULT_GRADE;
+}
+
+/**
+ * The balance for a child of `grade`: `balance` with that grade's `Balance.grades` overrides
+ * of the response limits and answer choices applied (the same object when it has none).
+ */
+export function gradeBalance(balance: Read<Balance>, grade: Grade): Read<Balance> {
+  const entry = balance.grades?.find((g) => g.grade === grade);
+  if (entry === undefined) return balance;
+  return {
+    ...balance,
+    response: {
+      ...balance.response,
+      choice: entry.choice ?? balance.response.choice,
+      keypad: entry.keypad ?? balance.response.keypad,
+    },
+    input: { ...balance.input, choices: entry.choices ?? balance.input.choices },
+  };
 }
 
 /**
