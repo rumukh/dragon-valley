@@ -13,7 +13,7 @@ import { failure, schema, success } from '@aegis/runtime';
 import type { Outcome, Schema } from '@aegis/runtime';
 import { OPERATORS, RELATIONS, TERMS } from './kinds';
 import type { Operator, Relation, Term } from './kinds';
-import { catalogKey, int, lazy, nullable, oneOf } from './schema';
+import { catalogKey, int, lazy, nullable, objectWithOptional, oneOf } from './schema';
 import { TABLE_MAX, TABLE_MIN } from './ids';
 
 /** Largest number any problem may show or expect. Keeps every value a small safe integer. */
@@ -189,11 +189,25 @@ export function solveBlank(expr: Expr, target: number): number | null {
 // ---------------------------------------------------------------------------------------------
 // Problems
 
+/**
+ * A picture the shell draws with an equation (1st and 2nd grade):
+ * - `dots`: `count` dots to count (`num.count`, `? = 7`). The known side of the equation is the
+ *   answer, so the shell **never shows or reads it aloud**; the child sees only the dots and the
+ *   blank.
+ * - `sticks`: `tens` bundles of ten sticks and `ones` loose sticks (`num.place`, `47 = ? · 10 + 7`);
+ *   the equation is shown and read as usual.
+ */
+export type ProblemPicture =
+  | { kind: 'dots'; count: number }
+  | { kind: 'sticks'; tens: number; ones: number };
+
 /** `left = right` with exactly one blank on either side: `7 · 8 = ?`, `? · 6 = 42`, `(2 + 3) · 4 = ?`. */
 export interface EquationProblem {
   kind: 'equation';
   left: Expr;
   right: Expr;
+  /** Optional picture (see `ProblemPicture`); absent for every 3rd-grade problem. */
+  picture?: ProblemPicture;
 }
 /** Division with remainder, answered with quotient and remainder: `23 : 5 = ? r ?`. */
 export interface DivRemProblem {
@@ -237,11 +251,15 @@ export interface TermProblem {
 }
 export type Problem = EquationProblem | DivRemProblem | CompareProblem | WordProblem | TermProblem;
 
-const equationSchema: Schema<EquationProblem> = schema.object({
-  kind: schema.literal('equation'),
-  left: exprSchema,
-  right: exprSchema,
-});
+const pictureSchema: Schema<ProblemPicture> = schema.union(
+  schema.object({ kind: schema.literal('dots'), count: int(0, 100) }),
+  schema.object({ kind: schema.literal('sticks'), tens: int(0, 10), ones: int(0, 9) }),
+);
+
+const equationSchema: Schema<EquationProblem> = objectWithOptional(
+  { kind: schema.literal('equation'), left: exprSchema, right: exprSchema },
+  { picture: pictureSchema },
+) as Schema<EquationProblem>;
 const divRemSchema: Schema<DivRemProblem> = schema.object({
   kind: schema.literal('divrem'),
   dividend: problemNumber,
