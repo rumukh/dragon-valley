@@ -78,7 +78,7 @@ describe('the family record keeps a pending grade until the save exists', () => 
     expect(FAMILY_RECORD.isValid(withGrade, 2)).toBe(true);
     const migration = FAMILY_RECORD.migrations?.find((step) => step.from === 1);
     expect(migration?.to).toBe(2);
-    expect(FAMILY_RECORD.isCurrent(migration!.migrate(v1))).toBe(true);
+    expect(FAMILY_RECORD.isCurrent!(migration!.migrate(v1))).toBe(true);
   });
 });
 
@@ -133,8 +133,8 @@ describe('a counting problem never gives its answer away', () => {
   it('asks "How many dots?" and never says the number before it is found', () => {
     expect(speakProblem(counting)).toBe(COUNT_QUESTION);
     expect(speakProblem(counting)).not.toMatch(/7|seven/i);
-    expect(speakSolved(counting, 7)).toBe('Seven dots.');
-    expect(formatSolved(counting, 7)).toBe('7');
+    expect(speakSolved(counting, { kind: 'number', value: 7 })).toBe('Seven dots.');
+    expect(formatSolved(counting, { kind: 'number', value: 7 })).toBe('7');
   });
 
   it('shows the dots as the counting model', () => {
