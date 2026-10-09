@@ -44,6 +44,8 @@ export type CardFace =
  * | ----------------------------- | ------------------------------------------------------- |
  * | `fact:mul:7x8`                | the fact `7 · 8` (`fact:` + a small-table item ID)      |
  * | `fact:div:56:7`               | the fact `56 : 7`                                       |
+ * | `fact:add:3+5`                | the fact `3 + 5`                                        |
+ * | `fact:sub:8-3`                | the fact `8 − 3`                                        |
  * | `expr:div:23:5`               | any other single operation (`23 : 5`, `14 · 3`)         |
  * | `num:56`                      | the number 56                                           |
  * | `term:product`                | the term "product" (term ↔ example pairs)               |
@@ -64,6 +66,12 @@ export function cardLabel(face: CardFace): string {
       if (expr.op === 'mul' && left <= 10 && right <= 10) return `fact:${mulFactId(left, right)}`;
       if (expr.op === 'div' && parseItemId(`div:${left}:${right}`)?.kind === 'div') {
         return `fact:div:${left}:${right}`;
+      }
+      if (expr.op === 'add' && parseItemId(`add:${left}+${right}`)?.kind === 'add') {
+        return `fact:add:${left}+${right}`;
+      }
+      if (expr.op === 'sub' && parseItemId(`sub:${left}-${right}`)?.kind === 'sub') {
+        return `fact:sub:${left}-${right}`;
       }
       return `expr:${expr.op}:${left}:${right}`;
     }
@@ -101,6 +109,12 @@ export function parseCardLabel(label: string): CardFace | null {
     }
     if (parsed?.kind === 'div') {
       return { kind: 'expr', expr: op('div', num(parsed.dividend), num(parsed.divisor)) };
+    }
+    if (parsed?.kind === 'add') {
+      return { kind: 'expr', expr: op('add', num(parsed.a), num(parsed.b)) };
+    }
+    if (parsed?.kind === 'sub') {
+      return { kind: 'expr', expr: op('sub', num(parsed.minuend), num(parsed.subtrahend)) };
     }
     return null;
   }
@@ -197,6 +211,8 @@ export interface NumberTrailBoard {
   kind: 'number-trail';
   /** The step of the trail (the times table); every value is a multiple of it. */
   step: number;
+  /** Counting direction. Omitted for existing multiplication trails, which count up. */
+  direction?: 'up' | 'down';
   path: TrailPosition[];
   /** The stones in gap order: `stones[i]` sits in gap `i`. */
   stones: { id: string; value: number }[];
@@ -246,9 +262,9 @@ export type EggGridMove = { type: 'set'; rows: number; columns: number } | { typ
 
 // ------------------------------------------------------------------------------ Fact Family Nest
 
-/** One equation of a Fact Family Nest: `_ · _ = _` or `_ : _ = _`. */
+/** One equation of a Fact Family Nest: `_ · _ = _`, `_ : _ = _`, `_ + _ = _` or `_ - _ = _`. */
 export interface FactFamilyEquation {
-  op: 'mul' | 'div';
+  op: 'mul' | 'div' | 'add' | 'sub';
   /** Left operand, right operand, result. */
   slots: (number | null)[];
   /** The last check of this equation, or `null` if it changed since (or was never checked). */
@@ -314,6 +330,54 @@ export type SharingFeastMove =
   | { type: 'deal' }
   | { type: 'submit'; each: number; left: number };
 
+// ------------------------------------------------------------------------------ Ten Frame
+
+/**
+ * Ten Frame (`ten-frame`, custom `dv.ten-frame`): fill two ten-frames to show a number, make ten,
+ * or cross ten for an addition fact (`8 + 5 = 8 + 2 + 3`). Frame counts are in array order.
+ */
+export interface TenFrameBoard {
+  kind: 'ten-frame';
+  task: 'show' | 'make-ten' | 'cross';
+  a: number;
+  b: number | null;
+  target: number;
+  frames: [number, number];
+  last: 'right' | 'wrong' | null;
+  attempts: number;
+}
+
+export type TenFrameMove =
+  | { type: 'add'; frame: number; count?: number }
+  | { type: 'remove'; frame: number; count?: number }
+  | { type: 'submit'; value?: number };
+
+// ------------------------------------------------------------------------------ Bundle Sticks
+
+/**
+ * Bundle Sticks (`bundle-sticks`, custom `dv.place-value`): make bundles of ten and loose sticks,
+ * then build, add or subtract 2-digit numbers. `target` is set for build tasks; `a` and `b` are set
+ * for add/sub tasks.
+ */
+export interface BundleSticksBoard {
+  kind: 'bundle-sticks';
+  task: 'build' | 'add' | 'sub';
+  target: number | null;
+  a: number | null;
+  b: number | null;
+  bundles: number;
+  loose: number;
+  last: 'right' | 'wrong' | null;
+  attempts: number;
+}
+
+export type BundleSticksMove =
+  | { type: 'bundle' }
+  | { type: 'unbundle' }
+  | { type: 'add'; what: 'bundle' | 'stick' }
+  | { type: 'remove'; what: 'bundle' | 'stick' }
+  | { type: 'submit' };
+
 // ------------------------------------------------------------------------------ Golem Orders
 
 /** A path from the root of an expression to a node: `left`/`right` of an operation, `inner` of
@@ -355,7 +419,9 @@ export type BoardView =
   | EggGridBoard
   | FactFamilyBoard
   | SharingFeastBoard
-  | GolemOrdersBoard;
+  | GolemOrdersBoard
+  | TenFrameBoard
+  | BundleSticksBoard;
 
 /** A move for `minigameMove.move`. */
 export type MinigameMove =
@@ -364,4 +430,6 @@ export type MinigameMove =
   | EggGridMove
   | FactFamilyMove
   | SharingFeastMove
-  | GolemOrdersMove;
+  | GolemOrdersMove
+  | TenFrameMove
+  | BundleSticksMove;

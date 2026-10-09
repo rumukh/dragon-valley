@@ -26,6 +26,7 @@ import type {
   DragonStage,
   GameAction,
   GameView,
+  Grade,
   MasteryLevel,
   ProblemRoundView,
 } from '../../src/rules/contract';
@@ -431,6 +432,8 @@ function counts(cells: readonly { level: MasteryLevel }[]): Record<MasteryLevel,
 
 export interface SimulateOptions {
   seed?: string;
+  /** The child's school grade, set before the first session (default: the profile's, 3). */
+  grade?: Grade;
   pack?: ContentPack<ContentData>;
   /** Answers per session instead of the learner's own (a short run for the Vitest gate). */
   answersPerDay?: number;
@@ -729,6 +732,9 @@ export async function simulate(
     child.day = day;
     const fromEvent = player.events.length;
     const fromCommit = player.hashes.length;
+    if (options.grade !== undefined && player.state().settings.grade !== options.grade) {
+      await player.act({ type: 'setSetting', setting: { key: 'grade', value: options.grade } });
+    }
     await player.act({ type: 'startSession', day: entry.day });
     Object.assign(entry, dueAtSessionStart(player.state().items, day));
     const elapsedBefore = child.elapsedMs;

@@ -81,8 +81,8 @@ needs the coordinator's agreement first.
   no grade is 3rd grade). Strands `numbers` and `addition-subtraction` and word families `add-to`
   and `take-from` serve grades 1-2. The minigame activities `ten-frame` (`dv.ten-frame`) and
   `bundle-sticks` (`dv.place-value`) are **reserved** (`RESERVED_MINIGAME_KIND_BY_ACTIVITY`): their
-  IDs are fixed, but a level cannot list them until the rules implement their boards (G2 moves
-  them into `MINIGAME_KIND_BY_ACTIVITY`).
+  IDs were reserved until the rules implemented their boards; G2 moved them into
+  `MINIGAME_KIND_BY_ACTIVITY` (§11.1).
 - **Stable forever.** Once shipped, an ID is never renamed or reused. Saves, the art catalog and the
   audio manifest refer to it. Retiring one needs a migration (§7.6).
 - **Catalog keys** (`catalogKey`, e.g. `level.sunny-meadow.3`) name strings in
@@ -117,6 +117,10 @@ nodes.
 | `compare`  | `{ left: Expr; right: Expr }`, no blanks                          | `7 · 8 ○ 50`                                 | `relation`                           |
 | `word`     | `{ template; vars; model; operation }`                            | catalog story                                | `operation`, then the model's answer |
 | `term`     | `{ sentence: { op, left, right, result, remainder }; highlight }` | which is 42 in `6 · 7 = 42`?                 | `term`                               |
+
+An `equation` may carry an optional `picture` (`ProblemPicture`: `{ kind: 'dots', count }` for
+counting, `{ kind: 'sticks', tens, ones }` for place value) that the shell draws beside the
+equation; the answer never depends on it.
 
 `word.template` is a catalog key; `vars` holds numbers shown in the story and catalog keys of words
 (names, objects) drawn from the `words` stream; `model` is an `equation` or `divrem` problem with
@@ -212,10 +216,12 @@ skill's item universe; content validation rejects skills whose universe is empty
 | `add.missing`   | `known`, `missing` (0-10), `sumMax` (≤ 20), `position: first/second/both`                           | `sub:M-S`                       |
 | `addsub.2d`     | `operators: add/sub`, `shapes: tens/2d1d/2d2d`, `twoDigit` (10-99), `crossing`, `resultMax` (≤ 100) | `add2d:…`, `sub2d:…`            |
 
-The seven grades 1-2 generators (`num.*`, `add.*`, `sub.fact`, `addsub.2d`) are contract only so
-far: their schemas and item universes exist, `learning/generate.ts` lists them as
-`PENDING_GENERATORS` and throws `not implemented (G2)`, and an activity using one is skipped
-(content.md §2.1) until the rules implement it. Crossing ten is `addCrossesTen(a, b)` and
+The seven grades 1-2 generators (`num.*`, `add.*`, `sub.fact`, `addsub.2d`) are implemented
+(`learning/generators/numbers.ts`, `additive.ts`): counting shows a `dots` picture, place value
+a `sticks` picture, `add.fact` shares commuted partial credit like multiplication, and additive
+distractors cover counting slips (±1), the other operation, a forgotten carry or borrow,
+digit-wise subtraction and reversed digits (learning.md). Word templates of the `add-to` and
+`take-from` families use the ordinary template `model` expressions. Crossing ten is `addCrossesTen(a, b)` and
 `subCrossesTen(m, s)`.
 
 The core 3rd-grade bounds for each are in [curriculum.md §4](curriculum.md#4-generator-bounds),
@@ -268,7 +274,8 @@ each grade starts in (`start`: a region ID), and `region.grade` the grade a regi
 pack without `grades` (every pack to 1.3.0) serves only grade 3, which starts at the region with
 the lowest `order`; `gradeStart(data, grade)` returns the start region or `null` when the pack does
 not serve that grade, and `regionGrade(region)` the region's grade (3 when absent). A placement
-step's optional `grades` limits it to those grades' checks (absent: every grade's).
+step's optional `grades` limits it to those grades' checks (absent: grade 3 only, so 1.3.0
+placement ladders never reach a younger child).
 
 **Word-template variables**: `int {min, max}` (a whole number drawn from `problems`),
 `word {list}` (an entry drawn from `words`: a name's catalog key, or a thing's plural form
@@ -313,23 +320,28 @@ level (`--strict-coverage`). The v1 pack passes both strict checks and `npm run 
 
 ### 7.3 Balance defaults
 
-| Key                 | Default                                                                                                        | Meaning                           |
-| ------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `leitner.intervals` | `[0, 1, 2, 4, 8, 16]`                                                                                          | days until due, by box 0-5        |
-| `response.choice`   | fast ≤ 2500 ms, ok ≤ 6000 ms                                                                                   | response buckets for choice input |
-| `response.keypad`   | fast ≤ 3500, ok ≤ 8000, +700 ms per extra digit                                                                | response buckets for keypad input |
-| `response.word`     | optional: `perWordMs`, `wholeStoryMs`, `rereadPercent` (1.2.0: 1000, 4000, 25; none in 1.1.0)                  | reading time for word problems    |
-| `input`             | keypad from box 2, 4 choices                                                                                   | `auto` input and option count     |
-| `mix`               | success 82 %, known 70 %, learning 10-50 %, window 20, no repeat within 2                                      | round composition                 |
-| `reask`             | delay 3 turns, at most 2 per round                                                                             | re-asking missed items            |
-| `coins`             | 1 per correct, +1 every 5 in a row, boss 15, placement 10                                                      | coin sources                      |
-| `stars`             | 2★ at 80 %, 3★ at 95 % with 60 % fast                                                                          | level stars                       |
-| `mastery`           | gold = box 5 and 2 fast of the last 3; effort: bronze on 2 right days, silver on 4, 2+ days apart (§5.4)       | gold rule, effort path            |
-| `growth`            | hatchling 30 % seen; youngling 60 % bronze + division; adult 80 % silver + division + boss; crowned 100 % gold | dragon stages                     |
-| `daily`             | goal 30 (10-100), 3 quests, 60 days of history                                                                 | daily goal and history            |
-| `gift`              | 2-6 coins (cosmetic weight 0, coins weight 1)                                                                  | the daily gift chest              |
-| `arena`             | unlocked after `sunny-meadow.boss`, ≤ 60 problems                                                              | Lightning Arena                   |
-| `hungry`            | 1 due item                                                                                                     | when a dragon is hungry           |
+| Key                 | Default                                                                                                        | Meaning                             |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `leitner.intervals` | `[0, 1, 2, 4, 8, 16]`                                                                                          | days until due, by box 0-5          |
+| `response.choice`   | fast ≤ 2500 ms, ok ≤ 6000 ms                                                                                   | response buckets for choice input   |
+| `response.keypad`   | fast ≤ 3500, ok ≤ 8000, +700 ms per extra digit                                                                | response buckets for keypad input   |
+| `response.word`     | optional: `perWordMs`, `wholeStoryMs`, `rereadPercent` (1.2.0: 1000, 4000, 25; none in 1.1.0)                  | reading time for word problems      |
+| `input`             | keypad from box 2, 4 choices                                                                                   | `auto` input and option count       |
+| `mix`               | success 82 %, known 70 %, learning 10-50 %, window 20, no repeat within 2                                      | round composition                   |
+| `reask`             | delay 3 turns, at most 2 per round                                                                             | re-asking missed items              |
+| `coins`             | 1 per correct, +1 every 5 in a row, boss 15, placement 10                                                      | coin sources                        |
+| `stars`             | 2★ at 80 %, 3★ at 95 % with 60 % fast                                                                          | level stars                         |
+| `mastery`           | gold = box 5 and 2 fast of the last 3; effort: bronze on 2 right days, silver on 4, 2+ days apart (§5.4)       | gold rule, effort path              |
+| `growth`            | hatchling 30 % seen; youngling 60 % bronze + division; adult 80 % silver + division + boss; crowned 100 % gold | dragon stages                       |
+| `daily`             | goal 30 (10-100), 3 quests, 60 days of history                                                                 | daily goal and history              |
+| `gift`              | 2-6 coins (cosmetic weight 0, coins weight 1)                                                                  | the daily gift chest                |
+| `arena`             | unlocked after `sunny-meadow.boss`, ≤ 60 problems                                                              | Lightning Arena                     |
+| `hungry`            | 1 due item                                                                                                     | when a dragon is hungry             |
+| `grades`            | optional: `{ grade, choice?, keypad?, choices? }[]` (none to 1.3.0)                                            | per-grade response buckets, options |
+
+`balance.grades` overrides, for a child in that grade, the response buckets (`choice`, `keypad`)
+and the number of answer options (`choices`); a grade without an entry uses the pack's values
+(`gradeBalance(balance, grade)`). Each grade is listed once and must be one the pack serves.
 
 ### 7.4 Catalogs
 
@@ -454,22 +466,22 @@ Every action is validated by `gameActionSchema` and then by the rules' legality 
 A rejected action changes nothing, costs nothing and draws no randomness. Only answers cost a
 logical turn (`ACTION_TURNS`); re-ask jobs count turns.
 
-| Action                                                 | Turns | Legal when                                                                                                     | Effect                                                                                                                                                                                     |
-| ------------------------------------------------------ | ----- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `startSession { day: 'YYYY-MM-DD' }`                   | 0     | always (first action of a profile)                                                                             | new day: daily record, history; first session: prologue                                                                                                                                    |
-| `startLevel { level, activity? }`                      | 0     | level open, no active round, no blocking beat; with `activity`: the level completed and that activity playable | start a run and its first playable activity, with the level-start beat; with `activity`, replay just that activity (the level is not completed again; the Daily Adventure's minigame step) |
-| `startActivity { activity }`                           | 0     | `level` (index ≤ next), `arena` (open and on), `snack` (a hungry dragon, or due basket facts), `placement`     | start a round                                                                                                                                                                              |
-| `answer { value, elapsedMs }`                          | 1     | a problem is on screen (not in the placement check)                                                            | grade, Leitner move, coins, re-ask job, next problem                                                                                                                                       |
-| `placementAnswer { value, elapsedMs }`                 | 1     | a placement-check problem is on screen                                                                         | grade, climb the ladder (no re-asks); at the end place levels                                                                                                                              |
-| `minigameMove { revision, move }`                      | 0     | a minigame board is active, `revision` is its revision, the move is legal (minigames.ts)                       | reduce the board; credit facts and coins; next board or the end of the round                                                                                                               |
-| `hint`                                                 | 0     | a problem is on screen, not yet hinted                                                                         | mark hinted (shell shows the model)                                                                                                                                                        |
-| `endRound { reason: done/quit/time-up/time-limit }`    | 0     | `done`: round finished; `quit`, `time-limit`: round active; `time-up`: the Arena only                          | close or end the round; cancel pending re-asks; only a finished round completes its activity                                                                                               |
-| `buy { item }`                                         | 0     | item available, not owned, affordable                                                                          | pay, grant (`buy:<item>`)                                                                                                                                                                  |
-| `equip { dragon, slot, item \| null }`                 | 0     | dragon owned; item owned and fits the slot                                                                     | dress the dragon                                                                                                                                                                           |
-| `claimQuest { quest }`                                 | 0     | quest done and unclaimed                                                                                       | pay the quest coins                                                                                                                                                                        |
-| `openGift`                                             | 0     | daily gift ready                                                                                               | weighted grant from `rewards`                                                                                                                                                              |
-| `storyChoice { beat, node, revision, choice \| null }` | 0     | the pending beat, current node and revision                                                                    | advance (or skip a skippable beat); grant rewards                                                                                                                                          |
-| `setSetting { setting }`                               | 0     | values in range; `grade` only one the content serves (`gradeStart`)                                            | `dailyGoal`, `arena`, `unlockAhead`, `grade` (`{ key: 'grade', value: 1 \| 2 \| 3 }`; progress, dragons and coins stay)                                                                    |
+| Action                                                 | Turns | Legal when                                                                                                                       | Effect                                                                                                                                                                                     |
+| ------------------------------------------------------ | ----- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `startSession { day: 'YYYY-MM-DD' }`                   | 0     | always (first action of a profile)                                                                                               | new day: daily record, history; first session: prologue                                                                                                                                    |
+| `startLevel { level, activity? }`                      | 0     | level open, no active round, no blocking beat; with `activity`: the level completed and that activity playable                   | start a run and its first playable activity, with the level-start beat; with `activity`, replay just that activity (the level is not completed again; the Daily Adventure's minigame step) |
+| `startActivity { activity }`                           | 0     | `level` (index ≤ next), `arena` (open and on), `snack` (a hungry dragon, or due basket facts), `placement`                       | start a round                                                                                                                                                                              |
+| `answer { value, elapsedMs }`                          | 1     | a problem is on screen (not in the placement check)                                                                              | grade, Leitner move, coins, re-ask job, next problem                                                                                                                                       |
+| `placementAnswer { value, elapsedMs }`                 | 1     | a placement-check problem is on screen                                                                                           | grade, climb the ladder (no re-asks); at the end place levels                                                                                                                              |
+| `minigameMove { revision, move }`                      | 0     | a minigame board is active, `revision` is its revision, the move is legal (minigames.ts)                                         | reduce the board; credit facts and coins; next board or the end of the round                                                                                                               |
+| `hint`                                                 | 0     | a problem is on screen, not yet hinted                                                                                           | mark hinted (shell shows the model)                                                                                                                                                        |
+| `endRound { reason: done/quit/time-up/time-limit }`    | 0     | `done`: round finished; `quit`, `time-limit`: round active; `time-up`: the Arena only                                            | close or end the round; cancel pending re-asks; only a finished round completes its activity                                                                                               |
+| `buy { item }`                                         | 0     | item available, not owned, affordable                                                                                            | pay, grant (`buy:<item>`)                                                                                                                                                                  |
+| `equip { dragon, slot, item \| null }`                 | 0     | dragon owned; item owned and fits the slot                                                                                       | dress the dragon                                                                                                                                                                           |
+| `claimQuest { quest }`                                 | 0     | quest done and unclaimed                                                                                                         | pay the quest coins                                                                                                                                                                        |
+| `openGift`                                             | 0     | daily gift ready                                                                                                                 | weighted grant from `rewards`                                                                                                                                                              |
+| `storyChoice { beat, node, revision, choice \| null }` | 0     | the pending beat, current node and revision                                                                                      | advance (or skip a skippable beat); grant rewards                                                                                                                                          |
+| `setSetting { setting }`                               | 0     | values in range; `grade` only one the content serves (`gradeStart`), also before the first session, not during a placement round | `dailyGoal`, `arena`, `unlockAhead`, `grade` (`{ key: 'grade', value: 1 \| 2 \| 3 }`; progress, dragons and coins stay)                                                                    |
 
 - **Rejections** are `RuntimeError`s with stable `code`s: `no-session`, `invalid-day`,
   `story-pending`, `round-active`, `unknown-level`, `locked-level`, `no-level`, `locked-activity`,
@@ -546,6 +558,12 @@ one-shots). It contains:
   column = second factor) and the division panel (110 cells, row = divisor, column = quotient), each
   cell with `level` (`dim/bronze/silver/gold`, the mastery level of §5.4: the box or the effort
   path) and `needsPolish`.
+- `sunWindow`: the **11 × 11** Sun Window, `{ size: 11, cells, subtraction, counts }`: `cells` are
+  the 121 addition facts `add:A+B` (row = A, column = B), `subtraction` the 121 facts
+  `sub:(S+D)-S` (row = subtrahend S, column = difference D), each cell `{ item, row, column,
+level, needsPolish }` as in the Magic Window; `counts` tallies levels over both panels.
+- `hub.certificates`: the grades (1, 2) all of whose regions' bosses the child has won over, in
+  order: the grade certificates of docs/grades-plan.md §1.3 (derived, never stored).
 - `market`, `album`, `daily` (goal, quests, gift, the week's practised days, sleepy), `parent`
   (per-table and per-skill accuracy, hardest facts, 60-day trend).
 
@@ -623,14 +641,29 @@ Memory Match pairs by its `match` option: `value` (a fact and its product or quo
 `6 · 7 = 42` with 42 highlighted). Every pair on one board is different, so a match is never
 ambiguous.
 
-| Board           | View (besides `kind`)                                                                                                         | Moves                                                                                              |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `memory-match`  | `cards[{ id, face, faceUp, matched }]`, `clearAvailable`, `pairs`, `matched`, `attempts`                                      | `{ type: 'select', card }`, `{ type: 'clear' }`                                                    |
-| `number-trail`  | `step`, `path[{ value, gap }]` (a fixed number or a gap index), `stones[{ id, value }]` in gap order, `submitted`, `attempts` | `{ type: 'place', item, index }`, `{ type: 'submit' }`                                             |
-| `egg-grid`      | `product`, `maxSide`, `split`, `find`, `rows`, `columns`, `found[{ rows, columns }]`, `last` (`found`, `again`, `wrong`)      | `{ type: 'set', rows, columns }` (1..`maxSide`), `{ type: 'submit' }`                              |
-| `fact-family`   | `numbers` (the nest), `equations[{ op, slots, correct }]` (two ·, two :), `submitted`, `attempts`                             | `{ type: 'fill', equation, slot, value }`, `{ type: 'submit' }`                                    |
-| `sharing-feast` | `total`, `baskets`, `remainder` (leftovers expected), `inBaskets[]`, `bowl`, `last` (`uneven`, `more`, `count`), `attempts`   | `{ type: 'put' \| 'take', basket, count? }`, `{ type: 'deal' }`, `{ type: 'submit', each, left }`  |
-| `golem-orders`  | `expr` (as it stands), `start`, `picked` (a path or null), `last` (`right`, `not-first`, `wrong-value`), `steps`, `mistakes`  | `{ type: 'pick', path }` (`left`/`right`/`inner` steps from the root), `{ type: 'answer', value }` |
+| Board           | View (besides `kind`)                                                                                                         | Moves                                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `memory-match`  | `cards[{ id, face, faceUp, matched }]`, `clearAvailable`, `pairs`, `matched`, `attempts`                                      | `{ type: 'select', card }`, `{ type: 'clear' }`                                                                    |
+| `number-trail`  | `step`, `path[{ value, gap }]` (a fixed number or a gap index), `stones[{ id, value }]` in gap order, `submitted`, `attempts` | `{ type: 'place', item, index }`, `{ type: 'submit' }`                                                             |
+| `egg-grid`      | `product`, `maxSide`, `split`, `find`, `rows`, `columns`, `found[{ rows, columns }]`, `last` (`found`, `again`, `wrong`)      | `{ type: 'set', rows, columns }` (1..`maxSide`), `{ type: 'submit' }`                                              |
+| `fact-family`   | `numbers` (the nest), `equations[{ op, slots, correct }]` (two ·, two :), `submitted`, `attempts`                             | `{ type: 'fill', equation, slot, value }`, `{ type: 'submit' }`                                                    |
+| `sharing-feast` | `total`, `baskets`, `remainder` (leftovers expected), `inBaskets[]`, `bowl`, `last` (`uneven`, `more`, `count`), `attempts`   | `{ type: 'put' \| 'take', basket, count? }`, `{ type: 'deal' }`, `{ type: 'submit', each, left }`                  |
+| `golem-orders`  | `expr` (as it stands), `start`, `picked` (a path or null), `last` (`right`, `not-first`, `wrong-value`), `steps`, `mistakes`  | `{ type: 'pick', path }` (`left`/`right`/`inner` steps from the root), `{ type: 'answer', value }`                 |
+| `ten-frame`     | `task` (`show`/`make-ten`/`cross`), `a`, `b` (or null), `target`, `frames: [n, n]`, `last` (`right`/`wrong`/null), `attempts` | `{ type: 'add' \| 'remove', frame, count? }`, `{ type: 'submit', value? }`                                         |
+| `bundle-sticks` | `task` (`build`/`add`/`sub`), `target`, `a`, `b` (null when unused), `bundles`, `loose`, `last`, `attempts`                   | `{ type: 'bundle' \| 'unbundle' }`, `{ type: 'add' \| 'remove', what: 'bundle' \| 'stick' }`, `{ type: 'submit' }` |
+
+Ten Frame (custom `dv.ten-frame`) models numbers to 20 in two frames: `show` starts empty and is
+right when the frames show `target` with the first frame filled first; `make-ten` starts with `a`
+counters and is right when the first frame holds ten; `cross` (`a + b` over ten) starts with `a`
+and is right when the first frame holds ten and the second the rest. Bundle Sticks (custom
+`dv.place-value`) builds `target` (`build`) or starts from `a` and adds or takes away `b`
+(`add`/`sub`), bundling ten sticks or unbundling one bundle to regroup; it is right when the
+bundles and loose sticks show the result (at most 9 loose). A wrong check only sets `last` and
+keeps the board editable. Both take the activity option `task` (`mix` by default) and draw from
+the round's `add:` facts and `count`/`place`/`add2d`/`sub2d` buckets. Memory Match labels
+also name additive facts (`fact:add:3+5`, `fact:sub:8-3`); a Fact Family Nest may hold an
+additive family (two `+`, two `−` equations); a Number Trail of counting or additive skills
+counts by ones, with `direction` (`up`/`down`; absent on multiplication trails, which count up).
 
 The Egg Grid's config is `{ product, maxSide, split, find }` and the board is complete when `found`
 has `find` rectangles; the rules set `find` to every rectangle up to 10 × 10 (both orders of each
@@ -650,7 +683,8 @@ trail stone, a basket, a Golem step) and credits facts to the Leitner boxes: a m
 fact (a family pair both its facts, a remainder pair `rem:d<divisor>`, a term pair
 `terms:<term>`; fast if no pair was mismatched on the board before, else ok); a new rectangle
 `rows × columns` its fact `mul:RxC` when that fact belongs to the activity's skills (each order is
-its own fact, so 3 × 4 and 4 × 3 each count when found); a finished family its four facts, a
+its own fact, so 3 × 4 and 4 × 3 each count when found); a solved Ten Frame or Bundle Sticks board
+its item (ok on the first check, slow after a wrong one); a finished family its four facts, a
 finished trail its `k · n` facts (a trail of tens `tens:d<k>`), a finished feast its division
 fact, `rem:d<baskets>` or `div2d1d:<regroup|noregroup>`, and a finished Golem board
 `order:<brackets|no-brackets>` (ok when the first check was right or no mistake was made, slow
@@ -695,6 +729,7 @@ rebuilds the screen from the view.
 | `finale.completed`    | `{}`                                      | the Seven-Headed Dragon is cured             |
 | `minigame.completed`  | `round`, `board`                          | a minigame board is solved                   |
 | `arena.finished`      | `score`, `best`, `record`                 | an Arena race ran to its end (time or cap)   |
+| `grade.completed`     | `grade`                                   | every boss of grade 1 or 2 won over          |
 
 ## 13. Persistence identifiers (`persistence.ts`)
 
@@ -726,12 +761,18 @@ market, outfits, settings (with unlock-ahead), state validation and the complete
 3rd-grade generator of §6 is implemented with its distractors ([learning.md](learning.md)); comparisons and
 terms are answered by choice whatever the input mode (`keypadPossible`).
 
-**Grades 1-3, contract only so far** (docs/grades-plan.md §7, G1): the `grade` setting is stored,
-migrated, validated against the content and shown in the view's settings, and a grade's start region
-counts as reachable for content validation. Not yet in the rules (G2): unlocking by grade (start
-region, earlier-grade regions open as free practice), suggestions from the start region, grade
-filters of beat triggers and placement steps, the seven grades 1-2 generators (§6) with additive
-distractors, the Sun Window, the Ten Frame and Bundle Sticks boards and per-grade balance.
+**Grades 1-3** (docs/grades-plan.md): the `grade` setting (settable before the first session, so
+the first-session beats see it; not during a placement round) only moves the start and the
+suggestions; progress, dragons and coins stay. A region is open when it is the child's grade's
+start region, its `unlock.after` levels are complete, unlock-ahead is on, or it belongs to an
+earlier grade than the child's (free practice; its levels still open in order). `hub.next`
+suggests levels from the grade's start region on and never sends a child back to an earlier
+grade's region. Beat triggers and placement steps follow their `grades` filters. A child reaching
+the 3rd grade's start region without one of its eggs receives its first story egg (Bubbles) when a
+level there starts (only when that region is not the first on the map). Winning over every boss
+of grade 1 or 2 emits `grade.completed` and adds the grade to `hub.certificates`. The seven
+grades 1-2 generators with additive distractors, the Sun Window, the Ten Frame and Bundle Sticks
+boards, Number Trail and Fact Family for + and −, and `balance.grades` are implemented.
 
 The command traces in `test/traces/` (`first-session`, `region-one`, `struggling-child`) pin the
 rules with named checks, literal golden hashes and trajectories, and mutation checks. When the

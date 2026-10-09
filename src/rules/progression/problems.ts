@@ -13,7 +13,14 @@
  */
 import { requireValue } from '@aegis/runtime';
 import type { DeepReadonly, RandomStream } from '@aegis/runtime';
-import { EVENTS, OPERATORS, expectedAnswer, firstStep, sameAnswer } from '../contract';
+import {
+  EVENTS,
+  OPERATORS,
+  expectedAnswer,
+  firstStep,
+  gradeBalance,
+  sameAnswer,
+} from '../contract';
 import type {
   AnswerValue,
   InputMode,
@@ -47,7 +54,7 @@ import {
 import { recordAnswer } from '../economy/daily';
 import { earnCoins } from '../economy/rewards';
 import { basketItems, firstTastes, itemsOf, taughtItems } from './dragons';
-import { advanceLadder, ladderDone } from './ladder';
+import { advanceLadder, ladderDone, placementFor } from './ladder';
 import type { Ctx, Data, ReadState } from '../types';
 
 /** A phase allowance large enough that rounds are never limited by it. */
@@ -147,8 +154,17 @@ export function startProblemRound(
 }
 
 /** The round has nothing more to ask: target reached, meter full or ladder over. */
-export function roundDone(data: Data, round: DeepReadonly<ProblemRound>): boolean {
-  if (round.placement !== null) return ladderDone(round.placement, data.placement, round.answered);
+export function roundDone(
+  state: ReadState,
+  data: Data,
+  round: DeepReadonly<ProblemRound>,
+): boolean {
+  if (round.placement !== null)
+    return ladderDone(
+      round.placement,
+      placementFor(data.placement, state.settings.grade),
+      round.answered,
+    );
   if (round.meter !== null && round.meter.value >= round.meter.target) return true;
   return round.target !== null && round.answered >= round.target;
 }
@@ -190,7 +206,7 @@ function chooseItem(
   const data = ctx.content.data;
   const blocked = blockedRecent(round.recent, data.balance.mix.noRepeatWithin);
   if (round.placement !== null) {
-    const step = data.placement.steps[round.placement.step]!;
+    const step = placementFor(data.placement, state.settings.grade).steps[round.placement.step]!;
     const pool = index.get(step.skill) ?? [];
     // Every other problem of a step prefers the chosen egg's facts (a table the step practises).
     const focus =
@@ -292,7 +308,11 @@ function choicesAt(
 ): AnswerValue[] | null {
   if (step === 'operation') return [...OPERATION_CHOICES];
   return input === 'choice'
-    ? choicesFor(problem, ctx.content.data.balance.input.choices, ctx.random('distractors'))
+    ? choicesFor(
+        problem,
+        gradeBalance(ctx.content.data.balance, ctx.state.settings.grade).input.choices,
+        ctx.random('distractors'),
+      )
     : null;
 }
 
@@ -363,7 +383,9 @@ export function serveNext(ctx: Ctx, index: Index): void {
   const item = queued ?? chooseItem(ctx, round, index, problems);
   if (item === null) return;
   const skillIds =
-    round.placement !== null ? [data.placement.steps[round.placement.step]!.skill] : round.skills;
+    round.placement !== null
+      ? [placementFor(data.placement, ctx.state.settings.grade).steps[round.placement.step]!.skill]
+      : round.skills;
   const skill = skillFor(data, skillIds, item, index, problems)!;
   let problem = problemFor(skill, item, { problems, words: ctx.random('words'), data });
   if (
@@ -453,7 +475,7 @@ export function gradeAnswer(ctx: Ctx, value: AnswerValue, elapsedMs: number): vo
     elapsedMs,
     current.input,
     answerDigits,
-    data.balance,
+    gradeBalance(data.balance, ctx.state.settings.grade),
     storyAllowance(data, current.problem),
   );
   creditItem(ctx, current.item, bucket);
@@ -497,7 +519,8 @@ export function gradeAnswer(ctx: Ctx, value: AnswerValue, elapsedMs: number): vo
       ctx.emit(EVENTS.reaskScheduled, { item: current.item, dueTurn: phase.enteredTurn + offset });
     }
   }
-  if (round.placement !== null) advanceLadder(round.placement, data.placement, correct);
+  if (round.placement !== null)
+    advanceLadder(round.placement, placementFor(data.placement, ctx.state.settings.grade), correct);
   recordAnswer(ctx, {
     correct,
     fast: bucket === 'fast',

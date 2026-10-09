@@ -138,6 +138,16 @@ Choice options are the mistakes a child plausibly makes on the problem shown.
 | `23 : 5 = 4 r 3`           | remainder not smaller than the divisor (3 r 8); for a quotient of 0, the next multiple (`3 : 5` → 1 r 2) | the next multiple's difference (5 r 2), swapped (3 r 4), remainder or quotient ± 1, remainder forgotten (4 r 0)    |
 | terms                      | the closest term (`product` for `factor`, `divisor` for `dividend`)                                      | other terms of the same and of the other operation                                                                 |
 
+**Grades 1-2** (`learning/generators/numbers.ts`, `additive.ts`): `num.count` asks `? = n` with a
+`dots` picture; `num.compare` compares two numbers; `num.place` composes `t · 10 + o`, or asks the
+tens or ones of a number, with a `sticks` picture; `add.fact` (`A + B = ?`, commuted partial
+credit like `mul`), `sub.fact` (`M − S = ?`), `add.missing` (`S + ? = M`, `? + S = M`) and
+`addsub.2d` by bucket. Their distractors: counting slips (± 1), the other operation (`8 + 5` →
+3, `13 − 5` → 18), a forgotten carry or borrow (`38 + 5` → 33, `42 − 7` → 45), digit-wise
+subtraction (`42 − 17` → 35), missing-addend confusions (the sum, the known addend) and reversed
+digits (`43` → 34). Word templates of the `add-to` and `take-from` families use the ordinary
+template `model` expressions (§5).
+
 ## 5. Word problems
 
 A word problem is a story from a content template (`content.wordTemplates`; catalog texts

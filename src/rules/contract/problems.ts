@@ -198,8 +198,7 @@ export function solveBlank(expr: Expr, target: number): number | null {
  *   the equation is shown and read as usual.
  */
 export type ProblemPicture =
-  | { kind: 'dots'; count: number }
-  | { kind: 'sticks'; tens: number; ones: number };
+  { kind: 'dots'; count: number } | { kind: 'sticks'; tens: number; ones: number };
 
 /** `left = right` with exactly one blank on either side: `7 · 8 = ?`, `? · 6 = 42`, `(2 + 3) · 4 = ?`. */
 export interface EquationProblem {

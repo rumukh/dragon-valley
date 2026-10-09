@@ -25,6 +25,8 @@ export const MINIGAME_ACTIVITY_KINDS = [
   'fact-family',
   'sharing-feast',
   'golem-orders',
+  'ten-frame',
+  'bundle-sticks',
 ] as const;
 export const ACTIVITY_KINDS = [...PROBLEM_ACTIVITY_KINDS, ...MINIGAME_ACTIVITY_KINDS] as const;
 export type ProblemActivityKind = (typeof PROBLEM_ACTIVITY_KINDS)[number];
@@ -56,21 +58,17 @@ export const MINIGAME_KIND_BY_ACTIVITY = {
   'fact-family': 'dv.fact-family',
   'sharing-feast': 'dv.sharing-feast',
   'golem-orders': 'dv.golem-orders',
+  'ten-frame': 'dv.ten-frame',
+  'bundle-sticks': 'dv.place-value',
 } as const satisfies Record<MinigameActivityKind, string>;
 export type NarrativeMinigameKind =
   (typeof MINIGAME_KIND_BY_ACTIVITY)[keyof typeof MINIGAME_KIND_BY_ACTIVITY];
 
 /**
- * Minigame activities reserved for grades 1-2 (docs/grades-plan.md §3.1), with their custom
- * narrative kinds: Ten Frame (fill two ten-frames, make ten, cross it) and Bundle Sticks (bundle
- * sticks into tens; place value and regrouping). Reserved, not yet playable: a level cannot list
- * them until the rules implement their boards, which moves each into `MINIGAME_ACTIVITY_KINDS`
- * and `MINIGAME_KIND_BY_ACTIVITY` (G2).
+ * Minigame activities reserved for grades 1-2 before their rules exist. The G2 boards moved Ten
+ * Frame and Bundle Sticks into the playable lists; keep this export for older importers.
  */
-export const RESERVED_MINIGAME_KIND_BY_ACTIVITY = {
-  'ten-frame': 'dv.ten-frame',
-  'bundle-sticks': 'dv.place-value',
-} as const;
+export const RESERVED_MINIGAME_KIND_BY_ACTIVITY = {} as const satisfies Record<string, string>;
 export type ReservedMinigameActivityKind = keyof typeof RESERVED_MINIGAME_KIND_BY_ACTIVITY;
 
 /**
