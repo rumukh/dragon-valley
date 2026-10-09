@@ -24,7 +24,9 @@ describe('rules paths', () => {
     await player.act({ type: 'startLevel', level: 'sunny-meadow.1' });
     await player.settleStory();
     expect(await player.reject({ type: 'endRound', reason: 'time-up' }, 'not-timed')).toBe(true);
-    expect(player.view().hub.regions[0]!.levels[0]!.stars).toBe(0);
+    expect(player.view().hub.regions.find((r) => r.id === 'sunny-meadow')!.levels[0]!.stars).toBe(
+      0,
+    );
     await player.dispose();
   });
 

@@ -58,6 +58,52 @@ export { CHILD_PROFILE, tokenizeWords } from '@aegis/narrative';`,
   }
 }
 
+/** Story and word-problem sentences for grades 1-2 stay this short (docs/grades-plan.md §4). */
+const YOUNG_MAX_WORDS = 6;
+
+/**
+ * The beats and word templates read by grade 1-2 children: a beat whose trigger is filtered to
+ * grades 1-2 or points at a grade 1-2 region's level or boss, and a template used by a skill that
+ * a grade 1-2 region's level practises.
+ * @param {any} data
+ * @param {unknown} _contract
+ */
+export function youngText(data, _contract) {
+  const youngRegions = new Set(
+    data.regions.filter((/** @type {any} */ r) => r.grade !== undefined && r.grade <= 2),
+  );
+  const levels = new Set();
+  const bosses = new Set();
+  const skills = new Set();
+  for (const region of youngRegions) {
+    if (region.boss) bosses.add(region.boss);
+    for (const level of data.levels.filter((/** @type {any} */ l) => l.region === region.id)) {
+      levels.add(level.id);
+      for (const activity of level.activities ?? []) {
+        for (const skill of activity.skills ?? []) skills.add(skill);
+      }
+    }
+  }
+  const templates = new Set();
+  for (const skill of data.skills) {
+    if (!skills.has(skill.id)) continue;
+    for (const id of skill.params?.templates ?? []) templates.add(id);
+  }
+  const beats = new Set();
+  for (const beat of data.story.beats) {
+    const t = beat.trigger ?? {};
+    const grades = t.grades;
+    if (
+      (Array.isArray(grades) && grades.length > 0 && grades.every((g) => g <= 2)) ||
+      levels.has(t.level) ||
+      bosses.has(t.boss)
+    ) {
+      beats.add(beat.id);
+    }
+  }
+  return { beats, templates };
+}
+
 /** @param {string} path */
 function readJson(path) {
   return JSON.parse(readFileSync(path, 'utf8'));
@@ -177,16 +223,19 @@ export async function validateContentTree(options = {}) {
     }
   }
   for (const d of contract.checkStoryWords(data, english)) errors.push(d.message);
+  const young = youngText(data, contract);
+  /** @param {boolean} isYoung */
+  const maxWords = (isYoung) =>
+    isYoung ? YOUNG_MAX_WORDS : contract.CHILD_PROFILE.maxWordsPerSentence;
   for (const beat of data.story.beats) {
+    const max = maxWords(young.beats.has(beat.id));
     for (const key of beat.graph.catalogs.text) {
       const text = english[key];
       if (text === undefined) continue;
       for (const sentence of text.split(/[.!?]+/)) {
         const words = contract.tokenizeWords(sentence).length;
-        if (words > contract.CHILD_PROFILE.maxWordsPerSentence) {
-          errors.push(
-            `${key}: "${sentence.trim()}" has ${words} words (max ${contract.CHILD_PROFILE.maxWordsPerSentence})`,
-          );
+        if (words > max) {
+          errors.push(`${key}: "${sentence.trim()}" has ${words} words (max ${max})`);
         }
       }
     }
@@ -194,11 +243,12 @@ export async function validateContentTree(options = {}) {
   for (const template of data.wordTemplates) {
     const text = english[template.textKey];
     if (text === undefined) continue;
+    const max = maxWords(young.templates.has(template.id));
     for (const sentence of text.split(/[.!?]+/)) {
       const words = wordProblemWords(sentence, template, data.wordLists, english, contract);
-      if (words > contract.CHILD_PROFILE.maxWordsPerSentence) {
+      if (words > max) {
         errors.push(
-          `${template.textKey}: "${sentence.trim()}" can have ${words} words (max ${contract.CHILD_PROFILE.maxWordsPerSentence})`,
+          `${template.textKey}: "${sentence.trim()}" can have ${words} words (max ${max})`,
         );
       }
     }
