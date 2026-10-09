@@ -64,6 +64,11 @@ export {
   MAP_HOTSPOTS,
   MAP_LEVELS,
   mapNodePositions,
+  LOWER_VALLEY_HOTSPOTS,
+  LOWER_VALLEY_LEVELS,
+  lowerValleyNodePositions,
+  MAP_SHEETS,
   HALL_WINDOW,
   type MapHotspots,
+  type MapSheet,
 } from './backgrounds';

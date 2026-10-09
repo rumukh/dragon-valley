@@ -1,5 +1,5 @@
 /**
- * Background scenes: the valley map, nine region scenes and the castle hall, as layered SVG
+ * Background scenes: the two map sheets (Lower Valley and valley map), the region scenes and the castle hall, as layered SVG
  * (1600 x 1000, 16:10). They are generated into assets/backgrounds/*.svg by `npm run art:build`;
  * painted versions can replace them later (prompts in assets/backgrounds/prompts/).
  */
@@ -17,10 +17,48 @@ import {
   riddleRuins,
 } from './scenes-b';
 import { pebbleBrook } from './scenes-c';
+import {
+  LOWER_VALLEY_HOTSPOTS,
+  LOWER_VALLEY_LEVELS,
+  lowerValleyMap,
+  lowerValleyNodePositions,
+} from './lower-valley';
 
-export { MAP_HOTSPOTS, MAP_LEVELS, mapNodePositions, HALL_WINDOW, type MapHotspots };
+export {
+  MAP_HOTSPOTS,
+  MAP_LEVELS,
+  mapNodePositions,
+  LOWER_VALLEY_HOTSPOTS,
+  LOWER_VALLEY_LEVELS,
+  lowerValleyNodePositions,
+  HALL_WINDOW,
+  type MapHotspots,
+};
+
+export interface MapSheet {
+  /** Background id of the sheet (assets/backgrounds/<id>.svg). */
+  id: string;
+  /** Repository path of the sheet's hotspots JSON. */
+  hotspotsFile: string;
+  hotspots: MapHotspots;
+}
+
+/** The valley's map sheets in travel order: the Lower Valley (grades 1-2), then the valley map. */
+export const MAP_SHEETS: readonly MapSheet[] = [
+  {
+    id: 'lower-valley-map',
+    hotspotsFile: 'assets/backgrounds/lower-valley-hotspots.json',
+    hotspots: LOWER_VALLEY_HOTSPOTS,
+  },
+  {
+    id: 'valley-map',
+    hotspotsFile: 'assets/backgrounds/map-hotspots.json',
+    hotspots: MAP_HOTSPOTS,
+  },
+];
 
 const SCENES: Record<string, (defs: Defs) => string> = {
+  'lower-valley-map': lowerValleyMap,
   'valley-map': valleyMap,
   'pebble-brook': pebbleBrook,
   'sunny-meadow': sunnyMeadow,

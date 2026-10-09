@@ -726,6 +726,15 @@
   },
   "backgrounds": [
     {
+      "id": "lower-valley-map",
+      "file": "assets/backgrounds/lower-valley-map.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "map",
+      "hotspots": "assets/backgrounds/lower-valley-hotspots.json",
+      "prompt": "assets/backgrounds/prompts/lower-valley-map.prompt.txt"
+    },
+    {
       "id": "valley-map",
       "file": "assets/backgrounds/valley-map.svg",
       "width": 1600,

@@ -13,7 +13,7 @@ import { PALETTE } from './palette';
 import { BOSS_IDS, BOSS_MOOD, BOSS_OUTCOME, BOSS_STATES } from './characters/bosses';
 import { STICKER_COLORS, STICKER_FRAMES } from './stickers';
 import { MASTERY_LEVELS, magicWindowLayout } from './window';
-import { BACKGROUND_IDS, HALL_WINDOW, SCENE_LAYOUT } from './backgrounds';
+import { BACKGROUND_IDS, HALL_WINDOW, MAP_SHEETS, SCENE_LAYOUT } from './backgrounds';
 
 /** Where each dragon hatches (docs/plan.md section 2.3). */
 const HOME_REGION: Record<string, string> = {
@@ -143,9 +143,11 @@ export function buildCatalog(): Record<string, unknown> {
       file: `assets/backgrounds/${id}.svg`,
       width: 1600,
       height: 1000,
-      kind: id === 'valley-map' ? 'map' : id === 'castle-hall' ? 'hall' : 'region',
+      kind: MAP_SHEETS.some((m) => m.id === id) ? 'map' : id === 'castle-hall' ? 'hall' : 'region',
       ...(ART_REGION_IDS.includes(id) ? { region: id, layout: SCENE_LAYOUT } : {}),
-      ...(id === 'valley-map' ? { hotspots: 'assets/backgrounds/map-hotspots.json' } : {}),
+      ...Object.fromEntries(
+        MAP_SHEETS.filter((m) => m.id === id).map((m) => ['hotspots', m.hotspotsFile]),
+      ),
       ...(id === 'castle-hall' ? { window: HALL_WINDOW } : {}),
       prompt: `assets/backgrounds/prompts/${id}.prompt.txt`,
     })),

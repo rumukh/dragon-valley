@@ -55,7 +55,7 @@ export function pebble(x: number, y: number, w: number, color: string): string {
 }
 
 /** A flat stepping stone in the water, seen from above at a slant. */
-function steppingStone(x: number, y: number, w: number, color: string): string {
+export function steppingStone(x: number, y: number, w: number, color: string): string {
   return (
     h('ellipse', {
       cx: x,

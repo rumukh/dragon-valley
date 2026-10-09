@@ -3,7 +3,7 @@
  * Generates the committed art artifacts from the TypeScript sources:
  *   assets/art/catalog.json            (src/app/art/catalog.ts)
  *   src/app/art/dragon/animations.css  (src/app/art/dragon/animations.ts)
- *   assets/backgrounds/*.svg + map-hotspots.json (src/app/art/backgrounds, when present)
+ *   assets/backgrounds/*.svg + map sheet hotspots (map-hotspots.json, lower-valley-hotspots.json) (src/app/art/backgrounds, when present)
  *
  *   node scripts/art/build-art.mjs           write everything
  *   node scripts/art/build-art.mjs --check   fail if any committed artifact is stale
@@ -24,10 +24,8 @@ const outputs = [
 if (typeof art.renderBackgrounds === 'function') {
   for (const [id, svg] of Object.entries(art.renderBackgrounds()))
     outputs.push([`assets/backgrounds/${id}.svg`, /** @type {string} */ (svg)]);
-  outputs.push([
-    'assets/backgrounds/map-hotspots.json',
-    `${JSON.stringify(art.MAP_HOTSPOTS, null, 2)}\n`,
-  ]);
+  for (const sheet of art.MAP_SHEETS)
+    outputs.push([sheet.hotspotsFile, `${JSON.stringify(sheet.hotspots, null, 2)}\n`]);
 }
 
 let stale = 0;
