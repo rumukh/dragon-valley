@@ -78,6 +78,9 @@ describe('the generator registry', () => {
   it('implements every generator of the contract', () => {
     expect([...IMPLEMENTED_GENERATORS].sort()).toEqual(
       [
+        'add.fact',
+        'add.missing',
+        'addsub.2d',
         'compare',
         'div.2d1d',
         'div.fact',
@@ -87,7 +90,11 @@ describe('the generator registry', () => {
         'mul.missing',
         'mul.power10',
         'mul.tens',
+        'num.compare',
+        'num.count',
+        'num.place',
         'order.ops',
+        'sub.fact',
         'terms',
         'word',
       ].sort(),

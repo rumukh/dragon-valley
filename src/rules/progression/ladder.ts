@@ -5,8 +5,21 @@
  * answers end it gently. Pure functions over the round's `PlacementProgress`.
  */
 import type { DeepReadonly } from '@aegis/runtime';
-import type { Placement, PlacementProgress } from '../contract';
+import { DEFAULT_GRADE } from '../contract';
+import type { Grade, Placement, PlacementProgress } from '../contract';
 import { percentOf } from './levels';
+
+/**
+ * The placement ladder of `grade`: the steps whose `grades` name it (a step without `grades` is a
+ * grade-3 rung). Grade 1 normally has none, so it has no placement check.
+ */
+export function placementFor(
+  placement: DeepReadonly<Placement>,
+  grade: Grade,
+): DeepReadonly<Placement> {
+  const steps = placement.steps.filter((step) => (step.grades ?? [DEFAULT_GRADE]).includes(grade));
+  return steps.length === placement.steps.length ? placement : { ...placement, steps };
+}
 
 /** The ladder is over: every step asked, a step failed, or stopped early. */
 export function ladderDone(
