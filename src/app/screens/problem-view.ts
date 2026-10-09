@@ -13,11 +13,42 @@ import { h } from '../ui/dom';
 
 type CompareProblem = Extract<Problem, { kind: 'compare' }>;
 
+/**
+ * A counting problem's dots in ten-frames (five a row), never their number: the number is the
+ * answer. The problem line's label reads the question ("How many dots?").
+ */
+function dotsElement(count: number): HTMLElement {
+  const frames = Math.max(1, Math.ceil(count / 10));
+  return h(
+    'span',
+    {
+      className: 'dv-problem__dots',
+      testId: 'problem-dots',
+      attributes: { 'aria-hidden': 'true' },
+    },
+    ...Array.from({ length: frames }, (_, frame) =>
+      h(
+        'span',
+        { className: 'dv-problem__frame' },
+        ...Array.from({ length: 10 }, (_, cell) =>
+          h('span', {
+            className:
+              frame * 10 + cell < count
+                ? 'dv-problem__dot'
+                : 'dv-problem__dot dv-problem__dot--empty',
+          }),
+        ),
+      ),
+    ),
+  );
+}
+
 function tokenElement(token: Token): HTMLElement {
   if (token.kind === 'blank') return h('span', { className: 'dv-problem__blank', text: '?' });
   if (token.kind === 'slot') {
     return h('span', { className: 'dv-problem__slot', testId: 'problem-slot' });
   }
+  if (token.kind === 'dots') return dotsElement(token.count);
   const highlighted = token.kind === 'number' && token.highlight === true;
   return h('span', {
     className: highlighted
@@ -54,7 +85,12 @@ export function faceElement(face: CardFace, notation: Notation): HTMLElement {
 function sizeOf(tokens: readonly Token[]): 's' | 'm' | 'l' {
   let length = 0;
   for (const token of tokens) {
-    length += token.kind === 'blank' || token.kind === 'slot' ? 2 : token.text.length + 1;
+    length +=
+      token.kind === 'blank' || token.kind === 'slot'
+        ? 2
+        : token.kind === 'dots'
+          ? 6
+          : token.text.length + 1;
   }
   return length > 14 ? 's' : length > 10 ? 'm' : 'l';
 }

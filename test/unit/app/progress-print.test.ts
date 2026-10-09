@@ -204,6 +204,7 @@ describe('what there is to print', () => {
     },
   } as unknown as GameView;
   const data = {
+    regions: [],
     bosses: [
       { id: 'bridge-troll' },
       { id: 'forest-witch' },

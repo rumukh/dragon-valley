@@ -22,6 +22,7 @@ import type {
 } from '../../rules/contract';
 import { getDragonAnchors } from '../art/dragon';
 import { CommandRejectedError, taken } from '../controller/commands';
+import { gradeOf, isYoungGrade, keypadDigitsFor } from '../game/grade';
 import { createResponseTimer } from '../game/timer';
 import {
   answerKindOf,
@@ -36,6 +37,7 @@ import type { BossPose } from '../game/view';
 import { plural } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { modelFor } from '../math/model';
+import type { ProblemModel } from '../math/model';
 import { formatSolved } from '../math/notation';
 import { speakProblem, speakSolved } from '../speech/verbalizer';
 import { artIcon, bossArt, outfitOf, sevenHeadedArt, viewDragonArt } from '../ui/art';
@@ -302,8 +304,12 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     return svgPointToPage(art as SVGSVGElement, anchors.mouth.x, anchors.mouth.y) ?? centerOf(art);
   };
 
+  // Grades 1-2 see pictures of + and − (docs/design.md §12.5); a 3rd grader's round is as it was.
+  const young = (): boolean => isYoungGrade(gradeOf(active.game.view()));
+  const modelOf = (problem: Problem): ProblemModel | null => modelFor(problem, young());
+
   const showModel = (problem: Problem, solved = false): void => {
-    const model = modelFor(problem);
+    const model = modelOf(problem);
     modelSlot.replaceChildren(
       ...(model ? [modelFigure(model, { t, notation: notation(), solved })] : []),
     );
@@ -335,8 +341,18 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     return words ? `${words} ${question}` : question;
   };
 
+  /**
+   * A young player's choice problem shows its picture up front (a counting problem's dots are
+   * already the problem); the keypad keeps it for the hint after a miss.
+   */
+  const picturedChoices = (problem: ProblemView): boolean => {
+    if (!young() || !stepChoices(problem)) return false;
+    const model = modelOf(problem.problem);
+    return model !== null && model.kind !== 'count';
+  };
+
   const hintButton = (problem: ProblemView): HTMLElement[] => {
-    if (pictureFirst(problem) || !modelFor(problem.problem)) return [];
+    if (pictureFirst(problem) || picturedChoices(problem) || !modelOf(problem.problem)) return [];
     return [
       candyButton({
         label: t('round.hint'),
@@ -616,9 +632,9 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
     const spoken = spokenProblem(problem);
     problemSlot.replaceChildren(problemElement(problem.problem, notation(), spoken, problem.step));
     speakerSlot.replaceChildren(...speakerButton(app, active, () => spokenProblem(problem)));
-    const said = problemNote(problem, modelFor(problem.problem) !== null);
+    const said = problemNote(problem, modelOf(problem.problem) !== null);
     note.textContent = said ? t(said) : '';
-    if (pictureFirst(problem)) showModel(problem.problem);
+    if (pictureFirst(problem) || picturedChoices(problem)) showModel(problem.problem);
     else modelSlot.replaceChildren();
     hintSlot.replaceChildren(...hintButton(problem));
 
@@ -649,7 +665,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
       prompt.textContent = t(kind === 'remainder' ? 'round.typeRemainder' : 'round.type');
       keypad = createKeypad(app.kit, {
         mode: kind === 'remainder' ? 'remainder' : 'number',
-        maxDigits: 6,
+        maxDigits: keypadDigitsFor(gradeOf(active.game.view()), 6),
         remainderSymbol: notation() === 'czech' ? 'r' : 'R',
         onSubmit: async (answer) => {
           const ok = answerSlot.querySelector('[data-testid="keypad-ok"]') ?? answerSlot;
@@ -827,7 +843,7 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
   const element = h(
     'main',
     {
-      className: `dv-round${boss ? ' dv-round--boss' : ''}`,
+      className: `dv-round${boss ? ' dv-round--boss' : ''}${young() ? ' dv-round--young' : ''}`,
       testId: 'screen-round',
       dataset: { activity, placement: String(placement) },
     },

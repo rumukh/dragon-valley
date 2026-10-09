@@ -116,7 +116,11 @@ describe('notation', () => {
     const text = (tokens: ReturnType<typeof problemTokens>) =>
       tokens
         .map((token) =>
-          token.kind === 'blank' ? '?' : token.kind === 'slot' ? SLOT_SYMBOL : token.text,
+          token.kind === 'blank' ? '?' : token.kind === 'slot'
+              ? SLOT_SYMBOL
+              : token.kind === 'dots'
+                ? ''
+                : token.text,
         )
         .join(' ');
     expect(text(problemTokens(story, 'czech', 'operation'))).toBe('3 ○ 4 = ?');

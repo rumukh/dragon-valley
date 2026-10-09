@@ -1,7 +1,11 @@
 /**
- * Create or change a keeper: a name and one of eight keeper pictures. Removing a keeper is
+ * Create or change a keeper: a name, one of eight keeper pictures and, for a new keeper, the
+ * class they are in (1st, 2nd or 3rd; 3rd is picked until someone chooses). The class waits on
+ * the keeper's family entry until the play screen hands it to the new game save. Removing a keeper is
  * behind the grown-ups' gate and a confirmation, and erases that keeper's own saved data.
  */
+import { DEFAULT_GRADE, GRADES } from '../../rules/contract/kinds';
+import type { Grade } from '../../rules/contract/kinds';
 import { KEEPER_AVATARS } from '../../rules/contract/ids';
 import type { KeeperAvatar } from '../../rules/contract/ids';
 import { openParentGate } from '../parent/gate-dialog';
@@ -27,6 +31,13 @@ const PROBLEM_KEYS: Record<FamilyProblem, MessageKey> = {
   full: 'editor.problem.full',
   missing: 'editor.problem.missing',
   avatar: 'editor.problem.avatar',
+  grade: 'editor.problem.grade',
+};
+
+export const GRADE_LABEL_KEYS: Readonly<Record<Grade, MessageKey>> = {
+  1: 'grade.1',
+  2: 'grade.2',
+  3: 'grade.3',
 };
 
 export function editorScreen(app: App, keeperId: string | null): ScreenEntry {
@@ -87,6 +98,48 @@ export function editorScreen(app: App, keeperId: string | null): ScreenEntry {
         );
       });
 
+      let grade: Grade = DEFAULT_GRADE;
+      const gradeQuestion = h('legend', { className: 'dv-field__label' });
+      const askGrade = (): void => {
+        const name = nameInput.value.trim();
+        gradeQuestion.textContent =
+          name === '' ? t('editor.gradeLabel') : t('editor.gradeLabelNamed', { name });
+      };
+      askGrade();
+      nameInput.addEventListener('input', askGrade);
+      // The editor has no keeper yet, so it reads the class aloud with the device default voice.
+      const say = (text: string): void => {
+        if (app.speech.available()) app.speech.speak(text, { voice: null });
+      };
+      const gradeRadios = GRADES.map((value) => {
+        const input = h('input', {
+          className: 'dv-grade-choice__input',
+          attributes: { type: 'radio', name: 'dv-grade', value: String(value) },
+        });
+        input.checked = value === grade;
+        input.addEventListener('change', () => {
+          if (!input.checked) return;
+          grade = value;
+          say(t(GRADE_LABEL_KEYS[value]));
+        });
+        return h(
+          'label',
+          { className: 'dv-grade-choice', testId: `grade-${value}` },
+          input,
+          h('span', { className: 'dv-grade-choice__number', text: String(value) }),
+          h('span', { className: 'dv-grade-choice__label', text: t(GRADE_LABEL_KEYS[value]) }),
+        );
+      });
+      const gradePicker = existing
+        ? null
+        : h(
+            'fieldset',
+            { className: 'dv-grade-picker', testId: 'keeper-grade' },
+            gradeQuestion,
+            h('div', { className: 'dv-grade-grid' }, ...gradeRadios),
+          );
+      gradeQuestion.addEventListener('click', () => say(gradeQuestion.textContent ?? ''));
+
       const submit = async (): Promise<void> => {
         if (!chosen) {
           showProblem('editor.problem.avatar');
@@ -96,7 +149,7 @@ export function editorScreen(app: App, keeperId: string | null): ScreenEntry {
         try {
           result = existing
             ? await app.family.update(existing.id, { name: nameInput.value, avatar: chosen })
-            : await app.family.add({ name: nameInput.value, avatar: chosen });
+            : await app.family.add({ name: nameInput.value, avatar: chosen, grade });
         } catch {
           showProblem('editor.problem.save');
           return;
@@ -153,6 +206,7 @@ export function editorScreen(app: App, keeperId: string | null): ScreenEntry {
           }),
         ),
         picker,
+        gradePicker,
         problem,
         h('div', { className: 'dv-row dv-row--end' }, save),
       );

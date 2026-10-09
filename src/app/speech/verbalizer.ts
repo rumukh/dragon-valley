@@ -23,6 +23,7 @@ import type {
   Term,
   TermProblem,
 } from '../../rules/contract';
+import { countedDots } from '../math/picture';
 import { numberToWords } from './numbers';
 
 export const OPERATOR_WORDS: Readonly<Record<Operator, string>> = {
@@ -55,6 +56,8 @@ export const TERM_WORDS: Readonly<Record<Term, string>> = {
 };
 
 const BLANK_WORD = 'what';
+/** A counting problem, read aloud without its number. */
+export const COUNT_QUESTION = 'How many dots?';
 /** Spoken for the empty sign of a story's operation step. */
 const SLOT_WORDS = 'which sign';
 
@@ -111,6 +114,8 @@ function termQuestion(problem: TermProblem): string {
 export function speakProblem(problem: Problem, step: ProblemStep = 'answer'): string {
   switch (problem.kind) {
     case 'equation':
+      // A counting problem never says its number: that number is the answer.
+      if (countedDots(problem) !== null) return COUNT_QUESTION;
       return sentence(`${speakExpr(problem.left)} equals ${speakExpr(problem.right)}`, '?');
     case 'divrem':
       return sentence(
@@ -170,6 +175,12 @@ export function speakAnswer(answer: AnswerValue): string {
 export function speakSolved(problem: Problem, answer: AnswerValue): string {
   switch (problem.kind) {
     case 'equation': {
+      if (countedDots(problem) !== null && answer.kind === 'number') {
+        return sentence(
+          `${numberToWords(answer.value)} ${answer.value === 1 ? 'dot' : 'dots'}`,
+          '.',
+        );
+      }
       let used = false;
       const fill = (expr: Expr): Expr => {
         if (expr.kind === 'blank' && !used && answer.kind === 'number') {

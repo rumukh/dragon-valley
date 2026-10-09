@@ -293,6 +293,57 @@
   outline-offset: 0.12em;
 }
 
+/* "Which class is Ema in?": three big buttons in one row. */
+.dv-grade-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.dv-grade-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6em;
+}
+
+.dv-grade-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  min-height: 3.2em;
+  padding: 0.4em 0.6em;
+  border-radius: 1em;
+  background: var(--dv-card);
+  box-shadow: 0 0 0 0.1em var(--dv-line);
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.dv-grade-choice__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.dv-grade-choice__number {
+  font-size: 1.8em;
+  line-height: 1;
+}
+
+.dv-grade-choice:has(input:checked) {
+  background: var(--dv-primary-soft);
+  box-shadow: 0 0 0 0.16em var(--dv-primary);
+}
+
+.dv-grade-choice:has(input:focus-visible) {
+  outline: 0.16em solid var(--dv-ink);
+  outline-offset: 0.12em;
+}
+
 /* ---- Scenes ---------------------------------------------------------------------------- */
 
 /* Screens drawn over one of S4's background scenes: the picture fills the screen behind. */
@@ -3642,4 +3693,141 @@
   .dv-keeper-card__play {
     min-height: 7.5em;
   }
+}
+
+/* ---- A counting problem's dots (grades 1-2): ten-frames, five a row ------------------------ */
+
+.dv-problem__dots {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25em;
+  vertical-align: middle;
+}
+
+.dv-problem__frame {
+  display: grid;
+  grid-template-columns: repeat(5, 0.7em);
+  gap: 0.12em;
+  padding: 0.12em;
+  border: 2px solid var(--dv-line-strong);
+  border-radius: 0.15em;
+  background: var(--dv-card);
+}
+
+.dv-problem__dot {
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  background: var(--dv-primary);
+  box-shadow: inset 0 0 0 2px var(--dv-primary-deep);
+}
+
+.dv-problem__dot--empty {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ---- Young players (grades 1-2): big numerals, short text --------------------------------- */
+
+.dv-round--young .dv-problem {
+  font-size: min(3.6rem, 13vw);
+}
+
+.dv-round--young .dv-round__story,
+.dv-round--young .dv-round__prompt {
+  font-size: 1.35em;
+  line-height: 1.3;
+}
+
+.dv-round--young .dv-tile {
+  font-size: 1.25em;
+}
+
+/* ---- The Sun Window: addition and subtraction panes ------------------------------------------ */
+
+.dv-sun__panels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.dv-sun__panel {
+  flex: 1 1 16rem;
+  max-width: 24rem;
+}
+
+.dv-sun__heading {
+  margin: 0 0 0.4rem;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.dv-sun__grid {
+  display: grid;
+  grid-template-columns: repeat(calc(var(--size) + 1), 1fr);
+  gap: 2px;
+  padding: 0.4rem;
+  border-radius: 1rem 1rem 0.5rem 0.5rem;
+  background: var(--dv-sun-deep);
+}
+
+.dv-sun__axis,
+.dv-sun__corner {
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--dv-card);
+}
+
+.dv-sun__pane {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--dv-paper);
+}
+
+.dv-sun__pane[data-level='bronze'] {
+  background: var(--dv-mastery-bronze);
+}
+
+.dv-sun__pane[data-level='silver'] {
+  background: var(--dv-mastery-silver);
+}
+
+.dv-sun__pane[data-level='gold'] {
+  background: var(--dv-mastery-gold);
+}
+
+/* A known fact due again: a ring, not only a color. */
+.dv-sun__pane[data-polish='true'] {
+  box-shadow: inset 0 0 0 2px var(--dv-primary-deep);
+}
+
+/* The map's sheets (Lower Valley, Upper Valley): one button each above the picture. */
+.dv-map__sheets {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-block: 0 0.5rem;
+}
+
+/* A finished grade's certificate for the child: big words, the grade's last boss smiling. */
+.dv-grade-done {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.dv-grade-done .dv-boss-art {
+  inline-size: min(60vw, 16rem);
+  block-size: auto;
+}
+
+.dv-grade-done__line {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.2;
 }

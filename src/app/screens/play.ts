@@ -19,6 +19,7 @@ import { minigameScreen } from './minigames';
 import { problemRoundScreen } from './problems';
 import { resultsScreen } from './results';
 import { storyScreen } from './story';
+import { applyPendingGrade } from '../game/grade';
 
 /** Start (or resume) today's session unless the game is already on today's date. */
 export async function startToday(active: ActiveKeeper, today = localDay()): Promise<void> {
@@ -36,6 +37,7 @@ export function playScreen(app: App, keeperId: string): ScreenEntry {
       const today = localDay();
       await active.day.begin(gameDay(active.game.view(), today), active.game.view());
       await startToday(active, today);
+      await applyPendingGrade(app, active);
       const view = active.game.view();
       switch (view.screen) {
         case 'story':
