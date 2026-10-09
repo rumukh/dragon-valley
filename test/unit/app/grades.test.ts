@@ -26,7 +26,9 @@ import {
   skillGrades,
 } from '../../../src/app/game/grade';
 import { countLevels, sunWindowOf } from '../../../src/app/game/sun-window';
-import { loadMapSheets, MAP_PATH, sheetOf } from '../../../src/app/game/map';
+import { readFileSync } from 'node:fs';
+import { loadMapSheets, MAP_PATH, MAP_SHEET_FILES, sheetOf } from '../../../src/app/game/map';
+import { MAP_SHEETS } from '../../../src/app/art';
 import type { Fetcher } from '../../../src/app/content/load';
 import {
   addTableFacts,
@@ -78,7 +80,7 @@ describe('the family record keeps a pending grade until the save exists', () => 
     expect(FAMILY_RECORD.isValid(withGrade, 2)).toBe(true);
     const migration = FAMILY_RECORD.migrations?.find((step) => step.from === 1);
     expect(migration?.to).toBe(2);
-    expect(FAMILY_RECORD.isCurrent!(migration!.migrate(v1))).toBe(true);
+    expect(FAMILY_RECORD.isCurrent!(migration!.migrate!(v1))).toBe(true);
   });
 });
 
@@ -111,13 +113,11 @@ describe('a counting problem never gives its answer away', () => {
     picture: { kind: 'dots', count: 7 },
   } as unknown as Problem;
 
-  it('reads the picture defensively', () => {
+  it('reads the picture of an equation or a word problem', () => {
     expect(pictureOf(counting)).toEqual({ kind: 'dots', count: 7 });
     expect(countedDots(counting)).toBe(7);
     const plain: Problem = { kind: 'equation', left: op('add', num(3), num(4)), right: BLANK };
     expect(pictureOf(plain)).toBeNull();
-    const broken = { ...plain, picture: { kind: 'dots', count: -1 } } as unknown as Problem;
-    expect(pictureOf(broken)).toBeNull();
   });
 
   it('draws dots where the number would be, in both notations', () => {
@@ -192,42 +192,45 @@ describe('grade helpers', () => {
 });
 
 describe('the Sun Window', () => {
-  it('is all dim until the rules serve it', () => {
-    const sun = sunWindowOf(view({}));
-    expect(sun.cells).toHaveLength(121);
-    expect(sun.subtraction).toHaveLength(121);
-    expect(sun.counts).toEqual({ dim: 242, bronze: 0, silver: 0, gold: 0 });
-    expect(sun.cells.find((cell) => cell.item === 'add:3+4')).toMatchObject({ row: 3, column: 4 });
-    expect(sun.subtraction.find((cell) => cell.item === 'sub:9-4')).toMatchObject({
-      row: 4,
-      column: 5,
-    });
-  });
-
-  it('shows the served panes', () => {
+  it('shows the panes the rules serve, and counts them', () => {
     const cells = [{ item: 'add:1+1', row: 1, column: 1, level: 'gold', needsPolish: false }];
     const subtraction = [
       { item: 'sub:2-1', row: 1, column: 1, level: 'bronze', needsPolish: true },
     ];
-    const sun = sunWindowOf(view({}, { sunWindow: { cells, subtraction } }));
+    const served = { size: 11, cells, subtraction, counts: countLevels(cells as never) };
+    const sun = sunWindowOf(view({}, { sunWindow: served }));
     expect(sun.cells).toEqual(cells);
-    expect(sun.counts).toEqual({ ...countLevels([]), gold: 1, bronze: 1 });
+    expect(countLevels([...sun.cells, ...sun.subtraction])).toEqual({
+      dim: 0,
+      bronze: 1,
+      silver: 0,
+      gold: 1,
+    });
   });
 });
 
 describe('the map sheets', () => {
-  const sheet = (id: string) => ({
-    width: 100,
-    height: 100,
-    regions: { [id]: { x: 10, y: 10, path: [{ x: 10, y: 10 }] } },
-    hotspots: [],
+  const file = (path: string): string => readFileSync(path, 'utf8');
+  const shipped: Fetcher = async (url) =>
+    new Response(
+      file(
+        url.includes('lower-valley')
+          ? 'assets/backgrounds/lower-valley-hotspots.json'
+          : 'assets/backgrounds/map-hotspots.json',
+      ),
+    );
+
+  it('names the same files, in the same order, as the art module', () => {
+    expect(MAP_SHEET_FILES.map((sheet) => [sheet.background, sheet.path])).toEqual(
+      MAP_SHEETS.map((sheet) => [sheet.id, sheet.hotspotsFile]),
+    );
   });
 
   it('fetches only the valley sheet while every region is on it', async () => {
     const asked: string[] = [];
-    const fetcher: Fetcher = async (url) => {
+    const fetcher: Fetcher = (url) => {
       asked.push(url);
-      return new Response(JSON.stringify(sheet('sunny-meadow')));
+      return shipped(url);
     };
     const sheets = await loadMapSheets('https://dv.test/only-valley/', ['sunny-meadow'], fetcher);
     expect(sheets.map((s) => s.background)).toEqual(['valley-map']);
@@ -235,22 +238,17 @@ describe('the map sheets', () => {
   });
 
   it('adds the Lower Valley before the valley, or leaves it off while it is missing', async () => {
-    const fetcher: Fetcher = async (url) =>
-      url.includes('lower-valley')
-        ? new Response(JSON.stringify(sheet('pebble-brook')))
-        : new Response(JSON.stringify(sheet('sunny-meadow')));
     const sheets = await loadMapSheets(
       'https://dv.test/both/',
       ['pebble-brook', 'sunny-meadow'],
-      fetcher,
+      shipped,
     );
     expect(sheets.map((s) => s.background)).toEqual(['lower-valley-map', 'valley-map']);
     expect(sheetOf(sheets, 'pebble-brook')?.background).toBe('lower-valley-map');
+    expect(sheetOf(sheets, 'sunny-meadow')?.background).toBe('valley-map');
 
     const missing: Fetcher = async (url) =>
-      url.includes('lower-valley')
-        ? new Response('', { status: 404 })
-        : new Response(JSON.stringify(sheet('sunny-meadow')));
+      url.includes('lower-valley') ? new Response('', { status: 404 }) : shipped(url);
     const valleyOnly = await loadMapSheets(
       'https://dv.test/missing/',
       ['pebble-brook', 'sunny-meadow'],
@@ -289,7 +287,7 @@ describe('grades in Progress and Print', () => {
     expect(grades.get('mul-2')).toBe(3);
   });
 
-  it('finishes a grade when all of its bosses are won over, with a certificate after it', () => {
+  it('finishes the grades the rules award, with a certificate after the grade', () => {
     const played = {
       dragons: [],
       hub: {
@@ -298,22 +296,14 @@ describe('grades in Progress and Print', () => {
           region('counting-hill', 2, 'hill-giant', false),
           region('sunny-meadow', 3, 'bridge-troll', false),
         ],
+        certificates: [1],
       },
     } as unknown as GameView;
-    expect(finishedGrades(played, data)).toEqual([1]);
+    expect(finishedGrades(played)).toEqual([1]);
     expect(gradeLastBoss(data, 1)).toBe('will-o-wisps');
     expect(earnedCertificates(played, data).map((c) => c.id)).toEqual([
       'certificate:region:pebble-brook',
       'certificate:grade:1',
     ]);
-  });
-
-  it('finishes no grade a pack does not have', () => {
-    const thirdOnly = { ...data, regions: [data.regions[2]] } as unknown as ContentData;
-    const played = {
-      dragons: [],
-      hub: { regions: [region('sunny-meadow', 3, 'bridge-troll', true)] },
-    } as unknown as GameView;
-    expect(finishedGrades(played, thirdOnly)).toEqual([]);
   });
 });

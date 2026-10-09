@@ -201,6 +201,7 @@ describe('what there is to print', () => {
         { id: 'fire-mountain', order: 3, boss: { id: 'krakonos', defeated: false } },
         { id: 'dragon-castle', order: 9, boss: { id: 'seven-headed', defeated: true } },
       ],
+      certificates: [],
     },
   } as unknown as GameView;
   const data = {

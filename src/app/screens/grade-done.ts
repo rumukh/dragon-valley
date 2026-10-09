@@ -28,7 +28,7 @@ export function gradeDoneScreen(app: App, keeperId: string, grade: Grade): Scree
       const active = await app.openKeeper(keeperId);
       const view = active.game.view();
       const data = active.game.content().data;
-      const done = finishedGrades(view, data).includes(grade);
+      const done = finishedGrades(view).includes(grade);
       const boss = gradeLastBoss(data, grade);
       const frame = collection(app, active, {
         title: t('gradeDone.title'),

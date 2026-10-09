@@ -431,7 +431,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       onError: app.kit.onError,
     }),
     // A finished 1st or 2nd class: its certificate (none until the pack has those regions).
-    ...finishedGrades(view, active.game.content().data).map((grade) =>
+    ...finishedGrades(view).map((grade) =>
       candyButton({
         label: t(grade === 1 ? 'hub.gradeDone1' : 'hub.gradeDone2'),
         icon: 'sparkle',

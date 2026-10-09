@@ -68,22 +68,11 @@ export type Certificate =
   | { readonly id: string; readonly kind: 'finale'; readonly boss: string };
 
 /**
- * The grades below 3rd a keeper has finished: every region of that grade with a boss has its boss
- * won over (3rd grade ends with the finale's own certificate). A pack without the grade's regions
- * finishes nothing.
+ * The grades below 3rd a keeper has finished, as the rules award them (`hub.certificates`: every
+ * boss of the grade won over). 3rd grade ends with the finale's own certificate.
  */
-export function finishedGrades(view: GameView, data: ContentData): Grade[] {
-  const won = new Set(
-    view.hub.regions.flatMap((region) => (region.boss?.defeated ? [region.id] : [])),
-  );
-  const out: Grade[] = [];
-  for (const grade of [1, 2] as const) {
-    const bossed = data.regions.filter(
-      (region) => regionGrade(region) === grade && region.boss !== null,
-    );
-    if (bossed.length > 0 && bossed.every((region) => won.has(region.id))) out.push(grade);
-  }
-  return out;
+export function finishedGrades(view: GameView): Grade[] {
+  return [...view.hub.certificates];
 }
 
 /** The boss of a grade's last region with one, for the grade's certificate art. */
@@ -103,7 +92,7 @@ export function gradeLastBoss(data: ContentData, grade: Grade): string | null {
 export function earnedCertificates(view: GameView, data: ContentData): Certificate[] {
   const out: Certificate[] = [];
   const lastOfGrade = new Map<string, Grade>();
-  for (const grade of finishedGrades(view, data)) {
+  for (const grade of finishedGrades(view)) {
     const last = data.regions
       .filter((region) => regionGrade(region) === grade && region.boss !== null)
       .sort((a, b) => b.order - a.order)[0];

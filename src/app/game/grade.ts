@@ -55,7 +55,8 @@ export function autoReadsByDefault(grade: Grade): boolean {
 
 /**
  * Ask the game for a grade. Content that does not serve the grade yet refuses it
- * (`invalid-setting`); that leaves the game as it is and returns false.
+ * (`invalid-setting`), and a placement round refuses a change (`round-active`); either leaves
+ * the game as it is and returns false.
  */
 export async function requestGrade(active: ActiveKeeper, grade: Grade): Promise<boolean> {
   if (gradeOf(active.game.view()) === grade) return true;
@@ -66,7 +67,10 @@ export async function requestGrade(active: ActiveKeeper, grade: Grade): Promise<
     });
     return true;
   } catch (error) {
-    if (error instanceof CommandRejectedError && error.error.code === 'invalid-setting') {
+    if (
+      error instanceof CommandRejectedError &&
+      (error.error.code === 'invalid-setting' || error.error.code === 'round-active')
+    ) {
       return false;
     }
     throw error;
@@ -74,13 +78,14 @@ export async function requestGrade(active: ActiveKeeper, grade: Grade): Promise<
 }
 
 /**
- * After the keeper's session has started: hand the editor's grade to the game, turn on auto
- * read-aloud for a 1st grader, and drop the pending grade from the family record.
+ * Before the keeper's session starts (so the first-session story is the grade's): hand the
+ * editor's grade to the game, turn on auto read-aloud for a 1st grader, and drop the pending
+ * grade from the family record.
  */
 export async function applyPendingGrade(app: App, active: ActiveKeeper): Promise<void> {
   const keeper = findKeeper(app.family.state(), active.keeper.id);
   const grade = keeper?.grade;
-  if (grade === undefined || active.game.view().day === null) return;
+  if (grade === undefined) return;
   await requestGrade(active, grade);
   if (autoReadsByDefault(grade) && !active.preferences.current().autoRead) {
     await active.preferences.change((draft) => {

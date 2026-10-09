@@ -13,8 +13,9 @@ export const MAP_PATH = 'assets/backgrounds/map-hotspots.json';
 
 /**
  * The map's sheets in travel order (docs/design.md §12.5): the Lower Valley of grades 1-2, then
- * today's valley. Each is a picture (a background id) with its hotspots file. The Lower Valley
- * sheet is S4/G5's (`lower-valley-map`); until its file ships the map is the one valley sheet.
+ * today's valley. Each is a picture (a background id) with its hotspots file, the same as the art
+ * module's `MAP_SHEETS` (a unit test keeps them in step; the map loader stays free of the art
+ * code). An optional sheet that fails to load leaves its regions off the map.
  */
 export const MAP_SHEET_FILES = [
   {
@@ -137,13 +138,14 @@ function loadSheet(
   baseUrl: string,
   fetcher?: Fetcher,
 ): Promise<ValleyMap> {
-  let loading = cached.get(sheet.path);
+  const key = new URL(sheet.path, baseUrl).href;
+  let loading = cached.get(key);
   if (!loading) {
     loading = fetchSiteText(baseUrl, sheet.path, fetcher).then((text) =>
       parseValleyMap(JSON.parse(text) as unknown, sheet.background),
     );
-    cached.set(sheet.path, loading);
-    loading.catch(() => cached.delete(sheet.path));
+    cached.set(key, loading);
+    loading.catch(() => cached.delete(key));
   }
   return loading;
 }

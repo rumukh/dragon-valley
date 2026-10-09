@@ -116,7 +116,9 @@ describe('notation', () => {
     const text = (tokens: ReturnType<typeof problemTokens>) =>
       tokens
         .map((token) =>
-          token.kind === 'blank' ? '?' : token.kind === 'slot'
+          token.kind === 'blank'
+            ? '?'
+            : token.kind === 'slot'
               ? SLOT_SYMBOL
               : token.kind === 'dots'
                 ? ''
