@@ -44,9 +44,7 @@ export type CardFace =
  * | ----------------------------- | ------------------------------------------------------- |
  * | `fact:mul:7x8`                | the fact `7 · 8` (`fact:` + a small-table item ID)      |
  * | `fact:div:56:7`               | the fact `56 : 7`                                       |
- * | `fact:add:3+5`                | the fact `3 + 5`                                        |
- * | `fact:sub:8-3`                | the fact `8 − 3`                                        |
- * | `expr:div:23:5`               | any other single operation (`23 : 5`, `14 · 3`)         |
+ * | `expr:div:23:5`               | any other single operation (`23 : 5`, `14 · 3`, `3 + 5`)  |
  * | `num:56`                      | the number 56                                           |
  * | `term:product`                | the term "product" (term ↔ example pairs)               |
  * | `rem:4:3`                     | the remainder answer `4 r 3`                            |
@@ -66,12 +64,6 @@ export function cardLabel(face: CardFace): string {
       if (expr.op === 'mul' && left <= 10 && right <= 10) return `fact:${mulFactId(left, right)}`;
       if (expr.op === 'div' && parseItemId(`div:${left}:${right}`)?.kind === 'div') {
         return `fact:div:${left}:${right}`;
-      }
-      if (expr.op === 'add' && parseItemId(`add:${left}+${right}`)?.kind === 'add') {
-        return `fact:add:${left}+${right}`;
-      }
-      if (expr.op === 'sub' && parseItemId(`sub:${left}-${right}`)?.kind === 'sub') {
-        return `fact:sub:${left}-${right}`;
       }
       return `expr:${expr.op}:${left}:${right}`;
     }
@@ -109,12 +101,6 @@ export function parseCardLabel(label: string): CardFace | null {
     }
     if (parsed?.kind === 'div') {
       return { kind: 'expr', expr: op('div', num(parsed.dividend), num(parsed.divisor)) };
-    }
-    if (parsed?.kind === 'add') {
-      return { kind: 'expr', expr: op('add', num(parsed.a), num(parsed.b)) };
-    }
-    if (parsed?.kind === 'sub') {
-      return { kind: 'expr', expr: op('sub', num(parsed.minuend), num(parsed.subtrahend)) };
     }
     return null;
   }

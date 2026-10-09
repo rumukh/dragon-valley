@@ -661,7 +661,8 @@ and is right when the first frame holds ten and the second the rest. Bundle Stic
 bundles and loose sticks show the result (at most 9 loose). A wrong check only sets `last` and
 keeps the board editable. Both take the activity option `task` (`mix` by default) and draw from
 the round's `add:` facts and `count`/`place`/`add2d`/`sub2d` buckets. Memory Match labels
-also name additive facts (`fact:add:3+5`, `fact:sub:8-3`); a Fact Family Nest may hold an
+name additive facts with `expr:` labels (`expr:add:3:5`, `expr:sub:8:3`; `+` is not allowed in a
+narrative ID); a Fact Family Nest may hold an
 additive family (two `+`, two `−` equations); a Number Trail of counting or additive skills
 counts by ones, with `direction` (`up`/`down`; absent on multiplication trails, which count up).
 

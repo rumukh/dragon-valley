@@ -114,8 +114,12 @@ function factValue(item: string): { face: string; value: number } | null {
   const parsed = parseItemId(item);
   if (parsed?.kind === 'mul') return { face: `fact:${item}`, value: parsed.product };
   if (parsed?.kind === 'div') return { face: `fact:${item}`, value: parsed.quotient };
-  if (parsed?.kind === 'add') return { face: `fact:${item}`, value: parsed.sum };
-  if (parsed?.kind === 'sub') return { face: `fact:${item}`, value: parsed.difference };
+  // Additive faces are `expr:` labels: `+` is not allowed in a narrative ID (`fact:add:3+5`).
+  if (parsed?.kind === 'add')
+    return { face: `expr:add:${parsed.a}:${parsed.b}`, value: parsed.sum };
+  if (parsed?.kind === 'sub') {
+    return { face: `expr:sub:${parsed.minuend}:${parsed.subtrahend}`, value: parsed.difference };
+  }
   return null;
 }
 
@@ -657,7 +661,7 @@ function familyPairs(request: BoardRequest): MemoryPair[] {
       return [
         {
           pair: `fam:${item}`,
-          faces: [`fact:add:${parsed.a}+${parsed.b}`, `fact:sub:${parsed.sum}-${parsed.a}`],
+          faces: [`expr:add:${parsed.a}:${parsed.b}`, `expr:sub:${parsed.sum}:${parsed.a}`],
           value: `${parsed.sum}`,
         } satisfies MemoryPair,
       ];
@@ -667,8 +671,8 @@ function familyPairs(request: BoardRequest): MemoryPair[] {
         {
           pair: `fam:${item}`,
           faces: [
-            `fact:add:${parsed.difference}+${parsed.subtrahend}`,
-            `fact:sub:${parsed.minuend}-${parsed.subtrahend}`,
+            `expr:add:${parsed.difference}:${parsed.subtrahend}`,
+            `expr:sub:${parsed.minuend}:${parsed.subtrahend}`,
           ],
           value: `${parsed.minuend}`,
         } satisfies MemoryPair,
@@ -710,8 +714,17 @@ function termPairs(request: BoardRequest): MemoryPair[] {
   return pairs;
 }
 
+/**
+ * A pair ID as a narrative stable ID: `+` (in `add:3+5`) is not allowed there, and no item ID
+ * uses `_`, so `+` is stored as `_` (`add:3_5`, `fam:add:3_5`) and restored by `pairItems`.
+ */
+export function pairStableId(pair: string): string {
+  return pair.replaceAll('+', '_');
+}
+
 /** Items a matched pair practised. */
-function pairItems(pair: string): string[] {
+function pairItems(stored: string): string[] {
+  const pair = stored.replaceAll('_', '+');
   if (pair.startsWith('fam:')) {
     const parsed = parseItemId(pair.slice(4));
     if (parsed?.kind === 'mul') return [pair.slice(4), divFactId(parsed.product, parsed.b)];
@@ -753,7 +766,7 @@ function memoryConfig(request: BoardRequest): MatchingConfig {
   return {
     cards: cards.map((card, index) => ({
       id: `c${index + 1}`,
-      pair: card.pair,
+      pair: pairStableId(card.pair),
       labelKey: card.labelKey,
       backLabelKey: CARD_BACK_LABEL,
     })),

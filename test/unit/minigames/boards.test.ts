@@ -87,11 +87,14 @@ describe('card faces', () => {
       },
     ];
     for (const face of faces) expect(parseCardLabel(cardLabel(face))).toEqual(face);
+    // Every label is a valid narrative stable ID (no `+`).
+    for (const label of faces.map(cardLabel))
+      expect(label).toMatch(/^[A-Za-z0-9][A-Za-z0-9._:/-]*$/);
     expect(faces.map(cardLabel)).toEqual([
       'fact:mul:7x8',
       'fact:div:56:7',
-      'fact:add:3+5',
-      'fact:sub:8-3',
+      'expr:add:3:5',
+      'expr:sub:8:3',
       'num:56',
       'rem:4:3',
       'term:product',
@@ -162,8 +165,8 @@ describe('Memory Match boards', () => {
     const valueLabels = (valueDef.config as { cards: { labelKey: string }[] }).cards.map(
       (c) => c.labelKey,
     );
-    expect(valueLabels).toContain('fact:add:3+5');
-    expect(valueLabels).toContain('fact:sub:8-3');
+    expect(valueLabels).toContain('expr:add:3:5');
+    expect(valueLabels).toContain('expr:sub:8:3');
     expect(valueLabels).toContain('num:8');
     expect(valueLabels).toContain('num:5');
 
@@ -175,8 +178,35 @@ describe('Memory Match boards', () => {
       }),
     );
     const pairs = (familyDef.config as { cards: { pair: string; labelKey: string }[] }).cards;
-    const family = pairs.filter((c) => c.pair === 'fam:add:3+5').map((c) => c.labelKey);
-    expect(family.sort()).toEqual(['fact:add:3+5', 'fact:sub:8-3']);
+    const family = pairs.filter((c) => c.pair === 'fam:add:3_5').map((c) => c.labelKey);
+    expect(family.sort()).toEqual(['expr:add:3:5', 'expr:sub:8:3']);
+  });
+
+  it('plays additive pairs (add:0+0 too) with stable IDs and credits the facts', () => {
+    for (const match of ['value', 'family'] as const) {
+      const pool = ['add:0+0', 'add:3+5', 'sub:8-3', 'sub:4-4'];
+      const def = makeBoard(
+        request({ activity: 'memory-match', pool, options: { pairs: 3, match } }),
+      );
+      const cards = (def.config as { cards: { id: string; pair: string }[] }).cards;
+      expect(cards.every((c) => !c.pair.includes('+'))).toBe(true);
+      const moves: MinigameMove[] = [];
+      for (const pair of new Set(cards.map((c) => c.pair))) {
+        for (const c of cards.filter((card) => card.pair === pair)) {
+          moves.push({ type: 'select', card: c.id });
+        }
+      }
+      const states = run(def, moves);
+      const last = states.at(-1)!;
+      expect(last.status, match).toBe('completed');
+      const credit = boardCredits(def, states[0]!, last, new Set(pool));
+      const items = credit.items.map((entry) => entry.item);
+      expect(items.length, match).toBeGreaterThan(0);
+      expect(
+        items.every((item) => pool.includes(item)),
+        items.join(),
+      ).toBe(true);
+    }
   });
 
   it('never puts two facts with the same value on one board (a match must be unambiguous)', () => {
