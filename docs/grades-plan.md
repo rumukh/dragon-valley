@@ -1,7 +1,6 @@
 # Dragon Valley for grades 1-3: plan
 
-Status: **draft for approval**. Nothing here is implemented yet. Once approved, this plan is
-executed like v1 ([plan.md §5](plan.md#5-delivery-plan-todos-are-tracked-in-sql)): this session
+Status: **approved**, with the proposals in §8 accepted. This plan is executed like v1 ([plan.md §5](plan.md#5-delivery-plan-todos-are-tracked-in-sql)): this session
 coordinates, child sessions implement one workstream and one PR each.
 
 ## 0. Decisions (from Q&A)
@@ -122,8 +121,7 @@ bosses are Czech folk-tale characters in the public domain, friendly as in v1.
 Then **Sunny Meadow** and **Whispering Woods** (2nd-grade ×), then the existing 3rd-grade valley.
 
 - New dragons are `special` dragons (no times table) growing on their region's skills, the way
-  Pearl, Boulder and Clockwork do. A 1st grader's first egg is Dot, Hop or Nibble (open question
-  2), and Pebble Brook 1 serves counting and + and − within 5, so whichever egg is chosen hatches
+  Pearl, Boulder and Clockwork do. A 1st grader's first egg is Dot, Hop or Nibble, and Pebble Brook 1 serves counting and + and − within 5, so whichever egg is chosen hatches
   in the first session (the learner simulation confirms it). A 2nd grader chooses among Bead,
   Tumble and a third 2nd-grade egg.
 - Each region keeps the v1 pattern: welcome beat with an egg, concept → choice → keypad →
@@ -209,11 +207,14 @@ other four regions are built.
 Phases: **0** plan approval → **1** G1 → **2** G2-G5 in parallel on Pebble Brook → **3** slice
 playtest with a 1st grader → **4** the remaining four regions → **5** G6 and release.
 
-## 8. Open questions for you
+## 8. Resolved questions
 
-1. Region names, bosses and dragon names in §3: keep, or do you have favourites?
-2. Grade-1 first egg: a choice of three different 1st-grade dragons (like today), or one dragon in
-   three colours?
-3. Should a 2nd or 3rd grader be allowed to earn the earlier-grade dragons by playing those
-   regions for fun (proposed: yes), or should those regions be hidden for them?
-4. Is anyone available for the slice playtest with a real 1st grader?
+The proposals were accepted:
+
+1. Region, boss and dragon names stay as in §3.
+2. A 1st grader's first egg is a choice of three different 1st-grade dragons (Dot, Hop, Nibble),
+   like today.
+3. A 2nd or 3rd grader may play the earlier-grade regions for fun and earn their dragons; those
+   regions are open, never required.
+4. The family runs the slice playtest with a 1st grader; the coordinator prepares a short
+   checklist when the slice lands.
