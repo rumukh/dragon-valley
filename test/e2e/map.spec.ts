@@ -26,13 +26,19 @@ interface Box {
   readonly height: number;
 }
 
-/** The regions in the valley's order, from the shipped content pack. */
+/**
+ * The 3rd-grade regions in the valley's order, from the shipped content pack: the Upper Valley
+ * sheet a 3rd grader's map opens on (the Lower Valley sheet of grades 1-2: grades.spec.ts).
+ */
 function valleyOrder(testInfo: TestInfo): string[] {
   const root = testInfo.config.configFile ? dirname(testInfo.config.configFile) : process.cwd();
   const pack = JSON.parse(
     readFileSync(join(root, 'content', 'dragon-valley.content.json'), 'utf8'),
-  ) as { data: { regions: { id: string; order: number }[] } };
-  return [...pack.data.regions].sort((a, b) => a.order - b.order).map((region) => region.id);
+  ) as { data: { regions: { id: string; order: number; grade?: number }[] } };
+  return pack.data.regions
+    .filter((region) => (region.grade ?? 3) === 3)
+    .sort((a, b) => a.order - b.order)
+    .map((region) => region.id);
 }
 
 async function boxes(places: Locator): Promise<Box[]> {
