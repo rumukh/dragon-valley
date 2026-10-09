@@ -20,6 +20,7 @@ import {
   collectCatalogKeys,
   contentRegistration,
   curriculumGaps,
+  regionGrade,
   skillItemIndex,
 } from '../../../src/rules/contract';
 import type { ContentData } from '../../../src/rules/contract';
@@ -49,6 +50,7 @@ const REVISIONS: Readonly<Record<string, string>> = {
   '1.1.0': 'e2acbc7228348abd', // v1: the nine regions
   '1.2.0': '69494a787c9bab06', // the balance from the learner simulation (docs/balance-report.md)
   '1.3.0': 'f41ae03a85710bac', // growing up: the effort path and adult at 80 % (balance-report §9)
+  '1.4.0': '685878727d35e7f9', // grades 1-3: grade starts, filters and Pebble Brook for grade 1
 };
 
 function diagnostics(pack: Pack): readonly RuntimeDiagnostic[] {
@@ -74,26 +76,57 @@ describe('the sample content pack', () => {
     expect(outcome.value.schemaVersion).toBe(1);
   });
 
-  it('is the v1 valley: nine regions, 50 lessons, nine bosses and every dragon', () => {
+  it('keeps the v1 valley for grade 3: nine regions, 50 lessons, nine bosses and every dragon', () => {
     const data = fresh().data;
-    const byOrder = [...data.regions].sort((a, b) => a.order - b.order);
+    const byOrder = [...data.regions]
+      .filter((r) => regionGrade(r) === 3)
+      .sort((a, b) => a.order - b.order);
     expect(byOrder.map((r) => r.id)).toEqual([...CANONICAL_REGION_IDS]);
-    expect(data.levels.filter((l) => l.kind === 'lesson')).toHaveLength(50);
+    const third = new Set(byOrder.map((r) => r.id));
+    expect(data.levels.filter((l) => l.kind === 'lesson' && third.has(l.region))).toHaveLength(50);
     const bossLevels = byOrder.map((r) =>
       data.levels.filter((l) => l.region === r.id && l.kind === 'boss').map((l) => l.boss),
     );
     expect(bossLevels).toEqual(CANONICAL_BOSS_IDS.map((boss) => [boss]));
-    expect(data.dragons.map((d) => d.id).sort()).toEqual([...CANONICAL_DRAGON_IDS].sort());
+    const dragons: readonly string[] = CANONICAL_DRAGON_IDS;
+    expect(
+      data.dragons
+        .map((d) => d.id)
+        .filter((id) => dragons.includes(id))
+        .sort(),
+    ).toEqual([...CANONICAL_DRAGON_IDS].sort());
   });
 
-  it('uses only canonical region, dragon and boss IDs', () => {
+  it('puts the younger grades in front: Pebble Brook for grade 1 with Dot, Hop and Nibble', () => {
+    const data = fresh().data;
+    const byOrder = [...data.regions].sort((a, b) => a.order - b.order);
+    expect(byOrder.map((r) => [r.id, regionGrade(r)]).slice(0, 2)).toEqual([
+      ['pebble-brook', 1],
+      ['sunny-meadow', 3],
+    ]);
+    expect(data.regions.find((r) => r.id === 'pebble-brook')!.boss).toBe('will-o-wisps');
+    expect(
+      data.dragons.filter((d) => d.region === 'pebble-brook').map((d) => [d.id, d.kind]),
+    ).toEqual([
+      ['dot', 'special'],
+      ['hop', 'special'],
+      ['nibble', 'special'],
+    ]);
+  });
+
+  it('uses only canonical region, dragon and boss IDs outside the grade 1-2 regions', () => {
     const data = fresh().data;
     const regions: readonly string[] = CANONICAL_REGION_IDS;
     const dragons: readonly string[] = CANONICAL_DRAGON_IDS;
     const bosses: readonly string[] = CANONICAL_BOSS_IDS;
-    expect(data.regions.filter((r) => !regions.includes(r.id))).toEqual([]);
-    expect(data.dragons.filter((d) => !dragons.includes(d.id))).toEqual([]);
-    expect(data.bosses.filter((b) => !bosses.includes(b.id))).toEqual([]);
+    const young = data.regions.filter((r) => regionGrade(r) < 3);
+    const youngIds = new Set(young.map((r) => r.id));
+    const youngBosses = new Set(young.map((r) => r.boss));
+    expect(data.regions.filter((r) => !regions.includes(r.id) && !youngIds.has(r.id))).toEqual([]);
+    expect(data.dragons.filter((d) => !dragons.includes(d.id) && !youngIds.has(d.region))).toEqual(
+      [],
+    );
+    expect(data.bosses.filter((b) => !bosses.includes(b.id) && !youngBosses.has(b.id))).toEqual([]);
   });
 
   it('has every catalog key it refers to in the English content catalog', () => {

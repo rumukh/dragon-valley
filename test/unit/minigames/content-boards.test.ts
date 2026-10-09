@@ -3,7 +3,8 @@
  * activities, boards from several seeds are generated from the activity's own items, skills and
  * options, accepted by their adapters, and projected as typed boards of the activity's kind.
  * Golem Orders needs the order-of-operations generator for its expressions; while a build lacks
- * it, its boards are the only ones allowed to be missing.
+ * it, its boards are the only ones allowed to be missing. Activities on skills whose generators G2
+ * has not implemented yet (Pebble Brook's counting and +/− skills) are dealt once G2 lands.
  */
 import { describe, expect, it } from 'vitest';
 import { createPrng } from '@aegis/core';

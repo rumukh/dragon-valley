@@ -29,8 +29,8 @@ vi.setConfig({ testTimeout: 300_000 });
  * pinned as literals. Re-pin only for a deliberate rules or content change, with the reason and
  * the old and new values in the commit message (docs/testing.md, "When a golden moves").
  */
-const GOLDEN_HASH = '6adb49aa3100d16b';
-const GOLDEN_TRAJECTORY = 'c0d44d5a709a91e0';
+const GOLDEN_HASH = '8e61b49c67bf428b';
+const GOLDEN_TRAJECTORY = 'edf576cc0bead9f5';
 
 const SEED = 'golden-first-session';
 const PLACEMENT_MISS = 6;
@@ -156,7 +156,8 @@ function checks(o: Observation): Record<string, boolean> {
     'Sunny wears the flower crown':
       o.final.dragons.find((d) => d.id === 'sunny')?.outfit.head === 'hat-flower-crown',
     'the map makes the next level glow':
-      o.final.hub.regions[0]?.levels.find((l) => l.glowing)?.id === 'sunny-meadow.3',
+      o.final.hub.regions.find((r) => r.id === 'sunny-meadow')?.levels.find((l) => l.glowing)
+        ?.id === 'sunny-meadow.3',
     'the child is back at the hub': o.final.screen === 'hub',
   };
 }

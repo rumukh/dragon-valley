@@ -35,3 +35,21 @@ describe('younger learners in the simulation', () => {
     });
   }
 });
+
+describe('a 1st grader in the shipped Pebble Brook (content 1.4.0)', () => {
+  it('hatches every brook dragon, beats the Will-o-Wisps and walks on to Sunny Meadow', async () => {
+    const report = await simulate('first-grader', 8, { grade: 1, answersPerDay: 25 });
+    expect(report.failures).toEqual([]);
+    const days = report.days.filter((day) => day.played);
+    expect(days[0]!.hatched.length, 'the first egg hatches in the first session').toBe(1);
+    const hatched = days.flatMap((day) => day.hatched);
+    for (const dragon of ['dot', 'hop', 'nibble']) expect(hatched, dragon).toContain(dragon);
+    expect(days.flatMap((day) => day.bosses)).toContain('will-o-wisps');
+    expect(Object.keys(report.levelDays)).toContain('sunny-meadow.1');
+    const answers = days.reduce((sum, day) => sum + day.answers, 0);
+    const correct = days.reduce((sum, day) => sum + day.correct, 0);
+    const success = (correct * 100) / answers;
+    expect(success).toBeGreaterThanOrEqual(65);
+    expect(success).toBeLessThanOrEqual(95);
+  });
+});
