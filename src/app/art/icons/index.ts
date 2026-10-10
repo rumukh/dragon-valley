@@ -18,6 +18,7 @@ import { h, svgDoc, ids as scoped } from '../svg/xml';
 import { lighten, outlineOf } from '../svg/color';
 import { gearD, sparkleD } from '../glyphs';
 import { emblemArt, REGION_EMBLEM_IDS } from './emblems';
+import { LOWER_VALLEY_ICON_IDS, lowerValleyIcon } from './lower-valley';
 
 /** Icon design grid: 64 x 64 units. Item icons are full color; glyphs use `currentColor`. */
 const S = 64;
@@ -44,6 +45,7 @@ export const ITEM_ICON_IDS = [
   'node-stars-1',
   'node-stars-2',
   'node-stars-3',
+  ...LOWER_VALLEY_ICON_IDS,
 ] as const;
 
 export const GLYPH_ICON_IDS = [
@@ -824,6 +826,7 @@ export function renderIcon(id: string, opts: IconOptions = {}): string {
   else if (id === 'badge-correct') body = badge('correct');
   else if (id === 'badge-almost') body = badge('almost');
   else if (id.startsWith('node-')) body = node(id, accent);
+  else if ((LOWER_VALLEY_ICON_IDS as readonly string[]).includes(id)) body = lowerValleyIcon(id, p);
   else throw new Error(`Unknown icon id: ${id}`);
   return svgDoc(
     {

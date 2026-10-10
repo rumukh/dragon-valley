@@ -48,6 +48,11 @@
     "lead": "#2f2746"
   },
   "regions": {
+    "pebble-brook": { "name": "Brook", "accent": "#3cb4e6", "deep": "#146a92", "soft": "#dcf2fb", "onAccent": "ink" },
+    "mushroom-hollow": { "name": "Toadstool", "accent": "#c98a5b", "deep": "#7f4a22", "soft": "#f6e6d8", "onAccent": "ink" },
+    "rainbow-ford": { "name": "Iris", "accent": "#6a74e8", "deep": "#3d43b8", "soft": "#e3e5fd", "onAccent": "white" },
+    "hundred-hills": { "name": "Lime", "accent": "#7cc242", "deep": "#3f7a14", "soft": "#e8f5d8", "onAccent": "ink" },
+    "market-square": { "name": "Terracotta", "accent": "#f08a6c", "deep": "#a8432a", "soft": "#fde6df", "onAccent": "ink" },
     "sunny-meadow": { "name": "Buttercup", "accent": "#ffc53d", "deep": "#8a5a00", "soft": "#fff3d1", "onAccent": "ink" },
     "whispering-woods": { "name": "Fern", "accent": "#3aa65b", "deep": "#1f7a3f", "soft": "#dff3e5", "onAccent": "ink" },
     "fire-mountain": { "name": "Ember", "accent": "#f26a2e", "deep": "#b23f12", "soft": "#fde3d6", "onAccent": "ink" },
@@ -69,6 +74,9 @@
     "stem": "#7a5230"
   },
   "dragonSignature": {
+    "dot": "#20b2a4",
+    "hop": "#8ccf3f",
+    "nibble": "#c4875a",
     "puff": "#b9b0ea",
     "mirror": "#a9b6cc",
     "bubbles": "#3a9cf0",

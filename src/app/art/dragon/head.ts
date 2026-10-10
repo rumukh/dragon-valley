@@ -380,6 +380,30 @@ function earRight(ctx: Ctx): string {
           }),
       );
     }
+    case 'round': {
+      // Mouse ear (Nibble): a big round body-coloured ear with a soft pink inside.
+      const r = s * 0.6;
+      return rot(
+        -12,
+        h('circle', {
+          cx: s * 0.42,
+          cy: -s * 0.5,
+          r,
+          fill: ctx.paint.body,
+          stroke: ctx.paint.line,
+          'stroke-width': W,
+        }) +
+          h('circle', {
+            cx: s * 0.46,
+            cy: -s * 0.52,
+            r: r * 0.64,
+            fill: ctx.paint.cheek,
+            stroke: ctx.paint.line,
+            'stroke-width': W * 0.45,
+            opacity: 0.85,
+          }),
+      );
+    }
     default:
       return '';
   }

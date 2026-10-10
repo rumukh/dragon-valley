@@ -2,7 +2,8 @@
  * The art catalog: every art id content may reference. `assets/art/catalog.json` is generated from
  * this function by `npm run art:build`, and a test keeps the committed file identical.
  */
-import { CANONICAL_REGION_IDS } from '../../rules/contract/ids';
+import { CANONICAL_BOSS_IDS, CANONICAL_REGION_IDS } from '../../rules/contract/ids';
+import { ART_REGION_IDS } from './regions';
 import { KEEPER_AVATARS } from './characters/avatars';
 import { COSMETICS } from './cosmetics';
 import { COSMETIC_SLOTS, DRAGON_EXPRESSIONS, DRAGON_RECIPES, DRAGON_STAGES } from './dragon';
@@ -12,10 +13,13 @@ import { PALETTE } from './palette';
 import { BOSS_IDS, BOSS_MOOD, BOSS_OUTCOME, BOSS_STATES } from './characters/bosses';
 import { STICKER_COLORS, STICKER_FRAMES } from './stickers';
 import { MASTERY_LEVELS, magicWindowLayout } from './window';
-import { BACKGROUND_IDS, HALL_WINDOW, SCENE_LAYOUT } from './backgrounds';
+import { BACKGROUND_IDS, HALL_WINDOW, MAP_SHEETS, SCENE_LAYOUT } from './backgrounds';
 
 /** Where each dragon hatches (docs/plan.md section 2.3). */
 const HOME_REGION: Record<string, string> = {
+  dot: 'pebble-brook',
+  hop: 'pebble-brook',
+  nibble: 'mushroom-hollow',
   puff: 'sunny-meadow',
   mirror: 'sunny-meadow',
   bubbles: 'sunny-meadow',
@@ -32,6 +36,12 @@ const HOME_REGION: Record<string, string> = {
   clockwork: 'riddle-ruins',
   'seven-headed': 'dragon-castle',
   glimmer: 'dragon-castle',
+};
+
+/** Where each boss waits: the canonical nine in valley order, plus the Lower Valley bosses. */
+const BOSS_REGION: Record<string, string> = {
+  'will-o-wisps': 'pebble-brook',
+  ...Object.fromEntries(CANONICAL_BOSS_IDS.map((id, i) => [id, CANONICAL_REGION_IDS[i]!])),
 };
 
 export const CATALOG_SCHEMA_VERSION = 1;
@@ -60,7 +70,7 @@ export function buildCatalog(): Record<string, unknown> {
       render: 'renderDragon',
       recipe: `assets/art/dragons/${r.id}.json`,
     }));
-  const regions = CANONICAL_REGION_IDS.map((id) => {
+  const regions = ART_REGION_IDS.map((id) => {
     const r = (
       PALETTE.regions as Record<
         string,
@@ -93,9 +103,9 @@ export function buildCatalog(): Record<string, unknown> {
     cosmeticSlots: [...COSMETIC_SLOTS],
     dragons,
     characters,
-    bosses: BOSS_IDS.map((id, i) => ({
+    bosses: BOSS_IDS.map((id) => ({
       id,
-      region: CANONICAL_REGION_IDS[i],
+      region: BOSS_REGION[id],
       states: [...BOSS_STATES],
       outcome: BOSS_OUTCOME[id],
       mood: BOSS_MOOD[id],
@@ -133,11 +143,11 @@ export function buildCatalog(): Record<string, unknown> {
       file: `assets/backgrounds/${id}.svg`,
       width: 1600,
       height: 1000,
-      kind: id === 'valley-map' ? 'map' : id === 'castle-hall' ? 'hall' : 'region',
-      ...((CANONICAL_REGION_IDS as readonly string[]).includes(id)
-        ? { region: id, layout: SCENE_LAYOUT }
-        : {}),
-      ...(id === 'valley-map' ? { hotspots: 'assets/backgrounds/map-hotspots.json' } : {}),
+      kind: MAP_SHEETS.some((m) => m.id === id) ? 'map' : id === 'castle-hall' ? 'hall' : 'region',
+      ...(ART_REGION_IDS.includes(id) ? { region: id, layout: SCENE_LAYOUT } : {}),
+      ...Object.fromEntries(
+        MAP_SHEETS.filter((m) => m.id === id).map((m) => ['hotspots', m.hotspotsFile]),
+      ),
       ...(id === 'castle-hall' ? { window: HALL_WINDOW } : {}),
       prompt: `assets/backgrounds/prompts/${id}.prompt.txt`,
     })),

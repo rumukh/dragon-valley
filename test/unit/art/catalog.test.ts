@@ -13,6 +13,8 @@ import {
 } from '../../../src/rules/contract/ids';
 import {
   ANIMATIONS_CSS,
+  ART_REGION_IDS,
+  LOWER_VALLEY_BOSS_IDS,
   buildCatalog,
   catalogIds,
   renderAvatar,
@@ -31,6 +33,10 @@ type Catalog = ReturnType<typeof buildCatalog> & {
   regions: Array<{ id: string; emblem: string }>;
 };
 
+/** Lower Valley dragons (grades 1-2) and the regions whose scene and boss are drawn so far. */
+const LOWER_VALLEY_DRAGON_IDS = ['dot', 'hop', 'nibble'];
+const DRAWN_LOWER_VALLEY = ['pebble-brook'];
+
 const committed = JSON.parse(readFileSync('assets/art/catalog.json', 'utf8')) as Catalog;
 
 describe('art catalog', () => {
@@ -44,14 +50,17 @@ describe('art catalog', () => {
     expect(committed.dragonExpressions).toEqual([...DRAGON_EXPRESSIONS]);
     expect(committed.cosmeticSlots).toEqual([...COSMETIC_SLOTS]);
     expect(committed.avatars.map((a) => a.id)).toEqual([...KEEPER_AVATARS]);
-    expect(committed.regions.map((r) => r.id)).toEqual([...CANONICAL_REGION_IDS]);
+    expect(committed.regions.map((r) => r.id)).toEqual([...ART_REGION_IDS]);
+    expect(ART_REGION_IDS.slice(-CANONICAL_REGION_IDS.length)).toEqual([...CANONICAL_REGION_IDS]);
   });
 
-  it('covers every canonical dragon, with a recipe file and a home region', () => {
-    expect(committed.dragons.map((d) => d.id).sort()).toEqual([...CANONICAL_DRAGON_IDS].sort());
+  it('covers every canonical dragon and the Lower Valley dragons, with a recipe file and a home region', () => {
+    expect(committed.dragons.map((d) => d.id).sort()).toEqual(
+      [...CANONICAL_DRAGON_IDS, ...LOWER_VALLEY_DRAGON_IDS].sort(),
+    );
     for (const d of committed.dragons) {
       expect(statSync(d.recipe).isFile(), d.recipe).toBe(true);
-      expect((CANONICAL_REGION_IDS as readonly string[]).includes(d.homeRegion), d.id).toBe(true);
+      expect(ART_REGION_IDS.includes(d.homeRegion), d.id).toBe(true);
     }
     const tables = committed.dragons.filter((d) => d.table !== undefined).map((d) => d.table);
     expect(tables.sort((a, b) => a! - b!)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -101,11 +110,14 @@ describe('art catalog', () => {
       stickers: { frames: Array<{ id: string }>; colors: string[] };
       magicWindow: { levels: string[]; flags: string[] };
     };
-    expect(cat.bosses.map((b) => b.id)).toEqual([...CANONICAL_BOSS_IDS]);
-    expect(cat.bosses.map((b) => b.region)).toEqual([...CANONICAL_REGION_IDS]);
+    expect(cat.bosses.map((b) => b.id)).toEqual([...LOWER_VALLEY_BOSS_IDS, ...CANONICAL_BOSS_IDS]);
+    expect(cat.bosses.map((b) => b.region)).toEqual([
+      ...DRAWN_LOWER_VALLEY,
+      ...CANONICAL_REGION_IDS,
+    ]);
     for (const b of cat.bosses) {
       expect(b.states).toEqual(['start', 'warming', 'won']);
-      expect(['laugh', 'sleep', 'agree']).toContain(b.outcome);
+      expect(['laugh', 'sleep', 'agree', 'dance']).toContain(b.outcome);
       expect(['sleepy', 'laughing', 'happy']).toContain(b.mood);
       for (const state of b.states)
         checkChildSafe(renderBoss(b.id, state as 'start', { idPrefix: 'cb' }));
@@ -115,6 +127,7 @@ describe('art catalog', () => {
       expect(statSync(bg.prompt).isFile(), bg.prompt).toBe(true);
     }
     expect(cat.backgrounds.filter((b) => b.kind === 'region').map((b) => b.region)).toEqual([
+      ...DRAWN_LOWER_VALLEY,
       ...CANONICAL_REGION_IDS,
     ]);
     expect(cat.stickers.frames.length).toBeGreaterThanOrEqual(8);

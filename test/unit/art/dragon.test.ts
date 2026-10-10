@@ -213,5 +213,9 @@ const GOLDENS: Record<string, string> = {
   'goldie crowned proud outfit': 'd5a79401feb06d948726a09b04d44b5ab6d83a661f27e940f3e2b77c55a6b016',
   'starry egg cold': '09dd4b9502a99c3deccc0150c009650aab3c39ebb541a583ab2c53c922f314a8',
   'clover hatch': '4f8a78fbe2657af7268b304e9a6ce4988b684e0df23d0787dab48518723fee7d',
+  'dot youngling happy': '98cb08470bbdedae74b73cce18ee8b350aa595b9972e5804f1eaf7263b840d1c',
+  'hop adult proud': 'e269b6b1bee2b897b79f94f006c55c58037a10f5b9ef7a05492f45fbbc548126',
+  'nibble egg': '3d81005e88774f13f0b13522276dead46183de6cbfc26731828786d0cd065ecb',
+  'nibble hatchling eating': '42d2debe7e8da2720801af823376ac5b916e508e45c93aa084a5ce0b1b4fb229',
 };
 // goldens:end

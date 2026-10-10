@@ -36,7 +36,8 @@ const cells = specs.map((spec) => {
     );
     let overlay = '';
     if (a2 === 'hot') {
-      const hot = art.MAP_HOTSPOTS;
+      const hot =
+        art.MAP_SHEETS.find((/** @type {any} */ s) => s.id === a1)?.hotspots ?? art.MAP_HOTSPOTS;
       overlay = `<svg viewBox="0 0 1600 1000" width="${size}" height="${Math.round((size * 1000) / 1600)}" style="position:absolute;left:0;top:0">${hot.hotspots.map((/** @type {any} */ s) => `<rect x="${s.x}" y="${s.y}" width="${s.width}" height="${s.height}" fill="none" stroke="#ff2d55" stroke-width="4" stroke-dasharray="12 8"/>`).join('')}${Object.values(
         hot.regions,
       )

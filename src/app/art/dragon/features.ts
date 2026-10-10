@@ -1,7 +1,7 @@
 import { lerp, polar } from '../svg/num';
-import { M, L, Q } from '../svg/path';
+import { M, L, Q, roundRectD } from '../svg/path';
 import { h } from '../svg/xml';
-import { pearl, sparkleD } from '../glyphs';
+import { berry, pearl, sparkleD } from '../glyphs';
 import { glowGradient, type Ctx } from './ctx';
 import { cloudUnion } from './shapes';
 import { CX, GROUND } from './skeleton';
@@ -464,4 +464,100 @@ export function crownAura(ctx: Ctx): { back: string; front: string } {
     }),
   );
   return { back, front };
+}
+
+/** Left edge of a ground prop standing beside the dragon (pearl pile, number line, berries). */
+export function groundPropLeft(ctx: Ctx): number {
+  return CX - ctx.sk.body.w * 0.62 - 150;
+}
+
+/** Hop's number line on the ground: ticks 0-4 with two dotted hop arcs and a hop arrow. */
+export function numberLine(ctx: Ctx): string {
+  const x0 = groundPropLeft(ctx) + 6;
+  const step = 30;
+  const y = GROUND - 4;
+  const line = ctx.paint.line;
+  const W = ctx.W * 0.55;
+  let ticks = '';
+  let dots = '';
+  for (let i = 0; i <= 4; i++) {
+    const x = x0 + 10 + i * step;
+    ticks += M(x, y - 7) + L(x, y + 7);
+    dots += h('circle', { cx: x, cy: y, r: 3.2, fill: line });
+  }
+  const arc = (a: number, b: number): string =>
+    M(x0 + 10 + a * step + 3, y - 10) +
+    Q(x0 + 10 + ((a + b) / 2) * step, y - 46, x0 + 10 + b * step - 3, y - 10);
+  const end = { x: x0 + 10 + 3 * step - 3, y: y - 10 };
+  return h(
+    'g',
+    { class: 'dv-number-line' },
+    h('path', {
+      d: M(x0, y) + L(x0 + step * 4 + 20, y) + ticks,
+      fill: 'none',
+      stroke: line,
+      'stroke-width': W,
+      'stroke-linecap': 'round',
+    }),
+    dots,
+    h('path', {
+      d: arc(1, 2) + arc(2, 3),
+      fill: 'none',
+      stroke: ctx.paint.accent,
+      'stroke-width': W * 1.1,
+      'stroke-linecap': 'round',
+      'stroke-dasharray': '1 7',
+    }),
+    h('path', {
+      d: M(end.x - 8, end.y - 9) + L(end.x, end.y) + L(end.x + 3, end.y - 12),
+      fill: 'none',
+      stroke: ctx.paint.accent,
+      'stroke-width': W * 1.1,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    }),
+    h('path', {
+      d: roundRectD(x0 + 10 + 3 * step - 8, y - 28, 16, 10, 5),
+      fill: ctx.paint.accent2,
+      stroke: line,
+      'stroke-width': W * 0.6,
+      opacity: 0.9,
+    }),
+  );
+}
+
+/** Nibble's row of five berries on the ground; the last two are nibbled (take away two). */
+export function berryRow(ctx: Ctx): string {
+  const r = lerp(10, 12, ctx.sk.t);
+  const x0 = groundPropLeft(ctx) + r + 4;
+  const y = GROUND - r;
+  const line = ctx.paint.accentLine;
+  let out = h('ellipse', {
+    cx: x0 + r * 5,
+    cy: GROUND + 2,
+    rx: r * 6.2,
+    ry: r * 0.5,
+    fill: '#2a2140',
+    opacity: 0.12,
+  });
+  for (let i = 0; i < 5; i++)
+    out += berry(x0 + i * r * 2.3, y, r, ctx.paint.accent, line, ctx.W * 0.45, i >= 3);
+  return h('g', { class: 'dv-berry-row' }, out);
+}
+
+/** Nibble's two little front teeth just under the smile. */
+export function buckTeeth(ctx: Ctx): string {
+  const m = ctx.sk.mouth;
+  const tw = Math.max(5, m.w * 0.24);
+  const th = tw * 1.15;
+  const y = m.y + 1;
+  return h('path', {
+    class: 'dv-teeth',
+    d:
+      roundRectD(CX - tw, y - 2, tw - 0.6, th, tw * 0.3) +
+      roundRectD(CX + 0.6, y - 2, tw - 0.6, th, tw * 0.3),
+    fill: '#ffffff',
+    stroke: ctx.paint.line,
+    'stroke-width': ctx.W * 0.35,
+  });
 }

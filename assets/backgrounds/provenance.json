@@ -3,6 +3,20 @@
   "description": "Provenance of every background. The committed SVG versions are original vector art generated deterministically from TypeScript; painted versions are pending (the image-generation service was not available when the SVGs were made).",
   "backgrounds": [
     {
+      "id": "lower-valley-map",
+      "file": "assets/backgrounds/lower-valley-map.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (G5)",
+      "generator": "src/app/art/backgrounds (lower-valley.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/lower-valley-map.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
       "id": "valley-map",
       "file": "assets/backgrounds/valley-map.svg",
       "kind": "svg-original",
@@ -12,6 +26,20 @@
       "painted": {
         "status": "pending",
         "prompt": "assets/backgrounds/prompts/valley-map.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "pebble-brook",
+      "file": "assets/backgrounds/pebble-brook.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (G5)",
+      "generator": "src/app/art/backgrounds (scenes-c.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/pebble-brook.prompt.txt",
         "model": null,
         "file": null
       }

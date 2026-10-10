@@ -1,7 +1,8 @@
 import { polar } from '../svg/num';
 import { M, L, Q, roundRectD, roundStarD, smoothClosedD } from '../svg/path';
 import { h } from '../svg/xml';
-import { clover } from '../glyphs';
+import { outlineOf } from '../svg/color';
+import { bittenCircleD, clover, plusD } from '../glyphs';
 import { linearGradient, type Ctx } from './ctx';
 import { belly, bellyPathD, bodyPathD } from './parts';
 import { CX } from './skeleton';
@@ -488,6 +489,149 @@ function scales(ctx: Ctx): string {
   });
 }
 
+/**
+ * Dot's counting belly: a ten-frame of ten round dots, five warm on top and five sunny below
+ * (5 and 5 make 10), on a light frame so it reads apart from Starry's night-sky stars.
+ */
+function countingDots(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const cols = 5;
+  const slot = Math.min((b.rx * 2.1) / cols, (b.ry * 1.5) / 2);
+  const w = slot * cols;
+  const hgt = slot * 2;
+  const x0 = b.cx - w / 2;
+  const y0 = b.cy - hgt / 2 + b.ry * 0.08;
+  const pad = slot * 0.16;
+  const line = ctx.paint.bellyLine;
+  let dots = '';
+  for (let r = 0; r < 2; r++) {
+    const fill = r === 0 ? ctx.paint.accent : ctx.paint.accent2;
+    const edge = r === 0 ? ctx.paint.accentLine : outlineOf(ctx.paint.accent2, 0.55);
+    for (let c = 0; c < cols; c++) {
+      const cx = x0 + slot * (c + 0.5);
+      const cy = y0 + slot * (r + 0.5);
+      dots +=
+        h('circle', {
+          cx,
+          cy,
+          r: slot * 0.36,
+          fill,
+          stroke: edge,
+          'stroke-width': ctx.W * 0.42,
+        }) +
+        h('circle', {
+          cx: cx - slot * 0.11,
+          cy: cy - slot * 0.12,
+          r: slot * 0.09,
+          fill: '#ffffff',
+          opacity: 0.75,
+        });
+    }
+  }
+  return h(
+    'g',
+    { class: 'dv-counting-dots' },
+    h('path', {
+      d: roundRectD(x0 - pad, y0 - pad, w + pad * 2, hgt + pad * 2, slot * 0.35),
+      fill: ctx.paint.bellyLight,
+      stroke: line,
+      'stroke-width': ctx.W * 0.55,
+    }),
+    h('path', {
+      d:
+        M(x0, y0 + slot) +
+        L(x0 + w, y0 + slot) +
+        [1, 2, 3, 4].map((k) => M(x0 + slot * k, y0) + L(x0 + slot * k, y0 + hgt)).join(''),
+      stroke: line,
+      'stroke-width': ctx.W * 0.3,
+      opacity: 0.45,
+    }),
+    dots,
+  );
+}
+
+/** Dot's polka dots on the body and head sides. */
+function polkaDots(ctx: Ctx): string {
+  const { top, w, h: bh } = ctx.sk.body;
+  const d = bodyPathD(ctx);
+  const clip = ctx.def('body-clip', (id) => h('clipPath', { id }, h('path', { d })));
+  let spots = '';
+  const colors = [ctx.paint.accent2, ctx.paint.accent, ctx.paint.accent2];
+  for (const s of [-1, 1]) {
+    for (const [i, [dx, dy, rr]] of (
+      [
+        [0.42, 0.3, 0.05],
+        [0.47, 0.52, 0.04],
+        [0.38, 0.74, 0.055],
+      ] as const
+    ).entries()) {
+      spots += h('circle', {
+        cx: CX + s * w * dx,
+        cy: top + bh * dy,
+        r: w * rr,
+        fill: colors[i]!,
+        stroke: ctx.paint.line,
+        'stroke-width': ctx.W * 0.3,
+        opacity: 0.9,
+      });
+    }
+  }
+  return h('g', { class: 'dv-polka', 'clip-path': `url(#${clip})` }, spots);
+}
+
+/** Round medallion on the upper belly holding a sign (Hop's plus, Nibble's minus). */
+function signMedallion(ctx: Ctx, sign: 'plus' | 'minus'): string {
+  const b = ctx.sk.belly;
+  const cx = b.cx;
+  const cy = b.cy - b.ry * 0.12;
+  const r = Math.min(b.rx, b.ry) * 0.62;
+  const W = ctx.W * 0.7;
+  const disc =
+    sign === 'minus'
+      ? h('path', {
+          d: bittenCircleD(cx, cy, r, -40, 0.34),
+          fill: ctx.paint.accent2,
+          stroke: ctx.paint.accentLine,
+          'stroke-width': W,
+          'stroke-linejoin': 'round',
+        })
+      : h('circle', {
+          cx,
+          cy,
+          r,
+          fill: ctx.paint.accent2,
+          stroke: ctx.paint.accentLine,
+          'stroke-width': W,
+        });
+  const s = r * 0.58;
+  const mark =
+    sign === 'plus'
+      ? plusD(cx, cy, s, 0.3)
+      : roundRectD(cx - s, cy - s * 0.3, s * 2, s * 0.6, s * 0.3);
+  return h(
+    'g',
+    { class: `dv-medal dv-${sign}` },
+    disc,
+    h('path', {
+      d: mark,
+      fill: ctx.paint.accent,
+      stroke: ctx.paint.accentLine,
+      'stroke-width': W,
+      'stroke-linejoin': 'round',
+    }),
+    h('path', {
+      d:
+        M(cx - r * 0.68, cy - r * 0.3) +
+        Q(cx - r * 0.6, cy - r * 0.66, cx - r * 0.25, cy - r * 0.76),
+      fill: 'none',
+      stroke: '#ffffff',
+      'stroke-width': r * 0.11,
+      'stroke-linecap': 'round',
+      opacity: 0.7,
+    }),
+  );
+}
+
 /** Belly layer (replaces the plain belly when a marking defines its own belly). */
 export function bellyLayer(ctx: Ctx): string {
   if (has(ctx, 'rainbow-belly')) return rainbowBelly(ctx);
@@ -499,7 +643,10 @@ export function bellyLayer(ctx: Ctx): string {
     has(ctx, 'clover-spots') ||
     has(ctx, 'gears') ||
     has(ctx, 'place-value') ||
-    has(ctx, 'zero-medallion');
+    has(ctx, 'zero-medallion') ||
+    has(ctx, 'counting-dots') ||
+    has(ctx, 'plus-belly') ||
+    has(ctx, 'minus-belly');
   let out = belly(ctx, undefined, !plain);
   if (has(ctx, 'clock-belly')) out += clockFace(ctx);
   if (has(ctx, 'snowflake-belly')) out += boldSnowflake(ctx);
@@ -522,6 +669,9 @@ export function bellyLayer(ctx: Ctx): string {
   if (has(ctx, 'gears')) out += gears(ctx);
   if (has(ctx, 'place-value')) out += placeValue(ctx);
   if (has(ctx, 'zero-medallion')) out += zeroMedallion(ctx);
+  if (has(ctx, 'counting-dots')) out += countingDots(ctx);
+  if (has(ctx, 'plus-belly')) out += signMedallion(ctx, 'plus');
+  if (has(ctx, 'minus-belly')) out += signMedallion(ctx, 'minus');
   return out;
 }
 
@@ -530,6 +680,7 @@ export function bodyMarks(ctx: Ctx): string {
   let out = '';
   if (has(ctx, 'bubble-spots')) out += bubbleSpots(ctx);
   if (has(ctx, 'scales')) out += scales(ctx);
+  if (has(ctx, 'polka-dots')) out += polkaDots(ctx);
   return out;
 }
 
