@@ -1,6 +1,6 @@
 /**
  * Young players' models (grades 1-2): counting dots in ten-frames, a sum or difference in
- * ten-frames, hops on a number line and bundles of ten sticks.
+ * ten-frames, hops on a number line, and numbers to 100 as bundles of ten sticks and ones cubes.
  *
  * Shapes differ, not only colors: the first number is round dots, the second (added) square
  * counters, and the dots taken away are crossed out. Before the child answers (`solved`), the
@@ -242,11 +242,15 @@ function numberLineModel(
   );
 }
 
-// ---- Bundles of ten sticks ---------------------------------------------------------------------
+// ---- Tens sticks and ones cubes ----------------------------------------------------------------
 
-const STICK = { width: 4, height: 54, gap: 3 };
+const STICK = { width: 4, height: 54 };
 const BUNDLE_WIDTH = 10 * STICK.width + 2;
 const ROW = STICK.height + 14;
+/** Ones are cubes in columns of five (a five is seen at a glance), bottom up. */
+const CUBE = 10;
+const CUBE_STEP = CUBE + 1;
+const CUBE_COLUMN = 5;
 
 function stickRow(x: number, y: number, number: StickNumber): { parts: SVGElement[]; end: number } {
   const parts: SVGElement[] = [];
@@ -260,10 +264,14 @@ function stickRow(x: number, y: number, number: StickNumber): { parts: SVGElemen
     parts.push(rect(left - 2, y + STICK.height / 2 - 4, BUNDLE_WIDTH + 4, 8, 3, 'dv-model__tie'));
     left += BUNDLE_WIDTH + 8;
   }
-  for (let stick = 0; stick < number.ones; stick++) {
-    parts.push(rect(left, y, STICK.width + 1, STICK.height, 2, 'dv-model__stick'));
-    left += STICK.width + 1 + STICK.gap + 2;
+  const bottom = y + STICK.height;
+  for (let cube = 0; cube < number.ones; cube++) {
+    const column = Math.floor(cube / CUBE_COLUMN);
+    const cx = left + column * CUBE_STEP;
+    const cy = bottom - ((cube % CUBE_COLUMN) + 1) * CUBE_STEP + 1;
+    parts.push(rect(cx, cy, CUBE, CUBE, 1.5, 'dv-model__cube'));
   }
+  if (number.ones > 0) left += Math.ceil(number.ones / CUBE_COLUMN) * CUBE_STEP + 4;
   return { parts, end: left };
 }
 

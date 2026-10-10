@@ -425,10 +425,16 @@
   stroke-width: 2;
 }
 
-.dv-model__bundle-sticks,
-.dv-model__stick {
+.dv-model__bundle-sticks {
   fill: var(--dv-sun);
   stroke: var(--dv-sun-deep);
+  stroke-width: 1.2;
+}
+
+/* Ones: small cubes, another shape and colour than the tens' sticks. */
+.dv-model__cube {
+  fill: var(--dv-primary);
+  stroke: var(--dv-primary-deep);
   stroke-width: 1.2;
 }
 

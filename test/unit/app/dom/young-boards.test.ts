@@ -154,4 +154,20 @@ describe('Bundle Sticks', () => {
     expect(disabled('sticks-untie')).toBe(false);
     expect(disabled('sticks-remove-stick')).toBe(false);
   });
+
+  it('says its goal again after the praise for the board before', () => {
+    const { context } = contextFor(build);
+    expect(bundleSticks(context).goal?.()).toBe('Make 34 with sticks.');
+    const frame = contextFor({
+      kind: 'ten-frame',
+      task: 'show',
+      a: 0,
+      b: null,
+      target: 7,
+      frames: [0, 0],
+      last: null,
+      attempts: 0,
+    });
+    expect(tenFrame(frame.context).goal?.()).toContain('7');
+  });
 });

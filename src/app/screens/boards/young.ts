@@ -110,6 +110,10 @@ export function tenFrame(context: BoardContext): BoardPainter {
   return {
     element: h('div', { className: 'dv-minigame__board dv-young-board' }, frames, check),
     paint,
+    goal: () => {
+      const board = context.board('ten-frame');
+      return board ? tenFrameGoal(context, board) : '';
+    },
     focus: () => frames.querySelector<HTMLElement>('button') ?? check,
   };
 }
@@ -232,6 +236,10 @@ export function bundleSticks(context: BoardContext): BoardPainter {
   return {
     element: h('div', { className: 'dv-minigame__board dv-young-board' }, table, actions, check),
     paint,
+    goal: () => {
+      const board = context.board('bundle-sticks');
+      return board ? sticksGoal(context, board) : '';
+    },
     focus: () => actions.querySelector<HTMLElement>('button:not(:disabled)') ?? check,
   };
 }

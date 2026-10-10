@@ -115,15 +115,40 @@ async function walkStory(player: Player, want: string): Promise<void> {
 export async function brookBackupBefore(level: string): Promise<string> {
   const index = BROOK_LEVELS.indexOf(level);
   if (index < 0) throw new Error(`${level} is not one of Pebble Brook's lessons.`);
-  const profileId = `brook-before-${level.replace(/\W+/g, '-')}`;
+  return youngBackupBefore(1, 'pebble-brook', 'hop', BROOK_LEVELS.slice(0, index), level);
+}
+
+/**
+ * A 2nd grader who chose Bead's egg at Hundred Hills and has played its lessons in order up to
+ * `level`, which is open and not yet played.
+ */
+export async function hillsBackupBefore(level: string): Promise<string> {
+  const lessons = Array.from({ length: 6 }, (_, index) => `hundred-hills.${index + 1}`);
+  const index = lessons.indexOf(level);
+  if (index < 0) throw new Error(`${level} is not one of Hundred Hills' lessons.`);
+  return youngBackupBefore(2, 'hundred-hills', 'bead', lessons.slice(0, index), level);
+}
+
+/**
+ * A keeper of `grade` who chose `egg` where it is offered and has played `played` in order, the
+ * placement check (if the grade has one) skipped; `level` of `region` is open and not yet played.
+ */
+async function youngBackupBefore(
+  grade: 1 | 2,
+  region: string,
+  egg: string,
+  played: readonly string[],
+  level: string,
+): Promise<string> {
+  const profileId = `${region}-before-${level.replace(/\W+/g, '-')}`;
   const player = new Player(PERFECT, profileId);
   try {
-    await player.act({ type: 'setSetting', setting: { key: 'grade', value: 1 } });
+    await player.act({ type: 'setSetting', setting: { key: 'grade', value: grade } });
     await player.act({ type: 'startSession', day: localDay() });
-    await walkStory(player, 'hop');
-    for (const played of BROOK_LEVELS.slice(0, index)) {
-      await player.act({ type: 'startLevel', level: played });
-      await walkStory(player, 'hop');
+    await walkStory(player, egg);
+    for (const lesson of played) {
+      await player.act({ type: 'startLevel', level: lesson });
+      await walkStory(player, egg);
       for (let guard = 0; guard < 10; guard++) {
         await player.playRound();
         if (player.view().round === null) break;
@@ -132,12 +157,12 @@ export async function brookBackupBefore(level: string): Promise<string> {
         if (run === null || run.result !== null) break;
         await player.act({ type: 'startActivity', activity: { kind: 'level', index: run.next } });
       }
-      await walkStory(player, 'hop');
+      await walkStory(player, egg);
     }
     expect(player.failures, 'the rules took every step').toEqual([]);
     const card = player
       .view()
-      .hub.regions.find((region) => region.id === 'pebble-brook')
+      .hub.regions.find((candidate) => candidate.id === region)
       ?.levels.find((candidate) => candidate.id === level);
     expect(card?.status, `${level} is open and not yet played`).toBe('open');
     return backupOf(player, profileId);

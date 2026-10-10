@@ -1,14 +1,17 @@
 /**
  * The class a keeper is in (docs/grades-plan.md): the new-keeper editor asks "Which class is
  * <name> in?" after the name and the picture, 3rd class chosen until another is, and the
- * grown-ups can change it per keeper behind the gate. A class this version of the valley has no
- * lessons for yet (2nd class until its regions ship) changes nothing: the keeper plays on as
- * before, and the grown-ups are told so.
+ * grown-ups can change it per keeper behind the gate. Every class from 1st to 3rd has its lessons:
+ * none is refused.
  *
  * A 1st grader starts in the Lower Valley: the prologue, then Pebble Brook 1, where the brook
  * offers Dot's, Hop's or Nibble's egg. Counting problems show dots and never their number, on
  * screen or read aloud (read-aloud is on by itself in 1st class); answers are three tiles, and the
  * keypad takes two digits.
+ *
+ * A 2nd grader starts in the Lower Valley too, at Hundred Hills, whose first lesson offers Bead's,
+ * Tumble's or Penny's egg. Place-value problems show bundles of ten sticks and single cubes; the
+ * keypad takes any number. Bundle Sticks builds and works out sums within 100 with sticks.
  */
 import type { Page } from '@playwright/test';
 import { expect, test } from './support/fixtures';
@@ -22,8 +25,8 @@ import {
   fillKeeper,
   finishStory,
   leaveHub,
+  leaveResults,
   loadBackup,
-  meetFirstEgg,
   newFamily,
   openGrownUps,
   playAs,
@@ -31,12 +34,19 @@ import {
   results,
   round,
   startLevel,
+  startPlacement,
+  throughHatches,
 } from './support/app';
-import { numberWords, readAnswer } from './support/problem';
-import { brookBackupBefore } from './support/saves';
+import { numberWords, readAnswer, readProblem, written } from './support/problem';
+import { continueToNextActivity } from './support/activities';
+import { playBundleSticks } from './support/boards';
+import { brookBackupBefore, hillsBackupBefore } from './support/saves';
 import { installSpeech, spokenTexts, TYPICAL_VOICES } from './support/speech';
 
-test('the editor asks for the class; a class without lessons yet leaves the game as it was', async ({
+/** The Hundred Hills lesson whose second activity is Bundle Sticks. */
+const BUNDLE_STICKS_LEVEL = 'hundred-hills.4';
+
+test('the editor asks for the class; every class is accepted, in the editor and behind the gate', async ({
   page,
 }) => {
   await boot(page);
@@ -52,27 +62,40 @@ test('the editor asks for the class; a class without lessons yet leaves the game
   await expect(page.getByTestId('grade-2').locator('input')).toBeChecked();
   await page.getByTestId('keeper-save').click();
 
-  await meetFirstEgg(page);
+  // A 2nd grader's egg waits at Hundred Hills: the prologue, then the Sun Window.
+  await expect(page.getByTestId('screen-story'), 'the prologue begins').toBeVisible();
+  await page.getByTestId('story-skip').click();
   await expectHub(page, 'Ema');
-  await expect(page.getByTestId('hub-window'), 'the Magic Window of a 3rd grader').toBeVisible();
+  await expect(page.getByTestId('hub-sun-window'), 'the Sun Window of a 2nd grader').toBeVisible();
+  await expect(
+    page.getByTestId('hub-adventure'),
+    'the 2nd-grade placement check is offered',
+  ).toHaveText('Show the dragons what you know!');
 
   await leaveHub(page);
   await openGrownUps(page, 'settings');
   const field = page.getByTestId('setting-grade');
   await expect(field).toContainText('every earlier region stays open for practice');
-  await expect(page.getByTestId('setting-grade-3')).toHaveAttribute('aria-pressed', 'true');
-  await page.getByTestId('setting-grade-2').click();
-  await expect(page.getByTestId('toast')).toContainText('no lessons for that class yet');
-  await expect(page.getByTestId('setting-grade-3')).toHaveAttribute('aria-pressed', 'true');
-
-  await page.getByTestId('setting-grade-1').click();
-  await expect(page.getByTestId('setting-grade-1')).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByTestId('setting-grade-3')).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByTestId('setting-grade-2')).toHaveAttribute('aria-pressed', 'true');
+  for (const grade of [3, 1, 2]) {
+    await page.getByTestId(`setting-grade-${grade}`).click();
+    await expect(page.getByTestId(`setting-grade-${grade}`)).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    for (const other of [1, 2, 3].filter((candidate) => candidate !== grade)) {
+      await expect(page.getByTestId(`setting-grade-${other}`)).toHaveAttribute(
+        'aria-pressed',
+        'false',
+      );
+    }
+  }
+  await expect(page.getByTestId('toast').filter({ hasText: 'no lessons' })).toHaveCount(0);
 });
 
-/** Next through a story beat until its choices of egg are offered. */
-async function untilEggs(page: Page): Promise<void> {
-  const hop = page.getByTestId('story-choice-hop');
+/** Next through a story beat until its choices of egg are offered (`egg` among them). */
+async function untilEggs(page: Page, egg: string): Promise<void> {
+  const hop = page.getByTestId(`story-choice-${egg}`);
   const next = page.getByTestId('story-next').and(page.locator(':enabled'));
   for (let line = 0; line < 10; line++) {
     // Wait for the line to settle: either the eggs are offered or Next can be pressed.
@@ -81,7 +104,7 @@ async function untilEggs(page: Page): Promise<void> {
     await next.click();
     await expect(page.getByTestId('stage')).not.toHaveAttribute('aria-busy', 'true');
   }
-  await expect(page.getByTestId('story-choice-hop'), 'the brook offers its eggs').toBeVisible();
+  await expect(hop, 'the eggs are offered').toBeVisible();
 }
 
 test('a 1st grader meets the brook, chooses an egg and counts dots on three tiles', async ({
@@ -127,7 +150,7 @@ test('a 1st grader meets the brook, chooses an egg and counts dots on three tile
   await expectScreen(page, 'level');
   await page.getByTestId('level-play').click();
   await expectScreen(page, 'play');
-  await untilEggs(page);
+  await untilEggs(page, 'hop');
   for (const egg of ['dot', 'hop', 'nibble']) {
     await expect(page.getByTestId(`story-choice-${egg}`)).toBeVisible();
   }
@@ -187,4 +210,148 @@ test('a 1st grader types at most two digits on the keypad', async ({ page }) => 
   await page.getByTestId('keypad-backspace').click();
   await page.getByTestId('keypad-backspace').click();
   await answerCorrectly(page, 'pointer');
+});
+
+test('a 2nd grader meets Hundred Hills, chooses an egg and reads tens and ones from sticks', async ({
+  page,
+}) => {
+  test.slow();
+  await boot(page);
+  await page.getByTestId('title-play').click();
+  await expectScreen(page, 'editor');
+  await fillKeeper(page, { name: 'Ota' });
+  await page.getByTestId('grade-2').click();
+  await expect(page.getByTestId('grade-2').locator('input')).toBeChecked();
+  await page.getByTestId('keeper-save').click();
+
+  await expect(page.getByTestId('screen-story'), 'the prologue begins').toBeVisible();
+  await page.getByTestId('story-skip').click();
+  await expectHub(page, 'Ota');
+  await expect(page.getByTestId('hub-sun-window'), 'the Sun Window of a 2nd grader').toBeVisible();
+  await expect(
+    page.getByTestId('hub-adventure'),
+    'the 2nd-grade placement check is offered',
+  ).toHaveText('Show the dragons what you know!');
+
+  // The Lower Valley sheet comes first, with Hundred Hills awake on it.
+  await page.getByTestId('hub-map').click();
+  await expectScreen(page, 'map');
+  await expect(page.getByTestId('screen-map')).toHaveAttribute('data-sheet', 'lower-valley-map');
+  await expect(page.getByTestId('map-region-hundred-hills')).toContainText('Hundred Hills');
+  await page.getByTestId('map-region-hundred-hills').click();
+  await expectScreen(page, 'region');
+  await page.getByTestId('level-hundred-hills.1').click();
+  await expectScreen(page, 'level');
+  await page.getByTestId('level-play').click();
+  await expectScreen(page, 'play');
+
+  // Hundred Hills 1 offers three 2nd-grade eggs, and neither the brook's nor the meadow's.
+  await untilEggs(page, 'bead');
+  for (const egg of ['bead', 'tumble', 'penny']) {
+    await expect(page.getByTestId(`story-choice-${egg}`)).toBeVisible();
+  }
+  for (const egg of ['hop', 'bubbles']) {
+    await expect(page.getByTestId(`story-choice-${egg}`)).toHaveCount(0);
+  }
+  await page.getByTestId('story-choice-bead').click();
+  await finishStory(page);
+  await expect(round(page), 'the lesson begins').toBeVisible();
+
+  // Every place-value problem shows its sticks and cubes with it, on tiles or the keypad.
+  let placeValue = 0;
+  let typedThree = false;
+  for (let step = 0; step < 80; step++) {
+    await awaitOpenProblem(page);
+    if (await results(page).isVisible()) break;
+    if (await page.getByTestId('screen-story').isVisible()) {
+      await finishStory(page);
+      continue;
+    }
+    if (await page.getByTestId('feedback-next').isVisible()) {
+      await page.getByTestId('feedback-next').click();
+      continue;
+    }
+    const { tokens } = await readProblem(page);
+    if (/· 10 \+|\? · 10|tens/.test(written(tokens))) {
+      placeValue++;
+      const model = page.getByTestId('model');
+      await expect(model, `the sticks of ${written(tokens)}`).toHaveAttribute(
+        'data-kind',
+        'sticks',
+      );
+      await expect(model.locator('.dv-model__cube').first()).toBeAttached();
+    }
+    if (!typedThree && (await answerMode(page)) === 'keypad') {
+      // No two-digit limit in 2nd class.
+      for (const digit of [1, 2, 3]) await page.getByTestId(`keypad-${digit}`).click();
+      await expect(page.getByTestId('keypad-display')).toContainText('123');
+      for (let press = 0; press < 3; press++) await page.getByTestId('keypad-backspace').click();
+      typedThree = true;
+    }
+    if ((await answerMode(page)) === 'choice') {
+      await expect(page.getByTestId('choices').locator('[data-testid^="choice-"]')).toHaveCount(3);
+    }
+    await answerCorrectly(page, 'pointer');
+  }
+  await expect(results(page), 'the lesson ends on its results').toBeVisible();
+  expect(placeValue, 'Hundred Hills 1 asks about tens and ones').toBeGreaterThan(0);
+});
+
+test('a 2nd grader who knows tens and ones passes the placement check: Hundred Hills 3 and 4 are placed', async ({
+  page,
+}) => {
+  test.slow();
+  await boot(page);
+  await page.getByTestId('title-play').click();
+  await fillKeeper(page, { name: 'Ota' });
+  await page.getByTestId('grade-2').click();
+  await page.getByTestId('keeper-save').click();
+  await page.getByTestId('story-skip').click();
+  await expectHub(page, 'Ota');
+  await startPlacement(page);
+  let answered = 0;
+  for (; answered < 30 && (await round(page).isVisible()); answered++) {
+    await answerCorrectly(page, 'keyboard');
+  }
+  expect(answered, 'both steps were asked').toBeGreaterThan(2);
+  await expect(results(page)).toBeVisible();
+  await throughHatches(page);
+  await expect(page.getByTestId('results-title')).toHaveText('The dragons saw what you know!');
+  await leaveResults(page, 'Ota');
+  await page.getByTestId('hub-map').click();
+  await expect(page.getByTestId('screen-map')).toHaveAttribute('data-sheet', 'lower-valley-map');
+  await page.getByTestId('map-region-hundred-hills').click();
+  await expectScreen(page, 'region');
+  for (const level of ['hundred-hills.3', 'hundred-hills.4']) {
+    await expect(page.getByTestId(`level-${level}`), `placed: ${level}`).toHaveAttribute(
+      'data-status',
+      'completed',
+    );
+  }
+  const road = {
+    'hundred-hills.1': 'open',
+    'hundred-hills.2': 'locked',
+    'hundred-hills.5': 'open',
+  };
+  for (const [level, status] of Object.entries(road)) {
+    await expect(page.getByTestId('level-' + level), level).toHaveAttribute('data-status', status);
+  }
+});
+
+test('a 2nd grader builds and works out sums with Bundle Sticks', async ({ page }) => {
+  test.slow();
+  const backup = await hillsBackupBefore(BUNDLE_STICKS_LEVEL);
+  await newFamily(page, { name: 'Ota' });
+  await leaveHub(page);
+  await loadBackup(page, backup, 'Ota');
+  await playAs(page, 1, 'Ota');
+  await startLevel(page, 'hundred-hills', BUNDLE_STICKS_LEVEL);
+  for (let activity = 0; activity < 4; activity++) {
+    await expect(round(page).or(page.getByTestId('screen-minigame'))).toBeVisible();
+    if (await page.getByTestId('screen-minigame').isVisible()) break;
+    await playRound(page, 'pointer');
+    await continueToNextActivity(page);
+  }
+  await expect(page.getByTestId('sticks'), 'Bundle Sticks is on the table').toBeVisible();
+  await playBundleSticks(page, 'keyboard');
 });

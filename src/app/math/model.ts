@@ -27,9 +27,11 @@
  *   same dots in place of the number, which is the answer and is never written or spoken.
  * - `ten-frame`: `a + b` and `a − b` (and a missing number) within 20, as dots in two
  *   ten-frames: the second addend in another shape, the taken-away dots crossed out.
- * - `number-line`: a two-digit number plus or minus a one-digit number, as a hop on a number line.
- * - `sticks`: two-digit numbers as bundles of ten sticks and loose ones, for tens and two-digit
- *   sums and differences and for place value (`num.place`, the problem's `sticks` picture).
+ * - `number-line`: a number beyond 20 plus or minus a one-digit number (`34 + 8`, `52 − 7`), as
+ *   hops on a number line.
+ * - `sticks`: numbers to 100 as bundles of ten sticks (tens) and cubes (ones), for sums and
+ *   differences with a step of ten or more (`40 + 30`, `34 + 25`, `3 + 40`) and for place value
+ *   (`num.place`, the problem's `sticks` picture).
  *
  * A model is data. `src/app/ui/models.ts` draws it in the child's notation.
  */
@@ -328,9 +330,9 @@ function addSubModel(left: Expr, right: Expr): ProblemModel | null {
   if (fact === null) return null;
   const whole = fact.op === 'add' ? fact.result : fact.left;
   if (whole <= MAX_TEN_FRAME) return { kind: 'ten-frame', ...fact };
-  const other = fact.op === 'add' ? Math.min(fact.left, fact.right) : fact.right;
-  // A one-digit step is a hop on the number line; tens and two-digit numbers are sticks.
-  if (other < 10) return { kind: 'number-line', ...fact };
+  // A one-digit step from the first number is a hop on the number line (one hop per unit, so
+  // `3 + 40` would be 40 hops); tens and two-digit steps are sticks and cubes.
+  if (fact.right < 10) return { kind: 'number-line', ...fact };
   return { kind: 'sticks', numbers: [sticksOf(fact.left), sticksOf(fact.right)], fact };
 }
 

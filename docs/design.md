@@ -891,7 +891,8 @@ the rules implement their boards.
   read aloud; buttons keep icons next to words. Story lines for grades 1-2 keep to **at most 6
   words** (a stricter child profile in the content gate for those regions).
 - **Pictures first.** Dots and ten-frames (to 20), a number line, tens sticks and ones cubes (to
-  100), shown on choice problems and as the hint after a miss.
+  100), shown on choice problems and as the hint after a miss; a place-value problem always shows
+  its sticks.
 - **Input.** Three choices instead of four while a fact is new; a keypad of at most 2 digits for
   grade 1; big numerals.
 - **Time.** Per-grade response thresholds _(balance)_, so a 1st grader's "fast" is slower than a 3rd
