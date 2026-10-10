@@ -217,5 +217,9 @@ const GOLDENS: Record<string, string> = {
   'hop adult proud': 'e269b6b1bee2b897b79f94f006c55c58037a10f5b9ef7a05492f45fbbc548126',
   'nibble egg': '3d81005e88774f13f0b13522276dead46183de6cbfc26731828786d0cd065ecb',
   'nibble hatchling eating': '42d2debe7e8da2720801af823376ac5b916e508e45c93aa084a5ce0b1b4fb229',
+  'bead youngling happy': 'b21caa812b1d29f8d173eaa0fe1bea22e47807a8830c660dd096fdabc707ea7a',
+  'tumble egg': 'b7473b7e403dbaf8a17eb4ae09a20e2707b3537e05a88619cc0b85c9b9cf0e23',
+  'tumble adult proud': '6419131e1f8591a28099e5066c9b41adf770d354630734ee4cc90e27f3ef6743',
+  'penny hatchling curious': '10f2f77e75836132a54aa69f6361e9c1c39449903385944594f44edc05f2f286',
 };
 // goldens:end
