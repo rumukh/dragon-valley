@@ -207,6 +207,33 @@
       "signature": "#c4875a",
       "mnemonic": "A mouse-eared dragon who nibbles berries one by one. Every nibble takes one away: minus means fewer are left.",
       "recipe": "assets/art/dragons/nibble.json"
+    },
+    {
+      "id": "bead",
+      "name": "Bead",
+      "kind": "special",
+      "homeRegion": "hundred-hills",
+      "signature": "#e2577f",
+      "mnemonic": "A bright dragon who sorts numbers into tens and ones. On her belly is an abacus: big golden beads count tens, little teal beads count ones.",
+      "recipe": "assets/art/dragons/bead.json"
+    },
+    {
+      "id": "tumble",
+      "name": "Tumble",
+      "kind": "special",
+      "homeRegion": "market-square",
+      "signature": "#ff9233",
+      "mnemonic": "A bouncy acrobat dragon who tumbles ten ones into one ten and back again. Ten little cubes roll over into one long rod: that is carrying.",
+      "recipe": "assets/art/dragons/tumble.json"
+    },
+    {
+      "id": "penny",
+      "name": "Penny",
+      "kind": "special",
+      "homeRegion": "market-square",
+      "signature": "#3d63d8",
+      "mnemonic": "A kind market dragon who pays with shiny coins. A golden coin on her belly and a purse of coins beside her: add them up to see how much she has.",
+      "recipe": "assets/art/dragons/penny.json"
     }
   ],
   "characters": [
@@ -229,6 +256,28 @@
       ],
       "outcome": "dance",
       "mood": "happy"
+    },
+    {
+      "id": "long-broad-sharp-eyes",
+      "region": "hundred-hills",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "dance",
+      "mood": "happy"
+    },
+    {
+      "id": "otesanek",
+      "region": "market-square",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "sleep",
+      "mood": "sleepy"
     },
     {
       "id": "bridge-troll",
@@ -581,7 +630,10 @@
       "pebbles",
       "wisp",
       "ten-frame",
-      "stepping-stones"
+      "stepping-stones",
+      "sticks-bundle",
+      "hill",
+      "market-stall"
     ],
     "fruits": [
       "apple",
@@ -771,6 +823,64 @@
         }
       },
       "prompt": "assets/backgrounds/prompts/pebble-brook.prompt.txt"
+    },
+    {
+      "id": "hundred-hills",
+      "file": "assets/backgrounds/hundred-hills.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "hundred-hills",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/hundred-hills.prompt.txt"
+    },
+    {
+      "id": "market-square",
+      "file": "assets/backgrounds/market-square.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "market-square",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/market-square.prompt.txt"
     },
     {
       "id": "sunny-meadow",

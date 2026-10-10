@@ -2,6 +2,7 @@ import { lerp, polar } from '../svg/num';
 import { M, L, Q, roundRectD } from '../svg/path';
 import { h } from '../svg/xml';
 import { berry, pearl, sparkleD } from '../glyphs';
+import { lighten, outlineOf } from '../svg/color';
 import { glowGradient, type Ctx } from './ctx';
 import { cloudUnion } from './shapes';
 import { CX, GROUND } from './skeleton';
@@ -543,6 +544,179 @@ export function berryRow(ctx: Ctx): string {
   for (let i = 0; i < 5; i++)
     out += berry(x0 + i * r * 2.3, y, r, ctx.paint.accent, line, ctx.W * 0.45, i >= 3);
   return h('g', { class: 'dv-berry-row' }, out);
+}
+
+const propShadow = (x: number, rx: number): string =>
+  h('ellipse', { cx: x, cy: GROUND + 2, rx, ry: rx * 0.1, fill: '#2a2140', opacity: 0.12 });
+
+/** Bead's counting rods on the ground: three ten-bead rods and four loose beads (34). */
+export function beadRods(ctx: Ctx): string {
+  const r = lerp(5.5, 6.5, ctx.sk.t);
+  const x0 = groundPropLeft(ctx) + 4;
+  const W = ctx.W * 0.4;
+  const rod = (x: number): string => {
+    let beads = '';
+    for (let i = 0; i < 10; i++) {
+      const y = GROUND - r - i * r * 1.9;
+      const fill = i < 5 ? ctx.paint.accent : lighten(ctx.paint.accent, 0.3);
+      beads += h('circle', {
+        cx: x,
+        cy: y,
+        r,
+        fill,
+        stroke: outlineOf(fill, 0.55),
+        'stroke-width': W,
+      });
+    }
+    return (
+      h('path', {
+        d: M(x, GROUND) + L(x, GROUND - r * 19.6),
+        stroke: '#a8743a',
+        'stroke-width': W * 1.4,
+        'stroke-linecap': 'round',
+      }) + beads
+    );
+  };
+  let out = propShadow(x0 + r * 9, r * 11);
+  for (let k = 0; k < 3; k++) out += rod(x0 + r + k * r * 2.6);
+  for (let i = 0; i < 4; i++) {
+    const x = x0 + r * 10 + i * r * 2.3;
+    out += h('circle', {
+      cx: x,
+      cy: GROUND - r,
+      r,
+      fill: ctx.paint.accent2,
+      stroke: outlineOf(ctx.paint.accent2, 0.55),
+      'stroke-width': W,
+    });
+  }
+  return h('g', { class: 'dv-bead-rods' }, out);
+}
+
+/** Tumble's bundle of ten sticks tied with a ribbon, with three loose sticks beside it (13). */
+export function stickBundle(ctx: Ctx): string {
+  const s = lerp(0.9, 1.05, ctx.sk.t);
+  const x0 = groundPropLeft(ctx) + 10;
+  const len = 70 * s;
+  const stickW = 6 * s;
+  const wood = '#d9a45a';
+  const line = outlineOf(wood, 0.55);
+  let out = propShadow(x0 + 60 * s, 70 * s);
+  const bx = x0 + 34 * s;
+  let bundle = '';
+  for (let i = 0; i < 10; i++) {
+    const off = (i - 4.5) * stickW * 0.92;
+    const tilt = (i - 4.5) * 1.6 * s;
+    bundle += h('path', {
+      d: roundRectD(bx + off - stickW / 2 + tilt * 0.3, GROUND - len, stickW, len, stickW / 2),
+      fill: i % 2 ? wood : lighten(wood, 0.12),
+      stroke: line,
+      'stroke-width': ctx.W * 0.35,
+      transform: `rotate(${tilt.toFixed(2)} ${(bx + off).toFixed(2)} ${GROUND})`,
+    });
+  }
+  out += bundle;
+  out += h('path', {
+    d: roundRectD(bx - stickW * 5.1, GROUND - len * 0.56, stickW * 10.2, 9 * s, 4 * s),
+    fill: ctx.paint.accent,
+    stroke: ctx.paint.accentLine,
+    'stroke-width': ctx.W * 0.4,
+  });
+  const kx = bx + stickW * 5.2;
+  const ky = GROUND - len * 0.52;
+  out += h('path', {
+    d:
+      M(kx, ky) +
+      Q(kx + 12 * s, ky - 14 * s, kx + 4 * s, ky - 16 * s) +
+      Q(kx - 2 * s, ky - 10 * s, kx, ky) +
+      M(kx, ky) +
+      Q(kx + 16 * s, ky + 2 * s, kx + 14 * s, ky + 12 * s),
+    fill: 'none',
+    stroke: ctx.paint.accent,
+    'stroke-width': ctx.W * 0.6,
+    'stroke-linecap': 'round',
+  });
+  for (let i = 0; i < 3; i++) {
+    const x = x0 + 86 * s + i * 13 * s;
+    out += h('path', {
+      d: roundRectD(x, GROUND - stickW - 1, len * 0.62, stickW, stickW / 2),
+      fill: lighten(wood, 0.08),
+      stroke: line,
+      'stroke-width': ctx.W * 0.35,
+      transform: `rotate(${(-8 + i * 6).toFixed(0)} ${x.toFixed(2)} ${GROUND})`,
+    });
+  }
+  return h('g', { class: 'dv-stick-bundle' }, out);
+}
+
+/** Penny's little drawstring purse with a short stack of coins beside it. */
+export function coinPurse(ctx: Ctx): string {
+  const s = lerp(0.9, 1.05, ctx.sk.t);
+  const x0 = groundPropLeft(ctx) + 10;
+  const cloth = '#d8604a';
+  const line = outlineOf(cloth, 0.55);
+  const cx = x0 + 42 * s;
+  const purse =
+    M(cx - 18 * s, GROUND - 56 * s) +
+    Q(cx - 46 * s, GROUND - 30 * s, cx - 34 * s, GROUND - 4 * s) +
+    Q(cx, GROUND + 4 * s, cx + 34 * s, GROUND - 4 * s) +
+    Q(cx + 46 * s, GROUND - 30 * s, cx + 18 * s, GROUND - 56 * s) +
+    'Z';
+  const gold = ctx.paint.accent;
+  const goldLine = ctx.paint.accentLine;
+  const coin = (x: number, y: number, rx: number): string =>
+    h('ellipse', {
+      cx: x,
+      cy: y,
+      rx,
+      ry: rx * 0.36,
+      fill: gold,
+      stroke: goldLine,
+      'stroke-width': ctx.W * 0.4,
+    });
+  let stack = '';
+  for (let i = 0; i < 4; i++) stack += coin(x0 + 108 * s, GROUND - 4 * s - i * 7 * s, 15 * s);
+  const top = { x: x0 + 108 * s, y: GROUND - 4 * s - 3 * 7 * s };
+  return h(
+    'g',
+    { class: 'dv-coin-purse' },
+    propShadow(x0 + 70 * s, 72 * s),
+    h('path', { d: purse, fill: cloth, stroke: line, 'stroke-width': ctx.W * 0.55 }),
+    h('path', {
+      d: M(cx - 20 * s, GROUND - 50 * s) + Q(cx, GROUND - 42 * s, cx + 20 * s, GROUND - 50 * s),
+      fill: 'none',
+      stroke: '#ffe27a',
+      'stroke-width': ctx.W * 0.6,
+      'stroke-linecap': 'round',
+    }),
+    h('path', {
+      d:
+        M(cx - 14 * s, GROUND - 56 * s) +
+        L(cx - 22 * s, GROUND - 68 * s) +
+        M(cx + 14 * s, GROUND - 56 * s) +
+        L(cx + 22 * s, GROUND - 68 * s),
+      stroke: line,
+      'stroke-width': ctx.W * 0.6,
+      'stroke-linecap': 'round',
+    }),
+    h('circle', {
+      cx: cx + 8 * s,
+      cy: GROUND - 54 * s,
+      r: 10 * s,
+      fill: gold,
+      stroke: goldLine,
+      'stroke-width': ctx.W * 0.4,
+    }),
+    h('path', { d: sparkleD(cx - 14 * s, GROUND - 26 * s, 6 * s), fill: '#fff3b0', opacity: 0.9 }),
+    coin(x0 + 140 * s, GROUND - 3 * s, 14 * s),
+    stack,
+    h('path', {
+      d: sparkleD(top.x + 6 * s, top.y - 12 * s, 7 * s),
+      fill: '#fff3b0',
+      stroke: '#e0a020',
+      'stroke-width': 1.4,
+    }),
+  );
 }
 
 /** Nibble's two little front teeth just under the smile. */

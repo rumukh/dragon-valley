@@ -39,7 +39,16 @@ describe('master palette', () => {
 
   it('has a signature color for every dragon and seven rainbow colors', () => {
     const sig = PALETTE.dragonSignature as Record<string, string>;
-    for (const id of [...CANONICAL_DRAGON_IDS, 'dot', 'hop', 'nibble', GUIDE_ID])
+    for (const id of [
+      ...CANONICAL_DRAGON_IDS,
+      'dot',
+      'hop',
+      'nibble',
+      'bead',
+      'tumble',
+      'penny',
+      GUIDE_ID,
+    ])
       expect(isHex(sig[id]), id).toBe(true);
     expect(PALETTE.rainbow).toHaveLength(7);
   });

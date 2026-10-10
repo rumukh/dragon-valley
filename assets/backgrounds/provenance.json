@@ -45,6 +45,34 @@
       }
     },
     {
+      "id": "hundred-hills",
+      "file": "assets/backgrounds/hundred-hills.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (G5b)",
+      "generator": "src/app/art/backgrounds (scenes-d.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/hundred-hills.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "market-square",
+      "file": "assets/backgrounds/market-square.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (G5b)",
+      "generator": "src/app/art/backgrounds (scenes-d.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/market-square.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
       "id": "sunny-meadow",
       "file": "assets/backgrounds/sunny-meadow.svg",
       "kind": "svg-original",
