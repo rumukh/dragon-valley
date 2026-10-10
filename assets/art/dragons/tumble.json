@@ -1,0 +1,65 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "tumble",
+  "name": "Tumble",
+  "kind": "special",
+  "mnemonic": "A bouncy acrobat dragon who tumbles ten ones into one ten and back again. Ten little cubes roll over into one long rod: that is carrying.",
+  "colors": {
+    "body": "#ff9233",
+    "shade": "#d0661a",
+    "belly": "#fff4dc",
+    "wing": "#ffc27a",
+    "horn": "#fff6e0",
+    "accent": "#3a8ef0",
+    "accent2": "#ffd84a",
+    "iris": "#5a2a08",
+    "cheek": "#ff8f86"
+  },
+  "build": {
+    "chub": 0.65,
+    "head": 1.05,
+    "snout": 0.95,
+    "body": 0.95
+  },
+  "horns": {
+    "style": "curved",
+    "count": 2,
+    "length": 0.85
+  },
+  "ears": {
+    "style": "fin",
+    "size": 0.9
+  },
+  "wings": {
+    "style": "bat",
+    "count": 2,
+    "size": 0.9
+  },
+  "tail": {
+    "count": 1,
+    "tip": "star",
+    "length": 1.2,
+    "curl": 1.3
+  },
+  "spikes": {
+    "style": "round",
+    "where": "tail",
+    "count": 3
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "carry-belly",
+    "scales"
+  ],
+  "features": [
+    "stick-bundle"
+  ],
+  "egg": {
+    "base": "#ffe9cf",
+    "accent": "#3a8ef0",
+    "pattern": "loops"
+  }
+}

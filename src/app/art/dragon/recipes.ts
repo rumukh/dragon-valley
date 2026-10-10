@@ -30,6 +30,9 @@ import glimmer from '../../../../assets/art/dragons/glimmer.json';
 import dot from '../../../../assets/art/dragons/dot.json';
 import hop from '../../../../assets/art/dragons/hop.json';
 import nibble from '../../../../assets/art/dragons/nibble.json';
+import bead from '../../../../assets/art/dragons/bead.json';
+import tumble from '../../../../assets/art/dragons/tumble.json';
+import penny from '../../../../assets/art/dragons/penny.json';
 
 const HORNS: readonly HornStyle[] = [
   'curved',
@@ -109,6 +112,9 @@ const MARKINGS: readonly MarkingStyle[] = [
   'polka-dots',
   'plus-belly',
   'minus-belly',
+  'abacus-belly',
+  'carry-belly',
+  'coin-belly',
 ];
 const FEATURES: readonly FeatureStyle[] = [
   'reflection',
@@ -127,6 +133,9 @@ const FEATURES: readonly FeatureStyle[] = [
   'number-line',
   'berry-row',
   'buck-teeth',
+  'bead-rods',
+  'stick-bundle',
+  'coin-purse',
 ];
 const EGGS: readonly EggPattern[] = [
   'clouds',
@@ -147,6 +156,9 @@ const EGGS: readonly EggPattern[] = [
   'hops',
   'berries',
   'spots',
+  'beads',
+  'loops',
+  'coins',
 ];
 
 type Json = Record<string, unknown>;
@@ -323,6 +335,9 @@ const RAW: readonly unknown[] = [
   dot,
   hop,
   nibble,
+  bead,
+  tumble,
+  penny,
 ];
 
 /** All built-in recipes, validated once at module load. */

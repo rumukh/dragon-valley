@@ -1,5 +1,5 @@
 /**
- * The nine friendly folklore bosses in three states each. Nobody gets hurt: the child's correct
+ * The friendly folklore bosses in three states each. Nobody gets hurt: the child's correct
  * answers make a boss laugh, fall asleep or agree. `start` is the challenge pose, `warming` is
  * about half way along the boss meter, `won` is the happy ending.
  */
@@ -28,9 +28,10 @@ import {
   tears,
   zzz,
 } from './kit';
+import { longBroadSharpEyes, otesanek } from './bosses-grade2';
 
 /** Bosses of the Lower Valley sheet (grades 1-2), drawn before the canonical third-grade nine. */
-export const LOWER_VALLEY_BOSS_IDS = ['will-o-wisps'] as const;
+export const LOWER_VALLEY_BOSS_IDS = ['will-o-wisps', 'long-broad-sharp-eyes', 'otesanek'] as const;
 
 export const BOSS_IDS: readonly string[] = [...LOWER_VALLEY_BOSS_IDS, ...CANONICAL_BOSS_IDS];
 export const BOSS_STATES = ['start', 'warming', 'won'] as const;
@@ -39,6 +40,8 @@ export type BossState = (typeof BOSS_STATES)[number];
 /** How each boss is won (for copy and audio cues). */
 export const BOSS_OUTCOME: Record<string, 'laugh' | 'sleep' | 'agree' | 'dance'> = {
   'will-o-wisps': 'dance',
+  'long-broad-sharp-eyes': 'dance',
+  otesanek: 'sleep',
   'bridge-troll': 'laugh',
   'forest-witch': 'agree',
   krakonos: 'laugh',
@@ -2139,6 +2142,8 @@ function smoothRing(cx: number, cy: number, r: number): string {
 
 const DRAW: Record<string, (state: BossState, p: P) => string> = {
   'will-o-wisps': willOWisps,
+  'long-broad-sharp-eyes': longBroadSharpEyes,
+  otesanek,
   'bridge-troll': bridgeTroll,
   'forest-witch': forestWitch,
   krakonos,

@@ -34,8 +34,8 @@ type Catalog = ReturnType<typeof buildCatalog> & {
 };
 
 /** Lower Valley dragons (grades 1-2) and the regions whose scene and boss are drawn so far. */
-const LOWER_VALLEY_DRAGON_IDS = ['dot', 'hop', 'nibble'];
-const DRAWN_LOWER_VALLEY = ['pebble-brook'];
+const LOWER_VALLEY_DRAGON_IDS = ['dot', 'hop', 'nibble', 'bead', 'tumble', 'penny'];
+const DRAWN_LOWER_VALLEY = ['pebble-brook', 'hundred-hills', 'market-square'];
 
 const committed = JSON.parse(readFileSync('assets/art/catalog.json', 'utf8')) as Catalog;
 

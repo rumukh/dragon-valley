@@ -1,0 +1,10 @@
+Dragon Valley background: market-square
+
+Scene: A cheerful cobbled town square in a small Czech storybook town, a row of tall colourful gabled houses (yellow, coral, sky blue, lilac, green, pink) with flower boxes framing the left and right edges and lower houses towards the middle, a low town wall and a little church tower with a clock face far in the centre, strings of triangular bunting between the houses, striped market stalls with scalloped awnings selling fruit, bread and vegetables (two big ones at the near left and right edges, two small ones further back), a stone well with a red roof in the middle of the square, baskets of red, green and yellow apples and flower pots on the cobbles, a bright sun and soft clouds in a pale blue sky.
+
+Style: storybook painterly illustration for a children's math adventure game (ages 6-9), soft gouache and watercolor textures with gentle edges, bright but harmonious colors, warm cream light and deep plum shadows (never black).
+Palette anchors: buttercup #ffc53d, fern #3aa65b, ember #f26a2e, amethyst #8b5cf6, lake #2d8ce6, lagoon #13b2a6, heather #e35d9b, moss #93a83a, royal #d93a57, paper #fff8ec, ink #2a2140.
+Format: 16:10 landscape, 3200 x 2000 px (it is shown at 1600 x 1000 logical units).
+Composition: keep the upper-middle third calm (sky or soft distant scenery) for UI panels; the ground line sits around the lower quarter; leave clear standing room left and right of centre where the game places the player's dragon (x about 27%) and the friendly boss (x about 73%).
+Strictly: no text, letters, numbers, signs, logos or watermarks; no people, dragons or creatures (the game draws them); nothing scary or dangerous; cosy, safe and inviting.
+Match the composition of the committed SVG version of this background (same layout, landmarks and light direction) so hotspots and characters still line up.
