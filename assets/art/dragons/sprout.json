@@ -1,0 +1,65 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "sprout",
+  "name": "Sprout",
+  "kind": "special",
+  "mnemonic": "A mossy little dragon with a toadstool cap who grows mushrooms in pairs that make ten. Seven red and three brown: what is missing to ten?",
+  "colors": {
+    "body": "#7fa35a",
+    "shade": "#5a7a3c",
+    "belly": "#fbf1dc",
+    "wing": "#b4d98a",
+    "horn": "#fff4e0",
+    "accent": "#e8473a",
+    "accent2": "#c98a5b",
+    "iris": "#3a2a14",
+    "cheek": "#ff9fa0"
+  },
+  "build": {
+    "chub": 0.95,
+    "head": 1.15,
+    "snout": 0.8,
+    "body": 0.85
+  },
+  "horns": {
+    "style": "none",
+    "count": 0,
+    "length": 0.5
+  },
+  "ears": {
+    "style": "leaf",
+    "size": 1
+  },
+  "wings": {
+    "style": "leaf",
+    "count": 2,
+    "size": 0.8
+  },
+  "tail": {
+    "count": 1,
+    "tip": "clover",
+    "length": 0.9,
+    "curl": 1.1
+  },
+  "spikes": {
+    "style": "leaf",
+    "where": "tail",
+    "count": 3
+  },
+  "crest": {
+    "style": "toadstool",
+    "count": 5
+  },
+  "markings": [
+    "bonds-belly",
+    "moss"
+  ],
+  "features": [
+    "toadstool-ring"
+  ],
+  "egg": {
+    "base": "#f3ead2",
+    "accent": "#e8473a",
+    "pattern": "toadstools"
+  }
+}

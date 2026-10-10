@@ -1,0 +1,10 @@
+Dragon Valley background: rainbow-ford
+
+Scene: A wide, shallow, sparkling river crossing the whole scene under a soft rainbow arching across a pale blue sky, a bright sun and soft clouds, gentle green hills and round trees on the far bank, twenty flat stepping stones crossing the water in two runs of ten (the last two stones of the first run golden), a small sandy sandbar in the middle of the river with a little red pennant between the two runs, the rainbow softly reflected in the water, ducks swimming and lily pads, a grassy near bank with pebbles, a small striped red-and-yellow puppet theatre booth with a purple frame, a scalloped yellow top, a little star and drawn red curtains on the right, a post with colourful bunting to the booth, reeds on the left edge, a few little flowers.
+
+Style: storybook painterly illustration for a children's math adventure game (ages 6-9), soft gouache and watercolor textures with gentle edges, bright but harmonious colors, warm cream light and deep plum shadows (never black).
+Palette anchors: buttercup #ffc53d, fern #3aa65b, ember #f26a2e, amethyst #8b5cf6, lake #2d8ce6, lagoon #13b2a6, heather #e35d9b, moss #93a83a, royal #d93a57, paper #fff8ec, ink #2a2140.
+Format: 16:10 landscape, 3200 x 2000 px (it is shown at 1600 x 1000 logical units).
+Composition: keep the upper-middle third calm (sky or soft distant scenery) for UI panels; the ground line sits around the lower quarter; leave clear standing room left and right of centre where the game places the player's dragon (x about 27%) and the friendly boss (x about 73%).
+Strictly: no text, letters, numbers, signs, logos or watermarks; no people, dragons or creatures (the game draws them); nothing scary or dangerous; cosy, safe and inviting.
+Match the composition of the committed SVG version of this background (same layout, landmarks and light direction) so hotspots and characters still line up.

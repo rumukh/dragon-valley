@@ -24,6 +24,8 @@ import {
   beadRods,
   buckTeeth,
   coinPurse,
+  fordStones,
+  toadstoolRing,
   stickBundle,
   groundPropLeft,
   numberLine,
@@ -42,6 +44,7 @@ import {
   ears,
   flameCrest,
   flowerCrest,
+  toadstoolCrest,
   horns,
   royalCrown,
   shellCrest,
@@ -149,6 +152,7 @@ function dragonLayers(ctx: Ctx): {
     else if (r.crest.style === 'shell') crestTop = shellCrest(ctx);
     else if (r.crest.style === 'cloud-tuft') crestTop = cloudTuft(ctx);
     else if (r.crest.style === 'flames') crestTop = flameCrest(ctx);
+    else if (r.crest.style === 'toadstool') crestTop = toadstoolCrest(ctx);
   }
   const crown =
     crowned && !hat && r.crest.style !== 'crown10'
@@ -227,7 +231,9 @@ function dragonLayers(ctx: Ctx): {
     (hasFeature(ctx, 'berry-row') ? berryRow(ctx) : '') +
     (hasFeature(ctx, 'bead-rods') ? beadRods(ctx) : '') +
     (hasFeature(ctx, 'stick-bundle') ? stickBundle(ctx) : '') +
-    (hasFeature(ctx, 'coin-purse') ? coinPurse(ctx) : '');
+    (hasFeature(ctx, 'coin-purse') ? coinPurse(ctx) : '') +
+    (hasFeature(ctx, 'toadstool-ring') ? toadstoolRing(ctx) : '') +
+    (hasFeature(ctx, 'ford-stones') ? fordStones(ctx) : '');
 
   return {
     back,
@@ -426,7 +432,9 @@ function designBounds(ctx: Ctx, stage: DragonStage): [number, number, number, nu
     hasFeature(ctx, 'berry-row') ||
     hasFeature(ctx, 'bead-rods') ||
     hasFeature(ctx, 'stick-bundle') ||
-    hasFeature(ctx, 'coin-purse')
+    hasFeature(ctx, 'coin-purse') ||
+    hasFeature(ctx, 'toadstool-ring') ||
+    hasFeature(ctx, 'ford-stones')
   )
     minX = Math.min(minX, groundPropLeft(ctx));
   if (ctx.outfit.nest) {

@@ -1,0 +1,63 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "tenzi",
+  "name": "Tenzi",
+  "kind": "special",
+  "mnemonic": "A river dragon who crosses the ford on stepping stones. Fill the ten first, then step over: 8 + 5 is 8 + 2 + 3, ten and three more.",
+  "colors": {
+    "body": "#6a74e8",
+    "shade": "#4a50c0",
+    "belly": "#f2f3ff",
+    "wing": "#9fe3ef",
+    "horn": "#fff3c8",
+    "accent": "#ff7a3a",
+    "accent2": "#ffd23f",
+    "iris": "#1f2470",
+    "cheek": "#ff9fc0"
+  },
+  "build": {
+    "chub": 0.75,
+    "head": 1.05,
+    "snout": 0.95,
+    "body": 1
+  },
+  "horns": {
+    "style": "curved",
+    "count": 2,
+    "length": 0.8
+  },
+  "ears": {
+    "style": "fin",
+    "size": 1
+  },
+  "wings": {
+    "style": "fin",
+    "count": 2,
+    "size": 0.95
+  },
+  "tail": {
+    "count": 1,
+    "tip": "fin",
+    "length": 1.1
+  },
+  "spikes": {
+    "style": "round",
+    "where": "tail",
+    "count": 5
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "cross-ten-belly"
+  ],
+  "features": [
+    "ford-stones"
+  ],
+  "egg": {
+    "base": "#e6ecff",
+    "accent": "#6a74e8",
+    "pattern": "tens"
+  }
+}

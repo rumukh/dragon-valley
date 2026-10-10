@@ -804,6 +804,165 @@ function coinBelly(ctx: Ctx): string {
   );
 }
 
+/**
+ * Sprout's bonds-of-ten belly: a ten-frame of little toadstool caps, seven red and three brown
+ * (7 and 3 make 10), on a light frame.
+ */
+function bondsBelly(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const cols = 5;
+  const slot = Math.min((b.rx * 2.1) / cols, (b.ry * 1.5) / 2);
+  const w = slot * cols;
+  const hgt = slot * 2;
+  const x0 = b.cx - w / 2;
+  const y0 = b.cy - hgt / 2 + b.ry * 0.08;
+  const pad = slot * 0.16;
+  const line = ctx.paint.bellyLine;
+  const W = ctx.W * 0.4;
+  let caps = '';
+  for (let i = 0; i < 10; i++) {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    const cx = x0 + slot * (c + 0.5);
+    const cy = y0 + slot * (r + 0.5);
+    const red = i < 7;
+    const fill = red ? ctx.paint.accent : ctx.paint.accent2;
+    const edge = red ? ctx.paint.accentLine : outlineOf(ctx.paint.accent2, 0.55);
+    const s2 = slot * 0.4;
+    caps +=
+      h('path', {
+        d: roundRectD(cx - s2 * 0.3, cy - s2 * 0.05, s2 * 0.6, s2 * 0.85, s2 * 0.2),
+        fill: '#fff8ea',
+        stroke: line,
+        'stroke-width': W * 0.8,
+      }) +
+      h('path', {
+        d:
+          M(cx - s2, cy + s2 * 0.1) +
+          Q(cx - s2, cy - s2 * 0.95, cx, cy - s2 * 0.95) +
+          Q(cx + s2, cy - s2 * 0.95, cx + s2, cy + s2 * 0.1) +
+          Q(cx, cy - s2 * 0.1, cx - s2, cy + s2 * 0.1) +
+          'Z',
+        fill,
+        stroke: edge,
+        'stroke-width': W,
+        'stroke-linejoin': 'round',
+      }) +
+      (red
+        ? h('circle', { cx: cx - s2 * 0.4, cy: cy - s2 * 0.38, r: s2 * 0.17, fill: '#ffffff' }) +
+          h('circle', { cx: cx + s2 * 0.32, cy: cy - s2 * 0.52, r: s2 * 0.13, fill: '#ffffff' })
+        : h('ellipse', {
+            cx: cx - s2 * 0.3,
+            cy: cy - s2 * 0.5,
+            rx: s2 * 0.28,
+            ry: s2 * 0.13,
+            fill: '#ffffff',
+            opacity: 0.55,
+          }));
+  }
+  return h(
+    'g',
+    { class: 'dv-bonds' },
+    h('path', {
+      d: roundRectD(x0 - pad, y0 - pad, w + pad * 2, hgt + pad * 2, slot * 0.35),
+      fill: ctx.paint.bellyLight,
+      stroke: line,
+      'stroke-width': ctx.W * 0.55,
+    }),
+    h('path', {
+      d:
+        M(x0, y0 + slot) +
+        L(x0 + w, y0 + slot) +
+        [1, 2, 3, 4].map((k) => M(x0 + slot * k, y0) + L(x0 + slot * k, y0 + hgt)).join(''),
+      stroke: line,
+      'stroke-width': ctx.W * 0.3,
+      opacity: 0.4,
+    }),
+    caps,
+  );
+}
+
+/**
+ * Tenzi's crossing-ten belly: a full ten-frame (eight orange and two yellow make ten) and, below
+ * it across a little hop, three more yellow: 8 + 5 = 8 + 2 + 3 = 13.
+ */
+function crossTenBelly(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const cols = 5;
+  const slot = Math.min((b.rx * 1.9) / cols, (b.ry * 1.25) / 3);
+  const w = slot * cols;
+  const x0 = b.cx - w / 2;
+  const y0 = b.cy - b.ry * 0.52;
+  const pad = slot * 0.14;
+  const line = ctx.paint.bellyLine;
+  const W = ctx.W * 0.42;
+  const dot = (cx: number, cy: number, warm: boolean): string => {
+    const fill = warm ? ctx.paint.accent : ctx.paint.accent2;
+    return (
+      h('circle', {
+        cx,
+        cy,
+        r: slot * 0.34,
+        fill,
+        stroke: warm ? ctx.paint.accentLine : outlineOf(ctx.paint.accent2, 0.55),
+        'stroke-width': W,
+      }) +
+      h('circle', {
+        cx: cx - slot * 0.1,
+        cy: cy - slot * 0.11,
+        r: slot * 0.085,
+        fill: '#ffffff',
+        opacity: 0.75,
+      })
+    );
+  };
+  let dots = '';
+  for (let i = 0; i < 10; i++)
+    dots += dot(x0 + slot * ((i % cols) + 0.5), y0 + slot * (Math.floor(i / cols) + 0.5), i < 8);
+  const y1 = y0 + slot * 2 + slot * 0.75;
+  const x1 = x0 + slot;
+  for (let i = 0; i < 3; i++) dots += dot(x1 + slot * (i + 0.5), y1 + slot * 0.5, false);
+  const frame = (x: number, y: number, n: number, rows: number): string =>
+    h('path', {
+      d: roundRectD(x - pad, y - pad, slot * n + pad * 2, slot * rows + pad * 2, slot * 0.32),
+      fill: ctx.paint.bellyLight,
+      stroke: line,
+      'stroke-width': ctx.W * 0.5,
+    }) +
+    h('path', {
+      d:
+        (rows > 1 ? M(x, y + slot) + L(x + slot * n, y + slot) : '') +
+        Array.from(
+          { length: n - 1 },
+          (_, k) => M(x + slot * (k + 1), y) + L(x + slot * (k + 1), y + slot * rows),
+        ).join(''),
+      stroke: line,
+      'stroke-width': ctx.W * 0.28,
+      opacity: 0.4,
+    });
+  // a small rainbow hop from the full ten down to the extra three
+  const ax = x0 + w + pad * 0.5;
+  const ay = y0 + slot * 1.5;
+  const ex = x1 + slot * 3 + pad;
+  const ey = y1 + slot * 0.5;
+  const hop = M(ax, ay) + Q(ax + slot * 1.1, (ay + ey) / 2, ex + slot * 0.1, ey - slot * 0.1);
+  return h(
+    'g',
+    { class: 'dv-cross-ten' },
+    frame(x0, y0, cols, 2),
+    frame(x1, y1, 3, 1),
+    dots,
+    h('path', {
+      d: hop,
+      fill: 'none',
+      stroke: ctx.paint.accent,
+      'stroke-width': ctx.W * 0.75,
+      'stroke-linecap': 'round',
+      'stroke-dasharray': `${(ctx.W * 0.2).toFixed(2)} ${(ctx.W * 1.3).toFixed(2)}`,
+    }),
+  );
+}
+
 /** Belly layer (replaces the plain belly when a marking defines its own belly). */
 export function bellyLayer(ctx: Ctx): string {
   if (has(ctx, 'rainbow-belly')) return rainbowBelly(ctx);
@@ -821,7 +980,9 @@ export function bellyLayer(ctx: Ctx): string {
     has(ctx, 'minus-belly') ||
     has(ctx, 'abacus-belly') ||
     has(ctx, 'carry-belly') ||
-    has(ctx, 'coin-belly');
+    has(ctx, 'coin-belly') ||
+    has(ctx, 'bonds-belly') ||
+    has(ctx, 'cross-ten-belly');
   let out = belly(ctx, undefined, !plain);
   if (has(ctx, 'clock-belly')) out += clockFace(ctx);
   if (has(ctx, 'snowflake-belly')) out += boldSnowflake(ctx);
@@ -850,6 +1011,8 @@ export function bellyLayer(ctx: Ctx): string {
   if (has(ctx, 'abacus-belly')) out += abacusBelly(ctx);
   if (has(ctx, 'carry-belly')) out += carryBelly(ctx);
   if (has(ctx, 'coin-belly')) out += coinBelly(ctx);
+  if (has(ctx, 'bonds-belly')) out += bondsBelly(ctx);
+  if (has(ctx, 'cross-ten-belly')) out += crossTenBelly(ctx);
   return out;
 }
 

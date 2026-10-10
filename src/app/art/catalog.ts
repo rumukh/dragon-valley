@@ -20,6 +20,8 @@ const HOME_REGION: Record<string, string> = {
   dot: 'pebble-brook',
   hop: 'pebble-brook',
   nibble: 'mushroom-hollow',
+  sprout: 'mushroom-hollow',
+  tenzi: 'rainbow-ford',
   bead: 'hundred-hills',
   tumble: 'market-square',
   penny: 'market-square',
@@ -44,6 +46,8 @@ const HOME_REGION: Record<string, string> = {
 /** Where each boss waits: the canonical nine in valley order, plus the Lower Valley bosses. */
 const BOSS_REGION: Record<string, string> = {
   'will-o-wisps': 'pebble-brook',
+  skritek: 'mushroom-hollow',
+  kasparek: 'rainbow-ford',
   'long-broad-sharp-eyes': 'hundred-hills',
   otesanek: 'market-square',
   ...Object.fromEntries(CANONICAL_BOSS_IDS.map((id, i) => [id, CANONICAL_REGION_IDS[i]!])),
