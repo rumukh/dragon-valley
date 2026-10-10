@@ -1,0 +1,63 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "penny",
+  "name": "Penny",
+  "kind": "special",
+  "mnemonic": "A kind market dragon who pays with shiny coins. A golden coin on her belly and a purse of coins beside her: add them up to see how much she has.",
+  "colors": {
+    "body": "#3d63d8",
+    "shade": "#2a44a8",
+    "belly": "#eef3ff",
+    "wing": "#8fb0ff",
+    "horn": "#fff1c4",
+    "accent": "#f5b623",
+    "accent2": "#ffe27a",
+    "iris": "#1a2560",
+    "cheek": "#ff9fb8"
+  },
+  "build": {
+    "chub": 0.9,
+    "head": 1.1,
+    "snout": 0.85,
+    "body": 1
+  },
+  "horns": {
+    "style": "crescent",
+    "count": 2,
+    "length": 0.7
+  },
+  "ears": {
+    "style": "round",
+    "size": 0.9
+  },
+  "wings": {
+    "style": "feather",
+    "count": 2,
+    "size": 0.85
+  },
+  "tail": {
+    "count": 1,
+    "tip": "heart",
+    "length": 0.9
+  },
+  "spikes": {
+    "style": "round",
+    "where": "tail",
+    "count": 3
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "coin-belly"
+  ],
+  "features": [
+    "coin-purse"
+  ],
+  "egg": {
+    "base": "#dfe7ff",
+    "accent": "#f5b623",
+    "pattern": "coins"
+  }
+}

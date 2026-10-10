@@ -362,7 +362,10 @@
           "counting-dots",
           "polka-dots",
           "plus-belly",
-          "minus-belly"
+          "minus-belly",
+          "abacus-belly",
+          "carry-belly",
+          "coin-belly"
         ]
       }
     },
@@ -386,7 +389,10 @@
           "rock-body",
           "number-line",
           "berry-row",
-          "buck-teeth"
+          "buck-teeth",
+          "bead-rods",
+          "stick-bundle",
+          "coin-purse"
         ]
       }
     },
@@ -427,7 +433,10 @@
             "polka",
             "hops",
             "berries",
-            "spots"
+            "spots",
+            "beads",
+            "loops",
+            "coins"
           ]
         }
       }

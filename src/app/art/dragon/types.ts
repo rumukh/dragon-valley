@@ -66,7 +66,10 @@ export type MarkingStyle =
   | 'counting-dots'
   | 'polka-dots'
   | 'plus-belly'
-  | 'minus-belly';
+  | 'minus-belly'
+  | 'abacus-belly'
+  | 'carry-belly'
+  | 'coin-belly';
 export type FeatureStyle =
   | 'reflection'
   | 'smoke-ring'
@@ -83,7 +86,10 @@ export type FeatureStyle =
   | 'rock-body'
   | 'number-line'
   | 'berry-row'
-  | 'buck-teeth';
+  | 'buck-teeth'
+  | 'bead-rods'
+  | 'stick-bundle'
+  | 'coin-purse';
 export type EggPattern =
   | 'clouds'
   | 'shine'
@@ -102,7 +108,10 @@ export type EggPattern =
   | 'polka'
   | 'hops'
   | 'berries'
-  | 'spots';
+  | 'spots'
+  | 'beads'
+  | 'loops'
+  | 'coins';
 
 export interface DragonColors {
   body: string;

@@ -403,6 +403,128 @@ function eggPattern(ctx: Ctx): string {
         out += berry(cx + x!, cy + y!, r!, accent, line, 2);
       return out;
     }
+    case 'beads': {
+      // Bead: strings of round beads draped across the shell, five warm then five teal.
+      let out = '';
+      for (const [row, y0] of [top + 70, top + 150, top + 222].entries()) {
+        const sag = 18;
+        let wire = '';
+        let beads = '';
+        for (let i = 0; i <= 10; i++) {
+          const x = cx - w / 2 - 6 + (i * (w + 12)) / 10;
+          const tt = i / 10;
+          const y = y0 + sag * 4 * tt * (1 - tt) + (row % 2 ? -6 : 0);
+          wire += i === 0 ? M(x, y) : L(x, y);
+          if (i === 0 || i === 10) continue;
+          const fill = i <= 5 !== (row % 2 === 1) ? accent : ctx.paint.accent2;
+          beads +=
+            h('circle', {
+              cx: x,
+              cy: y,
+              r: 9,
+              fill,
+              stroke: outlineOf(fill, 0.55),
+              'stroke-width': 1.8,
+            }) + h('circle', { cx: x - 3, cy: y - 3, r: 2.6, fill: '#ffffff', opacity: 0.75 });
+        }
+        out +=
+          h('path', { d: wire, fill: 'none', stroke: line, 'stroke-width': 2, opacity: 0.6 }) +
+          beads;
+      }
+      return out;
+    }
+    case 'loops': {
+      // Tumble: looping somersault arrows and little tumbling cubes.
+      let out = '';
+      for (const [x, y, s] of [
+        [-40, -70, 1],
+        [34, 40, 0.85],
+        [-30, 110, 0.7],
+      ] as const) {
+        const ox = cx + x;
+        const oy = cy + y;
+        const r = 24 * s;
+        const d =
+          M(ox - r * 2, oy + r) +
+          Q(ox - r * 0.6, oy + r * 1.1, ox - r * 0.2, oy) +
+          Q(ox + r * 0.2, oy - r * 1.4, ox - r * 0.8, oy - r) +
+          Q(ox - r * 1.6, oy - r * 0.2, ox, oy + r * 0.9) +
+          Q(ox + r * 0.9, oy + r * 1.3, ox + r * 1.9, oy + r * 0.2);
+        out +=
+          h('path', {
+            d,
+            fill: 'none',
+            stroke: accent,
+            'stroke-width': 5 * s,
+            'stroke-linecap': 'round',
+          }) +
+          h('path', {
+            d:
+              M(ox + r * 1.3, oy + r * 0.1) +
+              L(ox + r * 1.9, oy + r * 0.2) +
+              L(ox + r * 1.7, oy + r * 0.8),
+            fill: 'none',
+            stroke: accent,
+            'stroke-width': 5 * s,
+            'stroke-linecap': 'round',
+            'stroke-linejoin': 'round',
+          });
+      }
+      for (const [x, y, a] of [
+        [50, -40, 15],
+        [-62, 20, -12],
+        [56, 108, 24],
+        [10, -112, -20],
+      ] as const)
+        out += h('rect', {
+          x: cx + x - 9,
+          y: cy + y - 9,
+          width: 18,
+          height: 18,
+          rx: 4,
+          fill: ctx.paint.accent2,
+          stroke: outlineOf(ctx.paint.accent2, 0.55),
+          'stroke-width': 2,
+          transform: `rotate(${a} ${cx + x} ${cy + y})`,
+        });
+      return out;
+    }
+    case 'coins': {
+      // Penny: a scatter of shiny coins, each with an inner ring.
+      let out = '';
+      for (const [x, y, r] of [
+        [-46, -74, 20],
+        [38, -96, 14],
+        [50, -14, 22],
+        [-30, 10, 16],
+        [-58, 82, 14],
+        [24, 84, 20],
+      ] as const) {
+        out +=
+          h('circle', {
+            cx: cx + x,
+            cy: cy + y,
+            r,
+            fill: accent,
+            stroke: line,
+            'stroke-width': 2.2,
+          }) +
+          h('circle', {
+            cx: cx + x,
+            cy: cy + y,
+            r: r * 0.72,
+            fill: ctx.paint.accent2,
+            stroke: line,
+            'stroke-width': 1.4,
+          }) +
+          h('path', {
+            d: sparkleD(cx + x - r * 0.3, cy + y - r * 0.3, r * 0.35),
+            fill: '#ffffff',
+            opacity: 0.85,
+          });
+      }
+      return out;
+    }
     default: {
       let out = '';
       for (const [x, y, r] of [
