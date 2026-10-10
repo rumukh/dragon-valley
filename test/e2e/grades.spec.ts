@@ -1,8 +1,8 @@
 /**
  * The class a keeper is in (docs/grades-plan.md): the new-keeper editor asks "Which class is
  * <name> in?" after the name and the picture, 3rd class chosen until another is, and the
- * grown-ups can change it per keeper behind the gate. Every class from 1st to 3rd has its lessons:
- * none is refused.
+ * grown-ups can change it per keeper behind the gate, or the child can from the class chip on the
+ * hub (a yes, then the gate). Every class from 1st to 3rd has its lessons: none is refused.
  *
  * A 1st grader starts in the Lower Valley: the prologue, then Pebble Brook 1, where the brook
  * offers Dot's, Hop's or Nibble's egg. Counting problems show dots and never their number, on
@@ -29,6 +29,7 @@ import {
   loadBackup,
   newFamily,
   openGrownUps,
+  passGate,
   playAs,
   playRound,
   results,
@@ -91,6 +92,77 @@ test('the editor asks for the class; every class is accepted, in the editor and 
     }
   }
   await expect(page.getByTestId('toast').filter({ hasText: 'no lessons' })).toHaveCount(0);
+});
+
+test('the class chip on the hub switches the class after a yes and the grown-ups gate', async ({
+  page,
+}) => {
+  await boot(page);
+  await page.getByTestId('title-play').click();
+  await fillKeeper(page, { name: 'Lea' });
+  await page.getByTestId('grade-1').click();
+  await page.getByTestId('keeper-save').click();
+  await page.getByTestId('story-skip').click();
+  await expectHub(page, 'Lea');
+
+  const chip = page.getByTestId('hub-class');
+  await expect(chip).toHaveText(/1st class/);
+  await expect(chip).toHaveAttribute('aria-label', '1st class. Change class');
+  await expect(page.getByTestId('hub-sun-window')).toBeVisible();
+
+  // The picker marks the class Lea is in; No keeps it.
+  await chip.click();
+  const picker = page.getByTestId('class-picker');
+  await expect(picker).toBeVisible();
+  await expect(picker.getByRole('heading')).toHaveText('Which class are you in?');
+  await expect(page.getByTestId('class-pick-1')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('class-pick-1')).toBeFocused();
+  await page.getByTestId('class-pick-3').click();
+  await expect(picker.getByRole('heading')).toHaveText('Switch to 3rd class?');
+  await page.getByTestId('class-confirm-no').click();
+  await expect(picker).toHaveCount(0);
+  await expect(chip).toHaveText(/1st class/);
+  await expect(chip, 'focus comes back to the chip').toBeFocused();
+
+  // Escape on the gate changes nothing either.
+  await chip.click();
+  await page.getByTestId('class-pick-3').click();
+  await page.getByTestId('class-confirm-yes').click();
+  await expect(page.getByTestId('parent-gate')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByTestId('parent-gate')).toHaveCount(0);
+  await expect(chip).toHaveText(/1st class/);
+
+  // Yes and the gate: now in 3rd class, with the Magic Window.
+  await chip.click();
+  await page.getByTestId('class-pick-3').click();
+  await page.getByTestId('class-confirm-yes').click();
+  await passGate(page);
+  await expect(
+    page.getByTestId('toast').filter({ hasText: 'Now you are in 3rd class!' }),
+  ).toBeVisible();
+  await expectHub(page, 'Lea');
+  await expect(chip).toHaveText(/3rd class/);
+  await expect(page.getByTestId('hub-window')).toBeVisible();
+  await expect(page.getByTestId('hub-sun-window')).toHaveCount(0);
+
+  // With the keyboard, back to 2nd class: the Sun Window again.
+  await chip.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('class-pick-3')).toBeFocused();
+  await page.getByTestId('class-pick-2').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByTestId('class-confirm-yes')).toBeVisible();
+  await page.getByTestId('class-confirm-yes').focus();
+  await page.keyboard.press('Enter');
+  await passGate(page, 'keyboard');
+  await expect(chip).toHaveText(/2nd class/);
+  await expect(page.getByTestId('hub-sun-window')).toBeVisible();
+
+  // The grown-ups' area shows the same class.
+  await leaveHub(page);
+  await openGrownUps(page, 'settings');
+  await expect(page.getByTestId('setting-grade-2')).toHaveAttribute('aria-pressed', 'true');
 });
 
 /** Next through a story beat until its choices of egg are offered (`egg` among them). */

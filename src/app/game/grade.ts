@@ -53,28 +53,35 @@ export function autoReadsByDefault(grade: Grade): boolean {
   return grade === 1;
 }
 
+/** What became of a grade request: kept, changed, or refused and why. */
+export type GradeChange = 'same' | 'changed' | 'unavailable' | 'round-active';
+
 /**
  * Ask the game for a grade. Content that does not serve the grade yet refuses it
- * (`invalid-setting`), and a placement round refuses a change (`round-active`); either leaves
- * the game as it is and returns false.
+ * (`unavailable`), and a placement round refuses a change (`round-active`); either leaves the
+ * game as it is.
  */
-export async function requestGrade(active: ActiveKeeper, grade: Grade): Promise<boolean> {
-  if (gradeOf(active.game.view()) === grade) return true;
+export async function changeGrade(active: ActiveKeeper, grade: Grade): Promise<GradeChange> {
+  if (gradeOf(active.game.view()) === grade) return 'same';
   try {
     await active.commands.capture()({
       type: 'setSetting',
       setting: { key: 'grade', value: grade },
     });
-    return true;
+    return 'changed';
   } catch (error) {
-    if (
-      error instanceof CommandRejectedError &&
-      (error.error.code === 'invalid-setting' || error.error.code === 'round-active')
-    ) {
-      return false;
+    if (error instanceof CommandRejectedError) {
+      if (error.error.code === 'invalid-setting') return 'unavailable';
+      if (error.error.code === 'round-active') return 'round-active';
     }
     throw error;
   }
+}
+
+/** `changeGrade` as a yes or no: true when the keeper is in `grade` afterwards. */
+export async function requestGrade(active: ActiveKeeper, grade: Grade): Promise<boolean> {
+  const result = await changeGrade(active, grade);
+  return result === 'same' || result === 'changed';
 }
 
 /**

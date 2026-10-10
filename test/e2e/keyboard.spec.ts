@@ -121,6 +121,7 @@ test('a keyboard alone makes a keeper and starts a round, with focus always visi
   const hub = await around(page, 'hub-greeting');
   expect([...hub.before, 'hub-greeting', ...hub.after]).toEqual([
     'hub-back',
+    'hub-class',
     'hub-greeting',
     'hub-adventure',
     'hub-map',
