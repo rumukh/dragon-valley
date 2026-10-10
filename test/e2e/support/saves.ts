@@ -118,6 +118,25 @@ export async function brookBackupBefore(level: string): Promise<string> {
   return youngBackupBefore(1, 'pebble-brook', 'hop', BROOK_LEVELS.slice(0, index), level);
 }
 
+/** A 1st grader's year in order (content 1.6.0): three regions of six lessons and a boss. */
+const GRADE_ONE_LEVELS = ['pebble-brook', 'mushroom-hollow', 'rainbow-ford'].flatMap((region) => [
+  ...Array.from({ length: 6 }, (_, index) => `${region}.${index + 1}`),
+  `${region}.boss`,
+]);
+
+/**
+ * A 1st grader who chose Hop's egg at the brook and has played the 1st grade in order up to
+ * `level`, which is open and not yet played: a Mushroom Hollow or Rainbow Ford level, or
+ * `hundred-hills.1` once Kašpárek is won over.
+ */
+export async function gradeOneBackupBefore(level: string): Promise<string> {
+  const index =
+    level === 'hundred-hills.1' ? GRADE_ONE_LEVELS.length : GRADE_ONE_LEVELS.indexOf(level);
+  if (index < 0) throw new Error(`${level} is not one of the 1st grade's levels.`);
+  const region = level.slice(0, level.indexOf('.'));
+  return youngBackupBefore(1, region, 'hop', GRADE_ONE_LEVELS.slice(0, index), level);
+}
+
 /**
  * A 2nd grader who chose Bead's egg at Hundred Hills and has played its lessons in order up to
  * `level`, which is open and not yet played.

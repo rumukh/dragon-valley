@@ -547,3 +547,99 @@ export async function playBundleSticks(page: Page, via: BoardVia): Promise<void>
     'Bundle Sticks ends in its results or the next round of the lesson',
   ).toBeVisible();
 }
+
+interface TenFrameGoal {
+  readonly task: 'show' | 'make-ten' | 'cross';
+  /** The counters the board starts with, in the first frame. */
+  readonly given: number;
+  /** How many counters the two frames should hold. */
+  readonly target: number;
+}
+
+function readTenFrameGoal(text: string): TenFrameGoal | null {
+  const show = /Show (\d+) in the frames/.exec(text);
+  if (show) return { task: 'show', given: 0, target: Number(show[1]) };
+  const makeTen = /Here are (\d+)\. Fill the frame to ten/.exec(text);
+  if (makeTen) return { task: 'make-ten', given: Number(makeTen[1]), target: 10 };
+  const cross = /(\d+) \+ (\d+): fill ten first/.exec(text);
+  if (!cross) return null;
+  return { task: 'cross', given: Number(cross[1]), target: Number(cross[1]) + Number(cross[2]) };
+}
+
+/** The counters in each frame, as drawn. */
+async function countersInFrames(page: Page): Promise<[number, number]> {
+  const count = async (frame: number) =>
+    Number((await attributeOf(page.getByTestId(`ten-frame-${frame}`), 'data-count')) ?? 'NaN');
+  return [await count(0), await count(1)];
+}
+
+/**
+ * Ten Frame, played from the goal line: fill the first frame (to ten, or to the number shown),
+ * then put the rest in the second, by pressing the place the counters should reach; then Check.
+ * The first board is checked once too early, which only says "not quite yet" and leaves the
+ * counters where they are. Returns the tasks met.
+ */
+export async function playTenFrame(page: Page, via: BoardVia): Promise<TenFrameGoal['task'][]> {
+  await expect(page.getByTestId('screen-minigame'), 'Ten Frame opens as a minigame').toBeVisible();
+  const tasks: TenFrameGoal['task'][] = [];
+  let provedNotYet = false;
+  for (let board = 0; board < 12 && (await page.getByTestId('ten-frames').isVisible()); board++) {
+    const progress = Number(
+      (await attributeOf(page.getByTestId('minigame-progress'), 'aria-valuenow')) ?? '0',
+    );
+    let goal: TenFrameGoal | null = null;
+    await expect
+      .poll(
+        async () => (goal = readTenFrameGoal((await minigameStatus(page).textContent()) ?? '')),
+        {
+          message: 'the board says what to show',
+        },
+      )
+      .not.toBeNull();
+    const { task, given, target } = goal!;
+    tasks.push(task);
+    const start = await countersInFrames(page);
+    expect(start, 'the board starts with its given counters in the first frame').toEqual([
+      given,
+      0,
+    ]);
+    await expect(
+      page.getByTestId('ten-frame-0').locator('[data-kind="given"]'),
+      'the given counters are drawn as given',
+    ).toHaveCount(given);
+
+    if (!provedNotYet && given !== target) {
+      await pressButton(page.getByTestId('ten-frame-check'), via);
+      await expect(minigameStatus(page), 'checking too early is only "not yet"').toContainText(
+        'Not quite yet',
+      );
+      expect(await countersInFrames(page), 'and leaves the counters as they were').toEqual(start);
+      provedNotYet = true;
+    }
+
+    const want: [number, number] = [Math.min(target, 10), Math.max(0, target - 10)];
+    for (const frame of [0, 1] as const) {
+      if (want[frame] > (await countersInFrames(page))[frame]) {
+        const before = await countersInFrames(page);
+        await pressButton(page.getByTestId(`ten-frame-${frame}-${want[frame] - 1}`), via);
+        await expect
+          .poll(async () => (await countersInFrames(page))[frame], {
+            message: `frame ${frame + 1} fills to ${want[frame]}`,
+          })
+          .not.toBe(before[frame]);
+      }
+    }
+    expect(await countersInFrames(page), 'the frames show the answer').toEqual(want);
+    await expect(
+      page.getByTestId('ten-frames').locator('[data-kind="added"]'),
+      'the added counters are drawn as added',
+    ).toHaveCount(target - given);
+    await pressButton(page.getByTestId('ten-frame-check'), via);
+    if ((await waitForBoardAdvance(page, progress)) === 'ended') break;
+  }
+  await expect(
+    results(page).or(page.getByTestId('screen-round')),
+    'Ten Frame ends in its results or the next round of the lesson',
+  ).toBeVisible();
+  return tasks;
+}

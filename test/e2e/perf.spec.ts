@@ -30,17 +30,21 @@ const MB = 1_000_000;
 
 /** Upper bounds, in bytes; today's values are in docs/qa/performance.md. */
 const SIZE_BUDGETS = {
-  // Raised from 750 / 250 KB for grades 1-3 (rules, art and screens for the young players).
-  script: { built: 800 * KB, gzipped: 260 * KB },
+  // Raised from 750 / 250 KB for grades 1-3 (rules, art and screens for the young players), then
+  // from 800 / 260 KB for 1st grade's Mushroom Hollow and Rainbow Ford (two bosses, two dragons).
+  script: { built: 820 * KB, gzipped: 265 * KB },
   style: { built: 100 * KB, gzipped: 20 * KB },
   /** The offline pack without its audio (S5 holds the audio to 8 MB). */
   // Raised from 2.5 MB for grades 1-3 (the Lower Valley map sheet and the young screens), then
-  // from 3 MB for grade 2: its two backgrounds, the redrawn map sheet and the archived 1.4.0 pack.
-  packWithoutAudio: 3.6 * MB,
-  pack: 10.5 * MB,
+  // from 3 MB for grade 2: its two backgrounds, the redrawn map sheet and the archived 1.4.0 pack,
+  // then from 3.6 / 10.5 MB for Mushroom Hollow and Rainbow Ford: the archived 1.5.0 pack, two
+  // backgrounds, the content and the script.
+  packWithoutAudio: 4 * MB,
+  pack: 11 * MB,
   /** Bytes a first visit downloads before its first screen is ready, uncompressed. */
-  // Raised from 1.3 MB for grade 2 (Hundred Hills and Market Square in the content and the script).
-  firstScreen: 1.4 * MB,
+  // Raised from 1.3 MB for grade 2 (Hundred Hills and Market Square in the content and the script),
+  // then from 1.4 MB for Mushroom Hollow and Rainbow Ford (the same).
+  firstScreen: 1.45 * MB,
 };
 
 interface Profile {
