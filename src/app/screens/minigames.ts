@@ -559,9 +559,12 @@ function factFamily(context: BoardContext): BoardPainter {
 
 // ---- the screen -----------------------------------------------------------------------------
 
+// G4: Ten Frame and Bundle Sticks have no painter yet; they show the kind "cannot draw" message.
 const PAINTERS: {
-  readonly [K in BoardView['kind']]: (context: BoardContext) => BoardPainter;
-} = {
+  readonly [K in Exclude<BoardView['kind'], 'ten-frame' | 'bundle-sticks'>]: (
+    context: BoardContext,
+  ) => BoardPainter;
+} & { readonly [K in 'ten-frame' | 'bundle-sticks']?: (context: BoardContext) => BoardPainter } = {
   'memory-match': memoryMatch,
   'number-trail': numberTrail,
   'egg-grid': eggGrid,
@@ -662,7 +665,7 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     notation: () => active.preferences.current().notation,
   };
 
-  const painter = kind ? PAINTERS[kind](context) : null;
+  const painter = kind ? (PAINTERS[kind]?.(context) ?? null) : null;
 
   /** The grown-ups' time limit ends the round gently, between moves. */
   const endForRest = async (): Promise<boolean> => {

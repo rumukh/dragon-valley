@@ -10,13 +10,14 @@ import { EVENTS } from '../contract';
 import type { ProblemRound } from '../contract';
 import { earnCoins, grantEgg, grantItem } from '../economy/rewards';
 import { isComplete, openRegions } from './levels';
+import { placementFor } from './ladder';
 import { playableSkills, startProblemRound } from './problems';
 import type { Index } from './problems';
-import type { Ctx, Data } from '../types';
+import type { Ctx, Data, ReadState } from '../types';
 
-/** Why the placement check cannot start, or `null`. */
-export function placementProblem(data: Data, index: Index): string | null {
-  const first = data.placement.steps[0];
+/** Why the placement check cannot start for the child's grade, or `null`. */
+export function placementProblem(state: ReadState, data: Data, index: Index): string | null {
+  const first = placementFor(data.placement, state.settings.grade).steps[0];
   return first === undefined || playableSkills(data, [first.skill], index).length === 0
     ? 'There is no placement check in this content.'
     : null;
@@ -24,11 +25,8 @@ export function placementProblem(data: Data, index: Index): string | null {
 
 export function startPlacement(ctx: Ctx, index: Index): void {
   const data = ctx.content.data;
-  const skills = playableSkills(
-    data,
-    [...new Set(data.placement.steps.map((s) => s.skill))],
-    index,
-  );
+  const ladder = placementFor(data.placement, ctx.state.settings.grade);
+  const skills = playableSkills(data, [...new Set(ladder.steps.map((s) => s.skill))], index);
   startProblemRound(ctx, index, {
     activity: 'placement',
     source: { kind: 'placement' },

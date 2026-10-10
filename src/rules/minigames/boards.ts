@@ -22,13 +22,17 @@ import type { Json, MinigameDefinition, MinigameState } from '@aegis/narrative';
 import type { DeepReadonly, RandomStream } from '@aegis/runtime';
 import {
   CARD_BACK_LABEL,
+  addFactId,
   bucketId,
   divFactId,
   mulFactId,
   parseCardLabel,
   parseItemId,
+  subFactId,
 } from '../contract';
 import type {
+  AddSubShape,
+  BundleSticksBoard,
   BoardView,
   EggGridBoard,
   EggGridSplit,
@@ -36,9 +40,11 @@ import type {
   FactFamilyBoard,
   GolemOrdersBoard,
   MinigameActivityKind,
+  NumberTrailBoard,
   ResponseBucket,
   SharingFeastBoard,
   Skill,
+  TenFrameBoard,
   Term,
 } from '../contract';
 import { orderProblem } from '../learning/generators/order';
@@ -47,6 +53,10 @@ import { EGG_GRID_KIND, eggGridAdapter, rectangles } from './egg-grid';
 import type { EggGridConfig, EggGridState } from './egg-grid';
 import { FACT_FAMILY_KIND, factFamilyAdapter } from './fact-family';
 import type { FactFamilyConfig, FactFamilyState } from './fact-family';
+import { TEN_FRAME_KIND, tenFrameAdapter } from './ten-frame';
+import type { TenFrameConfig, TenFrameState } from './ten-frame';
+import { BUNDLE_STICKS_KIND, bundleSticksAdapter } from './bundle-sticks';
+import type { BundleSticksConfig, BundleSticksState } from './bundle-sticks';
 import { GOLEM_ORDERS_KIND, bracketed, golemOrdersAdapter, readsAsComputed } from './golem-orders';
 import type { GolemOrdersConfig, GolemOrdersState } from './golem-orders';
 import { SHARING_FEAST_KIND, sharingFeastAdapter } from './sharing-feast';
@@ -58,7 +68,9 @@ export const MINIGAMES = createMinigameRegistry()
   .register(eggGridAdapter)
   .register(factFamilyAdapter)
   .register(sharingFeastAdapter)
-  .register(golemOrdersAdapter);
+  .register(golemOrdersAdapter)
+  .register(tenFrameAdapter)
+  .register(bundleSticksAdapter);
 
 export type Options = Readonly<Record<string, number | boolean | string>>;
 
@@ -102,6 +114,12 @@ function factValue(item: string): { face: string; value: number } | null {
   const parsed = parseItemId(item);
   if (parsed?.kind === 'mul') return { face: `fact:${item}`, value: parsed.product };
   if (parsed?.kind === 'div') return { face: `fact:${item}`, value: parsed.quotient };
+  // Additive faces are `expr:` labels: `+` is not allowed in a narrative ID (`fact:add:3+5`).
+  if (parsed?.kind === 'add')
+    return { face: `expr:add:${parsed.a}:${parsed.b}`, value: parsed.sum };
+  if (parsed?.kind === 'sub') {
+    return { face: `expr:sub:${parsed.minuend}:${parsed.subtrahend}`, value: parsed.difference };
+  }
   return null;
 }
 
@@ -156,9 +174,35 @@ function families(pool: readonly string[]): { item: string; a: number; b: number
   });
 }
 
-/** Steps a number trail can count in: the tables of the round's skills, from 2 up. */
-function trailSteps(skills: readonly DeepReadonly<Skill>[]): number[] {
+/** Additive families `a + b = sum`, by addition or subtraction item. */
+function additiveFamilies(pool: readonly string[]): { item: string; a: number; b: number }[] {
+  return pool.flatMap((item) => {
+    const parsed = parseItemId(item);
+    if (parsed?.kind === 'add' && parsed.a !== parsed.b)
+      return [{ item, a: parsed.a, b: parsed.b }];
+    if (parsed?.kind === 'sub' && parsed.subtrahend !== parsed.difference) {
+      return [{ item, a: parsed.subtrahend, b: parsed.difference }];
+    }
+    return [];
+  });
+}
+
+interface TrailCandidate {
+  step: number;
+  length: number;
+  start: number;
+  direction?: 'up' | 'down';
+}
+
+/** Steps a number trail can count in: multiplication tables, or grade 1-2 counting trails. */
+function trailCandidates(
+  skills: readonly DeepReadonly<Skill>[],
+  options: Options = {},
+): TrailCandidate[] {
+  const requestedLength = Number(options['length'] ?? 10);
   const steps = new Set<number>();
+  let additiveMax = 0;
+  let hasYoungSkill = false;
   for (const skill of skills) {
     if (skill.generator === 'mul.fact' || skill.generator === 'mul.missing') {
       skill.params.tables.forEach((table) => steps.add(table));
@@ -167,9 +211,42 @@ function trailSteps(skills: readonly DeepReadonly<Skill>[]): number[] {
     } else if (skill.generator === 'mul.tens') {
       // Count in whole tens: 30, 60, 90, … (tens times one digit).
       range(skill.params.tens).forEach((tens) => steps.add(tens * 10));
+    } else if (skill.generator === 'num.count' || skill.generator === 'num.compare') {
+      hasYoungSkill = true;
+      additiveMax = Math.max(additiveMax, skill.params.numbers[1]);
+    } else if (skill.generator === 'num.place') {
+      hasYoungSkill = true;
+      additiveMax = Math.max(additiveMax, skill.params.numbers[1]);
+    } else if (skill.generator === 'add.fact') {
+      hasYoungSkill = true;
+      additiveMax = Math.max(additiveMax, skill.params.sumMax);
+    } else if (skill.generator === 'sub.fact') {
+      hasYoungSkill = true;
+      additiveMax = Math.max(additiveMax, skill.params.minuendMax);
+    } else if (skill.generator === 'add.missing') {
+      hasYoungSkill = true;
+      additiveMax = Math.max(additiveMax, skill.params.sumMax);
+    } else if (skill.generator === 'addsub.2d') {
+      hasYoungSkill = true;
+      additiveMax = Math.max(additiveMax, skill.params.resultMax);
     }
   }
-  return [...steps].filter((step) => step >= 2).sort((a, b) => a - b);
+  const tableTrails = [...steps]
+    .filter((step) => step >= 2)
+    .sort((a, b) => a - b)
+    .map((step) => ({ step, length: requestedLength, start: step }) satisfies TrailCandidate);
+  if (tableTrails.length > 0 || !hasYoungSkill) return tableTrails;
+
+  const max = Math.max(additiveMax, 10);
+  const candidates: TrailCandidate[] = [];
+  for (const step of [1, 2, 10]) {
+    const length = Math.min(requestedLength, Math.floor(max / step) + 1);
+    if (length >= 3) candidates.push({ step, length, start: 0 });
+  }
+  const downLength = Math.min(requestedLength, max + 1);
+  if (downLength >= 3)
+    candidates.push({ step: 1, length: downLength, start: max, direction: 'down' });
+  return candidates;
 }
 
 /** Distinct-value pairs a Memory Match board can deal in its mode. */
@@ -184,7 +261,17 @@ function matchable(
   }
   if (mode === 'family') {
     return new Set(
-      pool.map((item) => parseItemId(item)).flatMap((p) => (p?.kind === 'mul' ? [p.product] : [])),
+      pool
+        .map((item) => parseItemId(item))
+        .flatMap((p) =>
+          p?.kind === 'mul'
+            ? [p.product]
+            : p?.kind === 'add'
+              ? [p.sum]
+              : p?.kind === 'sub'
+                ? [p.minuend]
+                : [],
+        ),
     ).size;
   }
   const values = new Set<string>(
@@ -217,6 +304,149 @@ function range([low, high]: readonly [number, number] | readonly number[]): numb
 
 function fits(requirement: 'required' | 'allowed' | 'forbidden', holds: boolean): boolean {
   return requirement === 'allowed' || (requirement === 'required') === holds;
+}
+
+function addCrossesTen(a: number, b: number): boolean {
+  return a % 10 !== 0 && b % 10 !== 0 && (a % 10) + (b % 10) > 10;
+}
+
+function shapeOperands(
+  shape: AddSubShape,
+  twoDigit: readonly [number, number],
+): { first: number[]; second: number[] } {
+  const two = range(twoDigit);
+  if (shape === 'tens') {
+    const tens = two.filter((n) => n % 10 === 0);
+    return { first: tens, second: tens };
+  }
+  return { first: two, second: shape === '2d1d' ? range([1, 9]) : two };
+}
+
+function optionTask<T extends string>(
+  options: Options,
+  allowed: readonly T[],
+  fallback: T | 'mix',
+) {
+  const task = options['task'];
+  return typeof task === 'string' && (allowed as readonly string[]).includes(task)
+    ? (task as T)
+    : fallback;
+}
+
+interface TenFrameSource {
+  item: string;
+  task: TenFrameConfig['task'];
+  a: number;
+  b: number | null;
+  target: number;
+}
+
+function tenFrameSources(
+  pool: readonly string[],
+  skills: readonly DeepReadonly<Skill>[],
+  options: Options = {},
+): TenFrameSource[] {
+  const wanted = optionTask(options, ['show', 'make-ten', 'cross'] as const, 'mix');
+  const sources: TenFrameSource[] = [];
+  const push = (source: TenFrameSource) => {
+    if (wanted === 'mix' || source.task === wanted) sources.push(source);
+  };
+  for (const item of pool) {
+    const parsed = parseItemId(item);
+    if (parsed?.kind === 'add' && parsed.a <= 10 && parsed.b <= 10 && parsed.sum <= 20) {
+      if (parsed.sum > 10 && parsed.a < 10 && parsed.b > 10 - parsed.a) {
+        push({ item, task: 'cross', a: parsed.a, b: parsed.b, target: parsed.sum });
+      } else if (parsed.sum === 10) {
+        push({ item, task: 'make-ten', a: parsed.a, b: null, target: 10 });
+      } else {
+        push({ item, task: 'show', a: 0, b: null, target: parsed.sum });
+      }
+    }
+  }
+  for (const skill of skills) {
+    if (skill.generator !== 'num.count') continue;
+    for (const item of pool) {
+      const parsed = parseItemId(item);
+      if (parsed?.kind !== 'bucket' || parsed.family !== 'count') continue;
+      const [low, high] = skill.params.numbers;
+      for (const target of range([Math.max(0, low), Math.min(20, high)])) {
+        push({ item, task: 'show', a: 0, b: null, target });
+      }
+    }
+  }
+  return sources;
+}
+
+interface BundleSource {
+  item: string;
+  task: BundleSticksConfig['task'];
+  target: number | null;
+  a: number | null;
+  b: number | null;
+}
+
+function addSub2dExamples(
+  skill: Extract<DeepReadonly<Skill>, { generator: 'addsub.2d' }>,
+  item: string,
+): BundleSource[] {
+  const parsed = parseItemId(item);
+  if (parsed?.kind !== 'bucket' || (parsed.family !== 'add2d' && parsed.family !== 'sub2d'))
+    return [];
+  const match = /^(tens|2d1d|2d2d)-(carry|nocarry|borrow|noborrow)$/.exec(parsed.bucket);
+  if (!match) return [];
+  const shape = match[1] as AddSubShape;
+  if (!skill.params.shapes.includes(shape)) return [];
+  const task = parsed.family === 'add2d' ? 'add' : 'sub';
+  if (!skill.params.operators.includes(task)) return [];
+  const crosses = match[2] === 'carry' || match[2] === 'borrow';
+  if (!fits(skill.params.crossing, crosses)) return [];
+  const { first, second } = shapeOperands(shape, skill.params.twoDigit);
+  const examples: BundleSource[] = [];
+  for (const a of first) {
+    for (const b of second) {
+      if (task === 'add') {
+        if (a + b <= skill.params.resultMax && addCrossesTen(a, b) === crosses) {
+          examples.push({ item, task, target: null, a, b });
+        }
+      } else if (a >= b && a <= skill.params.resultMax && a % 10 < b % 10 === crosses) {
+        examples.push({ item, task, target: null, a, b });
+      }
+    }
+  }
+  return examples;
+}
+
+function bundleSources(
+  pool: readonly string[],
+  skills: readonly DeepReadonly<Skill>[],
+  options: Options = {},
+): BundleSource[] {
+  const wanted = optionTask(options, ['build', 'add', 'sub'] as const, 'mix');
+  const sources: BundleSource[] = [];
+  const push = (source: BundleSource) => {
+    if (wanted === 'mix' || source.task === wanted) sources.push(source);
+  };
+  for (const skill of skills) {
+    if (skill.generator === 'num.place') {
+      for (const item of pool) {
+        const parsed = parseItemId(item);
+        if (parsed?.kind !== 'bucket' || parsed.family !== 'place') continue;
+        for (const target of range(skill.params.numbers))
+          push({ item, task: 'build', target, a: null, b: null });
+      }
+    } else if (skill.generator === 'addsub.2d') {
+      for (const item of pool) for (const source of addSub2dExamples(skill, item)) push(source);
+    }
+  }
+  return sources.filter((source) => {
+    const result =
+      source.task === 'build'
+        ? (source.target ?? 0)
+        : source.task === 'add'
+          ? (source.a ?? 0) + (source.b ?? 0)
+          : (source.a ?? 0) - (source.b ?? 0);
+    return result >= 0 && result <= 100;
+  });
 }
 
 /**
@@ -305,15 +535,19 @@ export function canMakeBoard(
     case 'memory-match':
       return matchable(pool, skills, options['match']) >= 2;
     case 'number-trail':
-      return trailSteps(skills).length > 0;
+      return trailCandidates(skills, options).length > 0;
     case 'egg-grid':
       return eggProducts(pool).length > 0;
     case 'fact-family':
-      return families(pool).length > 0;
+      return families(pool).length + additiveFamilies(pool).length > 0;
     case 'sharing-feast':
       return feasts(pool, skills).length > 0;
     case 'golem-orders':
       return golemSkills(pool, skills).length > 0;
+    case 'ten-frame':
+      return tenFrameSources(pool, skills, options).length > 0;
+    case 'bundle-sticks':
+      return bundleSources(pool, skills, options).length > 0;
   }
 }
 
@@ -355,9 +589,19 @@ function eggGridConfig(request: BoardRequest): EggGridConfig {
 }
 
 function factFamilyConfig(request: BoardRequest): FactFamilyConfig {
-  const previous = request.previous?.config as { a?: number; b?: number } | undefined;
+  const previous = request.previous?.config as
+    { a?: number; b?: number; operation?: string } | undefined;
+  const additive = additiveFamilies(request.pool);
+  if (families(request.pool).length === 0 && additive.length > 0) {
+    const sameAdd = (e: { a: number; b: number }) =>
+      previous?.operation === 'add' &&
+      ((e.a === previous.a && e.b === previous.b) || (e.a === previous.b && e.b === previous.a));
+    const family = request.random.pick(prefer(additive, request, sameAdd));
+    return { a: family.a, b: family.b, product: family.a + family.b, operation: 'add' };
+  }
   const same = (e: { a: number; b: number }) =>
     previous !== undefined &&
+    previous.operation !== 'add' &&
     ((e.a === previous.a && e.b === previous.b) || (e.a === previous.b && e.b === previous.a));
   const family = request.random.pick(prefer(families(request.pool), request, same));
   return { a: family.a, b: family.b, product: family.a * family.b };
@@ -400,18 +644,41 @@ function valuePairs(request: BoardRequest): MemoryPair[] {
 function familyPairs(request: BoardRequest): MemoryPair[] {
   return request.pool.flatMap((item) => {
     const parsed = parseItemId(item);
-    if (parsed?.kind !== 'mul' || parsed.a < 1 || parsed.b < 1) return [];
-    const { a, b, product } = parsed;
-    return [
-      {
-        pair: `fam:${item}`,
-        faces: [
-          `example:mul:${a}:${b}:${product}:-:none`,
-          `example:div:${product}:${b}:${a}:-:none`,
-        ],
-        value: `${product}`,
-      } satisfies MemoryPair,
-    ];
+    if (parsed?.kind === 'mul' && parsed.a >= 1 && parsed.b >= 1) {
+      const { a, b, product } = parsed;
+      return [
+        {
+          pair: `fam:${item}`,
+          faces: [
+            `example:mul:${a}:${b}:${product}:-:none`,
+            `example:div:${product}:${b}:${a}:-:none`,
+          ],
+          value: `${product}`,
+        } satisfies MemoryPair,
+      ];
+    }
+    if (parsed?.kind === 'add') {
+      return [
+        {
+          pair: `fam:${item}`,
+          faces: [`expr:add:${parsed.a}:${parsed.b}`, `expr:sub:${parsed.sum}:${parsed.a}`],
+          value: `${parsed.sum}`,
+        } satisfies MemoryPair,
+      ];
+    }
+    if (parsed?.kind === 'sub') {
+      return [
+        {
+          pair: `fam:${item}`,
+          faces: [
+            `expr:add:${parsed.difference}:${parsed.subtrahend}`,
+            `expr:sub:${parsed.minuend}:${parsed.subtrahend}`,
+          ],
+          value: `${parsed.minuend}`,
+        } satisfies MemoryPair,
+      ];
+    }
+    return [];
   });
 }
 
@@ -447,11 +714,24 @@ function termPairs(request: BoardRequest): MemoryPair[] {
   return pairs;
 }
 
+/**
+ * A pair ID as a narrative stable ID: `+` (in `add:3+5`) is not allowed there, and no item ID
+ * uses `_`, so `+` is stored as `_` (`add:3_5`, `fam:add:3_5`) and restored by `pairItems`.
+ */
+export function pairStableId(pair: string): string {
+  return pair.replaceAll('+', '_');
+}
+
 /** Items a matched pair practised. */
-function pairItems(pair: string): string[] {
+function pairItems(stored: string): string[] {
+  const pair = stored.replaceAll('_', '+');
   if (pair.startsWith('fam:')) {
     const parsed = parseItemId(pair.slice(4));
-    return parsed?.kind === 'mul' ? [pair.slice(4), divFactId(parsed.product, parsed.b)] : [];
+    if (parsed?.kind === 'mul') return [pair.slice(4), divFactId(parsed.product, parsed.b)];
+    if (parsed?.kind === 'add') return [pair.slice(4), subFactId(parsed.sum, parsed.a)];
+    if (parsed?.kind === 'sub')
+      return [pair.slice(4), addFactId(parsed.difference, parsed.subtrahend)];
+    return [];
   }
   const slash = pair.indexOf('/');
   return [slash === -1 ? pair : pair.slice(0, slash)];
@@ -486,7 +766,7 @@ function memoryConfig(request: BoardRequest): MatchingConfig {
   return {
     cards: cards.map((card, index) => ({
       id: `c${index + 1}`,
-      pair: card.pair,
+      pair: pairStableId(card.pair),
       labelKey: card.labelKey,
       backLabelKey: CARD_BACK_LABEL,
     })),
@@ -494,11 +774,17 @@ function memoryConfig(request: BoardRequest): MatchingConfig {
 }
 
 function trailConfig(request: BoardRequest): { config: OrderingConfig; id: string } {
-  const steps = trailSteps(request.skills);
-  const previous = request.previous === null ? null : trailShape(request.previous.id)?.step;
-  const fresh = steps.filter((step) => step !== previous);
-  const step = request.random.pick(fresh.length > 0 ? fresh : steps);
-  const length = Number(request.options['length'] ?? 10);
+  const trails = trailCandidates(request.skills, request.options);
+  const previous = request.previous === null ? null : trailShape(request.previous.id);
+  const same = (trail: TrailCandidate) =>
+    previous !== null &&
+    trail.step === previous.step &&
+    trail.direction === previous.direction &&
+    trail.start === previous.start;
+  const fresh = trails.filter((trail) => !same(trail));
+  const trail = request.random.pick(fresh.length > 0 ? fresh : trails);
+  const { step, length, start } = trail;
+  const direction = trail.direction ?? 'up';
   const gaps = Math.min(Number(request.options['gaps'] ?? 3), length - 1);
   const positions = shuffled(
     Array.from({ length: length - 1 }, (_, i) => i + 1),
@@ -508,20 +794,35 @@ function trailConfig(request: BoardRequest): { config: OrderingConfig; id: strin
     .sort((a, b) => a - b);
   const stones = positions.map((position) => ({
     id: `g${position}`,
-    labelKey: `num:${step * (position + 1)}`,
+    labelKey: `num:${direction === 'down' ? start - step * position : start + step * position}`,
   }));
   const solution = stones.map((stone) => stone.id);
   let items = shuffled(stones, request.random);
   if (items.length > 1 && items.every((stone, i) => stone.id === solution[i])) {
     items = [...items.slice(1), items[0]!];
   }
-  return { config: { items, solution }, id: `${request.id}.trail.${step}.${length}` };
+  const id =
+    direction === 'up' && start === step
+      ? `${request.id}.trail.${step}.${length}`
+      : `${request.id}.trail.${step}.${length}.${start}.${direction}`;
+  return { config: { items, solution }, id };
 }
 
 /** Step and length of a number trail, from its definition ID (`….trail.<step>.<length>`). */
-export function trailShape(definitionId: string): { step: number; length: number } | null {
-  const match = /\.trail\.([1-9][0-9]*)\.([1-9][0-9]*)$/.exec(definitionId);
-  return match ? { step: Number(match[1]), length: Number(match[2]) } : null;
+export function trailShape(
+  definitionId: string,
+): { step: number; length: number; start: number; direction?: 'up' | 'down' } | null {
+  const match = /\.trail\.([1-9][0-9]*)\.([1-9][0-9]*)(?:\.([0-9]+)\.(up|down))?$/.exec(
+    definitionId,
+  );
+  if (!match) return null;
+  const step = Number(match[1]);
+  return {
+    step,
+    length: Number(match[2]),
+    start: match[3] === undefined ? step : Number(match[3]),
+    direction: match[4] === 'down' ? 'down' : undefined,
+  };
 }
 
 function feastConfig(request: BoardRequest): SharingFeastConfig {
@@ -564,6 +865,34 @@ function golemConfig(request: BoardRequest): GolemOrdersConfig {
   return { expr: readsAsComputed(expr) ? expr : bracketed(expr) };
 }
 
+function tenFrameConfig(request: BoardRequest): TenFrameConfig {
+  const previous = request.previous?.config as
+    { task?: string; a?: number; b?: number | null; target?: number } | undefined;
+  const same = (source: TenFrameSource) =>
+    source.task === previous?.task &&
+    source.a === previous.a &&
+    source.b === previous.b &&
+    source.target === previous.target;
+  const source = request.random.pick(
+    prefer(tenFrameSources(request.pool, request.skills, request.options), request, same),
+  );
+  return { task: source.task, a: source.a, b: source.b, target: source.target, item: source.item };
+}
+
+function bundleConfig(request: BoardRequest): BundleSticksConfig {
+  const previous = request.previous?.config as
+    { task?: string; target?: number | null; a?: number | null; b?: number | null } | undefined;
+  const same = (source: BundleSource) =>
+    source.task === previous?.task &&
+    source.target === previous.target &&
+    source.a === previous.a &&
+    source.b === previous.b;
+  const source = request.random.pick(
+    prefer(bundleSources(request.pool, request.skills, request.options), request, same),
+  );
+  return { task: source.task, target: source.target, a: source.a, b: source.b, item: source.item };
+}
+
 /** Generate the next board of a round as a narrative minigame definition. */
 export function makeBoard(request: BoardRequest): MinigameDefinition {
   const definition = (kind: string, config: unknown, id = request.id): MinigameDefinition => ({
@@ -590,6 +919,10 @@ export function makeBoard(request: BoardRequest): MinigameDefinition {
       return definition(SHARING_FEAST_KIND, feastConfig(request));
     case 'golem-orders':
       return definition(GOLEM_ORDERS_KIND, golemConfig(request));
+    case 'ten-frame':
+      return definition(TEN_FRAME_KIND, tenFrameConfig(request));
+    case 'bundle-sticks':
+      return definition(BUNDLE_STICKS_KIND, bundleConfig(request));
   }
 }
 
@@ -622,21 +955,26 @@ export function boardView(
   if (definition.kind === 'ordering') {
     const config = definition.config as unknown as OrderingConfig;
     const progress = state.progress as unknown as OrderingState;
-    const shape = trailShape(definition.id) ?? { step: 1, length: config.items.length };
-    const value = (id: string) => shape.step * (Number(id.slice(1)) + 1);
-    return {
+    const shape = trailShape(definition.id) ?? { step: 1, length: config.items.length, start: 1 };
+    const direction = shape.direction ?? 'up';
+    const valueAt = (position: number) =>
+      direction === 'down'
+        ? shape.start - shape.step * position
+        : shape.start + shape.step * position;
+    const value = (id: string) => valueAt(Number(id.slice(1)));
+    const board: NumberTrailBoard = {
       kind: 'number-trail',
       step: shape.step,
       path: Array.from({ length: shape.length }, (_, position) => {
         const gap = config.solution.indexOf(`g${position}`);
-        return gap === -1
-          ? { value: shape.step * (position + 1), gap: null }
-          : { value: null, gap };
+        return gap === -1 ? { value: valueAt(position), gap: null } : { value: null, gap };
       }),
       stones: progress.order.map((id) => ({ id, value: value(id) })),
       submitted: progress.submitted,
       attempts: progress.attempts,
     };
+    if (shape.direction !== undefined) board.direction = shape.direction;
+    return board;
   }
   if (definition.kind === EGG_GRID_KIND) {
     return { kind: 'egg-grid', ...(projected as unknown as Omit<EggGridBoard, 'kind'>) };
@@ -646,6 +984,15 @@ export function boardView(
   }
   if (definition.kind === GOLEM_ORDERS_KIND) {
     return { kind: 'golem-orders', ...(projected as unknown as Omit<GolemOrdersBoard, 'kind'>) };
+  }
+  if (definition.kind === TEN_FRAME_KIND) {
+    return { kind: 'ten-frame', ...(projected as unknown as Omit<TenFrameBoard, 'kind'>) };
+  }
+  if (definition.kind === BUNDLE_STICKS_KIND) {
+    return {
+      kind: 'bundle-sticks',
+      ...(projected as unknown as Omit<BundleSticksBoard, 'kind'>),
+    };
   }
   return { kind: 'fact-family', ...(projected as unknown as Omit<FactFamilyBoard, 'kind'>) };
 }
@@ -710,6 +1057,7 @@ export function boardCredits(
     for (const id of config.solution) {
       const groups = Number(id.slice(1)) + 1;
       if (shape === null) continue;
+      if (shape.start !== shape.step || shape.direction !== undefined) continue;
       if (shape.step <= 10 && groups <= 10) add(mulFactId(groups, shape.step), bucket);
       else if (shape.step % 10 === 0 && groups >= 2 && groups <= 9) {
         add(bucketId('tens', `d${groups}`), bucket);
@@ -725,14 +1073,22 @@ export function boardCredits(
       credit.coins += 1;
     }
   } else if (definition.kind === FACT_FAMILY_KIND && completed) {
-    const { a, b, product } = definition.config as unknown as FactFamilyConfig;
+    const { a, b, product, operation } = definition.config as unknown as FactFamilyConfig;
     const attempts = (after.progress as unknown as FactFamilyState).attempts;
     const bucket: ResponseBucket = attempts === 1 ? 'ok' : 'slow';
-    const small = a <= 10 && b <= 10;
-    add(small ? mulFactId(a, b) : null, bucket);
-    add(small ? mulFactId(b, a) : null, bucket);
-    add(small ? divFactId(product, a) : null, bucket);
-    add(small ? divFactId(product, b) : null, bucket);
+    if (operation === 'add') {
+      const small = a <= 10 && b <= 10 && product <= 20;
+      add(small ? addFactId(a, b) : null, bucket);
+      add(small ? addFactId(b, a) : null, bucket);
+      add(small ? subFactId(product, a) : null, bucket);
+      add(small ? subFactId(product, b) : null, bucket);
+    } else {
+      const small = a <= 10 && b <= 10;
+      add(small ? mulFactId(a, b) : null, bucket);
+      add(small ? mulFactId(b, a) : null, bucket);
+      add(small ? divFactId(product, a) : null, bucket);
+      add(small ? divFactId(product, b) : null, bucket);
+    }
     credit.coins += 4;
   } else if (definition.kind === SHARING_FEAST_KIND && completed) {
     const config = definition.config as unknown as SharingFeastConfig;
@@ -746,6 +1102,16 @@ export function boardCredits(
     const item = bucketId('order', hasGroup(config.expr) ? 'brackets' : 'no-brackets');
     add(item, progress.mistakes === 0 ? 'ok' : 'slow');
     credit.coins += progress.steps;
+  } else if (definition.kind === TEN_FRAME_KIND && completed) {
+    const config = definition.config as unknown as TenFrameConfig;
+    const attempts = (after.progress as unknown as TenFrameState).attempts;
+    add(config.item, attempts === 1 ? 'ok' : 'slow');
+    credit.coins += config.task === 'cross' ? 2 : 1;
+  } else if (definition.kind === BUNDLE_STICKS_KIND && completed) {
+    const config = definition.config as unknown as BundleSticksConfig;
+    const attempts = (after.progress as unknown as BundleSticksState).attempts;
+    add(config.item, attempts === 1 ? 'ok' : 'slow');
+    credit.coins += config.task === 'build' ? 1 : 2;
   }
   return credit;
 }

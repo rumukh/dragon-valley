@@ -70,6 +70,8 @@ describe('card faces', () => {
     const faces: CardFace[] = [
       { kind: 'expr', expr: op('mul', num(7), num(8)) },
       { kind: 'expr', expr: op('div', num(56), num(7)) },
+      { kind: 'expr', expr: op('add', num(3), num(5)) },
+      { kind: 'expr', expr: op('sub', num(8), num(3)) },
       { kind: 'answer', answer: { kind: 'number', value: 56 } },
       { kind: 'answer', answer: { kind: 'remainder', quotient: 4, remainder: 3 } },
       { kind: 'answer', answer: { kind: 'term', term: 'product' } },
@@ -85,9 +87,14 @@ describe('card faces', () => {
       },
     ];
     for (const face of faces) expect(parseCardLabel(cardLabel(face))).toEqual(face);
+    // Every label is a valid narrative stable ID (no `+`).
+    for (const label of faces.map(cardLabel))
+      expect(label).toMatch(/^[A-Za-z0-9][A-Za-z0-9._:/-]*$/);
     expect(faces.map(cardLabel)).toEqual([
       'fact:mul:7x8',
       'fact:div:56:7',
+      'expr:add:3:5',
+      'expr:sub:8:3',
       'num:56',
       'rem:4:3',
       'term:product',
@@ -148,6 +155,57 @@ describe('Memory Match boards', () => {
       const [, , dividend, divisor] = card.labelKey.split(':').map(Number);
       const partner = cards.find((c) => c.pair === card.pair && c !== card)!;
       expect(partner.labelKey).toBe(`num:${dividend! / divisor!}`);
+    }
+  });
+
+  it('pairs additive facts with values and additive family partners', () => {
+    const valueDef = makeBoard(
+      request({ activity: 'memory-match', pool: ['add:3+5', 'sub:8-3'], options: { pairs: 2 } }),
+    );
+    const valueLabels = (valueDef.config as { cards: { labelKey: string }[] }).cards.map(
+      (c) => c.labelKey,
+    );
+    expect(valueLabels).toContain('expr:add:3:5');
+    expect(valueLabels).toContain('expr:sub:8:3');
+    expect(valueLabels).toContain('num:8');
+    expect(valueLabels).toContain('num:5');
+
+    const familyDef = makeBoard(
+      request({
+        activity: 'memory-match',
+        pool: ['add:3+5'],
+        options: { pairs: 1, match: 'family' },
+      }),
+    );
+    const pairs = (familyDef.config as { cards: { pair: string; labelKey: string }[] }).cards;
+    const family = pairs.filter((c) => c.pair === 'fam:add:3_5').map((c) => c.labelKey);
+    expect(family.sort()).toEqual(['expr:add:3:5', 'expr:sub:8:3']);
+  });
+
+  it('plays additive pairs (add:0+0 too) with stable IDs and credits the facts', () => {
+    for (const match of ['value', 'family'] as const) {
+      const pool = ['add:0+0', 'add:3+5', 'sub:8-3', 'sub:4-4'];
+      const def = makeBoard(
+        request({ activity: 'memory-match', pool, options: { pairs: 3, match } }),
+      );
+      const cards = (def.config as { cards: { id: string; pair: string }[] }).cards;
+      expect(cards.every((c) => !c.pair.includes('+'))).toBe(true);
+      const moves: MinigameMove[] = [];
+      for (const pair of new Set(cards.map((c) => c.pair))) {
+        for (const c of cards.filter((card) => card.pair === pair)) {
+          moves.push({ type: 'select', card: c.id });
+        }
+      }
+      const states = run(def, moves);
+      const last = states.at(-1)!;
+      expect(last.status, match).toBe('completed');
+      const credit = boardCredits(def, states[0]!, last, new Set(pool));
+      const items = credit.items.map((entry) => entry.item);
+      expect(items.length, match).toBeGreaterThan(0);
+      expect(
+        items.every((item) => pool.includes(item)),
+        items.join(),
+      ).toBe(true);
     }
   });
 
@@ -243,6 +301,33 @@ describe('Number Trail boards', () => {
     const groups = solution.map((id) => Number(id.slice(1)) + 1);
     expect(credit.items).toEqual(groups.map((k) => ({ item: `mul:${k}x5`, bucket: 'ok' })));
   });
+
+  it('can lay out grade 1-2 counting trails without changing old trail JSON', () => {
+    const countSkill: Skill = {
+      id: 'count-20',
+      titleKey: 'skill.count-20',
+      generator: 'num.count',
+      params: { numbers: [0, 20] },
+    };
+    const def = makeBoard(
+      request({
+        activity: 'number-trail',
+        pool: ['count:0-5', 'count:6-10', 'count:11-20'],
+        skills: [countSkill],
+        options: { length: 6, gaps: 2 },
+      }),
+    );
+    const board = view(def, createMinigame(def, def.id, MINIGAMES));
+    if (board.kind !== 'number-trail') throw new Error('not a trail');
+    expect([1, 2, 10]).toContain(board.step);
+    if (board.direction === 'down') {
+      const fixed = board.path.filter((p) => p.value !== null).map((p) => p.value!);
+      expect(fixed[0]).toBeGreaterThan(fixed[fixed.length - 1]!);
+    } else {
+      expect(board.direction).toBeUndefined();
+    }
+    expect(board.path).toHaveLength(6);
+  });
 });
 
 describe('Egg Grid and Fact Family boards', () => {
@@ -302,6 +387,33 @@ describe('Egg Grid and Fact Family boards', () => {
     const def = makeBoard(request({ activity: 'fact-family', pool }));
     expect(def.config).toEqual({ a: 5, b: 8, product: 40 });
     expect(canMakeBoard('fact-family', ['mul:5x0', 'mul:5x1', 'mul:5x5'], [])).toBe(false);
+  });
+
+  it('builds additive fact families from add/sub items and credits all four facts', () => {
+    const def = makeBoard(request({ activity: 'fact-family', pool: ['add:3+5'] }));
+    expect(def.config).toEqual({ a: 3, b: 5, product: 8, operation: 'add' });
+    const fill = (equation: number, values: number[]): MinigameMove[] =>
+      values.map((value, slot) => ({ type: 'fill', equation, slot, value }));
+    const right: MinigameMove[] = [
+      ...fill(0, [3, 5, 8]),
+      ...fill(1, [5, 3, 8]),
+      ...fill(2, [8, 3, 5]),
+      ...fill(3, [8, 5, 3]),
+      { type: 'submit' },
+    ];
+    const states = run(def, right);
+    const credit = boardCredits(
+      def,
+      states[states.length - 2]!,
+      states[states.length - 1]!,
+      new Set(['add:3+5', 'add:5+3', 'sub:8-3', 'sub:8-5']),
+    );
+    expect(credit.items.map((c) => `${c.item}/${c.bucket}`).sort()).toEqual([
+      'add:3+5/ok',
+      'add:5+3/ok',
+      'sub:8-3/ok',
+      'sub:8-5/ok',
+    ]);
   });
 
   it('credits the four family facts, ok on the first check and slow after a retry', () => {

@@ -1,9 +1,9 @@
 /**
  * Fact Family Nest (`dv.fact-family`): three numbers sit in a nest (for example 6, 7 and 42) and
- * the child completes two multiplications and two divisions with them: `6 · 7 = 42`,
- * `7 · 6 = 42`, `42 : 6 = 7`, `42 : 7 = 6`. Only nest numbers go into the blanks. A check marks
- * each equation right or not yet; an equation that repeats an earlier one is not right. The
- * board is complete when all four are right.
+ * the child completes two multiplications and two divisions with them, or (for grades 1-2) two
+ * additions and two subtractions. Only nest numbers go into the blanks. A check marks each
+ * equation right or not yet; an equation that repeats an earlier one is not right. The board is
+ * complete when all four are right.
  *
  * Config `{ a, b, product }` (a ≠ b, both at least 1); moves
  * `{ type: 'fill', equation: 0-3, slot: 0-2, value }` and `{ type: 'submit' }`.
@@ -15,12 +15,15 @@ import { array, boolean, integer, invalid, literal, nullableInteger, object } fr
 export const FACT_FAMILY_KIND = 'dv.fact-family';
 
 /** The operator of each of the four equations, in board order. */
-export const FAMILY_OPS = ['mul', 'mul', 'div', 'div'] as const;
+export const MULTIPLICATIVE_FAMILY_OPS = ['mul', 'mul', 'div', 'div'] as const;
+export const ADDITIVE_FAMILY_OPS = ['add', 'add', 'sub', 'sub'] as const;
 
 export interface FactFamilyConfig {
   a: number;
   b: number;
   product: number;
+  /** Omitted means the original multiplication/division family. */
+  operation?: 'add';
 }
 
 export interface FactFamilyState {
@@ -35,10 +38,14 @@ function nest(config: FactFamilyConfig): number[] {
   return [config.a, config.b, config.product].sort((x, y) => x - y);
 }
 
+function familyOps(config: FactFamilyConfig) {
+  return config.operation === 'add' ? ADDITIVE_FAMILY_OPS : MULTIPLICATIVE_FAMILY_OPS;
+}
+
 /** Which equations are right: true sentences of the family, each a different fact. */
 export function checkFamily(config: FactFamilyConfig, slots: readonly (number | null)[][]) {
   const seen: string[] = [];
-  return FAMILY_OPS.map((operator, index) => {
+  return familyOps(config).map((operator, index) => {
     const [left, right, result] = slots[index] ?? [];
     if (left === null || right === null || result === null) return false;
     if (left === undefined || right === undefined || result === undefined) return false;
@@ -46,7 +53,11 @@ export function checkFamily(config: FactFamilyConfig, slots: readonly (number | 
     const isTrue =
       operator === 'mul'
         ? left * right === result && result === config.product
-        : right !== 0 && left === config.product && right * result === left;
+        : operator === 'div'
+          ? right !== 0 && left === config.product && right * result === left
+          : operator === 'add'
+            ? left + right === result && result === config.product
+            : left === config.product && left - right === result;
     if (!isTrue || seen.includes(fact)) return false;
     seen.push(fact);
     return true;
@@ -62,16 +73,30 @@ export const factFamilyAdapter: MinigameAdapter<
   kind: FACT_FAMILY_KIND,
   schema: 1,
   config(value) {
-    const o = object(value, '$.config', ['a', 'b', 'product']);
+    const o = object(value, '$.config', ['a', 'b', 'product', 'operation']);
     const config = {
-      a: integer(o.a, '$.config.a', 1, 100),
-      b: integer(o.b, '$.config.b', 1, 100),
-      product: integer(o.product, '$.config.product', 1, 10_000),
+      a: integer(o.a, '$.config.a', 0, 100),
+      b: integer(o.b, '$.config.b', 0, 100),
+      product: integer(o.product, '$.config.product', 0, 10_000),
+      operation:
+        o.operation === undefined
+          ? undefined
+          : literal(o.operation, '$.config.operation', ['add'] as const),
     };
-    if (config.a === config.b || config.a * config.b !== config.product) {
-      invalid('$.config', 'A family needs two different factors and their product.');
+    const valid =
+      config.operation === 'add'
+        ? config.a !== config.b && config.a + config.b === config.product
+        : config.a >= 1 &&
+          config.b >= 1 &&
+          config.product >= 1 &&
+          config.a !== config.b &&
+          config.a * config.b === config.product;
+    if (!valid) {
+      invalid('$.config', 'A family needs two different numbers and their result.');
     }
-    return config;
+    return config.operation === 'add'
+      ? config
+      : { a: config.a, b: config.b, product: config.product };
   },
   state(value, config) {
     const o = object(value, '$.progress', ['slots', 'correct', 'submitted', 'attempts']);
@@ -124,8 +149,8 @@ export const factFamilyAdapter: MinigameAdapter<
     };
   },
   initial: () => ({
-    slots: FAMILY_OPS.map(() => [null, null, null]),
-    correct: FAMILY_OPS.map(() => null),
+    slots: MULTIPLICATIVE_FAMILY_OPS.map(() => [null, null, null]),
+    correct: MULTIPLICATIVE_FAMILY_OPS.map(() => null),
     submitted: false,
     attempts: 0,
   }),
@@ -146,7 +171,7 @@ export const factFamilyAdapter: MinigameAdapter<
   },
   project: (config, state) => ({
     numbers: nest(config),
-    equations: FAMILY_OPS.map((operator, i) => ({
+    equations: familyOps(config).map((operator, i) => ({
       op: operator,
       slots: [...(state.slots[i] ?? [])],
       correct: state.correct[i] ?? null,

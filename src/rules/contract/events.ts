@@ -7,6 +7,7 @@
  * Names are `<subject>.<verb>`. Payloads are small JSON objects of IDs and numbers.
  */
 import type { DragonStage, MasteryLevel } from './ids';
+import type { Grade } from './kinds';
 import type { ProblemActivityKind, MinigameActivityKind, ResponseBucket } from './kinds';
 import type { Grant } from './content';
 
@@ -25,6 +26,7 @@ export const EVENTS = {
   regionUnlocked: 'region.unlocked',
   bossDefeated: 'boss.defeated',
   placementCompleted: 'placement.completed',
+  gradeCompleted: 'grade.completed',
   // Dragons and the Magic Window
   eggReceived: 'egg.received',
   dragonHatched: 'dragon.hatched',
@@ -64,6 +66,8 @@ export interface EventPayloads {
   'region.unlocked': { region: string };
   'boss.defeated': { boss: string };
   'placement.completed': { placed: string[] };
+  /** The last boss of an earlier grade's regions was defeated: its certificate (grades 1-2). */
+  'grade.completed': { grade: Grade };
   'egg.received': { dragon: string };
   'dragon.hatched': { dragon: string };
   'dragon.grew': { dragon: string; stage: DragonStage };

@@ -13,6 +13,7 @@ import { ACTIVITY_OPTION_DEFAULTS, EVENTS, isMinigameKind } from '../contract';
 import type { Level, MinigameActivityKind, ProblemActivityKind, RoundEndReason } from '../contract';
 import { countToday, questProgress } from '../economy/daily';
 import { awardStickers, earnCoins, grantEgg, grantItem } from '../economy/rewards';
+import { bossCertificate } from './grades';
 import { canMakeBoard } from '../minigames/boards';
 import { triggerBeats } from '../story/beats';
 import { applyGrowth, itemsOf } from './dragons';
@@ -190,6 +191,7 @@ export function completeLevel(ctx: Ctx, index: Index): void {
     ctx.state.bosses[level.boss] = { defeatedDay: ctx.state.day ?? 0 };
     earnCoins(ctx, data.balance.coins.bossDefeated, 'boss');
     ctx.emit(EVENTS.bossDefeated, { boss: level.boss });
+    bossCertificate(ctx, level.boss);
     triggerBeats(ctx, (t) => t.kind === 'boss-defeated' && t.boss === level.boss);
     if (data.bosses.find((b) => b.id === level.boss)?.finale === true) completeFinale(ctx);
   }
