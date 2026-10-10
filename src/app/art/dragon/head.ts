@@ -631,9 +631,9 @@ export function flowerCrest(ctx: Ctx): string {
 /** Sprout's toadstool cap: a red, white-spotted mushroom cap worn at a jaunty tilt, with a sprig. */
 export function toadstoolCrest(ctx: Ctx): string {
   const hd = ctx.sk.head;
-  const s = lerp(40, 52, ctx.sk.t);
+  const s = lerp(48, 62, ctx.sk.t);
   const cx = CX + s * 0.12;
-  const cy = hd.cy - hd.ry * 0.86;
+  const cy = hd.cy - hd.ry * 0.9;
   const fill = ctx.paint.accent;
   const line = ctx.paint.accentLine;
   const cap =

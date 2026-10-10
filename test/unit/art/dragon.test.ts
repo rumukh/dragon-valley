@@ -221,5 +221,9 @@ const GOLDENS: Record<string, string> = {
   'tumble egg': 'b7473b7e403dbaf8a17eb4ae09a20e2707b3537e05a88619cc0b85c9b9cf0e23',
   'tumble adult proud': '6419131e1f8591a28099e5066c9b41adf770d354630734ee4cc90e27f3ef6743',
   'penny hatchling curious': '10f2f77e75836132a54aa69f6361e9c1c39449903385944594f44edc05f2f286',
+  'sprout egg': 'f30c7598a3efebca294b04ef14a23963921d4fe1daf4894a8d119083abc9280d',
+  'sprout hatchling happy': '705e5c014a9aef0251bdc5ac3731c3562c7d85ef90677a67435a421406802656',
+  'tenzi egg': 'c8ec6aede10f637c310b8c59ac7a3fa9bad9337ae7ae622cf8c574e44c6a7a1b',
+  'tenzi adult proud': '6a55d85e5c46f93c558901d3f9ca8a508ff8a7a7a056bfeb7b6580a6d3f1dffc',
 };
 // goldens:end

@@ -210,7 +210,7 @@ function oldTrunk(x: number, y: number, w: number, color: string, top = -40): st
 }
 
 /** A little round door in a tree stump: the House Goblin's nook (foot centre x, y). */
-function goblinNook(x: number, y: number, s: number): string {
+export function goblinNook(x: number, y: number, s: number): string {
   const stump = '#a7774a';
   const top = y - s * 1.6;
   let rings = '';
@@ -340,6 +340,109 @@ function goblinNook(x: number, y: number, s: number): string {
   );
 }
 
+/** A rounded bunch of leaves hanging from the canopy (centre x, y; size s). */
+function leafCluster(r: Rng, x: number, y: number, s: number, color: string): string {
+  const blobs: Array<[number, number, number]> = [];
+  for (let i = 0; i < 7; i++) {
+    const a = (i / 7) * Math.PI * 2 + r() * 0.5;
+    const d = s * (0.35 + r() * 0.25);
+    blobs.push([x + Math.cos(a) * d, y + Math.sin(a) * d * 0.7, s * (0.32 + r() * 0.14)]);
+  }
+  blobs.push([x, y, s * 0.55]);
+  const circles = (dy: number): string =>
+    blobs
+      .map(
+        ([bx, by, br]) =>
+          M(bx - br, by + dy) + `a${br} ${br} 0 1 0 ${br * 2} 0a${br} ${br} 0 1 0 ${-br * 2} 0`,
+      )
+      .join('');
+  let shine = '';
+  for (const [bx, by, br] of blobs.slice(0, 4))
+    shine +=
+      M(bx - br * 0.5, by - br * 0.35) +
+      Q(bx - br * 0.1, by - br * 0.75, bx + br * 0.35, by - br * 0.55);
+  return (
+    h('path', { d: circles(s * 0.1), fill: darken(color, 0.22) }) +
+    h('path', { d: circles(0), fill: color }) +
+    h('path', {
+      d: shine,
+      fill: 'none',
+      stroke: lighten(color, 0.3),
+      'stroke-width': Math.max(3, s * 0.05),
+      'stroke-linecap': 'round',
+      opacity: 0.8,
+    })
+  );
+}
+
+/** A fallen log furred with moss, with two little toadstools on it (centre x, ground y, length w). */
+function mossyLog(x: number, y: number, w: number): string {
+  const hgt = w * 0.17;
+  const x0 = x - w / 2;
+  const x1 = x + w / 2;
+  return (
+    h('ellipse', {
+      cx: x,
+      cy: y + 4,
+      rx: w * 0.55,
+      ry: hgt * 0.25,
+      fill: '#2a2140',
+      opacity: 0.1,
+    }) +
+    h('path', {
+      d: M(x0, y - hgt) + L(x1, y - hgt) + L(x1, y) + L(x0, y) + 'Z',
+      fill: '#9a6a40',
+      stroke: '#5a3a1a',
+      'stroke-width': 3.5,
+      'stroke-linejoin': 'round',
+    }) +
+    h('path', {
+      d:
+        M(x0 + 30, y - hgt * 0.55) +
+        L(x1 - 40, y - hgt * 0.55) +
+        M(x0 + 60, y - hgt * 0.25) +
+        L(x1 - 70, y - hgt * 0.25),
+      stroke: '#7a4e2a',
+      'stroke-width': 2.5,
+      'stroke-linecap': 'round',
+    }) +
+    h('ellipse', {
+      cx: x1,
+      cy: y - hgt / 2,
+      rx: hgt * 0.32,
+      ry: hgt / 2,
+      fill: '#e2bf8a',
+      stroke: '#5a3a1a',
+      'stroke-width': 3.5,
+    }) +
+    h('ellipse', {
+      cx: x1,
+      cy: y - hgt / 2,
+      rx: hgt * 0.16,
+      ry: hgt * 0.25,
+      fill: 'none',
+      stroke: '#b58956',
+      'stroke-width': 2,
+    }) +
+    h('path', {
+      d:
+        M(x0 - 4, y - hgt * 0.7) +
+        Q(x0 + w * 0.1, y - hgt * 1.4, x0 + w * 0.3, y - hgt * 1.05) +
+        Q(x0 + w * 0.5, y - hgt * 1.4, x0 + w * 0.7, y - hgt * 1.0) +
+        Q(x0 + w * 0.85, y - hgt * 1.3, x1 - hgt * 0.3, y - hgt * 0.85) +
+        L(x1 - hgt * 0.3, y - hgt * 0.7) +
+        Q(x, y - hgt * 0.62, x0 - 4, y - hgt * 0.7) +
+        'Z',
+      fill: '#8fca5f',
+      stroke: '#4f7f32',
+      'stroke-width': 2.5,
+      'stroke-linejoin': 'round',
+    }) +
+    toadstool(x0 + w * 0.22, y - hgt * 1.05, 16, '#e0473a') +
+    toadstool(x0 + w * 0.32, y - hgt * 1.0, 11, '#c98a5b', false)
+  );
+}
+
 /** Soft fireflies drifting in the shade. */
 function fireflies(r: Rng, n: number, x0: number, x1: number, y0: number, y1: number): string {
   let glow = '';
@@ -395,9 +498,10 @@ export function mushroomHollow(defs: Defs): string {
     [1090, 16, '#d9584a'],
   ] as const)
     out += toadstool(x, 662, s, c, c === '#d9584a');
+  out += mossyLog(800, 708, 230);
   // old trees framing the edges, with canopy hanging from the top corners
-  out += oldTrunk(70, 820, 120, '#8a6440', -40);
-  out += oldTrunk(1560, 820, 110, '#7f5b3a', -40);
+  out += oldTrunk(70, 820, 120, '#8a6440', 60);
+  out += oldTrunk(1560, 820, 110, '#7f5b3a', 80);
   for (const [x, y, s, c] of [
     [-20, 40, 200, '#4f8f3a'],
     [150, -10, 170, '#5fa14a'],
@@ -406,7 +510,7 @@ export function mushroomHollow(defs: Defs): string {
     [1460, -10, 170, '#5fa14a'],
     [1310, -60, 140, '#6fb04f'],
   ] as const)
-    out += cloud(x, y, s, c, darken(c, 0.15));
+    out += leafCluster(r, x, y, s, c);
   // the mossy floor of the dell
   out += h('path', {
     d: ridgeD(r, 800, 24, 6),
@@ -427,14 +531,23 @@ export function mushroomHollow(defs: Defs): string {
   out += toadstool(1310, 870, 46, '#e0473a');
   out += toadstool(1545, 900, 70, '#c98a5b', false);
   out += fern(20, 900, 120, '#5aa54a', 1) + fern(1590, 930, 110, '#4f9a3f', -1);
-  // the fairy ring: ten little toadstools, seven red and three brown
-  for (let i = 0; i < 10; i++) {
-    const a = Math.PI * (0.95 + (i / 9) * 1.1);
-    const x = 800 + Math.cos(a) * 150;
-    const y = 920 - Math.sin(a) * 38;
-    const red = i < 7;
-    out += toadstool(x, y, red ? 20 : 17, red ? '#e0473a' : '#b8784a', red);
-  }
+  // the fairy ring: ten little toadstools round a ring of brighter moss, seven red and three brown
+  out += h('ellipse', {
+    cx: 800,
+    cy: 905,
+    rx: 150,
+    ry: 38,
+    fill: '#a6d873',
+    stroke: '#7fb44a',
+    'stroke-width': 3,
+    opacity: 0.85,
+  });
+  const ring = Array.from({ length: 10 }, (_, i) => {
+    const a = -Math.PI / 2 + (i / 10) * Math.PI * 2;
+    return { x: 800 + Math.cos(a) * 150, y: 905 + Math.sin(a) * 38 + 8, red: i < 7 };
+  }).sort((a, b) => a.y - b.y);
+  for (const t of ring)
+    out += toadstool(t.x, t.y, t.red ? 22 : 18, t.red ? '#e0473a' : '#b8784a', t.red);
   // acorns scattered on the moss, and a little heap of them
   for (const [x, y, s, a] of [
     [520, 900, 26, -20],
@@ -476,7 +589,7 @@ function rainbowArc(x: number, y: number, rr: number, bw: number, opacity: numbe
 }
 
 /** Kašpárek's little puppet theatre booth (foot centre x, y; width w). */
-function puppetBooth(x: number, y: number, w: number): string {
+export function puppetBooth(x: number, y: number, w: number): string {
   const hgt = w * 1.5;
   const top = y - hgt;
   const stripes: string[] = [];
@@ -566,7 +679,7 @@ function puppetBooth(x: number, y: number, w: number): string {
 }
 
 /** A duck swimming (centre x, y; size s; facing dir). */
-function duck(x: number, y: number, s: number, dir = 1): string {
+export function duck(x: number, y: number, s: number, dir = 1): string {
   return h(
     'g',
     { transform: `translate(${x} ${y}) scale(${dir} 1)` },
