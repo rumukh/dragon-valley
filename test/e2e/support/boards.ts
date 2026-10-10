@@ -439,3 +439,111 @@ export async function playGolemOrders(page: Page, via: BoardVia): Promise<void> 
   expect(provedKindFeedback, 'Golem Orders gave kind feedback for a wrong step').toBe(true);
   expect(provedSolvedChain, "Golem Orders kept a finished board's chain on show").toBe(true);
 }
+
+/** What a Bundle Sticks board asks, read from its goal line: the number to show at the end. */
+interface SticksGoal {
+  readonly task: 'build' | 'add' | 'sub';
+  readonly a: number;
+  readonly b: number;
+  readonly target: number;
+}
+
+function readSticksGoal(text: string): SticksGoal | null {
+  const build = /Make (\d+) with sticks/.exec(text);
+  if (build) return { task: 'build', a: 0, b: Number(build[1]), target: Number(build[1]) };
+  const calc = /Work out (\d+) (\+|−|-) (\d+) with sticks/.exec(text);
+  if (!calc) return null;
+  const a = Number(calc[1]);
+  const b = Number(calc[3]);
+  return calc[2] === '+'
+    ? { task: 'add', a, b, target: a + b }
+    : { task: 'sub', a, b, target: a - b };
+}
+
+/** The bundles and loose sticks on the table, as drawn. */
+async function sticksOnTable(page: Page): Promise<{ bundles: number; loose: number }> {
+  const count = async (testId: string) =>
+    Number((await attributeOf(page.getByTestId(testId), 'data-count')) ?? 'NaN');
+  return { bundles: await count('sticks-tens'), loose: await count('sticks-ones') };
+}
+
+/** Press a Bundle Sticks control and wait for the table to change. */
+async function sticksMove(page: Page, testId: string, via: BoardVia): Promise<void> {
+  const before = await sticksOnTable(page);
+  const control = page.getByTestId(testId);
+  await expect(control, `${testId} can be pressed`).toBeEnabled();
+  await pressButton(control, via);
+  await expect
+    .poll(async () => JSON.stringify(await sticksOnTable(page)), {
+      message: `${testId} changes the sticks on the table`,
+    })
+    .not.toBe(JSON.stringify(before));
+}
+
+/**
+ * Bundle Sticks, played from the goal line and the sticks on the table: add or take away the
+ * tens, then the ones, untying a ten when there are too few ones to take away and tying ten loose
+ * sticks into a bundle; then Check. The first board is checked once too early, which only says
+ * "not quite yet" and leaves the sticks where they are.
+ */
+export async function playBundleSticks(page: Page, via: BoardVia): Promise<void> {
+  await expect(
+    page.getByTestId('screen-minigame'),
+    'Bundle Sticks opens as a minigame',
+  ).toBeVisible();
+  let provedNotYet = false;
+  for (let board = 0; board < 12 && (await page.getByTestId('sticks').isVisible()); board++) {
+    const progress = Number(
+      (await attributeOf(page.getByTestId('minigame-progress'), 'aria-valuenow')) ?? '0',
+    );
+    let goal: SticksGoal | null = null;
+    await expect
+      .poll(async () => (goal = readSticksGoal((await minigameStatus(page).textContent()) ?? '')), {
+        message: 'the board says what to make',
+      })
+      .not.toBeNull();
+    const { task, b, target } = goal!;
+    const start = await sticksOnTable(page);
+    expect(
+      start.bundles * 10 + start.loose,
+      'add and take-away boards start from the first number',
+    ).toBe(task === 'build' ? 0 : goal!.a);
+
+    if (!provedNotYet && start.bundles * 10 + start.loose !== target) {
+      await pressButton(page.getByTestId('sticks-check'), via);
+      await expect(minigameStatus(page), 'checking too early is only "not yet"').toContainText(
+        'Not quite yet',
+      );
+      expect(await sticksOnTable(page), 'and leaves the sticks as they were').toEqual(start);
+      provedNotYet = true;
+    }
+
+    // As the sum is worked: the tens of b, then its ones.
+    const tens = Math.floor(b / 10);
+    const ones = b % 10;
+    if (task === 'sub') {
+      for (let i = 0; i < tens; i++) await sticksMove(page, 'sticks-remove-bundle', via);
+      if ((await sticksOnTable(page)).loose < ones) {
+        await sticksMove(page, 'sticks-untie', via);
+      }
+      for (let i = 0; i < ones; i++) await sticksMove(page, 'sticks-remove-stick', via);
+    } else {
+      for (let i = 0; i < tens; i++) await sticksMove(page, 'sticks-add-bundle', via);
+      for (let i = 0; i < ones; i++) {
+        await sticksMove(page, 'sticks-add-stick', via);
+        if ((await sticksOnTable(page)).loose === 10 && (await sticksOnTable(page)).bundles < 10) {
+          await sticksMove(page, 'sticks-tie', via);
+        }
+      }
+    }
+    const end = await sticksOnTable(page);
+    expect(end.bundles * 10 + end.loose, 'the table shows the answer').toBe(target);
+    expect(end.loose, 'as tens and ones').toBeLessThan(10);
+    await pressButton(page.getByTestId('sticks-check'), via);
+    if ((await waitForBoardAdvance(page, progress)) === 'ended') break;
+  }
+  await expect(
+    results(page).or(page.getByTestId('screen-round')),
+    'Bundle Sticks ends in its results or the next round of the lesson',
+  ).toBeVisible();
+}

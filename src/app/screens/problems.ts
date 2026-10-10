@@ -343,12 +343,15 @@ export function problemRoundScreen(app: App, active: ActiveKeeper): Screen {
 
   /**
    * A young player's choice problem shows its picture up front (a counting problem's dots are
-   * already the problem); the keypad keeps it for the hint after a miss.
+   * already the problem), and so does a place-value problem, whose sticks the rules drew with it
+   * (docs/contract.md §5.2); the keypad keeps any other picture for the hint after a miss.
    */
   const picturedChoices = (problem: ProblemView): boolean => {
-    if (!young() || !stepChoices(problem)) return false;
+    if (!young()) return false;
     const model = modelOf(problem.problem);
-    return model !== null && model.kind !== 'count';
+    if (model === null || model.kind === 'count') return false;
+    const own = problem.problem.kind === 'equation' && problem.problem.picture?.kind === 'sticks';
+    return own || stepChoices(problem) !== null;
   };
 
   const hintButton = (problem: ProblemView): HTMLElement[] => {
