@@ -52,7 +52,7 @@ const REVISIONS: Readonly<Record<string, string>> = {
   '1.3.0': 'f41ae03a85710bac', // growing up: the effort path and adult at 80 % (balance-report §9)
   '1.4.0': '9f81dad0a12a7159', // grades 1-3: grade starts, filters and Pebble Brook for grade 1
   '1.5.0': '07efa7b4d4d3fac1', // grade 2: Hundred Hills and Market Square
-  '1.6.0': 'PENDING', // grade 1: Mushroom Hollow and Rainbow Ford
+  '1.6.0': '8db4e9d2a5bfd4d7', // grade 1: Mushroom Hollow and Rainbow Ford
 };
 
 function diagnostics(pack: Pack): readonly RuntimeDiagnostic[] {

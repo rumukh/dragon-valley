@@ -504,7 +504,9 @@ export class Player {
           : board.task === 'cross'
             ? board.target
             : undefined;
-      await this.move(value === undefined ? { type: 'submit' } : { type: 'submit', value });
+      if (still()) {
+        await this.move(value === undefined ? { type: 'submit' } : { type: 'submit', value });
+      }
     } else if (board.kind === 'bundle-sticks') {
       if (this.style.clumsy) await this.move({ type: 'submit' });
       const repeat = async (count: number, move: BundleSticksMove) => {
