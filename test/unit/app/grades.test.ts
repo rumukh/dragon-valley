@@ -32,6 +32,7 @@ import { MAP_SHEETS } from '../../../src/app/art';
 import type { Fetcher } from '../../../src/app/content/load';
 import {
   addTableFacts,
+  addTensFacts,
   earnedCertificates,
   finishedGrades,
   gradeLastBoss,
@@ -103,6 +104,29 @@ describe('+ and − facts as text', () => {
     expect(cards[21]).toMatchObject({ question: '13 \u2212 3', answer: '10' });
     expect(() => addTableFacts(11, 'czech')).toThrow(RangeError);
   });
+
+  it('cards for adding whole tens within 100, and the subtractions that undo them', () => {
+    const cards = addTensFacts(4, 'czech');
+    expect(cards.map((card) => card.sentence)).toEqual([
+      '40 + 0 = 40',
+      '40 + 10 = 50',
+      '40 + 20 = 60',
+      '40 + 30 = 70',
+      '40 + 40 = 80',
+      '40 + 50 = 90',
+      '40 + 60 = 100',
+      '40 \u2212 40 = 0',
+      '50 \u2212 40 = 10',
+      '60 \u2212 40 = 20',
+      '70 \u2212 40 = 30',
+      '80 \u2212 40 = 40',
+      '90 \u2212 40 = 50',
+      '100 \u2212 40 = 60',
+    ]);
+    expect(new Set(cards.map((card) => card.item)).size).toBe(cards.length);
+    expect(addTensFacts(10, 'international')).toHaveLength(2);
+    expect(() => addTensFacts(-1, 'czech')).toThrow(RangeError);
+  });
 });
 
 describe('a counting problem never gives its answer away', () => {
@@ -163,6 +187,23 @@ describe('young players see + and − as pictures', () => {
     });
     expect(modelFor(add(23, 4), true)).toMatchObject({ kind: 'number-line', result: 27 });
     expect(modelFor(add(23, 14), true)).toMatchObject({ kind: 'sticks' });
+    // A one-digit first number with tens to add is sticks and cubes, not 40 hops.
+    expect(modelFor(add(3, 40), true)).toMatchObject({
+      kind: 'sticks',
+      numbers: [
+        { tens: 0, ones: 3 },
+        { tens: 4, ones: 0 },
+      ],
+    });
+    expect(modelFor(add(40, 30), true)).toMatchObject({ kind: 'sticks' });
+    const borrow: Problem = { kind: 'equation', left: op('sub', num(52), num(7)), right: BLANK };
+    expect(modelFor(borrow, true)).toMatchObject({ kind: 'number-line', left: 52, result: 45 });
+    const missing: Problem = {
+      kind: 'equation',
+      left: op('add', num(34), BLANK),
+      right: num(59),
+    };
+    expect(modelFor(missing, true)).toMatchObject({ kind: 'sticks', fact: { unknown: 'right' } });
     const takeAway: Problem = {
       kind: 'equation',
       left: op('sub', num(9), num(4)),

@@ -12,6 +12,7 @@ import type { Keeper } from '../persistence/family';
 import { gradeOf, isYoungGrade } from '../game/grade';
 import {
   addTableFacts,
+  addTensFacts,
   earnedCertificates,
   gradeLastBoss,
   hardestFacts,
@@ -113,6 +114,34 @@ export function printContent(
         onError: app.kit.onError,
       })
     : null;
+  // 2nd grade adds and takes away whole tens within 100: the same number, as tens.
+  const tensTableButton =
+    gradeOf(view) === 2
+      ? candyButton({
+          label: t('parent.print.tensTableButton', { tens: options.table * 10 }),
+          icon: 'print',
+          variant: 'sun',
+          testId: 'print-tens-table',
+          onPress: () =>
+            open(() => {
+              const title = t('parent.print.tensTableTitle', {
+                tens: options.table * 10,
+                add: signs.add,
+                sub: signs.sub,
+              });
+              return {
+                job: flashcardJob(
+                  title,
+                  addTensFacts(options.table, notation),
+                  `${slug}-adding-${options.table * 10}`,
+                ),
+                title,
+                guidance: cardsGuidance,
+              };
+            }),
+          onError: app.kit.onError,
+        })
+      : null;
   const flashcards = h(
     'div',
     { className: 'dv-print-tab__group' },
@@ -154,6 +183,7 @@ export function printContent(
       ),
     ),
     ...(addTableButton ? [addTableButton] : []),
+    ...(tensTableButton ? [tensTableButton] : []),
     candyButton({
       label: t('parent.print.tableButton', { table: options.table }),
       icon: 'print',

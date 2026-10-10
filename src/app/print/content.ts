@@ -5,6 +5,7 @@
  * catalogs in the grown-ups' Print tab; this module only decides what exists.
  */
 import {
+  OPERATOR_SYMBOLS,
   TABLE_MAX,
   TABLE_MIN,
   addFactId,
@@ -59,6 +60,34 @@ export function addTableFacts(addend: number, notation: Notation): FactText[] {
     facts.push(factText(subFactId(addend + k, addend), notation)!);
   }
   return facts;
+}
+
+/**
+ * Adding whole tens as cards, the 2nd graders' cards (`40 + 30` is `4 + 3` in tens): `n0 + 0`
+ * up to `n0 + k0 = 100`, then the subtractions that undo them, so every number stays within 100.
+ * Whole tens are not single facts of the rules (they are `add2d:` buckets), so the cards carry
+ * their own ids, `tens:40+30` and `tens:70-40`.
+ */
+export function addTensFacts(tens: number, notation: Notation): FactText[] {
+  if (!Number.isInteger(tens) || tens < TABLE_MIN || tens > TABLE_MAX) {
+    throw new RangeError('Adding tens is 0 to 10 tens.');
+  }
+  const signs = OPERATOR_SYMBOLS[notation];
+  const card = (item: string, question: string, answer: number): FactText => ({
+    item,
+    question,
+    answer: String(answer),
+    sentence: `${question} = ${answer}`,
+  });
+  const n = tens * 10;
+  const adds: FactText[] = [];
+  const subs: FactText[] = [];
+  for (let k = 0; n + k * 10 <= 100; k++) {
+    const m = k * 10;
+    adds.push(card(`tens:${n}+${m}`, `${n} ${signs.add} ${m}`, n + m));
+    subs.push(card(`tens:${n + m}-${n}`, `${n + m} ${signs.sub} ${n}`, m));
+  }
+  return [...adds, ...subs];
 }
 
 export type Certificate =
