@@ -116,6 +116,8 @@ describe('the suggested next level', () => {
     const player = await child(3, loadPack());
     expect(unlocked(player)).toEqual([
       'pebble-brook',
+      'mushroom-hollow',
+      'rainbow-ford',
       'hundred-hills',
       'market-square',
       'sunny-meadow',

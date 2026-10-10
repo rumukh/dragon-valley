@@ -436,7 +436,8 @@ export class Player {
       await this.move({ type: 'submit' });
     } else if (board.kind === 'number-trail') {
       if (this.style.clumsy) await this.move({ type: 'submit' });
-      const sorted = [...board.stones].sort((a, b) => a.value - b.value);
+      const down = board.direction === 'down' ? -1 : 1;
+      const sorted = [...board.stones].sort((a, b) => down * (a.value - b.value));
       for (const [index, stone] of sorted.entries()) {
         await this.move({ type: 'place', item: stone.id, index });
       }

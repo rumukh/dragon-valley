@@ -52,6 +52,7 @@ const REVISIONS: Readonly<Record<string, string>> = {
   '1.3.0': 'f41ae03a85710bac', // growing up: the effort path and adult at 80 % (balance-report §9)
   '1.4.0': '9f81dad0a12a7159', // grades 1-3: grade starts, filters and Pebble Brook for grade 1
   '1.5.0': '07efa7b4d4d3fac1', // grade 2: Hundred Hills and Market Square
+  '1.6.0': 'PENDING', // grade 1: Mushroom Hollow and Rainbow Ford
 };
 
 function diagnostics(pack: Pack): readonly RuntimeDiagnostic[] {
@@ -101,8 +102,10 @@ describe('the sample content pack', () => {
   it('puts the younger grades in front: Pebble Brook for grade 1 with Dot, Hop and Nibble', () => {
     const data = fresh().data;
     const byOrder = [...data.regions].sort((a, b) => a.order - b.order);
-    expect(byOrder.map((r) => [r.id, regionGrade(r)]).slice(0, 4)).toEqual([
+    expect(byOrder.map((r) => [r.id, regionGrade(r)]).slice(0, 6)).toEqual([
       ['pebble-brook', 1],
+      ['mushroom-hollow', 1],
+      ['rainbow-ford', 1],
       ['hundred-hills', 2],
       ['market-square', 2],
       ['sunny-meadow', 3],
@@ -117,12 +120,40 @@ describe('the sample content pack', () => {
     ]);
   });
 
+  it('finishes grade 1 in Mushroom Hollow (Sprout) and Rainbow Ford (Tenzi), in one chain', () => {
+    const data = fresh().data;
+    const region = (id: string) => data.regions.find((r) => r.id === id)!;
+    expect(region('mushroom-hollow').boss).toBe('skritek');
+    expect(region('rainbow-ford').boss).toBe('kasparek');
+    expect(region('mushroom-hollow').unlock.after).toEqual(['pebble-brook.boss']);
+    expect(region('rainbow-ford').unlock.after).toEqual(['mushroom-hollow.boss']);
+    expect(
+      data.dragons
+        .filter((d) => d.region === 'mushroom-hollow' || d.region === 'rainbow-ford')
+        .map((d) => [d.id, d.kind, d.table, d.boss]),
+    ).toEqual([
+      ['sprout', 'special', null, 'skritek'],
+      ['tenzi', 'special', null, 'kasparek'],
+    ]);
+    for (const id of ['mushroom-hollow', 'rainbow-ford']) {
+      const levels = data.levels.filter((l) => l.region === id);
+      expect(
+        levels.filter((l) => l.kind === 'lesson'),
+        id,
+      ).toHaveLength(6);
+      expect(
+        levels.filter((l) => l.kind === 'boss'),
+        id,
+      ).toHaveLength(1);
+    }
+  });
+
   it('teaches grade 2 in Hundred Hills (Bead, Tumble, Penny) and Market Square, in one chain', () => {
     const data = fresh().data;
     const region = (id: string) => data.regions.find((r) => r.id === id)!;
     expect(region('hundred-hills').boss).toBe('long-broad-sharp-eyes');
     expect(region('market-square').boss).toBe('otesanek');
-    expect(region('hundred-hills').unlock.after).toEqual(['pebble-brook.boss']);
+    expect(region('hundred-hills').unlock.after).toEqual(['rainbow-ford.boss']);
     expect(region('market-square').unlock.after).toEqual(['hundred-hills.boss']);
     expect(region('sunny-meadow').unlock.after).toEqual(['market-square.boss']);
     expect(
