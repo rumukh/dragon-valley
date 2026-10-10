@@ -145,15 +145,20 @@ grade starts in ([design §12.1](design.md#121-one-valley-a-grade-per-child)):
   `add.missing`, `addsub.2d`; bounds in [curriculum.md §7.3](curriculum.md#73-generator-bounds))
   serve the 1st- and 2nd-grade regions. The minigame kinds `ten-frame` (boards from `add:` facts
   within 20 and `num.count` buckets; option `task`: `mix`, `show`, `make-ten`, `cross`) and
-  `bundle-sticks` (2-digit work, for the 2nd grade) have boards. Pebble Brook 5 lists Ten Frame.
+  `bundle-sticks` (2-digit work, for the 2nd grade; option `task`: `mix`, `build`, `add`, `sub`)
+  have boards. Pebble Brook 5 lists Ten Frame; Hundred Hills and Market Square list Bundle Sticks.
 - Story text for grades 1-2 keeps to **at most 6 words a sentence**: the beats of a grade 1-2
   region (or with `grades` of 1-2 only) and the word templates its skills use. The validator names
   the sentence ([design §12.5](design.md#125-making-it-work-for-6--and-7-year-olds)).
 - `balance.grades: [{ grade, choice?, keypad?, choices? }]` overrides the answer times and the
-  number of choices for a grade; 1.4.0 gives the 1st grade 3 choices and slower "fast" and "ok".
-- Pebble Brook (1.4.0) is the first region: `grade: 1`, no `unlock.after`. Sunny Meadow unlocks
-  after `pebble-brook.boss` until the 2nd-grade regions slot in before it (then it names the last
-  2nd-grade boss level); as the 3rd grade's start it stays open for 3rd graders.
+  number of choices for a grade; 1.4.0 gives the 1st grade 3 choices and slower "fast" and "ok",
+  1.5.0 the 2nd grade 3 choices and times between the 1st grade's and the defaults.
+- Pebble Brook (1.4.0) is the first region: `grade: 1`, no `unlock.after`. Hundred Hills (1.5.0,
+  `grade: 2`, boss Long, Broad and Sharp-Eyes) unlocks after `pebble-brook.boss`, Market Square
+  (`grade: 2`, boss Otesánek) after `hundred-hills.boss`, and Sunny Meadow after
+  `market-square.boss`; as the 3rd grade's start Sunny Meadow stays open for 3rd graders. Beating
+  Otesánek ends the 2nd grade's +/− (`grade.completed` for grade 2). Later 1st- and 2nd-grade
+  regions slot in between Pebble Brook and Hundred Hills, and the chain moves with them.
 
 ## 3. Skills
 
@@ -194,6 +199,12 @@ Eggs a story gives are also rewards of their level, and a region's eggs rewards 
 with unlock-ahead still gets every dragon. Special dragons (Pearl, Boulder, Clockwork) grow on
 their region's skills; the finale dragon's mastery set is every strand of the Seven-Headed Dragon.
 
+The 2nd grade's first egg is chosen in `beat.hundred-hills-welcome` (`grades: [2]`, at the start
+of Hundred Hills 1): Bead, Tumble or Penny, special dragons without a table. Hundred Hills 1
+serves their skills (place value, comparing, tens ± tens, 2-digit ± 1-digit), so the chosen egg
+hatches in the first session (`test/traces/hundred-hills.test.ts`); Hundred Hills 2's completion
+gives the other two.
+
 ## 5. The placement check
 
 `placement.steps` is a ladder of `{ skill, problems, passAccuracy, levels }`. The check asks
@@ -212,7 +223,10 @@ previous boss is won over.
 
 A step may carry `grades` (for example `[3]`): the check of a child in another grade skips it.
 A step without `grades` belongs to every grade's ladder. The plan: no ladder for grade 1, a short
-one for grade 2 (numbers to 100, +/− without crossing), today's for grade 3.
+one for grade 2 (numbers to 100, +/− without crossing), today's for grade 3. Content 1.5.0's
+grade 2 ladder has two steps: comparing numbers to 100 places `hundred-hills.3`, 2-digit ± 1-digit
+without crossing places `hundred-hills.4` (Hundred Hills 1 and 2 give and hatch the eggs, so they
+are never placed).
 
 ## 6. Market, stickers and quests
 

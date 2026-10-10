@@ -322,7 +322,9 @@ describe('rounds from random states (property)', () => {
     }
     if (kind === 'arena') return { type: 'startActivity', activity: { kind: 'arena' } };
     if (kind === 'placement') return { type: 'startActivity', activity: { kind: 'placement' } };
-    const problems = data.levels.flatMap((level) =>
+    // The veteran's own levels: regions added since its save are still locked for it.
+    const played = data.levels.filter((level) => veteran.levels[level.id] !== undefined);
+    const problems = played.flatMap((level) =>
       level.activities
         .map((activity, i) => ({ level: level.id, activity: i, kind: activity.kind }))
         .filter((a) => !isMinigameKind(a.kind)),

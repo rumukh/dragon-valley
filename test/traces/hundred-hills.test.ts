@@ -95,9 +95,7 @@ describe('a 2nd grader in Hundred Hills', () => {
 
   it('places a child who knows numbers to 100 past Hundred Hills 3 and 4, never the egg level', async () => {
     const { player } = await secondGrader('hundred-hills-placement');
-    expect(await player.act({ type: 'startActivity', activity: { kind: 'placement' } })).toBe(
-      true,
-    );
+    expect(await player.act({ type: 'startActivity', activity: { kind: 'placement' } })).toBe(true);
     await player.playRound();
     if (player.view().round !== null) await player.act({ type: 'endRound', reason: 'done' });
     await walkStory(player, '');

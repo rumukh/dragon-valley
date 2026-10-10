@@ -95,7 +95,7 @@ describe('the grade setting', () => {
 
   it('is refused for a grade the content does not serve, and applied otherwise', async () => {
     // Content 1.4.0 served grades 1 and 3: grade 2 came with Hundred Hills in 1.5.0.
-    const player = new Player(PERFECT, 'grades', loadPack('content/history/1.4.0.json'));
+    const player = new Player(PERFECT, 'grades', undefined, loadPack('content/history/1.4.0.json'));
     expect(await player.act({ type: 'startSession', day: '2026-10-06' })).toBe(true);
     expect(
       await player.reject(
@@ -406,7 +406,7 @@ describe('grades in the shipped pack', () => {
     expect(beat('beat.first-egg').trigger.grades).toEqual([3]);
     expect(beat('beat.pebble-brook-welcome').trigger.grades).toEqual([1]);
     expect(beat('beat.hundred-hills-welcome').trigger.grades).toEqual([2]);
-    const ladder = (grade: number) =>
+    const ladder = (grade: 1 | 2 | 3) =>
       pack.data.placement.steps.filter((step) => step.grades!.includes(grade));
     for (const step of pack.data.placement.steps) expect(step.grades).toHaveLength(1);
     expect(ladder(1)).toEqual([]);

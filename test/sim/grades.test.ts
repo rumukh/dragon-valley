@@ -59,7 +59,9 @@ describe('a 2nd grader in the shipped Hundred Hills and Market Square', () => {
     const report = await simulate('second-grader', 14, { grade: 2, answersPerDay: 35 });
     expect(report.failures).toEqual([]);
     const days = report.days.filter((day) => day.played);
-    expect(days[0]!.hatched.length, 'the first egg hatches in the first session').toBeGreaterThan(0);
+    expect(days[0]!.hatched.length, 'the first egg hatches in the first session').toBeGreaterThan(
+      0,
+    );
     const hatched = days.flatMap((day) => day.hatched);
     for (const dragon of ['bead', 'tumble', 'penny']) expect(hatched, dragon).toContain(dragon);
     const bosses = days.flatMap((day) => day.bosses);

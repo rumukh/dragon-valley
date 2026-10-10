@@ -116,9 +116,7 @@ describe('Bundle Sticks boards', () => {
       const add = deal('add2d:2d1d-nocarry', 'add', seed);
       expect((add.a % 10) + (add.b % 10), `${add.a} + ${add.b}`).toBeLessThan(10);
       const carry = deal('add2d:2d1d-carry', 'add', seed);
-      expect((carry.a % 10) + (carry.b % 10), `${carry.a} + ${carry.b}`).toBeGreaterThanOrEqual(
-        10,
-      );
+      expect((carry.a % 10) + (carry.b % 10), `${carry.a} + ${carry.b}`).toBeGreaterThanOrEqual(10);
       const sub = deal('sub2d:2d1d-noborrow', 'sub', seed);
       expect(sub.a % 10, `${sub.a} − ${sub.b}`).toBeGreaterThanOrEqual(sub.b % 10);
     }

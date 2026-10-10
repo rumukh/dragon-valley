@@ -857,7 +857,7 @@ const GOLDEN_DIGESTS: Record<string, string> = {
   'order.ops': '5476b30016ea6583',
   compare: 'e401e296cf834ea4',
   terms: '6a437531585bea35',
-  word: '8deb9eb626430f60', // 1.4.0: the golden skill draws the new add-to and take-from templates too
+  word: '03312dbbc3cb803d', // 1.4.0: the golden skill draws the new add-to and take-from templates too
 };
 
 describe('determinism', () => {
