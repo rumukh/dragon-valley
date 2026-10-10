@@ -829,8 +829,12 @@ new regions after Dragon Castle.
   earlier-grade regions are open on the map but never pushed.
 - **Sunny Meadow** gets `unlock.after` the last 2nd-grade boss (Otesánek); a 3rd grader's start
   region is always open, so nothing locks for existing children.
-- **Changing grade** (parent area, behind the gate) only moves the start and the suggestions.
-  Progress, dragons and coins stay. Moving up ("now in 2nd grade") is the normal path.
+- **Changing grade** only moves the start and the suggestions. Progress, dragons and coins stay.
+  Moving up ("now in 2nd grade") is the normal path. The hub shows the child's class as a chip next
+  to their name ("1st class"); a tap opens a picker with the three classes, picking another one asks
+  _"Switch to 2nd class?"_, and a yes goes through the grown-ups' gate, so the change stays a
+  grown-up's decision. The same choice stays in the parent area's settings. A refusal (no lessons
+  for that class, or a placement check in progress) changes nothing and says why.
 - **Choosing the grade.** The new-keeper editor gets a third step after name and avatar: _"Which
   class is Ema in?"_ with three big read-aloud buttons (1st, 2nd, 3rd class). A wrong pick costs
   nothing. The shell sets the grade before the child's first session, so the first-session story

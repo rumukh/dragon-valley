@@ -344,6 +344,95 @@
   outline-offset: 0.12em;
 }
 
+/* The hub's class chip next to the keeper's name, and its picker (docs/design.md §12.1). */
+.dv-hub__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3em 0.6em;
+  min-width: 0;
+}
+
+.dv-class-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-height: var(--dv-target);
+  padding: 0.15em 0.8em 0.15em 0.25em;
+  border: 0.08em solid var(--dv-line);
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--dv-ink);
+  background: color-mix(in srgb, var(--dv-paper) 88%, transparent);
+  box-shadow: 0 0.18em 0 var(--dv-line-strong);
+  cursor: pointer;
+  touch-action: manipulation;
+  white-space: nowrap;
+}
+
+.dv-class-chip:hover {
+  background: var(--dv-paper);
+}
+
+.dv-class-chip:focus-visible {
+  outline: 0.16em solid var(--dv-ink);
+  outline-offset: 0.12em;
+}
+
+.dv-class-chip__number {
+  display: inline-grid;
+  place-items: center;
+  width: 1.7em;
+  height: 1.7em;
+  border-radius: 50%;
+  color: var(--dv-ink);
+  background: var(--dv-primary-soft);
+  box-shadow: inset 0 0 0 0.1em var(--dv-primary);
+}
+
+.dv-class-picker__title:focus {
+  outline: none;
+}
+
+.dv-class-choice {
+  flex-direction: column;
+  gap: 0.15em;
+  border: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--dv-ink);
+  touch-action: manipulation;
+}
+
+.dv-class-choice[aria-pressed='true'] {
+  background: var(--dv-primary-soft);
+  box-shadow: 0 0 0 0.16em var(--dv-primary);
+}
+
+.dv-class-choice:focus-visible {
+  outline: 0.16em solid var(--dv-ink);
+  outline-offset: 0.12em;
+}
+
+.dv-class-choice__now {
+  font-size: 0.75em;
+}
+
+.dv-class-picker__note {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin: 0;
+}
+
+.dv-class-picker__note svg {
+  flex: none;
+  width: 1.6em;
+  height: 1.6em;
+}
+
 /* ---- Scenes ---------------------------------------------------------------------------- */
 
 /* Screens drawn over one of S4's background scenes: the picture fills the screen behind. */

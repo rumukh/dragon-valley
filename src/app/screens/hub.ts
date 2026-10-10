@@ -3,6 +3,7 @@
  * close it is to growing, and the others as a strip that opens the Dragon Den), the coin purse
  * and save status, today's goal with the week's practised days (a habit view, never a streak),
  * and one big Daily Adventure button that does what the game suggests next (docs/design.md §4.2).
+ * The keeper's class sits next to their name as a chip that changes it (§12.1).
  * The valley map is one tap away. On a landscape screen the whole hub fits in the window, however
  * many dragons there are.
  */
@@ -22,6 +23,7 @@ import { gradeOf, isYoungGrade } from '../game/grade';
 import { finishedGrades } from '../print/content';
 import type { ActiveKeeper, App } from '../shell/app';
 import { createSaveStatus, keeperBadge, toastStickers, topBar } from './common';
+import { classChip } from './class-chip';
 import { hasDiary } from './goodbye';
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
@@ -476,7 +478,17 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
             ? app.router.push(app.screens.goodbye(keeperId))
             : app.router.reset(app.screens.keepers()),
       },
-      title: keeperBadge(active.keeper),
+      title: h(
+        'div',
+        { className: 'dv-hub__who' },
+        keeperBadge(active.keeper),
+        classChip(app, active, () => app.router.refresh(), {
+          // Read aloud by itself only where the keeper's read-aloud does so (1st class).
+          say: (line) => {
+            if (active.preferences.current().autoRead) app.speak(line);
+          },
+        }),
+      ),
       tools: [coins.element, saveStatus.element],
       onError: app.kit.onError,
     }),
