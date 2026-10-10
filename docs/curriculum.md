@@ -34,6 +34,10 @@ document's ID table and the content pack's objectives in step.
 | `obj.num.compare-10`           | Compare and order numbers 0-10 (`<`, `>`, `=`), number line (grade 1)             | porovnávání čísel do 10, číselná osa                                  | M-3-1-02, M-3-1-03 |
 | `obj.add.within-10`            | Addition within 10 (grade 1)                                                      | sčítání v oboru do 10                                                 | M-3-1-04           |
 | `obj.sub.within-10`            | Subtraction within 10 (grade 1)                                                   | odčítání v oboru do 10                                                | M-3-1-04           |
+| `obj.add.bonds-10`             | Number bonds of 10 and missing addends (`7 + ? = 10`) (grade 1)                   | rozklad čísla 10, doplňování do 10                                    | M-3-1-04           |
+| `obj.num.to-20`                | Numbers 11-20: tens and ones, compare, number line (grade 1)                      | čísla do 20, desítky a jednotky, číselná osa                          | M-3-1-02, M-3-1-03 |
+| `obj.addsub.20-no-cross`       | +/− within 20 without crossing ten (`13 + 4`, `17 − 3`) (grade 1)                 | sčítání a odčítání do 20 bez přechodu přes desítku                    | M-3-1-04           |
+| `obj.addsub.20-cross`          | +/− within 20 crossing ten (`8 + 5`, `13 − 6`) (grade 1)                          | sčítání a odčítání do 20 s přechodem přes desítku                     | M-3-1-04           |
 | `obj.num.to-100`               | Numbers to 100: tens and ones, place value, compare, order, number line (grade 2) | čísla do 100, desítky a jednotky, porovnávání                         | M-3-1-02, M-3-1-03 |
 | `obj.addsub.tens`              | Whole tens ± whole tens (`40 + 30`, `90 − 50`) (grade 2)                          | sčítání a odčítání celých desítek                                     | M-3-1-04           |
 | `obj.addsub.2d1d`              | 2-digit ± 1-digit, without and with crossing ten (`34 + 5`, `34 + 8`) (grade 2)   | dvojciferné ± jednociferné, bez přechodu i s přechodem                | M-3-1-04           |
@@ -72,49 +76,54 @@ document's ID table and the content pack's objectives in step.
 
 Level IDs follow [design.md §3](design.md#3-world-and-levels). Every objective has at least one
 lesson and at least one boss level; the Seven-Headed Dragon (`dragon-castle.boss`) reviews all of
-the 3rd-grade objectives, the Will-o'-the-Wisps (`pebble-brook.boss`) the 1st-grade ones of
-Pebble Brook, and Long, Broad and Sharp-Eyes (`hundred-hills.boss`) and Otesánek
+the 3rd-grade objectives, the Will-o'-the-Wisps (`pebble-brook.boss`), the House Goblin
+(`mushroom-hollow.boss`) and Kašpárek (`rainbow-ford.boss`) the 1st-grade ones of Pebble Brook,
+Mushroom Hollow and Rainbow Ford, and Long, Broad and Sharp-Eyes (`hundred-hills.boss`) and Otesánek
 (`market-square.boss`) the 2nd-grade ones of Hundred Hills and Market Square.
 
-| Objective                      | Lessons                                                                                                          | Boss levels                                |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `obj.num.count-10`             | `pebble-brook.1`, `pebble-brook.2`, `pebble-brook.3`                                                             | `pebble-brook.boss`                        |
-| `obj.num.compare-10`           | `pebble-brook.3`, `pebble-brook.5`                                                                               | `pebble-brook.boss`                        |
-| `obj.add.within-10`            | `pebble-brook.1`, `pebble-brook.4`, `pebble-brook.5`                                                             | `pebble-brook.boss`                        |
-| `obj.sub.within-10`            | `pebble-brook.1`, `pebble-brook.5`                                                                               | `pebble-brook.boss`                        |
-| `obj.num.to-100`               | `hundred-hills.1`, `hundred-hills.2`, `hundred-hills.3`                                                          | `hundred-hills.boss`                       |
-| `obj.addsub.tens`              | `hundred-hills.1`, `hundred-hills.3`                                                                             | `hundred-hills.boss`                       |
-| `obj.addsub.2d1d`              | `hundred-hills.1`, `hundred-hills.4`, `hundred-hills.5`, `market-square.1`, `market-square.5`                    | `hundred-hills.boss`, `market-square.boss` |
-| `obj.addsub.2d2d`              | `market-square.2`, `market-square.3`, `market-square.5`                                                          | `market-square.boss`                       |
-| `obj.word.add-sub`             | `pebble-brook.6`, `market-square.4`                                                                              | `pebble-brook.boss`, `market-square.boss`  |
-| `obj.word.two-step-add`        | `market-square.4`, `market-square.5`                                                                             | `market-square.boss`                       |
-| `obj.mul.meaning`              | `sunny-meadow.1`, `whispering-woods.1`                                                                           | `sunny-meadow.boss`                        |
-| `obj.mul.commutative`          | `sunny-meadow.2`, `sunny-meadow.4`, `whispering-woods.2`                                                         | `sunny-meadow.boss`                        |
-| `obj.mul.rules-0-1`            | `sunny-meadow.3`, `sunny-meadow.5`                                                                               | `sunny-meadow.boss`                        |
-| `obj.mul.table-2-5-10`         | `sunny-meadow.1`, `sunny-meadow.2`, `sunny-meadow.3`, `sunny-meadow.5`                                           | `sunny-meadow.boss`                        |
-| `obj.mul.table-3-4`            | `whispering-woods.1`, `whispering-woods.2`, `whispering-woods.3`, `whispering-woods.5`                           | `whispering-woods.boss`                    |
-| `obj.mul.table-6-7`            | `fire-mountain.1`, `fire-mountain.2`, `fire-mountain.3`, `fire-mountain.5`                                       | `fire-mountain.boss`                       |
-| `obj.mul.table-8-9`            | `crystal-caves.1`, `crystal-caves.2`, `crystal-caves.3`, `crystal-caves.5`                                       | `crystal-caves.boss`                       |
-| `obj.mul.fluency`              | `crystal-caves.5`, `dragon-castle.1`, `dragon-castle.2`                                                          | `dragon-castle.boss`                       |
-| `obj.div.meaning`              | `sunny-meadow.4`, `sharing-lake.1`                                                                               | `sunny-meadow.boss`, `sharing-lake.boss`   |
-| `obj.div.tables`               | `sunny-meadow.5`, `whispering-woods.4`, `fire-mountain.4`, `crystal-caves.4`, `sharing-lake.1`, `sharing-lake.6` | `sharing-lake.boss`                        |
-| `obj.div.fact-families`        | `sunny-meadow.4`, `whispering-woods.4`, `fire-mountain.4`, `sharing-lake.3`                                      | `sunny-meadow.boss`, `sharing-lake.boss`   |
-| `obj.div.missing-factor`       | `fire-mountain.4`, `sharing-lake.2`                                                                              | `sharing-lake.boss`                        |
-| `obj.rem.divide`               | `leftover-lagoon.1`, `leftover-lagoon.2`, `leftover-lagoon.3`, `leftover-lagoon.5`                               | `leftover-lagoon.boss`                     |
-| `obj.rem.word`                 | `leftover-lagoon.4`                                                                                              | `leftover-lagoon.boss`                     |
-| `obj.big.mul-10-100`           | `giants-peaks.1`                                                                                                 | `giants-peaks.boss`                        |
-| `obj.big.tens`                 | `giants-peaks.2`                                                                                                 | `giants-peaks.boss`                        |
-| `obj.big.mul-2d1d`             | `giants-peaks.3`, `giants-peaks.4`                                                                               | `giants-peaks.boss`                        |
-| `obj.big.div-2d1d`             | `giants-peaks.5`                                                                                                 | `giants-peaks.boss`                        |
-| `obj.order.precedence`         | `riddle-ruins.1`                                                                                                 | `riddle-ruins.boss`                        |
-| `obj.order.brackets`           | `riddle-ruins.2`                                                                                                 | `riddle-ruins.boss`                        |
-| `obj.compare.expressions`      | `whispering-woods.5`, `crystal-caves.5`, `sharing-lake.5`, `riddle-ruins.3`                                      | `riddle-ruins.boss`                        |
-| `obj.word.equal-groups`        | `sunny-meadow.6`, `whispering-woods.6`, `crystal-caves.6`                                                        | `sunny-meadow.boss`                        |
-| `obj.word.times-more-fewer`    | `fire-mountain.6`, `sharing-lake.4`                                                                              | `sharing-lake.boss`                        |
-| `obj.word.more-fewer-contrast` | `sunny-meadow.6`, `sharing-lake.5`                                                                               | `sharing-lake.boss`                        |
-| `obj.word.two-step`            | `giants-peaks.6`, `riddle-ruins.5`                                                                               | `riddle-ruins.boss`                        |
-| `obj.terms.mul`                | `riddle-ruins.4`                                                                                                 | `riddle-ruins.boss`                        |
-| `obj.terms.div`                | `riddle-ruins.4`                                                                                                 | `riddle-ruins.boss`                        |
+| Objective                      | Lessons                                                                                                                | Boss levels                                                                            |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `obj.num.count-10`             | `pebble-brook.1`, `pebble-brook.2`, `pebble-brook.3`                                                                   | `pebble-brook.boss`                                                                    |
+| `obj.num.compare-10`           | `pebble-brook.3`, `pebble-brook.5`                                                                                     | `pebble-brook.boss`                                                                    |
+| `obj.add.within-10`            | `pebble-brook.1`, `pebble-brook.4`, `pebble-brook.5`, `mushroom-hollow.4`, `mushroom-hollow.6`                         | `pebble-brook.boss`, `mushroom-hollow.boss`                                            |
+| `obj.sub.within-10`            | `pebble-brook.1`, `pebble-brook.5`, `mushroom-hollow.1`, `mushroom-hollow.2`, `mushroom-hollow.4`, `mushroom-hollow.6` | `pebble-brook.boss`, `mushroom-hollow.boss`                                            |
+| `obj.add.bonds-10`             | `mushroom-hollow.1`, `mushroom-hollow.3`, `mushroom-hollow.4`, `mushroom-hollow.6`                                     | `mushroom-hollow.boss`                                                                 |
+| `obj.num.to-20`                | `rainbow-ford.1`, `rainbow-ford.2`, `rainbow-ford.3`                                                                   | `rainbow-ford.boss`                                                                    |
+| `obj.addsub.20-no-cross`       | `rainbow-ford.3`, `rainbow-ford.6`                                                                                     | `rainbow-ford.boss`                                                                    |
+| `obj.addsub.20-cross`          | `rainbow-ford.4`, `rainbow-ford.5`, `rainbow-ford.6`                                                                   | `rainbow-ford.boss`                                                                    |
+| `obj.num.to-100`               | `hundred-hills.1`, `hundred-hills.2`, `hundred-hills.3`                                                                | `hundred-hills.boss`                                                                   |
+| `obj.addsub.tens`              | `hundred-hills.1`, `hundred-hills.3`                                                                                   | `hundred-hills.boss`                                                                   |
+| `obj.addsub.2d1d`              | `hundred-hills.1`, `hundred-hills.4`, `hundred-hills.5`, `market-square.1`, `market-square.5`                          | `hundred-hills.boss`, `market-square.boss`                                             |
+| `obj.addsub.2d2d`              | `market-square.2`, `market-square.3`, `market-square.5`                                                                | `market-square.boss`                                                                   |
+| `obj.word.add-sub`             | `pebble-brook.6`, `mushroom-hollow.5`, `rainbow-ford.6`, `market-square.4`                                             | `pebble-brook.boss`, `mushroom-hollow.boss`, `rainbow-ford.boss`, `market-square.boss` |
+| `obj.word.two-step-add`        | `market-square.4`, `market-square.5`                                                                                   | `market-square.boss`                                                                   |
+| `obj.mul.meaning`              | `sunny-meadow.1`, `whispering-woods.1`                                                                                 | `sunny-meadow.boss`                                                                    |
+| `obj.mul.commutative`          | `sunny-meadow.2`, `sunny-meadow.4`, `whispering-woods.2`                                                               | `sunny-meadow.boss`                                                                    |
+| `obj.mul.rules-0-1`            | `sunny-meadow.3`, `sunny-meadow.5`                                                                                     | `sunny-meadow.boss`                                                                    |
+| `obj.mul.table-2-5-10`         | `sunny-meadow.1`, `sunny-meadow.2`, `sunny-meadow.3`, `sunny-meadow.5`                                                 | `sunny-meadow.boss`                                                                    |
+| `obj.mul.table-3-4`            | `whispering-woods.1`, `whispering-woods.2`, `whispering-woods.3`, `whispering-woods.5`                                 | `whispering-woods.boss`                                                                |
+| `obj.mul.table-6-7`            | `fire-mountain.1`, `fire-mountain.2`, `fire-mountain.3`, `fire-mountain.5`                                             | `fire-mountain.boss`                                                                   |
+| `obj.mul.table-8-9`            | `crystal-caves.1`, `crystal-caves.2`, `crystal-caves.3`, `crystal-caves.5`                                             | `crystal-caves.boss`                                                                   |
+| `obj.mul.fluency`              | `crystal-caves.5`, `dragon-castle.1`, `dragon-castle.2`                                                                | `dragon-castle.boss`                                                                   |
+| `obj.div.meaning`              | `sunny-meadow.4`, `sharing-lake.1`                                                                                     | `sunny-meadow.boss`, `sharing-lake.boss`                                               |
+| `obj.div.tables`               | `sunny-meadow.5`, `whispering-woods.4`, `fire-mountain.4`, `crystal-caves.4`, `sharing-lake.1`, `sharing-lake.6`       | `sharing-lake.boss`                                                                    |
+| `obj.div.fact-families`        | `sunny-meadow.4`, `whispering-woods.4`, `fire-mountain.4`, `sharing-lake.3`                                            | `sunny-meadow.boss`, `sharing-lake.boss`                                               |
+| `obj.div.missing-factor`       | `fire-mountain.4`, `sharing-lake.2`                                                                                    | `sharing-lake.boss`                                                                    |
+| `obj.rem.divide`               | `leftover-lagoon.1`, `leftover-lagoon.2`, `leftover-lagoon.3`, `leftover-lagoon.5`                                     | `leftover-lagoon.boss`                                                                 |
+| `obj.rem.word`                 | `leftover-lagoon.4`                                                                                                    | `leftover-lagoon.boss`                                                                 |
+| `obj.big.mul-10-100`           | `giants-peaks.1`                                                                                                       | `giants-peaks.boss`                                                                    |
+| `obj.big.tens`                 | `giants-peaks.2`                                                                                                       | `giants-peaks.boss`                                                                    |
+| `obj.big.mul-2d1d`             | `giants-peaks.3`, `giants-peaks.4`                                                                                     | `giants-peaks.boss`                                                                    |
+| `obj.big.div-2d1d`             | `giants-peaks.5`                                                                                                       | `giants-peaks.boss`                                                                    |
+| `obj.order.precedence`         | `riddle-ruins.1`                                                                                                       | `riddle-ruins.boss`                                                                    |
+| `obj.order.brackets`           | `riddle-ruins.2`                                                                                                       | `riddle-ruins.boss`                                                                    |
+| `obj.compare.expressions`      | `whispering-woods.5`, `crystal-caves.5`, `sharing-lake.5`, `riddle-ruins.3`                                            | `riddle-ruins.boss`                                                                    |
+| `obj.word.equal-groups`        | `sunny-meadow.6`, `whispering-woods.6`, `crystal-caves.6`                                                              | `sunny-meadow.boss`                                                                    |
+| `obj.word.times-more-fewer`    | `fire-mountain.6`, `sharing-lake.4`                                                                                    | `sharing-lake.boss`                                                                    |
+| `obj.word.more-fewer-contrast` | `sunny-meadow.6`, `sharing-lake.5`                                                                                     | `sharing-lake.boss`                                                                    |
+| `obj.word.two-step`            | `giants-peaks.6`, `riddle-ruins.5`                                                                                     | `riddle-ruins.boss`                                                                    |
+| `obj.terms.mul`                | `riddle-ruins.4`                                                                                                       | `riddle-ruins.boss`                                                                    |
+| `obj.terms.div`                | `riddle-ruins.4`                                                                                                       | `riddle-ruins.boss`                                                                    |
 
 ## 4. Generator bounds
 
@@ -205,8 +214,9 @@ test keeps in step with the pack, once a region of the content teaches it. Conte
 **Pebble Brook** (grade 1) and with it `obj.num.count-10`, `obj.num.compare-10`,
 `obj.add.within-10`, `obj.sub.within-10` and `obj.word.add-sub`. Content 1.5.0 adds **Hundred
 Hills** and **Market Square** (grade 2) and with them `obj.num.to-100`, `obj.addsub.tens`,
-`obj.addsub.2d1d`, `obj.addsub.2d2d` and `obj.word.two-step-add`. The rest are listed here until
-their regions exist.
+`obj.addsub.2d1d`, `obj.addsub.2d2d` and `obj.word.two-step-add`. Content 1.6.0 adds **Mushroom
+Hollow** and **Rainbow Ford** (grade 1) and with them `obj.add.bonds-10`, `obj.num.to-20`,
+`obj.addsub.20-no-cross` and `obj.addsub.20-cross`: every objective of §7.2 is now in the pack.
 
 ### 7.1 Sources
 
@@ -227,6 +237,8 @@ Mapped to typical 1st- and 2nd-grade textbooks (Hejný, Fraus, Prodos):
 
 ### 7.2 Objectives
 
+All four are in the pack since content 1.6.0 (§2, §3).
+
 | ID                       | Grade | Objective (English)                                     | Czech program wording                              | RVP ZV             |
 | ------------------------ | ----- | ------------------------------------------------------- | -------------------------------------------------- | ------------------ |
 | `obj.add.bonds-10`       | 1     | Number bonds of 10 and missing addends (`7 + ? = 10`)   | rozklad čísla 10, doplňování do 10                 | M-3-1-04           |
@@ -239,7 +251,7 @@ Strands: `numbers` (`obj.num.*`), `addition-subtraction` (`obj.add.*`, `obj.sub.
 level mapping joins §3 with the content): **Pebble Brook** (grade 1) counting, comparing, addition
 within 10, subtraction within 5 and the first adding-to and taking-from stories (in the pack, §3); **Mushroom Hollow** (1) subtraction within 10, bonds of 10, missing addends and
 the first stories; **Rainbow Ford** (1) numbers to 20 and +/− within 20 without, then with crossing
-ten; **Hundred Hills** (2) numbers to 100, place value, tens ± tens and 2-digit ± 1-digit; **Market
+ten (both in the pack since 1.6.0, §3); **Hundred Hills** (2) numbers to 100, place value, tens ± tens and 2-digit ± 1-digit; **Market
 Square** (2) 2-digit ± 1-digit and ± 2-digit with crossing and two-step stories (both in the pack,
 §3).
 
