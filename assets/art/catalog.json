@@ -234,6 +234,24 @@
       "signature": "#3d63d8",
       "mnemonic": "A kind market dragon who pays with shiny coins. A golden coin on her belly and a purse of coins beside her: add them up to see how much she has.",
       "recipe": "assets/art/dragons/penny.json"
+    },
+    {
+      "id": "sprout",
+      "name": "Sprout",
+      "kind": "special",
+      "homeRegion": "mushroom-hollow",
+      "signature": "#7fa35a",
+      "mnemonic": "A mossy little dragon with a toadstool cap who grows mushrooms in pairs that make ten. Seven red and three brown: what is missing to ten?",
+      "recipe": "assets/art/dragons/sprout.json"
+    },
+    {
+      "id": "tenzi",
+      "name": "Tenzi",
+      "kind": "special",
+      "homeRegion": "rainbow-ford",
+      "signature": "#6a74e8",
+      "mnemonic": "A river dragon who crosses the ford on stepping stones. Fill the ten first, then step over: 8 + 5 is 8 + 2 + 3, ten and three more.",
+      "recipe": "assets/art/dragons/tenzi.json"
     }
   ],
   "characters": [
@@ -256,6 +274,28 @@
       ],
       "outcome": "dance",
       "mood": "happy"
+    },
+    {
+      "id": "skritek",
+      "region": "mushroom-hollow",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "dance",
+      "mood": "happy"
+    },
+    {
+      "id": "kasparek",
+      "region": "rainbow-ford",
+      "states": [
+        "start",
+        "warming",
+        "won"
+      ],
+      "outcome": "laugh",
+      "mood": "laughing"
     },
     {
       "id": "long-broad-sharp-eyes",
@@ -633,7 +673,10 @@
       "stepping-stones",
       "sticks-bundle",
       "hill",
-      "market-stall"
+      "market-stall",
+      "mushroom",
+      "acorn",
+      "rainbow-arc"
     ],
     "fruits": [
       "apple",
@@ -823,6 +866,64 @@
         }
       },
       "prompt": "assets/backgrounds/prompts/pebble-brook.prompt.txt"
+    },
+    {
+      "id": "mushroom-hollow",
+      "file": "assets/backgrounds/mushroom-hollow.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "mushroom-hollow",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/mushroom-hollow.prompt.txt"
+    },
+    {
+      "id": "rainbow-ford",
+      "file": "assets/backgrounds/rainbow-ford.svg",
+      "width": 1600,
+      "height": 1000,
+      "kind": "region",
+      "region": "rainbow-ford",
+      "layout": {
+        "logical": {
+          "width": 1600,
+          "height": 1000
+        },
+        "dragon": {
+          "x": 430,
+          "y": 850
+        },
+        "boss": {
+          "x": 1170,
+          "y": 850
+        },
+        "ui": {
+          "x": 400,
+          "y": 70,
+          "width": 800,
+          "height": 470
+        }
+      },
+      "prompt": "assets/backgrounds/prompts/rainbow-ford.prompt.txt"
     },
     {
       "id": "hundred-hills",

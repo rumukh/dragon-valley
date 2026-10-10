@@ -45,6 +45,34 @@
       }
     },
     {
+      "id": "mushroom-hollow",
+      "file": "assets/backgrounds/mushroom-hollow.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (G5c)",
+      "generator": "src/app/art/backgrounds (scenes-e.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/mushroom-hollow.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
+      "id": "rainbow-ford",
+      "file": "assets/backgrounds/rainbow-ford.svg",
+      "kind": "svg-original",
+      "author": "Dragon Valley art workstream (G5c)",
+      "generator": "src/app/art/backgrounds (scenes-e.ts) via npm run art:build",
+      "license": "MIT, original work for this repository",
+      "painted": {
+        "status": "pending",
+        "prompt": "assets/backgrounds/prompts/rainbow-ford.prompt.txt",
+        "model": null,
+        "file": null
+      }
+    },
+    {
       "id": "hundred-hills",
       "file": "assets/backgrounds/hundred-hills.svg",
       "kind": "svg-original",

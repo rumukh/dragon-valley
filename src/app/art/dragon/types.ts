@@ -47,7 +47,8 @@ export type TailTip =
   | 'gear'
   | 'tuft';
 export type SpikeStyle = 'round' | 'flame' | 'crystal' | 'leaf' | 'stone' | 'none';
-export type CrestStyle = 'none' | 'sun' | 'flower' | 'crown10' | 'shell' | 'cloud-tuft' | 'flames';
+export type CrestStyle =
+  'none' | 'sun' | 'flower' | 'crown10' | 'shell' | 'cloud-tuft' | 'flames' | 'toadstool';
 export type MarkingStyle =
   | 'belly-plates'
   | 'rainbow-belly'
@@ -69,7 +70,9 @@ export type MarkingStyle =
   | 'minus-belly'
   | 'abacus-belly'
   | 'carry-belly'
-  | 'coin-belly';
+  | 'coin-belly'
+  | 'bonds-belly'
+  | 'cross-ten-belly';
 export type FeatureStyle =
   | 'reflection'
   | 'smoke-ring'
@@ -89,7 +92,9 @@ export type FeatureStyle =
   | 'buck-teeth'
   | 'bead-rods'
   | 'stick-bundle'
-  | 'coin-purse';
+  | 'coin-purse'
+  | 'toadstool-ring'
+  | 'ford-stones';
 export type EggPattern =
   | 'clouds'
   | 'shine'
@@ -111,7 +116,9 @@ export type EggPattern =
   | 'spots'
   | 'beads'
   | 'loops'
-  | 'coins';
+  | 'coins'
+  | 'toadstools'
+  | 'tens';
 
 export interface DragonColors {
   body: string;

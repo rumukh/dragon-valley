@@ -15,12 +15,21 @@ static files in `assets/backgrounds/` and `assets/art/catalog.json` instead (onl
 
 **Grades 1-2 (Lower Valley).** The art-side region list `ART_REGION_IDS` is the five Lower Valley
 regions (`LOWER_VALLEY_REGION_IDS`: `pebble-brook`, `mushroom-hollow`, `rainbow-ford`,
-`hundred-hills`, `market-square`) followed by the nine canonical regions. Pebble Brook is fully
-drawn (scene, map area, boss `will-o-wisps`, first-egg dragons `dot`, `hop`, `nibble`, emblem,
-icons) for grade 1, and so are the grade 2 regions Hundred Hills (scene, map area, boss
+`hundred-hills`, `market-square`) followed by the nine canonical regions. All five are fully drawn.
+Grade 1: Pebble Brook (scene, map area, boss `will-o-wisps`, first-egg dragons `dot`, `hop`,
+`nibble`, emblem, icons), Mushroom Hollow (scene, map area, boss `skritek`, first-egg dragon
+`sprout`, icons `mushroom`, `acorn`) and Rainbow Ford (scene, map area, boss `kasparek`,
+first-egg dragon `tenzi`, icon `rainbow-arc`). Grade 2: Hundred Hills (scene, map area, boss
 `long-broad-sharp-eyes`, first-egg dragon `bead`) and Market Square (scene, map area, boss `otesanek`,
-first-egg dragons `tumble` and `penny`). Mushroom Hollow and Rainbow Ford have emblems, palette
-entries and roughed-in map areas; their scenes and bosses follow in later phases.
+first-egg dragons `tumble` and `penny`).
+
+The rest of grade 1 adds two special dragons (table `null`): **Sprout** (moss green) wears a
+toadstool-cap crest and a belly ten-frame of toadstool caps, seven red and three brown (7 + 3 = 10),
+and sits by a mossy patch of ten toadstools laid like a ten-frame, for subtraction within 10 and bonds
+of 10; **Tenzi** (blue-violet) shows 8 + 5 = 8 + 2 + 3 = 13 on the belly (a full ten-frame of eight
+orange and two yellow, then three more yellow across a little hop) and stands by a pool with ten
+stepping stones and a flag marking the ten, for crossing ten up to 20. Their eggs are dotted with
+toadstools, and with ten-frames.
 
 The grade 2 first-egg dragons are special dragons (table `null`) with their own mnemonics:
 **Bead** (pink) carries an abacus on her belly (3 golden tens and 4 teal ones = 34) and stands by
@@ -208,7 +217,9 @@ square view box, for Glimmer's Market tiles and stickers.
 - **Region emblems**: `emblem-<region-id>` for all fourteen regions (`ART_REGION_IDS`).
 - **Lower Valley items** (`LOWER_VALLEY_ICON_IDS`, full color, for grade 1-2 stickers and
   rewards): `pebbles`, `wisp`, `ten-frame` (seven counters), `stepping-stones`, `sticks-bundle`
-  (a tied ten plus one loose stick), `hill`, `market-stall`. Coins use the existing `coin` item.
+  (a tied ten plus one loose stick), `hill`, `market-stall`, `mushroom`, `acorn`, `rainbow-arc`
+  (a rainbow between two clouds; `rainbow` is already the dragon ID). Coins use the existing `coin`
+  item.
 
 `renderAvatar('keeper-1' … 'keeper-8', { size, idPrefix, title, frame })` renders eight diverse,
 gender-neutral keepers as round badges (120 × 120 grid).
@@ -222,20 +233,22 @@ gets hurt. `BOSS_OUTCOME` says how each one is won, and `BOSS_MOOD` gives the sa
 content contract's `BossMood` vocabulary. The `won` pose shows that mood, so a content pack's
 `bosses[].mood` must match it (tested):
 
-| Boss                    | Region           | Start → warming → won                                                                    | Outcome | Mood       |
-| ----------------------- | ---------------- | ---------------------------------------------------------------------------------------- | ------- | ---------- |
-| `will-o-wisps`          | pebble-brook     | three cheeky dim wisps over the brook → six, glowing → a ring of ten dancing             | dance   | `happy`    |
-| `long-broad-sharp-eyes` | hundred-hills    | Long, Broad and Sharp-Eyes waiting arms crossed → waving and pointing → dancing together | dance   | `happy`    |
-| `otesanek`              | market-square    | a hungry log-baby with an empty bowl → eating porridge → fast asleep, tummy full (zZ)    | sleep   | `sleepy`   |
-| `bridge-troll`          | sunny-meadow     | arms crossed on his bridge → scratching his head → belly laugh with tears                | laugh   | `laughing` |
-| `forest-witch`          | whispering-woods | a kind Ježibaba squinting on her broom → waving → sharing a gingerbread heart            | agree   | `happy`    |
-| `krakonos`              | fire-mountain    | stern under a rain cloud → the sun peeks out → laughing in the sunshine                  | laugh   | `laughing` |
-| `gnome-king`            | crystal-caves    | arms crossed by his lantern → lantern raised → dancing with a crystal                    | agree   | `happy`    |
-| `water-goblin`          | sharing-lake     | hugging lidded teacups → peeking at a plum → giving the lost fruit back                  | agree   | `happy`    |
-| `lake-nymphs`           | leftover-lagoon  | giggling behind their hands → waving → dancing hand in hand                              | laugh   | `laughing` |
-| `friendly-giant`        | giants-peaks     | puzzled (?) → yawning → fast asleep (zZ)                                                 | sleep   | `sleepy`   |
-| `golem`                 | riddle-ruins     | confused, lamps dark → lamps 1 and 2 lit → all three lit, cheering (in order!)           | agree   | `happy`    |
-| `seven-headed`          | dragon-castle    | all seven heads sneezy → four cured → all cured and happy                                | agree   | `happy`    |
+| Boss                    | Region           | Start → warming → won                                                                       | Outcome | Mood       |
+| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------- | ------- | ---------- |
+| `will-o-wisps`          | pebble-brook     | three cheeky dim wisps over the brook → six, glowing → a ring of ten dancing                | dance   | `happy`    |
+| `skritek`               | mushroom-hollow  | the House Goblin hugging his sack of hidden things → giving them back → a jig by 4, 3, 2, 1 | dance   | `happy`    |
+| `kasparek`              | rainbow-ford     | Kašpárek arms folded, slapstick tucked away → grinning, bells jingling → laughing out loud  | laugh   | `laughing` |
+| `long-broad-sharp-eyes` | hundred-hills    | Long, Broad and Sharp-Eyes waiting arms crossed → waving and pointing → dancing together    | dance   | `happy`    |
+| `otesanek`              | market-square    | a hungry log-baby with an empty bowl → eating porridge → fast asleep, tummy full (zZ)       | sleep   | `sleepy`   |
+| `bridge-troll`          | sunny-meadow     | arms crossed on his bridge → scratching his head → belly laugh with tears                   | laugh   | `laughing` |
+| `forest-witch`          | whispering-woods | a kind Ježibaba squinting on her broom → waving → sharing a gingerbread heart               | agree   | `happy`    |
+| `krakonos`              | fire-mountain    | stern under a rain cloud → the sun peeks out → laughing in the sunshine                     | laugh   | `laughing` |
+| `gnome-king`            | crystal-caves    | arms crossed by his lantern → lantern raised → dancing with a crystal                       | agree   | `happy`    |
+| `water-goblin`          | sharing-lake     | hugging lidded teacups → peeking at a plum → giving the lost fruit back                     | agree   | `happy`    |
+| `lake-nymphs`           | leftover-lagoon  | giggling behind their hands → waving → dancing hand in hand                                 | laugh   | `laughing` |
+| `friendly-giant`        | giants-peaks     | puzzled (?) → yawning → fast asleep (zZ)                                                    | sleep   | `sleepy`   |
+| `golem`                 | riddle-ruins     | confused, lamps dark → lamps 1 and 2 lit → all three lit, cheering (in order!)              | agree   | `happy`    |
+| `seven-headed`          | dragon-castle    | all seven heads sneezy → four cured → all cured and happy                                   | agree   | `happy`    |
 
 The root carries `data-boss`, `data-state` and `data-expression` (`happy` when won), so the
 shared animation classes (`dv-zzz`, twinkles, sneezes, the lantern glow) work for bosses too.
@@ -282,7 +295,7 @@ die-cut sticker (120 × 120) so content can add stickers without new art:
 
 Layered SVG scenes at 1600 × 1000 (16:10), generated by `npm run art:build` from
 `src/app/art/backgrounds` (each ≤ 150 KB, tested): the two map sheets `lower-valley-map` and
-`valley-map`, one scene per drawn region (`pebble-brook`, `hundred-hills`, `market-square` and the nine
+`valley-map`, one scene per drawn region (the five Lower Valley regions and the nine
 canonical regions) and
 `castle-hall`. They are child-safe static images (`<img>` or CSS backgrounds); painted versions
 can replace them later from `assets/backgrounds/prompts/<id>.prompt.txt`, and
