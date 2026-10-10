@@ -8,7 +8,7 @@
  * `balance.daily.historyDays` days; rounds keep short rolling lists. Nothing grows per answer.
  */
 import { failure, isRecord, schema, success } from '@aegis/runtime';
-import type { Schema } from '@aegis/runtime';
+import type { RuntimeSnapshot, Schema } from '@aegis/runtime';
 import type {
   CosmeticState,
   MinigameDefinition,
@@ -18,12 +18,14 @@ import type {
 import { COSMETIC_SLOTS, DRAGON_STAGES } from './ids';
 import type { CosmeticSlot, DragonStage } from './ids';
 import {
+  DEFAULT_GRADE,
   INPUT_MODES,
   MINIGAME_ACTIVITY_KINDS,
   PROBLEM_ACTIVITY_KINDS,
   RESPONSE_BUCKETS,
 } from './kinds';
 import type {
+  Grade,
   InputMode,
   MinigameActivityKind,
   ProblemActivityKind,
@@ -35,6 +37,7 @@ import type { AnswerValue, Problem, ProblemStep } from './problems';
 import {
   contentId,
   counter,
+  gradeSchema,
   idRecord,
   int,
   nullable,
@@ -49,7 +52,77 @@ import {
  * means an old snapshot cannot continue unchanged, and add an explicit save migration
  * (docs/contract.md, "Saves and migration").
  */
-export const STATE_VERSION = 1;
+export const STATE_VERSION = 2;
+
+/** One step per old version: `STATE_MIGRATIONS[n]` turns version n into n + 1. */
+const STATE_MIGRATIONS: Readonly<Record<number, (state: unknown) => unknown>> = {
+  1: (state) => {
+    if (!isRecord(state) || !isRecord(state.settings)) {
+      throw new TypeError('A version 1 profile state has settings.');
+    }
+    return { ...state, settings: { ...state.settings, grade: DEFAULT_GRADE } };
+  },
+};
+
+/**
+ * Upgrades the profile state of an older snapshot to version `to` (default `STATE_VERSION`), one
+ * version at a time.
+ * Pure and deterministic; returns a new object and never mutates `state`. Throws on a version it
+ * does not know.
+ *
+ * - 1 -> 2: `settings.grade` is added as 3 (every save before grades 1-2 is a 3rd grader).
+ */
+export function migrateProfileState(
+  state: unknown,
+  fromVersion: number,
+  to: number = STATE_VERSION,
+): unknown {
+  if (!Number.isInteger(fromVersion) || fromVersion < 1 || fromVersion > to || to > STATE_VERSION) {
+    throw new RangeError(`No profile state migration from version ${fromVersion} to ${to}.`);
+  }
+  let current = state;
+  for (let version = fromVersion; version < to; version++) {
+    const step = STATE_MIGRATIONS[version];
+    if (step === undefined) throw new RangeError(`No profile state migration from ${version}.`);
+    current = step(current);
+  }
+  return current;
+}
+
+/** The world resource where `@aegis/runtime` keeps the adapter state of a snapshot. */
+export const RUNTIME_STATE_RESOURCE = 'aegis.runtime.state';
+
+/**
+ * A runtime snapshot of an older `stateVersion` upgraded to version `to` (default
+ * `STATE_VERSION`): its profile state migrated by `migrateProfileState`, everything else (content
+ * revision, streams, jobs, revision, turn) unchanged. A snapshot already at `to` is returned as
+ * is. The shell applies it to saves before restoring them (docs/contract.md §7.6).
+ */
+export function migrateSnapshot(
+  snapshot: RuntimeSnapshot,
+  to: number = STATE_VERSION,
+): RuntimeSnapshot {
+  if (snapshot.stateVersion === to) return snapshot;
+  const resources = snapshot.world.resources;
+  if (!(RUNTIME_STATE_RESOURCE in resources)) {
+    throw new TypeError('The snapshot has no profile state.');
+  }
+  return {
+    ...snapshot,
+    stateVersion: to,
+    world: {
+      ...snapshot.world,
+      resources: {
+        ...resources,
+        [RUNTIME_STATE_RESOURCE]: migrateProfileState(
+          resources[RUNTIME_STATE_RESOURCE],
+          snapshot.stateVersion,
+          to,
+        ),
+      },
+    },
+  };
+}
 
 /** Days since 1970-01-01 in the child's local calendar (see `dayNumber`). */
 export type DayNumber = number;
@@ -263,6 +336,11 @@ export interface RuleSettings {
   arena: boolean;
   /** Regions the parent unlocked ahead of progress. */
   unlockAhead: string[];
+  /**
+   * The child's school grade: where the child starts and what the Daily Adventure suggests.
+   * Regions of earlier grades are open as free practice (docs/design.md §3).
+   */
+  grade: Grade;
 }
 
 export interface ProfileState {
@@ -512,6 +590,7 @@ export const profileStateSchema: Schema<ProfileState> = schema.object({
     dailyGoal: int(1, 1000),
     arena: schema.boolean,
     unlockAhead: uniqueArray(contentId, { max: 100 }),
+    grade: gradeSchema,
   }),
   finale: schema.object({ day: nullable(day) }),
 });
@@ -570,8 +649,12 @@ export function weekday(day: DayNumber): number {
   return (((day + 3) % 7) + 7) % 7;
 }
 
-/** The first state of a new profile. */
-export function initialProfileState(defaults: { dailyGoal: number; arena: boolean }): ProfileState {
+/** The first state of a new profile (a 3rd grader unless `defaults.grade` says otherwise). */
+export function initialProfileState(defaults: {
+  dailyGoal: number;
+  arena: boolean;
+  grade?: Grade;
+}): ProfileState {
   return {
     day: null,
     firstDay: null,
@@ -595,7 +678,12 @@ export function initialProfileState(defaults: { dailyGoal: number; arena: boolea
     run: null,
     round: null,
     roundCounter: 0,
-    settings: { dailyGoal: defaults.dailyGoal, arena: defaults.arena, unlockAhead: [] },
+    settings: {
+      dailyGoal: defaults.dailyGoal,
+      arena: defaults.arena,
+      unlockAhead: [],
+      grade: defaults.grade ?? DEFAULT_GRADE,
+    },
     finale: { day: null },
   };
 }

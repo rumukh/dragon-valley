@@ -12,9 +12,18 @@ import { schema } from '@aegis/runtime';
 import type { JsonValue, Schema } from '@aegis/runtime';
 import { COSMETIC_SLOTS } from './ids';
 import type { CosmeticSlot } from './ids';
+import type { Grade } from './kinds';
 import { answerValueSchema } from './problems';
 import type { AnswerValue } from './problems';
-import { contentId, int, nullable, objectWithOptional, oneOf, uniqueArray } from './schema';
+import {
+  contentId,
+  gradeSchema,
+  int,
+  nullable,
+  objectWithOptional,
+  oneOf,
+  uniqueArray,
+} from './schema';
 
 /** Longest response time recorded; anything slower is simply `slow`. */
 export const MAX_ELAPSED_MS = 600_000;
@@ -32,7 +41,9 @@ export type ActivityRequest =
 export type SettingChange =
   | { key: 'dailyGoal'; value: number }
   | { key: 'arena'; value: boolean }
-  | { key: 'unlockAhead'; value: string[] };
+  | { key: 'unlockAhead'; value: string[] }
+  /** The child's school grade (1-3): moves the start region and the suggestions only. */
+  | { key: 'grade'; value: Grade };
 
 export type GameAction =
   /** Start (or resume) a play session on the child's local date `YYYY-MM-DD`. */
@@ -100,6 +111,7 @@ const settingSchema: Schema<SettingChange> = schema.union(
     key: schema.literal('unlockAhead'),
     value: uniqueArray(contentId, { max: 100 }),
   }),
+  schema.object({ key: schema.literal('grade'), value: gradeSchema }),
 );
 
 export const gameActionSchema: Schema<GameAction> = schema.union(

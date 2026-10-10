@@ -12,9 +12,16 @@
 import type { DeepReadonly } from '@aegis/runtime';
 import { GENERATOR_IDS } from '../contract';
 import type { GeneratorId, Problem, Skill } from '../contract';
+import {
+  addFactProblem,
+  addSub2dProblem,
+  missingAddendProblem,
+  subFactProblem,
+} from './generators/additive';
 import { div2d1dProblem, mul2d1dProblem, power10Problem, tensProblem } from './generators/beyond';
 import { compareProblem } from './generators/compare';
 import { divFactProblem, missingFactorProblem, mulFactProblem } from './generators/facts';
+import { countProblem, numberCompareProblem, placeProblem } from './generators/numbers';
 import { orderProblem } from './generators/order';
 import { remainderProblem } from './generators/remainder';
 import { termProblem } from './generators/terms';
@@ -25,7 +32,8 @@ export { choicesFor, keypadPossible } from './distractors';
 export { NUMBER_RANGE, shuffle } from './generators/shared';
 export type { GeneratorSources } from './generators/shared';
 
-/** Every generator of the contract is implemented. */
+/** Every generator in the contract is implemented. */
+export const PENDING_GENERATORS: readonly GeneratorId[] = [];
 export const IMPLEMENTED_GENERATORS: readonly GeneratorId[] = GENERATOR_IDS;
 
 export function canGenerate(skill: DeepReadonly<Skill>): boolean {
@@ -67,5 +75,19 @@ export function problemFor(
       return wordProblem(skill.params, item, sources);
     case 'terms':
       return termProblem(skill.params, item, problems);
+    case 'num.count':
+      return countProblem(skill.params, item, problems);
+    case 'num.compare':
+      return numberCompareProblem(skill.params, item, problems);
+    case 'num.place':
+      return placeProblem(skill.params, item, problems);
+    case 'add.fact':
+      return addFactProblem(item);
+    case 'sub.fact':
+      return subFactProblem(item);
+    case 'add.missing':
+      return missingAddendProblem(skill.params, item, problems);
+    case 'addsub.2d':
+      return addSub2dProblem(skill.params, item, problems);
   }
 }

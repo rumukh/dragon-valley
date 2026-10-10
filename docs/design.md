@@ -6,7 +6,7 @@ content pack's `balance` block (see [contract.md](contract.md)) and are tuned wi
 The curriculum mapping is in [curriculum.md](curriculum.md).
 
 Audience: an 8-9-year-old Czech 3rd grader playing in English on a family tablet or PC, plus the
-parent who sets it up.
+parent who sets it up. §12 extends the valley down to 6- and 7-year-old 1st and 2nd graders.
 
 ---
 
@@ -92,7 +92,8 @@ Bosses (folk-tale, friendly; nobody gets hurt). The mood is the boss's won pose 
 
 ## 3. World and levels
 
-Nine regions, **50 lessons and 9 boss levels**, in curriculum order. Inside a table region, lessons
+Nine regions, **50 lessons and 9 boss levels**, in curriculum order (the 3rd-grade valley; five
+1st- and 2nd-grade regions come before it, §12.3). Inside a table region, lessons
 follow the plan's sequence: concept → guided recall (choice) → free recall (keypad) → matching
 division and fact family → mixed review → word problems → boss. Each region's boss mixes its skills
 with spaced review of earlier ones (`reviewShare`).
@@ -257,6 +258,9 @@ The first hatch is designed in: Hatchling needs 30 % of the table's facts answer
 once (`growth`, §6.5); a first Feeding Time of 8 problems meets ≈7 different facts (new facts first),
 which is 33 % of the 21 facts of a times table in both orders.
 
+For a 1st or 2nd grader the keeper editor asks for the class first, and the first egg and the
+placement ladder follow the grade (§12.2).
+
 ### 4.2 Daily Adventure
 
 One big button, about 10-15 minutes. The view's `hub.next` step decides what it does, in priority
@@ -301,7 +305,8 @@ to lose, no "come back or else", no notifications.
 
 Every activity is data-driven: a level lists activities as `{ kind, skills, count, input, options }`.
 "Problem" activities serve one problem at a time and are answered with `answer`; "minigame"
-activities are `@aegis/narrative` minigame boards played with `minigameMove`.
+activities are `@aegis/narrative` minigame boards played with `minigameMove`. The activities for
+1st and 2nd graders, with Ten Frame and Bundle Sticks, are in §12.4.
 
 General rules for all activities:
 
@@ -782,6 +787,8 @@ facts (A4, double-sided, via `layoutPrint` / `renderPrintHtml`).
   settings (`×`, `÷`, `R`).
 - **Child safety:** no outbound links, no third-party requests (a same-origin Content Security
   Policy enforces it), no ads, no accounts, no telemetry.
+- **Young players** (grades 1-2): read-aloud on by default for grade 1, pictures first, three
+  choices, a 2-digit keypad and slower "fast" thresholds (§12.5).
 
 ## 11. Profiles and the parent area
 
@@ -792,7 +799,120 @@ facts (A4, double-sided, via `layoutPrint` / `renderPrintHtml`).
   the last 60 days' trend, days practised, total answers.
 - **Settings:** notation, daily goal (10-100 correct answers) and optional time limit, Arena on/off,
   read-aloud voice and auto-read, music/effects/voice volumes, text size, reduced motion, re-run the
-  placement check, unlock regions ahead.
+  placement check, unlock regions ahead, and the child's grade (1st-3rd class; it moves only the
+  start and the suggestions, §12.1).
 - **Data:** backup export and import per child (local files), confirmed reset, install for offline
   use, storage status ("saved on this device"), and a notice that browser storage can be cleared.
 - **Printables:** flashcards of the hardest facts and certificates.
+
+## 12. Grades 1 and 2
+
+Dragon Valley grows down to the 1st and 2nd grade (the approved [grades plan](grades-plan.md); the
+curriculum is [curriculum.md §7](curriculum.md#7-grades-1-and-2), the contract
+[contract.md](contract.md) §4, §6, §7.1 and §7.6). Existing children are unchanged: every existing
+save is a 3rd grader who starts at Sunny Meadow, with all progress kept. 4th grade comes later, as
+new regions after Dragon Castle.
+
+### 12.1 One valley, a grade per child
+
+- **One continuous valley.** Five new regions come **before** Sunny Meadow (the Lower Valley); a
+  1st grader walks the whole valley from Pebble Brook to the castle.
+- **The `grade` setting** (1, 2 or 3) is rules state in the save (`settings.grade`, changed with
+  `setSetting { key: 'grade' }`), because it changes unlocks and suggestions. A save from before
+  grades reads as grade 3.
+- **Where each grade starts** is content: `grades: [{ grade, start }]` (1st grade at Pebble Brook,
+  2nd at Hundred Hills, 3rd at Sunny Meadow), and every region has a `grade`.
+- **Unlocking.** A region is open if it is the child's start region, its `unlock.after` is complete,
+  a parent unlocked it ahead, or it **belongs to an earlier grade** than the child's: free practice,
+  never required. A 2nd or 3rd grader may play the earlier regions for fun and earn their dragons.
+- **Suggestions.** The Daily Adventure's next glowing level starts at the child's start region;
+  earlier-grade regions are open on the map but never pushed.
+- **Sunny Meadow** gets `unlock.after` the last 2nd-grade boss (Otesánek); a 3rd grader's start
+  region is always open, so nothing locks for existing children.
+- **Changing grade** (parent area, behind the gate) only moves the start and the suggestions.
+  Progress, dragons and coins stay. Moving up ("now in 2nd grade") is the normal path.
+- **Choosing the grade.** The new-keeper editor gets a third step after name and avatar: _"Which
+  class is Ema in?"_ with three big read-aloud buttons (1st, 2nd, 3rd class). A wrong pick costs
+  nothing. The shell sets the grade before the child's first session, so the first-session story
+  already knows it.
+
+### 12.2 First session per grade
+
+- The prologue is shared. The **first egg** beat is per grade (beat triggers take a `grades`
+  filter): a 1st grader chooses among **Dot** (counting), **Hop** (+) and **Nibble** (−), a 2nd
+  grader among **Bead**, **Tumble** and a third 2nd-grade egg, a 3rd grader among Bubbles, Sunny and
+  Goldie as now. Pebble Brook 1 serves counting and + and − within 5, so whichever egg a 1st grader
+  chooses hatches in the first session.
+- A child who reaches Sunny Meadow without a meadow egg receives Bubbles's egg with Sunny Meadow 1's
+  welcome.
+- **Placement** runs only the child's grade's ladder (steps carry `grades`): none for grade 1, a
+  short ladder for grade 2 (numbers to 100, +/− without crossing), today's ladder for grade 3.
+- Finishing a grade's last boss earns a **"1st grade done!" / "2nd grade done!"** certificate and a
+  celebration; the valley simply continues. The Seven-Headed Dragon stays the finale.
+
+### 12.3 The new regions
+
+About 28 lessons and 5 bosses, in the v1 pattern: a welcome beat with an egg, concept → choice →
+keypad → minigame → mixed review → stories → boss, one album page of stickers per region, a few
+cosmetics and quests. Bosses are Czech folk-tale characters, won over as in v1. New dragons are
+`special` dragons growing on their region's skills, like Pearl, Boulder and Clockwork.
+
+| Region                                  | Grade | Focus                                                    | Boss (won over by…)                                                                   | New dragons                     |
+| --------------------------------------- | ----- | -------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------- |
+| **Pebble Brook** (`pebble-brook`)       | 1     | Counting and numbers to 10, compare, + within 10         | The Will-o'-the-Wisps (_bludičky_): count their lights until they dance               | **Dot** (counting), **Hop** (+) |
+| **Mushroom Hollow** (`mushroom-hollow`) | 1     | − within 10, bonds of 10, missing addend, first stories  | The House Goblin (_skřítek_): give back what he hid, one less each time               | **Nibble** (−)                  |
+| **Rainbow Ford** (`rainbow-ford`)       | 1     | Numbers to 20, +/− to 20 without, then with crossing ten | Kašpárek the jester: answers make him laugh (end of 1st grade)                        | **Tenzi** (crossing ten)        |
+| **Hundred Hills** (`hundred-hills`)     | 2     | Numbers to 100, place value, tens ± tens, 2d ± 1d        | Long, Broad and Sharp-Eyes (_Dlouhý, Široký a Bystrozraký_)                           | **Bead** (place value)          |
+| **Market Square** (`market-square`)     | 2     | 2d ± 1d and 2d ± 2d with crossing, two-step stories      | Otesánek, always hungry: feed him exact sums until he sleeps (end of 2nd grade's +/−) | **Tumble** (carry and borrow)   |
+
+Then **Sunny Meadow** and **Whispering Woods**, which teach 2nd-grade multiplication (×2-5, ×10) as
+well as 3rd-grade review, then the 3rd-grade valley as today.
+
+### 12.4 Activities for the young ones
+
+| Activity                                              | Reuse / change                                                                          |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Feeding Time                                          | as is, with `add`/`sub`/`num` problems                                                  |
+| Compare Stones                                        | as is, with `num.compare` (numbers 0-20, 0-100) and `add`/`sub` sides                   |
+| Riddle Scrolls                                        | as is, with additive templates; "pick the operation" offers only + and − for grades 1-2 |
+| Memory Match                                          | as is: sums ↔ values, `add` ↔ `sub` families                                            |
+| Number Trail                                          | counting trails (by 1 from any start, by 2, by 10, backwards) from `num.*` skills       |
+| Fact Family Nest                                      | an additive family: `a + b = c`, `b + a = c`, `c − a = b`, `c − b = a`                  |
+| **Ten Frame** (`ten-frame`, `dv.ten-frame`)           | fill two ten-frames to show a number, make ten, then cross it (`8 + 5 = 8 + 2 + 3`)     |
+| **Bundle Sticks** (`bundle-sticks`, `dv.place-value`) | bundle sticks into tens to build 2-digit numbers and to regroup for + and −             |
+| Boss                                                  | as is                                                                                   |
+
+The Ten Frame and Bundle Sticks activity IDs are reserved in the contract; they become playable when
+the rules implement their boards.
+
+### 12.5 Making it work for 6- and 7-year-olds
+
+- **Reading.** For grade 1 `autoRead` is on by default: every story line, instruction and problem is
+  read aloud; buttons keep icons next to words. Story lines for grades 1-2 keep to **at most 6
+  words** (a stricter child profile in the content gate for those regions).
+- **Pictures first.** Dots and ten-frames (to 20), a number line, tens sticks and ones cubes (to
+  100), shown on choice problems and as the hint after a miss.
+- **Input.** Three choices instead of four while a fact is new; a keypad of at most 2 digits for
+  grade 1; big numerals.
+- **Time.** Per-grade response thresholds _(balance)_, so a 1st grader's "fast" is slower than a 3rd
+  grader's; shorter rounds (6-8 problems) for grade 1.
+- **The Sun Window.** A second face of the Magic Window for + and −: an 11 × 11 addition mosaic
+  (`add:A+B`) and a subtraction panel (`sub:M-S`), the mirror of × and ÷. The hub shows the window of
+  the child's grade; both are always reachable. 2-digit work shows per skill in Progress.
+- **The map** becomes two connected sheets: the new **Lower Valley** (the five new regions, a river
+  and hills leading up) and today's valley. The road crosses from one to the other, and the map opens
+  on the sheet of the child's glowing level.
+- **Parents.** The settings show the grade per child with a note on what it changes; Progress groups
+  skills by grade; printables add addition and subtraction flashcards and a certificate per finished
+  grade.
+
+### 12.6 Compatibility
+
+- IDs stay append-only; only Sunny Meadow's region `unlock.after` changes, and the grade-3 start rule
+  keeps it open.
+- Content **1.4.0** (new regions). Old saves restore with their archived pack, move to 1.4.0 at the
+  hub and read as grade 3.
+- `STATE_VERSION` 2 adds `settings.grade` (a version-1 save migrates to grade 3); the family record
+  and preferences keep their versions.
+- The family runs the slice playtest (grade selection and Pebble Brook complete) with a 1st grader
+  before the other four regions are built.

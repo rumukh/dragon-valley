@@ -78,6 +78,9 @@ describe('the generator registry', () => {
   it('implements every generator of the contract', () => {
     expect([...IMPLEMENTED_GENERATORS].sort()).toEqual(
       [
+        'add.fact',
+        'add.missing',
+        'addsub.2d',
         'compare',
         'div.2d1d',
         'div.fact',
@@ -87,7 +90,11 @@ describe('the generator registry', () => {
         'mul.missing',
         'mul.power10',
         'mul.tens',
+        'num.compare',
+        'num.count',
+        'num.place',
         'order.ops',
+        'sub.fact',
         'terms',
         'word',
       ].sort(),
@@ -554,6 +561,8 @@ describe('word problems', () => {
         'fewer-than',
         'leftover',
         'two-step',
+        'add-to',
+        'take-from',
       ]),
     );
   });
@@ -848,7 +857,7 @@ const GOLDEN_DIGESTS: Record<string, string> = {
   'order.ops': '5476b30016ea6583',
   compare: 'e401e296cf834ea4',
   terms: '6a437531585bea35',
-  word: 'bbea82bfc710f266',
+  word: '8deb9eb626430f60', // 1.4.0: the golden skill draws the new add-to and take-from templates too
 };
 
 describe('determinism', () => {

@@ -18,6 +18,8 @@ import { artIcon, cosmeticIconArt, viewDragonArt } from '../ui/art';
 import { h } from '../ui/dom';
 import { createCoinCounter, createMeter } from '../ui/meters';
 import type { Screen } from '../router/router';
+import { gradeOf, isYoungGrade } from '../game/grade';
+import { finishedGrades } from '../print/content';
 import type { ActiveKeeper, App } from '../shell/app';
 import { createSaveStatus, keeperBadge, toastStickers, topBar } from './common';
 import { hasDiary } from './goodbye';
@@ -39,6 +41,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
   const text = app.text;
   const keeperId = active.keeper.id;
   const view = active.game.view();
+  const young = isYoungGrade(gradeOf(view));
   const saveStatus = createSaveStatus(app, active);
   const coins = createCoinCounter(app.kit, view.coins);
 
@@ -405,7 +408,7 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
       onPress: () => app.router.push(app.screens.map(keeperId)),
       onError: app.kit.onError,
     }),
-    ...(['market', 'den', 'album', 'window'] as const).map((place) =>
+    ...(['market', 'den', 'album'] as const).map((place) =>
       candyButton({
         label: t(PLACES[place].label),
         icon: PLACES[place].icon,
@@ -413,6 +416,29 @@ export function hubScreen(app: App, active: ActiveKeeper): Screen {
         size: 'small',
         testId: `hub-${place}`,
         onPress: () => app.router.push(app.screens[place](keeperId)),
+        onError: app.kit.onError,
+      }),
+    ),
+    // The window of the child's grade (docs/design.md §12.5); each window links to the other.
+    candyButton({
+      label: t(young ? 'hub.sunWindow' : PLACES.window.label),
+      icon: PLACES.window.icon,
+      variant: 'paper',
+      size: 'small',
+      testId: young ? 'hub-sun-window' : 'hub-window',
+      onPress: () =>
+        app.router.push(young ? app.screens.sunWindow(keeperId) : app.screens.window(keeperId)),
+      onError: app.kit.onError,
+    }),
+    // A finished 1st or 2nd class: its certificate (none until the pack has those regions).
+    ...finishedGrades(view).map((grade) =>
+      candyButton({
+        label: t(grade === 1 ? 'hub.gradeDone1' : 'hub.gradeDone2'),
+        icon: 'sparkle',
+        variant: 'paper',
+        size: 'small',
+        testId: `hub-grade-done-${grade}`,
+        onPress: () => app.router.push(app.screens.gradeDone(keeperId, grade)),
         onError: app.kit.onError,
       }),
     ),

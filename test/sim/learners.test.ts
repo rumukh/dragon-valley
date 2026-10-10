@@ -30,6 +30,28 @@ describe('knowledge keys', () => {
     expect(knowledgeKey('div:56:7')).not.toBe(knowledgeKey('mul:7x8'));
     expect(knowledgeKey('word:times-fewer')).toBe('word:times-fewer');
   });
+
+  it('treats 3 + 5 and 5 + 3 as one fact, 8 − 3 as its own', () => {
+    expect(knowledgeKey('add:3+5')).toBe(knowledgeKey('add:5+3'));
+    expect(knowledgeKey('sub:8-3')).toBe('sub:8-3');
+  });
+});
+
+describe('younger learners', () => {
+  it('know facts within ten better than crossing ten, and the 2nd grader more than the 1st', () => {
+    const first = LEARNERS['first-grader'];
+    const second = LEARNERS['second-grader'];
+    for (const learner of [first, second]) {
+      expect(learner.prior(knowledgeKey('add:3+4'))).toBeGreaterThan(
+        learner.prior(knowledgeKey('add:8+5')),
+      );
+      expect(learner.prior('sub:7-3')).toBeGreaterThan(learner.prior('sub:13-6'));
+    }
+    for (const key of ['a:3+4', 'a:5+8', 'sub:13-6', 'count:0-5', 'add2d:2d1d-carry']) {
+      expect(second.prior(key), key).toBeGreaterThanOrEqual(first.prior(key));
+    }
+    expect(first.prior(knowledgeKey('mul:7x8'))).toBe(0);
+  });
 });
 
 describe('learners', () => {

@@ -1,0 +1,62 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "dot",
+  "name": "Dot",
+  "kind": "special",
+  "mnemonic": "A round little dragon who counts everything she sees. Her belly is a ten-frame: five dots on top and five below make ten.",
+  "colors": {
+    "body": "#20b2a4",
+    "shade": "#14806f",
+    "belly": "#fff6dc",
+    "wing": "#7fe0d2",
+    "horn": "#fff4d6",
+    "accent": "#ff7f6b",
+    "accent2": "#ffd23f",
+    "iris": "#165a52",
+    "cheek": "#ff9f9a"
+  },
+  "build": {
+    "chub": 0.95,
+    "head": 1.15,
+    "snout": 0.8,
+    "body": 0.95
+  },
+  "horns": {
+    "style": "nub",
+    "count": 2,
+    "length": 0.7
+  },
+  "ears": {
+    "style": "none",
+    "size": 1
+  },
+  "wings": {
+    "style": "bat",
+    "count": 2,
+    "size": 0.8
+  },
+  "tail": {
+    "count": 1,
+    "tip": "pearl",
+    "length": 0.8
+  },
+  "spikes": {
+    "style": "round",
+    "where": "tail",
+    "count": 3
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "counting-dots",
+    "polka-dots"
+  ],
+  "features": [],
+  "egg": {
+    "base": "#d6f5ef",
+    "accent": "#ff7f6b",
+    "pattern": "polka"
+  }
+}

@@ -3,10 +3,13 @@
  *
  * A level is complete when it has at least one star or was placed out by the placement check.
  * A level is open when every level in its `unlock.after` is complete and its region is open; a
- * region is open when every level in its `unlock.after` is complete or the parent unlocked it
- * ahead. Unlocks are derived, never stored, so new content levels slot in by data alone.
+ * region is open when every level in its `unlock.after` is complete, the parent unlocked it ahead,
+ * it is the start region of the child's grade, or it belongs to an earlier grade (free practice
+ * for older children, docs/grades-plan.md). Unlocks are derived, never stored, so new content
+ * levels slot in by data alone, and a grade change only moves the start and the suggestions.
  */
 import type { DeepReadonly } from '@aegis/runtime';
+import { gradeStart, regionGrade } from '../contract';
 import type { Level, LevelStatus, StarRule } from '../contract';
 import type { Data, ReadState } from '../types';
 
@@ -20,6 +23,8 @@ export function regionOpen(state: ReadState, data: Data, region: string): boolea
   if (!found) return false;
   return (
     state.settings.unlockAhead.includes(region) ||
+    regionGrade(found) < state.settings.grade ||
+    gradeStart(data, state.settings.grade) === region ||
     found.unlock.after.every((level) => isComplete(state, level))
   );
 }
@@ -51,10 +56,20 @@ export function levelsInMapOrder(data: Data): DeepReadonly<Level>[] {
   );
 }
 
-/** The first open, not yet completed level in map order: the one the map makes glow. */
+/**
+ * The first open, not yet completed level in map order from the child's grade's start region on:
+ * the one the map makes glow. Regions before the start (earlier grades) are free practice and
+ * never suggested.
+ */
 export function nextLevel(state: ReadState, data: Data): string | null {
+  const start = data.regions.find((r) => r.id === gradeStart(data, state.settings.grade));
+  const regionOrder = new Map(data.regions.map((r) => [r.id, r.order]));
   return (
-    levelsInMapOrder(data).find((level) => levelStatus(state, data, level) === 'open')?.id ?? null
+    levelsInMapOrder(data).find(
+      (level) =>
+        (start === undefined || (regionOrder.get(level.region) ?? 0) >= start.order) &&
+        levelStatus(state, data, level) === 'open',
+    )?.id ?? null
   );
 }
 

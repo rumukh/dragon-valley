@@ -29,7 +29,7 @@ import { createTranslator, EN_UI, hasMessage } from '../i18n/messages';
 import { createOfflineInstaller } from '../parent/offline';
 import type { OfflineInstaller } from '../parent/offline';
 import { profileSeed, SAVE_DATABASE } from '../../rules/contract';
-import type { GameAction, GameEvent } from '../../rules/contract';
+import type { GameAction, Grade, GameEvent } from '../../rules/contract';
 import type { ContentText } from '../content/text';
 import type { DvGame, DvSession } from '../game/definition';
 import { createPlayClock } from '../game/timer';
@@ -108,13 +108,15 @@ export interface Screens {
   editor(keeperId: string | null): ScreenEntry;
   /** The game: whatever the view requires now (story, round, results), else the hub. */
   play(keeperId: string): ScreenEntry;
-  map(keeperId: string): ScreenEntry;
+  map(keeperId: string, sheet?: string): ScreenEntry;
   region(keeperId: string, regionId: string): ScreenEntry;
   level(keeperId: string, levelId: string): ScreenEntry;
   market(keeperId: string): ScreenEntry;
   den(keeperId: string): ScreenEntry;
   album(keeperId: string): ScreenEntry;
   window(keeperId: string): ScreenEntry;
+  sunWindow(keeperId: string): ScreenEntry;
+  gradeDone(keeperId: string, grade: Grade): ScreenEntry;
   parent(tab?: ParentTab, keeperId?: string): ScreenEntry;
   /** Goodbye, with the Dragon Diary of the keeper's day. */
   goodbye(keeperId: string): ScreenEntry;

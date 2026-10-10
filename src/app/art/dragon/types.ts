@@ -28,7 +28,7 @@ export type Outfit = Partial<Record<CosmeticSlot, string>>;
 
 export type HornStyle =
   'curved' | 'straight' | 'nub' | 'cloud' | 'crystal' | 'crescent' | 'ram' | 'branch' | 'none';
-export type EarStyle = 'frill' | 'fin' | 'leaf' | 'petal' | 'cloud' | 'shell' | 'none';
+export type EarStyle = 'frill' | 'fin' | 'leaf' | 'petal' | 'cloud' | 'shell' | 'round' | 'none';
 export type WingStyle =
   'bat' | 'cloud' | 'fin' | 'leaf' | 'petal' | 'crystal' | 'shell' | 'stone' | 'gear' | 'feather';
 export type TailTip =
@@ -62,7 +62,11 @@ export type MarkingStyle =
   | 'moss'
   | 'gears'
   | 'freckles'
-  | 'scales';
+  | 'scales'
+  | 'counting-dots'
+  | 'polka-dots'
+  | 'plus-belly'
+  | 'minus-belly';
 export type FeatureStyle =
   | 'reflection'
   | 'smoke-ring'
@@ -76,7 +80,10 @@ export type FeatureStyle =
   | 'bushy-brows'
   | 'shawl'
   | 'sparkle-cheeks'
-  | 'rock-body';
+  | 'rock-body'
+  | 'number-line'
+  | 'berry-row'
+  | 'buck-teeth';
 export type EggPattern =
   | 'clouds'
   | 'shine'
@@ -92,6 +99,9 @@ export type EggPattern =
   | 'scallops'
   | 'speckles'
   | 'gears'
+  | 'polka'
+  | 'hops'
+  | 'berries'
   | 'spots';
 
 export interface DragonColors {

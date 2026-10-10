@@ -1,6 +1,6 @@
 /** Small reusable glyph shapes (flames, leaves, flowers, snowflakes, gears...) in local coordinates. */
-import { polar, type Pt } from './svg/num';
-import { M, L, Q, C, Mp, Lp, polyD, circleD, heartD, roundStarD } from './svg/path';
+import { dist, polar, type Pt } from './svg/num';
+import { M, L, Q, C, A, Mp, Lp, polyD, circleD, heartD, roundStarD } from './svg/path';
 import { h } from './svg/xml';
 
 /** Flame pointing up: base centre at (0,0), height s. Three tongues. */
@@ -234,5 +234,89 @@ export function pearl(cx: number, cy: number, r: number, line: string, w: number
       opacity: 0.7,
     }) +
     h('circle', { cx: cx - r * 0.3, cy: cy - r * 0.32, r: r * 0.3, fill: '#ffffff' })
+  );
+}
+
+/**
+ * A circle with a round bite out of its rim (a nibbled berry or cookie): the bite circle of
+ * radius `bite * r` sits on the rim at angle `deg`.
+ */
+export function bittenCircleD(cx: number, cy: number, r: number, deg: number, bite = 0.42): string {
+  const rb = r * bite;
+  const b = polar(cx, cy, r * 0.92, deg);
+  const d = dist({ x: cx, y: cy }, b);
+  const ux = (b.x - cx) / d;
+  const uy = (b.y - cy) / d;
+  const a = (r * r - rb * rb + d * d) / (2 * d);
+  const hh = Math.sqrt(Math.max(0, r * r - a * a));
+  const p1 = { x: cx + ux * a - uy * hh, y: cy + uy * a + ux * hh };
+  const p2 = { x: cx + ux * a + uy * hh, y: cy + uy * a - ux * hh };
+  return Mp(p1) + A(r, r, 0, 1, 1, p2.x, p2.y) + A(rb, rb, 0, 0, 0, p1.x, p1.y) + 'Z';
+}
+
+/** A chunky rounded plus sign (arm half-width `k * s`), centred, as one closed outline. */
+export function plusD(cx: number, cy: number, s: number, k = 0.3): string {
+  const a = s * k;
+  return polyD([
+    { x: cx - a, y: cy - s },
+    { x: cx + a, y: cy - s },
+    { x: cx + a, y: cy - a },
+    { x: cx + s, y: cy - a },
+    { x: cx + s, y: cy + a },
+    { x: cx + a, y: cy + a },
+    { x: cx + a, y: cy + s },
+    { x: cx - a, y: cy + s },
+    { x: cx - a, y: cy + a },
+    { x: cx - s, y: cy + a },
+    { x: cx - s, y: cy - a },
+    { x: cx - a, y: cy - a },
+  ]);
+}
+
+/**
+ * A round berry with a leafy cap and a shine. `bitten` takes a bite out of it (Nibble's
+ * take-away: a nibbled berry still shows where it was).
+ */
+export function berry(
+  cx: number,
+  cy: number,
+  r: number,
+  fill: string,
+  line: string,
+  w: number,
+  bitten = false,
+): string {
+  const body = bitten
+    ? h('path', {
+        d: bittenCircleD(cx, cy, r, -30, 0.5),
+        fill,
+        stroke: line,
+        'stroke-width': w,
+        'stroke-linejoin': 'round',
+      })
+    : h('circle', { cx, cy, r, fill, stroke: line, 'stroke-width': w });
+  const leaf = (deg: number): string => {
+    const y0 = cy - r * 0.92;
+    const tip = polar(cx, y0, r * 0.62, deg);
+    const c1 = polar(cx, y0, r * 0.42, deg - 32);
+    const c2 = polar(cx, y0, r * 0.42, deg + 32);
+    return M(cx, y0) + Q(c1.x, c1.y, tip.x, tip.y) + Q(c2.x, c2.y, cx, y0) + 'Z';
+  };
+  return (
+    body +
+    h('path', {
+      d: leaf(-150) + leaf(-30) + leaf(-90),
+      fill: '#6fbf4f',
+      stroke: '#2f6b2a',
+      'stroke-width': w * 0.7,
+      'stroke-linejoin': 'round',
+    }) +
+    h('circle', {
+      cx: cx - r * 0.36,
+      cy: cy - r * 0.22,
+      r: r * 0.2,
+      fill: '#ffffff',
+      opacity: 0.75,
+    })
   );
 }

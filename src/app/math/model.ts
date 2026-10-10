@@ -21,10 +21,21 @@
  *   in the order Golem Orders teaches. That is brackets first, then · and :, then + and −, each
  *   from left to right.
  *
+ * For grades 1-2 (addition, subtraction and numbers to 100):
+ *
+ * - `count`: the dots of a counting problem (`num.count`), in ten-frames. The problem shows the
+ *   same dots in place of the number, which is the answer and is never written or spoken.
+ * - `ten-frame`: `a + b` and `a − b` (and a missing number) within 20, as dots in two
+ *   ten-frames: the second addend in another shape, the taken-away dots crossed out.
+ * - `number-line`: a two-digit number plus or minus a one-digit number, as a hop on a number line.
+ * - `sticks`: two-digit numbers as bundles of ten sticks and loose ones, for tens and two-digit
+ *   sums and differences and for place value (`num.place`, the problem's `sticks` picture).
+ *
  * A model is data. `src/app/ui/models.ts` draws it in the child's notation.
  */
 import { BLANK, evaluate, num, op } from '../../rules/contract';
 import type { Expr, ExprPath, Problem } from '../../rules/contract';
+import { pictureOf } from './picture';
 import { nodeAt, operations, readyOperations, reduceAt } from '../../rules/minigames/golem-orders';
 
 /** One step of an expression worked out in order: the expression, its first operation and value. */
@@ -106,9 +117,55 @@ export type ProblemModel =
       readonly right: number;
       readonly result: number;
       readonly unknown: 'left' | 'right' | 'result';
+    }
+  | { readonly kind: 'count'; readonly count: number }
+  | {
+      readonly kind: 'ten-frame';
+      readonly op: 'add' | 'sub';
+      /** The fact `left op right = result` and the number the child finds. */
+      readonly left: number;
+      readonly right: number;
+      readonly result: number;
+      readonly unknown: AddSubUnknown;
+    }
+  | {
+      readonly kind: 'number-line';
+      readonly op: 'add' | 'sub';
+      readonly left: number;
+      readonly right: number;
+      readonly result: number;
+      readonly unknown: AddSubUnknown;
+    }
+  | {
+      readonly kind: 'sticks';
+      /** One number (place value), or the two numbers of the sum or difference `fact`. */
+      readonly numbers: readonly StickNumber[];
+      readonly fact: AddSubFact | null;
     };
 
+/** `left op right = result`, and which of them the child finds. */
+export interface AddSubFact {
+  readonly op: 'add' | 'sub';
+  readonly left: number;
+  readonly right: number;
+  readonly result: number;
+  readonly unknown: AddSubUnknown;
+}
+
+export type AddSubUnknown = 'left' | 'right' | 'result';
+
+/** A number as bundles of ten and loose sticks. */
+export interface StickNumber {
+  readonly tens: number;
+  readonly ones: number;
+}
+
 export type ModelKind = ProblemModel['kind'];
+
+/** Ten-frames hold a fact within this number. */
+export const MAX_TEN_FRAME = 20;
+/** Number lines and sticks draw numbers up to this one. */
+export const MAX_YOUNG_NUMBER = 100;
 
 export const MAX_MODEL_DOTS = 100;
 /** More operations than this would not fit the model's place as a column of steps. */
@@ -231,10 +288,66 @@ function orderModel(expr: Expr): ProblemModel | null {
   return result === null ? null : { kind: 'order-steps', steps, result };
 }
 
-export function modelFor(problem: Problem): ProblemModel | null {
+export function sticksOf(value: number): StickNumber {
+  return { tens: Math.floor(value / 10), ones: value % 10 };
+}
+
+/**
+ * `a + b = c` or `a − b = c` with at most one blank, as a fact with its unknown, or null.
+ */
+function addSubFact(left: Expr, right: Expr): AddSubFact | null {
+  if (left.kind !== 'op' || (left.op !== 'add' && left.op !== 'sub')) return null;
+  const a = value(left.left);
+  const b = value(left.right);
+  const c = value(right);
+  const blanks = [a, b, c].filter((part) => part === null).length;
+  if (blanks !== 1) return null;
+  if (a === null && left.left.kind !== 'blank') return null;
+  if (b === null && left.right.kind !== 'blank') return null;
+  if (c === null && right.kind !== 'blank') return null;
+  const add = left.op === 'add';
+  let fact: [number, number, number];
+  let unknown: AddSubUnknown;
+  if (c === null) {
+    fact = [a!, b!, add ? a! + b! : a! - b!];
+    unknown = 'result';
+  } else if (a === null) {
+    fact = [add ? c - b! : c + b!, b!, c];
+    unknown = 'left';
+  } else {
+    fact = [a, add ? c - a : a - c, c];
+    unknown = 'right';
+  }
+  if (fact.some((part) => part < 0 || part > MAX_YOUNG_NUMBER)) return null;
+  return { op: left.op, left: fact[0], right: fact[1], result: fact[2], unknown };
+}
+
+/** The young players' picture of an addition or subtraction. */
+function addSubModel(left: Expr, right: Expr): ProblemModel | null {
+  const fact = addSubFact(left, right);
+  if (fact === null) return null;
+  const whole = fact.op === 'add' ? fact.result : fact.left;
+  if (whole <= MAX_TEN_FRAME) return { kind: 'ten-frame', ...fact };
+  const other = fact.op === 'add' ? Math.min(fact.left, fact.right) : fact.right;
+  // A one-digit step is a hop on the number line; tens and two-digit numbers are sticks.
+  if (other < 10) return { kind: 'number-line', ...fact };
+  return { kind: 'sticks', numbers: [sticksOf(fact.left), sticksOf(fact.right)], fact };
+}
+
+/**
+ * The model for a problem. Additions and subtractions get their pictures for young players
+ * (`young`: grades 1-2) only, so a 3rd grader's screens stay as they were; a problem with a
+ * picture (counting, place value) always shows it.
+ */
+export function modelFor(problem: Problem, young = false): ProblemModel | null {
+  const picture = pictureOf(problem);
+  if (picture?.kind === 'dots') return { kind: 'count', count: picture.count };
+  if (picture?.kind === 'sticks') {
+    return { kind: 'sticks', numbers: [{ tens: picture.tens, ones: picture.ones }], fact: null };
+  }
   switch (problem.kind) {
     case 'word':
-      return modelFor(problem.model);
+      return modelFor(problem.model, young);
     case 'divrem':
       return countable(problem.dividend, problem.divisor)
         ? { kind: 'groups', total: problem.dividend, size: problem.divisor }
@@ -242,6 +355,9 @@ export function modelFor(problem: Problem): ProblemModel | null {
     case 'equation': {
       const { left, right } = problem;
       if (left.kind !== 'op') return null;
+      if (young && operations(left) === 1 && (left.op === 'add' || left.op === 'sub')) {
+        return addSubModel(left, right);
+      }
       if (right.kind === 'blank' && operations(left) >= 2) return orderModel(left);
       const a = value(left.left);
       const b = value(left.right);

@@ -14,14 +14,23 @@ import { tokenizeWords, validateNarrative } from '@aegis/narrative';
 import type { NarrativeGraph } from '@aegis/narrative';
 import { COSMETIC_SLOTS, DRAGON_STAGES } from './ids';
 import type { CosmeticSlot, DragonStage } from './ids';
-import { INPUT_MODES, LEVEL_ACTIVITY_KINDS, OPERATORS, STRANDS, isMinigameKind } from './kinds';
-import type { InputMode, LevelActivityKind, Operator, Strand, WordFamily } from './kinds';
+import {
+  DEFAULT_GRADE,
+  GRADES,
+  INPUT_MODES,
+  LEVEL_ACTIVITY_KINDS,
+  OPERATORS,
+  STRANDS,
+  isMinigameKind,
+} from './kinds';
+import type { Grade, InputMode, LevelActivityKind, Operator, Strand, WordFamily } from './kinds';
 import { EGG_GRID_SPLITS } from './minigames';
 import { MAX_PROBLEM_NUMBER } from './problems';
 import {
   artId,
   catalogKey,
   contentId,
+  gradeSchema,
   hexColor,
   int,
   lazy,
@@ -66,6 +75,18 @@ export interface Region {
   boss: string | null;
   /** Art catalog ID of the region's background. */
   background: string;
+  /** The school grade the region teaches; absent means 3 (`regionGrade`). */
+  grade?: Grade;
+}
+
+/**
+ * Where a grade starts: the region a child of that grade begins in, always open to them. The
+ * pack-level `grades` list names one per grade it serves; absent, the pack serves grade 3 only and
+ * starts at its first region (`gradeStart`).
+ */
+export interface GradeStart {
+  grade: Grade;
+  start: string;
 }
 
 /**
@@ -311,12 +332,16 @@ export interface WordTiming {
   rereadPercent: number;
 }
 
-/** One rung of the placement check: a few problems of `skill`; passing marks `levels` placed. */
+/**
+ * One rung of the placement check: a few problems of `skill`; passing marks `levels` placed. With
+ * `grades`, the rung belongs only to the ladders of those grades; absent, it is a grade-3 rung.
+ */
 export interface PlacementStep {
   skill: string;
   problems: number;
   passAccuracy: number;
   levels: string[];
+  grades?: Grade[];
 }
 
 export interface Placement {
@@ -327,13 +352,18 @@ export interface Placement {
   stopAfterMisses: number;
 }
 
-export type BeatTrigger =
+/**
+ * What starts a beat. With `grades`, the trigger fires only for a child of one of those grades
+ * (the first-egg beat is per grade); absent, it fires for every grade.
+ */
+export type BeatTrigger = (
   | { kind: 'first-session' }
   | { kind: 'after-beat'; beat: string }
   | { kind: 'level-start'; level: string }
   | { kind: 'level-complete'; level: string }
   | { kind: 'boss-defeated'; boss: string }
-  | { kind: 'finale' };
+  | { kind: 'finale' }
+) & { grades?: Grade[] };
 
 /**
  * A story beat: a small `@aegis/narrative` graph played when its trigger fires. Text references
@@ -435,9 +465,26 @@ export interface Balance {
   gift: { coinsMin: number; coinsMax: number; cosmeticWeight: number; coinsWeight: number };
   arena: { unlockAfter: string; maxProblems: number };
   hungry: { minDue: number };
+  /**
+   * Per-grade overrides of the response limits and the number of answer choices (optional;
+   * absent, or a grade without an entry, uses the values above). Younger children read and type
+   * more slowly, so their fast and ok limits are usually longer (`gradeBalance`).
+   */
+  grades?: GradeBalance[];
+}
+
+/** A grade's overrides of `Balance` (`Balance.grades`). */
+export interface GradeBalance {
+  grade: Grade;
+  choice?: { fastMs: number; okMs: number };
+  keypad?: { fastMs: number; okMs: number; perExtraDigitMs: number };
+  /** Answer choices offered with choice input (`input.choices`). */
+  choices?: number;
 }
 
 export interface ContentData {
+  /** Where each grade starts (optional; absent = grade 3 only, from the first region). */
+  grades?: GradeStart[];
   objectives: Objective[];
   regions: Region[];
   levels: Level[];
@@ -483,6 +530,8 @@ export const ACTIVITY_OPTION_SCHEMAS: Readonly<
   'fact-family': {},
   'sharing-feast': {},
   'golem-orders': {},
+  'ten-frame': { task: oneOf(['mix', 'show', 'make-ten', 'cross'] as const) },
+  'bundle-sticks': { task: oneOf(['mix', 'build', 'add', 'sub'] as const) },
 };
 export const ACTIVITY_OPTION_DEFAULTS: Readonly<
   Record<LevelActivityKind, Readonly<Record<string, number | boolean | string>>>
@@ -497,6 +546,8 @@ export const ACTIVITY_OPTION_DEFAULTS: Readonly<
   'fact-family': {},
   'sharing-feast': {},
   'golem-orders': {},
+  'ten-frame': { task: 'mix' },
+  'bundle-sticks': { task: 'mix' },
 };
 
 const activitySchema: Schema<Activity> = schema.object({
@@ -631,14 +682,16 @@ function narrativeGraphSchema(): Schema<NarrativeGraph> {
   };
 }
 
-const beatTriggerSchema: Schema<BeatTrigger> = schema.union(
-  schema.object({ kind: schema.literal('first-session') }),
-  schema.object({ kind: schema.literal('after-beat'), beat: contentId }),
-  schema.object({ kind: schema.literal('level-start'), level: contentId }),
-  schema.object({ kind: schema.literal('level-complete'), level: contentId }),
-  schema.object({ kind: schema.literal('boss-defeated'), boss: contentId }),
-  schema.object({ kind: schema.literal('finale') }),
-);
+const gradesFilter = { grades: uniqueArray(gradeSchema, { min: 1, max: 3 }) };
+
+const beatTriggerSchema = schema.union(
+  objectWithOptional({ kind: schema.literal('first-session') }, gradesFilter),
+  objectWithOptional({ kind: schema.literal('after-beat'), beat: contentId }, gradesFilter),
+  objectWithOptional({ kind: schema.literal('level-start'), level: contentId }, gradesFilter),
+  objectWithOptional({ kind: schema.literal('level-complete'), level: contentId }, gradesFilter),
+  objectWithOptional({ kind: schema.literal('boss-defeated'), boss: contentId }, gradesFilter),
+  objectWithOptional({ kind: schema.literal('finale') }, gradesFilter),
+) as Schema<BeatTrigger>;
 
 const grantSchema: Schema<Grant> = schema.union(
   schema.object({ kind: schema.literal('egg'), dragon: contentId }),
@@ -646,79 +699,99 @@ const grantSchema: Schema<Grant> = schema.union(
   schema.object({ kind: schema.literal('cosmetic'), item: contentId }),
 );
 
-const balanceSchema: Schema<Balance> = schema.object({
-  leitner: schema.object({ intervals: schema.array(int(0, 365), { min: 6, max: 6 }) }),
-  response: objectWithOptional(
-    {
-      choice: schema.object({ fastMs: int(500, 60_000), okMs: int(500, 120_000) }),
-      keypad: schema.object({
-        fastMs: int(500, 60_000),
-        okMs: int(500, 120_000),
-        perExtraDigitMs: int(0, 10_000),
-      }),
-    },
-    {
-      word: schema.object({
-        perWordMs: int(0, 10_000),
-        wholeStoryMs: int(0, 120_000),
-        rereadPercent: percent,
-      }),
-    },
-  ),
-  input: schema.object({ keypadFromBox: int(0, 6), choices: int(2, 6) }),
-  mix: schema.object({
-    successTarget: percent,
-    knownShare: percent,
-    minLearningShare: percent,
-    maxLearningShare: percent,
-    window: int(1, 200),
-    noRepeatWithin: int(0, 10),
-  }),
-  reask: schema.object({ delay: int(1, 20), maxPerRound: int(0, 10) }),
-  coins: schema.object({
-    correct: int(0, 100),
-    streakEvery: int(1, 100),
-    streakBonus: int(0, 100),
-    bossDefeated: int(0, 1000),
-    placementDone: int(0, 1000),
-  }),
-  stars: starRuleSchema,
-  mastery: objectWithOptional(
-    { goldBox: int(0, 5), goldFast: int(0, 10), goldOfLast: int(1, 10) },
-    {
-      effort: schema.object({
-        bronzeDays: int(1, 365),
-        silverDays: int(1, 365),
-        gapDays: int(1, 365),
-      }),
-    },
-  ),
-  growth: schema.array(
-    schema.object({
-      stage: oneOf(['hatchling', 'youngling', 'adult', 'crowned'] as const),
-      share: percent,
-      mastery: oneOf(['seen', 'bronze', 'silver', 'gold'] as const),
-      division: schema.boolean,
-      boss: schema.boolean,
+const timingSchema = schema.object({ fastMs: int(500, 60_000), okMs: int(500, 120_000) });
+
+const gradeBalanceSchema: Schema<GradeBalance> = objectWithOptional(
+  { grade: gradeSchema },
+  {
+    choice: timingSchema,
+    keypad: schema.object({
+      fastMs: int(500, 60_000),
+      okMs: int(500, 120_000),
+      perExtraDigitMs: int(0, 10_000),
     }),
-    { min: 4, max: 4 },
-  ),
-  daily: schema.object({
-    goalAnswers: int(1, 1000),
-    goalMin: int(1, 1000),
-    goalMax: int(1, 1000),
-    quests: int(0, 5),
-    historyDays: int(7, 365),
-  }),
-  gift: schema.object({
-    coinsMin: int(0, 1000),
-    coinsMax: int(0, 1000),
-    cosmeticWeight: int(0, 100),
-    coinsWeight: int(0, 100),
-  }),
-  arena: schema.object({ unlockAfter: contentId, maxProblems: int(1, 200) }),
-  hungry: schema.object({ minDue: int(1, 100) }),
-});
+    choices: int(2, 6),
+  },
+) as Schema<GradeBalance>;
+
+const balanceSchema: Schema<Balance> = objectWithOptional(
+  {
+    leitner: schema.object({ intervals: schema.array(int(0, 365), { min: 6, max: 6 }) }),
+    response: objectWithOptional(
+      {
+        choice: schema.object({ fastMs: int(500, 60_000), okMs: int(500, 120_000) }),
+        keypad: schema.object({
+          fastMs: int(500, 60_000),
+          okMs: int(500, 120_000),
+          perExtraDigitMs: int(0, 10_000),
+        }),
+      },
+      {
+        word: schema.object({
+          perWordMs: int(0, 10_000),
+          wholeStoryMs: int(0, 120_000),
+          rereadPercent: percent,
+        }),
+      },
+    ),
+    input: schema.object({ keypadFromBox: int(0, 6), choices: int(2, 6) }),
+    mix: schema.object({
+      successTarget: percent,
+      knownShare: percent,
+      minLearningShare: percent,
+      maxLearningShare: percent,
+      window: int(1, 200),
+      noRepeatWithin: int(0, 10),
+    }),
+    reask: schema.object({ delay: int(1, 20), maxPerRound: int(0, 10) }),
+    coins: schema.object({
+      correct: int(0, 100),
+      streakEvery: int(1, 100),
+      streakBonus: int(0, 100),
+      bossDefeated: int(0, 1000),
+      placementDone: int(0, 1000),
+    }),
+    stars: starRuleSchema,
+    mastery: objectWithOptional(
+      { goldBox: int(0, 5), goldFast: int(0, 10), goldOfLast: int(1, 10) },
+      {
+        effort: schema.object({
+          bronzeDays: int(1, 365),
+          silverDays: int(1, 365),
+          gapDays: int(1, 365),
+        }),
+      },
+    ),
+    growth: schema.array(
+      schema.object({
+        stage: oneOf(['hatchling', 'youngling', 'adult', 'crowned'] as const),
+        share: percent,
+        mastery: oneOf(['seen', 'bronze', 'silver', 'gold'] as const),
+        division: schema.boolean,
+        boss: schema.boolean,
+      }),
+      { min: 4, max: 4 },
+    ),
+    daily: schema.object({
+      goalAnswers: int(1, 1000),
+      goalMin: int(1, 1000),
+      goalMax: int(1, 1000),
+      quests: int(0, 5),
+      historyDays: int(7, 365),
+    }),
+    gift: schema.object({
+      coinsMin: int(0, 1000),
+      coinsMax: int(0, 1000),
+      cosmeticWeight: int(0, 100),
+      coinsWeight: int(0, 100),
+    }),
+    arena: schema.object({ unlockAfter: contentId, maxProblems: int(1, 200) }),
+    hungry: schema.object({ minDue: int(1, 100) }),
+  },
+  {
+    grades: schema.array(gradeBalanceSchema, { min: 1, max: 3 }),
+  },
+) as Schema<Balance>;
 
 export const contentDataSchema: Schema<ContentData> = objectWithOptional(
   {
@@ -727,14 +800,17 @@ export const contentDataSchema: Schema<ContentData> = objectWithOptional(
       { min: 1, max: 200 },
     ),
     regions: schema.array(
-      schema.object({
-        id: contentId,
-        order: int(1, 100),
-        titleKey: catalogKey,
-        unlock: unlockSchema,
-        boss: nullable(contentId),
-        background: artId,
-      }),
+      objectWithOptional(
+        {
+          id: contentId,
+          order: int(1, 100),
+          titleKey: catalogKey,
+          unlock: unlockSchema,
+          boss: nullable(contentId),
+          background: artId,
+        },
+        { grade: gradeSchema },
+      ),
       { min: 1, max: 100 },
     ),
     levels: schema.array(levelSchema, { min: 1, max: 1000 }),
@@ -820,12 +896,15 @@ export const contentDataSchema: Schema<ContentData> = objectWithOptional(
     wordTemplates: schema.array(wordTemplateSchema, { max: 500 }),
     placement: schema.object({
       steps: schema.array(
-        schema.object({
-          skill: contentId,
-          problems: int(1, 10),
-          passAccuracy: percent,
-          levels: uniqueArray(contentId, { max: 64 }),
-        }),
+        objectWithOptional(
+          {
+            skill: contentId,
+            problems: int(1, 10),
+            passAccuracy: percent,
+            levels: uniqueArray(contentId, { max: 64 }),
+          },
+          gradesFilter,
+        ),
         { max: 50 },
       ),
       minProblems: int(0, 100),
@@ -846,7 +925,12 @@ export const contentDataSchema: Schema<ContentData> = objectWithOptional(
     }),
     balance: balanceSchema,
   },
-  {},
+  {
+    grades: schema.array(schema.object({ grade: gradeSchema, start: contentId }), {
+      min: 1,
+      max: 3,
+    }),
+  },
 );
 
 // ---------------------------------------------------------------------------------------------
@@ -1175,6 +1259,52 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
     }
   }
 
+  // Grades: one start per grade, in a region of that grade; region grades never fall along the
+  // map; filters name only served grades. Without `grades` the pack is grade 3 only.
+  const regionById = new Map(data.regions.map((r) => [r.id, r]));
+  const served = new Set(GRADES.filter((g) => gradeStart(data, g) !== null));
+  unique(
+    'grades',
+    (data.grades ?? []).map((g) => String(g.grade)),
+  );
+  for (const entry of data.grades ?? []) {
+    const id = `grade-${entry.grade}`;
+    need('grades', id, 'start', [entry.start], regions, 'region');
+    const region = regionById.get(entry.start);
+    if (region && regionGrade(region) !== entry.grade) {
+      problem(id, 'start', 'A grade starts in a region of that grade.');
+    }
+  }
+  const byOrder = [...data.regions].sort((a, b) => a.order - b.order);
+  byOrder.forEach((region, index) => {
+    const previous = byOrder[index - 1];
+    if (previous && regionGrade(previous) > regionGrade(region)) {
+      problem(region.id, 'grade', 'Region grades must not decrease along the map order.');
+    }
+    if (!served.has(regionGrade(region)) && data.grades === undefined) {
+      problem(region.id, 'grade', 'A pack without `grades` serves grade 3 only.');
+    }
+  });
+  const unserved = (filter: readonly Grade[] | undefined) =>
+    (filter ?? []).some((g) => !served.has(g));
+  for (const beat of data.story.beats) {
+    if (unserved(beat.trigger.grades)) {
+      problem(beat.id, 'trigger.grades', 'The content serves no such grade.', 'missing-reference');
+    }
+  }
+  data.placement.steps.forEach((step, index) => {
+    if (unserved(step.grades)) {
+      problem(`step-${index}`, 'grades', 'The content serves no such grade.', 'missing-reference');
+    }
+  });
+  const balanceGrades = (data.balance.grades ?? []).map((g) => g.grade);
+  if (new Set(balanceGrades).size !== balanceGrades.length) {
+    problem('balance', 'grades', 'A grade has more than one balance entry.');
+  }
+  if (unserved(balanceGrades)) {
+    problem('balance', 'grades', 'The content serves no such grade.', 'missing-reference');
+  }
+
   // Multi-head bosses share the meter evenly and need a skill per head; one finale at most.
   for (const boss of data.bosses) {
     const heads = boss.heads ?? 1;
@@ -1194,11 +1324,17 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
 
   // Unlock graph: acyclic and every level reachable from the start.
   const levelById = new Map(data.levels.map((l) => [l.id, l]));
-  const regionById = new Map(data.regions.map((r) => [r.id, r]));
+  // A grade's start region is open to that grade, so its own unlock does not gate reachability.
+  const startRegions = new Set(
+    GRADES.map((g) => gradeStart(data, g)).filter((id): id is string => id !== null),
+  );
   const requires = (levelId: string): string[] => {
     const level = levelById.get(levelId);
     if (!level) return [];
-    return [...level.unlock.after, ...(regionById.get(level.region)?.unlock.after ?? [])];
+    const region = startRegions.has(level.region)
+      ? []
+      : (regionById.get(level.region)?.unlock.after ?? []);
+    return [...level.unlock.after, ...region];
   };
   const reached = new Set<string>();
   let progress = true;
@@ -1278,6 +1414,42 @@ export function validateContentData(data: Read<ContentData>): RuntimeDiagnostic[
     }
   }
   return out;
+}
+
+/** The school grade a region teaches (absent = 3). */
+export function regionGrade(region: Read<Region>): Grade {
+  return region.grade ?? DEFAULT_GRADE;
+}
+
+/**
+ * The balance for a child of `grade`: `balance` with that grade's `Balance.grades` overrides
+ * of the response limits and answer choices applied (the same object when it has none).
+ */
+export function gradeBalance(balance: Read<Balance>, grade: Grade): Read<Balance> {
+  const entry = balance.grades?.find((g) => g.grade === grade);
+  if (entry === undefined) return balance;
+  return {
+    ...balance,
+    response: {
+      ...balance.response,
+      choice: entry.choice ?? balance.response.choice,
+      keypad: entry.keypad ?? balance.response.keypad,
+    },
+    input: { ...balance.input, choices: entry.choices ?? balance.input.choices },
+  };
+}
+
+/**
+ * The start region of `grade`, or null when the pack does not serve it. Without a `grades` list
+ * the pack serves grade 3 only, starting at its first region in map order.
+ */
+export function gradeStart(data: Read<ContentData>, grade: Grade): string | null {
+  if (data.grades !== undefined) {
+    return data.grades.find((g) => g.grade === grade)?.start ?? null;
+  }
+  if (grade !== DEFAULT_GRADE) return null;
+  const first = [...data.regions].sort((a, b) => a.order - b.order)[0];
+  return first?.id ?? null;
 }
 
 /** The registration passed to the runtime host and to `parseContentJson`. */

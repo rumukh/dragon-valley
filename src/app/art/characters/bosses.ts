@@ -6,7 +6,7 @@
 import { CANONICAL_BOSS_IDS } from '../../../rules/contract/ids';
 import type { BossMood } from '../../../rules/contract/content';
 import { polar } from '../svg/num';
-import { M, L, Q, C, roundRectD, roundStarD, eggD, heartD, polyD } from '../svg/path';
+import { M, L, Q, C, A, roundRectD, roundStarD, eggD, heartD, polyD } from '../svg/path';
 import { h, svgDoc, ids as scoped } from '../svg/xml';
 import { darken, lighten, outlineOf } from '../svg/color';
 import { clover, flower, sparkleD } from '../glyphs';
@@ -29,12 +29,16 @@ import {
   zzz,
 } from './kit';
 
-export const BOSS_IDS = CANONICAL_BOSS_IDS;
+/** Bosses of the Lower Valley sheet (grades 1-2), drawn before the canonical third-grade nine. */
+export const LOWER_VALLEY_BOSS_IDS = ['will-o-wisps'] as const;
+
+export const BOSS_IDS: readonly string[] = [...LOWER_VALLEY_BOSS_IDS, ...CANONICAL_BOSS_IDS];
 export const BOSS_STATES = ['start', 'warming', 'won'] as const;
 export type BossState = (typeof BOSS_STATES)[number];
 
 /** How each boss is won (for copy and audio cues). */
-export const BOSS_OUTCOME: Record<string, 'laugh' | 'sleep' | 'agree'> = {
+export const BOSS_OUTCOME: Record<string, 'laugh' | 'sleep' | 'agree' | 'dance'> = {
+  'will-o-wisps': 'dance',
   'bridge-troll': 'laugh',
   'forest-witch': 'agree',
   krakonos: 'laugh',
@@ -50,6 +54,7 @@ const MOOD_OF_OUTCOME = {
   laugh: 'laughing',
   sleep: 'sleepy',
   agree: 'happy',
+  dance: 'happy',
 } as const satisfies Record<(typeof BOSS_OUTCOME)[string], BossMood>;
 
 /**
@@ -1945,7 +1950,195 @@ function golem(state: BossState, p: P): string {
 
 // ---------------------------------------------------------------------------------------------
 
+/**
+ * One will-o'-wisp (bludička): a little flame-shaped light with a round face, glowing from a
+ * shared radial gradient. `lean` bends the tip, `dim` fades it for the hiding pose.
+ */
+function wisp(
+  x: number,
+  y: number,
+  r: number,
+  glow: string,
+  tint: string,
+  mood: 'cheeky' | 'curious' | 'joy',
+  lean = 0,
+  dim = 1,
+): string {
+  const tip = { x: x + lean * r * 0.9, y: y - r * 2.3 };
+  const d =
+    M(x - r, y) +
+    C(x - r, y - r * 0.9, tip.x - r * 0.4, tip.y + r * 0.9, tip.x, tip.y) +
+    C(tip.x + r * 0.2, tip.y + r * 0.9, x + r, y - r * 0.9, x + r, y) +
+    C(x + r, y + r * 1.35, x - r, y + r * 1.35, x - r, y) +
+    'Z';
+  return h(
+    'g',
+    { class: 'dv-wisp', opacity: dim },
+    h('circle', { cx: x, cy: y - r * 0.3, r: r * 2.1, fill: `url(#${glow})` }),
+    h('path', { d, ...st(tint, 0.62, 3.2) }),
+    h('path', {
+      d:
+        M(x - r * 0.45, y - r * 0.55) +
+        Q(x - r * 0.35, y - r * 1.1, tip.x - r * 0.1, tip.y + r * 0.7),
+      fill: 'none',
+      stroke: '#ffffff',
+      'stroke-width': r * 0.16,
+      'stroke-linecap': 'round',
+      opacity: 0.75,
+    }),
+    face({
+      cx: x,
+      cy: y + r * 0.12,
+      dx: r * 0.36,
+      r: r * 0.17,
+      eyes: mood === 'joy' ? 'happy' : mood === 'cheeky' ? 'side' : 'open',
+      brows: 'none',
+      mouth: mood === 'joy' ? 'laugh' : mood === 'cheeky' ? 'pout' : 'smile',
+      my: y + r * 0.55,
+      mw: r * 0.5,
+      skin: tint,
+      blush: 0.5,
+      look: mood === 'cheeky' ? -1 : 0,
+    }),
+  );
+}
+
+/**
+ * Pebble Brook's will-o'-wisps (bludičky). They hide among the reeds and lead counters astray;
+ * every correct count calls one more light out, and when all ten are counted they dance a ring.
+ */
+function willOWisps(state: BossState, p: P): string {
+  const glow = p('wisp-glow');
+  const defs = h(
+    'defs',
+    null,
+    h(
+      'radialGradient',
+      { id: glow },
+      h('stop', { offset: '0', 'stop-color': '#fff6b8', 'stop-opacity': 0.9 }),
+      h('stop', { offset: '0.45', 'stop-color': '#bff3ff', 'stop-opacity': 0.4 }),
+      h('stop', { offset: '1', 'stop-color': '#bff3ff', 'stop-opacity': 0 }),
+    ),
+  );
+  const brook =
+    h('ellipse', { cx: 256, cy: 474, rx: 240, ry: 28, fill: '#8fd3f4', opacity: 0.6 }) +
+    h('path', {
+      d: M(70, 474) + Q(110, 466, 150, 474) + M(330, 476) + Q(372, 468, 414, 476),
+      fill: 'none',
+      stroke: '#ffffff',
+      'stroke-width': 4,
+      'stroke-linecap': 'round',
+      opacity: 0.8,
+    });
+  const pebbles = (
+    [
+      [118, 468, 22, '#c9c2b8'],
+      [196, 476, 16, '#a9b8c4'],
+      [304, 474, 18, '#d8c7ae'],
+      [392, 466, 24, '#b9b0c9'],
+    ] as const
+  )
+    .map(([x, y, r, c]) => h('ellipse', { cx: x, cy: y, rx: r, ry: r * 0.62, ...st(c, 0.55, 3) }))
+    .join('');
+  const reeds = (x: number, s: number): string =>
+    h(
+      'g',
+      { class: 'dv-reeds' },
+      h('path', {
+        d:
+          M(x - 26 * s, 470) +
+          Q(x - 34 * s, 380, x - 50 * s, 300) +
+          M(x - 6 * s, 470) +
+          Q(x - 4 * s, 360, x + 4 * s, 262) +
+          M(x + 18 * s, 470) +
+          Q(x + 30 * s, 390, x + 46 * s, 318),
+        fill: 'none',
+        stroke: '#4f9a3c',
+        'stroke-width': 9 * s,
+        'stroke-linecap': 'round',
+      }),
+      h('ellipse', { cx: x + 4 * s, cy: 290, rx: 9 * s, ry: 28 * s, ...st('#9a6a3e', 0.55, 3) }),
+      h('ellipse', { cx: x - 46 * s, cy: 326, rx: 8 * s, ry: 24 * s, ...st('#9a6a3e', 0.55, 3) }),
+    );
+  const tints = ['#fff1a0', '#c8f4ff', '#ffd6f2', '#d8ffc4', '#ffe1b0'];
+  let lights = '';
+  if (state === 'start') {
+    lights =
+      wisp(150, 300, 30, glow, tints[0]!, 'cheeky', -0.4, 0.85) +
+      wisp(372, 250, 26, glow, tints[1]!, 'cheeky', 0.4, 0.75) +
+      wisp(262, 196, 22, glow, tints[2]!, 'curious', 0.2, 0.6);
+  } else if (state === 'warming') {
+    const spots: Array<[number, number, number]> = [
+      [256, 330, 34],
+      [150, 270, 28],
+      [362, 270, 28],
+      [96, 180, 22],
+      [416, 180, 22],
+      [256, 160, 24],
+    ];
+    lights = spots
+      .map(([x, y, r], i) =>
+        wisp(
+          x,
+          y,
+          r,
+          glow,
+          tints[i % tints.length]!,
+          i === 0 ? 'joy' : 'curious',
+          (i % 3) - 1,
+          0.92,
+        ),
+      )
+      .join('');
+  } else {
+    for (let i = 0; i < 10; i++) {
+      const a = -90 + i * 36;
+      const c = polar(256, 262, 170, a);
+      lights += wisp(
+        c.x,
+        c.y + (i % 2 ? 10 : -6),
+        i % 2 ? 22 : 26,
+        glow,
+        tints[i % tints.length]!,
+        'joy',
+        i % 2 ? 0.5 : -0.5,
+      );
+    }
+    lights += h('path', {
+      d: smoothRing(256, 262, 170),
+      fill: 'none',
+      stroke: '#fff1a0',
+      'stroke-width': 3,
+      'stroke-dasharray': '2 12',
+      'stroke-linecap': 'round',
+      opacity: 0.8,
+    });
+  }
+  return (
+    defs +
+    brook +
+    pebbles +
+    reeds(64, 1) +
+    reeds(452, 0.9) +
+    lights +
+    (state === 'won'
+      ? sparkles([
+          [256, 262, 18],
+          [70, 70, 12],
+          [442, 70, 12],
+        ])
+      : state === 'warming'
+        ? h('path', { d: sparkleD(430, 90, 11) + sparkleD(84, 96, 9), fill: '#fff1a0' })
+        : '')
+  );
+}
+
+function smoothRing(cx: number, cy: number, r: number): string {
+  return M(cx - r, cy) + A(r, r, 0, 1, 1, cx + r, cy) + A(r, r, 0, 1, 1, cx - r, cy) + 'Z';
+}
+
 const DRAW: Record<string, (state: BossState, p: P) => string> = {
+  'will-o-wisps': willOWisps,
   'bridge-troll': bridgeTroll,
   'forest-witch': forestWitch,
   krakonos,

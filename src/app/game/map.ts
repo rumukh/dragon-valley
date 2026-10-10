@@ -11,6 +11,21 @@ import type { Fetcher } from '../content/load';
 
 export const MAP_PATH = 'assets/backgrounds/map-hotspots.json';
 
+/**
+ * The map's sheets in travel order (docs/design.md §12.5): the Lower Valley of grades 1-2, then
+ * today's valley. Each is a picture (a background id) with its hotspots file, the same as the art
+ * module's `MAP_SHEETS` (a unit test keeps them in step; the map loader stays free of the art
+ * code). An optional sheet that fails to load leaves its regions off the map.
+ */
+export const MAP_SHEET_FILES = [
+  {
+    background: 'lower-valley-map',
+    path: 'assets/backgrounds/lower-valley-hotspots.json',
+    optional: true,
+  },
+  { background: 'valley-map', path: MAP_PATH, optional: false },
+] as const;
+
 export interface MapPoint {
   readonly x: number;
   readonly y: number;
@@ -24,6 +39,8 @@ export interface MapRegion {
 }
 
 export interface ValleyMap {
+  /** The sheet's picture: a background id. */
+  readonly background: string;
   readonly logical: { readonly width: number; readonly height: number };
   readonly hotspots: readonly Hotspot[];
   readonly regions: Readonly<Record<string, MapRegion>>;
@@ -50,7 +67,7 @@ function points(value: unknown, what: string): MapPoint[] {
   return value.map((entry) => point(entry, what));
 }
 
-export function parseValleyMap(input: unknown): ValleyMap {
+export function parseValleyMap(input: unknown, background = 'valley-map'): ValleyMap {
   if (!isRecord(input) || !isRecord(input['logical'])) throw new Error('Map: no logical size.');
   const logical = {
     width: finite(input['logical']['width'], 'logical width'),
@@ -80,7 +97,7 @@ export function parseValleyMap(input: unknown): ValleyMap {
       path: points(region['path'], `${id} path`),
     };
   }
-  return { logical, hotspots, regions };
+  return { background, logical, hotspots, regions };
 }
 
 /** `count` points spaced evenly along a polyline (its ends included when count ≥ 2). */
@@ -114,14 +131,64 @@ export function levelPositions(region: MapRegion, lessons: number): MapPoint[] {
   return pointsAlong(region.path, lessons);
 }
 
-let cached: Promise<ValleyMap> | undefined;
+const cached = new Map<string, Promise<ValleyMap>>();
 
+function loadSheet(
+  sheet: (typeof MAP_SHEET_FILES)[number],
+  baseUrl: string,
+  fetcher?: Fetcher,
+): Promise<ValleyMap> {
+  const key = new URL(sheet.path, baseUrl).href;
+  let loading = cached.get(key);
+  if (!loading) {
+    loading = fetchSiteText(baseUrl, sheet.path, fetcher).then((text) =>
+      parseValleyMap(JSON.parse(text) as unknown, sheet.background),
+    );
+    cached.set(key, loading);
+    loading.catch(() => cached.delete(key));
+  }
+  return loading;
+}
+
+const VALLEY_SHEET = MAP_SHEET_FILES.find((sheet) => !sheet.optional)!;
+
+/** The valley sheet (today's map, of grade 3's regions). */
 export function loadValleyMap(baseUrl: string, fetcher?: Fetcher): Promise<ValleyMap> {
-  cached ??= fetchSiteText(baseUrl, MAP_PATH, fetcher).then((text) =>
-    parseValleyMap(JSON.parse(text) as unknown),
+  return loadSheet(VALLEY_SHEET, baseUrl, fetcher);
+}
+
+/**
+ * The sheets of the map in travel order. The other sheets (the Lower Valley) are fetched only when
+ * the content has regions the valley sheet does not, so a pack of grade 3 alone asks for nothing
+ * more.
+ */
+export async function loadMapSheets(
+  baseUrl: string,
+  regionIds: readonly string[],
+  fetcher?: Fetcher,
+): Promise<readonly ValleyMap[]> {
+  const valley = await loadValleyMap(baseUrl, fetcher);
+  if (regionIds.every((id) => sheetOf([valley], id) !== null)) return [valley];
+  // An optional sheet that cannot load (its art not shipped yet) leaves its regions off the map.
+  const sheets = await Promise.all(
+    MAP_SHEET_FILES.map((sheet) =>
+      sheet === VALLEY_SHEET
+        ? valley
+        : loadSheet(sheet, baseUrl, fetcher).catch((error: unknown) => {
+            if (sheet.optional) return null;
+            throw error;
+          }),
+    ),
   );
-  cached.catch(() => {
-    cached = undefined;
-  });
-  return cached;
+  return sheets.filter((sheet): sheet is ValleyMap => sheet !== null);
+}
+/** The sheet a region is on, or null. */
+export function sheetOf(sheets: readonly ValleyMap[], regionId: string): ValleyMap | null {
+  return (
+    sheets.find(
+      (sheet) =>
+        sheet.regions[regionId] !== undefined ||
+        sheet.hotspots.some((spot) => spot.id === regionId),
+    ) ?? null
+  );
 }
