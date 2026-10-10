@@ -16,6 +16,7 @@ import { SH, SW, cloud, linear, pine, radial, reeds, rock, roundTree, type Defs 
 import { buildMapSheet, mapRoad, sheetNodePositions, type MapHotspots } from './map';
 import { pebble, steppingStone } from './scenes-c';
 import { basket, domeHill, kite, marketStall, pennant, stickSheaf, townHouse } from './scenes-d';
+import { acornProp, duck, goblinNook, puppetBooth } from './scenes-e';
 
 /** Planned level count per Lower Valley region (docs/grades-plan.md); plus one boss node each. */
 export const LOWER_VALLEY_LEVELS: Record<string, number> = {
@@ -370,6 +371,14 @@ export function lowerValleyMap(defs: Defs): string {
     });
   });
   out += cloud(1160, 900, 26) + cloud(1468, 900, 26);
+  // the ford itself: two rows of five stepping stones (a ten) across the river
+  const g1 = rng('lower-valley-map-g1');
+  for (let i = 0; i < 5; i++) {
+    out += steppingStone(1206 + i * 17, 930 + (g1() - 0.5) * 4, 15, '#d6e2f2');
+    out += steppingStone(1212 + i * 17, 956 + (g1() - 0.5) * 4, 15, '#f6dc8c');
+  }
+  out += duck(1532, 634, 11, -1) + duck(1556, 626, 8, -1);
+  out += puppetBooth(1090, 868, 58);
 
   // 2. Mushroom Hollow (bottom middle, roughed in): a mossy dell full of toadstools
   out += h('ellipse', {
@@ -391,6 +400,16 @@ export function lowerValleyMap(defs: Defs): string {
     [600, 780, 34, '#c9784e'],
   ] as const)
     out += toadstool(x, y, s, cap);
+  // the House Goblin's stump with its round red door, and acorns everywhere
+  out += goblinNook(900, 712, 30);
+  for (const [x, y, a] of [
+    [632, 920, -20],
+    [792, 930, 15],
+    [1000, 958, -10],
+    [850, 780, 25],
+    [580, 860, 0],
+  ] as const)
+    out += acornProp(x, y, 14, a);
 
   // scattered orchard trees and rocks in the margins
   for (const [x, y] of [

@@ -735,3 +735,184 @@ export function buckTeeth(ctx: Ctx): string {
     'stroke-width': ctx.W * 0.35,
   });
 }
+
+/** One little toadstool standing on the ground (Sprout's prop). */
+function toadstool(x: number, r: number, fill: string, spots: boolean, W: number): string {
+  const y = GROUND;
+  return (
+    h('path', {
+      d:
+        M(x - r * 0.32, y - r * 0.85) +
+        L(x - r * 0.4, y - 1) +
+        Q(x, y + r * 0.12, x + r * 0.4, y - 1) +
+        L(x + r * 0.32, y - r * 0.85) +
+        'Z',
+      fill: '#fff8ea',
+      stroke: outlineOf('#fff8ea', 0.45),
+      'stroke-width': W * 0.8,
+    }) +
+    h('path', {
+      d:
+        M(x - r, y - r * 0.75) +
+        Q(x - r, y - r * 1.85, x, y - r * 1.85) +
+        Q(x + r, y - r * 1.85, x + r, y - r * 0.75) +
+        Q(x, y - r * 1.05, x - r, y - r * 0.75) +
+        'Z',
+      fill,
+      stroke: outlineOf(fill, 0.55),
+      'stroke-width': W,
+      'stroke-linejoin': 'round',
+    }) +
+    (spots
+      ? h('circle', { cx: x - r * 0.42, cy: y - r * 1.3, r: r * 0.17, fill: '#ffffff' }) +
+        h('circle', { cx: x + r * 0.28, cy: y - r * 1.52, r: r * 0.13, fill: '#ffffff' }) +
+        h('circle', { cx: x + r * 0.58, cy: y - r * 1.08, r: r * 0.1, fill: '#ffffff' })
+      : h('ellipse', {
+          cx: x - r * 0.3,
+          cy: y - r * 1.45,
+          rx: r * 0.3,
+          ry: r * 0.13,
+          fill: '#ffffff',
+          opacity: 0.55,
+        }))
+  );
+}
+
+/**
+ * Sprout's patch of ten toadstools on a mossy mound, standing like a ten-frame: five red ones at
+ * the back, two red and three brown in front (7 + 3 = 10).
+ */
+export function toadstoolRing(ctx: Ctx): string {
+  const r = lerp(15, 18, ctx.sk.t);
+  const step = r * 1.72;
+  const x0 = groundPropLeft(ctx) + r + 2;
+  const x1 = x0 + step * 4.5;
+  const W = ctx.W * 0.42;
+  const lift = r * 0.8;
+  const moss = h('path', {
+    d:
+      M(x0 - r * 1.3, GROUND + 2) +
+      Q(x0 - r * 0.9, GROUND - lift * 1.3, x0 + step * 2, GROUND - lift * 1.2) +
+      Q(x1 + r * 0.4, GROUND - lift * 1.3, x1 + r * 1.2, GROUND + 2) +
+      'Z',
+    fill: '#8fbf5a',
+    stroke: '#4f7f32',
+    'stroke-width': W,
+    'stroke-linejoin': 'round',
+  });
+  let back = '';
+  let front = '';
+  for (let i = 0; i < 5; i++)
+    back += h(
+      'g',
+      { transform: `translate(0 ${(-lift).toFixed(2)})` },
+      toadstool(x0 + step * (i + 0.5), r * 0.9, ctx.paint.accent, true, W),
+    );
+  for (let i = 0; i < 5; i++) {
+    const red = i < 2;
+    front += toadstool(
+      x0 + step * i,
+      red ? r : r * 0.82,
+      red ? ctx.paint.accent : ctx.paint.accent2,
+      red,
+      W,
+    );
+  }
+  return h(
+    'g',
+    { class: 'dv-toadstool-ring' },
+    propShadow((x0 + x1) / 2, step * 3.2),
+    moss,
+    back,
+    front,
+  );
+}
+
+/**
+ * Tenzi's ford: a little pool with ten stepping stones laid like a ten-frame (eight orange and two
+ * golden make ten) and a flag on the near bank marking the ten.
+ */
+export function fordStones(ctx: Ctx): string {
+  const s = lerp(1, 1.15, ctx.sk.t);
+  const x0 = groundPropLeft(ctx) + 2;
+  const len = 150 * s;
+  const W = ctx.W * 0.42;
+  const top = GROUND - 40 * s;
+  const water = h('path', {
+    d:
+      M(x0, GROUND - 4) +
+      Q(x0 - 4, top, x0 + len * 0.5, top) +
+      Q(x0 + len + 4, top, x0 + len, GROUND - 4) +
+      Q(x0 + len * 0.5, GROUND + 8 * s, x0, GROUND - 4) +
+      'Z',
+    fill: '#9fdcff',
+    stroke: '#3a8cc0',
+    'stroke-width': W,
+    'stroke-linejoin': 'round',
+  });
+  const stone = (x: number, y: number, rx: number, fill: string): string =>
+    h('ellipse', {
+      cx: x,
+      cy: y,
+      rx,
+      ry: rx * 0.55,
+      fill,
+      stroke: outlineOf(fill, 0.55),
+      'stroke-width': W,
+    }) +
+    h('ellipse', {
+      cx: x - rx * 0.3,
+      cy: y - rx * 0.2,
+      rx: rx * 0.32,
+      ry: rx * 0.13,
+      fill: '#ffffff',
+      opacity: 0.6,
+    });
+  const r = 10.5 * s;
+  const step = 25 * s;
+  const sx = x0 + len * 0.5 - step * 2 - 8 * s;
+  let stones = '';
+  for (let i = 0; i < 10; i++) {
+    const row = Math.floor(i / 5);
+    const col = i % 5;
+    const x = sx + col * step + row * 8 * s;
+    const y = row ? GROUND - 10 * s : GROUND - 27 * s;
+    stones += stone(x, y, row ? r : r * 0.9, i < 8 ? ctx.paint.accent : ctx.paint.accent2);
+  }
+  const fx = x0 + 6 * s;
+  const fy = GROUND - 14 * s;
+  const flag =
+    h('path', {
+      d: M(fx, fy) + L(fx, fy - 50 * s),
+      stroke: '#8a5a2e',
+      'stroke-width': W * 1.5,
+      'stroke-linecap': 'round',
+    }) +
+    h('path', {
+      d: M(fx, fy - 50 * s) + L(fx + 22 * s, fy - 43 * s) + L(fx, fy - 36 * s) + 'Z',
+      fill: ctx.paint.accent,
+      stroke: ctx.paint.accentLine,
+      'stroke-width': W * 0.8,
+      'stroke-linejoin': 'round',
+    });
+  return h(
+    'g',
+    { class: 'dv-ford-stones' },
+    propShadow(x0 + len * 0.5, len * 0.55),
+    water,
+    h('path', {
+      d:
+        M(x0 + 14, top + 8 * s) +
+        Q(x0 + 26, top + 5 * s, x0 + 38, top + 8 * s) +
+        M(x0 + len - 54, top + 8 * s) +
+        Q(x0 + len - 42, top + 5 * s, x0 + len - 30, top + 8 * s),
+      fill: 'none',
+      stroke: '#ffffff',
+      'stroke-width': W,
+      'stroke-linecap': 'round',
+      opacity: 0.8,
+    }),
+    stones,
+    flag,
+  );
+}

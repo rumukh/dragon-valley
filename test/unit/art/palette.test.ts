@@ -44,6 +44,8 @@ describe('master palette', () => {
       'dot',
       'hop',
       'nibble',
+      'sprout',
+      'tenzi',
       'bead',
       'tumble',
       'penny',

@@ -628,6 +628,77 @@ export function flowerCrest(ctx: Ctx): string {
   );
 }
 
+/** Sprout's toadstool cap: a red, white-spotted mushroom cap worn at a jaunty tilt, with a sprig. */
+export function toadstoolCrest(ctx: Ctx): string {
+  const hd = ctx.sk.head;
+  const s = lerp(48, 62, ctx.sk.t);
+  const cx = CX + s * 0.12;
+  const cy = hd.cy - hd.ry * 0.9;
+  const fill = ctx.paint.accent;
+  const line = ctx.paint.accentLine;
+  const cap =
+    M(cx - s * 1.2, cy + s * 0.1) +
+    C(cx - s * 1.25, cy - s * 0.95, cx + s * 1.25, cy - s * 0.95, cx + s * 1.2, cy + s * 0.1) +
+    Q(cx, cy - s * 0.18, cx - s * 1.2, cy + s * 0.1) +
+    'Z';
+  const spots: Array<[number, number, number]> = [
+    [-0.62, -0.28, 0.17],
+    [-0.08, -0.56, 0.2],
+    [0.5, -0.36, 0.15],
+    [0.12, -0.12, 0.1],
+    [0.86, -0.06, 0.09],
+  ].slice(0, Math.max(3, Math.min(5, ctx.recipe.crest.count))) as Array<[number, number, number]>;
+  return h(
+    'g',
+    { class: 'dv-crest', transform: `rotate(-8 ${cx} ${cy})` },
+    h('path', {
+      d: M(cx - s * 1.0, cy + s * 0.08) + Q(cx, cy + s * 0.32, cx + s * 1.0, cy + s * 0.08),
+      fill: 'none',
+      stroke: '#fff8ea',
+      'stroke-width': ctx.W * 1.6,
+      'stroke-linecap': 'round',
+    }),
+    h('path', {
+      d: cap,
+      fill,
+      stroke: line,
+      'stroke-width': ctx.W * 0.8,
+      'stroke-linejoin': 'round',
+    }),
+    ...spots.map(([x, y, r]) =>
+      h('circle', { cx: cx + x * s, cy: cy + y * s, r: r * s, fill: '#ffffff' }),
+    ),
+    h('ellipse', {
+      cx: cx - s * 0.5,
+      cy: cy - s * 0.55,
+      rx: s * 0.22,
+      ry: s * 0.1,
+      fill: '#ffffff',
+      opacity: 0.45,
+      transform: `rotate(-25 ${cx - s * 0.5} ${cy - s * 0.55})`,
+    }),
+    h('path', {
+      d:
+        M(cx + s * 0.2, cy - s * 0.66) +
+        Q(cx + s * 0.3, cy - s * 1.0, cx + s * 0.55, cy - s * 1.08),
+      fill: 'none',
+      stroke: '#4f7f32',
+      'stroke-width': ctx.W * 0.6,
+      'stroke-linecap': 'round',
+    }),
+    h('ellipse', {
+      cx: cx + s * 0.62,
+      cy: cy - s * 1.1,
+      rx: s * 0.2,
+      ry: s * 0.1,
+      fill: '#8fcf5a',
+      stroke: '#4f7f32',
+      'stroke-width': ctx.W * 0.4,
+      transform: `rotate(-20 ${cx + s * 0.62} ${cy - s * 1.1})`,
+    }),
+  );
+}
+
 export function shellCrest(ctx: Ctx): string {
   const hd = ctx.sk.head;
   const s = lerp(32, 48, ctx.sk.t);
