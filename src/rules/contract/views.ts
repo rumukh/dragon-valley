@@ -11,6 +11,7 @@
 import type { JsonValue } from '@aegis/runtime';
 import type { CosmeticSlot, DragonExpression, DragonStage, MasteryLevel } from './ids';
 import type {
+  Grade,
   InputMode,
   MinigameActivityKind,
   ProblemActivityKind,
@@ -39,6 +40,8 @@ export interface GameView {
   round: RoundView | null;
   dragons: DragonView[];
   window: WindowView;
+  /** The Sun Window: addition and subtraction facts, for grades 1-2 (docs/design.md §12). */
+  sunWindow: SunWindowView;
   market: MarketView;
   album: AlbumView;
   daily: DailyView | null;
@@ -111,6 +114,8 @@ export interface HubView {
   /** Dragons with due items ("hungry for snacks"). */
   hungry: string[];
   arena: { available: boolean; best: number };
+  /** Grade certificates earned ("1st grade done!"), in grade order (grades before the 3rd). */
+  certificates: Grade[];
 }
 
 // ------------------------------------------------------------------------------ rounds
@@ -233,6 +238,21 @@ export interface WindowView {
   cells: WindowCell[];
   /** 110 cells, by divisor then quotient. */
   division: WindowCell[];
+  counts: Record<MasteryLevel, number>;
+}
+
+/**
+ * The Sun Window: the Magic Window's twin for grades 1-2, an 11 x 11 mosaic of the addition facts
+ * (row = first addend, column = second addend, 0..10) plus a subtraction panel (row = subtrahend
+ * 0..10, column = difference 0..10). Cells are the same `WindowCell`s as the Magic Window.
+ */
+export interface SunWindowView {
+  size: 11;
+  /** 121 cells, row-major from `add:0+0` to `add:10+10`. */
+  cells: WindowCell[];
+  /** 121 cells, by subtrahend then difference, from `sub:0-0` to `sub:20-10`. */
+  subtraction: WindowCell[];
+  /** Mastery counts of the addition cells. */
   counts: Record<MasteryLevel, number>;
 }
 

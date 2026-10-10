@@ -6,13 +6,14 @@
  * Parameter bounds follow the Czech 3rd-grade program (docs/curriculum.md): remainder division
  * keeps the dividend at most 99 with the quotient inside the table; 2-digit x 1-digit and
  * 2-digit : 1-digit stay within 1000 and, for division, without remainder; x10/x100 and tens x
- * 1-digit stay within 1000.
+ * 1-digit stay within 1000. The grades 1-2 generators (`num.*`, `add.*`, `sub.fact`,
+ * `addsub.2d`) stay within 20 (facts) and 100 (2-digit work), docs/curriculum.md §7.2.
  */
 import { failure, isRecord, schema, success } from '@aegis/runtime';
 import type { Outcome, Schema } from '@aegis/runtime';
 import { OPERATORS, TERMS, WORD_FAMILIES } from './kinds';
 import type { GeneratorId, Operator, Term, WordFamily } from './kinds';
-import { bucketId, divFactId, mulFactId } from './problems';
+import { addFactId, bucketId, divFactId, mulFactId, subFactId } from './problems';
 import { catalogKey, contentId, int, intRange, oneOf, uniqueArray } from './schema';
 
 /** Whether a property must hold, may hold or must not hold for generated problems. */
@@ -97,6 +98,71 @@ export interface TermsParams {
   tables: number[];
 }
 
+// Grades 1-2 (docs/curriculum.md §7.2).
+
+/** Bands of `num.count` (`count:<band>`) and `num.compare` (`ncompare:<band>`) buckets. */
+export const COUNT_BANDS = ['0-5', '6-10', '11-20'] as const;
+export const COMPARE_BANDS = ['0-10', '0-20', '0-100'] as const;
+/** What a `num.place` problem asks: the tens digit, the ones digit, or the number they make. */
+export const PLACE_ASKS = ['tens', 'ones', 'compose'] as const;
+/** `addsub.2d` shapes: whole tens ± whole tens, 2-digit ± 1-digit, 2-digit ± 2-digit. */
+export const ADDSUB_SHAPES = ['tens', '2d1d', '2d2d'] as const;
+export type AddSubShape = (typeof ADDSUB_SHAPES)[number];
+
+export interface NumCountParams {
+  /** How many objects (dots in ten-frames) there are, 0..20. */
+  numbers: [number, number];
+}
+export interface NumCompareParams {
+  /** Both numbers lie in this range, 0..100. */
+  numbers: [number, number];
+  /** Share of comparisons whose answer is `=`. */
+  equalShare: number;
+}
+export interface NumPlaceParams {
+  /** The 2-digit numbers, 10..99. */
+  numbers: [number, number];
+  asks: (typeof PLACE_ASKS)[number][];
+}
+export interface AddFactParams {
+  /** Range of both addends, within 0..10. */
+  addends: [number, number];
+  /** Largest sum (10 for "within 10", 20 for "within 20"). */
+  sumMax: number;
+  /** Crossing ten: both addends below 10 and the sum above 10 (8 + 5 crosses; 7 + 3 does not). */
+  crossing: Requirement;
+}
+export interface SubFactParams {
+  /** Range of the subtrahend, within 0..10. */
+  subtrahends: [number, number];
+  /** Range of the difference, within 0..10. */
+  differences: [number, number];
+  /** Largest minuend (10 for "within 10", 20 for "within 20"). */
+  minuendMax: number;
+  /** Crossing ten: the minuend above 10 and its ones below the subtrahend (13 - 6 crosses). */
+  crossing: Requirement;
+}
+export interface AddMissingParams {
+  /** The known addend's range. */
+  known: [number, number];
+  /** The missing addend's range. */
+  missing: [number, number];
+  /** Largest sum, at most 20. */
+  sumMax: number;
+  /** Where the blank stands: `? + 4 = 9`, `7 + ? = 10` or both. */
+  position: 'first' | 'second' | 'both';
+}
+export interface AddSub2dParams {
+  operators: ('add' | 'sub')[];
+  shapes: AddSubShape[];
+  /** Range of the 2-digit operand(s) (`[10, 19]` keeps 1st-grade work within 20). */
+  twoDigit: [number, number];
+  /** Carry (addition) or borrow (subtraction) across ten. */
+  crossing: Requirement;
+  /** Largest number in the problem (sum or minuend), at most 100. */
+  resultMax: number;
+}
+
 export interface SkillParamsByGenerator {
   'mul.fact': MulFactParams;
   'div.fact': DivFactParams;
@@ -110,6 +176,13 @@ export interface SkillParamsByGenerator {
   compare: CompareParams;
   word: WordParams;
   terms: TermsParams;
+  'num.count': NumCountParams;
+  'num.compare': NumCompareParams;
+  'num.place': NumPlaceParams;
+  'add.fact': AddFactParams;
+  'sub.fact': SubFactParams;
+  'add.missing': AddMissingParams;
+  'addsub.2d': AddSub2dParams;
 }
 
 /** A skill: what the child practises, as one generator with parameters. */
@@ -185,6 +258,36 @@ export const SKILL_PARAM_SCHEMAS: { [G in GeneratorId]: Schema<SkillParamsByGene
   }),
   word: schema.object({ templates: uniqueArray(contentId, { min: 1, max: 64 }) }),
   terms: schema.object({ terms: uniqueArray(oneOf(TERMS), { min: 1, max: 6 }), tables }),
+  'num.count': schema.object({ numbers: intRange(0, 20) }),
+  'num.compare': schema.object({ numbers: intRange(0, 100), equalShare: int(0, 100) }),
+  'num.place': schema.object({
+    numbers: intRange(10, 99),
+    asks: uniqueArray(oneOf(PLACE_ASKS), { min: 1, max: 3 }),
+  }),
+  'add.fact': schema.object({
+    addends: intRange(0, 10),
+    sumMax: int(0, 20),
+    crossing: requirement,
+  }),
+  'sub.fact': schema.object({
+    subtrahends: intRange(0, 10),
+    differences: intRange(0, 10),
+    minuendMax: int(0, 20),
+    crossing: requirement,
+  }),
+  'add.missing': schema.object({
+    known: intRange(0, 10),
+    missing: intRange(0, 10),
+    sumMax: int(0, 20),
+    position: oneOf(['first', 'second', 'both'] as const),
+  }),
+  'addsub.2d': schema.object({
+    operators: uniqueArray(oneOf(['add', 'sub'] as const), { min: 1, max: 2 }),
+    shapes: uniqueArray(oneOf(ADDSUB_SHAPES), { min: 1, max: 3 }),
+    twoDigit: intRange(10, 99),
+    crossing: requirement,
+    resultMax: int(1, 100),
+  }),
 };
 
 const generatorSchema = oneOf(Object.keys(SKILL_PARAM_SCHEMAS) as GeneratorId[]);
@@ -225,7 +328,7 @@ function range([low, high]: [number, number]): number[] {
   return values;
 }
 
-/** Bucket families for open-ended skills. */
+/** Bucket families for open-ended skills (`addsub.2d` has one per operator). */
 export const BUCKET_FAMILIES = {
   'div.remainder': 'rem',
   'mul.power10': 'pow10',
@@ -236,7 +339,38 @@ export const BUCKET_FAMILIES = {
   compare: 'compare',
   word: 'word',
   terms: 'terms',
+  'num.count': 'count',
+  'num.compare': 'ncompare',
+  'num.place': 'place',
+  'addsub.2d': ['add2d', 'sub2d'],
 } as const;
+
+/** Whether `a + b` crosses ten: both addends' ones make ten or more and the sum exceeds 10. */
+export function addCrossesTen(a: number, b: number): boolean {
+  return a + b > 10 && (a % 10) + (b % 10) >= 10;
+}
+
+/** Whether `m - s` crosses ten: the minuend exceeds 10 and its ones are below the subtrahend's. */
+export function subCrossesTen(m: number, s: number): boolean {
+  return m > 10 && m % 10 < s % 10;
+}
+
+function meets(requirement: Requirement, holds: boolean): boolean {
+  return requirement === 'allowed' || (requirement === 'required') === holds;
+}
+
+/** Operand ranges of an `addsub.2d` shape: `[low, high]` of the first and the second operand. */
+function shapeOperands(
+  shape: AddSubShape,
+  twoDigit: [number, number],
+): { first: number[]; second: number[] } {
+  const two = range(twoDigit);
+  if (shape === 'tens') {
+    const tens = two.filter((n) => n % 10 === 0);
+    return { first: tens, second: tens };
+  }
+  return { first: two, second: shape === '2d1d' ? range([1, 9]) : two };
+}
 
 /**
  * The item IDs a skill can produce, sorted. Word skills need the template families, supplied by
@@ -340,6 +474,73 @@ export function skillItems(
     case 'terms':
       for (const term of skill.params.terms) items.add(bucketId('terms', term));
       break;
+    case 'num.count': {
+      const [low, high] = skill.params.numbers;
+      for (const band of COUNT_BANDS) {
+        const [from, to] = band.split('-').map(Number) as [number, number];
+        if (from <= high && to >= low) items.add(bucketId('count', band));
+      }
+      break;
+    }
+    case 'num.compare': {
+      const high = skill.params.numbers[1];
+      const band = high <= 10 ? '0-10' : high <= 20 ? '0-20' : '0-100';
+      items.add(bucketId('ncompare', band));
+      break;
+    }
+    case 'num.place':
+      for (const ask of skill.params.asks) items.add(bucketId('place', ask));
+      break;
+    case 'add.fact': {
+      const { addends, sumMax, crossing } = skill.params;
+      for (const a of range(addends)) {
+        for (const b of range(addends)) {
+          if (a + b <= sumMax && meets(crossing, addCrossesTen(a, b))) items.add(addFactId(a, b));
+        }
+      }
+      break;
+    }
+    case 'sub.fact': {
+      const { subtrahends, differences, minuendMax, crossing } = skill.params;
+      for (const s of range(subtrahends)) {
+        for (const d of range(differences)) {
+          if (s + d <= minuendMax && meets(crossing, subCrossesTen(s + d, s))) {
+            items.add(subFactId(s + d, s));
+          }
+        }
+      }
+      break;
+    }
+    case 'add.missing': {
+      const { known, missing, sumMax } = skill.params;
+      for (const k of range(known)) {
+        for (const m of range(missing)) if (k + m <= sumMax) items.add(subFactId(k + m, k));
+      }
+      break;
+    }
+    case 'addsub.2d': {
+      const { operators, shapes, twoDigit, crossing, resultMax } = skill.params;
+      for (const shape of shapes) {
+        const { first, second } = shapeOperands(shape, twoDigit);
+        for (const a of first) {
+          for (const b of second) {
+            if (operators.includes('add') && a + b <= resultMax) {
+              const carries = addCrossesTen(a, b);
+              if (meets(crossing, carries)) {
+                items.add(bucketId('add2d', `${shape}-${carries ? 'carry' : 'nocarry'}`));
+              }
+            }
+            if (operators.includes('sub') && a <= resultMax && a >= b) {
+              const borrows = a % 10 < b % 10;
+              if (meets(crossing, borrows)) {
+                items.add(bucketId('sub2d', `${shape}-${borrows ? 'borrow' : 'noborrow'}`));
+              }
+            }
+          }
+        }
+      }
+      break;
+    }
   }
   return [...items].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }

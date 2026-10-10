@@ -17,6 +17,7 @@ import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import { dataHash } from '@aegis/runtime';
 import type { ContentPack, RuntimeSnapshot } from '@aegis/runtime';
+import { migrateSnapshot } from '../../src/rules/contract';
 import type { ContentData, GameView, ProfileState } from '../../src/rules/contract';
 import { Player, loadPack, root } from '../traces/support';
 import type { Style } from '../traces/support';
@@ -27,9 +28,11 @@ vi.setConfig({ testTimeout: 300_000 });
 /** Content 1.2.0: archived once a later revision ships, the current pack until then. */
 const ARCHIVED = join('content', 'history', '1.2.0.json');
 const saved = existsSync(join(root, ARCHIVED)) ? loadPack(ARCHIVED) : loadPack();
-const save = JSON.parse(
-  readFileSync(join(root, 'test', 'migration', 'fixtures', 'effort-save.json'), 'utf8'),
-) as RuntimeSnapshot;
+const save = migrateSnapshot(
+  JSON.parse(
+    readFileSync(join(root, 'test', 'migration', 'fixtures', 'effort-save.json'), 'utf8'),
+  ) as RuntimeSnapshot,
+);
 
 /** The pack the save moves to: the current one once it has the effort path, else 1.2.0 with it. */
 function next(): ContentPack<ContentData> {

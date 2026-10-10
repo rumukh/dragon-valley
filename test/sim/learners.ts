@@ -13,7 +13,8 @@ import type { Prng } from '@aegis/core';
 import { parseItemId } from '../../src/rules/contract';
 import type { ProblemRoundView } from '../../src/rules/contract';
 
-export type LearnerName = 'perfect' | 'average' | 'struggling' | 'slow';
+export type LearnerName =
+  'perfect' | 'average' | 'struggling' | 'slow' | 'first-grader' | 'second-grader';
 
 /** Thinking time (ms) by how well the fact comes to mind: fluent, steady, unsure. */
 export interface Pace {
@@ -64,6 +65,8 @@ export function knowledgeKey(item: string): string {
     return `x:${Math.min(parsed.a, parsed.b)}x${Math.max(parsed.a, parsed.b)}`;
   }
   if (parsed?.kind === 'div') return `d:${parsed.divisor}x${parsed.quotient}`;
+  if (parsed?.kind === 'add')
+    return `a:${Math.min(parsed.a, parsed.b)}+${Math.max(parsed.a, parsed.b)}`;
   return item;
 }
 
@@ -91,6 +94,31 @@ export function priorOf(key: string, p: Priors): number {
 }
 
 const weekdays = (day: number) => day % 7 !== 5 && day % 7 !== 6;
+
+/** How well a younger child knows each kind of knowledge on the first day, 0-100. */
+export interface GradePriors {
+  /** Addition and subtraction facts within 10 (`add:3+4`, `sub:7-3`). */
+  withinTen: number;
+  /** Facts crossing ten (`add:8+5`, `sub:13-6`). */
+  crossing: number;
+  /** Counting, comparing and place value (`count:`, `ncompare:`, `place:`). */
+  numbers: number;
+  /** Two-digit addition and subtraction (`add2d:`, `sub2d:`). */
+  twoDigit: number;
+  /** Multiplication and everything else (taught later). */
+  other: number;
+}
+
+/** A younger child's prior for a knowledge key (`knowledgeKey`). */
+export function gradePriorOf(key: string, p: GradePriors): number {
+  const add = /^a:(\d+)\+(\d+)$/.exec(key);
+  if (add) return Number(add[1]) + Number(add[2]) > 10 ? p.crossing : p.withinTen;
+  const sub = /^sub:(\d+)-(\d+)$/.exec(key);
+  if (sub) return Number(sub[1]) > 10 ? p.crossing : p.withinTen;
+  if (/^(count|ncompare|place):/.test(key)) return p.numbers;
+  if (/^(add2d|sub2d):/.test(key)) return p.twoDigit;
+  return p.other;
+}
 
 /**
  * The four children. Their priors model a child starting 3rd grade (docs/curriculum.md §1: the
@@ -187,6 +215,45 @@ export const LEARNERS: Readonly<Record<LearnerName, LearnerProfile>> = {
     clumsy: false,
     answersPerDay: 35,
     readingMsPerWord: 900,
+    playsOn: weekdays,
+  },
+  /**
+   * A child starting 1st grade (docs/curriculum.md §7): counts and compares small numbers, knows
+   * a few sums within 10, no crossing ten yet. Does not read yet (a parent reads the stories),
+   * so is slow on every answer, and plays four days a week in short sessions.
+   */
+  'first-grader': {
+    name: 'first-grader',
+    prior: (key) =>
+      gradePriorOf(key, { withinTen: 35, crossing: 5, numbers: 60, twoDigit: 0, other: 0 }),
+    gain: 30,
+    forget: 5,
+    choice: { fluent: 3500, steady: 6500, unsure: 10000 },
+    keypad: { fluent: 4000, steady: 7500, unsure: 12000 },
+    typingMs: 900,
+    perfect: false,
+    clumsy: true,
+    answersPerDay: 25,
+    readingMsPerWord: 1500,
+    playsOn: (day) => day % 7 !== 2 && weekdays(day),
+  },
+  /**
+   * A child starting 2nd grade: 1st-grade facts within 10 are review, crossing ten is shaky,
+   * numbers to 100 and two-digit sums are new.
+   */
+  'second-grader': {
+    name: 'second-grader',
+    prior: (key) =>
+      gradePriorOf(key, { withinTen: 85, crossing: 50, numbers: 70, twoDigit: 10, other: 5 }),
+    gain: 35,
+    forget: 4,
+    choice: { fluent: 2500, steady: 5000, unsure: 8500 },
+    keypad: { fluent: 2500, steady: 5500, unsure: 10000 },
+    typingMs: 700,
+    perfect: false,
+    clumsy: false,
+    answersPerDay: 35,
+    readingMsPerWord: 1000,
     playsOn: weekdays,
   },
 };

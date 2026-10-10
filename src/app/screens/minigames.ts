@@ -1,7 +1,7 @@
 /**
  * Minigame rounds on the rules' typed boards (`MinigameRoundView.current`, docs/contract.md
- * §11.1): Memory Match, Number Trail, Egg Grid and Fact Family Nest here, Sharing Feast and
- * Golem Orders in `boards/`. Every move goes through the
+ * §11.1): Memory Match, Number Trail, Egg Grid and Fact Family Nest here, Sharing Feast, Golem
+ * Orders, Ten Frame and Bundle Sticks in `boards/`. Every move goes through the
  * command controller with the board revision it was made against; the screen redraws from the
  * view after each commit, cheers when a board is done (`minigame.completed`; the next board
  * replaces it in the same commit), and moves on to the results once the round is over. Boards
@@ -32,6 +32,7 @@ import { createMoveQueue } from '../controller/moves';
 import type { BoardContext, BoardOf, BoardPainter } from './boards/board';
 import { sharingFeast } from './boards/feast';
 import { golemOrders } from './boards/golem';
+import { bundleSticks, tenFrame } from './boards/young';
 import { createSaveStatus, topBar } from './common';
 import { faceElement } from './problem-view';
 import { backdrop } from './scene';
@@ -157,7 +158,9 @@ function numberTrail(context: BoardContext): BoardPainter {
         ? t('trail.notYet')
         : selected
           ? t('trail.where')
-          : t('trail.goal', { step: board.step }),
+          : board.direction === 'down'
+            ? t('trail.goalDown', { step: board.step })
+            : t('trail.goal', { step: board.step }),
     );
     trail.replaceChildren(
       ...board.path.map((position, index) => {
@@ -568,6 +571,8 @@ const PAINTERS: {
   'fact-family': factFamily,
   'sharing-feast': sharingFeast,
   'golem-orders': golemOrders,
+  'ten-frame': tenFrame,
+  'bundle-sticks': bundleSticks,
 };
 
 export function minigameScreen(app: App, active: ActiveKeeper): Screen {

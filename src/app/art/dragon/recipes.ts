@@ -27,6 +27,9 @@ import boulder from '../../../../assets/art/dragons/boulder.json';
 import clockwork from '../../../../assets/art/dragons/clockwork.json';
 import sevenHeaded from '../../../../assets/art/dragons/seven-headed.json';
 import glimmer from '../../../../assets/art/dragons/glimmer.json';
+import dot from '../../../../assets/art/dragons/dot.json';
+import hop from '../../../../assets/art/dragons/hop.json';
+import nibble from '../../../../assets/art/dragons/nibble.json';
 
 const HORNS: readonly HornStyle[] = [
   'curved',
@@ -39,7 +42,16 @@ const HORNS: readonly HornStyle[] = [
   'branch',
   'none',
 ];
-const EARS: readonly EarStyle[] = ['frill', 'fin', 'leaf', 'petal', 'cloud', 'shell', 'none'];
+const EARS: readonly EarStyle[] = [
+  'frill',
+  'fin',
+  'leaf',
+  'petal',
+  'cloud',
+  'shell',
+  'round',
+  'none',
+];
 const WINGS: readonly WingStyle[] = [
   'bat',
   'cloud',
@@ -93,6 +105,10 @@ const MARKINGS: readonly MarkingStyle[] = [
   'gears',
   'freckles',
   'scales',
+  'counting-dots',
+  'polka-dots',
+  'plus-belly',
+  'minus-belly',
 ];
 const FEATURES: readonly FeatureStyle[] = [
   'reflection',
@@ -108,6 +124,9 @@ const FEATURES: readonly FeatureStyle[] = [
   'shawl',
   'sparkle-cheeks',
   'rock-body',
+  'number-line',
+  'berry-row',
+  'buck-teeth',
 ];
 const EGGS: readonly EggPattern[] = [
   'clouds',
@@ -124,6 +143,9 @@ const EGGS: readonly EggPattern[] = [
   'scallops',
   'speckles',
   'gears',
+  'polka',
+  'hops',
+  'berries',
   'spots',
 ];
 
@@ -298,6 +320,9 @@ const RAW: readonly unknown[] = [
   clockwork,
   sevenHeaded,
   glimmer,
+  dot,
+  hop,
+  nibble,
 ];
 
 /** All built-in recipes, validated once at module load. */

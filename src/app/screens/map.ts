@@ -15,7 +15,7 @@ import type { Hotspot } from '@aegis/browser/ui';
 import type { LevelCard, RegionView } from '../../rules/contract';
 import { taken } from '../controller/commands';
 import { findLevel, findRegion } from '../game/view';
-import { levelPositions, loadValleyMap } from '../game/map';
+import { levelPositions, loadMapSheets, loadValleyMap, sheetOf } from '../game/map';
 import type { MapPoint, ValleyMap } from '../game/map';
 import type { MessageKey } from '../i18n/messages';
 import { PALETTE } from '../art/palette';
@@ -97,7 +97,7 @@ function mapPicture(map: ValleyMap, camera: Camera, className: string): HTMLElem
   const image = h('img', {
     className: `${className}__image`,
     attributes: {
-      src: backgroundUrl('valley-map'),
+      src: backgroundUrl(map.background),
       alt: '',
       decoding: 'async',
       draggable: 'false',
@@ -113,14 +113,39 @@ function mapPicture(map: ValleyMap, camera: Camera, className: string): HTMLElem
   return frame;
 }
 
-export function mapScreen(app: App, keeperId: string): ScreenEntry {
+/** Sheet names; literal keys, so the catalog test sees them used. */
+const SHEET_KEYS: Readonly<Record<string, MessageKey>> = {
+  'lower-valley-map': 'map.sheet.lower-valley-map',
+  'valley-map': 'map.sheet.valley-map',
+};
+
+/**
+ * The sheet the map opens on: the one of the glowing level (docs/design.md §12.5), else the
+ * valley's.
+ */
+function openingSheet(sheets: readonly ValleyMap[], regions: readonly RegionView[]): ValleyMap {
+  const glowing = regions.find((region) => region.levels.some((level) => level.glowing));
+  return (
+    (glowing ? sheetOf(sheets, glowing.id) : null) ??
+    sheets.find((sheet) => sheet.background === 'valley-map') ??
+    sheets[sheets.length - 1]!
+  );
+}
+
+export function mapScreen(app: App, keeperId: string, sheetId?: string): ScreenEntry {
   return {
-    key: `map:${keeperId}`,
+    key: sheetId ? `map:${keeperId}:${sheetId}` : `map:${keeperId}`,
     async build() {
       const t = app.kit.t;
       const active = await app.openKeeper(keeperId);
-      const map = await loadValleyMap(app.env.baseUrl);
       const view = active.game.view();
+      const sheets = await loadMapSheets(
+        app.env.baseUrl,
+        view.hub.regions.map((region) => region.id),
+      );
+      const map =
+        sheets.find((sheet) => sheet.background === sheetId) ??
+        openingSheet(sheets, view.hub.regions);
       const saveStatus = createSaveStatus(app, active);
       const coins = createCoinCounter(app.kit, view.coins);
       const camera: Camera = { x: 0, y: 0, ...map.logical };
@@ -228,15 +253,50 @@ export function mapScreen(app: App, keeperId: string): ScreenEntry {
         if (hit) void activate(hit).catch(app.kit.onError);
       });
       const heading = h('h1', { className: 'dv-map__title', text: t('map.heading') });
+      // The road crosses from one sheet to the next: one button per sheet, the shown one pressed.
+      const sheetNav =
+        sheets.length > 1
+          ? [
+              h(
+                'nav',
+                {
+                  className: 'dv-map__sheets',
+                  testId: 'map-sheets',
+                  attributes: { 'aria-label': t('map.sheets') },
+                },
+                ...sheets.map((sheet) => {
+                  const button = candyButton({
+                    label: t(SHEET_KEYS[sheet.background] ?? 'map.sheet.valley-map'),
+                    icon: 'map',
+                    variant: sheet === map ? 'primary' : 'paper',
+                    size: 'small',
+                    testId: `map-sheet-${sheet.background}`,
+                    onPress: () =>
+                      sheet === map
+                        ? undefined
+                        : app.router.replace(app.screens.map(keeperId, sheet.background)),
+                    onError: app.kit.onError,
+                  });
+                  if (sheet === map) button.setAttribute('aria-current', 'true');
+                  return button;
+                }),
+              ),
+            ]
+          : [];
       const element = h(
         'main',
-        { className: 'dv-map-screen', testId: 'screen-map' },
+        {
+          className: 'dv-map-screen',
+          testId: 'screen-map',
+          dataset: { sheet: map.background },
+        },
         topBar({
           back: { label: t('map.back'), testId: 'map-back', onPress: () => app.router.back() },
           title: heading,
           tools: [coins.element, saveStatus.element],
           onError: app.kit.onError,
         }),
+        ...sheetNav,
         area,
         h('p', { className: 'dv-note', text: t('map.asleep') }),
       );
@@ -271,8 +331,12 @@ export function regionScreen(app: App, keeperId: string, regionId: string): Scre
       const t = app.kit.t;
       const text = app.text;
       const active = await app.openKeeper(keeperId);
-      const map = await loadValleyMap(app.env.baseUrl);
       const view = active.game.view();
+      const sheets = await loadMapSheets(
+        app.env.baseUrl,
+        view.hub.regions.map((candidate) => candidate.id),
+      );
+      const map = sheetOf(sheets, regionId) ?? (await loadValleyMap(app.env.baseUrl));
       const region = findRegion(view, regionId);
       const layout = map.regions[regionId];
       const spot = map.hotspots.find((candidate) => candidate.id === regionId);

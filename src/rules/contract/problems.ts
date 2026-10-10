@@ -13,7 +13,7 @@ import { failure, schema, success } from '@aegis/runtime';
 import type { Outcome, Schema } from '@aegis/runtime';
 import { OPERATORS, RELATIONS, TERMS } from './kinds';
 import type { Operator, Relation, Term } from './kinds';
-import { catalogKey, int, lazy, nullable, oneOf } from './schema';
+import { catalogKey, int, lazy, nullable, objectWithOptional, oneOf } from './schema';
 import { TABLE_MAX, TABLE_MIN } from './ids';
 
 /** Largest number any problem may show or expect. Keeps every value a small safe integer. */
@@ -189,11 +189,24 @@ export function solveBlank(expr: Expr, target: number): number | null {
 // ---------------------------------------------------------------------------------------------
 // Problems
 
+/**
+ * A picture the shell draws with an equation (1st and 2nd grade):
+ * - `dots`: `count` dots to count (`num.count`, `? = 7`). The known side of the equation is the
+ *   answer, so the shell **never shows or reads it aloud**; the child sees only the dots and the
+ *   blank.
+ * - `sticks`: `tens` bundles of ten sticks and `ones` loose sticks (`num.place`, `47 = ? · 10 + 7`);
+ *   the equation is shown and read as usual.
+ */
+export type ProblemPicture =
+  { kind: 'dots'; count: number } | { kind: 'sticks'; tens: number; ones: number };
+
 /** `left = right` with exactly one blank on either side: `7 · 8 = ?`, `? · 6 = 42`, `(2 + 3) · 4 = ?`. */
 export interface EquationProblem {
   kind: 'equation';
   left: Expr;
   right: Expr;
+  /** Optional picture (see `ProblemPicture`); absent for every 3rd-grade problem. */
+  picture?: ProblemPicture;
 }
 /** Division with remainder, answered with quotient and remainder: `23 : 5 = ? r ?`. */
 export interface DivRemProblem {
@@ -237,11 +250,15 @@ export interface TermProblem {
 }
 export type Problem = EquationProblem | DivRemProblem | CompareProblem | WordProblem | TermProblem;
 
-const equationSchema: Schema<EquationProblem> = schema.object({
-  kind: schema.literal('equation'),
-  left: exprSchema,
-  right: exprSchema,
-});
+const pictureSchema: Schema<ProblemPicture> = schema.union(
+  schema.object({ kind: schema.literal('dots'), count: int(0, 100) }),
+  schema.object({ kind: schema.literal('sticks'), tens: int(0, 10), ones: int(0, 9) }),
+);
+
+const equationSchema: Schema<EquationProblem> = objectWithOptional(
+  { kind: schema.literal('equation'), left: exprSchema, right: exprSchema },
+  { picture: pictureSchema },
+) as Schema<EquationProblem>;
 const divRemSchema: Schema<DivRemProblem> = schema.object({
   kind: schema.literal('divrem'),
   dividend: problemNumber,
@@ -405,20 +422,30 @@ export function expectedAnswer(
  *   `mul:8x7` are distinct items that share partial credit.
  * - `div:P:D`: the fact P : D = Q with D in 1..10 and Q in 0..10. 110 items. A missing-factor
  *   problem `? · 6 = 42` practises `div:42:6`.
+ * - `add:A+B`: the addition fact A + B as presented (A, B in 0..10). 121 items; `add:3+5` and
+ *   `add:5+3` are distinct items that share partial credit, like `mul:`.
+ * - `sub:M-S`: the subtraction fact M - S = D with S in 0..10 and D in 0..10 (so M in 0..20).
+ *   121 items, the mirror of `add:`. A missing-addend problem `7 + ? = 10` practises `sub:10-7`.
  * - `<family>:<bucket>`: open-ended skills grouped into buckets, e.g. `rem:d7` (remainder,
  *   divisor 7), `mul2d1d:carry`, `div2d1d:regroup`, `order:brackets`, `word:times-fewer`,
- *   `terms:quotient`. The family is never `mul` or `div`.
+ *   `terms:quotient`, `count:0-5`, `place:tens`, `add2d:2d1d-carry`. The family is never `mul`,
+ *   `div`, `add` or `sub`.
  *
  * The item is what is retrieved; presentation (direct, missing factor, word problem, choice or
  * keypad) is a property of the problem, not of the item.
  */
 export const MUL_FACT_PATTERN = /^mul:(\d|10)x(\d|10)$/;
 export const DIV_FACT_PATTERN = /^div:(\d{1,3}):([1-9]|10)$/;
-export const BUCKET_PATTERN = /^(?!mul:|div:)([a-z][a-z0-9]*):([a-z0-9]+(?:-[a-z0-9]+)*)$/;
+export const ADD_FACT_PATTERN = /^add:(\d|10)\+(\d|10)$/;
+export const SUB_FACT_PATTERN = /^sub:(\d{1,2})-(\d|10)$/;
+export const BUCKET_PATTERN =
+  /^(?!mul:|div:|add:|sub:)([a-z][a-z0-9]*):([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 
 export type ParsedItem =
   | { kind: 'mul'; a: number; b: number; product: number }
   | { kind: 'div'; dividend: number; divisor: number; quotient: number }
+  | { kind: 'add'; a: number; b: number; sum: number }
+  | { kind: 'sub'; minuend: number; subtrahend: number; difference: number }
   | { kind: 'bucket'; family: string; bucket: string };
 
 function inTable(value: number): boolean {
@@ -438,6 +465,26 @@ export function divFactId(dividend: number, divisor: number): string {
     throw new RangeError('div facts are P : D = Q with D in 1..10 and Q in 0..10');
   }
   return `div:${dividend}:${divisor}`;
+}
+
+export function addFactId(a: number, b: number): string {
+  if (!inTable(a) || !inTable(b) || !Number.isInteger(a) || !Number.isInteger(b)) {
+    throw new RangeError(`add facts use addends ${TABLE_MIN}..${TABLE_MAX}`);
+  }
+  return `add:${a}+${b}`;
+}
+
+export function subFactId(minuend: number, subtrahend: number): string {
+  const difference = minuend - subtrahend;
+  if (
+    !Number.isInteger(minuend) ||
+    !Number.isInteger(subtrahend) ||
+    !inTable(subtrahend) ||
+    !inTable(difference)
+  ) {
+    throw new RangeError('sub facts are M - S = D with S in 0..10 and D in 0..10');
+  }
+  return `sub:${minuend}-${subtrahend}`;
 }
 
 export function bucketId(family: string, bucket: string): string {
@@ -463,6 +510,21 @@ export function parseItemId(id: string): ParsedItem | null {
       ? { kind: 'div', dividend, divisor, quotient }
       : null;
   }
+  const add = ADD_FACT_PATTERN.exec(id);
+  if (add) {
+    const a = Number(add[1]);
+    const b = Number(add[2]);
+    return { kind: 'add', a, b, sum: a + b };
+  }
+  const sub = SUB_FACT_PATTERN.exec(id);
+  if (sub) {
+    const minuend = Number(sub[1]);
+    const subtrahend = Number(sub[2]);
+    const difference = minuend - subtrahend;
+    return inTable(difference) && String(minuend) === sub[1]
+      ? { kind: 'sub', minuend, subtrahend, difference }
+      : null;
+  }
   const bucket = BUCKET_PATTERN.exec(id);
   return bucket ? { kind: 'bucket', family: bucket[1]!, bucket: bucket[2]! } : null;
 }
@@ -471,10 +533,15 @@ export function isItemId(id: string): boolean {
   return parseItemId(id) !== null;
 }
 
-/** The commuted twin of a multiplication fact (`mul:7x8` -> `mul:8x7`), or null. */
+/**
+ * The commuted twin of a multiplication or addition fact (`mul:7x8` -> `mul:8x7`,
+ * `add:3+5` -> `add:5+3`), or null.
+ */
 export function commutedId(id: string): string | null {
   const parsed = parseItemId(id);
-  return parsed?.kind === 'mul' && parsed.a !== parsed.b ? mulFactId(parsed.b, parsed.a) : null;
+  if (parsed?.kind === 'mul' && parsed.a !== parsed.b) return mulFactId(parsed.b, parsed.a);
+  if (parsed?.kind === 'add' && parsed.a !== parsed.b) return addFactId(parsed.b, parsed.a);
+  return null;
 }
 
 /** Every small-table multiplication fact in window order (row A, column B). */
@@ -497,12 +564,34 @@ export function allDivFactIds(): string[] {
   return ids;
 }
 
+/** Every addition fact in window order (row A, column B). */
+export function allAddFactIds(): string[] {
+  const ids: string[] = [];
+  for (let a = TABLE_MIN; a <= TABLE_MAX; a++) {
+    for (let b = TABLE_MIN; b <= TABLE_MAX; b++) ids.push(addFactId(a, b));
+  }
+  return ids;
+}
+
+/** Every subtraction fact, by subtrahend then difference. */
+export function allSubFactIds(): string[] {
+  const ids: string[] = [];
+  for (let subtrahend = TABLE_MIN; subtrahend <= TABLE_MAX; subtrahend++) {
+    for (let difference = TABLE_MIN; difference <= TABLE_MAX; difference++) {
+      ids.push(subFactId(subtrahend + difference, subtrahend));
+    }
+  }
+  return ids;
+}
+
 export const itemIdSchema: Schema<string> = {
   parse(value: unknown, path = '') {
     return typeof value === 'string' && isItemId(value)
       ? success(value)
-      : failure('invalid-data', 'Expected an item ID (mul:AxB, div:P:D or family:bucket).', {
-          path,
-        });
+      : failure(
+          'invalid-data',
+          'Expected an item ID (mul:AxB, div:P:D, add:A+B, sub:M-S or family:bucket).',
+          { path },
+        );
   },
 };

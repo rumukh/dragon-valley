@@ -104,7 +104,7 @@ describe('the placement check as played', () => {
       'glasses-square',
     ]);
     expect(
-      player.view().hub.regions[1]!.unlocked,
+      player.view().hub.regions.find((r) => r.id === 'whispering-woods')!.unlocked,
       'placed Whispering Woods lessons wait for the Bridge Troll',
     ).toBe(false);
     await player.act({ type: 'endRound', reason: 'done' });

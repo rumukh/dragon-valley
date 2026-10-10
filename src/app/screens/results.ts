@@ -33,6 +33,7 @@ const CELEBRATED = [
   'egg.received',
   'sticker.earned',
   'region.unlocked',
+  'grade.completed',
 ] as const;
 
 type Celebrated = Extract<GameEvent, { type: (typeof CELEBRATED)[number] }>;
@@ -196,6 +197,22 @@ export function resultsScreen(app: App, active: ActiveKeeper): Screen {
           h('p', {
             className: 'dv-celebrate',
             text: t('results.region', { name: text(region.titleKey) }),
+          }),
+        );
+        break;
+      }
+      case 'grade.completed': {
+        // "1st grade done!": the grade's certificate is a page of its own.
+        const grade = event.data.grade;
+        if (grade === 3) break;
+        celebrations.push(
+          candyButton({
+            label: t(grade === 1 ? 'hub.gradeDone1' : 'hub.gradeDone2'),
+            icon: 'sparkle',
+            variant: 'sun',
+            testId: 'celebrate-grade',
+            onPress: () => app.router.push(app.screens.gradeDone(keeperId, grade)),
+            onError: app.kit.onError,
           }),
         );
         break;

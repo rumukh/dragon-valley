@@ -37,6 +37,48 @@ async function gateWith(id: string, words: number) {
   return validateContentTree({ root });
 }
 
+describe('the content gate on sentences for grades 1-2', () => {
+  /** Give catalog key `key` the text `text` and run the gate on the repository's pack. */
+  async function gateWithText(key: string, text: string) {
+    const file = join(root, 'content', 'catalogs', 'en.content.json');
+    const original = readFileSync(
+      join(repository, 'content', 'catalogs', 'en.content.json'),
+      'utf8',
+    );
+    const catalog = JSON.parse(original);
+    const strings = catalog.strings ?? catalog;
+    strings[key] = text;
+    writeFileSync(file, `${JSON.stringify(catalog, null, 2)}\n`);
+    writeFileSync(
+      join(root, 'content', 'dragon-valley.content.json'),
+      readFileSync(join(repository, 'content', 'dragon-valley.content.json'), 'utf8'),
+    );
+    try {
+      return await validateContentTree({ root });
+    } finally {
+      writeFileSync(file, original);
+    }
+  }
+
+  it('fails a seven-word sentence in a grade 1 region beat', async () => {
+    const result = await gateWithText(
+      'story.wisps-dance.1',
+      'The little wisps dance and giggle together!',
+    );
+    expect(result.errors).toEqual([
+      'story.wisps-dance.1: "The little wisps dance and giggle together" has 7 words (max 6)',
+    ]);
+  });
+
+  it('keeps the longer limit for 3rd-grade beats', async () => {
+    const result = await gateWithText(
+      'story.finale.4',
+      'Thank you, Dragon Keeper, the whole valley is warm again.',
+    );
+    expect(result.errors).toEqual([]);
+  });
+});
+
 describe('the content gate on story word counts', () => {
   it('passes a count that is the length of the story', async () => {
     // "{name} finds {nests} nests. Each nest has {eggs} eggs. How many eggs are there?"

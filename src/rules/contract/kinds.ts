@@ -25,6 +25,8 @@ export const MINIGAME_ACTIVITY_KINDS = [
   'fact-family',
   'sharing-feast',
   'golem-orders',
+  'ten-frame',
+  'bundle-sticks',
 ] as const;
 export const ACTIVITY_KINDS = [...PROBLEM_ACTIVITY_KINDS, ...MINIGAME_ACTIVITY_KINDS] as const;
 export type ProblemActivityKind = (typeof PROBLEM_ACTIVITY_KINDS)[number];
@@ -56,9 +58,27 @@ export const MINIGAME_KIND_BY_ACTIVITY = {
   'fact-family': 'dv.fact-family',
   'sharing-feast': 'dv.sharing-feast',
   'golem-orders': 'dv.golem-orders',
+  'ten-frame': 'dv.ten-frame',
+  'bundle-sticks': 'dv.place-value',
 } as const satisfies Record<MinigameActivityKind, string>;
 export type NarrativeMinigameKind =
   (typeof MINIGAME_KIND_BY_ACTIVITY)[keyof typeof MINIGAME_KIND_BY_ACTIVITY];
+
+/**
+ * Minigame activities reserved for grades 1-2 before their rules exist. The G2 boards moved Ten
+ * Frame and Bundle Sticks into the playable lists; keep this export for older importers.
+ */
+export const RESERVED_MINIGAME_KIND_BY_ACTIVITY = {} as const satisfies Record<string, string>;
+export type ReservedMinigameActivityKind = keyof typeof RESERVED_MINIGAME_KIND_BY_ACTIVITY;
+
+/**
+ * School grades the valley serves (docs/grades-plan.md). A profile's `settings.grade` picks where
+ * the child starts and what the Daily Adventure suggests; content regions belong to one grade.
+ */
+export const GRADES = [1, 2, 3] as const;
+export type Grade = (typeof GRADES)[number];
+/** The grade of a save or region that does not name one: the valley as shipped is 3rd grade. */
+export const DEFAULT_GRADE: Grade = 3;
 
 /**
  * How answers are entered. `auto` resolves per problem: multiple choice while the item is new
@@ -101,6 +121,14 @@ export const GENERATOR_IDS = [
   'compare',
   'word',
   'terms',
+  // Grades 1-2 (docs/curriculum.md §7).
+  'num.count',
+  'num.compare',
+  'num.place',
+  'add.fact',
+  'sub.fact',
+  'add.missing',
+  'addsub.2d',
 ] as const;
 export type GeneratorId = (typeof GENERATOR_IDS)[number];
 
@@ -133,6 +161,9 @@ export const STRANDS = [
   'comparison',
   'word-problems',
   'terminology',
+  // Grades 1-2.
+  'numbers',
+  'addition-subtraction',
 ] as const;
 export type Strand = (typeof STRANDS)[number];
 
@@ -148,6 +179,9 @@ export const WORD_FAMILIES = [
   'fewer-than',
   'leftover',
   'two-step',
+  // Grades 1-2: additive change stories (Petr has 5 apples and gets 3 more / gives 2 away).
+  'add-to',
+  'take-from',
 ] as const;
 export type WordFamily = (typeof WORD_FAMILIES)[number];
 

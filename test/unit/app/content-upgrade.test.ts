@@ -8,7 +8,7 @@
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { exportSave, MemorySaveStorage } from '@aegis/browser/save';
+import { MemorySaveStorage } from '@aegis/browser/save';
 import { parseContentJson, requireValue } from '@aegis/runtime';
 import type { ContentPack, RuntimeSnapshot } from '@aegis/runtime';
 import { describe, expect, it, vi } from 'vitest';
@@ -209,25 +209,24 @@ describe('a save of the deployed Region 1 slice on the v1 content', () => {
 
   async function storeSliceSave(storage: MemorySaveStorage, profileId: string): Promise<void> {
     const policy = gamePolicy(dragonValleyGame(slice), profileId);
-    const payload = exportSave(
-      {
-        format: 'aegis.save',
-        formatVersion: 1,
-        gameId: GAME_ID,
-        profileId,
-        contentRevision: snapshot.content.revision,
-        schemaVersion: snapshot.stateVersion,
-        engine: {
-          id: ENGINE_ID,
-          snapshotVersion: ENGINE_SNAPSHOT_VERSION,
-          revision: ENGINE_REVISION,
-        },
-        revision: 1,
-        state: snapshot,
-        resume: null,
+    // A record as the slice build stored it: state version 1, older than the policy's, so it is
+    // written as is (exportSave writes current versions only) and migrated on load.
+    const payload = JSON.stringify({
+      format: 'aegis.save',
+      formatVersion: 1,
+      gameId: GAME_ID,
+      profileId,
+      contentRevision: snapshot.content.revision,
+      schemaVersion: snapshot.stateVersion,
+      engine: {
+        id: ENGINE_ID,
+        snapshotVersion: ENGINE_SNAPSHOT_VERSION,
+        revision: ENGINE_REVISION,
       },
-      policy,
-    );
+      revision: 1,
+      state: snapshot,
+      resume: null,
+    });
     await storage.compareAndSwap(policy, 0, { revision: 1, payload });
   }
 
@@ -270,10 +269,12 @@ describe('a save of the deployed Region 1 slice on the v1 content', () => {
     expect(session.content().revision).toBe('1.0.0');
     expect(session.host.getView().hub.regions.map((region) => region.id)).toEqual(['sunny-meadow']);
     const progress = session.host.inspect().state;
+    expect(snapshot.stateVersion, 'the slice saved state version 1').toBe(1);
+    expect(progress.settings.grade, 'a save from before grades is a 3rd grader').toBe(3);
 
     expect(await session.activateLatestContent()).toBe(true);
     expect(session.content()).toBe(v1);
-    expect(session.host.getView().hub.regions).toHaveLength(9);
+    expect(session.host.getView().hub.regions).toHaveLength(10);
     expect(session.host.inspect().state, 'every bit of progress carried forward').toEqual(progress);
     expect(session.indicator()).toEqual({ kind: 'saved' });
     await session.close();
@@ -285,7 +286,7 @@ describe('a save of the deployed Region 1 slice on the v1 content', () => {
       seed: profileSeed('profile-1'),
     });
     expect(fetched, 'the archived pack is fetched once per page').toHaveLength(1);
-    expect(reopened.host.getView().hub.regions).toHaveLength(9);
+    expect(reopened.host.getView().hub.regions).toHaveLength(10);
     await reopened.close();
   });
 

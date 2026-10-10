@@ -30,10 +30,12 @@ const MB = 1_000_000;
 
 /** Upper bounds, in bytes; today's values are in docs/qa/performance.md. */
 const SIZE_BUDGETS = {
-  script: { built: 750 * KB, gzipped: 250 * KB },
+  // Raised from 750 / 250 KB for grades 1-3 (rules, art and screens for the young players).
+  script: { built: 800 * KB, gzipped: 260 * KB },
   style: { built: 100 * KB, gzipped: 20 * KB },
   /** The offline pack without its audio (S5 holds the audio to 8 MB). */
-  packWithoutAudio: 2.5 * MB,
+  // Raised from 2.5 MB for grades 1-3 (the Lower Valley map sheet and the young screens).
+  packWithoutAudio: 3 * MB,
   pack: 10.5 * MB,
   /** Bytes a first visit downloads before its first screen is ready, uncompressed. */
   firstScreen: 1.3 * MB,

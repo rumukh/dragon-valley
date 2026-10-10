@@ -2,7 +2,7 @@
   "regions": [
     {
       "id": "pearl-island",
-      "order": 10,
+      "order": 15,
       "titleKey": "region.pearl-island.name",
       "unlock": { "after": ["sunny-meadow.1"] },
       "boss": null,

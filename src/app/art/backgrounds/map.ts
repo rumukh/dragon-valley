@@ -125,7 +125,7 @@ const AREAS: Record<string, [number, number, number, number]> = {
   'dragon-castle': [860, 30, 360, 230],
 };
 
-function sampleRoad(points: readonly Pt[], perSeg = 16): Pt[] {
+export function sampleRoad(points: readonly Pt[], perSeg = 16): Pt[] {
   const out: Pt[] = [];
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[Math.max(0, i - 1)]!;
@@ -160,9 +160,15 @@ export interface MapRegion {
   path: Array<[number, number]>;
 }
 
+/**
+ * One map sheet's layout. The valley is drawn on two sheets travelled in order: the Lower Valley
+ * (grades 1-2, `lower-valley-map`) and then the valley map (grade 3, `valley-map`). `next`/`exit`
+ * name the following sheet and where the road leaves this one; `previous`/`entry` name the sheet
+ * before and where the road arrives.
+ */
 export interface MapHotspots {
   schemaVersion: 1;
-  background: 'valley-map';
+  background: string;
   logical: { width: number; height: number };
   hotspots: Array<{
     id: string;
@@ -174,58 +180,82 @@ export interface MapHotspots {
   }>;
   path: Array<[number, number]>;
   regions: Record<string, MapRegion>;
+  previous?: string;
+  entry?: Pt;
+  next?: string;
+  exit?: Pt;
 }
 
-function buildHotspots(): MapHotspots {
+export interface MapSheetSpec {
+  background: string;
+  regionIds: readonly string[];
+  levels: Readonly<Record<string, number>>;
+  route: Readonly<Record<string, readonly Pt[]>>;
+  areas: Readonly<Record<string, readonly [number, number, number, number]>>;
+  /** Extra road beyond the first and last region (drawn, but without nodes). */
+  lead?: { before?: readonly Pt[]; after?: readonly Pt[] };
+  links?: Pick<MapHotspots, 'previous' | 'entry' | 'next' | 'exit'>;
+}
+
+const r10 = (p: Pt): [number, number] => [Math.round(p.x * 10) / 10, Math.round(p.y * 10) / 10];
+
+export function buildMapSheet(spec: MapSheetSpec): MapHotspots {
   const all: Pt[] = [];
   const spans: Record<string, [number, number]> = {};
-  for (const id of CANONICAL_REGION_IDS) {
+  for (const id of spec.regionIds) {
     const start = all.length;
-    all.push(...ROUTE[id]!);
+    all.push(...spec.route[id]!);
     spans[id] = [start, all.length - 1];
   }
   const regions: Record<string, MapRegion> = {};
-  for (const id of CANONICAL_REGION_IDS) {
+  for (const id of spec.regionIds) {
     const [a, b] = spans[id]!;
     const pts = all.slice(a, b + 1);
     const poly = sampleRoad(pts, 12);
     const cum = [0];
     for (let i = 1; i < poly.length; i++) cum.push(cum[i - 1]! + dist(poly[i - 1]!, poly[i]!));
     const len = cum[cum.length - 1]!;
-    const n = MAP_LEVELS[id]! + 1;
+    const n = spec.levels[id]! + 1;
     const nodes: Pt[] = [];
     for (let i = 0; i < n; i++) nodes.push(pointAt(poly, cum, (len * i) / (n - 1)));
-    const area = AREAS[id]!;
+    const area = spec.areas[id]!;
     regions[id] = {
       center: { x: area[0] + area[2] / 2, y: area[1] + area[3] / 2 },
       nodes: nodes.slice(0, n - 1),
       boss: nodes[n - 1]!,
-      path: poly
-        .filter((_, i) => i % 3 === 0 || i === poly.length - 1)
-        .map((p) => [Math.round(p.x * 10) / 10, Math.round(p.y * 10) / 10] as [number, number]),
+      path: poly.filter((_, i) => i % 3 === 0 || i === poly.length - 1).map(r10),
     };
   }
-  const road = sampleRoad(all, 10).map(
-    (p) => [Math.round(p.x * 10) / 10, Math.round(p.y * 10) / 10] as [number, number],
-  );
+  const full = [...(spec.lead?.before ?? []), ...all, ...(spec.lead?.after ?? [])];
   return {
     schemaVersion: 1,
-    background: 'valley-map',
+    background: spec.background,
     logical: { width: SW, height: SH },
-    hotspots: CANONICAL_REGION_IDS.map((id) => {
-      const [x, y, width, height] = AREAS[id]!;
+    hotspots: spec.regionIds.map((id) => {
+      const [x, y, width, height] = spec.areas[id]!;
       return { id, x, y, width, height, labelKey: `region.${id}.name` };
     }),
-    path: road,
+    path: sampleRoad(full, 10).map(r10),
     regions,
+    ...spec.links,
   };
 }
 
-export const MAP_HOTSPOTS: MapHotspots = /* @__PURE__ */ buildHotspots();
+/** The road the valley map continues from: it arrives from the Lower Valley sheet. */
+const VALLEY_ENTRY: Pt = { x: 96, y: 942 };
 
-/** Evenly spaced positions for `count` nodes along a region's trail (if content grows). */
-export function mapNodePositions(regionId: string, count: number): Pt[] {
-  const region = MAP_HOTSPOTS.regions[regionId];
+export const MAP_HOTSPOTS: MapHotspots = /* @__PURE__ */ buildMapSheet({
+  background: 'valley-map',
+  regionIds: CANONICAL_REGION_IDS,
+  levels: MAP_LEVELS,
+  route: ROUTE,
+  areas: AREAS,
+  links: { previous: 'lower-valley-map', entry: VALLEY_ENTRY },
+});
+
+/** Evenly spaced positions for `count` nodes along a region's trail on a sheet. */
+export function sheetNodePositions(sheet: MapHotspots, regionId: string, count: number): Pt[] {
+  const region = sheet.regions[regionId];
   if (!region) throw new Error(`Unknown region id: ${regionId}`);
   const poly = region.path.map(([x, y]) => ({ x, y }));
   const cum = [0];
@@ -233,6 +263,33 @@ export function mapNodePositions(regionId: string, count: number): Pt[] {
   const len = cum[cum.length - 1]!;
   if (count <= 1) return [pointAt(poly, cum, 0)];
   return Array.from({ length: count }, (_, i) => pointAt(poly, cum, (len * i) / (count - 1)));
+}
+
+/** Evenly spaced positions for `count` nodes along a region's trail (if content grows). */
+export function mapNodePositions(regionId: string, count: number): Pt[] {
+  return sheetNodePositions(MAP_HOTSPOTS, regionId, count);
+}
+
+/** The road drawn in the map style (edge, sand, dashed centre line). */
+export function mapRoad(path: ReadonlyArray<readonly [number, number]>): string {
+  const d = smoothOpenD(
+    path.map(([x, y]) => ({ x, y })),
+    1,
+  );
+  const line = { d, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' };
+  return (
+    h('path', { ...line, stroke: '#b88a52', 'stroke-width': 30 }) +
+    h('path', { ...line, stroke: '#f2d9a8', 'stroke-width': 22 }) +
+    h('path', {
+      d,
+      fill: 'none',
+      stroke: '#ffffff',
+      'stroke-width': 3,
+      'stroke-dasharray': '2 18',
+      'stroke-linecap': 'round',
+      opacity: 0.8,
+    })
+  );
 }
 
 // ------------------------------------------------------------------------------------- drawing
@@ -539,36 +596,12 @@ export function valleyMap(defs: Defs): string {
   out += rock(1120, 520, 26) + rock(560, 620, 20) + rock(1560, 980, 30);
   out += cloud(70, 60, 40) + cloud(1540, 70, 44) + cloud(720, 60, 26) + cloud(1560, 420, 30);
 
-  // the road
-  const road = smoothOpenD(
-    MAP_HOTSPOTS.path.map(([x, y]) => ({ x, y })),
-    1,
-  );
-  out += h('path', {
-    d: road,
-    fill: 'none',
-    stroke: '#b88a52',
-    'stroke-width': 30,
-    'stroke-linecap': 'round',
-    'stroke-linejoin': 'round',
-  });
-  out += h('path', {
-    d: road,
-    fill: 'none',
-    stroke: '#f2d9a8',
-    'stroke-width': 22,
-    'stroke-linecap': 'round',
-    'stroke-linejoin': 'round',
-  });
-  out += h('path', {
-    d: road,
-    fill: 'none',
-    stroke: '#ffffff',
-    'stroke-width': 3,
-    'stroke-dasharray': '2 18',
-    'stroke-linecap': 'round',
-    opacity: 0.8,
-  });
+  // the road, arriving from the Lower Valley off the bottom-left edge
+  out += mapRoad([
+    [40, 1010],
+    [VALLEY_ENTRY.x, VALLEY_ENTRY.y],
+  ]);
+  out += mapRoad(MAP_HOTSPOTS.path);
   for (let i = 0; i < 18; i++)
     out += h('path', {
       d: sparkleD(r() * SW, r() * SH, 3 + r() * 3),

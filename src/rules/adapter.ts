@@ -31,6 +31,7 @@ import {
   contentRegistration,
   dayNumber,
   gameActionSchema,
+  gradeStart,
   initialProfileState,
   isItemId,
   isoDay,
@@ -53,6 +54,8 @@ import { arenaProblem, startArena } from './progression/arena';
 import { applyGrowth } from './progression/dragons';
 import { isComplete, isPlayable } from './progression/levels';
 import { applyMinigameMove, moveProblem } from './progression/minigame-rounds';
+import { catchUpEgg } from './progression/grades';
+import { placementFor } from './progression/ladder';
 import { placementProblem, startPlacement } from './progression/placement';
 import { activeProblemRound, gradeAnswer, roundDone, serveNext } from './progression/problems';
 import { canPlay, closeRound, completeRound, startRunActivity } from './progression/rounds';
@@ -85,7 +88,9 @@ function legality(action: GameAction, read: Read): Reject | null {
   const activeRound = round !== null && round.status === 'active';
   const pendingBlocking =
     state.story.pending !== null && findBeat(data, state.story.pending)?.skippable === false;
-  if (action.type !== 'startSession' && state.day === null) {
+  // The grade may be set before the first session, so the first-session story knows it.
+  const gradeSetting = action.type === 'setSetting' && action.setting.key === 'grade';
+  if (action.type !== 'startSession' && !gradeSetting && state.day === null) {
     return reject('no-session', 'Start a session first.');
   }
   switch (action.type) {
@@ -113,7 +118,7 @@ function legality(action: GameAction, read: Read): Reject | null {
       const request = action.activity;
       const index = itemIndex(data);
       if (request.kind === 'placement') {
-        const problem = placementProblem(data, index);
+        const problem = placementProblem(state, data, index);
         return problem === null ? null : reject('locked-activity', problem);
       }
       if (request.kind === 'snack') {
@@ -211,6 +216,15 @@ function legality(action: GameAction, read: Read): Reject | null {
           ? null
           : reject('invalid-setting', 'Unknown region.');
       }
+      if (setting.key === 'grade') {
+        // The placement ladder is per grade, so the grade cannot change in the middle of it.
+        if (activeRound && round.type === 'problems' && round.placement !== null) {
+          return reject('round-active', 'Finish the placement check first.');
+        }
+        return gradeStart(data, setting.value) !== null
+          ? null
+          : reject('invalid-setting', 'The content has no regions for this grade.');
+      }
       return null;
     }
   }
@@ -251,7 +265,8 @@ function settleRound(ctx: Ctx, index: Index): void {
 function afterAnswer(ctx: Ctx): void {
   const index = indexOf(ctx);
   const round = activeProblemRound(ctx);
-  if (round && round.current === null && !roundDone(ctx.content.data, round)) serveNext(ctx, index);
+  if (round && round.current === null && !roundDone(ctx.state, ctx.content.data, round))
+    serveNext(ctx, index);
   settleRound(ctx, index);
   applyGrowth(ctx, index);
   awardStickers(ctx);
@@ -351,7 +366,9 @@ function validateState(read: Read): Outcome<void> {
     }
   }
   if (round?.type === 'problems' && round.placement !== null) {
-    if (round.placement.step > data.placement.steps.length) problems.push('placement step');
+    if (round.placement.step > placementFor(data.placement, state.settings.grade).steps.length) {
+      problems.push('placement step');
+    }
     for (const level of round.placement.placed)
       if (!known(data.levels, level)) problems.push(`placed ${level}`);
   }
@@ -403,6 +420,7 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
             startRunActivity(ctx, index, action.activity);
           } else {
             ctx.state.run = { level: action.level, next: 0, results: [] };
+            catchUpEgg(ctx, action.level);
             triggerBeats(
               ctx,
               (trigger) => trigger.kind === 'level-start' && trigger.level === action.level,
@@ -517,6 +535,7 @@ export const dragonValleyAdapter: RuntimeAdapter<ProfileState, GameAction, GameV
             if (ctx.state.daily) ctx.state.daily.goal = setting.value;
             checkDailyGoal(ctx);
           } else if (setting.key === 'arena') ctx.state.settings.arena = setting.value;
+          else if (setting.key === 'grade') ctx.state.settings.grade = setting.value;
           else ctx.state.settings.unlockAhead = [...setting.value];
         },
       }),

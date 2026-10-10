@@ -25,6 +25,14 @@
  *   ones divided separately** (`48 : 3` -> 12); only the tens (10); the zero dropped; ± 1; ± 10;
  *   `48 − 3`;
  * - missing factor `? · 6 = 42`: the answer ± 1 or ± 2; the known factor; ± 10;
+ * - small addition/subtraction facts: counting slips ±1 first, then the other operation, ±2,
+ *   reversed digits and ±10;
+ * - two-digit addition/subtraction: **carry forgotten** (`34 + 8` -> 32), **digit-wise
+ *   subtraction** (`52 - 27` -> 35), borrow/carry slips, ±1, ±10, reversed digits and the other
+ *   operation;
+ * - missing addend `7 + ? = 10`: the sum, the sum plus the known addend, slips, and the known
+ *   addend;
+ * - counting dots: `n ± 1`, `n ± 2`; place value: swapped tens/ones, the whole number, slips;
  * - order of operations: **brackets ignored** (`(2 + 3) · 4` -> 14) or **precedence ignored**,
  *   strictly left to right (`2 + 3 · 4` -> 20); brackets first, then left to right; a step left
  *   out (12); slips;
@@ -203,6 +211,104 @@ function quotientMistakes(dividend: number, divisor: number, answer: number): Mi
   };
 }
 
+function additionMistakes(a: number, b: number, answer: number): Mistakes<number> {
+  const reversed = reversedDigits(answer);
+  if (a <= 10 && b <= 10 && answer <= 20) {
+    return {
+      signature: [],
+      ranked: [
+        answer + 1,
+        answer - 1,
+        Math.abs(a - b),
+        answer + 2,
+        answer - 2,
+        ...(reversed ? [reversed] : []),
+        answer + 10,
+        answer - 10,
+      ],
+    };
+  }
+  const ones = (a % 10) + (b % 10);
+  const tensSum = tens(a) + tens(b);
+  const carryForgotten = tensSum * 10 + (ones % 10);
+  const carryAsDigits = Number(`${tensSum}${ones}`);
+  return {
+    signature: [carryForgotten],
+    ranked: [
+      carryAsDigits,
+      answer + 1,
+      answer - 1,
+      answer + 10,
+      answer - 10,
+      ...(reversed ? [reversed] : []),
+      Math.abs(a - b),
+    ],
+  };
+}
+
+function subtractionMistakes(a: number, b: number, answer: number): Mistakes<number> {
+  const reversed = reversedDigits(answer);
+  if (a <= 20 && b <= 10) {
+    return {
+      signature: [],
+      ranked: [
+        answer + 1,
+        answer - 1,
+        a + b,
+        Math.abs(b - a),
+        answer + 2,
+        answer - 2,
+        answer + 10,
+        answer - 10,
+      ],
+    };
+  }
+  const digitWise = Math.abs(tens(a) - tens(b)) * 10 + Math.abs((a % 10) - (b % 10));
+  const borrowForgotten = (tens(a) - tens(b)) * 10 + (10 + (a % 10) - (b % 10));
+  return {
+    signature: [digitWise, borrowForgotten === digitWise ? answer + 10 : borrowForgotten],
+    ranked: [
+      answer + 1,
+      answer - 1,
+      answer + 10,
+      answer - 10,
+      ...(reversed ? [reversed] : []),
+      a + b,
+    ],
+  };
+}
+
+function missingAddendMistakes(sum: number, known: number, answer: number): Mistakes<number> {
+  return {
+    signature: [],
+    ranked: [sum, sum + known, answer + 1, answer - 1, answer + 2, answer - 2, known],
+  };
+}
+
+function dotsMistakes(answer: number): Mistakes<number> {
+  return { signature: [], ranked: [answer + 1, answer - 1, answer + 2, answer - 2] };
+}
+
+function placeMistakes(
+  problem: Extract<Problem, { kind: 'equation' }>,
+  answer: number,
+): Mistakes<number> | null {
+  const picture = problem.picture?.kind === 'sticks' ? problem.picture : null;
+  if (picture === null) return null;
+  const n = picture.tens * 10 + picture.ones;
+  const swapped = picture.ones * 10 + picture.tens;
+  if (problem.right.kind === 'blank') {
+    return {
+      signature: swapped === n ? [] : [swapped],
+      ranked: [n, answer + 1, answer - 1, answer + 10, answer - 10],
+    };
+  }
+  return {
+    signature: [answer === picture.tens ? picture.ones : picture.tens],
+    ranked: [n, answer + 1, answer - 1, answer + 10, answer - 10],
+  };
+}
+
 /** Tokens with every bracket worked out first: the child does brackets, then left to right. */
 function bracketsFirst(expr: Expr): Token[] | null {
   switch (expr.kind) {
@@ -255,19 +361,25 @@ const INVERSE: Readonly<Record<Operator, Operator>> = {
   div: 'mul',
 };
 
-function storyMistakes(expr: Expr, answer: number): Mistakes<number> {
+function storyMistakes(expr: Expr, answer: number, template: string): Mistakes<number> {
   const operators = operatorsOf(expr);
   const swapped = (table: Readonly<Record<Operator, Operator>>) =>
     operators.map((operator, index) => evaluate(withOperator(expr, index, table[operator])));
   const tokens = tokensOf(expr);
-  // A one-step story also invites the arithmetic mistakes of its product or quotient.
+  // A one-step story also invites the arithmetic mistakes of its operation. Additive arithmetic is
+  // limited to the new additive change-story families so existing 3rd-grade traces stay pinned.
+  const additiveStory = template.includes('.add-to.') || template.includes('.take-from.');
   const arithmetic =
     expr.kind === 'op' && expr.left.kind === 'num' && expr.right.kind === 'num'
       ? expr.op === 'mul'
         ? productMistakes(expr.left.value, expr.right.value, answer)
         : expr.op === 'div'
           ? quotientMistakes(expr.left.value, expr.right.value, answer)
-          : null
+          : additiveStory && expr.op === 'add'
+            ? additionMistakes(expr.left.value, expr.right.value, answer)
+            : additiveStory && expr.op === 'sub'
+              ? subtractionMistakes(expr.left.value, expr.right.value, answer)
+              : null
       : null;
   return {
     signature: present(swapped(CONTRAST)),
@@ -286,27 +398,35 @@ function storyMistakes(expr: Expr, answer: number): Mistakes<number> {
 export function numberMistakes(problem: Problem, answer: number): Mistakes<number> {
   if (problem.kind === 'word') {
     return problem.model.kind === 'equation'
-      ? storyMistakes(problem.model.left, answer)
+      ? storyMistakes(problem.model.left, answer, problem.template)
       : { signature: [], ranked: slips(answer) };
   }
   if (problem.kind === 'equation') {
     const { left, right } = problem;
+    if (problem.picture?.kind === 'dots') return dotsMistakes(answer);
+    const place = placeMistakes(problem, answer);
+    if (place !== null) return place;
     if (right.kind === 'blank' && left.kind === 'op') {
       if (left.left.kind === 'num' && left.right.kind === 'num') {
         const [a, b] = [left.left.value, left.right.value];
+        if (left.op === 'add') return additionMistakes(a, b, answer);
+        if (left.op === 'sub') return subtractionMistakes(a, b, answer);
         if (left.op === 'mul') return productMistakes(a, b, answer);
         if (left.op === 'div') return quotientMistakes(a, b, answer);
       }
       return expressionMistakes(left, answer);
     }
     if (left.kind === 'op' && right.kind === 'num') {
-      // A missing factor: `? · k = p` or `k · ? = p`.
+      // A missing factor/addend: `? · k = p`, `k · ? = p`, `? + k = s` or `k + ? = s`.
       const known =
         left.left.kind === 'num'
           ? left.left.value
           : left.right.kind === 'num'
             ? left.right.value
             : null;
+      if (left.op === 'add' && known !== null) {
+        return missingAddendMistakes(right.value, known, answer);
+      }
       return {
         signature: [],
         ranked: [

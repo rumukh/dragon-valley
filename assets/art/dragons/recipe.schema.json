@@ -184,6 +184,7 @@
             "petal",
             "cloud",
             "shell",
+            "round",
             "none"
           ]
         },
@@ -357,7 +358,11 @@
           "moss",
           "gears",
           "freckles",
-          "scales"
+          "scales",
+          "counting-dots",
+          "polka-dots",
+          "plus-belly",
+          "minus-belly"
         ]
       }
     },
@@ -378,7 +383,10 @@
           "bushy-brows",
           "shawl",
           "sparkle-cheeks",
-          "rock-body"
+          "rock-body",
+          "number-line",
+          "berry-row",
+          "buck-teeth"
         ]
       }
     },
@@ -416,6 +424,9 @@
             "scallops",
             "speckles",
             "gears",
+            "polka",
+            "hops",
+            "berries",
             "spots"
           ]
         }

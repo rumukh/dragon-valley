@@ -8,8 +8,10 @@ import {
   DRAGON_STAGES,
   MASTERY_LEVELS,
   TABLE_MAX,
+  allAddFactIds,
   allDivFactIds,
   allMulFactIds,
+  allSubFactIds,
   isMinigameKind,
   isoDay,
   parseItemId,
@@ -30,6 +32,7 @@ import type {
   RoundView,
   RunView,
   Screen,
+  SunWindowView,
   WindowCell,
   WindowView,
 } from './contract';
@@ -55,6 +58,8 @@ import {
   percentOf,
   regionOpen,
 } from './progression/levels';
+import { completedGrades } from './progression/grades';
+import { placementFor } from './progression/ladder';
 import { canPlay } from './progression/rounds';
 import { availableCosmetics } from './economy/rewards';
 import { storyView } from './story/beats';
@@ -85,7 +90,10 @@ function nextStep(
   index: ReadonlyMap<string, readonly string[]>,
 ): NextStep {
   if (state.story.pending !== null) return { kind: 'story', beat: state.story.pending };
-  if (state.onboarding.placement === 'pending' && data.placement.steps.length > 0) {
+  if (
+    state.onboarding.placement === 'pending' &&
+    placementFor(data.placement, state.settings.grade).steps.length > 0
+  ) {
     return { kind: 'placement' };
   }
   const daily = state.daily !== null && state.daily.day === state.day ? state.daily : null;
@@ -215,6 +223,7 @@ function hubView(
       available: arenaProblem(state, data, index) === null,
       best: state.arena.best,
     },
+    certificates: completedGrades(state, data),
   };
 }
 
@@ -290,6 +299,7 @@ function roundView(
   }
   const item = round.current?.item ?? round.feedback?.item ?? null;
   const dragon = roundDragon(state, data, index, item);
+  const ladderSteps = placementFor(data.placement, state.settings.grade).steps.length;
   const sleepy = state.daily !== null && state.daily.correct >= state.daily.goal;
   const expression: DragonExpression =
     round.feedback === null
@@ -325,8 +335,8 @@ function roundView(
       round.placement === null
         ? null
         : {
-            step: Math.min(round.placement.step, data.placement.steps.length),
-            steps: data.placement.steps.length,
+            step: Math.min(round.placement.step, ladderSteps),
+            steps: ladderSteps,
             placed: [...round.placement.placed],
           },
   };
@@ -424,12 +434,40 @@ const TABLE_FACTS = Array.from({ length: TABLE_MAX + 1 }, (_, table) =>
 function windowView(state: ReadState, data: Data): WindowView {
   const cells = MUL_PANES.map((pane) => cell(state, data, pane.item, pane.row, pane.column));
   const division = DIV_PANES.map((pane) => cell(state, data, pane.item, pane.row, pane.column));
+  return { size: 11, cells, division, counts: masteryCounts(cells) };
+}
+
+function masteryCounts(cells: readonly WindowCell[]): Record<MasteryLevel, number> {
   const counts = Object.fromEntries(MASTERY_LEVELS.map((level) => [level, 0])) as Record<
     MasteryLevel,
     number
   >;
   for (const c of cells) counts[c.level] += 1;
-  return { size: 11, cells, division, counts };
+  return counts;
+}
+
+const ADD_PANES = allAddFactIds().map((item) => {
+  const parsed = parseItemId(item);
+  return {
+    item,
+    row: parsed?.kind === 'add' ? parsed.a : 0,
+    column: parsed?.kind === 'add' ? parsed.b : 0,
+  };
+});
+const SUB_PANES = allSubFactIds().map((item) => {
+  const parsed = parseItemId(item);
+  return {
+    item,
+    row: parsed?.kind === 'sub' ? parsed.subtrahend : 0,
+    column: parsed?.kind === 'sub' ? parsed.difference : 0,
+  };
+});
+
+/** The Sun Window: the Magic Window of addition, with a subtraction panel. */
+function sunWindowView(state: ReadState, data: Data): SunWindowView {
+  const cells = ADD_PANES.map((pane) => cell(state, data, pane.item, pane.row, pane.column));
+  const subtraction = SUB_PANES.map((pane) => cell(state, data, pane.item, pane.row, pane.column));
+  return { size: 11, cells, subtraction, counts: masteryCounts(cells) };
 }
 
 function marketView(state: ReadState, data: Data): MarketView {
@@ -582,6 +620,7 @@ export function projectView(read: Read, index: ReadonlyMap<string, readonly stri
       dailyGoal: state.settings.dailyGoal,
       arena: state.settings.arena,
       unlockAhead: [...state.settings.unlockAhead],
+      grade: state.settings.grade,
     },
     onboarding: { ...state.onboarding },
     story: storyView(state, data),
@@ -590,6 +629,7 @@ export function projectView(read: Read, index: ReadonlyMap<string, readonly stri
     round: roundView(state, data, index),
     dragons: dragonViews(state, data, index),
     window: windowView(state, data),
+    sunWindow: sunWindowView(state, data),
     market: marketView(state, data),
     album: albumView(state, data),
     daily: dailyView(state, data),
