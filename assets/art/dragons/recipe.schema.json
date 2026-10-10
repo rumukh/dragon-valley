@@ -330,7 +330,8 @@
             "crown10",
             "shell",
             "cloud-tuft",
-            "flames"
+            "flames",
+            "toadstool"
           ]
         },
         "count": {
@@ -365,7 +366,9 @@
           "minus-belly",
           "abacus-belly",
           "carry-belly",
-          "coin-belly"
+          "coin-belly",
+          "bonds-belly",
+          "cross-ten-belly"
         ]
       }
     },
@@ -392,7 +395,9 @@
           "buck-teeth",
           "bead-rods",
           "stick-bundle",
-          "coin-purse"
+          "coin-purse",
+          "toadstool-ring",
+          "ford-stones"
         ]
       }
     },
@@ -436,7 +441,9 @@
             "spots",
             "beads",
             "loops",
-            "coins"
+            "coins",
+            "toadstools",
+            "tens"
           ]
         }
       }

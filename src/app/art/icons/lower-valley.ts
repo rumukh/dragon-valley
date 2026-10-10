@@ -1,7 +1,7 @@
 /**
  * Item icons for the Lower Valley (grades 1-2): Pebble Brook's counting pebbles, a
  * will-o'-wisp light, a ten-frame and stepping stones; Hundred Hills' bundle of ten sticks and a
- * flagged hill; Market Square's striped stall (its coin is the shared coin icon). 64 x 64, full color, like the other
+ * flagged hill; Market Square's striped stall (its coin is the shared coin icon); Mushroom Hollow's\n * spotted toadstool and acorn; Rainbow Ford's rainbow. 64 x 64, full color, like the other
  * item icons; used on stickers and in content.
  */
 import { M, L, Q, C, roundRectD } from '../svg/path';
@@ -17,6 +17,9 @@ export const LOWER_VALLEY_ICON_IDS = [
   'sticks-bundle',
   'hill',
   'market-stall',
+  'mushroom',
+  'acorn',
+  'rainbow',
 ] as const;
 
 const INK = '#2a2140';
@@ -267,6 +270,126 @@ function marketStall(): string {
   );
 }
 
+/** A spotted red toadstool with a cream stem and a tuft of moss. */
+function mushroom(): string {
+  const cap = M(6, 34) + C(6, 12, 58, 12, 58, 34) + Q(32, 40, 6, 34) + 'Z';
+  const spots: Array<[number, number, number]> = [
+    [20, 24, 4.2],
+    [34, 19, 3.6],
+    [46, 27, 3.8],
+    [29, 31, 2.6],
+    [13, 31, 2.2],
+  ];
+  return (
+    h('ellipse', { cx: 32, cy: 58, rx: 20, ry: 4, fill: '#2a2140', opacity: 0.18 }) +
+    h('path', {
+      d:
+        M(24, 36) + C(22, 46, 21, 54, 20, 57) + Q(32, 61, 44, 57) + C(43, 54, 42, 46, 40, 36) + 'Z',
+      ...st('#fbf1dc'),
+    }) +
+    h('path', {
+      d: M(26, 41) + Q(32, 44, 38, 41),
+      fill: 'none',
+      stroke: '#d8c5a0',
+      'stroke-width': 2,
+    }) +
+    h('path', { d: cap, ...st('#e8473a') }) +
+    spots.map(([x, y, r]) => h('circle', { cx: x, cy: y, r, fill: '#fffaf0' })).join('') +
+    shine(20, 17, 6, 3) +
+    h('path', {
+      d:
+        M(10, 58) +
+        Q(14, 50, 18, 57) +
+        Q(21, 51, 24, 58) +
+        M(41, 58) +
+        Q(45, 51, 48, 57) +
+        Q(52, 50, 55, 58),
+      fill: '#7cc75a',
+      stroke: '#3f7f32',
+      'stroke-width': 2,
+      'stroke-linejoin': 'round',
+    })
+  );
+}
+
+/** A plump acorn with a cross-hatched cap and a little stalk. */
+function acorn(p: (n: string) => string): string {
+  const clip = p('cap');
+  const capD = M(10, 30) + C(10, 14, 54, 14, 54, 30) + Q(32, 36, 10, 30) + 'Z';
+  let hatch = '';
+  for (let k = -2; k <= 3; k++) hatch += M(14 + k * 8, 18) + L(26 + k * 8, 32);
+  for (let k = -1; k <= 4; k++) hatch += M(18 + k * 8, 32) + L(30 + k * 8, 18);
+  return (
+    h('ellipse', { cx: 32, cy: 60, rx: 14, ry: 3, fill: '#2a2140', opacity: 0.18 }) +
+    h('path', {
+      d: M(15, 28) + C(13, 44, 22, 57, 32, 58) + C(42, 57, 51, 44, 49, 28) + 'Z',
+      ...st('#d9963f'),
+    }) +
+    h('path', {
+      d: M(32, 58) + L(32, 55),
+      stroke: '#8a5520',
+      'stroke-width': 3,
+      'stroke-linecap': 'round',
+    }) +
+    shine(23, 40, 3.5, 7) +
+    h('defs', null, h('clipPath', { id: clip }, h('path', { d: capD }))) +
+    h('path', { d: capD, ...st('#9a6a3a') }) +
+    h('path', {
+      d: hatch,
+      fill: 'none',
+      stroke: '#6e4724',
+      'stroke-width': 1.6,
+      opacity: 0.7,
+      'clip-path': `url(#${clip})`,
+    }) +
+    h('path', {
+      d: M(31, 18) + Q(30, 10, 36, 6),
+      fill: 'none',
+      stroke: '#6e4724',
+      'stroke-width': 4,
+      'stroke-linecap': 'round',
+    })
+  );
+}
+
+/** A rainbow arching between two puffy clouds. */
+function rainbow(): string {
+  const bands = ['#ff5a5a', '#ff9c3a', '#ffd93f', '#6fcf5a', '#4aa8f0', '#8a6cf0'];
+  const w = 4.2;
+  const arcs = bands
+    .map((c, i) => {
+      const r = 26 - i * w;
+      return h('path', {
+        d: M(32 - r, 44) + `A${r} ${r} 0 0 1 ${32 + r} 44`,
+        fill: 'none',
+        stroke: c,
+        'stroke-width': w + 0.4,
+      });
+    })
+    .join('');
+  const cloud = (x: number): string =>
+    h('path', {
+      d:
+        M(x - 12, 52) +
+        C(x - 16, 52, x - 16, 43, x - 10, 43) +
+        C(x - 9, 36, x + 1, 35, x + 3, 41) +
+        C(x + 9, 38, x + 14, 44, x + 11, 48) +
+        C(x + 15, 50, x + 13, 53, x + 9, 53) +
+        'Z',
+      ...st('#ffffff', 3),
+    });
+  return (
+    arcs +
+    h('path', {
+      d: M(5.5, 44) + 'A26.5 26.5 0 0 1 58.5 44',
+      fill: 'none',
+      stroke: outlineOf('#ff5a5a', 0.5),
+      'stroke-width': 2,
+    }) +
+    cloud(12) +
+    cloud(52)
+  );
+}
 export function lowerValleyIcon(id: string, p: (n: string) => string): string {
   switch (id) {
     case 'pebbles':
@@ -283,6 +406,12 @@ export function lowerValleyIcon(id: string, p: (n: string) => string): string {
       return hill(p);
     case 'market-stall':
       return marketStall();
+    case 'mushroom':
+      return mushroom();
+    case 'acorn':
+      return acorn(p);
+    case 'rainbow':
+      return rainbow();
     default:
       throw new Error(`Unknown icon id: ${id}`);
   }

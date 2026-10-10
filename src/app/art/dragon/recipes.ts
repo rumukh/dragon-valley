@@ -33,6 +33,8 @@ import nibble from '../../../../assets/art/dragons/nibble.json';
 import bead from '../../../../assets/art/dragons/bead.json';
 import tumble from '../../../../assets/art/dragons/tumble.json';
 import penny from '../../../../assets/art/dragons/penny.json';
+import sprout from '../../../../assets/art/dragons/sprout.json';
+import tenzi from '../../../../assets/art/dragons/tenzi.json';
 
 const HORNS: readonly HornStyle[] = [
   'curved',
@@ -92,6 +94,7 @@ const CRESTS: readonly CrestStyle[] = [
   'shell',
   'cloud-tuft',
   'flames',
+  'toadstool',
 ];
 const MARKINGS: readonly MarkingStyle[] = [
   'belly-plates',
@@ -115,6 +118,8 @@ const MARKINGS: readonly MarkingStyle[] = [
   'abacus-belly',
   'carry-belly',
   'coin-belly',
+  'bonds-belly',
+  'cross-ten-belly',
 ];
 const FEATURES: readonly FeatureStyle[] = [
   'reflection',
@@ -136,6 +141,8 @@ const FEATURES: readonly FeatureStyle[] = [
   'bead-rods',
   'stick-bundle',
   'coin-purse',
+  'toadstool-ring',
+  'ford-stones',
 ];
 const EGGS: readonly EggPattern[] = [
   'clouds',
@@ -159,6 +166,8 @@ const EGGS: readonly EggPattern[] = [
   'beads',
   'loops',
   'coins',
+  'toadstools',
+  'tens',
 ];
 
 type Json = Record<string, unknown>;
@@ -338,6 +347,8 @@ const RAW: readonly unknown[] = [
   bead,
   tumble,
   penny,
+  sprout,
+  tenzi,
 ];
 
 /** All built-in recipes, validated once at module load. */

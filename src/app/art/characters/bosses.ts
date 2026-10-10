@@ -28,10 +28,17 @@ import {
   tears,
   zzz,
 } from './kit';
+import { kasparek, skritek } from './bosses-grade1';
 import { longBroadSharpEyes, otesanek } from './bosses-grade2';
 
 /** Bosses of the Lower Valley sheet (grades 1-2), drawn before the canonical third-grade nine. */
-export const LOWER_VALLEY_BOSS_IDS = ['will-o-wisps', 'long-broad-sharp-eyes', 'otesanek'] as const;
+export const LOWER_VALLEY_BOSS_IDS = [
+  'will-o-wisps',
+  'skritek',
+  'kasparek',
+  'long-broad-sharp-eyes',
+  'otesanek',
+] as const;
 
 export const BOSS_IDS: readonly string[] = [...LOWER_VALLEY_BOSS_IDS, ...CANONICAL_BOSS_IDS];
 export const BOSS_STATES = ['start', 'warming', 'won'] as const;
@@ -40,6 +47,8 @@ export type BossState = (typeof BOSS_STATES)[number];
 /** How each boss is won (for copy and audio cues). */
 export const BOSS_OUTCOME: Record<string, 'laugh' | 'sleep' | 'agree' | 'dance'> = {
   'will-o-wisps': 'dance',
+  skritek: 'dance',
+  kasparek: 'laugh',
   'long-broad-sharp-eyes': 'dance',
   otesanek: 'sleep',
   'bridge-troll': 'laugh',
@@ -2144,6 +2153,8 @@ const DRAW: Record<string, (state: BossState, p: P) => string> = {
   'will-o-wisps': willOWisps,
   'long-broad-sharp-eyes': longBroadSharpEyes,
   otesanek,
+  skritek,
+  kasparek,
   'bridge-troll': bridgeTroll,
   'forest-witch': forestWitch,
   krakonos,

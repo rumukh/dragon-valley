@@ -38,6 +38,8 @@ describe('bosses', () => {
   it('draws every boss in every state as child-safe SVG', () => {
     expect(BOSS_IDS).toEqual([
       'will-o-wisps',
+      'skritek',
+      'kasparek',
       'long-broad-sharp-eyes',
       'otesanek',
       ...CANONICAL_BOSS_IDS,
@@ -143,6 +145,8 @@ describe('backgrounds', () => {
         'lower-valley-map',
         'valley-map',
         'pebble-brook',
+        'mushroom-hollow',
+        'rainbow-ford',
         'hundred-hills',
         'market-square',
         ...CANONICAL_REGION_IDS,

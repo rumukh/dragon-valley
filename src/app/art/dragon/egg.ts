@@ -525,6 +525,128 @@ function eggPattern(ctx: Ctx): string {
       }
       return out;
     }
+    case 'toadstools': {
+      // Sprout: red spotted toadstools and little brown ones growing up the shell from moss.
+      let out = h('path', {
+        d:
+          M(cx - w, top + eh * 0.86) +
+          Q(cx - 60, top + eh * 0.78, cx - 20, top + eh * 0.84) +
+          Q(cx + 30, top + eh * 0.76, cx + w, top + eh * 0.84) +
+          'V' +
+          (top + eh + 10) +
+          'H' +
+          (cx - w) +
+          'Z',
+        fill: '#8fbf5a',
+        stroke: '#4f7f32',
+        'stroke-width': 2.5,
+      });
+      for (const [x, y, r, red] of [
+        [-42, -64, 26, true],
+        [40, -96, 15, false],
+        [46, -20, 22, true],
+        [-20, 30, 15, false],
+        [-50, 74, 18, true],
+        [30, 70, 13, false],
+      ] as const) {
+        const fill = red ? accent : ctx.paint.accent2;
+        const ox = cx + x;
+        const oy = cy + y;
+        out +=
+          h('path', {
+            d:
+              M(ox - r * 0.3, oy) +
+              L(ox - r * 0.36, oy + r * 0.9) +
+              Q(ox, oy + r * 1.05, ox + r * 0.36, oy + r * 0.9) +
+              L(ox + r * 0.3, oy) +
+              'Z',
+            fill: '#fff8ea',
+            stroke: outlineOf('#fff8ea', 0.4),
+            'stroke-width': 2,
+          }) +
+          h('path', {
+            d:
+              M(ox - r, oy + r * 0.1) +
+              Q(ox - r, oy - r * 0.9, ox, oy - r * 0.9) +
+              Q(ox + r, oy - r * 0.9, ox + r, oy + r * 0.1) +
+              Q(ox, oy - r * 0.15, ox - r, oy + r * 0.1) +
+              'Z',
+            fill,
+            stroke: outlineOf(fill, 0.5),
+            'stroke-width': 2.2,
+            'stroke-linejoin': 'round',
+          }) +
+          (red
+            ? h('circle', { cx: ox - r * 0.4, cy: oy - r * 0.4, r: r * 0.16, fill: '#ffffff' }) +
+              h('circle', { cx: ox + r * 0.3, cy: oy - r * 0.55, r: r * 0.12, fill: '#ffffff' }) +
+              h('circle', { cx: ox + r * 0.55, cy: oy - r * 0.15, r: r * 0.1, fill: '#ffffff' })
+            : h('ellipse', {
+                cx: ox - r * 0.3,
+                cy: oy - r * 0.5,
+                rx: r * 0.3,
+                ry: r * 0.14,
+                fill: '#ffffff',
+                opacity: 0.55,
+              }));
+      }
+      return out;
+    }
+    case 'tens': {
+      // Tenzi: a ten-frame band (eight orange and two yellow make ten), three more beyond it,
+      // and the river ford's ripples.
+      const slot = 26;
+      const x0 = cx - slot * 2.5;
+      const y0 = cy - 70;
+      let out = h('path', {
+        d:
+          M(x0 - 6, y0 - 6) +
+          'h' +
+          (slot * 5 + 12) +
+          'v' +
+          (slot * 2 + 12) +
+          'h' +
+          -(slot * 5 + 12) +
+          'Z',
+        fill: '#ffffff',
+        opacity: 0.55,
+        stroke: line,
+        'stroke-width': 2,
+        'stroke-linejoin': 'round',
+      });
+      const dot = (x: number, y: number, warm: boolean): string => {
+        const fill = warm ? ctx.paint.accent : ctx.paint.accent2;
+        return (
+          h('circle', {
+            cx: x,
+            cy: y,
+            r: slot * 0.36,
+            fill,
+            stroke: outlineOf(fill, 0.55),
+            'stroke-width': 2,
+          }) + h('circle', { cx: x - 3, cy: y - 3, r: 2.6, fill: '#ffffff', opacity: 0.75 })
+        );
+      };
+      for (let i = 0; i < 10; i++)
+        out += dot(x0 + slot * ((i % 5) + 0.5), y0 + slot * (Math.floor(i / 5) + 0.5), i < 8);
+      for (let i = 0; i < 3; i++) out += dot(cx - slot + i * slot, y0 + slot * 3.2, false);
+      for (const [y, k] of [
+        [cy + 70, 1],
+        [cy + 100, -1],
+        [cy - 104, 1],
+      ] as const)
+        out += h('path', {
+          d:
+            M(cx - w / 2, y) +
+            Q(cx - w / 4, y - 10 * k, cx, y) +
+            Q(cx + w / 4, y + 10 * k, cx + w / 2, y),
+          fill: 'none',
+          stroke: accent,
+          'stroke-width': 5,
+          'stroke-linecap': 'round',
+          opacity: 0.55,
+        });
+      return out;
+    }
     default: {
       let out = '';
       for (const [x, y, r] of [

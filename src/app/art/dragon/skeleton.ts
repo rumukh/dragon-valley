@@ -156,6 +156,8 @@ const BELLY_EMBLEMS = new Set([
   'abacus-belly',
   'carry-belly',
   'coin-belly',
+  'bonds-belly',
+  'cross-ten-belly',
 ]);
 
 /** True when the dragon's mnemonic is drawn on its belly (bigger belly, paws rest at the sides). */
