@@ -9,11 +9,11 @@ is revisited with numbers in hand.
 
 | What                                                    | Budget       | Now (CI)     | Notes                                                                                    |
 | ------------------------------------------------------- | ------------ | ------------ | ---------------------------------------------------------------------------------------- |
-| `app.js` as built / gzipped                             | 800 / 260 KB | 765 / 245 KB | the whole game: rules, SDK, screens, inline art; raised from 750 / 250 KB for grades 1-3 |
+| `app.js` as built / gzipped                             | 820 / 265 KB | 765 / 245 KB | the whole game: rules, SDK, screens, inline art; raised from 750 / 250 KB for grades 1-3 |
 | `app.css` as built / gzipped                            | 100 / 20 KB  | 74 / 14 KB   |                                                                                          |
-| Offline pack without its audio                          | 3.6 MB       | 2.64 MB      | 52 files: data, images, script, style, fonts; raised from 2.5 MB for grades 1-3          |
-| Whole offline pack (`resource-graph.json`)              | 10.5 MB      | 9.60 MB      | 85 files; the audio is 6.96 MB of it                                                     |
-| First visit: downloaded before the title (uncompressed) | 1.4 MB       | 1.14 MB      | 341 KB gzipped, as GitHub Pages sends it                                                 |
+| Offline pack without its audio                          | 4 MB         | 2.64 MB      | 52 files: data, images, script, style, fonts; raised from 2.5 MB for grades 1-3          |
+| Whole offline pack (`resource-graph.json`)              | 11 MB        | 9.60 MB      | 85 files; the audio is 6.96 MB of it                                                     |
+| First visit: downloaded before the title (uncompressed) | 1.45 MB      | 1.14 MB      | 341 KB gzipped, as GitHub Pages sends it                                                 |
 | First visit, fast 4G, processor ×4: title ready         | 4 s          | 1.47 s       | first paint 0.29 s (budget 1.5 s)                                                        |
 | First visit, slow 4G, processor ×4: title ready         | 10 s         | 6.66 s       | first paint 1.16 s (budget 3 s)                                                          |
 | Feedback after an answer, processor ×4 (median of 7)    | 500 ms       | 107 ms       | slowest of the seven 154 ms                                                              |
@@ -30,6 +30,15 @@ is the archived 1.4.0 content pack that upgrades need, 176 KB the Hundred Hills 
 backgrounds and the redrawn Lower Valley map, 46 KB the content and 23 KB the script. The first
 visit went to 1.36 MB (1.3 MB budget, now 1.4 MB) for the same content and script; the title is
 still ready within its time budgets. The whole pack is 10.43 MB of its 10.5 MB.
+
+1st grade's Mushroom Hollow and Rainbow Ford (content 1.6.0) raised four budgets, measured on
+their branch (Edge, development machine). The offline pack without its audio went from 3.47 to
+3.97 MB (3.6 MB budget, now 4 MB) and the whole pack from 10.43 to 10.93 MB (10.5 MB budget, now
+11 MB): of the 498 KB, 329 KB is the archived 1.5.0 content pack that upgrades need, 83 KB the
+Mushroom Hollow and Rainbow Ford backgrounds, and the rest the content, its catalog and the
+script. `app.js` is 814 / 259 KB (800 / 260 KB budget, now 820 / 265 KB) with the two new bosses
+and dragons drawn inline. The first visit went to 1.43 MB (1.4 MB budget, now 1.45 MB) for the
+same content and script; the title is still ready within its time budgets.
 
 ## What the first screen costs
 

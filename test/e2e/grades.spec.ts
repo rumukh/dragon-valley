@@ -40,12 +40,16 @@ import {
 } from './support/app';
 import { numberWords, readAnswer, readProblem, written } from './support/problem';
 import { continueToNextActivity } from './support/activities';
-import { playBundleSticks } from './support/boards';
-import { brookBackupBefore, hillsBackupBefore } from './support/saves';
+import { playBundleSticks, playTenFrame } from './support/boards';
+import { brookBackupBefore, gradeOneBackupBefore, hillsBackupBefore } from './support/saves';
 import { installSpeech, spokenTexts, TYPICAL_VOICES } from './support/speech';
 
 /** The Hundred Hills lesson whose second activity is Bundle Sticks. */
 const BUNDLE_STICKS_LEVEL = 'hundred-hills.4';
+/** Mushroom Hollow's lesson that starts with Ten Frame's make-ten boards. */
+const MAKE_TEN_LEVEL = 'mushroom-hollow.3';
+/** Rainbow Ford's lesson that gives Tenzi's egg and starts with Ten Frame's crossing boards. */
+const CROSS_LEVEL = 'rainbow-ford.4';
 
 test('the editor asks for the class; every class is accepted, in the editor and behind the gate', async ({
   page,
@@ -426,4 +430,78 @@ test('a 2nd grader builds and works out sums with Bundle Sticks', async ({ page 
   }
   await expect(page.getByTestId('sticks'), 'Bundle Sticks is on the table').toBeVisible();
   await playBundleSticks(page, 'keyboard');
+});
+
+test.describe('on a touch screen', () => {
+  test.use({ hasTouch: true });
+
+  test('a 1st grader goes on to Mushroom Hollow and fills the frame to ten', async ({ page }) => {
+    test.slow();
+    const backup = await gradeOneBackupBefore(MAKE_TEN_LEVEL);
+    await newFamily(page, { name: 'Lea' });
+    await leaveHub(page);
+    await loadBackup(page, backup, 'Lea');
+    await playAs(page, 1, 'Lea');
+
+    // After the Will-o'-the-wisps, Mushroom Hollow is awake on the Lower Valley sheet; the ford waits.
+    await page.getByTestId('hub-map').click();
+    await expect(page.getByTestId('screen-map')).toHaveAttribute('data-sheet', 'lower-valley-map');
+    await expect(page.getByTestId('map-region-mushroom-hollow')).toContainText('Mushroom Hollow');
+    await page.getByTestId('map-back').click();
+
+    await startLevel(page, 'mushroom-hollow', MAKE_TEN_LEVEL);
+    await expect(
+      page.locator('img[src$="backgrounds/mushroom-hollow.svg"]').first(),
+      'the hollow is drawn behind the lesson',
+    ).toBeAttached();
+    expect(await playTenFrame(page, 'touch')).toEqual(['make-ten', 'make-ten']);
+  });
+});
+
+test('a 1st grader is given Tenzi at Rainbow Ford and crosses ten in the frames', async ({
+  page,
+}) => {
+  test.slow();
+  const backup = await gradeOneBackupBefore(CROSS_LEVEL);
+  await newFamily(page, { name: 'Lea' });
+  await leaveHub(page);
+  await loadBackup(page, backup, 'Lea');
+  await playAs(page, 1, 'Lea');
+  await page.getByTestId('hub-map').click();
+  await page.getByTestId('map-region-rainbow-ford').click();
+  await expectScreen(page, 'region');
+  await page.getByTestId(`level-${CROSS_LEVEL}`).click();
+  await expectScreen(page, 'level');
+  await page.getByTestId('level-play').click();
+
+  // Tenzi's egg comes with the ford's story, drawn at the ford.
+  await expect(page.getByTestId('screen-story'), "Tenzi's story begins").toBeVisible();
+  await expect(
+    page.locator('img[src$="backgrounds/rainbow-ford.svg"]').first(),
+    'the story is told at the ford',
+  ).toBeAttached();
+  await finishStory(page);
+  expect(await playTenFrame(page, 'keyboard')).toEqual(['cross', 'cross']);
+});
+
+test('after Kašpárek a 1st grader goes on to Hundred Hills', async ({ page }) => {
+  test.slow();
+  const backup = await gradeOneBackupBefore('hundred-hills.1');
+  await newFamily(page, { name: 'Lea' });
+  await leaveHub(page);
+  await loadBackup(page, backup, 'Lea');
+  await playAs(page, 1, 'Lea');
+  await page.getByTestId('hub-map').click();
+  await expect(page.getByTestId('screen-map')).toHaveAttribute('data-sheet', 'lower-valley-map');
+  for (const [region, name] of [
+    ['pebble-brook', 'Pebble Brook'],
+    ['mushroom-hollow', 'Mushroom Hollow'],
+    ['rainbow-ford', 'Rainbow Ford'],
+    ['hundred-hills', 'Hundred Hills'],
+  ] as const) {
+    await expect(page.getByTestId(`map-region-${region}`), `${name} is awake`).toContainText(name);
+  }
+  await page.getByTestId('map-region-hundred-hills').click();
+  await expectScreen(page, 'region');
+  await expect(page.getByTestId('level-hundred-hills.1')).toHaveAttribute('data-status', 'open');
 });
