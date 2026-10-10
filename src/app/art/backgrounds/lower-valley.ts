@@ -12,21 +12,10 @@ import { h } from '../svg/xml';
 import { rng } from '../svg/prng';
 import { flower, sparkleD } from '../glyphs';
 import { LOWER_VALLEY_REGION_IDS } from '../regions';
-import {
-  SH,
-  SW,
-  cloud,
-  cottage,
-  linear,
-  pine,
-  radial,
-  reeds,
-  rock,
-  roundTree,
-  type Defs,
-} from './kit';
+import { SH, SW, cloud, linear, pine, radial, reeds, rock, roundTree, type Defs } from './kit';
 import { buildMapSheet, mapRoad, sheetNodePositions, type MapHotspots } from './map';
 import { pebble, steppingStone } from './scenes-c';
+import { basket, domeHill, kite, marketStall, pennant, stickSheaf, townHouse } from './scenes-d';
 
 /** Planned level count per Lower Valley region (docs/grades-plan.md); plus one boss node each. */
 export const LOWER_VALLEY_LEVELS: Record<string, number> = {
@@ -142,62 +131,6 @@ function toadstool(x: number, y: number, s: number, cap: string): string {
   return out;
 }
 
-function stall(x: number, y: number, s: number, awning: string): string {
-  let stripes = '';
-  for (let i = 0; i < 4; i++)
-    stripes += h('path', {
-      d: roundRectD(x - s / 2 + (i * s) / 4, y - s * 0.95, s / 4, s * 0.26, 0),
-      fill: i % 2 ? '#fffaf0' : awning,
-    });
-  return (
-    h('path', {
-      d: roundRectD(x - s * 0.42, y - s * 0.7, s * 0.84, s * 0.7, 3),
-      fill: '#e8c48e',
-      stroke: '#7a5530',
-      'stroke-width': 2.5,
-    }) +
-    stripes +
-    h('path', {
-      d: roundRectD(x - s / 2, y - s * 0.95, s, s * 0.26, 4),
-      fill: 'none',
-      stroke: '#7a5530',
-      'stroke-width': 2.5,
-    }) +
-    h('circle', { cx: x - s * 0.18, cy: y - s * 0.52, r: s * 0.1, fill: '#e8423f' }) +
-    h('circle', { cx: x + s * 0.04, cy: y - s * 0.52, r: s * 0.1, fill: '#ffb31f' }) +
-    h('circle', { cx: x + s * 0.24, cy: y - s * 0.52, r: s * 0.1, fill: '#7fc65a' })
-  );
-}
-
-function littleHill(x: number, y: number, w: number, color: string, flag?: string): string {
-  let out = h('path', {
-    d:
-      M(x - w / 2, y) +
-      C(x - w * 0.36, y - w * 0.62, x + w * 0.36, y - w * 0.62, x + w / 2, y) +
-      'Z',
-    fill: color,
-    stroke: '#5f9a46',
-    'stroke-width': 3,
-  });
-  if (flag) {
-    const top = y - w * 0.46;
-    out +=
-      h('path', {
-        d: M(x, top) + L(x, top - w * 0.34),
-        stroke: '#6b4a2e',
-        'stroke-width': 3,
-        'stroke-linecap': 'round',
-      }) +
-      h('path', {
-        d: M(x, top - w * 0.34) + L(x + w * 0.2, top - w * 0.28) + L(x, top - w * 0.2) + 'Z',
-        fill: flag,
-        stroke: '#6b4a2e',
-        'stroke-width': 1.5,
-      });
-  }
-  return out;
-}
-
 function willow(x: number, y: number, s: number): string {
   let out = h('path', {
     d:
@@ -276,50 +209,143 @@ export function lowerValleyMap(defs: Defs): string {
     out += pine(x, y, 50 + r() * 26, i % 3 ? '#2f8a4c' : '#3fa458', i % 4 === 0);
   }
 
-  // 5. Market Square (top middle, roughed in): cottages around a cobbled square with stalls
-  out += h('path', {
-    d: smoothClosedD(
-      [
-        { x: 700, y: 250 },
-        { x: 820, y: 290 },
-        { x: 960, y: 300 },
-        { x: 1080, y: 270 },
-        { x: 1060, y: 330 },
-        { x: 880, y: 360 },
-        { x: 720, y: 320 },
-      ],
-      1,
-    ),
-    fill: '#e9dcc0',
-    stroke: '#b8a27a',
-    'stroke-width': 3,
-  });
+  // 5. Market Square (top middle, fully drawn): a row of gabled town houses with a clock tower
+  // above the road, and below it a cobbled square with striped stalls, a well and apple baskets
+  const walls = ['#ffcf6b', '#ff9f80', '#9fd0ff', '#c8a8ff', '#a8e08c', '#ffd8e4', '#ffe9a8'];
+  const roofs = ['#d9533a', '#b84a32', '#3f8fd9', '#8a5ad9', '#3aa65b', '#e0533a', '#c9784e'];
+  for (const [i, [x, w, hgt]] of (
+    [
+      [600, 54, 74],
+      [662, 48, 62],
+      [760, 52, 70],
+      [1000, 52, 70],
+      [1066, 48, 62],
+      [1128, 54, 78],
+    ] as const
+  ).entries())
+    out += townHouse(x, 128, w, hgt, walls[i % walls.length]!, roofs[i % roofs.length]!);
   out +=
-    cottage(640, 120, 46) +
-    cottage(760, 112, 40, '#3f8fd9') +
-    cottage(1000, 130, 44, '#e0663f') +
-    cottage(1120, 110, 38, '#8a5ad9');
-  out +=
-    stall(800, 330, 50, '#e8423f') +
-    stall(900, 344, 50, '#3f8fd9') +
-    stall(1000, 334, 50, '#ffb31f');
-
-  // 4. Hundred Hills (right, roughed in): rows of little round hills, some with flags
-  const hillColors = ['#a8dc8c', '#9fd684', '#b7e39a'];
-  for (let row = 0; row < 5; row++)
-    for (let col = 0; col < 4; col++) {
-      const x = 1270 + col * 80 + (row % 2) * 40;
-      const y = 140 + row * 90;
-      if (x > 1580) continue;
-      out += littleHill(
-        x,
-        y,
-        66,
-        hillColors[(row + col) % 3]!,
-        (row + col) % 3 === 0 ? ['#e8423f', '#ffb31f', '#3f8fd9'][col % 3] : undefined,
-      );
+    h('path', {
+      d: roundRectD(860, 54, 40, 76, 4),
+      fill: '#fff6e6',
+      stroke: '#b8a27a',
+      'stroke-width': 2.5,
+    }) +
+    h('path', {
+      d: M(852, 58) + L(880, 18) + L(908, 58) + 'Z',
+      fill: '#3aa65b',
+      stroke: '#2f6b2a',
+      'stroke-width': 2.5,
+      'stroke-linejoin': 'round',
+    }) +
+    h('circle', { cx: 880, cy: 80, r: 10, fill: '#fffaf0', stroke: '#b8a27a', 'stroke-width': 2 }) +
+    h('path', {
+      d: M(880, 80) + L(880, 73) + M(880, 80) + L(886, 82),
+      stroke: '#6b4a2e',
+      'stroke-width': 2,
+      'stroke-linecap': 'round',
+    });
+  for (const [x0, x1] of [
+    [600, 760],
+    [1000, 1128],
+  ] as const) {
+    out += h('path', {
+      d: M(x0, 76) + Q((x0 + x1) / 2, 104, x1, 76),
+      fill: 'none',
+      stroke: '#8a6a4a',
+      'stroke-width': 1.5,
+    });
+    for (let i = 1; i < 6; i++) {
+      const t = i / 6;
+      const fx = x0 + (x1 - x0) * t;
+      const fy = 76 + 28 * 2 * t * (1 - t);
+      out += h('path', {
+        d: M(fx - 5, fy) + L(fx + 5, fy) + L(fx, fy + 10) + 'Z',
+        fill: ['#e8423f', '#ffb31f', '#3f8fd9', '#8a5ad9', '#3aa65b'][i % 5]!,
+      });
     }
+  }
+  const square = smoothClosedD(
+    [
+      { x: 680, y: 262 },
+      { x: 820, y: 296 },
+      { x: 960, y: 306 },
+      { x: 1100, y: 268 },
+      { x: 1130, y: 330 },
+      { x: 900, y: 378 },
+      { x: 690, y: 340 },
+    ],
+    1,
+  );
+  out += h('path', { d: square, fill: '#e9dcc0', stroke: '#b8a27a', 'stroke-width': 3 });
+  for (let i = 0; i < 46; i++) {
+    const x = 712 + r() * 390;
+    const y = 300 + r() * 60;
+    if (Math.abs(x - 900) < 34 && y < 350) continue;
+    out += h('ellipse', {
+      cx: x,
+      cy: y,
+      rx: 7,
+      ry: 3.5,
+      fill: '#d8c6a2',
+      stroke: '#b8a27a',
+      'stroke-width': 1,
+    });
+  }
+  out +=
+    marketStall(770, 336, 62, '#e8423f', 'fruit') +
+    marketStall(1030, 330, 62, '#3f8fd9', 'bread') +
+    marketStall(1110, 368, 46, '#ffb31f', 'veg');
+  out +=
+    h('path', {
+      d: roundRectD(880, 330, 40, 20, 5),
+      fill: '#cfc6d8',
+      stroke: '#6f6a7f',
+      'stroke-width': 2,
+    }) +
+    h('path', {
+      d: M(884, 330) + L(884, 310) + M(916, 330) + L(916, 310),
+      stroke: '#8a5a2e',
+      'stroke-width': 3,
+    }) +
+    h('path', {
+      d: M(876, 312) + L(900, 298) + L(924, 312) + 'Z',
+      fill: '#d9533a',
+      stroke: '#8a2a1a',
+      'stroke-width': 2,
+    });
+  out +=
+    basket(700, 364, 26, '#e8423f') +
+    basket(960, 374, 22, '#7fc65a') +
+    basket(986, 378, 20, '#ffb31f');
 
+  // 4. Hundred Hills (right, fully drawn): rows of round counting hills climbing to the top,
+  // the far ten with pennants, bundles of ten sticks and a kite above
+  const hillColors = ['#9fd684', '#8fcd74', '#b0e092'];
+  for (let row = 0; row < 6; row++)
+    for (let col = 0; col < 5; col++) {
+      const x = 1262 + col * 76 + (row % 2) * 36;
+      const y = 120 + row * 80;
+      if (x > 1600) continue;
+      const w = 74 + ((row * 3 + col) % 3) * 8;
+      out += domeHill(x, y, w, w * 0.42, hillColors[(row + col) % 3]!);
+      if (row === 0 || (row === 3 && col % 2 === 0))
+        out += pennant(
+          x,
+          y - w * 0.4,
+          26,
+          ['#e8423f', '#ffb31f', '#3f8fd9', '#8a5ad9', '#3aa65b'][col]!,
+        );
+    }
+  out +=
+    stickSheaf(1250, 400, 38) +
+    stickSheaf(1556, 330, 40, '#3f8fd9') +
+    stickSheaf(1520, 540, 36, '#ffb31f');
+  out += h(
+    'g',
+    { transform: 'translate(1546 48) scale(0.5) translate(-1546 -48)' },
+    kite(1546, 48, 40),
+  );
   // 3. Rainbow Ford (bottom right, roughed in): a river with a rainbow over the ford
   const river =
     M(1230, 1010) + C(1240, 900, 1340, 860, 1330, 760) + C(1320, 680, 1500, 640, 1610, 600);
@@ -376,7 +402,7 @@ export function lowerValleyMap(defs: Defs): string {
   ] as const)
     out += roundTree(x, y, 60, '#6fbf4f', true, '#e8423f');
   out += rock(1200, 540, 24) + rock(620, 440, 20);
-  out += cloud(640, 40, 30) + cloud(1500, 30, 36) + cloud(1060, 470, 24);
+  out += cloud(430, 570, 24) + cloud(1220, 610, 24) + cloud(1060, 470, 24);
 
   // the road (drawn before Pebble Brook so the brook and its stepping stones cross it)
   out += mapRoad(LOWER_VALLEY_HOTSPOTS.path);

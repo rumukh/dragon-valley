@@ -34,4 +34,11 @@ export const GOLDEN_CASES: Record<string, () => string> = {
   'nibble egg': () => renderDragon({ dragon: 'nibble', stage: 'egg', idPrefix: 'g' }),
   'nibble hatchling eating': () =>
     renderDragon({ dragon: 'nibble', stage: 'hatchling', expression: 'eating', idPrefix: 'g' }),
+  'bead youngling happy': () =>
+    renderDragon({ dragon: 'bead', stage: 'youngling', expression: 'happy', idPrefix: 'g' }),
+  'tumble egg': () => renderDragon({ dragon: 'tumble', stage: 'egg', idPrefix: 'g' }),
+  'tumble adult proud': () =>
+    renderDragon({ dragon: 'tumble', stage: 'adult', expression: 'proud', idPrefix: 'g' }),
+  'penny hatchling curious': () =>
+    renderDragon({ dragon: 'penny', stage: 'hatchling', expression: 'curious', idPrefix: 'g' }),
 };

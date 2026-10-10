@@ -236,9 +236,10 @@ function marketStall(): string {
     Q(52.8, 32, 58, 24);
   let stripes = '';
   for (let i = 0; i < 5; i++) {
-    const x = 6 + i * 10.4;
+    const top = 9 + i * 9.2;
+    const bot = 6 + i * 10.4;
     stripes += h('path', {
-      d: M(x + 3, 10) + L(x + 13.4, 10) + L(x + 10.4, 24) + L(x, 24) + 'Z',
+      d: M(top, 10) + L(top + 9.2, 10) + L(bot + 10.4, 24) + L(bot, 24) + 'Z',
       fill: i % 2 ? '#fffaf0' : '#e0533a',
     });
   }
@@ -252,7 +253,7 @@ function marketStall(): string {
     h('circle', { cx: 49, cy: 39, r: 4, ...st('#b98cff', 2) }) +
     stripes +
     h('path', {
-      d: M(6, 24) + L(9, 10) + L(55, 10) + L(58, 24) + scallops.slice(scallops.indexOf('Q') - 0),
+      d: M(6, 24) + L(9, 10) + L(55, 10) + L(58, 24) + 'Z',
       fill: 'none',
       stroke: outlineOf('#e0533a', 0.5),
       'stroke-width': 3,
@@ -262,7 +263,6 @@ function marketStall(): string {
       d: M(6, 24) + scallops.slice(scallops.indexOf('Q')) + 'Z',
       ...st('#e0533a', 2.4),
     }) +
-    h('path', { d: M(30, 10) + L(32, 4) + L(34, 10), ...st('#ffd23f', 2) }) +
     h('path', { d: M(10, 48) + L(54, 48), stroke: '#b07a3a', 'stroke-width': 2, opacity: 0.6 })
   );
 }

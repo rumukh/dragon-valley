@@ -112,9 +112,14 @@ describe('the suggested next level', () => {
     }
   });
 
-  it('in the shipped pack still starts a 3rd grader at Sunny Meadow, Pebble Brook free practice', async () => {
+  it('in the shipped pack still starts a 3rd grader at Sunny Meadow, grades 1-2 free practice', async () => {
     const player = await child(3, loadPack());
-    expect(unlocked(player)).toEqual(['pebble-brook', 'sunny-meadow']);
+    expect(unlocked(player)).toEqual([
+      'pebble-brook',
+      'hundred-hills',
+      'market-square',
+      'sunny-meadow',
+    ]);
     await player.settleStory();
     await player.choose('bubbles');
     await player.settleStory();
