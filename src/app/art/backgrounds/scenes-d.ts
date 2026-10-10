@@ -117,7 +117,7 @@ export function stickSheaf(x: number, y: number, s: number, ribbon = '#e0533a'):
 }
 
 /** A diamond kite with a ribbon tail of bows. */
-function kite(x: number, y: number, s: number): string {
+export function kite(x: number, y: number, s: number): string {
   const tail =
     M(x, y + s) + C(x - s * 0.5, y + s * 1.6, x + s * 0.6, y + s * 2.1, x - s * 0.2, y + s * 2.8);
   return (
@@ -204,43 +204,40 @@ export function hundredHills(defs: Defs): string {
     [1060, 690, 70, '#5aa54a'],
   ] as const)
     out += roundTree(x, y, s, c, true, x > 1000 ? '#e8423f' : undefined);
-  // the path climbing over the hills towards the castle
-  const path =
-    M(700, 1010) +
-    C(740, 900, 900, 860, 860, 780) +
-    C(830, 720, 760, 700, 800, 640) +
-    C(820, 610, 820, 590, 820, 566);
-  out +=
-    h('path', {
-      d: path,
-      fill: 'none',
-      stroke: '#d9b77a',
-      'stroke-width': 54,
-      'stroke-linecap': 'round',
-      opacity: 0.9,
-    }) +
-    h('path', {
-      d: path,
-      fill: 'none',
-      stroke: '#ead2a0',
-      'stroke-width': 36,
-      'stroke-linecap': 'round',
-    });
-  // near meadow
+  // a nearer row of broad green hills, then the near meadow
+  for (let i = 0; i < 7; i++) {
+    const x = 60 + i * 250 + (i % 2) * 20;
+    out += domeHill(x, 800, 330, 76 + (i % 3) * 10, ['#7cc65a', '#86cc62', '#74be54'][i % 3]!);
+  }
   out += h('path', {
-    d: ridgeD(r, 800, 30, 7),
+    d: ridgeD(r, 820, 26, 7),
     fill: linear(defs, 'meadow', [
       [0, '#8fd46a'],
       [1, '#5fae4c'],
     ]),
   });
-  out += h('path', {
-    d: M(760, 1010) + C(800, 920, 880, 880, 870, 810),
-    fill: 'none',
-    stroke: '#ead2a0',
-    'stroke-width': 40,
-    'stroke-linecap': 'round',
-  });
+  // the path climbing over the hills towards the castle (narrower as it goes further away)
+  const near = M(760, 1010) + C(800, 930, 890, 880, 860, 790);
+  const far = M(860, 790) + C(830, 720, 760, 700, 800, 640) + C(820, 610, 820, 590, 820, 566);
+  for (const [d, w] of [
+    [far, 30],
+    [near, 50],
+  ] as const)
+    out +=
+      h('path', {
+        d,
+        fill: 'none',
+        stroke: '#d9b77a',
+        'stroke-width': w + 12,
+        'stroke-linecap': 'round',
+      }) +
+      h('path', {
+        d,
+        fill: 'none',
+        stroke: '#ead2a0',
+        'stroke-width': w,
+        'stroke-linecap': 'round',
+      });
   // bundles of ten sticks on the near meadow (left and right edges), a few loose ones
   out += stickSheaf(120, 870, 120) + stickSheaf(230, 900, 96, '#3f8fd9');
   out += stickSheaf(1380, 880, 110, '#ffb31f') + stickSheaf(1500, 900, 128);
@@ -265,7 +262,7 @@ export function hundredHills(defs: Defs): string {
 }
 
 /** A tall Czech town house with a curved gable (foot centre x, y). */
-function townHouse(
+export function townHouse(
   x: number,
   y: number,
   w: number,
@@ -447,7 +444,7 @@ export function marketStall(
   );
 }
 
-function basket(x: number, y: number, s: number, fruit: string): string {
+export function basket(x: number, y: number, s: number, fruit: string): string {
   let apples = '';
   for (const [dx, dy] of [
     [-0.28, -0.34],

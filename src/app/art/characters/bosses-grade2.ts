@@ -441,10 +441,15 @@ export function longBroadSharpEyes(state: BossState, p: P): string {
       : '';
   return (
     ground(256, 236) +
-    brother(LONG, longPose(state), p('long'), longHair) +
-    brother(BROAD, broadPose(state), p('broad'), broadHair, broadBelly) +
-    brother(SHARP, sharpPose(state), p('sharp'), sharpHair) +
-    twinkle +
+    // the trio is wider than one boss, so it is drawn a little smaller to fit the frame
+    h(
+      'g',
+      { transform: 'translate(256 474) scale(0.84) translate(-256 -474)' },
+      brother(LONG, longPose(state), p('long'), longHair) +
+        brother(BROAD, broadPose(state), p('broad'), broadHair, broadBelly) +
+        brother(SHARP, sharpPose(state), p('sharp'), sharpHair) +
+        twinkle,
+    ) +
     (won
       ? sparkles([
           [256, 46, 15],
