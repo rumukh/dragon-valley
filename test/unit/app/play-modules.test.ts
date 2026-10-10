@@ -6,7 +6,15 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parseContentJson, requireValue } from '@aegis/runtime';
-import { BLANK, contentRegistration, MAX_ELAPSED_MS, num, op } from '../../../src/rules/contract';
+import {
+  BLANK,
+  contentRegistration,
+  formatFace,
+  MAX_ELAPSED_MS,
+  num,
+  op,
+  parseCardLabel,
+} from '../../../src/rules/contract';
 import { createPlayClock, createResponseTimer } from '../../../src/app/game/timer';
 import { modelFor } from '../../../src/app/math/model';
 import { levelPositions, parseValleyMap, pointsAlong } from '../../../src/app/game/map';
@@ -118,6 +126,15 @@ describe('answer choices', () => {
 });
 
 describe('minigame cards', () => {
+  it('show and read the additive faces of the younger classes (contract §11.1)', () => {
+    const add = parseCardLabel('expr:add:3:5');
+    const sub = parseCardLabel('expr:sub:8:3');
+    expect(add && formatFace(add, 'czech')).toBe('3 + 5');
+    expect(sub && formatFace(sub, 'czech')).toBe('8 \u2212 3');
+    expect(add && speakFace(add)).toBe('three plus five');
+    expect(sub && speakFace(sub)).toBe('eight minus three');
+  });
+
   it('read faces aloud and fill whole rows', () => {
     expect(speakFace({ kind: 'expr', expr: op('mul', num(7), num(8)) })).toBe('seven times eight');
     expect(speakFace({ kind: 'answer', answer: { kind: 'number', value: 56 } })).toBe('fifty-six');

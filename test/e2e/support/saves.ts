@@ -82,6 +82,70 @@ export async function meadowBackupBefore(level: string): Promise<string> {
   }
 }
 
+const BROOK_LEVELS = [
+  'pebble-brook.1',
+  'pebble-brook.2',
+  'pebble-brook.3',
+  'pebble-brook.4',
+  'pebble-brook.5',
+  'pebble-brook.6',
+];
+
+/** Through a story beat: the wanted choice where it is offered, else Next, else skip. */
+async function walkStory(player: Player, want: string): Promise<void> {
+  for (let guard = 0; guard < 30; guard++) {
+    const story = player.view().story;
+    if (story === null) return;
+    const ids = story.choices.map((choice) => choice.id);
+    const choice = ids.includes(want)
+      ? want
+      : ids.includes('next')
+        ? 'next'
+        : story.skippable || ids.length === 0
+          ? null
+          : ids[0]!;
+    if (!(await player.choose(choice))) return;
+  }
+}
+
+/**
+ * A 1st grader (docs/grades-plan.md) who chose Hop's egg at the brook and has played Pebble
+ * Brook's lessons in order up to `level`, which is open and not yet played.
+ */
+export async function brookBackupBefore(level: string): Promise<string> {
+  const index = BROOK_LEVELS.indexOf(level);
+  if (index < 0) throw new Error(`${level} is not one of Pebble Brook's lessons.`);
+  const profileId = `brook-before-${level.replace(/\W+/g, '-')}`;
+  const player = new Player(PERFECT, profileId);
+  try {
+    await player.act({ type: 'setSetting', setting: { key: 'grade', value: 1 } });
+    await player.act({ type: 'startSession', day: localDay() });
+    await walkStory(player, 'hop');
+    for (const played of BROOK_LEVELS.slice(0, index)) {
+      await player.act({ type: 'startLevel', level: played });
+      await walkStory(player, 'hop');
+      for (let guard = 0; guard < 10; guard++) {
+        await player.playRound();
+        if (player.view().round === null) break;
+        await player.act({ type: 'endRound', reason: 'done' });
+        const run = player.view().run;
+        if (run === null || run.result !== null) break;
+        await player.act({ type: 'startActivity', activity: { kind: 'level', index: run.next } });
+      }
+      await walkStory(player, 'hop');
+    }
+    expect(player.failures, 'the rules took every step').toEqual([]);
+    const card = player
+      .view()
+      .hub.regions.find((region) => region.id === 'pebble-brook')
+      ?.levels.find((candidate) => candidate.id === level);
+    expect(card?.status, `${level} is open and not yet played`).toBe('open');
+    return backupOf(player, profileId);
+  } finally {
+    await player.dispose();
+  }
+}
+
 /** A keeper who has played Sunny Meadow to its end, the Bridge Troll won over: the Arena opens. */
 export async function meadowWonBackup(): Promise<string> {
   const player = await newMeadowPlayer('meadow-won');

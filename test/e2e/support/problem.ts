@@ -56,11 +56,17 @@ const OPERATORS: Readonly<Record<string, { op: Operator; notation: Notation | nu
 export interface RenderedToken {
   readonly className: string;
   readonly text: string;
+  /** The filled dots of a counting problem's picture. */
+  readonly dots?: number;
 }
 
 export function toToken(raw: RenderedToken): Token {
   const text = raw.text.trim();
   if (raw.className.includes('dv-problem__blank')) return { kind: 'blank' };
+  // A counting problem's dots: the number is what a child counts (the filled dots), never written.
+  if (raw.className.includes('dv-problem__dots')) {
+    return { kind: 'number', value: raw.dots ?? 0, asked: false };
+  }
   if (raw.className.includes('dv-problem__slot')) return { kind: 'slot' };
   if (raw.className.includes('dv-problem__number')) {
     if (!/^\d+$/.test(text)) throw new Error(`Not a number token: "${text}"`);
@@ -89,6 +95,7 @@ export async function readTokens(page: Page): Promise<Token[]> {
     [...line.querySelectorAll('.dv-problem__part > span')].map((span) => ({
       className: span.className,
       text: span.textContent ?? '',
+      dots: span.querySelectorAll('.dv-problem__dot:not(.dv-problem__dot--empty)').length,
     })),
   );
   return raw.map(toToken);
