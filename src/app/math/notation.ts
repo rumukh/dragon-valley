@@ -19,6 +19,7 @@ import {
   OPERATOR_SYMBOLS,
   REMAINDER_SYMBOLS,
 } from '../../rules/contract';
+import { countedDots } from './picture';
 import type {
   AnswerValue,
   DivRemProblem,
@@ -42,7 +43,12 @@ export type Token =
   | { readonly kind: 'sign'; readonly text: string }
   | { readonly kind: 'bracket'; readonly text: string }
   | { readonly kind: 'blank' }
-  | { readonly kind: 'slot' };
+  | { readonly kind: 'slot' }
+  /** A counting problem's dots, drawn in place of their number (the answer, never written). */
+  | { readonly kind: 'dots'; readonly count: number };
+
+/** How a counting problem's dot is written in plain text. */
+export const DOT_SYMBOL = '\u25cf';
 
 /** How an empty sign slot is written in plain text. */
 export const SLOT_SYMBOL = '\u25cb';
@@ -111,11 +117,17 @@ export function problemTokens(
 ): Token[] {
   const out: Token[] = [];
   switch (problem.kind) {
-    case 'equation':
-      exprTokens(problem.left, notation, out);
+    case 'equation': {
+      const dots = countedDots(problem);
+      const side = (expr: Expr): void => {
+        if (dots !== null && expr.kind === 'num') out.push({ kind: 'dots', count: dots });
+        else exprTokens(expr, notation, out);
+      };
+      side(problem.left);
       out.push({ kind: 'sign', text: '=' });
-      exprTokens(problem.right, notation, out);
+      side(problem.right);
       return out;
+    }
     case 'divrem':
       out.push(
         { kind: 'number', text: String(problem.dividend) },
@@ -236,6 +248,8 @@ export function formatSolved(
 ): string {
   if (problem.kind === 'word') return formatSolved(problem.model, answer, notation);
   if (problem.kind === 'term') return formatProblem(problem, notation);
+  // A counting problem's fact is its number: the dots are the picture beside it.
+  if (countedDots(problem) !== null) return formatAnswer(answer, notation);
   const fills =
     answer.kind === 'remainder'
       ? [String(answer.quotient), String(answer.remainder)]
@@ -247,7 +261,9 @@ export function formatSolved(
         ? (fills[next++] ?? '?')
         : token.kind === 'slot'
           ? SLOT_SYMBOL
-          : token.text,
+          : token.kind === 'dots'
+            ? DOT_SYMBOL.repeat(token.count)
+            : token.text,
     )
     .join(' ')
     .replace(/\( /g, '(')

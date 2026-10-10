@@ -27,6 +27,7 @@ import type { Notation } from '../math/notation';
 import { numberToWords } from '../speech/numbers';
 import { speakExpr } from '../speech/verbalizer';
 import { h, svg } from './dom';
+import { youngModelFigure } from './young-models';
 
 export function arrayModel(rows: number, columns: number, label: string): HTMLElement {
   const grid = h('div', {
@@ -193,6 +194,11 @@ export function modelFigure(model: ProblemModel, options: ModelOptions): HTMLEle
       return orderStepsModel(model, options);
     case 'rule':
       return ruleFigure(model, options);
+    case 'count':
+    case 'ten-frame':
+    case 'number-line':
+    case 'sticks':
+      return youngModelFigure(model, options);
   }
 }
 

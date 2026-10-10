@@ -83,7 +83,7 @@ describe('a save from the deployed Region 1 slice', () => {
     await player.dispose();
   });
 
-  it('moves to content 1.3.0 at the hub with every bit of progress, as the shell does', async () => {
+  it('moves to content 1.4.0 at the hub with every bit of progress, as the shell does', async () => {
     const player = await restored();
     const before = player.state();
     const unbumped: ContentPack<ContentData> = {
@@ -99,9 +99,9 @@ describe('a save from the deployed Region 1 slice', () => {
     expect(player.host.stageContent(current).ok, 'staging it again is harmless').toBe(true);
     const activated = await player.host.activateContent(current, 'boundary');
     expect(activated.ok, activated.ok ? '' : activated.error.code).toBe(true);
-    expect(player.host.inspect().content.revision).toBe('1.3.0');
+    expect(player.host.inspect().content.revision).toBe('1.4.0');
     expect(player.state(), 'progress carried forward unchanged').toEqual(before);
-    expect(player.view().hub.regions).toHaveLength(9);
+    expect(player.view().hub.regions).toHaveLength(10);
 
     // Play on the day the slice began: snacks, then a level with a minigame.
     await player.act({ type: 'startActivity', activity: { kind: 'snack', dragon: null } });

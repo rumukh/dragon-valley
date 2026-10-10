@@ -1,18 +1,8 @@
 {
   "id": "dragon-valley",
-  "revision": "1.4.0",
+  "revision": "1.3.0",
   "schemaVersion": 1,
   "data": {
-    "grades": [
-      {
-        "grade": 1,
-        "start": "pebble-brook"
-      },
-      {
-        "grade": 3,
-        "start": "sunny-meadow"
-      }
-    ],
     "objectives": [
       {
         "id": "obj.mul.meaning",
@@ -148,47 +138,22 @@
         "id": "obj.terms.div",
         "strand": "terminology",
         "titleKey": "objective.terms.div"
-      },
-      {
-        "id": "obj.num.count-10",
-        "strand": "numbers",
-        "titleKey": "objective.num.count-10"
-      },
-      {
-        "id": "obj.num.compare-10",
-        "strand": "numbers",
-        "titleKey": "objective.num.compare-10"
-      },
-      {
-        "id": "obj.add.within-10",
-        "strand": "addition-subtraction",
-        "titleKey": "objective.add.within-10"
-      },
-      {
-        "id": "obj.sub.within-10",
-        "strand": "addition-subtraction",
-        "titleKey": "objective.sub.within-10"
-      },
-      {
-        "id": "obj.word.add-sub",
-        "strand": "word-problems",
-        "titleKey": "objective.word.add-sub"
       }
     ],
     "regions": [
       {
         "id": "sunny-meadow",
-        "order": 6,
+        "order": 1,
         "titleKey": "region.sunny-meadow.name",
         "unlock": {
-          "after": ["pebble-brook.boss"]
+          "after": []
         },
         "boss": "bridge-troll",
         "background": "sunny-meadow"
       },
       {
         "id": "whispering-woods",
-        "order": 7,
+        "order": 2,
         "titleKey": "region.whispering-woods.name",
         "unlock": {
           "after": ["sunny-meadow.boss"]
@@ -198,7 +163,7 @@
       },
       {
         "id": "fire-mountain",
-        "order": 8,
+        "order": 3,
         "titleKey": "region.fire-mountain.name",
         "unlock": {
           "after": ["whispering-woods.boss"]
@@ -208,7 +173,7 @@
       },
       {
         "id": "crystal-caves",
-        "order": 9,
+        "order": 4,
         "titleKey": "region.crystal-caves.name",
         "unlock": {
           "after": ["fire-mountain.boss"]
@@ -218,7 +183,7 @@
       },
       {
         "id": "sharing-lake",
-        "order": 10,
+        "order": 5,
         "titleKey": "region.sharing-lake.name",
         "unlock": {
           "after": ["crystal-caves.boss"]
@@ -228,7 +193,7 @@
       },
       {
         "id": "leftover-lagoon",
-        "order": 11,
+        "order": 6,
         "titleKey": "region.leftover-lagoon.name",
         "unlock": {
           "after": ["sharing-lake.boss"]
@@ -238,7 +203,7 @@
       },
       {
         "id": "giants-peaks",
-        "order": 12,
+        "order": 7,
         "titleKey": "region.giants-peaks.name",
         "unlock": {
           "after": ["leftover-lagoon.boss"]
@@ -248,7 +213,7 @@
       },
       {
         "id": "riddle-ruins",
-        "order": 13,
+        "order": 8,
         "titleKey": "region.riddle-ruins.name",
         "unlock": {
           "after": ["giants-peaks.boss"]
@@ -258,24 +223,13 @@
       },
       {
         "id": "dragon-castle",
-        "order": 14,
+        "order": 9,
         "titleKey": "region.dragon-castle.name",
         "unlock": {
           "after": ["riddle-ruins.boss"]
         },
         "boss": "seven-headed",
         "background": "dragon-castle"
-      },
-      {
-        "id": "pebble-brook",
-        "order": 1,
-        "grade": 1,
-        "titleKey": "region.pebble-brook.name",
-        "unlock": {
-          "after": []
-        },
-        "boss": "will-o-wisps",
-        "background": "pebble-brook"
       }
     ],
     "levels": [
@@ -2313,250 +2267,6 @@
         "boss": "seven-headed",
         "storyBeat": "beat.seven-headed",
         "objectives": ["obj.mul.fluency"]
-      },
-      {
-        "id": "pebble-brook.1",
-        "region": "pebble-brook",
-        "order": 1,
-        "titleKey": "level.pebble-brook.1",
-        "kind": "lesson",
-        "unlock": {
-          "after": []
-        },
-        "activities": [
-          {
-            "kind": "feeding",
-            "skills": ["count-10"],
-            "count": 4,
-            "input": "choice",
-            "options": {}
-          },
-          {
-            "kind": "feeding",
-            "skills": ["add-5", "sub-5"],
-            "count": 8,
-            "input": "choice",
-            "options": {}
-          }
-        ],
-        "stars": null,
-        "rewards": {
-          "coins": [2, 4, 6],
-          "eggs": [],
-          "cosmetics": []
-        },
-        "boss": null,
-        "storyBeat": "beat.pebble-brook-welcome",
-        "objectives": ["obj.num.count-10", "obj.add.within-10", "obj.sub.within-10"]
-      },
-      {
-        "id": "pebble-brook.2",
-        "region": "pebble-brook",
-        "order": 2,
-        "titleKey": "level.pebble-brook.2",
-        "kind": "lesson",
-        "unlock": {
-          "after": ["pebble-brook.1"]
-        },
-        "activities": [
-          {
-            "kind": "feeding",
-            "skills": ["count-10"],
-            "count": 8,
-            "input": "choice",
-            "options": {}
-          },
-          {
-            "kind": "number-trail",
-            "skills": ["count-10"],
-            "count": 1,
-            "input": "auto",
-            "options": {}
-          }
-        ],
-        "stars": null,
-        "rewards": {
-          "coins": [2, 4, 6],
-          "eggs": ["dot", "hop", "nibble"],
-          "cosmetics": []
-        },
-        "boss": null,
-        "storyBeat": null,
-        "objectives": ["obj.num.count-10"]
-      },
-      {
-        "id": "pebble-brook.3",
-        "region": "pebble-brook",
-        "order": 3,
-        "titleKey": "level.pebble-brook.3",
-        "kind": "lesson",
-        "unlock": {
-          "after": ["pebble-brook.2"]
-        },
-        "activities": [
-          {
-            "kind": "compare-stones",
-            "skills": ["compare-10"],
-            "count": 8,
-            "input": "choice",
-            "options": {}
-          },
-          {
-            "kind": "feeding",
-            "skills": ["count-10", "compare-10"],
-            "count": 6,
-            "input": "choice",
-            "options": {}
-          }
-        ],
-        "stars": null,
-        "rewards": {
-          "coins": [2, 4, 6],
-          "eggs": [],
-          "cosmetics": []
-        },
-        "boss": null,
-        "storyBeat": null,
-        "objectives": ["obj.num.count-10", "obj.num.compare-10"]
-      },
-      {
-        "id": "pebble-brook.4",
-        "region": "pebble-brook",
-        "order": 4,
-        "titleKey": "level.pebble-brook.4",
-        "kind": "lesson",
-        "unlock": {
-          "after": ["pebble-brook.3"]
-        },
-        "activities": [
-          {
-            "kind": "feeding",
-            "skills": ["add-10"],
-            "count": 8,
-            "input": "choice",
-            "options": {}
-          },
-          {
-            "kind": "memory-match",
-            "skills": ["add-5"],
-            "count": 1,
-            "input": "auto",
-            "options": {}
-          }
-        ],
-        "stars": null,
-        "rewards": {
-          "coins": [2, 4, 6],
-          "eggs": [],
-          "cosmetics": ["hat-straw"]
-        },
-        "boss": null,
-        "storyBeat": null,
-        "objectives": ["obj.add.within-10"]
-      },
-      {
-        "id": "pebble-brook.5",
-        "region": "pebble-brook",
-        "order": 5,
-        "titleKey": "level.pebble-brook.5",
-        "kind": "lesson",
-        "unlock": {
-          "after": ["pebble-brook.4"]
-        },
-        "activities": [
-          {
-            "kind": "feeding",
-            "skills": ["add-10", "sub-5"],
-            "count": 8,
-            "input": "keypad",
-            "options": {}
-          },
-          {
-            "kind": "ten-frame",
-            "skills": ["add-10"],
-            "count": 2,
-            "input": "auto",
-            "options": {}
-          },
-          {
-            "kind": "compare-stones",
-            "skills": ["compare-10"],
-            "count": 6,
-            "input": "choice",
-            "options": {}
-          }
-        ],
-        "stars": null,
-        "rewards": {
-          "coins": [2, 4, 6],
-          "eggs": [],
-          "cosmetics": []
-        },
-        "boss": null,
-        "storyBeat": null,
-        "objectives": ["obj.num.compare-10", "obj.add.within-10", "obj.sub.within-10"]
-      },
-      {
-        "id": "pebble-brook.6",
-        "region": "pebble-brook",
-        "order": 6,
-        "titleKey": "level.pebble-brook.6",
-        "kind": "lesson",
-        "unlock": {
-          "after": ["pebble-brook.5"]
-        },
-        "activities": [
-          {
-            "kind": "riddle-scrolls",
-            "skills": ["word-brook"],
-            "count": 5,
-            "input": "auto",
-            "options": {}
-          }
-        ],
-        "stars": null,
-        "rewards": {
-          "coins": [2, 4, 6],
-          "eggs": [],
-          "cosmetics": []
-        },
-        "boss": null,
-        "storyBeat": null,
-        "objectives": ["obj.word.add-sub"]
-      },
-      {
-        "id": "pebble-brook.boss",
-        "region": "pebble-brook",
-        "order": 7,
-        "titleKey": "level.pebble-brook.boss",
-        "kind": "boss",
-        "unlock": {
-          "after": ["pebble-brook.6"]
-        },
-        "activities": [
-          {
-            "kind": "boss",
-            "skills": ["count-10", "compare-10", "add-10", "sub-5", "word-brook"],
-            "count": 17,
-            "input": "auto",
-            "options": {}
-          }
-        ],
-        "stars": null,
-        "rewards": {
-          "coins": [4, 8, 12],
-          "eggs": [],
-          "cosmetics": ["hat-flower-crown"]
-        },
-        "boss": "will-o-wisps",
-        "storyBeat": "beat.will-o-wisps",
-        "objectives": [
-          "obj.num.count-10",
-          "obj.num.compare-10",
-          "obj.add.within-10",
-          "obj.sub.within-10",
-          "obj.word.add-sub"
-        ]
       }
     ],
     "skills": [
@@ -3260,67 +2970,6 @@
             "word.two-step.garden"
           ]
         }
-      },
-      {
-        "id": "count-10",
-        "titleKey": "skill.count-10",
-        "generator": "num.count",
-        "params": {
-          "numbers": [0, 10]
-        }
-      },
-      {
-        "id": "compare-10",
-        "titleKey": "skill.compare-10",
-        "generator": "num.compare",
-        "params": {
-          "numbers": [0, 10],
-          "equalShare": 20
-        }
-      },
-      {
-        "id": "add-5",
-        "titleKey": "skill.add-5",
-        "generator": "add.fact",
-        "params": {
-          "addends": [0, 5],
-          "sumMax": 5,
-          "crossing": "forbidden"
-        }
-      },
-      {
-        "id": "add-10",
-        "titleKey": "skill.add-10",
-        "generator": "add.fact",
-        "params": {
-          "addends": [0, 10],
-          "sumMax": 10,
-          "crossing": "forbidden"
-        }
-      },
-      {
-        "id": "sub-5",
-        "titleKey": "skill.sub-5",
-        "generator": "sub.fact",
-        "params": {
-          "subtrahends": [0, 5],
-          "differences": [0, 5],
-          "minuendMax": 5,
-          "crossing": "forbidden"
-        }
-      },
-      {
-        "id": "word-brook",
-        "titleKey": "skill.word-brook",
-        "generator": "word",
-        "params": {
-          "templates": [
-            "word.add-to.pebbles",
-            "word.add-to.ducks",
-            "word.take-from.frogs",
-            "word.take-from.cherries"
-          ]
-        }
       }
     ],
     "dragons": [
@@ -3496,39 +3145,6 @@
         ],
         "divisionSkills": [],
         "boss": "seven-headed"
-      },
-      {
-        "id": "dot",
-        "kind": "special",
-        "table": null,
-        "nameKey": "dragon.dot",
-        "region": "pebble-brook",
-        "rig": "dot",
-        "skills": ["count-10", "compare-10"],
-        "divisionSkills": [],
-        "boss": "will-o-wisps"
-      },
-      {
-        "id": "hop",
-        "kind": "special",
-        "table": null,
-        "nameKey": "dragon.hop",
-        "region": "pebble-brook",
-        "rig": "hop",
-        "skills": ["add-5"],
-        "divisionSkills": [],
-        "boss": "will-o-wisps"
-      },
-      {
-        "id": "nibble",
-        "kind": "special",
-        "table": null,
-        "nameKey": "dragon.nibble",
-        "region": "pebble-brook",
-        "rig": "nibble",
-        "skills": ["sub-5"],
-        "divisionSkills": [],
-        "boss": "will-o-wisps"
       }
     ],
     "bosses": [
@@ -3605,14 +3221,6 @@
         "reviewShare": 0,
         "heads": 7,
         "finale": true
-      },
-      {
-        "id": "will-o-wisps",
-        "region": "pebble-brook",
-        "nameKey": "boss.will-o-wisps",
-        "mood": "happy",
-        "meter": 12,
-        "reviewShare": 20
       }
     ],
     "cosmetics": [
@@ -4630,70 +4238,6 @@
         "icon": "egg",
         "color": "#ff8fab",
         "frame": "frame-heart"
-      },
-      {
-        "id": "brook-first-steps",
-        "nameKey": "sticker.brook-first-steps",
-        "page": "pebble-brook",
-        "criteria": {
-          "kind": "level-complete",
-          "level": "pebble-brook.1",
-          "stars": 1
-        },
-        "icon": "emblem-pebble-brook",
-        "color": "#7cc6e8",
-        "frame": "frame-round"
-      },
-      {
-        "id": "brook-pebble-counter",
-        "nameKey": "sticker.brook-pebble-counter",
-        "page": "pebble-brook",
-        "criteria": {
-          "kind": "level-complete",
-          "level": "pebble-brook.2",
-          "stars": 3
-        },
-        "icon": "pebbles",
-        "color": "#b9a38a",
-        "frame": "frame-scallop"
-      },
-      {
-        "id": "brook-stepping-stones",
-        "nameKey": "sticker.brook-stepping-stones",
-        "page": "pebble-brook",
-        "criteria": {
-          "kind": "level-complete",
-          "level": "pebble-brook.3",
-          "stars": 3
-        },
-        "icon": "stepping-stones",
-        "color": "#8bd36b",
-        "frame": "frame-hexagon"
-      },
-      {
-        "id": "brook-ten-frame",
-        "nameKey": "sticker.brook-ten-frame",
-        "page": "pebble-brook",
-        "criteria": {
-          "kind": "level-complete",
-          "level": "pebble-brook.5",
-          "stars": 3
-        },
-        "icon": "ten-frame",
-        "color": "#ffd23f",
-        "frame": "frame-star"
-      },
-      {
-        "id": "wisps-dance",
-        "nameKey": "sticker.wisps-dance",
-        "page": "pebble-brook",
-        "criteria": {
-          "kind": "boss-defeated",
-          "boss": "will-o-wisps"
-        },
-        "icon": "wisp",
-        "color": "#c9b6ff",
-        "frame": "frame-shield"
       }
     ],
     "quests": [
@@ -4804,24 +4348,6 @@
         "coins": 5,
         "weight": 4,
         "unlock": "crystal-caves.1"
-      },
-      {
-        "id": "correct-10",
-        "titleKey": "quest.correct-10",
-        "goal": "correct-answers",
-        "target": 10,
-        "coins": 2,
-        "weight": 10,
-        "unlock": "pebble-brook.1"
-      },
-      {
-        "id": "snack-3",
-        "titleKey": "quest.snack-3",
-        "goal": "feed-hungry",
-        "target": 3,
-        "coins": 2,
-        "weight": 10,
-        "unlock": "pebble-brook.2"
       }
     ],
     "wordLists": [
@@ -7845,180 +7371,6 @@
         },
         "operation": null,
         "words": 22
-      },
-      {
-        "id": "word.add-to.pebbles",
-        "family": "add-to",
-        "vars": {
-          "name": {
-            "kind": "word",
-            "list": "names"
-          },
-          "have": {
-            "kind": "int",
-            "min": 1,
-            "max": 5
-          },
-          "more": {
-            "kind": "int",
-            "min": 1,
-            "max": 5
-          }
-        },
-        "model": {
-          "kind": "value",
-          "expr": {
-            "kind": "op",
-            "op": "add",
-            "left": {
-              "kind": "var",
-              "name": "have"
-            },
-            "right": {
-              "kind": "var",
-              "name": "more"
-            }
-          }
-        },
-        "operation": "add",
-        "textKey": "word.add-to.pebbles",
-        "words": 12
-      },
-      {
-        "id": "word.add-to.ducks",
-        "family": "add-to",
-        "vars": {
-          "swim": {
-            "kind": "int",
-            "min": 1,
-            "max": 5
-          },
-          "more": {
-            "kind": "int",
-            "min": 1,
-            "max": 5
-          }
-        },
-        "model": {
-          "kind": "value",
-          "expr": {
-            "kind": "op",
-            "op": "add",
-            "left": {
-              "kind": "var",
-              "name": "swim"
-            },
-            "right": {
-              "kind": "var",
-              "name": "more"
-            }
-          }
-        },
-        "operation": "add",
-        "textKey": "word.add-to.ducks",
-        "words": 11
-      },
-      {
-        "id": "word.take-from.frogs",
-        "family": "take-from",
-        "vars": {
-          "left": {
-            "kind": "int",
-            "min": 0,
-            "max": 5
-          },
-          "jump": {
-            "kind": "int",
-            "min": 1,
-            "max": 5
-          },
-          "frogs": {
-            "kind": "calc",
-            "expr": {
-              "kind": "op",
-              "op": "add",
-              "left": {
-                "kind": "var",
-                "name": "left"
-              },
-              "right": {
-                "kind": "var",
-                "name": "jump"
-              }
-            }
-          }
-        },
-        "model": {
-          "kind": "value",
-          "expr": {
-            "kind": "op",
-            "op": "sub",
-            "left": {
-              "kind": "var",
-              "name": "frogs"
-            },
-            "right": {
-              "kind": "var",
-              "name": "jump"
-            }
-          }
-        },
-        "operation": "sub",
-        "textKey": "word.take-from.frogs",
-        "words": 14
-      },
-      {
-        "id": "word.take-from.cherries",
-        "family": "take-from",
-        "vars": {
-          "name": {
-            "kind": "word",
-            "list": "names"
-          },
-          "left": {
-            "kind": "int",
-            "min": 0,
-            "max": 5
-          },
-          "eaten": {
-            "kind": "int",
-            "min": 1,
-            "max": 5
-          },
-          "total": {
-            "kind": "calc",
-            "expr": {
-              "kind": "op",
-              "op": "add",
-              "left": {
-                "kind": "var",
-                "name": "left"
-              },
-              "right": {
-                "kind": "var",
-                "name": "eaten"
-              }
-            }
-          }
-        },
-        "model": {
-          "kind": "value",
-          "expr": {
-            "kind": "op",
-            "op": "sub",
-            "left": {
-              "kind": "var",
-              "name": "total"
-            },
-            "right": {
-              "kind": "var",
-              "name": "eaten"
-            }
-          }
-        },
-        "operation": "sub",
-        "textKey": "word.take-from.cherries",
-        "words": 11
       }
     ],
     "placement": {
@@ -8027,43 +7379,37 @@
           "skill": "mul-2-5",
           "problems": 4,
           "passAccuracy": 75,
-          "levels": ["sunny-meadow.2"],
-          "grades": [3]
+          "levels": ["sunny-meadow.2"]
         },
         {
           "skill": "mul-0-1-10",
           "problems": 3,
           "passAccuracy": 100,
-          "levels": ["sunny-meadow.3"],
-          "grades": [3]
+          "levels": ["sunny-meadow.3"]
         },
         {
           "skill": "div-2-5-10",
           "problems": 3,
           "passAccuracy": 67,
-          "levels": ["sunny-meadow.4"],
-          "grades": [3]
+          "levels": ["sunny-meadow.4"]
         },
         {
           "skill": "missing-2-5-10",
           "problems": 3,
           "passAccuracy": 67,
-          "levels": ["sunny-meadow.5"],
-          "grades": [3]
+          "levels": ["sunny-meadow.5"]
         },
         {
           "skill": "mul-3-4",
           "problems": 4,
           "passAccuracy": 75,
-          "levels": ["whispering-woods.2", "whispering-woods.3"],
-          "grades": [3]
+          "levels": ["whispering-woods.2", "whispering-woods.3"]
         },
         {
           "skill": "div-3-4",
           "problems": 3,
           "passAccuracy": 67,
-          "levels": ["whispering-woods.4"],
-          "grades": [3]
+          "levels": ["whispering-woods.4"]
         }
       ],
       "minProblems": 4,
@@ -8181,8 +7527,7 @@
           "id": "beat.first-egg",
           "trigger": {
             "kind": "after-beat",
-            "beat": "beat.prologue",
-            "grades": [3]
+            "beat": "beat.prologue"
           },
           "skippable": false,
           "graph": {
@@ -10490,297 +9835,6 @@
             "endings": [],
             "maxAutomaticSteps": 4
           }
-        },
-        {
-          "id": "beat.pebble-brook-welcome",
-          "trigger": {
-            "kind": "level-start",
-            "level": "pebble-brook.1",
-            "grades": [1]
-          },
-          "skippable": false,
-          "graph": {
-            "schema": 1,
-            "id": "story.pebble-brook-welcome",
-            "revision": "1",
-            "start": "pebble-brook-welcome-1",
-            "catalogs": {
-              "scene": ["pebble-brook"],
-              "text": [
-                "story.pebble-brook-welcome.1",
-                "story.next",
-                "story.pebble-brook-welcome.2",
-                "story.pebble-brook-welcome.choose",
-                "story.pebble-brook-welcome.dot",
-                "story.pebble-brook-welcome.hop",
-                "story.pebble-brook-welcome.nibble",
-                "story.pebble-brook-welcome.chosen"
-              ],
-              "asset": [],
-              "clue": [],
-              "fact": [],
-              "glossary": [],
-              "reward": ["first-egg.dot", "first-egg.hop", "first-egg.nibble"],
-              "completion": []
-            },
-            "flags": [],
-            "items": [],
-            "data": [],
-            "effects": [
-              {
-                "id": "claim-dot",
-                "kind": "claim",
-                "catalog": "reward",
-                "ref": "first-egg.dot"
-              },
-              {
-                "id": "claim-hop",
-                "kind": "claim",
-                "catalog": "reward",
-                "ref": "first-egg.hop"
-              },
-              {
-                "id": "claim-nibble",
-                "kind": "claim",
-                "catalog": "reward",
-                "ref": "first-egg.nibble"
-              }
-            ],
-            "nodes": [
-              {
-                "id": "pebble-brook-welcome-1",
-                "scene": "pebble-brook",
-                "text": "story.pebble-brook-welcome.1",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [
-                  {
-                    "id": "next",
-                    "text": "story.next",
-                    "to": "pebble-brook-welcome-2",
-                    "guard": null,
-                    "effects": []
-                  }
-                ],
-                "automatic": [],
-                "resolveEnding": false
-              },
-              {
-                "id": "pebble-brook-welcome-2",
-                "scene": "pebble-brook",
-                "text": "story.pebble-brook-welcome.2",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [
-                  {
-                    "id": "next",
-                    "text": "story.next",
-                    "to": "choose",
-                    "guard": null,
-                    "effects": []
-                  }
-                ],
-                "automatic": [],
-                "resolveEnding": false
-              },
-              {
-                "id": "choose",
-                "scene": "pebble-brook",
-                "text": "story.pebble-brook-welcome.choose",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [
-                  {
-                    "id": "dot",
-                    "text": "story.pebble-brook-welcome.dot",
-                    "to": "chosen",
-                    "guard": null,
-                    "effects": ["claim-dot"]
-                  },
-                  {
-                    "id": "hop",
-                    "text": "story.pebble-brook-welcome.hop",
-                    "to": "chosen",
-                    "guard": null,
-                    "effects": ["claim-hop"]
-                  },
-                  {
-                    "id": "nibble",
-                    "text": "story.pebble-brook-welcome.nibble",
-                    "to": "chosen",
-                    "guard": null,
-                    "effects": ["claim-nibble"]
-                  }
-                ],
-                "automatic": [],
-                "resolveEnding": false
-              },
-              {
-                "id": "chosen",
-                "scene": "pebble-brook",
-                "text": "story.pebble-brook-welcome.chosen",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [],
-                "automatic": [],
-                "resolveEnding": false
-              }
-            ],
-            "maxAutomaticSteps": 4,
-            "endings": []
-          }
-        },
-        {
-          "id": "beat.will-o-wisps",
-          "trigger": {
-            "kind": "level-start",
-            "level": "pebble-brook.boss"
-          },
-          "skippable": true,
-          "graph": {
-            "schema": 1,
-            "id": "story.will-o-wisps",
-            "revision": "1",
-            "start": "will-o-wisps-1",
-            "catalogs": {
-              "scene": ["pebble-brook"],
-              "text": [
-                "story.will-o-wisps.1",
-                "story.next",
-                "story.will-o-wisps.2",
-                "story.will-o-wisps.3"
-              ],
-              "asset": [],
-              "clue": [],
-              "fact": [],
-              "glossary": [],
-              "reward": [],
-              "completion": []
-            },
-            "flags": [],
-            "items": [],
-            "data": [],
-            "effects": [],
-            "nodes": [
-              {
-                "id": "will-o-wisps-1",
-                "scene": "pebble-brook",
-                "text": "story.will-o-wisps.1",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [
-                  {
-                    "id": "next",
-                    "text": "story.next",
-                    "to": "will-o-wisps-2",
-                    "guard": null,
-                    "effects": []
-                  }
-                ],
-                "automatic": [],
-                "resolveEnding": false
-              },
-              {
-                "id": "will-o-wisps-2",
-                "scene": "pebble-brook",
-                "text": "story.will-o-wisps.2",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [
-                  {
-                    "id": "next",
-                    "text": "story.next",
-                    "to": "will-o-wisps-3",
-                    "guard": null,
-                    "effects": []
-                  }
-                ],
-                "automatic": [],
-                "resolveEnding": false
-              },
-              {
-                "id": "will-o-wisps-3",
-                "scene": "pebble-brook",
-                "text": "story.will-o-wisps.3",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [],
-                "automatic": [],
-                "resolveEnding": false
-              }
-            ],
-            "maxAutomaticSteps": 4,
-            "endings": []
-          }
-        },
-        {
-          "id": "beat.wisps-dance",
-          "trigger": {
-            "kind": "boss-defeated",
-            "boss": "will-o-wisps"
-          },
-          "skippable": true,
-          "graph": {
-            "schema": 1,
-            "id": "story.wisps-dance",
-            "revision": "1",
-            "start": "wisps-dance-1",
-            "catalogs": {
-              "scene": ["pebble-brook"],
-              "text": ["story.wisps-dance.1", "story.next", "story.wisps-dance.2"],
-              "asset": [],
-              "clue": [],
-              "fact": [],
-              "glossary": [],
-              "reward": [],
-              "completion": []
-            },
-            "flags": [],
-            "items": [],
-            "data": [],
-            "effects": [],
-            "nodes": [
-              {
-                "id": "wisps-dance-1",
-                "scene": "pebble-brook",
-                "text": "story.wisps-dance.1",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [
-                  {
-                    "id": "next",
-                    "text": "story.next",
-                    "to": "wisps-dance-2",
-                    "guard": null,
-                    "effects": []
-                  }
-                ],
-                "automatic": [],
-                "resolveEnding": false
-              },
-              {
-                "id": "wisps-dance-2",
-                "scene": "pebble-brook",
-                "text": "story.wisps-dance.2",
-                "narration": null,
-                "revisit": "allow",
-                "entryEffects": [],
-                "choices": [],
-                "automatic": [],
-                "resolveEnding": false
-              }
-            ],
-            "maxAutomaticSteps": 4,
-            "endings": []
-          }
         }
       ],
       "rewards": [
@@ -10859,27 +9913,6 @@
           "grant": {
             "kind": "egg",
             "dragon": "clockwork"
-          }
-        },
-        {
-          "reward": "first-egg.dot",
-          "grant": {
-            "kind": "egg",
-            "dragon": "dot"
-          }
-        },
-        {
-          "reward": "first-egg.hop",
-          "grant": {
-            "kind": "egg",
-            "dragon": "hop"
-          }
-        },
-        {
-          "reward": "first-egg.nibble",
-          "grant": {
-            "kind": "egg",
-            "dragon": "nibble"
           }
         }
       ]
@@ -10995,22 +10028,7 @@
       },
       "hungry": {
         "minDue": 1
-      },
-      "grades": [
-        {
-          "grade": 1,
-          "choice": {
-            "fastMs": 4000,
-            "okMs": 9000
-          },
-          "keypad": {
-            "fastMs": 5000,
-            "okMs": 12000,
-            "perExtraDigitMs": 1000
-          },
-          "choices": 3
-        }
-      ]
+      }
     }
   }
 }

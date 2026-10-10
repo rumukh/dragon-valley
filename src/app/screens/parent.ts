@@ -7,7 +7,9 @@
  * keeper's game is open while it is shown.
  */
 import { assertChildSafeView } from '@aegis/browser/ui';
-import type { SettingChange } from '../../rules/contract';
+import { DEFAULT_GRADE, GRADES } from '../../rules/contract';
+import type { Grade, SettingChange } from '../../rules/contract';
+import { requestGrade } from '../game/grade';
 import { possessive } from '../i18n/messages';
 import type { MessageKey } from '../i18n/messages';
 import { NOTATIONS } from '../math/notation';
@@ -36,6 +38,7 @@ import {
   readKeeperGame,
 } from './keeper-data';
 import type { KeeperGame } from './keeper-data';
+import { GRADE_LABEL_KEYS } from './editor';
 import { printContent } from './parent-print';
 import { progressContent } from './parent-progress';
 
@@ -266,7 +269,13 @@ export function parentScreen(
           h(
             'div',
             { className: 'dv-progress', testId: 'parent-progress' },
-            ...progressContent(app, read.keeper, read.game.view, read.game.notation),
+            ...progressContent(
+              app,
+              read.keeper,
+              read.game.view,
+              read.game.notation,
+              read.game.content.data,
+            ),
           ),
         );
       };
@@ -533,11 +542,36 @@ export function parentScreen(
         const heading = h('h3', { text: t('parent.rules.heading', { name: keeper.name }) });
         const active = await app.openKeeper(keeper.id);
         const view = active.game.view();
+        /** The class: the game's setting, or the editor's pick until the first session. */
+        const gradeField = (current: Grade, pick: (grade: Grade) => Promise<void>): HTMLElement =>
+          h(
+            'div',
+            { className: 'dv-field', testId: 'setting-grade' },
+            h('span', { className: 'dv-field__label', text: t('parent.rules.grade') }),
+            segmented(
+              t('parent.rules.grade'),
+              GRADES.map(String),
+              String(current),
+              (value) => t(GRADE_LABEL_KEYS[Number(value) as Grade]),
+              (value) => `setting-grade-${value}`,
+              (value) => pick(Number(value) as Grade),
+            ),
+            h('span', {
+              className: 'dv-field__hint',
+              text: t('parent.rules.gradeNote', { name: keeper.name }),
+            }),
+          );
         if (view.day === null) {
+          const pending = findKeeper(app.family.state(), keeper.id)?.grade ?? DEFAULT_GRADE;
           return h(
             'div',
             { className: 'dv-parent__rules', testId: 'parent-rules' },
             heading,
+            gradeField(pending, async (grade) => {
+              await app.family.setPendingGrade(keeper.id, grade);
+              app.kit.toasts.show(t('parent.rules.saved'), { tone: 'success', durationMs: 1800 });
+              await render();
+            }),
             h('p', { className: 'dv-note', text: t('parent.rules.notYet', { name: keeper.name }) }),
           );
         }
@@ -565,6 +599,14 @@ export function parentScreen(
           'div',
           { className: 'dv-parent__rules', testId: 'parent-rules' },
           heading,
+          gradeField(view.settings.grade, async (grade) => {
+            if (await requestGrade(active, grade)) {
+              app.kit.toasts.show(t('parent.rules.saved'), { tone: 'success', durationMs: 1800 });
+            } else {
+              app.kit.toasts.show(t('parent.rules.gradeUnavailable'), { tone: 'warning' });
+            }
+            await render();
+          }),
           h(
             'div',
             { className: 'dv-field' },

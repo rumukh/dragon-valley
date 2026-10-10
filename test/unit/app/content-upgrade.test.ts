@@ -274,7 +274,7 @@ describe('a save of the deployed Region 1 slice on the v1 content', () => {
 
     expect(await session.activateLatestContent()).toBe(true);
     expect(session.content()).toBe(v1);
-    expect(session.host.getView().hub.regions).toHaveLength(9);
+    expect(session.host.getView().hub.regions).toHaveLength(10);
     expect(session.host.inspect().state, 'every bit of progress carried forward').toEqual(progress);
     expect(session.indicator()).toEqual({ kind: 'saved' });
     await session.close();
@@ -286,7 +286,7 @@ describe('a save of the deployed Region 1 slice on the v1 content', () => {
       seed: profileSeed('profile-1'),
     });
     expect(fetched, 'the archived pack is fetched once per page').toHaveLength(1);
-    expect(reopened.host.getView().hub.regions).toHaveLength(9);
+    expect(reopened.host.getView().hub.regions).toHaveLength(10);
     await reopened.close();
   });
 

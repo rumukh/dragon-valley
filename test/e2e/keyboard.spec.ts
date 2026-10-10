@@ -77,10 +77,10 @@ test('a keyboard alone makes a keeper and starts a round, with focus always visi
 
   const editor = await around(page, 'keeper-name');
   expect(editor.before).toEqual(['back']);
-  expect(editor.after, 'then the pictures (one stop) and the big button').toEqual([
-    'avatar-keeper-1',
-    'keeper-save',
-  ]);
+  expect(
+    editor.after,
+    'then the pictures and the classes (one stop each) and the big button',
+  ).toEqual(['avatar-keeper-1', 'grade-3', 'keeper-save']);
   expectVisibleFocus(editor.stops, 'editor');
   await page.getByTestId('back').focus();
   await page.keyboard.press('Tab');
@@ -93,6 +93,8 @@ test('a keyboard alone makes a keeper and starts a round, with focus always visi
   await page.keyboard.press('ArrowRight');
   await page.keyboard.press('ArrowRight');
   await expect(page.getByTestId('avatar-keeper-3').locator('input')).toBeChecked();
+  await page.keyboard.press('Tab');
+  expect(await focusedId(page), 'the class: 3rd is chosen until another is').toBe('grade-3');
   await page.keyboard.press('Tab');
   expect(await focusedId(page)).toBe('keeper-save');
   await page.keyboard.press('Enter');
@@ -193,12 +195,18 @@ test.describe('the keeper editor by keyboard alone', () => {
     await expect(name).toBeFocused();
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
     await expect(page.getByTestId('keeper-save')).toBeFocused();
     await page.keyboard.press('Enter');
     const problem = page.getByTestId('keeper-problem');
     await expect(problem).toHaveText('Please pick a keeper picture.');
     await expect(problem, 'problems are announced').toHaveAttribute('aria-live', 'polite');
     await expect(page.getByTestId('keeper-save'), 'focus stays on Save').toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(
+      page.getByTestId('grade-3').locator('input'),
+      'the class comes first',
+    ).toBeFocused();
     await page.keyboard.press('Shift+Tab');
     const entered = await pictures(page);
     expect(entered, 'Shift+Tab goes back into the pictures').toEqual({
@@ -210,6 +218,7 @@ test.describe('the keeper editor by keyboard alone', () => {
       focused: entered.focused,
       chosen: entered.focused,
     });
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await expect(problem).toHaveText('Please type a name.');
@@ -226,6 +235,7 @@ test.describe('the keeper editor by keyboard alone', () => {
     expect((await pictures(page)).focused, 'Tab goes on to the chosen picture').toBe(
       entered.focused,
     );
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await meetFirstEgg(page);
@@ -298,10 +308,14 @@ test.describe('the keeper editor by keyboard alone', () => {
       afterArrows,
       'the picture an arrow key moved to shows its focus ring',
     ).toBeGreaterThanOrEqual(SEEN_PIXELS);
+    await expect(page.getByTestId('grade-3').locator('input'), 'then the class').toBeFocused();
+    await page.keyboard.press('Tab');
     await expect(page.getByTestId('keeper-save')).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
     await page.keyboard.press('Shift+Tab');
     await expect(picture(2), 'Shift+Tab comes back to the chosen picture').toBeFocused();
 
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await meetFirstEgg(page);

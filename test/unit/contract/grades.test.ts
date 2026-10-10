@@ -2,7 +2,8 @@
  * The grades 1-3 contract (docs/grades-plan.md, docs/contract.md): the grade setting, the state
  * migration that reads every older save as a 3rd grader, the addition and subtraction item IDs,
  * the new generators' item universes, and the content fields that say where each grade starts.
- * Content cases start from the real pack and change one thing, like content.test.ts.
+ * Content cases start from the archived 1.3.0 pack, the last without grades, and change one thing,
+ * like content.test.ts; the shipped pack's own grades are checked last.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -37,7 +38,8 @@ import type { ContentData, ProfileState, Skill } from '../../../src/rules/contra
 import { PERFECT, Player } from '../../traces/support';
 
 const root = join(import.meta.dirname, '..', '..', '..');
-const packText = readFileSync(join(root, 'content', 'dragon-valley.content.json'), 'utf8');
+const packText = readFileSync(join(root, 'content', 'history', '1.3.0.json'), 'utf8');
+const shippedText = readFileSync(join(root, 'content', 'dragon-valley.content.json'), 'utf8');
 interface Pack {
   id: string;
   revision: string;
@@ -96,7 +98,7 @@ describe('the grade setting', () => {
     expect(await player.act({ type: 'startSession', day: '2026-10-06' })).toBe(true);
     expect(
       await player.reject(
-        { type: 'setSetting', setting: { key: 'grade', value: 1 } },
+        { type: 'setSetting', setting: { key: 'grade', value: 2 } },
         'invalid-setting',
       ),
       player.failures.join(),
@@ -380,5 +382,27 @@ describe('grades in the content pack', () => {
     const step = fresh();
     step.data.placement.steps[0]!.grades = [2];
     expectDiagnostic(step, 'missing-reference', 'step-0');
+  });
+});
+
+describe('grades in the shipped pack', () => {
+  it('start grade 1 in Pebble Brook and grade 3 in Sunny Meadow; grade 2 waits for its regions', () => {
+    const pack: Pack = JSON.parse(shippedText);
+    expect(diagnostics(pack)).toEqual([]);
+    expect(pack.data.grades).toEqual([
+      { grade: 1, start: 'pebble-brook' },
+      { grade: 3, start: 'sunny-meadow' },
+    ]);
+    expect(gradeStart(pack.data, 1)).toBe('pebble-brook');
+    expect(gradeStart(pack.data, 2)).toBeNull();
+    expect(gradeStart(pack.data, 3)).toBe('sunny-meadow');
+  });
+
+  it('keep the 3rd-grade first egg and placement for 3rd graders only', () => {
+    const pack: Pack = JSON.parse(shippedText);
+    const beat = (id: string) => pack.data.story.beats.find((b) => b.id === id)!;
+    expect(beat('beat.first-egg').trigger.grades).toEqual([3]);
+    expect(beat('beat.pebble-brook-welcome').trigger.grades).toEqual([1]);
+    for (const step of pack.data.placement.steps) expect(step.grades).toEqual([3]);
   });
 });

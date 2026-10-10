@@ -26,7 +26,7 @@ import type { ActiveKeeper, App } from '../shell/app';
 import { createSaveStatus, toastStickers, topBar } from './common';
 
 /** The common frame of a collection screen: Back, a title, the coins and the save status. */
-function collection(
+export function collection(
   app: App,
   active: ActiveKeeper,
   options: { title: string; testId: string; music: string; body: Node[] },
@@ -560,6 +560,16 @@ export function windowScreen(app: App, keeperId: string): ScreenEntry {
                 ),
               ),
             ),
+            // The Sun Window (+ and −) is always reachable from here, as this one is from there.
+            candyButton({
+              label: t('window.toSun'),
+              icon: 'window',
+              variant: 'paper',
+              size: 'small',
+              testId: 'window-to-sun',
+              onPress: () => app.router.replace(app.screens.sunWindow(keeperId)),
+              onError: app.kit.onError,
+            }),
           ),
         ],
       });

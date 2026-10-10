@@ -366,3 +366,83 @@
   background: transparent;
   outline-style: dotted;
 }
+
+/* ---- Young players: ten-frames, number lines and sticks ---------------------------------- */
+
+.dv-model__frame {
+  fill: var(--dv-card);
+  stroke: var(--dv-line-strong);
+  stroke-width: 2.5;
+}
+
+.dv-model__frame-cell {
+  fill: none;
+  stroke: var(--dv-line);
+  stroke-width: 1.2;
+}
+
+.dv-model__counter {
+  fill: var(--dv-primary);
+  stroke: var(--dv-primary-deep);
+  stroke-width: 1.5;
+}
+
+/* The added number: squares, not dots. */
+.dv-model__counter--added {
+  fill: var(--dv-sun);
+  stroke: var(--dv-sun-deep);
+}
+
+/* Taken away: a paler dot, crossed out. */
+.dv-model__counter--gone {
+  fill: var(--dv-paper);
+}
+
+/* A place the child fills in: a dashed ring. */
+.dv-model__counter--hole {
+  fill: none;
+  stroke: var(--dv-ink-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+.dv-model__cross {
+  stroke: var(--dv-miss-deep);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.dv-model__axis,
+.dv-model__tick {
+  stroke: var(--dv-ink-soft);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.dv-model__hop {
+  fill: none;
+  stroke: var(--dv-primary);
+  stroke-width: 2;
+}
+
+.dv-model__bundle-sticks,
+.dv-model__stick {
+  fill: var(--dv-sun);
+  stroke: var(--dv-sun-deep);
+  stroke-width: 1.2;
+}
+
+.dv-model__stick-line {
+  stroke: var(--dv-sun-deep);
+  stroke-width: 0.8;
+}
+
+.dv-model__tie {
+  fill: var(--dv-primary);
+  stroke: var(--dv-primary-deep);
+  stroke-width: 1;
+}
+
+.dv-model__line--young {
+  font-size: 1.4em;
+}

@@ -6,7 +6,10 @@
  * skill begun. Calm and plain: no sounds, no animation, nothing to press but the details.
  */
 import { renderMasteryGrid } from '../art/window';
-import type { GameView, MasteryLevel, Notation } from '../../rules/contract';
+import type { DeepReadonly } from '@aegis/runtime';
+import type { ContentData, GameView, Grade, MasteryLevel, Notation } from '../../rules/contract';
+import { gradeOf, isYoungGrade, skillGrades } from '../game/grade';
+import { sunWindowOf } from '../game/sun-window';
 import { plural } from '../i18n/messages';
 import type { MessageKey, Translate } from '../i18n/messages';
 import {
@@ -22,6 +25,7 @@ import {
 import { svgElement } from '../ui/art';
 import { h } from '../ui/dom';
 import type { App } from '../shell/app';
+import { litPanes, sunPanel } from './sun-window';
 
 const SVG = 'http://www.w3.org/2000/svg';
 const LEVELS_HIGH_FIRST: readonly MasteryLevel[] = ['gold', 'silver', 'bronze', 'dim'];
@@ -289,12 +293,51 @@ function trend(t: Translate, view: GameView, today: string, name: string): HTMLE
   );
 }
 
-/** The Progress tab's content for one keeper's game view. */
+const SKILL_GRADE_HEADINGS: Readonly<Record<Grade, MessageKey>> = {
+  1: 'parent.progress.grade1',
+  2: 'parent.progress.grade2',
+  3: 'parent.progress.grade3',
+};
+
+/** The Sun Window's two panels (+ and −) for the grown-ups, with their counts. */
+function sunGrids(t: Translate, view: GameView): HTMLElement {
+  const sun = sunWindowOf(view);
+  const figure = (
+    cells: typeof sun.cells,
+    op: 'add' | 'sub',
+    heading: MessageKey,
+    label: MessageKey,
+    sign: string,
+  ): HTMLElement =>
+    h(
+      'figure',
+      { className: 'dv-progress-grid__figure' },
+      sunPanel(cells, {
+        heading: t(heading),
+        label: t(label, { lit: litPanes(cells), total: cells.length }),
+        testId: `progress-grid-${op}`,
+        sign,
+      }),
+      h('p', {
+        className: 'dv-note',
+        text: t('parent.progress.lit', { lit: litPanes(cells), total: cells.length }),
+      }),
+    );
+  return h(
+    'div',
+    { className: 'dv-progress__grids dv-sun' },
+    figure(sun.cells, 'add', 'sun.addition', 'sun.additionArt', '+'),
+    figure(sun.subtraction, 'sub', 'sun.subtraction', 'sun.subtractionArt', '\u2212'),
+  );
+}
+
+/** The Progress tab's content for one keeper's game view (and the pack, to group by grade). */
 export function progressContent(
   app: App,
   keeper: { readonly id: string; readonly name: string },
   view: GameView,
   notation: Notation,
+  data?: DeepReadonly<ContentData>,
 ): HTMLElement[] {
   const t = app.kit.t;
   const parent = view.parent;
@@ -309,7 +352,52 @@ export function progressContent(
   }
   const skills = practisedSkills(parent.skills);
   const unanswered = unansweredTables(view);
-  const lit = paneCounts([...view.window.cells, ...view.window.division]);
+  const grade = gradeOf(view);
+  const sun = sunWindowOf(view);
+  // The Sun Window shows for a 1st or 2nd grader, or once a 3rd grader has lit one of its panes.
+  const showSun = isYoungGrade(grade) || litPanes([...sun.cells, ...sun.subtraction]) > 0;
+  const lit = paneCounts([
+    ...view.window.cells,
+    ...view.window.division,
+    ...(showSun ? [...sun.cells, ...sun.subtraction] : []),
+  ]);
+  const sunSection: HTMLElement[] = showSun
+    ? [
+        h('h3', { text: t('parent.progress.sunHeading') }),
+        h('p', { className: 'dv-note', text: t('parent.progress.sunIntro') }),
+        sunGrids(t, view),
+      ]
+    : [];
+  const grades = data ? skillGrades(data) : new Map<string, Grade>();
+  const skillRows = (list: typeof skills): HTMLElement =>
+    statList(
+      t('parent.progress.skillsHeading'),
+      [t('parent.progress.mastered'), t('parent.progress.right')],
+      list.map((skill) => ({
+        name: app.text.has(skill.titleKey) ? app.text(skill.titleKey) : skill.skill,
+        values: [
+          t('parent.progress.of', { value: skill.mastered, total: skill.items }),
+          percent(t, skill.accuracy),
+        ],
+      })),
+      'progress-skills',
+    );
+  const skillGrade = (skill: string): Grade => grades.get(skill) ?? 3;
+  const byGrade = ([1, 2, 3] as const)
+    .map((g) => ({ grade: g, list: skills.filter((skill) => skillGrade(skill.skill) === g) }))
+    .filter((group) => group.list.length > 0);
+  // One pack-wide grade (today's 3rd-grade pack) keeps the plain list; several get a heading each.
+  const skillBody: HTMLElement[] =
+    byGrade.length <= 1
+      ? [skillRows(skills)]
+      : byGrade.map((group) =>
+          h(
+            'section',
+            { className: 'dv-progress__grade', dataset: { grade: String(group.grade) } },
+            h('h4', { text: t(SKILL_GRADE_HEADINGS[group.grade]) }),
+            skillRows(group.list),
+          ),
+        );
   const crowned = view.dragons.filter((dragon) => dragon.stage === 'crowned').length;
   return [
     h('p', {
@@ -329,6 +417,7 @@ export function progressContent(
         crowned,
       }),
     }),
+    ...(isYoungGrade(grade) ? sunSection : []),
     h('h3', { text: t('parent.progress.windowHeading') }),
     h('p', { className: 'dv-note', text: t('parent.progress.windowIntro') }),
     h(
@@ -337,6 +426,7 @@ export function progressContent(
       windowGrid(t, 'mul', view, keeper.id),
       windowGrid(t, 'div', view, keeper.id),
     ),
+    ...(isYoungGrade(grade) ? [] : sunSection),
     legend(t),
     h('h3', { text: t('parent.progress.tablesHeading') }),
     statList(
@@ -395,18 +485,7 @@ export function progressContent(
               'parent.progress.skillsShow.other',
             ),
           }),
-          statList(
-            t('parent.progress.skillsHeading'),
-            [t('parent.progress.mastered'), t('parent.progress.right')],
-            skills.map((skill) => ({
-              name: app.text.has(skill.titleKey) ? app.text(skill.titleKey) : skill.skill,
-              values: [
-                t('parent.progress.of', { value: skill.mastered, total: skill.items }),
-                percent(t, skill.accuracy),
-              ],
-            })),
-            'progress-skills',
-          ),
+          ...skillBody,
         ),
   ];
 }
