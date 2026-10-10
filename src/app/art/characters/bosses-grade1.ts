@@ -543,7 +543,7 @@ export function skritek(state: BossState, p: P): string {
               360 + i * 30 + r * 2,
               360 + r * 30,
               0.62,
-              kind === 1 ? 90 : 0,
+              kind === 1 ? 35 : 0,
             ),
           ).join(''),
         )
