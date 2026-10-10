@@ -22,12 +22,14 @@ import type { Json, MinigameDefinition, MinigameState } from '@aegis/narrative';
 import type { DeepReadonly, RandomStream } from '@aegis/runtime';
 import {
   CARD_BACK_LABEL,
+  addCrossesTen,
   addFactId,
   bucketId,
   divFactId,
   mulFactId,
   parseCardLabel,
   parseItemId,
+  subCrossesTen,
   subFactId,
 } from '../contract';
 import type {
@@ -306,10 +308,6 @@ function fits(requirement: 'required' | 'allowed' | 'forbidden', holds: boolean)
   return requirement === 'allowed' || (requirement === 'required') === holds;
 }
 
-function addCrossesTen(a: number, b: number): boolean {
-  return a % 10 !== 0 && b % 10 !== 0 && (a % 10) + (b % 10) > 10;
-}
-
 function shapeOperands(
   shape: AddSubShape,
   twoDigit: readonly [number, number],
@@ -408,7 +406,7 @@ function addSub2dExamples(
         if (a + b <= skill.params.resultMax && addCrossesTen(a, b) === crosses) {
           examples.push({ item, task, target: null, a, b });
         }
-      } else if (a >= b && a <= skill.params.resultMax && a % 10 < b % 10 === crosses) {
+      } else if (a >= b && a <= skill.params.resultMax && subCrossesTen(a, b) === crosses) {
         examples.push({ item, task, target: null, a, b });
       }
     }
