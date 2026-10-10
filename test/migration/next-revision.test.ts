@@ -69,7 +69,7 @@ describe('activating the next content revision on a save', () => {
     expect(midRound.ok ? 'activated' : midRound.error.code, 'never mid-round').toBe(
       'unsafe-boundary',
     );
-    expect(later.getView().hub.regions).toHaveLength(12);
+    expect(later.getView().hub.regions).toHaveLength(14);
 
     expect((await later.dispatch({ type: 'endRound', reason: 'quit' })).ok).toBe(true);
     const progress = later.inspect().state;

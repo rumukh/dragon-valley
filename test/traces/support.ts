@@ -436,7 +436,8 @@ export class Player {
       await this.move({ type: 'submit' });
     } else if (board.kind === 'number-trail') {
       if (this.style.clumsy) await this.move({ type: 'submit' });
-      const sorted = [...board.stones].sort((a, b) => a.value - b.value);
+      const down = board.direction === 'down' ? -1 : 1;
+      const sorted = [...board.stones].sort((a, b) => down * (a.value - b.value));
       for (const [index, stone] of sorted.entries()) {
         await this.move({ type: 'place', item: stone.id, index });
       }
@@ -503,7 +504,9 @@ export class Player {
           : board.task === 'cross'
             ? board.target
             : undefined;
-      await this.move(value === undefined ? { type: 'submit' } : { type: 'submit', value });
+      if (still()) {
+        await this.move(value === undefined ? { type: 'submit' } : { type: 'submit', value });
+      }
     } else if (board.kind === 'bundle-sticks') {
       if (this.style.clumsy) await this.move({ type: 'submit' });
       const repeat = async (count: number, move: BundleSticksMove) => {

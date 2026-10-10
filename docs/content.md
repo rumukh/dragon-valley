@@ -146,19 +146,23 @@ grade starts in ([design §12.1](design.md#121-one-valley-a-grade-per-child)):
   serve the 1st- and 2nd-grade regions. The minigame kinds `ten-frame` (boards from `add:` facts
   within 20 and `num.count` buckets; option `task`: `mix`, `show`, `make-ten`, `cross`) and
   `bundle-sticks` (2-digit work, for the 2nd grade; option `task`: `mix`, `build`, `add`, `sub`)
-  have boards. Pebble Brook 5 lists Ten Frame; Hundred Hills and Market Square list Bundle Sticks.
+  have boards. Pebble Brook 5, Mushroom Hollow 3 and 6 (`make-ten`) and Rainbow Ford 3 (`show`) and 4
+  (`cross`) list Ten Frame; Hundred Hills and Market Square list Bundle Sticks.
 - Story text for grades 1-2 keeps to **at most 6 words a sentence**: the beats of a grade 1-2
   region (or with `grades` of 1-2 only) and the word templates its skills use. The validator names
   the sentence ([design §12.5](design.md#125-making-it-work-for-6--and-7-year-olds)).
 - `balance.grades: [{ grade, choice?, keypad?, choices? }]` overrides the answer times and the
   number of choices for a grade; 1.4.0 gives the 1st grade 3 choices and slower "fast" and "ok",
   1.5.0 the 2nd grade 3 choices and times between the 1st grade's and the defaults.
-- Pebble Brook (1.4.0) is the first region: `grade: 1`, no `unlock.after`. Hundred Hills (1.5.0,
-  `grade: 2`, boss Long, Broad and Sharp-Eyes) unlocks after `pebble-brook.boss`, Market Square
+- Pebble Brook (1.4.0) is the first region: `grade: 1`, no `unlock.after`. Mushroom Hollow (1.6.0,
+  `grade: 1`, boss the House Goblin `skritek`) unlocks after `pebble-brook.boss`, Rainbow Ford
+  (1.6.0, `grade: 1`, boss Kašpárek) after `mushroom-hollow.boss`; beating Kašpárek ends the 1st
+  grade (`grade.completed` for grade 1). Hundred Hills (1.5.0,
+  `grade: 2`, boss Long, Broad and Sharp-Eyes) unlocks after `rainbow-ford.boss`, Market Square
   (`grade: 2`, boss Otesánek) after `hundred-hills.boss`, and Sunny Meadow after
   `market-square.boss`; as the 3rd grade's start Sunny Meadow stays open for 3rd graders. Beating
-  Otesánek ends the 2nd grade's +/− (`grade.completed` for grade 2). Later 1st- and 2nd-grade
-  regions slot in between Pebble Brook and Hundred Hills, and the chain moves with them.
+  Otesánek ends the 2nd grade's +/− (`grade.completed` for grade 2). Later 2nd-grade regions slot
+  in between Rainbow Ford and Hundred Hills, and the chain moves with them.
 
 ## 3. Skills
 
@@ -204,6 +208,11 @@ of Hundred Hills 1): Bead, Tumble or Penny, special dragons without a table. Hun
 serves their skills (place value, comparing, tens ± tens, 2-digit ± 1-digit), so the chosen egg
 hatches in the first session (`test/traces/hundred-hills.test.ts`); Hundred Hills 2's completion
 gives the other two.
+
+Mushroom Hollow and Rainbow Ford follow the later-region pattern with one special dragon each
+(no table): Sprout's egg (`missing-10`) comes in `beat.mushroom-hollow-welcome` and hatches in
+Mushroom Hollow 1, Tenzi's (`add-20-cross`) in `beat.rainbow-ford-tenzi` at the start of Rainbow
+Ford 4, the first level that crosses ten, and hatches there (`test/traces/grade-one.test.ts`).
 
 ## 5. The placement check
 
