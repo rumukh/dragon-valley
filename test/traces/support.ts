@@ -14,6 +14,8 @@ import { dragonValleyAdapter } from '../../src/rules/adapter';
 import { contentRegistration } from '../../src/rules/contract';
 import type {
   AnswerValue,
+  BundleSticksBoard,
+  BundleSticksMove,
   CardFace,
   ContentData,
   Expr,
@@ -502,6 +504,28 @@ export class Player {
             ? board.target
             : undefined;
       await this.move(value === undefined ? { type: 'submit' } : { type: 'submit', value });
+    } else if (board.kind === 'bundle-sticks') {
+      if (this.style.clumsy) await this.move({ type: 'submit' });
+      const repeat = async (count: number, move: BundleSticksMove) => {
+        for (let i = 0; i < count; i++) await this.move(move);
+      };
+      const now = () => (this.view().round as MinigameRoundView).current as BundleSticksBoard;
+      if (board.task === 'build') {
+        const target = board.target!;
+        await repeat(Math.floor(target / 10), { type: 'add', what: 'bundle' });
+        await repeat(target % 10, { type: 'add', what: 'stick' });
+      } else if (board.task === 'add') {
+        const b = board.b!;
+        await repeat(Math.floor(b / 10), { type: 'add', what: 'bundle' });
+        await repeat(b % 10, { type: 'add', what: 'stick' });
+        if (now().loose >= 10) await this.move({ type: 'bundle' });
+      } else {
+        const b = board.b!;
+        await repeat(Math.floor(b / 10), { type: 'remove', what: 'bundle' });
+        if (now().loose < b % 10) await this.move({ type: 'unbundle' });
+        await repeat(b % 10, { type: 'remove', what: 'stick' });
+      }
+      await this.move({ type: 'submit' });
     } else if (board.kind === 'golem-orders') {
       for (let guard = 0; guard < 32 && still(); guard++) {
         const now = (this.view().round as MinigameRoundView).current;
