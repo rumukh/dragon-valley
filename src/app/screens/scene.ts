@@ -29,6 +29,9 @@ export const BACKGROUND_IDS = [
   // Grades 1-2 (G5 art): the Lower Valley map sheet and its first region.
   'lower-valley-map',
   'pebble-brook',
+  // More 1st grade (G5c art).
+  'mushroom-hollow',
+  'rainbow-ford',
   // 2nd grade (G5b art).
   'hundred-hills',
   'market-square',
