@@ -35,7 +35,7 @@ import {
   subFactId,
 } from '../../../src/rules/contract';
 import type { ContentData, ProfileState, Skill } from '../../../src/rules/contract';
-import { PERFECT, Player } from '../../traces/support';
+import { PERFECT, Player, loadPack } from '../../traces/support';
 
 const root = join(import.meta.dirname, '..', '..', '..');
 const packText = readFileSync(join(root, 'content', 'history', '1.3.0.json'), 'utf8');
@@ -94,7 +94,8 @@ describe('the grade setting', () => {
   });
 
   it('is refused for a grade the content does not serve, and applied otherwise', async () => {
-    const player = new Player(PERFECT, 'grades');
+    // Content 1.4.0 served grades 1 and 3: grade 2 came with Hundred Hills in 1.5.0.
+    const player = new Player(PERFECT, 'grades', loadPack('content/history/1.4.0.json'));
     expect(await player.act({ type: 'startSession', day: '2026-10-06' })).toBe(true);
     expect(
       await player.reject(
@@ -386,23 +387,33 @@ describe('grades in the content pack', () => {
 });
 
 describe('grades in the shipped pack', () => {
-  it('start grade 1 in Pebble Brook and grade 3 in Sunny Meadow; grade 2 waits for its regions', () => {
+  it('start grade 1 in Pebble Brook, grade 2 in Hundred Hills and grade 3 in Sunny Meadow', () => {
     const pack: Pack = JSON.parse(shippedText);
     expect(diagnostics(pack)).toEqual([]);
     expect(pack.data.grades).toEqual([
       { grade: 1, start: 'pebble-brook' },
+      { grade: 2, start: 'hundred-hills' },
       { grade: 3, start: 'sunny-meadow' },
     ]);
     expect(gradeStart(pack.data, 1)).toBe('pebble-brook');
-    expect(gradeStart(pack.data, 2)).toBeNull();
+    expect(gradeStart(pack.data, 2)).toBe('hundred-hills');
     expect(gradeStart(pack.data, 3)).toBe('sunny-meadow');
   });
 
-  it('keep the 3rd-grade first egg and placement for 3rd graders only', () => {
+  it('keep each first egg and placement ladder for its own grade', () => {
     const pack: Pack = JSON.parse(shippedText);
     const beat = (id: string) => pack.data.story.beats.find((b) => b.id === id)!;
     expect(beat('beat.first-egg').trigger.grades).toEqual([3]);
     expect(beat('beat.pebble-brook-welcome').trigger.grades).toEqual([1]);
-    for (const step of pack.data.placement.steps) expect(step.grades).toEqual([3]);
+    expect(beat('beat.hundred-hills-welcome').trigger.grades).toEqual([2]);
+    const ladder = (grade: number) =>
+      pack.data.placement.steps.filter((step) => step.grades!.includes(grade));
+    for (const step of pack.data.placement.steps) expect(step.grades).toHaveLength(1);
+    expect(ladder(1)).toEqual([]);
+    expect(ladder(2).flatMap((step) => step.levels)).toEqual([
+      'hundred-hills.3',
+      'hundred-hills.4',
+    ]);
+    expect(ladder(3).length).toBeGreaterThan(0);
   });
 });

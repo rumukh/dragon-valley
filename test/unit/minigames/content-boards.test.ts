@@ -41,6 +41,7 @@ describe('the v1 minigame activities', () => {
         'sharing-feast',
         'golem-orders',
         'ten-frame',
+        'bundle-sticks',
       ]),
     );
   });

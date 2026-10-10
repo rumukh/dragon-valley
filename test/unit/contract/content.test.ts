@@ -51,6 +51,7 @@ const REVISIONS: Readonly<Record<string, string>> = {
   '1.2.0': '69494a787c9bab06', // the balance from the learner simulation (docs/balance-report.md)
   '1.3.0': 'f41ae03a85710bac', // growing up: the effort path and adult at 80 % (balance-report §9)
   '1.4.0': '9f81dad0a12a7159', // grades 1-3: grade starts, filters and Pebble Brook for grade 1
+  '1.5.0': 'd6bae241783b5756', // grade 2: Hundred Hills and Market Square
 };
 
 function diagnostics(pack: Pack): readonly RuntimeDiagnostic[] {
@@ -100,8 +101,10 @@ describe('the sample content pack', () => {
   it('puts the younger grades in front: Pebble Brook for grade 1 with Dot, Hop and Nibble', () => {
     const data = fresh().data;
     const byOrder = [...data.regions].sort((a, b) => a.order - b.order);
-    expect(byOrder.map((r) => [r.id, regionGrade(r)]).slice(0, 2)).toEqual([
+    expect(byOrder.map((r) => [r.id, regionGrade(r)]).slice(0, 4)).toEqual([
       ['pebble-brook', 1],
+      ['hundred-hills', 2],
+      ['market-square', 2],
       ['sunny-meadow', 3],
     ]);
     expect(data.regions.find((r) => r.id === 'pebble-brook')!.boss).toBe('will-o-wisps');
@@ -112,6 +115,34 @@ describe('the sample content pack', () => {
       ['hop', 'special'],
       ['nibble', 'special'],
     ]);
+  });
+
+  it('teaches grade 2 in Hundred Hills (Bead, Tumble, Penny) and Market Square, in one chain', () => {
+    const data = fresh().data;
+    const region = (id: string) => data.regions.find((r) => r.id === id)!;
+    expect(region('hundred-hills').boss).toBe('long-broad-sharp-eyes');
+    expect(region('market-square').boss).toBe('otesanek');
+    expect(region('hundred-hills').unlock.after).toEqual(['pebble-brook.boss']);
+    expect(region('market-square').unlock.after).toEqual(['hundred-hills.boss']);
+    expect(region('sunny-meadow').unlock.after).toEqual(['market-square.boss']);
+    expect(
+      data.dragons.filter((d) => d.region === 'hundred-hills').map((d) => [d.id, d.kind, d.table]),
+    ).toEqual([
+      ['bead', 'special', null],
+      ['tumble', 'special', null],
+      ['penny', 'special', null],
+    ]);
+    for (const id of ['hundred-hills', 'market-square']) {
+      const levels = data.levels.filter((l) => l.region === id);
+      expect(
+        levels.filter((l) => l.kind === 'lesson'),
+        id,
+      ).toHaveLength(5);
+      expect(
+        levels.filter((l) => l.kind === 'boss'),
+        id,
+      ).toHaveLength(1);
+    }
   });
 
   it('uses only canonical region, dragon and boss IDs outside the grade 1-2 regions', () => {

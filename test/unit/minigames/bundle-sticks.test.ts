@@ -99,6 +99,31 @@ describe('Bundle Sticks boards', () => {
     expect(state.status).toBe('completed');
   });
 
+  it('crosses ten exactly as the generator does (34 + 6 needs a bundle, 40 − 3 a borrow)', () => {
+    const deal = (pool: string, task: 'add' | 'sub', seed: number) =>
+      makeBoard({
+        activity: 'bundle-sticks',
+        id: `bundle.cross-${seed}`,
+        pool: [pool],
+        focus: null,
+        skills: [{ ...addSubSkill, params: { ...addSubSkill.params, twoDigit: [30, 40] } }],
+        options: { task },
+        previous: null,
+        state: initialProfileState({ dailyGoal: 30, arena: true }),
+        random: createPrng(`bundle-cross-${seed}`),
+      }).config as { a: number; b: number };
+    for (let seed = 0; seed < 60; seed++) {
+      const add = deal('add2d:2d1d-nocarry', 'add', seed);
+      expect((add.a % 10) + (add.b % 10), `${add.a} + ${add.b}`).toBeLessThan(10);
+      const carry = deal('add2d:2d1d-carry', 'add', seed);
+      expect((carry.a % 10) + (carry.b % 10), `${carry.a} + ${carry.b}`).toBeGreaterThanOrEqual(
+        10,
+      );
+      const sub = deal('sub2d:2d1d-noborrow', 'sub', seed);
+      expect(sub.a % 10, `${sub.a} − ${sub.b}`).toBeGreaterThanOrEqual(sub.b % 10);
+    }
+  });
+
   it('rejects impossible stick moves', () => {
     const def: MinigameDefinition = {
       schema: 1,
