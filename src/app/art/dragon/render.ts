@@ -21,7 +21,10 @@ import {
   hasFeature,
   joySparkles,
   berryRow,
+  beadRods,
   buckTeeth,
+  coinPurse,
+  stickBundle,
   groundPropLeft,
   numberLine,
   pearlPile,
@@ -221,7 +224,10 @@ function dragonLayers(ctx: Ctx): {
   const ground =
     (hasFeature(ctx, 'pearl-pile') ? pearlPile(ctx) : '') +
     (hasFeature(ctx, 'number-line') ? numberLine(ctx) : '') +
-    (hasFeature(ctx, 'berry-row') ? berryRow(ctx) : '');
+    (hasFeature(ctx, 'berry-row') ? berryRow(ctx) : '') +
+    (hasFeature(ctx, 'bead-rods') ? beadRods(ctx) : '') +
+    (hasFeature(ctx, 'stick-bundle') ? stickBundle(ctx) : '') +
+    (hasFeature(ctx, 'coin-purse') ? coinPurse(ctx) : '');
 
   return {
     back,
@@ -415,7 +421,13 @@ function designBounds(ctx: Ctx, stage: DragonStage): [number, number, number, nu
     maxX = Math.max(maxX, hd.cx + hd.rx + 64);
   }
   if (hasFeature(ctx, 'pearl-pile')) minX = Math.min(minX, CX - sk.body.w * 0.62 - 90);
-  if (hasFeature(ctx, 'number-line') || hasFeature(ctx, 'berry-row'))
+  if (
+    hasFeature(ctx, 'number-line') ||
+    hasFeature(ctx, 'berry-row') ||
+    hasFeature(ctx, 'bead-rods') ||
+    hasFeature(ctx, 'stick-bundle') ||
+    hasFeature(ctx, 'coin-purse')
+  )
     minX = Math.min(minX, groundPropLeft(ctx));
   if (ctx.outfit.nest) {
     minX = Math.min(minX, CX - sk.body.w * 1.25);

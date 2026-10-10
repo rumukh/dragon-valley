@@ -1,0 +1,10 @@
+Dragon Valley background: hundred-hills
+
+Scene: A sunny landscape of many round, soft green hills rolling away in rows, the far row of ten small blue-green dome hills each topped with a little coloured pennant, a small cream castle with a yellow flag on the farthest hill, a sandy path winding up between the hills towards it, a few round fruit trees, a diamond kite with a bow tail high in the sky on the right, a bright sun and soft clouds in a pale blue sky, a grassy near meadow with little flowers and two bundles of ten sticks tied with ribbons at each side of the foreground, a few loose sticks in the grass and short wooden fences at the edges.
+
+Style: storybook painterly illustration for a children's math adventure game (ages 6-9), soft gouache and watercolor textures with gentle edges, bright but harmonious colors, warm cream light and deep plum shadows (never black).
+Palette anchors: buttercup #ffc53d, fern #3aa65b, ember #f26a2e, amethyst #8b5cf6, lake #2d8ce6, lagoon #13b2a6, heather #e35d9b, moss #93a83a, royal #d93a57, paper #fff8ec, ink #2a2140.
+Format: 16:10 landscape, 3200 x 2000 px (it is shown at 1600 x 1000 logical units).
+Composition: keep the upper-middle third calm (sky or soft distant scenery) for UI panels; the ground line sits around the lower quarter; leave clear standing room left and right of centre where the game places the player's dragon (x about 27%) and the friendly boss (x about 73%).
+Strictly: no text, letters, numbers, signs, logos or watermarks; no people, dragons or creatures (the game draws them); nothing scary or dangerous; cosy, safe and inviting.
+Match the composition of the committed SVG version of this background (same layout, landmarks and light direction) so hotspots and characters still line up.

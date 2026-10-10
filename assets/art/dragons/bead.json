@@ -1,0 +1,64 @@
+{
+  "$schema": "./recipe.schema.json",
+  "id": "bead",
+  "name": "Bead",
+  "kind": "special",
+  "mnemonic": "A bright dragon who sorts numbers into tens and ones. On her belly is an abacus: big golden beads count tens, little teal beads count ones.",
+  "colors": {
+    "body": "#e2577f",
+    "shade": "#b03a5f",
+    "belly": "#fff1e6",
+    "wing": "#ffa6bf",
+    "horn": "#fff3d6",
+    "accent": "#ffc23a",
+    "accent2": "#2fb8c2",
+    "iris": "#5a1430",
+    "cheek": "#ff9fae"
+  },
+  "build": {
+    "chub": 0.8,
+    "head": 1.1,
+    "snout": 0.9,
+    "body": 0.95
+  },
+  "horns": {
+    "style": "curved",
+    "count": 2,
+    "length": 0.6
+  },
+  "ears": {
+    "style": "frill",
+    "size": 0.9
+  },
+  "wings": {
+    "style": "petal",
+    "count": 2,
+    "size": 0.85
+  },
+  "tail": {
+    "count": 1,
+    "tip": "pearl",
+    "length": 0.9
+  },
+  "spikes": {
+    "style": "round",
+    "where": "tail",
+    "count": 4
+  },
+  "crest": {
+    "style": "none",
+    "count": 0
+  },
+  "markings": [
+    "abacus-belly",
+    "freckles"
+  ],
+  "features": [
+    "bead-rods"
+  ],
+  "egg": {
+    "base": "#ffe3ec",
+    "accent": "#e2577f",
+    "pattern": "beads"
+  }
+}

@@ -632,6 +632,178 @@ function signMedallion(ctx: Ctx, sign: 'plus' | 'minus'): string {
   );
 }
 
+/** A round bead with a little highlight (abacus beads, Bead's tail and egg). */
+function bead(cx: number, cy: number, rx: number, ry: number, fill: string, W: number): string {
+  return (
+    h('ellipse', { cx, cy, rx, ry, fill, stroke: outlineOf(fill, 0.55), 'stroke-width': W }) +
+    h('ellipse', {
+      cx: cx - rx * 0.3,
+      cy: cy - ry * 0.35,
+      rx: rx * 0.28,
+      ry: ry * 0.22,
+      fill: '#ffffff',
+      opacity: 0.7,
+    })
+  );
+}
+
+/**
+ * Bead's abacus belly: a wooden frame with two wires. Big golden beads on the top wire are tens,
+ * little teal beads on the bottom wire are ones (here 3 tens and 4 ones), pushed to the left.
+ */
+function abacusBelly(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const w = b.rx * 1.7;
+  const hgt = b.ry * 1.2;
+  const x0 = b.cx - w / 2;
+  const y0 = b.cy - hgt / 2 + b.ry * 0.06;
+  const frame = '#c98a4a';
+  const W = ctx.W * 0.5;
+  const rows = [
+    { y: y0 + hgt * 0.31, n: 3, rx: w * 0.085, ry: hgt * 0.17, fill: ctx.paint.accent },
+    { y: y0 + hgt * 0.71, n: 4, rx: w * 0.052, ry: hgt * 0.12, fill: ctx.paint.accent2 },
+  ];
+  let wires = '';
+  let beads = '';
+  for (const r of rows) {
+    wires += M(x0 + 4, r.y) + L(x0 + w - 4, r.y);
+    for (let i = 0; i < r.n; i++)
+      beads += bead(x0 + w * 0.1 + r.rx * (1 + i * 2.15), r.y, r.rx, r.ry, r.fill, W);
+  }
+  return h(
+    'g',
+    { class: 'dv-abacus' },
+    h('path', {
+      d: roundRectD(x0, y0, w, hgt, hgt * 0.16),
+      fill: ctx.paint.bellyLight,
+      stroke: frame,
+      'stroke-width': ctx.W * 1.1,
+    }),
+    h('path', {
+      d: wires,
+      stroke: outlineOf(frame, 0.6),
+      'stroke-width': ctx.W * 0.4,
+      'stroke-linecap': 'round',
+    }),
+    beads,
+  );
+}
+
+/**
+ * Tumble's carrying belly: ten little cubes (two rows of five) on the right roll over a looping
+ * arrow into one long ten-rod on the left: ten ones make one ten.
+ */
+function carryBelly(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const u = Math.min(b.rx * 0.2, b.ry * 0.16);
+  const W = ctx.W * 0.45;
+  const cubeFill = ctx.paint.accent2;
+  const cubeLine = outlineOf(cubeFill, 0.55);
+  const gx = b.cx - u * 0.6;
+  const gy = b.cy + b.ry * 0.06;
+  let cubes = '';
+  for (let r = 0; r < 2; r++)
+    for (let c = 0; c < 5; c++)
+      cubes += h('path', {
+        d: roundRectD(gx + c * u * 1.05, gy + r * u * 1.05, u * 0.92, u * 0.92, u * 0.2),
+        fill: cubeFill,
+        stroke: cubeLine,
+        'stroke-width': W,
+      });
+  const rx = b.cx - b.rx * 0.62;
+  const ry = b.cy - u * 3.4;
+  const rod =
+    h('path', {
+      d: roundRectD(rx, ry, u * 0.95, u * 7.6, u * 0.25),
+      fill: cubeFill,
+      stroke: cubeLine,
+      'stroke-width': W,
+    }) +
+    h('path', {
+      d: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        .map((k) => M(rx + 2, ry + k * u * 0.76) + L(rx + u * 0.95 - 2, ry + k * u * 0.76))
+        .join(''),
+      stroke: cubeLine,
+      'stroke-width': W * 0.7,
+      opacity: 0.7,
+    });
+  const ax = gx + u * 2.6;
+  const ay = gy - u * 0.5;
+  const ex = rx + u * 1.5;
+  const ey = ry + u * 0.9;
+  const arrow =
+    M(ax, ay) +
+    Q(ax + u * 0.4, ry - u * 2.2, (ax + ex) / 2, ry - u * 1.5) +
+    Q(ex + u * 0.6, ry - u, ex, ey);
+  return h(
+    'g',
+    { class: 'dv-carry' },
+    rod,
+    cubes,
+    h('path', {
+      d: arrow,
+      fill: 'none',
+      stroke: ctx.paint.accent,
+      'stroke-width': ctx.W * 0.9,
+      'stroke-linecap': 'round',
+    }),
+    h('path', {
+      d: M(ex - u * 0.75, ey - u * 0.55) + L(ex, ey) + L(ex + u * 0.65, ey - u * 0.65),
+      fill: 'none',
+      stroke: ctx.paint.accent,
+      'stroke-width': ctx.W * 0.9,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    }),
+  );
+}
+
+/** Penny's coin belly: a big golden coin with a heart stamp and a smaller coin peeking behind. */
+function coinBelly(ctx: Ctx): string {
+  const b = ctx.sk.belly;
+  const r = Math.min(b.rx, b.ry) * 0.6;
+  const cx = b.cx + r * 0.08;
+  const cy = b.cy - b.ry * 0.04;
+  const gold = ctx.paint.accent;
+  const line = ctx.paint.accentLine;
+  const W = ctx.W * 0.7;
+  const coin = (x: number, y: number, rr: number): string =>
+    h('circle', { cx: x, cy: y, r: rr, fill: gold, stroke: line, 'stroke-width': W }) +
+    h('circle', {
+      cx: x,
+      cy: y,
+      r: rr * 0.76,
+      fill: ctx.paint.accent2,
+      stroke: line,
+      'stroke-width': W * 0.55,
+    });
+  const hs = r * 0.36;
+  const heart =
+    M(cx, cy + hs * 0.95) +
+    Q(cx - hs * 1.25, cy + hs * 0.05, cx - hs * 0.95, cy - hs * 0.55) +
+    Q(cx - hs * 0.55, cy - hs * 1.05, cx, cy - hs * 0.35) +
+    Q(cx + hs * 0.55, cy - hs * 1.05, cx + hs * 0.95, cy - hs * 0.55) +
+    Q(cx + hs * 1.25, cy + hs * 0.05, cx, cy + hs * 0.95) +
+    'Z';
+  return h(
+    'g',
+    { class: 'dv-coin-belly' },
+    coin(cx - r * 0.78, cy + r * 0.62, r * 0.48),
+    coin(cx, cy, r),
+    h('path', { d: heart, fill: gold, stroke: line, 'stroke-width': W * 0.7 }),
+    h('path', {
+      d:
+        M(cx - r * 0.66, cy - r * 0.3) +
+        Q(cx - r * 0.58, cy - r * 0.66, cx - r * 0.24, cy - r * 0.76),
+      fill: 'none',
+      stroke: '#ffffff',
+      'stroke-width': r * 0.11,
+      'stroke-linecap': 'round',
+      opacity: 0.75,
+    }),
+  );
+}
+
 /** Belly layer (replaces the plain belly when a marking defines its own belly). */
 export function bellyLayer(ctx: Ctx): string {
   if (has(ctx, 'rainbow-belly')) return rainbowBelly(ctx);
@@ -646,7 +818,10 @@ export function bellyLayer(ctx: Ctx): string {
     has(ctx, 'zero-medallion') ||
     has(ctx, 'counting-dots') ||
     has(ctx, 'plus-belly') ||
-    has(ctx, 'minus-belly');
+    has(ctx, 'minus-belly') ||
+    has(ctx, 'abacus-belly') ||
+    has(ctx, 'carry-belly') ||
+    has(ctx, 'coin-belly');
   let out = belly(ctx, undefined, !plain);
   if (has(ctx, 'clock-belly')) out += clockFace(ctx);
   if (has(ctx, 'snowflake-belly')) out += boldSnowflake(ctx);
@@ -672,6 +847,9 @@ export function bellyLayer(ctx: Ctx): string {
   if (has(ctx, 'counting-dots')) out += countingDots(ctx);
   if (has(ctx, 'plus-belly')) out += signMedallion(ctx, 'plus');
   if (has(ctx, 'minus-belly')) out += signMedallion(ctx, 'minus');
+  if (has(ctx, 'abacus-belly')) out += abacusBelly(ctx);
+  if (has(ctx, 'carry-belly')) out += carryBelly(ctx);
+  if (has(ctx, 'coin-belly')) out += coinBelly(ctx);
   return out;
 }
 

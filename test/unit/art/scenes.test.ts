@@ -36,7 +36,12 @@ import { checkChildSafe } from './svg-check';
 
 describe('bosses', () => {
   it('draws every boss in every state as child-safe SVG', () => {
-    expect(BOSS_IDS).toEqual(['will-o-wisps', ...CANONICAL_BOSS_IDS]);
+    expect(BOSS_IDS).toEqual([
+      'will-o-wisps',
+      'long-broad-sharp-eyes',
+      'otesanek',
+      ...CANONICAL_BOSS_IDS,
+    ]);
     for (const id of BOSS_IDS) {
       const states = new Set<string>();
       for (const state of BOSS_STATES) {
@@ -138,6 +143,8 @@ describe('backgrounds', () => {
         'lower-valley-map',
         'valley-map',
         'pebble-brook',
+        'hundred-hills',
+        'market-square',
         ...CANONICAL_REGION_IDS,
       ].sort(),
     );

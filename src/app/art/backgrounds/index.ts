@@ -17,6 +17,7 @@ import {
   riddleRuins,
 } from './scenes-b';
 import { pebbleBrook } from './scenes-c';
+import { hundredHills, marketSquare } from './scenes-d';
 import {
   LOWER_VALLEY_HOTSPOTS,
   LOWER_VALLEY_LEVELS,
@@ -61,6 +62,8 @@ const SCENES: Record<string, (defs: Defs) => string> = {
   'lower-valley-map': lowerValleyMap,
   'valley-map': valleyMap,
   'pebble-brook': pebbleBrook,
+  'hundred-hills': hundredHills,
+  'market-square': marketSquare,
   'sunny-meadow': sunnyMeadow,
   'whispering-woods': whisperingWoods,
   'fire-mountain': fireMountain,
