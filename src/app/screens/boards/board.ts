@@ -27,6 +27,11 @@ export interface BoardPainter {
   focus(): HTMLElement | null;
   /** A finished board's own ending, played before the next board (or the results) appears. */
   finish?(): Promise<void>;
+  /**
+   * What the next board asks, for boards whose goal is only in the status line (the young boards):
+   * said after the praise for a finished board, which takes that line.
+   */
+  goal?(): string;
   /** Release what outlives the element, such as a keypad's keyboard handler. */
   dispose?(): void;
 }

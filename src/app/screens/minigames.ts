@@ -703,8 +703,9 @@ export function minigameScreen(app: App, active: ActiveKeeper): Screen {
     painter?.paint();
     if (completed.length > 0) {
       app.kit.cue('fx.dragon-happy');
-      app.kit.announcer.announce(t('board.done'));
-      status.textContent = t('board.done');
+      const done = [t('board.done'), painter?.goal?.() ?? ''].join(' ').trim();
+      app.kit.announcer.announce(done);
+      status.textContent = done;
       void confetti(app.kit.fx);
     }
     return true;

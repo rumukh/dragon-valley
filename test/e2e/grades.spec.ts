@@ -25,6 +25,7 @@ import {
   fillKeeper,
   finishStory,
   leaveHub,
+  leaveResults,
   loadBackup,
   newFamily,
   openGrownUps,
@@ -33,6 +34,8 @@ import {
   results,
   round,
   startLevel,
+  startPlacement,
+  throughHatches,
 } from './support/app';
 import { numberWords, readAnswer, readProblem, written } from './support/problem';
 import { continueToNextActivity } from './support/activities';
@@ -64,6 +67,10 @@ test('the editor asks for the class; every class is accepted, in the editor and 
   await page.getByTestId('story-skip').click();
   await expectHub(page, 'Ema');
   await expect(page.getByTestId('hub-sun-window'), 'the Sun Window of a 2nd grader').toBeVisible();
+  await expect(
+    page.getByTestId('hub-adventure'),
+    'the 2nd-grade placement check is offered',
+  ).toHaveText('Show the dragons what you know!');
 
   await leaveHub(page);
   await openGrownUps(page, 'settings');
@@ -221,6 +228,10 @@ test('a 2nd grader meets Hundred Hills, chooses an egg and reads tens and ones f
   await page.getByTestId('story-skip').click();
   await expectHub(page, 'Ota');
   await expect(page.getByTestId('hub-sun-window'), 'the Sun Window of a 2nd grader').toBeVisible();
+  await expect(
+    page.getByTestId('hub-adventure'),
+    'the 2nd-grade placement check is offered',
+  ).toHaveText('Show the dragons what you know!');
 
   // The Lower Valley sheet comes first, with Hundred Hills awake on it.
   await page.getByTestId('hub-map').click();
@@ -286,6 +297,47 @@ test('a 2nd grader meets Hundred Hills, chooses an egg and reads tens and ones f
   expect(placeValue, 'Hundred Hills 1 asks about tens and ones').toBeGreaterThan(0);
 });
 
+test('a 2nd grader who knows tens and ones passes the placement check: Hundred Hills 3 and 4 are placed', async ({
+  page,
+}) => {
+  test.slow();
+  await boot(page);
+  await page.getByTestId('title-play').click();
+  await fillKeeper(page, { name: 'Ota' });
+  await page.getByTestId('grade-2').click();
+  await page.getByTestId('keeper-save').click();
+  await page.getByTestId('story-skip').click();
+  await expectHub(page, 'Ota');
+  await startPlacement(page);
+  let answered = 0;
+  for (; answered < 30 && (await round(page).isVisible()); answered++) {
+    await answerCorrectly(page, 'keyboard');
+  }
+  expect(answered, 'both steps were asked').toBeGreaterThan(2);
+  await expect(results(page)).toBeVisible();
+  await throughHatches(page);
+  await expect(page.getByTestId('results-title')).toHaveText('The dragons saw what you know!');
+  await leaveResults(page, 'Ota');
+  await page.getByTestId('hub-map').click();
+  await expect(page.getByTestId('screen-map')).toHaveAttribute('data-sheet', 'lower-valley-map');
+  await page.getByTestId('map-region-hundred-hills').click();
+  await expectScreen(page, 'region');
+  for (const level of ['hundred-hills.3', 'hundred-hills.4']) {
+    await expect(page.getByTestId(`level-${level}`), `placed: ${level}`).toHaveAttribute(
+      'data-status',
+      'completed',
+    );
+  }
+  const road = {
+    'hundred-hills.1': 'open',
+    'hundred-hills.2': 'locked',
+    'hundred-hills.5': 'open',
+  };
+  for (const [level, status] of Object.entries(road)) {
+    await expect(page.getByTestId('level-' + level), level).toHaveAttribute('data-status', status);
+  }
+});
+
 test('a 2nd grader builds and works out sums with Bundle Sticks', async ({ page }) => {
   test.slow();
   const backup = await hillsBackupBefore(BUNDLE_STICKS_LEVEL);
@@ -301,5 +353,5 @@ test('a 2nd grader builds and works out sums with Bundle Sticks', async ({ page 
     await continueToNextActivity(page);
   }
   await expect(page.getByTestId('sticks'), 'Bundle Sticks is on the table').toBeVisible();
-  await playBundleSticks(page, 'touch');
+  await playBundleSticks(page, 'keyboard');
 });
