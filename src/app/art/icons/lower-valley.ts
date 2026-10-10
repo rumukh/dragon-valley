@@ -1,7 +1,8 @@
 /**
  * Item icons for the Lower Valley (grades 1-2): Pebble Brook's counting pebbles, a
  * will-o'-wisp light, a ten-frame and stepping stones; Hundred Hills' bundle of ten sticks and a
- * flagged hill; Market Square's striped stall (its coin is the shared coin icon); Mushroom Hollow's\n * spotted toadstool and acorn; Rainbow Ford's rainbow. 64 x 64, full color, like the other
+ * flagged hill; Market Square's striped stall (its coin is the shared coin icon); Mushroom Hollow's
+ * spotted toadstool and acorn; Rainbow Ford's rainbow arc. 64 x 64, full color, like the other
  * item icons; used on stickers and in content.
  */
 import { M, L, Q, C, roundRectD } from '../svg/path';
@@ -19,7 +20,7 @@ export const LOWER_VALLEY_ICON_IDS = [
   'market-stall',
   'mushroom',
   'acorn',
-  'rainbow',
+  'rainbow-arc',
 ] as const;
 
 const INK = '#2a2140';
@@ -353,7 +354,7 @@ function acorn(p: (n: string) => string): string {
 }
 
 /** A rainbow arching between two puffy clouds. */
-function rainbow(): string {
+function rainbowArc(): string {
   const bands = ['#ff5a5a', '#ff9c3a', '#ffd93f', '#6fcf5a', '#4aa8f0', '#8a6cf0'];
   const w = 4.2;
   const arcs = bands
@@ -410,8 +411,8 @@ export function lowerValleyIcon(id: string, p: (n: string) => string): string {
       return mushroom();
     case 'acorn':
       return acorn(p);
-    case 'rainbow':
-      return rainbow();
+    case 'rainbow-arc':
+      return rainbowArc();
     default:
       throw new Error(`Unknown icon id: ${id}`);
   }

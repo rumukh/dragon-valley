@@ -51,12 +51,6 @@ const DRAWN_LOWER_VALLEY = [
   'hundred-hills',
   'market-square',
 ];
-/**
- * Ids deliberately shared across kinds: the Rainbow Ford item icon `rainbow` (a fixed content id)
- * and the canonical dragon `rainbow`. They never meet: icons resolve through `icon:` sticker refs
- * and the icon renderer, dragons through the dragon renderer.
- */
-const SHARED_IDS = new Set(['rainbow']);
 
 const committed = JSON.parse(readFileSync('assets/art/catalog.json', 'utf8')) as Catalog;
 
@@ -93,9 +87,7 @@ describe('art catalog', () => {
     ids.push(...committed.cosmetics.map((c) => c.id), ...committed.avatars.map((a) => a.id));
     for (const list of Object.values(committed.icons)) ids.push(...list);
     for (const id of ids) expect(isContentId(id), id).toBe(true);
-    const unique = ids.filter((id) => !SHARED_IDS.has(id));
-    expect(new Set(unique).size).toBe(unique.length);
-    for (const id of SHARED_IDS) expect(ids.filter((x) => x === id)).toHaveLength(2);
+    expect(new Set(ids).size).toBe(ids.length);
     expect(catalogIds(committed).has('hat-wizard')).toBe(true);
   });
 
