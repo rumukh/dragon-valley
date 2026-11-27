@@ -167,6 +167,9 @@ before the first launch:
 - Back closes the gate, pauses and resumes a round, leaves the hub, and on "Who is playing?" puts
   the app in the background; reopening shows the same screen.
 - About shows the privacy policy and, opened in place, the license notices.
+- On the phone, held upright: the placement check's keypad with its OK, the rewards after it,
+  Feeding Time's four answers and Memory Match with "Turn back" each fit the screen, nothing
+  scrolled.
 
 The first emulator check (2026-11-26, a debug build in a temporary wrapper) found two faults this
 shell fixes: a backup reported as saved when no file had been written, and no read-aloud voices,
@@ -174,7 +177,8 @@ because Android's WebView has none. `test/e2e/android.spec.ts` guards both on ev
 `docs/play/screenshots/` holds the store screenshots, taken from the release build.
 
 The release build's emulator check (2026-11-27, Android 16 Pixel Tablet and a 1080 × 1920 phone,
-offline throughout) passed every item above, an app update keeping the progress. One limitation
-remains, on phones only: the game is laid out for tablets, so in portrait some screens scroll a
-little. Feeding Time's second row of answers, the rewards after the placement check and Memory
-Match's "Turn back" can start below the fold. Nothing is cut off or too small to tap.
+offline throughout) passed every item above, an app update keeping the progress, except on the
+phone: the game was laid out for tablets, so Feeding Time's second row of answers, the rewards
+after the placement check and Memory Match's "Turn back" started below the fold. A phone in
+portrait now has its own layout ([app.md](app.md) §7), guarded by `test/e2e/phone.spec.ts` at
+411 × 731 (that phone) and 360 × 640.

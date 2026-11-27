@@ -217,6 +217,14 @@ gets kind, specific help after a miss.
   title and progress share a line and the picture behind a problem stands under the dragon (in
   a boss round under the dragon and the boss, side by side, who step back while it shows);
   boards keep a wide keypad beside them; the map's names stand beside it on a wide window.
+  On a phone in portrait (narrower than 600 px; checked at 360 × 640 and 411 × 731) a round,
+  Memory Match and the results fit one screen at 100 % text too. The bar takes two lines (the
+  activity with the coins and pause or Stop, then the progress with the save status), and a streak
+  hangs under the progress instead of adding a third; the dragon,
+  and a boss, take the room the problem and the answers leave; the keypad is four keys wide, "Type
+  the answer." shares a line with its box and three choices share a row; Memory Match's cards fill
+  the screen, three wide where the deck allows; the results list every reward on a short line. A
+  story, a picture behind a problem or bigger text may still make a round scroll.
 - **Feedback never relies on colour alone**: correct is green + check + happy egg; a miss is
   warm orange + `?` + a curious egg + "Almost! Let's look…", with the visual model shown first.
   Term questions mark the asked-about number with a marker **and** an underline.

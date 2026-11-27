@@ -47,6 +47,11 @@ shell, read-aloud over the device's speech, saving and opening files through the
 privacy policy in the grown-ups' area. The build also publishes that policy as `privacy.html`
 (4 KB): the offline pack without its audio is 3.99 MB of its 4 MB.
 
+The phone layout ([app.md](../app.md) §7) adds 5 KB to `app.css`, measured on its branch (Edge,
+development machine): `app.css` is 99.5 / 18.4 KB of its 100 / 20 KB, and the offline pack without
+its audio still 3.99 MB of its 4 MB. Both are at their budgets: the next style or pack change will
+need a raise.
+
 ## What the first screen costs
 
 A first visit downloads eight files before the title is ready:

@@ -36,6 +36,7 @@ const LOCAL = new Set([
   '--ratio',
   '--cols',
   '--wide-cols',
+  '--narrow-cols',
   '--cell',
   '--side',
   '--x',
