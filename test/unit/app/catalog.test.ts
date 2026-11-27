@@ -46,6 +46,8 @@ const DYNAMIC_PREFIXES = [
   'slot.',
   'window.',
   'speech.alias.',
+  // The privacy policy is every parent.privacy.* message in catalog order (parent/privacy.ts).
+  'parent.privacy.',
   ...RULE_ERROR_CODES.map((code) => `error.${code}`),
 ];
 

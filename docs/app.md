@@ -12,25 +12,26 @@ the grown-ups' area with progress, printables and the game settings. What is lef
 
 ## 1. Layout
 
-| Path                    | What it holds                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------ |
-| `main.ts`, `index.html` | Boot (§2) and the static splash; the CSP is filled in by `scripts/build.mjs`   |
-| `shell/app.ts`          | The persistent chrome, shared services, the active keeper's session, errors    |
-| `router/`               | Screen stack and router (§3)                                                   |
-| `screens/`              | Title, keepers, editor, play (story, hub, rounds, results), map, collections   |
-| `persistence/`          | Family, preferences, game sessions, save status, recovery, backups (§4)        |
-| `controller/`           | The command controller (§5)                                                    |
-| `content/`              | Loading and validating the content pack and its strings                        |
-| `game/`                 | Game definition, view readings, timers, the map layout, the Dragon Diary, …    |
-| `design/`, `styles/`    | Tokens from S4's palette, the reading font, CSS (§7)                           |
-| `ui/`                   | DOM kit: buttons, keypad, choice tiles, dialogs, toasts, meters, confetti, …   |
-| `math/`                 | Problems as tokens in Czech or international notation (§9), facts, pictures    |
-| `speech/`               | Read-aloud: local voices, number words, the verbalizer (§11)                   |
-| `audio/`                | Game audio over `createNarration`, S5's manifest, event-to-sound mapping (§10) |
-| `parent/`               | The grown-ups' gate (§6), offline installation (§12), the Progress tab (§14)   |
-| `print/`                | Printables: what to print, the toolkit's print documents, the sheets (§14)     |
-| `i18n/messages.ts`      | Typed access to `content/catalogs/en.ui.json` (§13)                            |
-| `sw.ts`                 | The offline worker (`createOfflineWorker`), built by `scripts/build.mjs`       |
+| Path                    | What it holds                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| `main.ts`, `index.html` | Boot (§2) and the static splash; the CSP is filled in by `scripts/build.mjs`            |
+| `shell/app.ts`          | The persistent chrome, shared services, the active keeper's session, errors             |
+| `router/`               | Screen stack and router (§3)                                                            |
+| `screens/`              | Title, keepers, editor, play (story, hub, rounds, results), map, collections            |
+| `persistence/`          | Family, preferences, game sessions, save status, recovery, backups (§4)                 |
+| `controller/`           | The command controller (§5)                                                             |
+| `content/`              | Loading and validating the content pack and its strings                                 |
+| `game/`                 | Game definition, view readings, timers, the map layout, the Dragon Diary, …             |
+| `design/`, `styles/`    | Tokens from S4's palette, the reading font, CSS (§7)                                    |
+| `ui/`                   | DOM kit: buttons, keypad, choice tiles, dialogs, toasts, meters, confetti, …            |
+| `math/`                 | Problems as tokens in Czech or international notation (§9), facts, pictures             |
+| `speech/`               | Read-aloud: local voices, number words, the verbalizer (§11)                            |
+| `audio/`                | Game audio over `createNarration`, S5's manifest, event-to-sound mapping (§10)          |
+| `parent/`               | The grown-ups' gate (§6), offline installation (§12), the Progress tab (§14)            |
+| `print/`                | Printables: what to print, the toolkit's print documents, the sheets (§14)              |
+| `i18n/messages.ts`      | Typed access to `content/catalogs/en.ui.json` (§13)                                     |
+| `platform/`             | Browser or Android app: files, printing, speech engine, Back ([android.md](android.md)) |
+| `sw.ts`                 | The offline worker (`createOfflineWorker`), built by `scripts/build.mjs`                |
 
 ## 2. Boot and readiness
 
@@ -135,7 +136,9 @@ copy). Identifiers come from `src/rules/contract/ids.ts` and `persistence.ts`.
 - **Backups** (`backup.ts`): one child per file (`dragon-valley-backup` v1, at most 4 MiB): name,
   avatar, and the game and preferences envelopes exactly as stored. Importing into a keeper
   rebinds the envelopes to that keeper's profile ID and then validates them like a normal load;
-  an imported game is persisted with `retryCheckpoint()`.
+  an imported game is persisted with `retryCheckpoint()`. Files are saved and opened through the
+  platform (`platform/platform.ts`): a browser download and file field, or in the Android app the
+  system's own document screens, where "saved as a file" shows only once the file was written.
 - **Storage persistence** (`storage.ts`): the grown-ups' area shows usage and asks for
   `navigator.storage.persist()` (only there, because some browsers show an adult-facing prompt).
 
@@ -326,7 +329,9 @@ One `createNarration` instance (`audio/game-audio.ts`) with an `AudioContext` at
 browser can never fall back to a network voice. The grown-ups choose the voice; read-aloud and
 auto-read are per child. Speech is cancelled on every screen change, on pause and when the page is
 hidden. With no local English voice the speaker button is hidden and the grown-ups' area explains
-why.
+why. Android's WebView has no Web Speech voices, so in the Android app the same code speaks through
+the device's text-to-speech (`platform/android-speech.ts`, [android.md](android.md) §3), offered
+only the voices installed on the device.
 
 `speech/verbalizer.ts` speaks the contract's problems the way they are written, identically for
 both notations: "Fifty-six divided by seven equals what?", "four remainder three", brackets as
@@ -353,7 +358,7 @@ every digest matches, and the worker is registered with `registerOfflineWorker`.
 progress are shown ("Downloading 12 of 64 files…"); "Installed" appears only after both succeed. Checking for an
 update installs a newer revision next to the running one; the waiting worker takes over the next
 time the game is opened. There is no forced reload, and content moves to a new pack only at the
-hub (§4).
+hub (§4). The Android app carries the whole game, so its grown-ups' area has no Offline tab.
 
 ## 13. Messages
 

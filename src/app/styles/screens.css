@@ -2345,13 +2345,26 @@
   width: min(6.5rem, 16vh);
 }
 
-/* Many celebrations at once (after the placement check): smaller pictures, smaller words. */
-.dv-results__celebrations[data-many='true'] .dv-celebrate {
+/* Many celebrations at once (after the placement check): picture and words side by side in rows of
+   three on a tablet, so every reward shows with its name without scrolling the list (the Android
+   emulator QA, 2026-11-26: names under the first row were out of view at 1280 × 800). */
+.dv-results__celebrations[data-many='true'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11em), 1fr));
+  gap: 0.5rem 1rem;
   font-size: 0.85rem;
 }
 
+.dv-results__celebrations[data-many='true'] .dv-celebrate {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  max-width: none;
+  text-align: start;
+}
+
 .dv-results__celebrations[data-many='true'] .dv-celebrate svg {
-  width: min(4rem, 10vh);
+  width: min(3em, 7.5vh);
 }
 
 /* ---- Goodbye and the Dragon Diary ------------------------------------------------------ */
@@ -3441,6 +3454,35 @@
 .dv-offline-status[data-state='failed'],
 .dv-offline-status[data-state='unavailable'] {
   color: var(--dv-miss-deep);
+}
+
+/* About: the license notices open in place, and the privacy policy reads as a document. */
+.dv-licenses-box > summary {
+  list-style: none;
+  justify-self: start;
+}
+
+.dv-licenses-box > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dv-licenses {
+  max-height: 50vh;
+  margin: 0.5em 0 0;
+  overflow: auto;
+  font-family: inherit;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.dv-privacy > h2 {
+  font-size: 1.25rem;
+}
+
+.dv-privacy > h3 {
+  margin-top: 0.4em;
+  font-size: 1.05rem;
 }
 
 /* The Progress tab: the window's two grids side by side when there is room for both. */

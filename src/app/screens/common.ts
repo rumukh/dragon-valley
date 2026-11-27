@@ -1,6 +1,6 @@
 /**
- * Pieces shared by screens: the top bar, the save status pill, keeper badges, file download
- * and upload for grown-ups, and the local calendar day.
+ * Pieces shared by screens: the top bar, the save status pill, keeper badges and the local
+ * calendar day. Saving and opening a grown-up's files is the platform's (platform/platform.ts).
  */
 import { candyButton } from '../ui/button';
 import { avatarArt } from '../ui/art';
@@ -19,17 +19,18 @@ export function topBar(options: {
 }): HTMLElement {
   const bar = h('header', { className: 'dv-topbar' });
   if (options.back) {
-    bar.append(
-      candyButton({
-        label: options.back.label,
-        icon: 'back',
-        variant: 'paper',
-        size: 'small',
-        testId: options.back.testId ?? 'back',
-        onPress: options.back.onPress,
-        onError: options.onError,
-      }),
-    );
+    const back = candyButton({
+      label: options.back.label,
+      icon: 'back',
+      variant: 'paper',
+      size: 'small',
+      testId: options.back.testId ?? 'back',
+      onPress: options.back.onPress,
+      onError: options.onError,
+    });
+    // Android's Back button presses this one (shell/app.ts).
+    back.dataset['back'] = 'true';
+    bar.append(back);
   }
   bar.append(h('div', { className: 'dv-topbar__title' }, options.title ?? null));
   bar.append(h('div', { className: 'dv-topbar__tools' }, ...(options.tools ?? [])));
@@ -157,47 +158,6 @@ export function toastStickers(app: App, active: ActiveKeeper): void {
 export function localDay(now: Date = new Date()): string {
   const pad = (value: number): string => String(value).padStart(2, '0');
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
-
-/** Offer `text` as a file download without putting a link into the page. */
-export function downloadText(fileName: string, text: string, type = 'application/json'): void {
-  const url = URL.createObjectURL(new Blob([text], { type }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-/** Ask for one local file and read it as text (bounded by `maxBytes`). Call from a tap. */
-export function pickTextFile(maxBytes: number): Promise<string | null> {
-  return new Promise((resolve, reject) => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'application/json,.json';
-    input.className = 'dv-visually-hidden';
-    input.tabIndex = -1;
-    const done = (): void => input.remove();
-    input.addEventListener('change', () => {
-      done();
-      const file = input.files?.[0];
-      if (!file) {
-        resolve(null);
-        return;
-      }
-      if (file.size > maxBytes) {
-        reject(new RangeError('The file is too large.'));
-        return;
-      }
-      file.text().then(resolve, reject);
-    });
-    input.addEventListener('cancel', () => {
-      done();
-      resolve(null);
-    });
-    document.body.append(input);
-    input.click();
-  });
 }
 
 export function fileSlug(name: string): string {

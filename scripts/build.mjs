@@ -9,6 +9,8 @@
  *   app.js, app.css       esbuild bundle of src/app/main.ts
  *   content/**.json       content packs, history and catalogs (copied verbatim)
  *   assets/**             runtime art, audio and fonts (authoring metadata is not shipped)
+ *   licenses.txt          the game's and the bundled SDK's license notices
+ *   privacy.html          the privacy policy, from the UI catalog (Google Play links to it)
  *   resource-graph.json   every file above with bytes + SHA-256 (validated by the SDK validator)
  *   sw.js                 offline worker bundled from the PUBLIC @aegis/browser/offline/worker export
  *   build-report.json     format marker, base, revision and bundle inputs
@@ -123,6 +125,55 @@ function copyTree(from, to, include) {
   return copied;
 }
 
+/** @param {string} text */
+function escapeHtml(text) {
+  return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
+/**
+ * The privacy policy page Google Play links to (`privacy.html`): every `parent.privacy.*` message
+ * of the UI catalog, in catalog order, exactly as the grown-ups' About tab shows them
+ * (src/app/parent/privacy.ts): the title, then each heading followed by its text.
+ * @param {Record<string, string>} catalog
+ */
+export function renderPrivacyPage(catalog) {
+  const blocks = Object.entries(catalog).filter(([key]) => key.startsWith('parent.privacy.'));
+  const title = catalog['parent.privacy.heading'];
+  if (!title || blocks.length < 2) throw new Error('en.ui.json has no privacy policy.');
+  const body = blocks
+    .map(([key, text]) =>
+      key === 'parent.privacy.heading'
+        ? `<h1>${escapeHtml(text)}</h1>`
+        : key.endsWith('.heading')
+          ? `<h2>${escapeHtml(text)}</h2>`
+          : `<p>${escapeHtml(text)}</p>`,
+    )
+    .join('\n      ');
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="${CONTENT_SECURITY_POLICY}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="light" />
+    <title>${escapeHtml(title)} · Dragon Valley</title>
+    <style>
+      body { margin: 0; font: 18px/1.6 system-ui, sans-serif; color: #2a2140; background: #fff9ee; }
+      main { max-width: 42rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+      h1 { font-size: 2rem; line-height: 1.2; }
+      h2 { margin-top: 1.75rem; font-size: 1.25rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      ${body}
+    </main>
+  </body>
+</html>
+`;
+}
+
 /** @param {string} output */
 function isPreviousBuild(output) {
   const entries = readdirSync(output);
@@ -197,6 +248,10 @@ export async function buildSite(options = {}) {
         readFileSync(join(root, 'node_modules', '@aegis', 'core', 'LICENSE'), 'utf8').trim(),
         'Fonts, art and audio carry their own licenses next to the files under assets/.',
       ].join('\n\n') + '\n',
+    );
+    writeFileSync(
+      join(stage, 'privacy.html'),
+      renderPrivacyPage(readJson(join(root, 'content', 'catalogs', 'en.ui.json'))),
     );
     const provisional = describeResources(stage, base);
     const revision = createHash('sha256')

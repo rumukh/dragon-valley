@@ -28,6 +28,8 @@ import type { CommandController } from '../controller/commands';
 import { createTranslator, EN_UI, hasMessage } from '../i18n/messages';
 import { createOfflineInstaller } from '../parent/offline';
 import type { OfflineInstaller } from '../parent/offline';
+import { createPlatform } from '../platform/platform';
+import type { Platform } from '../platform/platform';
 import { profileSeed, SAVE_DATABASE } from '../../rules/contract';
 import type { GameAction, Grade, GameEvent } from '../../rules/contract';
 import type { ContentText } from '../content/text';
@@ -135,6 +137,8 @@ export interface App {
   readonly audio: GameAudio;
   readonly speech: ReadAloud;
   readonly offline: OfflineInstaller;
+  /** A browser or the Android app: files, printing, speech and the Back button. */
+  readonly platform: Platform;
   /** The game definition and its content strings, set once at boot by `useContent`. */
   readonly game: DvGame;
   readonly text: ContentText;
@@ -164,6 +168,7 @@ export interface AppOptions {
   readonly root: HTMLElement;
   readonly audioMap: AudioMap;
   readonly storage?: SaveStorage;
+  readonly platform?: Platform;
 }
 
 export function createApp(options: AppOptions): App {
@@ -189,7 +194,8 @@ export function createApp(options: AppOptions): App {
   root.replaceChildren(stage, toasts.element, fx, dialogs, announcer.element, bootStatus);
 
   const audio = createGameAudio({ baseUrl: env.baseUrl, map: options.audioMap });
-  const speech = createReadAloud(undefined, speechAliases(EN_UI));
+  const platform = options.platform ?? createPlatform(globalThis, (error) => reportError(error));
+  const speech = createReadAloud(platform.speech, speechAliases(EN_UI));
   const storage = options.storage ?? new IndexedDbSaveStorage(SAVE_DATABASE);
   const family = new FamilyStore(storage);
   const offline = createOfflineInstaller({ baseUrl: env.baseUrl, revision: env.revision });
@@ -465,6 +471,7 @@ export function createApp(options: AppOptions): App {
     audio,
     speech,
     offline,
+    platform,
     get game() {
       return requireContent().game;
     },
@@ -513,6 +520,33 @@ export function createApp(options: AppOptions): App {
   };
   root.addEventListener('pointerdown', unlock, { capture: true });
   root.addEventListener('keydown', unlock, { capture: true });
+
+  /**
+   * Android's Back button or gesture does what Escape or the screen's own Back button does: it
+   * closes the open dialog, pauses a round, goes back a screen, and on the first screen leaves for
+   * the home screen with the game as it was.
+   */
+  const systemBack = async (): Promise<void> => {
+    const open = [...dialogs.querySelectorAll<HTMLDialogElement>('dialog[open]')].pop();
+    if (open) {
+      open.dispatchEvent(new Event('cancel', { cancelable: true }));
+      return;
+    }
+    if (router.escape()) return;
+    const button = stage.querySelector<HTMLButtonElement>('[data-back="true"]');
+    if (button && !button.disabled && !button.closest('[hidden]')) {
+      button.click();
+      return;
+    }
+    if (router.canGoBack()) {
+      await router.back();
+      return;
+    }
+    platform.exit();
+  };
+  platform.onBack(() => {
+    void systemBack().catch(reportError);
+  });
 
   window.addEventListener('error', (event) => {
     event.preventDefault();

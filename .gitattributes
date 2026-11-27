@@ -17,3 +17,7 @@
 *.otf binary
 *.woff binary
 *.woff2 binary
+*.jar binary
+
+# The Gradle wrapper's Windows script runs under cmd.exe, which expects CRLF line endings.
+*.bat text eol=crlf

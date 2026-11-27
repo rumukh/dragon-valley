@@ -57,6 +57,37 @@ jobs:
         if: always()
         run: node scripts/verify.mjs --audit .verify-report.json
 
+  android:
+    name: android (debug APK)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      # The hosted runner has the Android SDK (ANDROID_HOME); Gradle installs a missing platform or
+      # build-tools itself. setup-gradle caches Gradle's downloads and validates the wrapper jar.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install
+        run: npm ci
+
+      # The game built with base "/", the shell around it, and the check that the app asks for no
+      # permissions (docs/android.md §4).
+      - name: Build the Android app
+        run: node scripts/android/build.mjs
+
   e2e:
     name: e2e (${{ matrix.engine }}, ${{ matrix.label }})
     runs-on: ubuntu-latest

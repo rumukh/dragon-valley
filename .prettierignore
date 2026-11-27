@@ -8,6 +8,11 @@ blob-report
 *.tsbuildinfo
 package-lock.json
 
+# Gradle's own output and caches in the Android project (android/.gitignore).
+android/.gradle
+android/build
+android/app/build
+
 # Vendored SDK artifacts: exact bytes, digest-checked by test/tooling/vendor-sdk.test.ts.
 vendor
 

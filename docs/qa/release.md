@@ -8,6 +8,10 @@ the art and the audio and playtested the game with their child. By the owner's d
 checks on real devices and with VoiceOver (the last item of §3, and §4) follow the release, and
 whatever they find ships as v1.0.x.
 
+The Android app for Google Play has its own release steps and device checks:
+[android.md](../android.md) §6 and §7, with the Play Console answers in
+[play/README.md](../play/README.md).
+
 ## 1. The build
 
 - [x] `main` is green on the release commit: CI (verify on Ubuntu and Windows, and the 16 e2e jobs:

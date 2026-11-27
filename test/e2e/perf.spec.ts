@@ -31,8 +31,10 @@ const MB = 1_000_000;
 /** Upper bounds, in bytes; today's values are in docs/qa/performance.md. */
 const SIZE_BUDGETS = {
   // Raised from 750 / 250 KB for grades 1-3 (rules, art and screens for the young players), then
-  // from 800 / 260 KB for 1st grade's Mushroom Hollow and Rainbow Ford (two bosses, two dragons).
-  script: { built: 820 * KB, gzipped: 265 * KB },
+  // from 800 / 260 KB for 1st grade's Mushroom Hollow and Rainbow Ford (two bosses, two dragons),
+  // then from 820 KB built for the Android app's platform layer (its bridge, the device's speech,
+  // saving and opening files) and the privacy policy in the grown-ups' area.
+  script: { built: 830 * KB, gzipped: 265 * KB },
   style: { built: 100 * KB, gzipped: 20 * KB },
   /** The offline pack without its audio (S5 holds the audio to 8 MB). */
   // Raised from 2.5 MB for grades 1-3 (the Lower Valley map sheet and the young screens), then

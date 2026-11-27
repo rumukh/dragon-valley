@@ -1,8 +1,9 @@
 /**
  * The print preview, opened from the grown-ups' Print tab: the pages of a printable as they will
- * come out of the printer (print/sheets.ts), how to print them, and two ways out - the browser's
- * own print dialog (only the pages are printed; the screen around them is hidden by the print
- * styles) or the same layout saved as a plain HTML file (`renderPrintHtml`) to print elsewhere.
+ * come out of the printer (print/sheets.ts), how to print them, and two ways out - the system's
+ * print dialog (only the pages are printed; the screen around them is hidden by the print styles)
+ * or the same layout saved as a plain HTML file (`renderPrintHtml`) to print elsewhere. A browser
+ * prints and downloads itself; the Android app's shell does both (platform/platform.ts).
  */
 import { plural } from '../i18n/messages';
 import type { PrintJob } from '../print/documents';
@@ -13,7 +14,7 @@ import { candyButton } from '../ui/button';
 import { h } from '../ui/dom';
 import type { ScreenEntry } from '../router/router';
 import type { App } from '../shell/app';
-import { downloadText, topBar } from './common';
+import { topBar } from './common';
 
 export interface PrintRequest {
   readonly job: PrintJob;
@@ -78,7 +79,13 @@ export function printScreen(app: App, request: PrintRequest): ScreenEntry {
               icon: 'print',
               variant: 'sun',
               testId: 'print-now',
-              onPress: () => window.print(),
+              onPress: async () => {
+                try {
+                  await app.platform.print(request.title);
+                } catch {
+                  app.kit.toasts.show(t('print.failed'), { tone: 'warning' });
+                }
+              },
               onError: app.kit.onError,
             }),
             candyButton({
@@ -86,8 +93,17 @@ export function printScreen(app: App, request: PrintRequest): ScreenEntry {
               icon: 'download',
               variant: 'paper',
               testId: 'print-file',
-              onPress: () =>
-                downloadText(`${job.fileName}.html`, printFile(job, 'en'), 'text/html'),
+              onPress: async () => {
+                try {
+                  await app.platform.saveFile(
+                    `${job.fileName}.html`,
+                    printFile(job, 'en'),
+                    'text/html',
+                  );
+                } catch {
+                  app.kit.toasts.show(t('print.fileFailed'), { tone: 'warning' });
+                }
+              },
               onError: app.kit.onError,
             }),
           ),

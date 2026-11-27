@@ -6,6 +6,10 @@
  * the speaker button is hidden and the grown-ups' area explains why. Speech is cancelled on
  * every screen change, on pause and when the page is hidden. Words the voices say wrongly are
  * replaced by their aliases just before speaking (`aliases.ts`); the screen keeps them.
+ *
+ * The engine is anything shaped like the Web Speech API (`SpeechPlatform`): the browser's own,
+ * or in the Android app the device's text-to-speech through the shell (platform/android-speech.ts),
+ * because Android's WebView has no Web Speech voices.
  */
 import { applyAliases } from './aliases';
 import type { SpeechAlias } from './aliases';
@@ -31,9 +35,27 @@ export interface ReadAloud {
   dispose(): void;
 }
 
+/** The part of a `SpeechSynthesisUtterance` read-aloud uses. */
+export interface UtteranceLike extends EventTarget {
+  text: string;
+  voice: VoiceLike | null;
+  lang: string;
+  volume: number;
+  rate: number;
+}
+
+/** The part of `speechSynthesis` read-aloud uses. */
+export interface SynthLike {
+  getVoices(): readonly VoiceLike[];
+  speak(utterance: UtteranceLike): void;
+  cancel(): void;
+  addEventListener?(type: 'voiceschanged', listener: () => void): void;
+  removeEventListener?(type: 'voiceschanged', listener: () => void): void;
+}
+
 export interface SpeechPlatform {
-  readonly synth: SpeechSynthesis | undefined;
-  readonly Utterance: typeof SpeechSynthesisUtterance | undefined;
+  readonly synth: SynthLike | undefined;
+  readonly Utterance: (new (text?: string) => UtteranceLike) | undefined;
 }
 
 function platform(): SpeechPlatform {
@@ -51,13 +73,13 @@ export function createReadAloud(
   const { synth, Utterance } = environment;
   const listeners = new Set<() => void>();
   let voices: VoiceInfo[] = [];
-  let native: VoiceLike[] = [];
-  let active: SpeechSynthesisUtterance | undefined;
+  let native: readonly VoiceLike[] = [];
+  let active: UtteranceLike | undefined;
 
   const refresh = (): void => {
     if (!synth) return;
     try {
-      native = synth.getVoices() as VoiceLike[];
+      native = synth.getVoices();
     } catch {
       native = [];
     }
@@ -81,7 +103,7 @@ export function createReadAloud(
       if (!chosen || !voice) return false;
       synth.cancel();
       const utterance = new Utterance(applyAliases(text, aliases));
-      utterance.voice = voice as SpeechSynthesisVoice;
+      utterance.voice = voice;
       utterance.lang = voice.lang;
       utterance.volume = options.volume ?? 1;
       utterance.rate = options.rate ?? 0.92;

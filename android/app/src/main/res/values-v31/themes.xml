@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12 and later show the launcher icon on the sky while the game starts. -->
+    <style name="Theme.DragonValley" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/sky</item>
+        <item name="android:windowSplashScreenBackground">@color/sky</item>
+    </style>
+</resources>

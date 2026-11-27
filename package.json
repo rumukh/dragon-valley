@@ -32,7 +32,11 @@
     "art:build": "node scripts/art/build-art.mjs",
     "art:check": "node scripts/art/build-art.mjs --check",
     "art:gallery": "node scripts/art/gallery.mjs",
-    "art:goldens": "node scripts/art/goldens.mjs"
+    "art:goldens": "node scripts/art/goldens.mjs",
+    "android:build": "node scripts/android/build.mjs",
+    "android:release": "node scripts/android/build.mjs --release",
+    "android:art": "node scripts/android/art.mjs",
+    "android:upload-key": "node scripts/android/upload-key.mjs"
   },
   "dependencies": {
     "@aegis/browser": "file:vendor/aegis/0.0.0-local.r0abd61b5a679.da726c53afdf74c5f/aegis-browser-0.0.0-local.r0abd61b5a679.da726c53afdf74c5f.tgz",

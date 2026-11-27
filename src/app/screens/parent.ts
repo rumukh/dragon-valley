@@ -1,10 +1,12 @@
 /**
  * The grown-ups' area, behind the parent gate: keepers, each keeper's settings (math signs,
  * read-aloud, voice, volumes, text size, reduced motion), backups and erasing, storage
- * persistence, offline installation and updates, and what the game does and does not do.
+ * persistence, offline installation and updates, and what the game does and does not do,
+ * with its privacy policy.
  *
  * It is an operating surface: calm, plain and complete. Nothing here plays sounds, and no
- * keeper's game is open while it is shown.
+ * keeper's game is open while it is shown. In the Android app the whole game is already on the
+ * device, so there is no offline installation, and storage belongs to the app, not a browser.
  */
 import { assertChildSafeView } from '@aegis/browser/ui';
 import { DEFAULT_GRADE, GRADES } from '../../rules/contract';
@@ -15,6 +17,7 @@ import type { MessageKey } from '../i18n/messages';
 import { NOTATIONS } from '../math/notation';
 import { shortRevision } from '../parent/about';
 import type { OfflineState } from '../parent/offline';
+import { privacyPolicy } from '../parent/privacy';
 import { BACKUP_MAX_BYTES } from '../persistence/backup';
 import { findKeeper, MAX_KEEPERS } from '../persistence/family';
 import type { Keeper } from '../persistence/family';
@@ -23,12 +26,13 @@ import type { PreferencesDraft } from '../persistence/preferences';
 import { RecoveryRequired } from '../persistence/recovery';
 import { formatBytes, requestPersistence, storageReport } from '../persistence/storage';
 import { PreferencesStore } from '../persistence/stores';
+import type { SaveOutcome } from '../platform/platform';
 import { candyButton, linkButton } from '../ui/button';
 import { confirmDialog } from '../ui/dialog';
 import { h } from '../ui/dom';
 import type { ScreenEntry } from '../router/router';
 import type { App, ParentTab } from '../shell/app';
-import { downloadText, fileSlug, keeperBadge, localDay, pickTextFile, topBar } from './common';
+import { fileSlug, keeperBadge, localDay, topBar } from './common';
 import {
   eraseKeeperData,
   eraseProgress,
@@ -57,8 +61,10 @@ export function parentScreen(
   initialTab: ParentTab = 'keepers',
   keeperId?: string,
 ): ScreenEntry {
+  // The Android app carries the whole game, so it has nothing to install for offline play.
+  const tabs = TABS.filter((value) => value !== 'offline' || app.platform.kind === 'web');
   // Kept by the entry, so coming back from the print preview finds the same tab and keeper.
-  let tab: ParentTab = initialTab;
+  let tab: ParentTab = tabs.includes(initialTab) ? initialTab : 'keepers';
   let selected: string | undefined = keeperId;
   let printTable = 2;
   return {
@@ -113,7 +119,7 @@ export function parentScreen(
         tabBar.replaceChildren(
           segmented(
             t('parent.heading'),
-            TABS,
+            tabs,
             tab,
             (value) => t(`parent.tab.${value}` as MessageKey),
             (value) => `parent-tab-${value}`,
@@ -691,18 +697,33 @@ export function parentScreen(
                 size: 'small',
                 testId: `backup-export-${keeper.id}`,
                 onPress: async () => {
+                  let text: string;
                   try {
-                    const text = await exportKeeper(app, keeper);
-                    downloadText(`dragon-valley-${fileSlug(keeper.name)}-${localDay()}.json`, text);
-                    app.kit.toasts.show(t('parent.data.exported', { name: keeper.name }), {
-                      tone: 'success',
-                    });
+                    text = await exportKeeper(app, keeper);
                   } catch {
                     app.kit.toasts.show(
                       t('parent.data.exportFailed', { owner: possessive(keeper.name) }),
                       { tone: 'warning' },
                     );
+                    return;
                   }
+                  // "Saved" only once the file exists: in the Android app the shell says whether
+                  // the grown-up chose a place and the file was written there.
+                  let outcome: SaveOutcome;
+                  try {
+                    outcome = await app.platform.saveFile(
+                      `dragon-valley-${fileSlug(keeper.name)}-${localDay()}.json`,
+                      text,
+                      'application/json',
+                    );
+                  } catch {
+                    app.kit.toasts.show(t('parent.data.saveFailed'), { tone: 'warning' });
+                    return;
+                  }
+                  if (outcome === 'cancelled') return;
+                  app.kit.toasts.show(t('parent.data.exported', { name: keeper.name }), {
+                    tone: 'success',
+                  });
                 },
                 onError: app.kit.onError,
               }),
@@ -715,7 +736,7 @@ export function parentScreen(
                 onPress: async () => {
                   let text: string | null;
                   try {
-                    text = await pickTextFile(BACKUP_MAX_BYTES);
+                    text = await app.platform.openTextFile(BACKUP_MAX_BYTES);
                   } catch {
                     app.kit.toasts.show(t('parent.data.importFailed'), { tone: 'warning' });
                     return;
@@ -766,8 +787,10 @@ export function parentScreen(
           ),
         );
         const report = await storageReport();
-        const storageText =
-          report.persisted === true
+        const inApp = app.platform.kind === 'android';
+        const storageText = inApp
+          ? t('parent.data.appStorage')
+          : report.persisted === true
             ? t('parent.data.persisted')
             : report.persisted === false
               ? t('parent.data.notPersisted')
@@ -787,7 +810,7 @@ export function parentScreen(
             h('p', {
               testId: 'storage-status',
               text: storageText,
-              dataset: { persisted: String(report.persisted) },
+              dataset: { persisted: inApp ? 'app' : String(report.persisted) },
             }),
             report.usageBytes !== null
               ? h('p', {
@@ -795,7 +818,8 @@ export function parentScreen(
                   text: t('parent.data.usage', { size: formatBytes(report.usageBytes) }),
                 })
               : null,
-            report.persisted === true
+            // An app's storage is its own: there is no browser to ask.
+            inApp || report.persisted === true
               ? null
               : candyButton({
                   label: t('parent.data.persist'),
@@ -876,27 +900,64 @@ export function parentScreen(
       };
 
       // ---- About --------------------------------------------------------------------------
+      // The notices are read in place: a page of plain text would leave the game behind.
+      const licenses = (): HTMLElement => {
+        const text = h('pre', { className: 'dv-licenses', testId: 'about-licenses-text' });
+        const details = h(
+          'details',
+          { className: 'dv-licenses-box', testId: 'about-licenses' },
+          h('summary', { className: 'dv-link-button', text: t('parent.about.licenses') }),
+          text,
+        );
+        let loaded = false;
+        details.addEventListener('toggle', () => {
+          if (!details.open || loaded) return;
+          loaded = true;
+          void fetch(new URL('licenses.txt', app.env.baseUrl))
+            .then((response) => {
+              if (!response.ok) throw new Error(`licenses.txt: HTTP ${response.status}`);
+              return response.text();
+            })
+            .then((value) => {
+              text.textContent = value;
+            })
+            .catch(() => {
+              loaded = false;
+              text.textContent = t('parent.about.licensesMissing');
+            });
+        });
+        return details;
+      };
+      const policy = (): HTMLElement =>
+        h(
+          'section',
+          { className: 'dv-card dv-parent__section dv-privacy', testId: 'about-privacy' },
+          ...privacyPolicy().map((block) =>
+            block.kind === 'title'
+              ? h('h2', { text: t(block.key) })
+              : block.kind === 'heading'
+                ? h('h3', { text: t(block.key) })
+                : h('p', { text: t(block.key) }),
+          ),
+        );
       const aboutPanel = (): HTMLElement =>
-        section(
-          'parent.tab.about',
-          h('p', {
-            testId: 'about-version',
-            text: t('parent.about.version', { revision: shortRevision(app.env.revision) }),
-            // The whole revision for support, as in index.html and resource-graph.json.
-            attributes: { title: app.env.revision },
-            dataset: { revision: app.env.revision },
-          }),
-          h('p', { text: t('parent.about.privacy') }),
-          h('p', { text: t('parent.about.font') }),
-          h('a', {
-            className: 'dv-link-button',
-            text: t('parent.about.licenses'),
-            attributes: {
-              href: new URL('licenses.txt', app.env.baseUrl).href,
-              target: '_blank',
-              rel: 'noopener',
-            },
-          }),
+        h(
+          'div',
+          { className: 'dv-stack' },
+          section(
+            'parent.tab.about',
+            h('p', {
+              testId: 'about-version',
+              text: t('parent.about.version', { revision: shortRevision(app.env.revision) }),
+              // The whole revision for support, as in index.html and resource-graph.json.
+              attributes: { title: app.env.revision },
+              dataset: { revision: app.env.revision },
+            }),
+            h('p', { text: t('parent.about.privacy') }),
+            h('p', { text: t('parent.about.font') }),
+            licenses(),
+          ),
+          policy(),
         );
 
       const render = async (): Promise<void> => {

@@ -19,7 +19,6 @@ import { h } from '../ui/dom';
 import { icon } from '../ui/icons';
 import type { ScreenEntry } from '../router/router';
 import type { App } from '../shell/app';
-import { downloadText, pickTextFile } from './common';
 
 export function recoveryScreen(app: App, problem: RecoveryRequired): ScreenEntry {
   return {
@@ -72,9 +71,10 @@ export function recoveryScreen(app: App, problem: RecoveryRequired): ScreenEntry
       if (original !== undefined) {
         actions.push(
           action(t('recovery.export'), 'recovery-export', async () => {
-            downloadText(
+            await app.platform.saveFile(
               `dragon-valley-${problem.kind}-${problem.profileId}-stored.json`,
               original,
+              'application/json',
             );
           }),
         );
@@ -92,7 +92,7 @@ export function recoveryScreen(app: App, problem: RecoveryRequired): ScreenEntry
         if (problem.kind !== 'family') {
           actions.push(
             action(t('recovery.import'), 'recovery-import', async () => {
-              const text = await pickTextFile(BACKUP_MAX_BYTES);
+              const text = await app.platform.openTextFile(BACKUP_MAX_BYTES);
               if (text === null) return;
               const backup = readBackup(text);
               const envelope = problem.kind === 'game' ? backup.game : backup.preferences;
