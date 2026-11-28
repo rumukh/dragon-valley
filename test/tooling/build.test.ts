@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { browserBoundary, buildSite, isForbiddenModule } from '../../scripts/build.mjs';
 import { verifySite } from '../../scripts/lib/site.mjs';
+import { privacyPolicy } from '../../src/app/parent/privacy';
 
 let directory: string;
 let site: Awaited<ReturnType<typeof buildSite>>;
@@ -37,7 +38,7 @@ describe('scripts/build.mjs', () => {
     expect(verified.base).toBe(BASE);
     expect(verified.revision).toMatch(/^[0-9a-f]{24}$/);
     const sources = graph().resources.map((resource) => resource.src);
-    for (const member of ['index.html', 'app.js', 'app.css', 'licenses.txt']) {
+    for (const member of ['index.html', 'app.js', 'app.css', 'licenses.txt', 'privacy.html']) {
       expect(sources, `${member} is installable offline`).toContain(BASE + member);
     }
     expect(sources, 'the worker is not a member of the graph it serves').not.toContain(
@@ -62,6 +63,29 @@ describe('scripts/build.mjs', () => {
   it('bundles the worker from the public offline worker export and pins this revision', () => {
     expect(report().inputs.worker).toContain('node_modules/@aegis/browser/dist/offline/worker.js');
     expect(readFileSync(join(site.directory, 'sw.js'), 'utf8')).toContain(report().revision);
+  });
+
+  it('publishes the privacy policy the grown-ups read in the game as privacy.html', () => {
+    expect(graph().resources.map((resource) => resource.src)).toContain(BASE + 'privacy.html');
+    const page = readFileSync(join(site.directory, 'privacy.html'), 'utf8');
+    const catalog = JSON.parse(
+      readFileSync(join('content', 'catalogs', 'en.ui.json'), 'utf8'),
+    ) as Record<string, string>;
+    const blocks = privacyPolicy();
+    expect(blocks[0], 'the title comes first').toEqual({
+      key: 'parent.privacy.heading',
+      kind: 'title',
+    });
+    blocks.forEach((block, index) => {
+      if (block.kind === 'heading') expect(blocks[index + 1]?.kind, block.key).toBe('text');
+      const text = catalog[block.key]!.replaceAll('&', '&amp;').replaceAll('<', '&lt;');
+      const tag = block.kind === 'title' ? 'h1' : block.kind === 'heading' ? 'h2' : 'p';
+      expect(page, block.key).toContain(`<${tag}>${text}</${tag}>`);
+    });
+    expect(page).toContain('Content-Security-Policy');
+    expect(page, 'a plain page: nothing runs, nothing loads from elsewhere').not.toMatch(
+      /<script|https?:\/\/(?!rumukh\.github\.io)/,
+    );
   });
 
   it('builds reproducibly: the same tree yields the same offline revision', async () => {

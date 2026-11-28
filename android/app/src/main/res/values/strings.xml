@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The launcher name; Google Play shows the store title, "Dragon Valley: Math Adventure". -->
+    <string name="app_name">Dragon Valley</string>
+    <string name="webview_update">Dragon Valley needs a newer Android System WebView. Ask a grown-up to update it in Google Play, then open Dragon Valley again.</string>
+</resources>

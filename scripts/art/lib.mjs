@@ -48,8 +48,9 @@ export function findBrowser() {
  * @param {string} pngPath
  * @param {number} width
  * @param {number} height
+ * @param {{ transparent?: boolean }} [options] keep the page's empty areas transparent
  */
-export function screenshot(htmlPath, pngPath, width, height) {
+export function screenshot(htmlPath, pngPath, width, height, options = {}) {
   const browser = findBrowser();
   if (!browser) throw new Error('No Edge/Chromium found; set DV_EDGE to a browser executable.');
   const html = resolve(htmlPath);
@@ -68,6 +69,7 @@ export function screenshot(htmlPath, pngPath, width, height) {
         '--no-default-browser-check',
         `--user-data-dir=${profile}`,
         '--force-device-scale-factor=1',
+        ...(options.transparent ? ['--default-background-color=00000000'] : []),
         `--screenshot=${png}`,
         `--window-size=${width},${height}`,
         pathToFileURL(html).href,

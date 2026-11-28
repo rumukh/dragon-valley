@@ -2345,13 +2345,26 @@
   width: min(6.5rem, 16vh);
 }
 
-/* Many celebrations at once (after the placement check): smaller pictures, smaller words. */
-.dv-results__celebrations[data-many='true'] .dv-celebrate {
+/* Many celebrations at once (after the placement check): picture and words side by side in rows of
+   three on a tablet, so every reward shows with its name without scrolling the list (the Android
+   emulator QA, 2026-11-26: names under the first row were out of view at 1280 × 800). */
+.dv-results__celebrations[data-many='true'] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11em), 1fr));
+  gap: 0.5rem 1rem;
   font-size: 0.85rem;
 }
 
+.dv-results__celebrations[data-many='true'] .dv-celebrate {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  max-width: none;
+  text-align: start;
+}
+
 .dv-results__celebrations[data-many='true'] .dv-celebrate svg {
-  width: min(4rem, 10vh);
+  width: min(3em, 7.5vh);
 }
 
 /* ---- Goodbye and the Dragon Diary ------------------------------------------------------ */
@@ -3443,6 +3456,35 @@
   color: var(--dv-miss-deep);
 }
 
+/* About: the license notices open in place, and the privacy policy reads as a document. */
+.dv-licenses-box > summary {
+  list-style: none;
+  justify-self: start;
+}
+
+.dv-licenses-box > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dv-licenses {
+  max-height: 50vh;
+  margin: 0.5em 0 0;
+  overflow: auto;
+  font-family: inherit;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.dv-privacy > h2 {
+  font-size: 1.25rem;
+}
+
+.dv-privacy > h3 {
+  margin-top: 0.4em;
+  font-size: 1.05rem;
+}
+
 /* The Progress tab: the window's two grids side by side when there is room for both. */
 .dv-progress,
 .dv-print-tab {
@@ -4018,4 +4060,332 @@
   font-size: 2rem;
   font-weight: 800;
   line-height: 1.2;
+}
+
+/* ---- A phone held upright: a round, Memory Match and the results on one screen -------------- */
+
+/* On a phone in portrait a round is one screen tall whenever it can be: the bar, the problem and
+   the answers take compact sizes and the dragon (and a boss) the room that is left, so no answer
+   starts below the fold. The Android emulator QA (2026-11-27, 411 × 731) found Feeding Time's
+   second row of answers, Memory Match's "Turn back" and the placement check's rewards out of
+   view. With big text the screen grows and scrolls instead; nothing is ever cut off. */
+@media (max-width: 599px) and (orientation: portrait) {
+  /* The bar in two lines: the activity with the coins and pause (or Stop), then the progress with
+     the save status. Big text wraps them onto more lines. */
+  .dv-round .dv-topbar {
+    position: relative;
+    gap: 0.3rem 0.45rem;
+  }
+
+  .dv-round .dv-topbar__title,
+  .dv-round .dv-topbar__tools,
+  .dv-round .dv-round__header {
+    display: contents;
+  }
+
+  .dv-round .dv-round__title {
+    flex: 1 1 0;
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+
+  .dv-round .dv-round__header > .dv-meter {
+    order: 1;
+    flex: 1 1 50%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15em 0.5em;
+    width: auto;
+    padding: 0.3em 0.6em;
+  }
+
+  .dv-round .dv-round__header > .dv-meter > .dv-meter__label {
+    flex: 0 1 auto;
+    font-size: 0.8rem;
+  }
+
+  .dv-round .dv-round__header > .dv-meter > .dv-meter__track {
+    flex: 1 1 3em;
+  }
+
+  .dv-round .dv-topbar .dv-save {
+    order: 2;
+  }
+
+  /* A streak ("3 in a row!") hangs under the progress at the bar's left end, over the sky beside
+     the dragon (in a boss round above the child's dragon, never on the boss), so it never adds a
+     line to the bar and moves the answers down. */
+  .dv-round .dv-round__streak {
+    position: absolute;
+    top: calc(100% + 0.3rem);
+    left: 0;
+    z-index: 1;
+    padding: 0.15em 0.55em;
+    font-size: 0.8rem;
+  }
+
+  .dv-round .dv-topbar .dv-coins {
+    font-size: 0.85rem;
+  }
+
+  /* Under the bar the round fills the screen: the dragon's row takes what the problem and the
+     answers leave. */
+  .dv-round:not(.dv-minigame).dv-screen,
+  .dv-minigame.dv-screen:has(.dv-match-grid) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+
+  .dv-round__play {
+    grid-template-rows: 1fr auto auto;
+    align-content: stretch;
+    gap: 0.3rem;
+  }
+
+  .dv-round__cast {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(2rem, 1fr);
+    align-items: end;
+    justify-items: center;
+    gap: 0.3rem;
+  }
+
+  .dv-round--boss .dv-round__cast {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  }
+
+  .dv-round__cast > .dv-round__model {
+    grid-column: 1 / -1;
+  }
+
+  .dv-round__boss-figure {
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-self: stretch;
+    justify-self: stretch;
+  }
+
+  /* The dragon and the boss are drawn as tall as their row (size containment keeps a picture from
+     growing the row), never taller than on a roomy phone. Percentages, not container units: an
+     engine can keep a picture's container units from before its row shrank. */
+  .dv-round__dragon,
+  .dv-round__boss {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    align-self: stretch;
+    justify-self: stretch;
+    min-height: 0;
+    contain: size;
+  }
+
+  /* A picture's own minimum would follow its width, so only its height (the row's) decides. */
+  .dv-round__dragon svg,
+  .dv-round__dragon[data-stage='egg'] svg,
+  .dv-round--boss .dv-round__dragon svg,
+  .dv-round--boss .dv-round__dragon[data-stage='egg'] svg,
+  .dv-round__boss svg {
+    flex: none;
+    width: auto;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    max-width: 100%;
+    max-height: 40vw;
+  }
+
+  .dv-round__dragon[data-stage='egg'] svg,
+  .dv-round--boss .dv-round__dragon[data-stage='egg'] svg {
+    max-height: 30vw;
+  }
+
+  .dv-round__boss svg {
+    max-height: 44vw;
+  }
+
+  .dv-round__board {
+    gap: 0.3rem;
+  }
+
+  /* "Type the answer." and its box share a line when they fit, the keys or tiles under them. */
+  .dv-round__input {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem 0.5rem;
+  }
+
+  .dv-round__answer,
+  .dv-round__answer > .dv-keypad-wrap {
+    display: contents;
+  }
+
+  .dv-round__answer > .dv-tiles,
+  .dv-round__answer > .dv-keypad-wrap > .dv-keypad {
+    flex: 0 0 100%;
+  }
+
+  .dv-round__play .dv-problem-card {
+    gap: 0.35rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .dv-round__play .dv-feedback {
+    min-height: 2em;
+    padding-block: 0.15em;
+  }
+
+  .dv-round__answer .dv-tile {
+    min-height: max(var(--dv-target), min(3.2em, 9dvh));
+    padding-block: 0.15em;
+    line-height: 1.15;
+  }
+
+  /* Three choices share a row (each still as wide as its label). */
+  .dv-round__answer .dv-tiles:has(> :nth-child(3):last-child) > .dv-tile {
+    flex-basis: 0;
+  }
+
+  .dv-round__play .dv-round__prompt {
+    padding-inline: 0.5em;
+  }
+
+  .dv-round--young .dv-round__prompt {
+    font-size: 1.05em;
+  }
+
+  .dv-round__answer .dv-answer {
+    font-size: 1.4rem;
+  }
+
+  .dv-round__answer .dv-answer__field {
+    min-width: 2.2em;
+    min-height: var(--dv-target);
+    line-height: 1.1;
+  }
+
+  .dv-round__answer .dv-key {
+    min-height: max(var(--dv-target), min(2.1em, 7dvh));
+    line-height: 1.2;
+  }
+
+  /* The keypad four keys wide and three rows tall, as beside a board's picture
+     (1 2 3 ⌫ / 4 5 6 0 / 7 8 9 OK): a row less under the problem. Focus still goes through
+     the digits in order, then ⌫, 0 and OK. */
+  .dv-round__answer .dv-keypad:not(.dv-keypad--wide) {
+    grid-template-columns: repeat(4, minmax(var(--dv-target), 1fr));
+    width: min(100%, 16em);
+  }
+
+  .dv-round__answer .dv-keypad:not(.dv-keypad--wide) > :nth-child(10) {
+    grid-area: 1 / 4;
+  }
+
+  .dv-round__answer .dv-keypad:not(.dv-keypad--wide) > :nth-child(11) {
+    grid-area: 2 / 4;
+  }
+
+  .dv-round__answer .dv-keypad:not(.dv-keypad--wide) > :nth-child(12) {
+    grid-area: 3 / 4;
+  }
+
+  /* Memory Match: the cards share the room under the bar, three wide where the deck allows, so
+     a face like "12 · 5" stays on one line; "Turn back" keeps its place under them. */
+  .dv-minigame:has(.dv-match-grid) .dv-minigame__card {
+    grid-template-rows: auto 1fr;
+    align-self: stretch;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0;
+  }
+
+  .dv-minigame:has(.dv-match-grid) .dv-minigame__status {
+    font-size: 0.95rem;
+  }
+
+  .dv-minigame__board:has(> .dv-match-grid) {
+    grid-template-rows: 1fr auto;
+    gap: 0.5rem;
+  }
+
+  .dv-match-grid {
+    grid-template-columns: repeat(var(--narrow-cols, var(--cols, 4)), minmax(0, 1fr));
+    grid-auto-rows: minmax(var(--dv-target), auto);
+    align-content: stretch;
+    align-self: stretch;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .dv-match-grid[data-count='4'],
+  .dv-match-grid[data-count='8'],
+  .dv-match-grid[data-count='10'] {
+    --narrow-cols: 2;
+  }
+
+  .dv-match-grid[data-count='6'],
+  .dv-match-grid[data-count='9'],
+  .dv-match-grid[data-count='12'],
+  .dv-match-grid[data-count='15'],
+  .dv-match-grid[data-count='18'] {
+    --narrow-cols: 3;
+  }
+
+  .dv-card-tile {
+    min-height: var(--dv-target);
+    padding: 0.2em;
+    font-size: 1.15rem;
+  }
+
+  .dv-minigame__board:has(> .dv-match-grid) > .dv-minigame__actions {
+    min-height: 3.4rem;
+  }
+
+  /* The results: every reward on its own short line, so even the placement check's seven fit. */
+  .dv-results.dv-screen {
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    gap: 8px;
+  }
+
+  .dv-results__card {
+    gap: 0.35rem;
+    padding-block: 10px;
+  }
+
+  .dv-results__title {
+    font-size: min(2.4rem, 6.5vw);
+  }
+
+  .dv-results__summary {
+    font-size: 0.9rem;
+  }
+
+  .dv-results__coins {
+    padding-block: 0.15em;
+  }
+
+  .dv-results__card > .dv-results__celebrations {
+    padding-bottom: 0.5rem;
+  }
+
+  .dv-results__celebrations[data-many='true'] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+    font-size: 0.8rem;
+  }
+
+  .dv-results__celebrations[data-many='true'] .dv-celebrate svg {
+    width: 1.6em;
+  }
+
+  .dv-results__card > .dv-button {
+    font-size: 0.9rem;
+  }
 }

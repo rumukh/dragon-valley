@@ -101,6 +101,20 @@ test('a child who knows the meadow passes every step: Sunny Meadow 2 to 5 are pl
     );
   }
   expect(said, 'the check earns its sticker').toContain('New sticker: Show What You Know');
+  // On a tablet every reward shows with its name, the list needing no scrolling (the Android
+  // emulator QA, 2026-11-26, found the names under the first row out of view at 1280 × 800).
+  const list = page.getByTestId('results-celebrations');
+  for (const viewport of [
+    { width: 1280, height: 800 },
+    { width: 1180, height: 820 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect
+      .poll(() => list.evaluate((node) => node.scrollHeight - node.clientHeight), {
+        message: `every reward in view at ${viewport.width} × ${viewport.height}`,
+      })
+      .toBeLessThanOrEqual(1);
+  }
   await leaveResults(page, 'Ada');
   await expect(page.getByTestId('hub-adventure'), 'the concept level comes first').toHaveText(
     'Play: Equal Groups',

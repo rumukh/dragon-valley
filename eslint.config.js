@@ -140,6 +140,8 @@ export default tseslint.config(
       'blob-report/**',
       '**/.*.staging-*/**',
       '**/*.tsbuildinfo',
+      // The Android project has no JavaScript of its own; Gradle writes reports into it.
+      'android/**',
     ],
   },
   js.configs.recommended,

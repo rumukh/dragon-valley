@@ -9,7 +9,7 @@ is revisited with numbers in hand.
 
 | What                                                    | Budget       | Now (CI)     | Notes                                                                                    |
 | ------------------------------------------------------- | ------------ | ------------ | ---------------------------------------------------------------------------------------- |
-| `app.js` as built / gzipped                             | 820 / 265 KB | 765 / 245 KB | the whole game: rules, SDK, screens, inline art; raised from 750 / 250 KB for grades 1-3 |
+| `app.js` as built / gzipped                             | 830 / 265 KB | 765 / 245 KB | the whole game: rules, SDK, screens, inline art; raised from 750 / 250 KB for grades 1-3 |
 | `app.css` as built / gzipped                            | 100 / 20 KB  | 74 / 14 KB   |                                                                                          |
 | Offline pack without its audio                          | 4 MB         | 2.64 MB      | 52 files: data, images, script, style, fonts; raised from 2.5 MB for grades 1-3          |
 | Whole offline pack (`resource-graph.json`)              | 11 MB        | 9.60 MB      | 85 files; the audio is 6.96 MB of it                                                     |
@@ -39,6 +39,18 @@ Mushroom Hollow and Rainbow Ford backgrounds, and the rest the content, its cata
 script. `app.js` is 814 / 259 KB (800 / 260 KB budget, now 820 / 265 KB) with the two new bosses
 and dragons drawn inline. The first visit went to 1.43 MB (1.4 MB budget, now 1.45 MB) for the
 same content and script; the title is still ready within its time budgets.
+
+The Android app ([android.md](../android.md)) raised one budget, measured on its branch (Edge,
+development machine): `app.js` went from 814 to 822 KB built (820 KB budget, now 830 KB) and is
+262 KB gzipped, within its 265 KB. The 8 KB are the platform layer the app needs (its bridge to the
+shell, read-aloud over the device's speech, saving and opening files through the system) and the
+privacy policy in the grown-ups' area. The build also publishes that policy as `privacy.html`
+(4 KB): the offline pack without its audio is 3.99 MB of its 4 MB.
+
+The phone layout ([app.md](../app.md) §7) adds 5 KB to `app.css`, measured on its branch (Edge,
+development machine): `app.css` is 99.5 / 18.4 KB of its 100 / 20 KB, and the offline pack without
+its audio still 3.99 MB of its 4 MB. Both are at their budgets: the next style or pack change will
+need a raise.
 
 ## What the first screen costs
 

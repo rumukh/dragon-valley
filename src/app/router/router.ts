@@ -62,6 +62,8 @@ export interface Router {
   backTo(key: string): Promise<boolean>;
   canGoBack(): boolean;
   currentKey(): string | undefined;
+  /** Offer Escape to the current screen (Android's Back does too); true when it handled it. */
+  escape(): boolean;
   dispose(): void;
 }
 
@@ -245,6 +247,7 @@ export function createRouter(options: RouterOptions): Router {
     },
     canGoBack: () => (stack?.depth() ?? 0) > 1,
     currentKey: () => stack?.current().key,
+    escape: () => current?.onEscape?.() ?? false,
     dispose() {
       release();
       controller?.abort();

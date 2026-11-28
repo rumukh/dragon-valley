@@ -60,6 +60,13 @@ Every shipped asset has recorded provenance that lets anyone reproduce or audit 
    version and the SHA-256.
 4. **Nothing else**: no stock art, no samples from the internet, no recorded voices (read-aloud uses
    the device's local speech), no assets whose licence forbids redistribution.
+5. **Android and Google Play graphics**: the launcher icon's foreground
+   (`android/app/src/main/res/mipmap-*dpi/ic_launcher_foreground.png`), the Play icon and the
+   feature graphic (`docs/play/graphics/`) are the game's own art: `node scripts/android/art.mjs`
+   draws them with the dragon renderer, the Sunny Meadow background and the DV Reading font, and
+   photographs them with headless Edge (`scripts/art/lib.mjs`). Edge's rasteriser is not
+   byte-identical across machines, so they are regenerated and checked by eye, not by digest. Store
+   screenshots (`docs/play/screenshots/`) are taken from the release build on the Android emulator.
 
 ## 5. Determinism across machines
 

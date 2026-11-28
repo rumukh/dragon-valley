@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From assets/art/palette.json: brand.sky, ink.ink and brand.sun. -->
+    <color name="sky">#FF8FD3FF</color>
+    <color name="ink">#FF2A2140</color>
+    <color name="icon_background">#FFFFC53D</color>
+</resources>

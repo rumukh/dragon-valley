@@ -115,15 +115,20 @@ All storage is local IndexedDB through `@aegis/browser` (no accounts, no cloud):
   (`assertChildSafeView` checks views before mounting).
 - Read-aloud uses only `localService` speech voices.
 - Children's names live only in the family record on the device.
+- The privacy policy is the `parent.privacy.*` messages: the grown-ups' About tab shows them, and
+  the build publishes them as `privacy.html`, the address given to Google Play.
+- The Android app ([android.md](android.md)) asks for no permissions, so it cannot reach a network;
+  its WebView sends no usage statistics, and Android backup is off.
 
 ## 6. Build, deploy and the gate
 
-| Command                                   | What it does                                                                                                                                 |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run build -- --base /dragon-valley/` | esbuild bundle of `src/app/main.ts` and the worker, copies content and runtime assets, writes and verifies the resource graph (`dist-site/`) |
-| `npm run serve`                           | builds into `out/dev-site-*`, serves on loopback with the same CSP, rebuilds on change                                                       |
-| `npm run verify`                          | the gate: build, typecheck (rules, app, worker, tests), lint, format, content validation, Vitest, lockfile                                   |
-| `npm run test:e2e`                        | Playwright flows, accessibility and screenshots at the Pages base (system Edge/Chrome locally; three engines on CI)                          |
+| Command                                     | What it does                                                                                                                                 |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run build -- --base /dragon-valley/`   | esbuild bundle of `src/app/main.ts` and the worker, copies content and runtime assets, writes and verifies the resource graph (`dist-site/`) |
+| `npm run serve`                             | builds into `out/dev-site-*`, serves on loopback with the same CSP, rebuilds on change                                                       |
+| `npm run verify`                            | the gate: build, typecheck (rules, app, worker, tests), lint, format, content validation, Vitest, lockfile                                   |
+| `npm run test:e2e`                          | Playwright flows, accessibility and screenshots at the Pages base (system Edge/Chrome locally; three engines on CI)                          |
+| `npm run android:build` / `android:release` | the Android app: the game built with base `/`, then Gradle; a debug APK, or the signed bundle for Google Play ([android.md](android.md))     |
 
 CI (`.github/workflows/ci.yml`) runs the gate on Ubuntu and Windows and audits its record in a
 separate step; the e2e jobs run the browser suite (`docs/testing.md` §5), each engine in parallel jobs
@@ -139,7 +144,8 @@ content/                  content pack, history/, catalogs/
 src/rules/                contract/, adapter.ts, learning/, progression/, economy/, story/, view.ts
 src/app/                  main.ts, index.html, sw.ts, style.css (+ screens, components, art/, audio/, …)
 assets/                   art/, backgrounds/, audio/, fonts/ (runtime files + provenance)
-scripts/                  build, serve, verify, check-site, validate-content, canonicalise-lockfile, lib/
+scripts/                  build, serve, verify, check-site, validate-content, canonicalise-lockfile, lib/, android/
+android/                  the Android app's Gradle project: the WebView shell around the built game
 test/                     unit/, traces/, tooling/, e2e/ (+ sim/, migration/ later)
-docs/                     plan, design, curriculum, contract, architecture, testing, assets, sdk-update
+docs/                     plan, design, curriculum, contract, architecture, testing, assets, sdk-update, android, play/
 ```

@@ -7,7 +7,9 @@ Hatch and raise a dragon for every times table, light up the Magic Window fact b
 Seven-Headed Dragon in the finale.
 
 **Play it at <https://rumukh.github.io/dragon-valley/>**: in any recent browser, best on a tablet in
-landscape. A grown-up can install it for offline play from the grown-ups' area.
+landscape. A grown-up can install it for offline play from the grown-ups' area. An Android app for
+Google Play carries the whole game, works without a connection from its first start and has no
+permission to use the internet ([`docs/android.md`](docs/android.md)).
 
 | ![Old Glimmer asks which of three eggs feels warm: the bubbly blue, the sunny yellow or the shiny golden egg](docs/images/first-egg.jpg) |     ![Feeding Time: 10 · 2 = ? with four answers to pick, a read-aloud button and "Show me"](docs/images/round.jpg)     |
 | :--------------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: |
@@ -45,6 +47,8 @@ Built as a standalone consumer of the [Aegis](https://github.com/rumukh/aegis-en
 | [`docs/app.md`](docs/app.md)                   | The browser application: screens, saves, input, audio, read-aloud, offline                         |
 | [`docs/assets.md`](docs/assets.md)             | Art and audio pipelines, what ships, provenance rules                                              |
 | [`docs/sdk-update.md`](docs/sdk-update.md)     | The pinned Aegis SDK and how to update it                                                          |
+| [`docs/android.md`](docs/android.md)           | The Android app: its shell and bridge, building, the upload key, releasing on Google Play          |
+| [`docs/play/`](docs/play/README.md)            | Google Play: the store listing, Play Console answers, privacy policy address, graphics             |
 | [`docs/qa/`](docs/qa/)                         | Quality evidence: screens for review, defects, accessibility, coverage, performance, copy, release |
 
 ## Develop
@@ -58,6 +62,8 @@ npm run serve        # build, watch and serve at http://127.0.0.1:4320/ (refresh
 npm run verify       # the gate: build, typecheck, lint, format, content, tests, lockfile
 npm run test:e2e     # the browser QA suite through the system Edge (or Chrome: DV_BROWSER_CHANNEL=chrome)
 npm run build -- --base /dragon-valley/   # the GitHub Pages build in dist-site/
+npm run android:build                     # the Android app as a debug APK (Android Studio's JDK and SDK)
+npm run android:release                   # the signed bundle for Google Play (docs/android.md)
 ```
 
 After any `npm install`, run `npm run lockfile:fix` (the lockfile keeps public registry URLs so CI
@@ -71,8 +77,9 @@ can install).
 | `src/app/`      | Browser shell: DOM/SVG screens, audio, speech, saves, offline worker (`sw.ts`)            |
 | `content/`      | Data: content pack, history of shipped packs, catalogs                                    |
 | `assets/`       | Runtime art, audio and fonts with provenance                                              |
-| `scripts/`      | Node tooling: build, serve, verify, content validation, lockfile                          |
+| `scripts/`      | Node tooling: build, serve, verify, content validation, lockfile, the Android build       |
 | `test/`         | Vitest unit/trace/tooling tests and Playwright end-to-end tests (`e2e/`)                  |
+| `android/`      | The Android app: a WebView shell around the built game (Gradle project)                   |
 | `vendor/aegis/` | The pinned SDK tarball set and its artifact manifest                                      |
 | `docs/`         | Plan, design, curriculum, contract, architecture, testing, assets, SDK update, QA (`qa/`) |
 
